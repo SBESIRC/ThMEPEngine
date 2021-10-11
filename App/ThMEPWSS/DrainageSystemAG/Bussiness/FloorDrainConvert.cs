@@ -13,7 +13,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
     {
         static double _balconyWMachineFloorDrainDistance = 1000;//阳台洗衣机找地漏范围
         public static string FloorDrainBlockDynName = "普通地漏";
-        public static string FloorDrainWMachineBlockDynName = "多通道地漏";
+        public static string FloorDrainWMachineBlockDynName = "带洗衣机插口地漏";
         public static List<CreateBlockInfo> FloorDrainConvertToBlock(string floorId,List<EquipmentBlockSpace> floorDrainBlcoks,List<EquipmentBlockSpace> balconyWMachine) 
         {
             var createBlocks = new List<CreateBlockInfo>();

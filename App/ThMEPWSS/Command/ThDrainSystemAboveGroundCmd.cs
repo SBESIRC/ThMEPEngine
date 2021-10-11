@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG;
@@ -28,7 +30,7 @@ namespace ThMEPWSS.Command
     public class ThDrainSystemAboveGroundCmd : IAcadCommand, IDisposable
     {
         public string errorMsg = "";
-        ThWallColumnsEngine _wallColumnsEngine = null;
+        Engine.ThWallColumnsEngine _wallColumnsEngine = null;
         ThRoomDataEngine _roomEngine = null;
         DoorWindowEngine _doorWindowEngine = null;
         BasicElementEngine _basicElementEngine;
@@ -40,6 +42,7 @@ namespace ThMEPWSS.Command
 
         List<Polyline> _allWalls;
         List<Polyline> _allColumns;
+        List<Polyline> _allRailings;
 
         List<CreateBlockInfo> createBlockInfos = new List<CreateBlockInfo>();
         List<CreateBasicElement> createBasicElems = new List<CreateBasicElement>();
@@ -51,7 +54,8 @@ namespace ThMEPWSS.Command
         Dictionary<string, List<ThIfcRoom>> _roofFloorRooms = new Dictionary<string, List<ThIfcRoom>>();
         List<CreateBasicElement> _pipeDrainConnectLines = new List<CreateBasicElement>();
         List<CreateBasicElement> _roofY1ConvertLines = new List<CreateBasicElement>();
-
+        List<RoofPointInfo> _roofBlockPoints = new List<RoofPointInfo>();
+        List<CreateBlockInfo> _maxRoofFromMinRoofY1 = new List<CreateBlockInfo>();
         double _obstacleAxisAngle = 5;
         double _roofY1ConvertAddLineDistance = 1500;
         double _roofY1BreakMoveLength = 25;
@@ -115,7 +119,6 @@ namespace ThMEPWSS.Command
             }
         }
         public void Dispose(){}
-
         public void Execute()
         {
             errorMsg = "";
@@ -125,7 +128,6 @@ namespace ThMEPWSS.Command
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //所有的楼层框 必须有顶层，没有时不进行后续的生成
-                //var allFrames = FramedReadUtil.ReadAllFloorFramed();
                 _roomEngine = new ThRoomDataEngine();
                 var tempRooms = _roomEngine.GetAllRooms(new Point3dCollection());
                 if (!CheckData(floorFrameds))
@@ -134,9 +136,9 @@ namespace ThMEPWSS.Command
                         Active.Database.GetEditor().WriteMessage(errorMsg);
                     return;
                 }
+                ThMEPEngineCoreLayerUtils.CreateAILayer(acdb.Database, "W-辅助", 253);
                 InitData(acdb.Database);
                 var allRooms = _roomEngine.GetAllRooms(livingHighestFloor.blockOutPointCollection);
-                
                 var tubeBlocks = new List<BlockReference>();
                 var flueBlocks = new List<BlockReference>();
                 foreach (var item in _floorBlockEqums)
@@ -152,21 +154,17 @@ namespace ThMEPWSS.Command
                 //对设备数据进行分类
                 var classifyEqumBlock = new ClassifyEqumBlockByRoomSpace(rooms, _floorBlockEqums);
                 _classifyResult = classifyEqumBlock.GetClassifyEquipments();
-
                 //对房间进行分类处理
                 var tRooms = _roomEngine.GetTubeWellRooms(rooms);
                 var tubeRooms = DrainSysAGCommon.GetTubeWellRoomRelation(rooms.Where(c => c.roomTypeName == Model.EnumRoomType.Toilet || c.roomTypeName == Model.EnumRoomType.Kitchen).ToList(), tRooms);
                 var kitchenRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Kitchen).ToList();
                 var toiletRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Toilet).ToList();
-
-                //标准层、非标层的房间布置逻辑
-                //地漏转换
+                //标准层、非标层的房间布置逻辑 地漏转换
                 var blocks = FloorDrainConvert.FloorDrainConvertToBlock(livingHighestFloor.floorUid,
                     _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.floorDrain).ToList(),
                     _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.washingMachine).ToList());
                 if (null != blocks && blocks.Count > 0)
                     createBlockInfos.AddRange(blocks);
-
                 var converterTypes = new List<EnumEquipmentType>
                 {
                     EnumEquipmentType.sewageWasteRiser,
@@ -187,8 +185,12 @@ namespace ThMEPWSS.Command
                 var connectLines = pipeConnectPipe.GetConnectLines();
                 if (connectLines.Count > 0)
                     createBasicElems.AddRange(connectLines);
-
-
+                //厨房台盆转换连接
+                var kitchenSinkConnect = new KitchenSinkConnect(livingHighestFloor.floorUid, createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag == "FL").ToList());
+                kitchenSinkConnect.InitData(kitchenRooms, toiletRooms, _classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.kitchenBasin).ToList());
+                var addBasics = kitchenSinkConnect.SinkConvertorConnect();
+                if (null != addBasics && addBasics.Count > 0)
+                    createBasicElems.AddRange(addBasics);
                 //阳台逻辑
                 var balconyRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Balcony).ToList();
                 var corridorRooms = rooms.Where(c => c.roomTypeName == EnumRoomType.Corridor).ToList();
@@ -239,7 +241,6 @@ namespace ThMEPWSS.Command
                 } 
                 if (balconyCorridorEqu.createBlockInfos != null && balconyCorridorEqu.createBlockInfos.Count > 0)
                     createBlockInfos.AddRange(balconyCorridorEqu.createBlockInfos);
-
                 //卫生间PL添加清扫口
                 List<string> pipeTags = new List<string> { "PL", "FL", "TL", "DL" };
                 var pipes = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && pipeTags.Any(x => x.Equals(c.tag))).ToList();
@@ -247,14 +248,15 @@ namespace ThMEPWSS.Command
                 var addClean = roomCleanout.GetCreateCleanout(_classifyResult.Where(c => c.enumEquipmentType == EnumEquipmentType.toilet).ToList());
                 if (null != addClean && addClean.Count > 0)
                     createBlockInfos.AddRange(addClean);
-
-
                 var midY = LivingFloorMidY(rooms, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList());
-                RoofPipeLabelLayout(midY, _classifyResult.Where(c=>c.enumEquipmentType == EnumEquipmentType.roofRainRiser).ToList());
-                LivingFloorLabelLayout(midY);
+                RoofPipeLabelLayout();
+                LivingFloorLabelLayout(midY,rooms);
                 CopyToOtherFloor(midY);
                 BreakPipeConnectByY1Lines(_pipeDrainConnectLines, _roofY1ConvertLines);
-
+                //屋面立管碰撞检查
+                var roofCheck = new RoofCollisionCheck(roofFloors, _allRailings);
+                var addPLines = roofCheck.GetCheckResults(createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && (c.tag == "FL" || c.tag == "PL")).ToList());
+                createBasicElems.AddRange(addPLines);
                 var createBlocks = CreateBlockService.CreateBlocks(acdb.Database, createBlockInfos);
                 var createElems = CreateBlockService.CreateBasicElement(acdb.Database, createBasicElems);
                 var createTexts = CreateBlockService.CreateTextElement(acdb.Database, createTextElems);
@@ -284,7 +286,6 @@ namespace ThMEPWSS.Command
                 }
             }
         }
-
         void InitData(Database database) 
         {
             _pipeDrainConnectLines.Clear();
@@ -293,35 +294,45 @@ namespace ThMEPWSS.Command
             //载入数据
             ClearLoadBlockServices.LoadBlockLayerToDocument(database);
             ClearLoadBlockServices.ClearHisFloorBlock(database, floorFrameds.Select(c => c.outPolyline).ToList());
-
             _basicElementEngine = new BasicElementEngine();
             _blockReferenceData = new BlockReferenceDataEngine(_configLayerNames);
             try
             {
+                var railingEngine = new ThRailingBuilderEngine();
+                var railingData = railingEngine.Extract(database);
+                _allRailings = new List<Polyline>();
+                foreach (var item in railingData) 
+                {
+                    var pl = item.Geometry as Polyline;
+                    if(pl == null)
+                        continue;
+                    _allRailings.Add(pl);
+                }
+            }
+            catch { }
+            try
+            {
                 _doorWindowEngine = new DoorWindowEngine(database);
             }
-            catch (Exception ex) { }
-
+            catch{ }
             _allColumns = new List<Polyline>();
             _allWalls = new List<Polyline>();
             //获取相应的数据，框线内的房间，烟道井，墙，柱
             try
             {
-                _wallColumnsEngine = new ThWallColumnsEngine();
+                _wallColumnsEngine = new Engine.ThWallColumnsEngine();
                 _wallColumnsEngine.GetStructureInfo(livingHighestFloor.outPolyline, out _allColumns, out _allWalls);
             }
-            catch (Exception ex) { }
-
-            //去重，在一定范围内不能有同一类的数据
+            catch{ }
             _floorBlockEqums = InitFloorData(livingHighestFloor);
         }
-        void RoofPipeLabelLayout(double midY, List<EquipmentBlockSpace> livingFloorY1LBlocks) 
+        void RoofPipeLabelLayout() 
         {
             //屋面数据处理
             //有大屋面时，找到住人顶层的所有污废立管（PL）和废水立管（FL）。将所有的立管和编号标注根据基点复制到大屋面。
-            var roofV = GetRoofFloorBlocks();
+            _roofBlockPoints = GetRoofFloorBlocks();
             var roofRooms = MaxRoofFloorRooms();
-            var roofLayout = new RoofLayout(roofFloors, roofV, roofRooms);
+            var roofLayout = new RoofLayout(roofFloors, _roofBlockPoints, roofRooms);
             var copyToRoofBlocks = new List<CreateBlockInfo>();
             if (roofLayout.HaveMaxRoof())
             {
@@ -333,9 +344,11 @@ namespace ThMEPWSS.Command
                 }
             }
             var addBlocks = roofLayout.RoofLayoutResult(livingHighestFloor, copyToRoofBlocks);
-            if (null != addBlocks && addBlocks.Count > 0)
+            if (null != addBlocks && addBlocks.Count > 0) 
+            {
+                _maxRoofFromMinRoofY1 = addBlocks.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("Y1L")).ToList();
                 createBlockInfos.AddRange(addBlocks);
-
+            }
             //Y1L转换,重力和侧入雨水斗转换在不同的楼层
             var y1 = createBlockInfos.Where(c => !string.IsNullOrEmpty(c.tag) && c.tag.ToUpper().Equals("Y1L")).ToList();
             var addY1Ls = roofLayout.RoofY1LGravityConverter(livingHighestFloor, y1, out List<CreateBasicElement> addLines, _roofY1ConvertAddLineDistance);
@@ -358,13 +371,13 @@ namespace ThMEPWSS.Command
             if (null != addLines && addLines.Count > 0)
                 createBasicElems.AddRange(addLines);
         }
-        void LivingFloorLabelLayout(double midY) 
+        void LivingFloorLabelLayout(double midY, List<RoomModel> thisFloorRooms) 
         {
             //标注处理
             var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY);
-            pipelineLabel.InitFloorData(livingHighestFloor, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(), null);
-            pipelineLabel.AddObstacleEntitys(_allWalls);
-            pipelineLabel.AddObstacleEntitys(_allColumns);
+            pipelineLabel.InitFloorData(livingHighestFloor, createBlockInfos.Where(c => c.floorId.Equals(livingHighestFloor.floorUid)).ToList(), thisFloorRooms);
+            pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
+            pipelineLabel.AddObstacleEntitys(_allWalls.Cast<Entity>().ToList());
             LabelLayout(pipelineLabel, livingHighestFloor, _floorBlockEqums);
         }
         void CopyToOtherFloor(double midY)
@@ -378,7 +391,7 @@ namespace ThMEPWSS.Command
 
             //将标注复制到屋,先将数复制到大屋面，再根据大屋面数据到小屋面
             var maxRoofFloors = roofLayout.AllMaxRoofFloor();
-
+            var minRoofFloors = roofLayout.AllMinRoofFloor();
             if (maxRoofFloors.Count > 0)
             {
                 //如果没有大屋面，这里就不需要后续的处理
@@ -422,6 +435,10 @@ namespace ThMEPWSS.Command
                 {
                     RoofFloorLavelLayout(item, midY);
                 }
+                foreach (var item in minRoofFloors) 
+                {
+                    RoofFloorLavelLayout(item, midY);
+                }
             }
             //复制到其它非屋面楼层
             foreach (var item in floorFrameds)
@@ -439,83 +456,44 @@ namespace ThMEPWSS.Command
         }
         List<EquipmentBlcokModel> InitFloorData(FloorFramed floor, double disToDist=30) 
         {
-            var tempBlocks = _blockReferenceData.GetPolylineEquipmentBlocks(floor.outPolyline);
+            var tempBlocks = _blockReferenceData.GetPolylineEquipmentBlocks(floor.outPolyline, disToDist);
             var axisEntitys = _basicElementEngine.GetExtractorEntity(floor.outPolyline, new List<EnumElementType> { EnumElementType.ExternalLineAxis });
             var floorBlocks = DrainSysAGCommon.GetFloorBlocks(tempBlocks, axisEntitys);
-            //去重，在一定范围内不能有同一类的数据
-            var retBlocks = new List<EquipmentBlcokModel>();
-            foreach (var item in floorBlocks)
-            {
-                if (null == item || item.blockReferences == null || item.blockReferences.Count < 1)
-                    continue;
-                var tempList = new List<BlockReference>();
-                foreach (var block in item.blockReferences)
-                {
-                    var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
-                    bool isAdd = true;
-                    foreach (var checkBlock in tempList)
-                    {
-                        if (!isAdd)
-                            break;
-                        var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
-                        isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
-                    }
-                    if (isAdd)
-                        tempList.Add(block);
-                }
-                bool addType = true;
-                foreach (var retItem in retBlocks)
-                {
-                    if (!addType || retItem.enumEquipmentType != item.enumEquipmentType)
-                        continue;
-                    addType = false;
-                    foreach (var block in tempList) 
-                    {
-                        bool isAdd = true;
-                        var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
-                        foreach (var checkBlock in retItem.blockReferences)
-                        {
-                            if (!isAdd)
-                                break;
-                            var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
-                            isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
-                        }
-                        if (isAdd)
-                            retItem.blockReferences.Add(block);
-                    }
-                    break;
-                }
-                if (addType && tempList.Count > 0)
-                    retBlocks.Add(new EquipmentBlcokModel(item.enumEquipmentType, tempList));
-            }
-            return retBlocks;
+            return floorBlocks;
         }
         void RoofFloorLavelLayout(FloorFramed roofFloor,double midY) 
         {
             var pipelineLabel = new PipeLineLabelLayout(livingHighestFloor, midY);
             var roofTexts = createTextElems.Where(c => c.floorUid.Equals(roofFloor.floorUid) && c.dbText != null).Select(c=>c.dbText).ToList();
             var roofLayouts = createBlockInfos.Where(c => c.floorId.Equals(roofFloor.floorUid) && !string.IsNullOrEmpty(c.tag) && c.tag.Contains("Y1") ).ToList();
+            var thisFloorY1 = new List<CreateBlockInfo>();
+            if (roofFloor.floorType.Contains("大屋面")) 
+            {
+                thisFloorY1.AddRange(_maxRoofFromMinRoofY1.Where(c => c.floorId.Equals(roofFloor.floorUid)));
+                roofLayouts = roofLayouts.Where(c => !thisFloorY1.Any(x => x.uid.Equals(c.uid))).ToList();
+            }
+            var thisFloorDrainPoints = _roofBlockPoints.Where(c => c.roofUid.Equals(roofFloor.floorUid) && (c.equipmentType == EnumEquipmentType.sideRainBucket || c.equipmentType == EnumEquipmentType.gravityRainBucket)).ToList();
             pipelineLabel.InitFloorData(roofFloor, roofLayouts, null);
+            pipelineLabel.InitRoofFloorPipes(thisFloorY1, thisFloorDrainPoints);
+            if (roofLayouts.Count < 1 && thisFloorY1.Count < 1 && thisFloorDrainPoints.Count < 1)
+                return;
             var roofWalls = new List<Polyline>();
             var roofColumns = new List<Polyline>();
             try
             {
                 _wallColumnsEngine.GetStructureInfo(roofFloor.outPolyline, out roofColumns, out roofWalls);
             }
-            catch (Exception ex) { }
-            if(null != roofTexts && roofTexts.Count > 0) 
+            catch { }
+            if (null != roofTexts && roofTexts.Count > 0)
             {
-                foreach (var text in roofTexts) 
-                {
-                    pipelineLabel.AddObstacleEntity(text.GeometricExtents.ToRectangle());
-                }
+                var textPL  = roofTexts.Select(c => c.GeometricExtents.ToRectangle()).ToList();
+                pipelineLabel.AddObstacleEntitys(textPL.Cast<Entity>().ToList());
             }
-            pipelineLabel.AddObstacleEntitys(roofWalls);
-            pipelineLabel.AddObstacleEntitys(roofColumns);
+            pipelineLabel.AddObstacleEntitys(roofWalls.Cast<Entity>().ToList());
+            pipelineLabel.AddObstacleEntitys(roofColumns.Cast<Entity>().ToList());
             var roofFloorBlocks = _blockReferenceData.GetPolylineEquipmentBlocks(roofFloor.outPolyline);
             LabelLayout(pipelineLabel, roofFloor, roofFloorBlocks);
         }
-
         void BreakPipeConnectByY1Lines(List<CreateBasicElement> connetLines,List<CreateBasicElement> roofY1Lines ) 
         {
             List<string> delCurveIds = new List<string>();
@@ -636,19 +614,18 @@ namespace ThMEPWSS.Command
                 floorDoor = _doorWindowEngine.AllDoors(labelFloor.outPolyline);
                 floorWindow = _doorWindowEngine.AllWindows(labelFloor.outPolyline);
             }
-            catch (Exception ex) { }
-            pipelineLabel.AddObstacleEntitys(floorDoor);
-            pipelineLabel.AddObstacleEntitys(floorWindow);
-            
+            catch{ }
+            pipelineLabel.AddObstacleEntitys(floorDoor.Cast<Entity>().ToList());
+            pipelineLabel.AddObstacleEntitys(floorWindow.Cast<Entity>().ToList());
+
             //获取躲避块
             foreach (var item in floorBlocks)
             {
                 if (item.blockReferences.Count < 1)
                     continue;
-                if (!_obstacleBlockTypes.Any(c=>c == item.enumEquipmentType))
+                if (!_obstacleBlockTypes.Any(c => c == item.enumEquipmentType))
                     continue;
-                foreach (var block in item.blockReferences)
-                    pipelineLabel.AddObstacleEntity(block);
+                pipelineLabel.AddObstacleEntitys(item.blockReferences.Cast<Entity>().ToList());
             }
             var addEntitys = new List<Entity>();
             var baseEntitys = _basicElementEngine.GetAllTypeEntity(labelFloor.outPolyline);
@@ -688,7 +665,6 @@ namespace ThMEPWSS.Command
             if (null != lineAdds && lineAdds.Count > 0)
                 createBasicElems.AddRange(lineAdds);
         }
-
         double LivingFloorMidY(List<RoomModel> livingFloorRooms,List<CreateBlockInfo> livingFloorBlocks) 
         {
             var listBlockPoints = livingFloorBlocks.Select(c => c.createPoint).ToList();
