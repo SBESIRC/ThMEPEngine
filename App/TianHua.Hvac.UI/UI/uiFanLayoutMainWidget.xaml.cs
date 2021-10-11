@@ -146,8 +146,17 @@ namespace TianHua.Hvac.UI.UI
                 return frame.Vertices();
             }
         }
+        public static void FocusMainWindow()
+        {
+#if ACAD_ABOVE_2014
+            Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+#else
+FocusToCAD();
+#endif
+        }
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            FocusMainWindow();
             // 获取范围
             var areas = SelectAreas();
             if (areas.Count == 0)

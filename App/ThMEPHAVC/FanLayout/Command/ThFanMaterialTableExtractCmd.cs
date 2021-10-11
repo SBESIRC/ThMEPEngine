@@ -38,6 +38,7 @@ namespace ThMEPHVAC.FanLayout.Command
         {
             throw new NotImplementedException();
         }
+
         public void Execute()
         {
             try
@@ -90,7 +91,7 @@ namespace ThMEPHVAC.FanLayout.Command
                 tmpItem.StrPressure = d.Value[0].FanPressure.ToString();
                 tmpItem.StrPower = d.Value[0].FanPower.ToString();
                 tmpItem.StrNoise = d.Value[0].FanNoise.ToString();
-                tmpItem.StrWeight = "";
+                tmpItem.StrWeight = d.Value[0].FanWeight.ToString();
                 tmpItem.StrCount = d.Value.Count.ToString();
                 tmpItem.StrRemark = "";
                 formItmes.Add(tmpItem);
