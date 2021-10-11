@@ -90,7 +90,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
         /// <returns></returns>
         public LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
+            var roomAInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.connectType == ConnectType.AllConnect || x.connectType == ConnectType.NoCennect).Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -104,7 +104,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                     }
                 }
             }
-            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
+            var roomBInfos = HandleAccessControlRoomService.GTRooms.Where(x => x.connectType == ConnectType.AllConnect || x.connectType == ConnectType.NoCennect).Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)

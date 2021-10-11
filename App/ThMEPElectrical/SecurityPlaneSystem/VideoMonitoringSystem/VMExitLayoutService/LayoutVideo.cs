@@ -47,8 +47,8 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var checkDoors = new List<Polyline>(doors);
             checkDoors.Remove(door);
             checkDoors = checkDoors.Select(x => x.Buffer(-5)[0] as Polyline).ToList();
-            var pts = CreateClomunLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors);
-            pts.AddRange(CreateWallLayoutPt(roomPtInfo.Item1, nCols, nWalls, checkDoors));
+            var pts = CreateClomunLayoutPt(room,roomPtInfo.Item1, nCols, nWalls, checkDoors);
+            pts.AddRange(CreateWallLayoutPt(room,roomPtInfo.Item1, nCols, nWalls, checkDoors));
             var checkRoom = room.Buffer(-10)[0] as Polyline;
             pts = pts.Where(x => poly.Contains(x) && checkRoom.Contains(x)).ToList();
 
@@ -92,7 +92,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="doorPt"></param>
         /// <param name="columns"></param>
         /// <param name="walls"></param>
-        private List<Point3d> CreateClomunLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
+        private List<Point3d> CreateClomunLayoutPt(Polyline room, Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
         {
             List<Point3d> pts = new List<Point3d>();
             List<Polyline> checkStru = new List<Polyline>(columns);
@@ -106,7 +106,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 {
                     var pt = new Point3d((line.StartPoint.X + line.EndPoint.X) / 2, (line.StartPoint.Y + line.EndPoint.Y) / 2, 0);
                     var checkLine = new Line(pt, doorPt);
-                    if (CheckIntersectWithStruc(checkLine, checkStru))
+                    if (CheckIntersectWithStruc(checkLine, checkStru, room))
                     {
                         pts.Add(pt);
                     }
@@ -123,7 +123,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="columns"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        private List<Point3d> CreateWallLayoutPt(Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
+        private List<Point3d> CreateWallLayoutPt(Polyline room, Point3d doorPt, List<Polyline> columns, List<Polyline> walls, List<Polyline> doors)
         {
             List<Point3d> pts = new List<Point3d>();
             List<Polyline> checkStru = new List<Polyline>(walls);
@@ -144,11 +144,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 foreach (Point3d pt in allPts)
                 {
                     var interPts = allLines.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).ToList();
-                    if (CheckIntersectWithStruc(new Line(interPts[0], doorPt), checkStru))
+                    if (CheckIntersectWithStruc(new Line(interPts[0], doorPt), checkStru, room))
                     {
                         pts.Add(interPts[0]);
                     }
-                    if (CheckIntersectWithStruc(new Line(interPts[1], doorPt), checkStru))
+                    if (CheckIntersectWithStruc(new Line(interPts[1], doorPt), checkStru, room))
                     {
                         pts.Add(interPts[1]);
                     }
@@ -165,7 +165,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="walls"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        private bool CheckIntersectWithStruc(Line checkLine, List<Polyline> strus)
+        private bool CheckIntersectWithStruc(Line checkLine, List<Polyline> strus, Polyline room)
         {
             var leftMatrix = Matrix3d.Rotation(Math.PI / 180 * 2, Vector3d.ZAxis, checkLine.StartPoint);
             var leftLine = checkLine.Clone() as Line;
@@ -182,6 +182,25 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 //    db.ModelSpace.Add(item);
                 //}
             }
+            Point3dCollection pts = new Point3dCollection();
+            checkLine.IntersectWith(room, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+            if (pts.Count > 1)
+            {
+                return false;
+            }
+            pts = new Point3dCollection();
+            leftLine.IntersectWith(room, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+            if (pts.Count > 1)
+            {
+                return false;
+            }
+            pts = new Point3dCollection();
+            rightLine.IntersectWith(room, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+            if (pts.Count > 1)
+            {
+                return false;
+            }
+
             foreach (var wall in strus)
             {
                 if (wall.Intersects(checkLine))
@@ -197,7 +216,6 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                     return false;
                 }
             }
-
             return true;
         }
     }
