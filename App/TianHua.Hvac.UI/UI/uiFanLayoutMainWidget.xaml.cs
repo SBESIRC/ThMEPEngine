@@ -1,6 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using AcHelper;
+using System;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPEngineCore.IO.ExcelService;
@@ -119,8 +122,19 @@ namespace TianHua.Hvac.UI.UI
         }
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            var cmd = new ThFanMaterialTableExtractCmd();
-            cmd.Execute();
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.FileName = "风机材料表 - " + DateTime.Now.ToString("yyyy.MM.dd");
+            saveFileDialog.InitialDirectory = Active.DocumentDirectory;
+
+            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                var cmd = new ThFanMaterialTableExtractCmd();
+                cmd.FilePath = saveFileDialog.FileName.ToString();
+                cmd.Execute();
+            }
         }
 
         private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

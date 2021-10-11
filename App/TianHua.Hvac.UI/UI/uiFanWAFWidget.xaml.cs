@@ -53,6 +53,7 @@ namespace TianHua.Hvac.UI.UI
             if (fanWidget.ShowDialog() == true)
             {
                 ViewModel.FanInfoConfigs.Add(fanWidget.GetFanConfigInfo());
+                //写入到图纸
             }
         }
     }

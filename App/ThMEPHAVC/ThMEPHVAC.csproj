@@ -35,6 +35,7 @@
     <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanMaterialTableExtractCmd.cs" />
     <Compile Include="FanLayout\Engine\ThFanCEXHRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWAFRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWEXHRecognitionEngine.cs" />
     <Compile Include="FanLayout\Model\ThFanAirPortMarkModel.cs" />

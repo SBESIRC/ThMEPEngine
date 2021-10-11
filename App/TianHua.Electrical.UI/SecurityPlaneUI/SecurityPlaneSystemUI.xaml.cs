@@ -360,7 +360,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 //设置填充listview
                 var dataSet = GetExcelContent(file);
                 SetListView(dataSet);
-
+                 
                 //存储成excel
                 var fileArray = file.Split("\\".ToCharArray());
                 var flieName = fileArray[fileArray.Length - 1];
