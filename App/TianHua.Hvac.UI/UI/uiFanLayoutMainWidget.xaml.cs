@@ -151,9 +151,19 @@ namespace TianHua.Hvac.UI.UI
 #if ACAD_ABOVE_2014
             Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
 #else
-FocusToCAD();
+            FocusToCAD();
 #endif
         }
+        public static void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
+        }
+
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
             FocusMainWindow();
