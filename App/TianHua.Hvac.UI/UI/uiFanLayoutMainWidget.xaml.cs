@@ -1,5 +1,11 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
@@ -118,23 +124,55 @@ namespace TianHua.Hvac.UI.UI
             ViewModel.thFanLayoutConfigInfo.CEXHConfigInfo = FanCEXHWidget.GetFanCEXHConfigInfo();
             var cmd = new ThFanLayoutExtractCmd();
             cmd.thFanLayoutConfigInfo = ViewModel.thFanLayoutConfigInfo;
-            cmd.Execute();
+            cmd.SubExecute();
+        }
+
+        private Point3dCollection SelectAreas()
+        {
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return new Point3dCollection();
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                return frame.Vertices();
+            }
         }
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
+            // 获取范围
+            var areas = SelectAreas();
+            if (areas.Count == 0)
+            {
+                return;
+            }
 
+            // 获取导出路径
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
             saveFileDialog.RestoreDirectory = true;
             saveFileDialog.FileName = "风机材料表 - " + DateTime.Now.ToString("yyyy.MM.dd");
             saveFileDialog.InitialDirectory = Active.DocumentDirectory;
-
-            if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
             {
-                var cmd = new ThFanMaterialTableExtractCmd();
-                cmd.FilePath = saveFileDialog.FileName.ToString();
-                cmd.Execute();
+                return;
             }
+
+            // 执行命令
+            var cmd = new ThFanMaterialTableExtractCmd()
+            {
+                Areas = areas,
+                FilePath = saveFileDialog.FileName,
+            };
+            cmd.Execute();
         }
 
         private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)

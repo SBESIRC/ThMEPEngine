@@ -33,45 +33,25 @@ namespace ThMEPHVAC.FanLayout.Command
     public class ThFanMaterialTableExtractCmd : IAcadCommand, IDisposable
     {
         public string FilePath { set; private get; }
+        public Point3dCollection Areas { set; private get; }
         public void Dispose()
         {
             throw new NotImplementedException();
-        }
-        public Point3dCollection SelectAreas()
-        {
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return new Point3dCollection();
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                return frame.Vertices();
-            }
         }
         public void Execute()
         {
             try
             {
-                var area = SelectAreas();//获取范围
-                string configPath = ThCADCommon.FanParameterTablePath();
-
+                string configPath = ThCADCommon.FanMaterialTablePath();
                 using (var excelpackage = CreateModelExportExcelPackage(configPath))
                 {
                     excelpackage.SaveAs(new FileInfo(FilePath));
                 }
-                var wafFanInfoList = ThFanExtractServiece.GetWAFFanConfigInfoList(area);
+                var wafFanInfoList = ThFanExtractServiece.GetWAFFanConfigInfoList(Areas);
                 HandleFanInfoList(wafFanInfoList, FilePath, "壁式轴流风机");
-                var WexhFanInfoList = ThFanExtractServiece.GetWEXHFanConfigInfoList(area);
+                var WexhFanInfoList = ThFanExtractServiece.GetWEXHFanConfigInfoList(Areas);
                 HandleFanInfoList(WexhFanInfoList, FilePath, "壁式排气扇");
-                var cexhFanInfoList = ThFanExtractServiece.GetCEXHFanConfigInfoList(area);
+                var cexhFanInfoList = ThFanExtractServiece.GetCEXHFanConfigInfoList(Areas);
                 HandleFanInfoList(cexhFanInfoList, FilePath, "吊顶式排气扇");
             }
             catch (Exception ex)
@@ -120,19 +100,23 @@ namespace ThMEPHVAC.FanLayout.Command
             {
                 if (type == "壁式轴流风机")
                 {
-                    SaveAsExecl(excelpackage.Workbook.Worksheets[1], formItmes, 1);
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["壁式轴流风机"], formItmes);
                     excelpackage.Save();
                 }
                 else if (type == "壁式排气扇")
                 {
-                    SaveAsExecl(excelpackage.Workbook.Worksheets[2], formItmes, 2);
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["壁式排气扇"], formItmes);
                     excelpackage.Save();
 
                 }
                 else if (type == "吊顶式排气扇")
                 {
-                    SaveAsExecl(excelpackage.Workbook.Worksheets[3], formItmes, 3);
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["吊顶式排气扇"], formItmes);
                     excelpackage.Save();
+                }
+                else
+                {
+                    throw new NotSupportedException();
                 }
             }
         }
@@ -142,11 +126,11 @@ namespace ThMEPHVAC.FanLayout.Command
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             return new ExcelPackage(new FileInfo(filePath));
         }
-        private void SaveAsExecl( ExcelWorksheet _Sheet, List<FanFormItem> itemList,int index)
+        private void SaveAsExecl( ExcelWorksheet _Sheet, List<FanFormItem> itemList)
         {
             var i = 3;
 
-            if(index == 1 || index == 2)
+            if(_Sheet.Name == "壁式轴流风机" || _Sheet.Name == "壁式排气扇")
             {
                 foreach(var p in itemList)
                 {
@@ -164,7 +148,7 @@ namespace ThMEPHVAC.FanLayout.Command
                     i++;
                 }
             }
-            else if(index == 3)
+            else if(_Sheet.Name == "吊顶式排气扇")
             {
                 foreach (var p in itemList)
                 {

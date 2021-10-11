@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 using ThMEPHVAC.DrawService;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.Service;
@@ -19,7 +20,7 @@ using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
-    public class ThFanLayoutExtractCmd : IAcadCommand, IDisposable
+    public class ThFanLayoutExtractCmd : ThMEPBaseCommand, IDisposable
     {
         public ThFanLayoutConfigInfo thFanLayoutConfigInfo { set; get; }
         public ThFanLayoutExtractCmd()
@@ -117,7 +118,7 @@ FocusToCAD();
                 DbHelper.EnsureLayerOn("H-DUCT-VENT");
             }
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {
