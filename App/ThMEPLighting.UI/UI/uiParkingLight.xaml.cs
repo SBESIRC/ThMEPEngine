@@ -109,23 +109,11 @@ namespace ThMEPLighting.UI.UI
 
         private void btnLayoutLight_Click(object sender, RoutedEventArgs e)
         {
-            var type = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;
-            if (type == Common.EnumParkingSource.OnlyBlockName)
+            string msg = ParkingStallCheckData();
+            if (!string.IsNullOrEmpty(msg)) 
             {
-                bool haveSelectBlock = false;
-                foreach (var item in parkingLightView.PickBlockNames)
-                {
-                    if (item.IsSelect)
-                    {
-                        haveSelectBlock = true;
-                        break;
-                    }
-                }
-                if (!haveSelectBlock)
-                {
-                    MessageBox.Show("选择了仅块名称，但没有选择相应的块名称，请选择块名称后再进行后续操作");
-                    return;
-                }
+                MessageBox.Show(msg, "天华-提醒");
+                return;
             }
             BtnClick(true);
         }
@@ -221,6 +209,54 @@ namespace ThMEPLighting.UI.UI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        string ParkingStallCheckData() 
+        {
+            //现在改为获取块和名称都支持
+            string errorMsg = "";
+            var type = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;
+            if (type == Common.EnumParkingSource.OnlyBlockName)
+            {
+                if (!HaveSelectBlock())
+                {
+                    errorMsg = "选择了仅块名称，但没有选择相应的块名称，请选择块名称后再进行后续操作";
+                }
+            }
+            else if (type == Common.EnumParkingSource.BlokcAndLayer) 
+            {
+                if (!HaveSelectBlock() && !HaveSelectLayer())
+                {
+                    errorMsg = "没有选择任何块名称或图层名称，无法进行后续操作，请选择后再进行后续操作";
+                }
+            }
+            return errorMsg;
+        }
+        bool HaveSelectBlock() 
+        {
+            bool haveSelectBlock = false;
+            foreach (var item in parkingLightView.PickBlockNames)
+            {
+                if (item.IsSelect)
+                {
+                    haveSelectBlock = true;
+                    break;
+                }
+            }
+            return haveSelectBlock;
+        }
+        bool HaveSelectLayer() 
+        {
+            bool haveSelectLayer = false;
+            foreach (var item in parkingLightView.PickLayerNames)
+            {
+                if (item.IsSelect)
+                {
+                    haveSelectLayer = true;
+                    break;
+                }
+            }
+            return haveSelectLayer;
         }
     }
 }
