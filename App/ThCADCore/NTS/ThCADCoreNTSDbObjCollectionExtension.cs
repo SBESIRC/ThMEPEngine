@@ -42,12 +42,7 @@ namespace ThCADCore.NTS
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            // UnaryUnionOp.Union()有Robust issue
-            // 会抛出"non-noded intersection" TopologyException
-            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException (NTS 2.2.0)
-            Geometry polygons = curves.ToNTSMultiPolygon();
-            Geometry polygon = ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-            return OverlayNGRobust.Overlay(polygons, polygon, SpatialFunction.Union);
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon().Geometries);
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
