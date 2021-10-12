@@ -6,8 +6,10 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
@@ -15,7 +17,7 @@ using ThMEPWSS.Pipe;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
-    public class ThHydrantConnectPipeCmd : IAcadCommand, IDisposable
+    public class ThHydrantConnectPipeCmd : ThMEPBaseCommand, IDisposable
     {
         private ThHydrantConnectPipeConfigInfo ConfigInfo;
         public ThHydrantConnectPipeCmd(ThHydrantConnectPipeConfigInfo configInfo)
@@ -71,7 +73,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         public void Dispose()
         {
         }
-        public void Execute()
+        override public void SubExecute()
         {
             try
             {
@@ -141,9 +143,24 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     pathService.SetTermination(loopLines);
                     pathService.InitData();
 
+                    
                     if (ConfigInfo.isCoveredGraph)
                     {
                         ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, hydrantValve, pipeMark, range);
+                    }
+                    else
+                    {
+                        List<ThHydrantPipe> tmpPipes = new List<ThHydrantPipe>();
+                        while(hydrantPipes.Count != 0)
+                        {
+                            var pipe = hydrantPipes.Last();
+                            hydrantPipes.Remove(pipe);
+                            if (!ThHydrantConnectPipeUtils.PipeIsContainBranchLine(pipe, branchLines))
+                            {
+                                tmpPipes.Add(pipe);
+                            }
+                        }
+                        hydrantPipes = tmpPipes;
                     }
 
                     var brLines = new List<ThHydrantBranchLine>();
@@ -173,7 +190,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                                 var brLine = ThHydrantBranchLine.Create(path);
                                 brLines.Add(brLine);
 
-                                var objcets = path.BufferPL(200)[0];
+                                var objcets = path.BufferPL(200)[0]; 
                                 var obb = objcets as Polyline;
                                 pathService.AddObstacle(obb);
                                 path.Dispose();

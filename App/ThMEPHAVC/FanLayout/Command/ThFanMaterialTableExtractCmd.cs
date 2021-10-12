@@ -14,6 +14,7 @@ using ThMEPEngineCore.IO.ExcelService;
 using System.Data;
 using OfficeOpenXml;
 using System.IO;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
@@ -30,7 +31,7 @@ namespace ThMEPHVAC.FanLayout.Command
         public string StrCount;//台数
         public string StrRemark;//备注
     }
-    public class ThFanMaterialTableExtractCmd : IAcadCommand, IDisposable
+    public class ThFanMaterialTableExtractCmd : ThMEPBaseCommand, IDisposable
     {
         public string FilePath { set; private get; }
         public Point3dCollection Areas { set; private get; }
@@ -38,8 +39,7 @@ namespace ThMEPHVAC.FanLayout.Command
         {
             throw new NotImplementedException();
         }
-
-        public void Execute()
+        override public void SubExecute()
         {
             try
             {

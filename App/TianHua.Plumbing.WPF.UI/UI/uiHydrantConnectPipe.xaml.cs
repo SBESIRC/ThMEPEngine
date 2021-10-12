@@ -24,7 +24,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnConnectPipe_Click(object sender, RoutedEventArgs e)
         {
-            var cmd = new ThHydrantConnectPipeCmd(ViewModel.GetConfigInfo());
+            var cmd = new ThHydrantConnectPipeCmd(ViewModel.GetConfigInfo())
+            {
+                CommandName = "THDXXHS",
+                ActionName = "连管",
+            };
             cmd.Execute();
         }
 
