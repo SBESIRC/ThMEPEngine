@@ -73,7 +73,7 @@ namespace ThMEPWSS.Command
                 //var engine = new ThTCHSprinklerRecognitionEngine();
                 //engine.RecognizeMS(currentDb.Database, frame.Vertices());
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
-                recognizeAllEngine.RecognizeMS(currentDb.Database);
+                recognizeAllEngine.RecognizeMS(currentDb.Database, new Point3dCollection());
 
                 var frame = new Extents3d();
                 polylines.ForEach(p => frame.AddExtents(p.GeometricExtents));

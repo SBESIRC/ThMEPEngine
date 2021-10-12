@@ -1,4 +1,5 @@
 ﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Model.Hvac
@@ -39,6 +40,11 @@ namespace ThMEPEngineCore.Model.Hvac
         /// 等分角度
         /// </summary>
         public double BisectorAngle { get; set; }
+
+        /// <summary>
+        /// 几何外包框
+        /// </summary>
+        public Polyline Outline { get; set; }
     }
 
     public class ThIfcDuctElbow : ThIfcDuctFitting

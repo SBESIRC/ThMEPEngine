@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -8,11 +9,12 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThTCHSprinklerExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThTCHFittingExtractionEngine : ThDistributionElementExtractionEngine
     {
         public override void Extract(Database database)
         {
@@ -38,7 +40,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHSprinklerExtractionVisitor()
+                var visitor = new ThTCHFittingExtractionVisitor()
                 {
                     LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
                 };
@@ -61,7 +63,7 @@ namespace ThMEPEngineCore.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHSprinklerExtractionVisitor()
+                var visitor = new ThTCHFittingExtractionVisitor()
                 {
                     LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
                 };
@@ -112,16 +114,35 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThTCHSprinklerRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThTCHFittingRecognitionEngine : ThDistributionElementRecognitionEngine
     {
+        //弯头
+        public List<ThIfcDuctElbow> Elbows { get; set; }
+        //三通
+        public List<ThIfcDuctTee> Tees { get; set; }
+        //四通
+        public List<ThIfcDuctCross> Crosses { get; set; }
+        //变径
+        public List<ThIfcDuctReducing> Reducings { get; set; }
+
+        public ThTCHFittingRecognitionEngine()
+        {
+            Elbows = new List<ThIfcDuctElbow>();
+            Tees = new List<ThIfcDuctTee>();
+            Crosses = new List<ThIfcDuctCross>();
+            Reducings = new List<ThIfcDuctReducing>();
+        }
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var engine = new ThTCHFittingExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThTCHSprinklerExtractionEngine();
+            var engine = new ThTCHFittingExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
@@ -130,15 +151,7 @@ namespace ThMEPEngineCore.Engine
         {
             foreach (var data in dataList)
             {
-                var block = data.Geometry as BlockReference;
-                if (block == null || !block.Bounds.HasValue)
-                {
-                    continue;
-                }
-                
-                var sprinkler = new ThSprinkler();
-                sprinkler.Outline = block.GeometricExtents.ToRectangle();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection{ sprinkler.Outline });
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { data.Geometry });
                 if (polygon.Count > 0)
                 {
                     var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
@@ -148,41 +161,92 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
 
-                sprinkler.Position = block.Position;
                 var dictionary = data.Data as Dictionary<string, object>;
-                if (block.Name.Contains("$TwtSys$00000131"))
+                var category = Convert.ToString(dictionary["类型"]);
+                switch(category)
                 {
-                    sprinkler.Category = "侧喷";
-                    if (dictionary["横向镜像"] as string == "是")
-                    {
-                        sprinkler.Direction = (new Vector3d(0, 1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) / Math.PI),
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
-                    else
-                    {
-                        sprinkler.Direction = (new Vector3d(0, -1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) / Math.PI,
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
+                    case "2" : RecoginzeElbow(data);
+                        break;
+                    case "5":
+                        RecoginzeTee(data);
+                        break;
+                    case "7":
+                        RecoginzeCross(data);
+                        break;
                 }
-                else if (block.Name.Contains("$TwtSys$00000125"))
-                {
-                    if (dictionary["遮挡管线"] as string == "是")
-                    {
-                        sprinkler.Category = "上喷";
-                    }
-                    else if (dictionary["遮挡管线"] as string == "否")
-                    {
-                        sprinkler.Category = "下喷";
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-                Elements.Add(sprinkler);
             }
+        }
+
+        private void RecoginzeElbow(ThRawIfcDistributionElementData data)
+        {
+            var dictionary = data.Data as Dictionary<string, object>;
+            var bigEndWidth = Convert.ToDouble(dictionary["始端宽度"]);
+            var smallEndWidth = Convert.ToDouble(dictionary["末端宽度"]);
+            if(bigEndWidth < smallEndWidth)
+            {
+                var temp = bigEndWidth;
+                bigEndWidth = smallEndWidth;
+                smallEndWidth = temp;
+            }
+            if(bigEndWidth - smallEndWidth < 1.0)
+            {
+                var elbow = new ThIfcDuctElbowParameters
+                {
+                    Outline = data.Geometry as Polyline,
+                    PipeOpenWidth = bigEndWidth
+                };
+                Elbows.Add(new ThIfcDuctElbow(elbow));
+            }
+            else
+            {
+                var reducing = new ThIfcDuctReducingParameters
+                {
+                    Outline = data.Geometry as Polyline,
+                    BigEndWidth = bigEndWidth,
+                    SmallEndWidth = smallEndWidth
+                };
+                Reducings.Add(new ThIfcDuctReducing(reducing));
+            }
+        }
+
+        private void RecoginzeTee(ThRawIfcDistributionElementData data)
+        {
+            var dictionary = data.Data as Dictionary<string, object>;
+            var mainBigDiameter = Convert.ToDouble(dictionary["始端宽度"]);
+            var mainSmallDiameter = Convert.ToDouble(dictionary["末端宽度"]);
+            var branchDiameter = Convert.ToDouble(dictionary["支管宽度"]);
+            if (mainBigDiameter < mainSmallDiameter)
+            {
+                var temp = mainBigDiameter;
+                mainBigDiameter = mainSmallDiameter;
+                mainSmallDiameter = temp;
+            }
+            var tee = new ThIfcDuctTeeParameters
+            {
+                Outline = data.Geometry as Polyline,
+                MainBigDiameter = mainBigDiameter,
+                MainSmallDiameter = mainSmallDiameter,
+                BranchDiameter = branchDiameter
+            };
+            Tees.Add(new ThIfcDuctTee(tee));
+        }
+
+        private void RecoginzeCross(ThRawIfcDistributionElementData data)
+        {
+            var dictionary = data.Data as Dictionary<string, object>;
+            var bigEndWidth = Convert.ToDouble(dictionary["始端宽度"]);
+            var mainSmallEndWidth = Convert.ToDouble(dictionary["末端宽度"]);
+            var sideBigEndWidth = Convert.ToDouble(dictionary["支管1宽度"]);
+            var sideSmallEndWidth = Convert.ToDouble(dictionary["支管2宽度"]);
+            var cross = new ThIfcDuctCrossParameters
+            {
+                Outline = data.Geometry as Polyline,
+                BigEndWidth = bigEndWidth,
+                MainSmallEndWidth = mainSmallEndWidth,
+                SideBigEndWidth = sideBigEndWidth,
+                SideSmallEndWidth = sideSmallEndWidth
+            };
+            Crosses.Add(new ThIfcDuctCross(cross));
         }
     }
 }

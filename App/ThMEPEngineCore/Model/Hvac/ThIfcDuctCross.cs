@@ -14,7 +14,7 @@ namespace ThMEPEngineCore.Model.Hvac
         /// <summary>
         /// 四通与大端对接管道截面宽度
         /// </summary>
-        public double mainSmallEndWidth { get; set; }
+        public double MainSmallEndWidth { get; set; }
 
         /// <summary>
         /// 四通侧路大端管道截面宽度
@@ -35,6 +35,11 @@ namespace ThMEPEngineCore.Model.Hvac
         /// 旋转角度
         /// </summary>
         public double RotateAngle { get; set; }
+
+        /// <summary>
+        /// 几何外包框
+        /// </summary>
+        public Polyline Outline { get; set; }
 
     }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -8,11 +9,12 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThTCHSprinklerExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThTCHDuctExtractionEngine : ThDistributionElementExtractionEngine
     {
         public override void Extract(Database database)
         {
@@ -38,7 +40,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHSprinklerExtractionVisitor()
+                var visitor = new ThTCHDuctExtractionVisitor()
                 {
                     LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
                 };
@@ -61,7 +63,7 @@ namespace ThMEPEngineCore.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHSprinklerExtractionVisitor()
+                var visitor = new ThTCHDuctExtractionVisitor()
                 {
                     LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
                 };
@@ -112,16 +114,18 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThTCHSprinklerRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThTCHDuctRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            var engine = new ThTCHDuctExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThTCHSprinklerExtractionEngine();
+            var engine = new ThTCHDuctExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }
@@ -130,15 +134,7 @@ namespace ThMEPEngineCore.Engine
         {
             foreach (var data in dataList)
             {
-                var block = data.Geometry as BlockReference;
-                if (block == null || !block.Bounds.HasValue)
-                {
-                    continue;
-                }
-                
-                var sprinkler = new ThSprinkler();
-                sprinkler.Outline = block.GeometricExtents.ToRectangle();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection{ sprinkler.Outline });
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { data.Geometry });
                 if (polygon.Count > 0)
                 {
                     var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
@@ -148,40 +144,17 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
 
-                sprinkler.Position = block.Position;
+                var parameter = new ThIfcDuctSegmentParameters();
+                parameter.Outline = data.Geometry as Polyline;
                 var dictionary = data.Data as Dictionary<string, object>;
-                if (block.Name.Contains("$TwtSys$00000131"))
-                {
-                    sprinkler.Category = "侧喷";
-                    if (dictionary["横向镜像"] as string == "是")
-                    {
-                        sprinkler.Direction = (new Vector3d(0, 1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) / Math.PI),
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
-                    else
-                    {
-                        sprinkler.Direction = (new Vector3d(0, -1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) / Math.PI,
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
-                }
-                else if (block.Name.Contains("$TwtSys$00000125"))
-                {
-                    if (dictionary["遮挡管线"] as string == "是")
-                    {
-                        sprinkler.Category = "上喷";
-                    }
-                    else if (dictionary["遮挡管线"] as string == "否")
-                    {
-                        sprinkler.Category = "下喷";
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-                Elements.Add(sprinkler);
+                parameter.Width = Convert.ToDouble(dictionary["宽度"]);
+                parameter.Height = Convert.ToDouble(dictionary["厚度"]);
+                var start_x = Convert.ToDouble(dictionary["始端 X 坐标"]);
+                var start_y = Convert.ToDouble(dictionary["始端 Y 坐标"]);
+                var end_x = Convert.ToDouble(dictionary["末端 X 坐标"]);
+                var end_y = Convert.ToDouble(dictionary["末端 Y 坐标"]);
+                parameter.Length = Math.Sqrt(Math.Pow(start_x - end_x, 2) + Math.Pow(start_y - end_y, 2));
+                Elements.Add(new ThIfcDuctSegment(parameter));
             }
         }
     }

@@ -186,6 +186,10 @@
     <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
     <Compile Include="Engine\ThSlabBuilderEngine.cs" />
     <Compile Include="Engine\ThStairBuilderEngine.cs" />
+    <Compile Include="Engine\ThTCHDuctExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHDuctRecognitionEngine.cs" />
+    <Compile Include="Engine\ThTCHFittingExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHFittingRecognitionEngine.cs" />
     <Compile Include="Engine\ThTCHSprinklerExtractionVisitor.cs" />
     <Compile Include="Engine\ThTCHSprinklerRecognitionEngine.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />

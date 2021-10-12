@@ -1,4 +1,5 @@
 ﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model.Hvac
 {
@@ -16,6 +17,10 @@ namespace ThMEPEngineCore.Model.Hvac
         /// 风管高度
         /// </summary>
         public double Height { get; set; }
+        /// <summary>
+        /// 几何外包框
+        /// </summary>
+        public Polyline Outline { get; set; }
     }
 
     public class ThIfcDuctSegment : ThIfcFlowSegment
