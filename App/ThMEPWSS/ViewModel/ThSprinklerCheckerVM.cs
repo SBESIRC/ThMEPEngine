@@ -22,7 +22,7 @@ namespace ThMEPWSS.ViewModel
             if (CheckParameter())
             {
                 SetFocusToDwgView();
-                using (var cmd = new ThSprinklerCheckCmd())
+                using (var cmd = new ThSprinklerCheckCmd { CommandName = "THPTJH", ActionName = "校核"})
                 {
                     cmd.Execute();
                 }

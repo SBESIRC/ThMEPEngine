@@ -196,14 +196,13 @@ namespace ThMEPWSS
                 temp3.ForEach(o => results.Add(o.Parameters.Outline));
                 temp4.ForEach(o => results.Add(o.Parameters.Outline));
 
-
-                //AI风管
+                //AI风管及其配件
                 var list = new List<string> { "Duct", "Elbow", "Tee", "Cross", "Reducing" };
                 list.ForEach(o =>
                 {
                     var thEngine = new ThSprinklerDuctExtractor();
                     thEngine.Category = o;
-                    thEngine.RecognizeMS(frame.Vertices());
+                    thEngine.Recognize(frame.Vertices(), acadDatabase.Database);
                     var result = thEngine.Elements;
                     result.OfType<ThIfcDuctSegment>().ForEach(o =>
                     {

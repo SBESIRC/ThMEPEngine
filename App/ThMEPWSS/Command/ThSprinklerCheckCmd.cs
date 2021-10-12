@@ -5,6 +5,7 @@ using ThCADExtension;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Command;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
@@ -13,7 +14,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Command
 {
-    public class ThSprinklerCheckCmd : IAcadCommand, IDisposable
+    public class ThSprinklerCheckCmd : ThMEPBaseCommand, IDisposable
     {
         public static ThSprinklerCheckerVM SprinklerCheckerVM { get; set; }
 
@@ -22,7 +23,7 @@ namespace ThMEPWSS.Command
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase currentDb = AcadDatabase.Active())

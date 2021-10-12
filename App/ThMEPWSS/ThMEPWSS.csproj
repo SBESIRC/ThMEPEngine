@@ -85,6 +85,7 @@
     <Compile Include="Sprinkler\Service\ThSprinklerCheckerLayer.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCleanEntityService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCreateLayoutAreaService.cs" />
+    <Compile Include="Sprinkler\Service\ThSprinklerDuctService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerHandleConflictService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerHandleNonClosedPolylineService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerIsExteriorDoorService.cs" />
