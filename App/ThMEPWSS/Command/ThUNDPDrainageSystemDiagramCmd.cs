@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
 using System.Diagnostics;
+using ThMEPEngineCore.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.PressureDrainage.Model;
 using ThMEPWSS.PressureDrainageSystem.Model;
@@ -11,19 +12,21 @@ using ThMEPWSS.PressureDrainageSystem.Service;
 
 namespace ThMEPWSS.Command
 {
-    public class ThUNDPDrainageSystemDiagramCmd : IAcadCommand, IDisposable
+    public class ThUNDPDrainageSystemDiagramCmd : ThMEPBaseCommand, IDisposable
     {
         readonly PressureDrainageSystemDiagramVieModel _pressureDrainageViewModel;
         public Point3d InsertPt { get; set; }
         public ThUNDPDrainageSystemDiagramCmd(PressureDrainageSystemDiagramVieModel pressureDrainageViewModel = null)
         {
             _pressureDrainageViewModel = pressureDrainageViewModel;
+            this.CommandName = "THDXPSXTT";
+            this.ActionName = "生成";
         }
         public void Dispose()
         {
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {
@@ -55,7 +58,7 @@ namespace ThMEPWSS.Command
                 }
             }
             catch (Exception ex)
-            {
+            {           
                 Active.Editor.WriteMessage(ex.Message + "\n");
             }
         }
