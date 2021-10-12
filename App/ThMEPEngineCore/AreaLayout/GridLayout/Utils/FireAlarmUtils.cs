@@ -45,6 +45,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             foreach (var polygon in polygons)
             {
                 var intersectLine = polygon.Intersection(linestring);
+                if (intersectLine.IsEmpty)
+                    continue;
                 if (intersectLine is LineString lineString1)
                     ans.Add(new LineSegment(lineString1.Coordinates[0], lineString1.Coordinates[1]));
                 else if (intersectLine is MultiLineString multi)
