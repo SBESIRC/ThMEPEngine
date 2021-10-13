@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Command
             }
             catch (Exception ex)
             {
-                Active.Editor.WriteMessage(ex.Message + "\n");       
+                Active.Editor.WriteMessage(ex.Message + "\n");
             }
         }
 

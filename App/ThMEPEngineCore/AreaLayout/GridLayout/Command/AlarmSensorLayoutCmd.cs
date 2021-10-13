@@ -44,33 +44,41 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                try
+                {
+                    //输入区域
+                    InputArea input_Area = null;
+                    if (ucs != null && ucs.Count > 0)
+                    {
+                        //use input areas
+                        input_Area = new InputArea(frame, layoutList, holeList, wallList, columns, prioritys, detectArea, ucs);
+                    }
+                    else
+                    {
+                        //区域分割
+                        SpaceDivider spaceDivider = new SpaceDivider();
+                        spaceDivider.Compute(frame, layoutList);
+                        ucs = spaceDivider.UCSs;
+                        input_Area = new InputArea(frame, layoutList, holeList, wallList, columns, prioritys, detectArea, spaceDivider.UCSs);
+                    }
+                    //输入参数
+                    var equipmentParameter = new EquipmentParameter(protectRadius, equipmentType);
+                    //初始化布点引擎
+                    sensorOpt = new BeamSensorOpt(input_Area, equipmentParameter);
+                    sensorOpt.Calculate();
+                    //输出参数
+                    blinds = sensorOpt.Blinds;
+                    layoutPoints = sensorOpt.PlacePoints;
+                    ShowPoints();
+                    ShowBlind();
+                    //ShowDetect();
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
 
-                //输入区域
-                InputArea input_Area = null;
-                if(ucs != null && ucs.Count > 0)
-                {
-                    //use input areas
-                    input_Area = new InputArea(frame, layoutList, holeList, wallList, columns, prioritys, detectArea, ucs);
-                }
-                else
-                {
-                    //区域分割
-                    SpaceDivider spaceDivider = new SpaceDivider();
-                    spaceDivider.Compute(frame, layoutList);
-                    ucs = spaceDivider.UCSs;
-                    input_Area = new InputArea(frame, layoutList, holeList, wallList, columns, prioritys, detectArea, spaceDivider.UCSs);
-                }
-                //输入参数
-                var equipmentParameter = new EquipmentParameter(protectRadius, equipmentType);
-                //初始化布点引擎
-                sensorOpt = new BeamSensorOpt(input_Area, equipmentParameter);
-                sensorOpt.Calculate();
-                //输出参数
-                blinds = sensorOpt.Blinds;
-                layoutPoints = sensorOpt.PlacePoints;
-                ShowPoints();
-                ShowBlind();
-                //ShowDetect();
+              
             }
         }
 

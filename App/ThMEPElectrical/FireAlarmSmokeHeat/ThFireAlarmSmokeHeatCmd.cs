@@ -74,12 +74,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
 
             //洞,必须先做找到框线
             dataQuery.analysisHoles();
-            //墙，柱，可布区域，避让
+            var roomType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
 
-            foreach (var frame in dataQuery.FrameHoleList)
+            foreach (var frame in dataQuery.FrameList)
             {
-                DrawUtils.ShowGeometry(frame.Key, string.Format("l0room"), 30);
-                DrawUtils.ShowGeometry(frame.Value, string.Format("l0hole"), 140);
+                DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
+                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
+                DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
             }
 
         }
@@ -175,10 +176,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 //
 
                 //转回原点
-                // var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
-                var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
-                newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
-                var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
+                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+                //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+                //var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
 
                 var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线
@@ -194,6 +195,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                     DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
                     DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
                     DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
+                    DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
+
                 }
 
 

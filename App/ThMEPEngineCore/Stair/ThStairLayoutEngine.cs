@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Stair
         public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, Point3dCollection points, double scale, string equimentName, bool platOnly)
         {
             // 提取楼梯块
-            var engine = new ThDB3StairRecognitionEngine { Rooms = rooms};
+            var engine = new ThDB3StairRecognitionEngine { Rooms = rooms };
             engine.Recognize(database, points);
             var stairs = engine.Elements.Cast<ThIfcStair>().ToList();
 
@@ -33,21 +33,7 @@ namespace ThMEPEngineCore.Stair
                 var doors = doorsEngine.GetDoorList(stair.SrcBlock);
                 var layoutEngine = new ThStairLayoutEngine();
                 var angle = 0.0;
-                stair.PlatForLayout.ForEach(o =>
-                {
-                    var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey, ref angle);
-                    dictionary.Add(position, angle);
-                });
-                if (!platOnly)
-                {
-                    stair.HalfPlatForLayout.ForEach(o =>
-                    {
-                        var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey,ref angle);
-                        dictionary.Add(position, angle);
-                    });
-                }
-                
-                if(equimentName == "E-BFAS110")
+                if (equimentName == "E-BFAS110")
                 {
                     if (stair.Storey == "顶层")
                     {
@@ -56,21 +42,60 @@ namespace ThMEPEngineCore.Stair
                         {
                             var position = stair.Rungs.GeometricExtents().CenterPoint();
                             angle = GetAngle(dirction, GetVector(stair.PlatForLayout[0][0], stair.PlatForLayout[0][3]));
-                            dictionary.Add(position, angle);
+                            if (!dictionary.ContainsKey(position))
+                            {
+                                dictionary.Add(position, angle);
+                            }
                         }
-                        else if(stair.StairType == "剪刀楼梯")
+                        else if (stair.StairType == "剪刀楼梯")
                         {
-                            foreach(Entity rung in stair.Rungs)
+                            foreach (Entity rung in stair.Rungs)
                             {
                                 var position = rung.GeometricExtents.CenterPoint();
                                 angle = GetAngle(dirction, GetVector(stair.PlatForLayout[0][0], stair.PlatForLayout[0][3]));
-                                dictionary.Add(position, angle);
+                                if (!dictionary.ContainsKey(position))
+                                {
+                                    dictionary.Add(position, angle);
+                                }
                             }
                         }
                         else
                         {
                             throw new NotSupportedException();
                         }
+                    }
+                    else
+                    {
+                        stair.PlatForLayout.ForEach(o =>
+                        {
+                            var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey, ref angle);
+                            if (!dictionary.ContainsKey(position))
+                            {
+                                dictionary.Add(position, angle);
+                            };
+                        });
+                    }
+                }
+                else
+                {
+                    stair.PlatForLayout.ForEach(o =>
+                    {
+                        var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey, ref angle);
+                        if (!dictionary.ContainsKey(position))
+                        {
+                            dictionary.Add(position, angle);
+                        }
+                    });
+                    if (!platOnly)
+                    {
+                        stair.HalfPlatForLayout.ForEach(o =>
+                        {
+                            var position = layoutEngine.Displacement(o, doors, equimentName, scale, stair.Storey, ref angle);
+                            if (!dictionary.ContainsKey(position))
+                            {
+                                dictionary.Add(position, angle);
+                            }
+                        });
                     }
                 }
             });
@@ -100,7 +125,7 @@ namespace ThMEPEngineCore.Stair
             // 平台靠近上行方向1/4位置中心吸顶布置
             else if (equimentName == "E-BFAS110")
             {
-                if(storey != "顶层")
+                if (storey != "顶层")
                 {
                     position = platform[0].GetAsVector() + (GetVector(platform[0], platform[1]) * 3 / 4)
                            + (GetVector(platform[0], platform[3]) / 2);

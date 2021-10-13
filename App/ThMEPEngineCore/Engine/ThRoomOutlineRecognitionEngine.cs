@@ -67,6 +67,7 @@ namespace ThMEPEngineCore.Engine
             {
                 var transformer = new ThMEPOriginTransformer(curves);
                 transformer.Transform(curves);
+                curves = ThRoomOutlineSimplifier.Simplify(curves);
                 curves = ThRoomOutlineSimplifier.MakeValid(curves);
                 curves = ThRoomOutlineSimplifier.Simplify(curves);
                 transformer.Reset(curves);
