@@ -40,6 +40,7 @@ namespace ThMEPWSS.Command
                     SprinklerCheckerVM.Parameter.CheckItem7,
                     SprinklerCheckerVM.Parameter.CheckItem8,
                     SprinklerCheckerVM.Parameter.CheckItem9,
+                    SprinklerCheckerVM.Parameter.CheckItem11,
                     SprinklerCheckerVM.Parameter.CheckItem12,
                 };
 
@@ -58,6 +59,7 @@ namespace ThMEPWSS.Command
                         new ThSprinklerDistanceFromBoundarySoCloseChecker(),
                         new ThSprinklerDistanceFromBeamChecker{RoomFrames = polylines },
                         new ThSprinklerBeamChecker(),
+                        new ThSprinklerDuctChecker(),
                         new ThSprinklerSoDenseChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
                     };
                 checkers.ForEach(o =>
@@ -82,6 +84,7 @@ namespace ThMEPWSS.Command
                 {
                     if (checkBoxs[i])
                     {
+                        checkers[i].Extract(currentDb.Database, frame.ToRectangle());
                         checkers[i].Clean(frame.ToRectangle());
                         polylines.ForEach(p =>
                         {

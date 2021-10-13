@@ -33,6 +33,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public abstract void Clean(Polyline pline);
 
+        public abstract void Extract(Database database, Polyline pline);
+
         public void Present(HashSet<Line> result, ObjectId layerId)
         {
             using (var acadDatabase = AcadDatabase.Active())

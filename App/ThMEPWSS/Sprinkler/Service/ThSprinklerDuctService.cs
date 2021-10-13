@@ -56,20 +56,27 @@ namespace ThMEPWSS.Sprinkler.Service
                 if (param.handle == ObjectId.Null.Handle || param.sp.IsEqualTo(param.ep, tor))
                     continue;
                 var poly = GetGeometry(id);
-                poly.TransformBy(matrix);
-                dic.Add(poly, param);
+                if (poly != null) 
+                {
+                    poly.TransformBy(matrix);
+                    dic.Add(poly, param);
+                }
             }
         }
 
         private static Polyline GetGeometry(ObjectId groupId)
         {
             var ids = Dreambuild.AutoCAD.DbHelper.GetEntityIdsInGroup(groupId);
-            var collection = ids.Select(o => o.GetObject(OpenMode.ForRead))
-                                .OfType<Curve>()
-                                .Where(o => !o.Layer.Contains("H-DUCT-DUAL-MID"))
-                                .ToCollection()
-                                .Outline();
-            return collection[0] as Polyline;
+            var results = ids.Select(o => o.GetObject(OpenMode.ForRead))
+                    .OfType<Curve>()
+                    .Where(o => !o.Layer.Contains("H-DUCT-DUAL-MID"))
+                    .ToCollection();
+            var outline = results
+                    .Buffer(0.01)
+                    .OfType<Polyline>()
+                    .OrderByDescending(o => o.Area)
+                    .FirstOrDefault();
+            return outline;
         }
 
         public static void Get_shapes_dic(out Dictionary<Polyline, EntityModifyParam> dic, Database database, Matrix3d matrix)
@@ -228,13 +235,19 @@ namespace ThMEPWSS.Sprinkler.Service
                             if (type == "Tee" || type == "Cross" || type == "Reducing" || type == "Elbow")
                             {
                                 var entities = Get_group_entitys(g);
-                                var collection = entities.OfType<Curve>()
-                                                         .Where(o => !o.Layer.Contains("H-DUCT-DUAL-MID"))
-                                                         .ToCollection()
-                                                         .Outline();
-                                var pline = collection[0] as Polyline;
-                                pline.TransformBy(matrix);
-                                dic.Add(id, pline);
+                                var results = entities.OfType<Curve>()
+                                        .Where(o => !o.Layer.Contains("H-DUCT-DUAL-MID"))
+                                        .ToCollection();
+                                var outline = results
+                                        .Buffer(0.01)
+                                        .OfType<Polyline>()
+                                        .OrderByDescending(o => o.Area)
+                                        .FirstOrDefault();
+                                if (outline != null) 
+                                {
+                                    outline.TransformBy(matrix);
+                                    dic.Add(id, outline);
+                                }
                             }
                         }
                     }

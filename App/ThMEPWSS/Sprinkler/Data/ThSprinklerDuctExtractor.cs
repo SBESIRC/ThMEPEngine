@@ -25,7 +25,7 @@ namespace ThMEPWSS.Sprinkler.Data
             Elements = new List<ThIfcDistributionFlowElement>();
         }
 
-        public void Recognize(Point3dCollection polygon, Database database)
+        public void Recognize(Database database, Point3dCollection polygon)
         {
             if (Category == "Duct")
             {

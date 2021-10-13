@@ -88,6 +88,16 @@ namespace ThMEPWSS.Sprinkler.Service
         }
 
         /// <summary>
+        /// 11.宽度大于1200的风管
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public static ObjectId CreateAIDuctCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Duct_Checker_LayerName, 40);
+        }
+
+        /// <summary>
         /// 12.区域喷头过密
         /// </summary>
         /// <param name="database"></param>

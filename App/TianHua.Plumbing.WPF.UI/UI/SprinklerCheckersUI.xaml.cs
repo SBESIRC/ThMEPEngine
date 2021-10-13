@@ -15,6 +15,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void rbUpSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
         {
             IsEnabledOpen();
+            this.chkItem11.IsEnabled = false;
+            this.chkItem11.IsChecked = false;
         }
 
         private void rbDownSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
@@ -32,12 +34,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem3.IsEnabled = false;
             this.chkItem7.IsEnabled = false;
             this.chkItem8.IsEnabled = false;
+            this.chkItem11.IsEnabled = false;
             this.chkItem12.IsEnabled = false;
             this.chkItem1.IsChecked = false;
             this.chkItem2.IsChecked = false;
             this.chkItem3.IsChecked = false;
             this.chkItem7.IsChecked = false;
             this.chkItem8.IsChecked = false;
+            this.chkItem11.IsChecked = false;
             this.chkItem12.IsChecked = false;
         }
 
@@ -50,6 +54,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem7.IsEnabled = true;
             this.chkItem8.IsEnabled = true;
             this.chkItem9.IsEnabled = true;
+            this.chkItem11.IsEnabled = true;
             this.chkItem12.IsEnabled = true;
             this.chkItem1.IsChecked = true;
             this.chkItem2.IsChecked = true;
@@ -58,6 +63,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem7.IsChecked = true;
             this.chkItem8.IsChecked = true;
             this.chkItem9.IsChecked = true;
+            this.chkItem11.IsChecked = true;
             this.chkItem12.IsChecked = true;
         }
 

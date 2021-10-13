@@ -178,7 +178,7 @@ namespace ThMEPWSS
                 var results = new DBObjectCollection();
                 //天正风管
                 var engine = new ThTCHDuctRecognitionEngine();
-                //engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
                 engine.RecognizeMS(acadDatabase.Database, frame.Vertices());
                 var temp = engine.Elements;
                 temp.OfType<ThIfcDuctSegment>().ForEach(o => results.Add(o.Parameters.Outline));
@@ -202,7 +202,7 @@ namespace ThMEPWSS
                 {
                     var thEngine = new ThSprinklerDuctExtractor();
                     thEngine.Category = o;
-                    thEngine.Recognize(frame.Vertices(), acadDatabase.Database);
+                    thEngine.Recognize(acadDatabase.Database, frame.Vertices());
                     var result = thEngine.Elements;
                     result.OfType<ThIfcDuctSegment>().ForEach(o =>
                     {

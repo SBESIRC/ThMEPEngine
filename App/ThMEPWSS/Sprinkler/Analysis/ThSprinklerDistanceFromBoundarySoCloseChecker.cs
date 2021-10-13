@@ -87,5 +87,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 Present(result, layerId);
             }
         }
+
+        public override void Extract(Database database, Polyline pline)
+        {
+            //
+        }
     }
 }

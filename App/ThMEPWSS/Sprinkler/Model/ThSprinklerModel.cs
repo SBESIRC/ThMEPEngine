@@ -24,6 +24,7 @@ namespace ThMEPWSS.Sprinkler.Model
             checkItem7 = true;
             checkItem8 = true;
             checkItem9 = true;
+            checkItem11 = false;
             checkItem12 = true;
         }
 
@@ -209,6 +210,23 @@ namespace ThMEPWSS.Sprinkler.Model
             {
                 aboveBeamHeight = value;
                 RaisePropertyChanged("AboveBeamHeight");
+            }
+        }
+
+        private bool checkItem11;
+        /// <summary>
+        /// 宽度大于1200的风管
+        /// </summary>
+        public bool CheckItem11
+        {
+            get
+            {
+                return checkItem11;
+            }
+            set
+            {
+                checkItem11 = value;
+                RaisePropertyChanged("CheckItem11");
             }
         }
 

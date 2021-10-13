@@ -102,5 +102,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 }
             }
         }
+
+        public override void Extract(Database database, Polyline pline)
+        {
+            //
+        }
     }
 }
