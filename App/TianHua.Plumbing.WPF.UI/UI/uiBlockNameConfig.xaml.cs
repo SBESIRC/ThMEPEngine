@@ -27,11 +27,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            var oldViewModel = viewModel.SetViewModel?.Clone();
             System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
             var blockName = btn.Tag.ToString();
+
             viewModel.SetViewModel.BlockName = blockName;
             viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
+            var oldViewModel = viewModel.SetViewModel?.Clone();
             uiBlockNameConfigSet systemSet = new uiBlockNameConfigSet(viewModel.SetViewModel);
             systemSet.Owner = this;
             var ret = systemSet.ShowDialog();
