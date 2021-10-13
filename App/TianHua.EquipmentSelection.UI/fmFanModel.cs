@@ -852,7 +852,7 @@ namespace TianHua.FanSelection.UI
 
           
             CalcFanEfficiency(m_Fan);
-            InitSonFan();
+            //InitSonFan();
         }
 
 
