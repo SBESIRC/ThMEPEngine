@@ -142,7 +142,7 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-                foreach (var obj in objs.PolygonsEx())
+                foreach (var obj in objs.Polygons())
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
