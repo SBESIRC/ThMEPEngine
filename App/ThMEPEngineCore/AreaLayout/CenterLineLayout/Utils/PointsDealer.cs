@@ -170,6 +170,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 Point3d ptB = new Point3d((i * pt01.X + (Xcnt - i) * pt1.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt1.Y) / Xcnt, 0);//Bpt01_1
                 Point3d ptC = new Point3d((i * pt23.X + (Xcnt - i) * pt2.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt2.Y) / Xcnt, 0);//Cpt23_2
                 Point3d ptD = new Point3d((i * pt23.X + (Xcnt - i) * pt3.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt3.Y) / Xcnt, 0);//Dpt23_3
+
                 Point3d ptAD = CenterOfTwoPoints(ptA, ptD);//AD中点
                 Point3d ptBC = CenterOfTwoPoints(ptB, ptC);//BC中点
                 bool flag = true;
