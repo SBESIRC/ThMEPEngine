@@ -15,6 +15,9 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas.Model
         public double Scale { get; set; } = 100;
         public double ProtectRadius { get; set; } = 8000;
         public double AisleAreaThreshold { get; set; } = 0.025;
+        public string BlkNameGas = "";
+        public string BlkNameGasPrf = "";
+
         public Dictionary<Polyline, ThFaSmokeCommon.layoutType> RoomType { get; set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
-}
+    }
 }

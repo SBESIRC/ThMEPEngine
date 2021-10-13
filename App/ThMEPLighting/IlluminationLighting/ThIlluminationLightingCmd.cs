@@ -78,7 +78,7 @@ namespace ThMEPLighting.IlluminationLighting
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThIlluminationCommon.BlkNameListAreaLayout;
+                var extractBlkList = ThIlluminationCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThIlluminationCommon.BlkName_CircleCeiling,
                                                         ThIlluminationCommon.BlkName_DomeCeiling,
                                                         ThIlluminationCommon.BlkName_InductionCeiling,
@@ -89,9 +89,12 @@ namespace ThMEPLighting.IlluminationLighting
                     cleanBlkName.Add(ThIlluminationCommon.BlkName_EmergencyLight);
                 }
 
-                var avoidBlkName = ThIlluminationCommon.BlkNameListAreaLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var avoidBlkName = ThIlluminationCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
                 var layoutBlkNameE = ThIlluminationCommon.BlkName_EmergencyLight;
+
+                //导入块图层。free图层
+                ThInsertBlk.prepareInsert(extractBlkList, ThIlluminationCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
                 var pts = ThIlluminationUtils.getFrame();
@@ -114,13 +117,17 @@ namespace ThMEPLighting.IlluminationLighting
                 dataQuery.analysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
+                var priorityExtend = ThParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.extendPriority(priorityExtend);
                 var roomType = ThFaAreaLayoutRoomTypeService.getAreaLightType(dataQuery.Rooms, dataQuery.roomFrameDict);
 
-                foreach (var frame in dataQuery.FrameHoleList)
+                foreach (var frame in dataQuery.FrameList)
                 {
-                    DrawUtils.ShowGeometry(frame.Key, string.Format("l0room"), 30);
-                    DrawUtils.ShowGeometry(frame.Value, string.Format("l0hole"), 140);
+                    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
+                    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
+                    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
                 }
+
 
                 var layoutParameter = new ThLayoutParameter();
                 layoutParameter.Scale = _scale;
@@ -133,6 +140,7 @@ namespace ThMEPLighting.IlluminationLighting
                 layoutParameter.framePts = pts;
                 layoutParameter.transformer = transformer;
                 layoutParameter.roomType = roomType;
+                layoutParameter.priorityExtend = priorityExtend;
 
                 //接入楼梯
                 var stairBlkResult = ThStairService.layoutStair(layoutParameter);
@@ -142,9 +150,8 @@ namespace ThMEPLighting.IlluminationLighting
 
                 //转回到原始位置
                 lightResult.ForEach(x => x.transformBack(transformer));
-              
+
                 //打印
-                ThInsertBlk.prepareInsert(extractBlkList, extractBlkList.Select(x => ThIlluminationCommon.blk_layer[x]).ToList());
                 ThInsertBlk.InsertBlock(lightResult, _scale);
                 ThInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
 

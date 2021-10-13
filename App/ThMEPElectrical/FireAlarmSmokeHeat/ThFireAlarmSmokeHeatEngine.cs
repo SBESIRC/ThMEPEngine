@@ -19,7 +19,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Command;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.GeoJSON;
@@ -38,8 +38,11 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
 {
     class ThFireAlarmSmokeHeatEngine
     {
-        public static void thFaSmokeHeatLayoutEngine(ThSmokeDataQueryService dataQuery, ThFaAreaLayoutResult heatResult, ThFaAreaLayoutResult smokeResult, ThFaAreaLayoutParameter layoutParameter)
+        public static void thFaSmokeHeatLayoutEngine(ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, out List<ThLayoutPt> layoutResult, out List<Polyline> blindsResult)
         {
+            blindsResult = new List<Polyline>();
+            layoutResult = new List<ThLayoutPt>();
+
             foreach (var frame in dataQuery.FrameList)
             {
                 try
@@ -50,21 +53,28 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                         continue;
                     }
 
-                    var priority = new List<Polyline>();
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.heat || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeat)
                     {
-                        var localHeatResult = layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, heatResult);
-                        if (localHeatResult.layoutPts != null && localHeatResult.layoutPts.Count > 0)
-                        {
-                            var size = ThFaCommon.blk_size[layoutParameter.BlkNameHeat];
-                            priority = ThFaAreaLayoutParamterCalculationService.getPriorityBoundary(localHeatResult.layoutPts, layoutParameter.Scale, size);
-                        }
-                        dataQuery.FramePriorityList[frame].AddRange(priority);
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameHeat);
+                        dataQuery.FramePriorityList[frame].AddRange(ThFaAreaLayoutService.toPriority(localPts, ThFaCommon.blk_size[layoutParameter.BlkNameHeat], layoutParameter.Scale, layoutParameter.priorityExtend));
+                    }
+                    else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.heatPrf || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeatPrf)
+                    {
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.heat, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameHeatPrf);
+                        dataQuery.FramePriorityList[frame].AddRange(ThFaAreaLayoutService.toPriority(localPts, ThFaCommon.blk_size[layoutParameter.BlkNameHeatPrf], layoutParameter.Scale, layoutParameter.priorityExtend));
                     }
 
                     if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smoke || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeat)
                     {
-                        var localSmokeResult = layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.smoke, smokeResult);
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.smoke, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameSmoke);
+                    }
+                    else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokePrf || layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.smokeHeatPrf)
+                    {
+                        layoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.smoke, out var localPts, out var blines);
+                        ThFaAreaLayoutService.addResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameSmokePrf);
                     }
                 }
                 catch
@@ -75,9 +85,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
 
         }
 
-        private static ThFaAreaLayoutResult layoutProcess(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, ThFaAreaLayoutResult layoutResult)
+        private static void layoutProcess(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaAreaLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
-            var localResult = new ThFaAreaLayoutResult();
             var radius = ThFaAreaLayoutParamterCalculationService.calculateRadius(frame.Area, layoutParameter.FloorHightIdx, layoutParameter.RootThetaIdx, layoutType);//to do...frame.area need to remove hole's area
             DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
 
@@ -86,23 +95,15 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             if (bIsAisleArea == false)
             {
                 debugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                localResult = ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius);
-                debugShowResult(localResult.layoutPts, localResult.blind, layoutType, bIsAisleArea);
+                ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius, out localPts, out blines);
+                debugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
             else
             {
                 debugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                localResult = ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius);
-                debugShowResult(localResult.layoutPts, localResult.blind, layoutType, bIsAisleArea);
+                ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius, out localPts, out blines);
+                debugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
-
-            foreach (var re in localResult.layoutPts)
-            {
-                layoutResult.layoutPts.Add(re.Key, re.Value);
-            }
-            layoutResult.blind.AddRange(localResult.blind);
-
-            return localResult;
         }
 
         private static void debugShowFrame(Polyline frame, ThSmokeDataQueryService dataQuery, ThFaSmokeCommon.layoutType type, bool isCenterLine)
@@ -117,7 +118,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), string.Format("l0{0}{1}-layoutArea", sCenterLine, stype), 200);
             DrawUtils.ShowGeometry(dataQuery.FramePriorityList[frame], string.Format("l0{0}{1}-priority", sCenterLine, stype), 60);
         }
-
         private static void debugShowResult(Dictionary<Point3d, Vector3d> layoutPts, List<Polyline> blinds, ThFaSmokeCommon.layoutType type, bool isCenterLine)
         {
             var stype = type == ThFaSmokeCommon.layoutType.heat ? "-h" : "-s";

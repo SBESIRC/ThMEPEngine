@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using System.Linq;
+using ThMEPWSS.DrainageSystemAG.Models;
 
 namespace ThMEPWSS.DrainageSystemAG.Bussiness
 {
@@ -9,7 +10,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _pipeLabelNearDistance = 500;//文字距离立管最短距离
         private double _pipeLabelMaxDistance = 3500;//文字距离立管最大距离
         private double _pipeLavelDirectionMoveStep = 300;//文字沿着线方向移动步长
-        List<LablePipe> _areaAllPipe;
+        List<PointLabelInfo> _areaAllPipe;
         double _minX;
         double _maxX;
         double _midY;
@@ -17,11 +18,11 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         Vector3d yAxis = Vector3d.YAxis;
         Vector3d xy13 = Vector3d.XAxis;
         Vector3d xy24 = Vector3d.YAxis;
-        public PipeLabelLayoutDirection(List<LablePipe> areaAllPipe, double minX, double maxX, double midY) 
+        public PipeLabelLayoutDirection(List<PointLabelInfo> areaAllPipe, double minX, double maxX, double midY) 
         {
             xy13 = (xAxis + yAxis).GetNormal();
             xy24 = (xAxis.Negate() + yAxis).GetNormal();
-            _areaAllPipe = new List<LablePipe>();
+            _areaAllPipe = new List<PointLabelInfo>();
             _minX = minX;
             _maxX = maxX;
             _midY = midY;
@@ -34,7 +35,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             _pipeLabelNearDistance = pipeLabelNearDistance;
             _pipeLavelDirectionMoveStep = pipeLavelDirectionMoveStep;
         }
-        public List<CheckDirection> GetLayoutDirections(List<LablePipe> thisLinePipes, Point3d centerPoint, double textWidth, double textHeight,double checkDistance) 
+        public List<CheckDirection> GetLayoutDirections(List<PointLabelInfo> thisLinePipes, Point3d centerPoint, double textWidth, double textHeight,double checkDistance) 
         {
             var layoutDirs = new List<CheckDirection>();
             bool noRight = centerPoint.X + textWidth > _maxX;
@@ -46,10 +47,10 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 layoutDirs.Add(new CheckDirection(yAxis, xAxis, _pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep));
                 return layoutDirs;
             }
-            var otherPipes = _areaAllPipe.Where(c => !thisLinePipes.Any(x => x.pipeCenterPoint.DistanceTo(c.pipeCenterPoint) < 10)).ToList();
-            var nearPipes = otherPipes.Where(c => c.pipeCenterPoint.DistanceTo(centerPoint) > 10 && c.pipeCenterPoint.DistanceTo(centerPoint) < checkDistance).ToList();
-            bool leftHavePipe = nearPipes.Any(c => c.pipeCenterPoint.X < centerPoint.X);
-            bool rightHavePipe = nearPipes.Any(c => c.pipeCenterPoint.X > centerPoint.X);
+            var otherPipes = _areaAllPipe.Where(c => !thisLinePipes.Any(x => x.BasePoint.DistanceTo(c.BasePoint) < 10)).ToList();
+            var nearPipes = otherPipes.Where(c => c.BasePoint.DistanceTo(centerPoint) > 10 && c.BasePoint.DistanceTo(centerPoint) < checkDistance).ToList();
+            bool leftHavePipe = nearPipes.Any(c => c.BasePoint.X < centerPoint.X);
+            bool rightHavePipe = nearPipes.Any(c => c.BasePoint.X > centerPoint.X);
             bool inUp = centerPoint.Y >= _midY;
             if (thisLinePipes.Count > 1)
                 layoutDirs = MiultPipeLayoutDir(noLeft, noRight, leftHavePipe, rightHavePipe, inUp, startHeight);

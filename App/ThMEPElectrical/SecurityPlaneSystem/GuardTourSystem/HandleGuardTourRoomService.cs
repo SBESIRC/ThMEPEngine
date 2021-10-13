@@ -48,20 +48,23 @@ namespace ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem
             otherRooms.Clear();
             foreach (DataRow row in table.Rows)
             {
-                var roomNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[columnName].ToString());
-                RoomInfoModel roomInfoModel = new RoomInfoModel();
-                roomInfoModel.roomName = roomNames;
-                if (row[floor].ToString() != "All")
+                if (true == (row[0] as bool?).Value)
                 {
-                    roomInfoModel.floor = row[floor].ToString();
-                }
-                if (row[insideRoom].ToString() == "是")
-                {
-                    GTRooms.Add(roomInfoModel);
-                }
-                if (row[outsideRoom].ToString() == "是")
-                {
-                    otherRooms.Add(roomInfoModel);
+                    var roomNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[columnName].ToString());
+                    RoomInfoModel roomInfoModel = new RoomInfoModel();
+                    roomInfoModel.roomName = roomNames;
+                    if (row[floor].ToString() != "All")
+                    {
+                        roomInfoModel.floor = row[floor].ToString();
+                    }
+                    if (row[insideRoom].ToString() == "是")
+                    {
+                        GTRooms.Add(roomInfoModel);
+                    }
+                    if (row[outsideRoom].ToString() == "是")
+                    {
+                        otherRooms.Add(roomInfoModel);
+                    }
                 }
             }
         }

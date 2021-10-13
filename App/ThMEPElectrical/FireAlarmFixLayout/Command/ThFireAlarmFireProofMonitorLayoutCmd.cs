@@ -80,10 +80,13 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThFaCommon.BlkNameListFixLayout;
+                var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Monitor };
-                var avoidBlkName = ThFaCommon.BlkNameListFixLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkName = ThFaCommon.BlkName_Monitor;//to do： from UI
+
+                //导入块图层。free图层
+                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
                 var pts = ThFireAlarmUtils.getFrame();

@@ -41,5 +41,18 @@ namespace ThMEPLighting.IlluminationLighting.Service
 
             return boundray;
         }
+
+        public static double getPriorityExtendValue(List<string> blkNameList, double scale)
+        {
+            double extend = -1;
+            var size = new List<double>();
+            size.AddRange(blkNameList.Select(x => ThIlluminationCommon.blk_size[x].Item1));
+            size.AddRange(blkNameList.Select(x => ThIlluminationCommon.blk_size[x].Item2));
+
+            extend = size.OrderByDescending(x => x).First();
+            extend = extend * scale / 2;
+            return extend;
+        }
+
     }
 }

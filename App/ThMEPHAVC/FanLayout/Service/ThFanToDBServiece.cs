@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPHVAC.FanLayout.Model;
+using ThMEPHVAC.FanLayout.ViewModel;
 
 namespace ThMEPHVAC.FanLayout.Service
 {
@@ -77,7 +78,7 @@ namespace ThMEPHVAC.FanLayout.Service
                 }
             }
         }
-        public void InsertCEXHFan(AcadDatabase acadDatabase , ThFanCEXHModel cexh)
+        public void InsertCEXHFan(AcadDatabase acadDatabase , ThFanCEXHModel cexh, ThFanConfigInfo info)
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", cexh.FanNumber);
@@ -107,6 +108,11 @@ namespace ThMEPHVAC.FanLayout.Service
                     }
                 }
             }
+            var tvs = new TypedValueList();
+            tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanPressure));
+            tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanNoise));
+            tvs.Add(new TypedValue((int) DxfCode.ExtendedDataReal, info.FanWeight));
+            blkId.AddXData("FanProperty", tvs);
         }
         public void InsertFireValve(AcadDatabase acadDatabase,ThFanFireValveModel valve)
         {
@@ -162,7 +168,7 @@ namespace ThMEPHVAC.FanLayout.Service
                 }
             }
         }
-        public void InsertWAFFan(AcadDatabase acadDatabase,ThFanWAFModel waf)
+        public void InsertWAFFan(AcadDatabase acadDatabase,ThFanWAFModel waf, ThFanConfigInfo info)
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", waf.FanNumber);
@@ -193,8 +199,13 @@ namespace ThMEPHVAC.FanLayout.Service
                     }
                 }
             }
+            var tvs = new TypedValueList();
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPressure));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanNoise));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
+            blkId.AddXData("FanProperty", tvs);
         }
-        public void InsertWEXHFan(AcadDatabase acadDatabase , ThFanWEXHModel wexh)
+        public void InsertWEXHFan(AcadDatabase acadDatabase , ThFanWEXHModel wexh, ThFanConfigInfo info)
         {
             Dictionary<string, string> attNameValues = new Dictionary<string, string>();
             attNameValues.Add("设备编号", wexh.FanNumber);
@@ -225,6 +236,11 @@ namespace ThMEPHVAC.FanLayout.Service
                     }
                 }
             }
+            var tvs = new TypedValueList();
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanPressure));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanNoise));
+            tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
+            blkId.AddXData("FanProperty", tvs);
         }
     }
 }

@@ -4,9 +4,9 @@ using ThCADExtension;
 using ThMEPEngineCore;
 using AcHelper.Commands;
 using System.Windows.Input;
-using ThMEPEngineCore.Service;
-using GalaSoft.MvvmLight.Command;
 using ThMEPEngineCore.CAD;
+using GalaSoft.MvvmLight.Command;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -56,6 +56,9 @@ namespace ThMEPWSS.ViewModel
 
                 acdb.Database.CreateAIRoomOutlineLayer();
                 roomOutline.Layer = ThMEPEngineCoreLayerUtils.ROOMOUTLINE;
+                roomOutline.ColorIndex = (int)ColorIndex.BYLAYER;
+                roomOutline.LineWeight = LineWeight.ByLayer;
+                roomOutline.Linetype = "ByLayer";
             }
         }
 
@@ -77,6 +80,9 @@ namespace ThMEPWSS.ViewModel
                 // 设置到指定图层
                 acdb.Database.CreateAIRoomSplitlineLayer();
                 roomSplitline.Layer = ThMEPEngineCoreLayerUtils.ROOMSPLITLINE;
+                roomSplitline.ColorIndex = (int)ColorIndex.BYLAYER;
+                roomSplitline.LineWeight = LineWeight.ByLayer;
+                roomSplitline.Linetype = "ByLayer";
             }            
         }
 

@@ -32,11 +32,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem3.IsEnabled = false;
             this.chkItem7.IsEnabled = false;
             this.chkItem8.IsEnabled = false;
+            this.chkItem12.IsEnabled = false;
             this.chkItem1.IsChecked = false;
             this.chkItem2.IsChecked = false;
             this.chkItem3.IsChecked = false;
             this.chkItem7.IsChecked = false;
             this.chkItem8.IsChecked = false;
+            this.chkItem12.IsChecked = false;
         }
 
         private void IsEnabledOpen()
@@ -48,6 +50,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem7.IsEnabled = true;
             this.chkItem8.IsEnabled = true;
             this.chkItem9.IsEnabled = true;
+            this.chkItem12.IsEnabled = true;
             this.chkItem1.IsChecked = true;
             this.chkItem2.IsChecked = true;
             this.chkItem3.IsChecked = true;
@@ -55,6 +58,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.chkItem7.IsChecked = true;
             this.chkItem8.IsChecked = true;
             this.chkItem9.IsChecked = true;
+            this.chkItem12.IsChecked = true;
         }
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -95,6 +99,21 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void lblAboveBeam_MouseDown(object sender, MouseButtonEventArgs e)
         {
             chkItem9.IsChecked = !chkItem9.IsChecked;
+        }
+
+        private void lblDistance_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            chkItem12.IsChecked = !chkItem12.IsChecked;
+        }
+
+        private void tbMiddle_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            chkItem12.IsChecked = !chkItem12.IsChecked;
+        }
+
+        private void tbBottom_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            chkItem12.IsChecked = !chkItem12.IsChecked;
         }
     }
 }

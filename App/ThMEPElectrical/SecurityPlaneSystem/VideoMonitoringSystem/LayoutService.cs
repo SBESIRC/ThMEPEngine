@@ -223,7 +223,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
         /// <returns></returns>
         private LayoutType CalNoCennectRoom(ThIfcRoom connectRoom, string floor)
         {
-            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
+            var roomAInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x=>x.connectType == ConnectType.AllConnect || x.connectType == ConnectType.NoCennect).Where(x => connectRoom.Tags.Any(y => x.roomA.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomAInfos.Count > 0)
             {
                 foreach (var roomAInfo in roomAInfos)
@@ -237,7 +237,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                     }
                 }
             }
-            var roomBInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
+            var roomBInfos = HandleVideoMonitoringRoomService.GTRooms.Where(x => x.connectType == ConnectType.AllConnect || x.connectType == ConnectType.NoCennect).Where(x => connectRoom.Tags.Any(y => x.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, y)))).ToList();
             if (roomBInfos.Count > 0)
             {
                 foreach (var roomBInfo in roomBInfos)
@@ -285,7 +285,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                         }
                         else if (roomAInfo.connectType == ConnectType.Normal)
                         {
-                            if (roomB.Tags.Any(y => roomAInfo.roomB.Contains(y)))
+                            if (roomB.Tags.Any(y => roomAInfo.roomB.Any(z => RoomConfigTreeService.CompareRoom(z,y))))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;

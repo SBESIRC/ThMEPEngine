@@ -4,24 +4,14 @@ using System.Linq;
 using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 
 using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.ExcelService;
-using ThMEPElectrical.Service;
-
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
@@ -57,7 +47,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
         public Dictionary<Polyline, List<MPolygon>> FrameLayoutList { get; private set; } = new Dictionary<Polyline, List<MPolygon>>();
         public Dictionary<Polyline, List<Polyline>> FramePriorityList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<Polyline, List<Polyline>> FrameDetectAreaList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
-     //   public Dictionary<Polyline, ThFaSmokeCommon.layoutType> FrameSensorType { get; private set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
+        //   public Dictionary<Polyline, ThFaSmokeCommon.layoutType> FrameSensorType { get; private set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
         public Dictionary<ThGeometry, Polyline> roomFrameDict { get; set; } = new Dictionary<ThGeometry, Polyline>();
         public ThSmokeDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
         {
@@ -184,47 +174,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             }
         }
 
-        //public void ClassifyData()
-        //{
-        //    var wallList = new List<Polyline>();
-        //    wallList.AddRange(ArchitectureWalls.Select(x => x.Boundary as Polyline));
-        //    wallList.AddRange(Shearwalls.Select(x => x.Boundary as Polyline));
-        //    var columnList = new List<Polyline>();
-        //    columnList.AddRange(Columns.Select(x => x.Boundary as Polyline));
-        //    var layoutList = new List<Polyline>();
-        //    layoutList.AddRange(LayoutArea.Select(x => x.Boundary as Polyline));
-        //    var priorityList = new List<Polyline>();
-        //    priorityList.AddRange(AvoidEquipments.Select(x => x.Boundary as Polyline));
-
-        //    FrameWallList = classifyData(wallList);
-        //    FrameColumnList = classifyData(columnList);
-        //    FrameLayoutList = classifyData(layoutList);
-        //    FramePriorityList = classifyData(priorityList);
-        //    FrameDetectAreaList = classifyData(new List<Polyline>());
-        //}
-        //private Dictionary<Polyline, List<Polyline>> classifyData(List<Polyline> polyList)
-        //{
-        //    var polyDict = new Dictionary<Polyline, List<Polyline>>();
-
-        //    for (int i = 0; i < FrameList.Count; i++)
-        //    {
-        //        var plInFrame = new List<Polyline>();
-        //        for (int j = 0; j < polyList.Count; j++)
-        //        {
-        //            polyList[j].Closed = true;
-        //            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(FrameList[i], polyList[j]);
-
-        //            if (relation.IsContains || relation.IsIntersects)
-        //            {
-        //                plInFrame.Add(polyList[j]);
-        //            }
-        //        }
-        //        polyDict.Add(FrameList[i], plInFrame);
-        //    }
-
-        //    return polyDict;
-        //}
-
         public void ClassifyData()
         {
             var wallList = new List<ThGeometry>();
@@ -269,7 +218,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             return polyDict;
         }
 
-
         private Dictionary<Polyline, List<MPolygon>> classifyLayoutArea(List<ThGeometry> polyList)
         {
             var polyDict = new Dictionary<Polyline, List<MPolygon>>();
@@ -308,9 +256,12 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             return polyDict;
         }
 
-        //public void getAreaSensorType()
-        //{
-        //    FrameSensorType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(Rooms, roomFrameDict);
-        //}
+        public void extendPriority(double priorityExtend)
+        {
+            foreach (var frame in FrameList)
+            {
+                FramePriorityList [frame] = FramePriorityList[frame].Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+            }
+        }
     }
 }

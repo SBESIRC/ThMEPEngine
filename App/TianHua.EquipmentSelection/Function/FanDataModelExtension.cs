@@ -48,6 +48,11 @@ namespace TianHua.FanSelection.Function
             return !string.IsNullOrEmpty(model.FanModelName) && (model.FanModelName != "无此风机");
         }
 
+        public static bool IsVariableSpeedModel(this FanDataModel model)
+        {
+            return model.Control == "双速";
+        }
+
         public static bool IsAXIALModel(this FanDataModel model)
         {
             return FuncStr.NullToStr(model.VentStyle) == "轴流";

@@ -1,6 +1,15 @@
-﻿using System.Collections.ObjectModel;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Text.RegularExpressions;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPEngineCore.IO.ExcelService;
@@ -115,11 +124,73 @@ namespace TianHua.Hvac.UI.UI
             ViewModel.thFanLayoutConfigInfo.CEXHConfigInfo = FanCEXHWidget.GetFanCEXHConfigInfo();
             var cmd = new ThFanLayoutExtractCmd();
             cmd.thFanLayoutConfigInfo = ViewModel.thFanLayoutConfigInfo;
-            cmd.Execute();
+            cmd.SubExecute();
         }
+
+        private Point3dCollection SelectAreas()
+        {
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return new Point3dCollection();
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                return frame.Vertices();
+            }
+        }
+        public static void FocusMainWindow()
+        {
+#if ACAD_ABOVE_2014
+            Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+#else
+            FocusToCAD();
+#endif
+        }
+        public static void FocusToCAD()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
+        }
+
         private void btnExportMat_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            var cmd = new ThFanMaterialTableExtractCmd();
+            FocusMainWindow();
+            // 获取范围
+            var areas = SelectAreas();
+            if (areas.Count == 0)
+            {
+                return;
+            }
+
+            // 获取导出路径
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
+            saveFileDialog.RestoreDirectory = true;
+            saveFileDialog.FileName = "风机材料表 - " + DateTime.Now.ToString("yyyy.MM.dd");
+            saveFileDialog.InitialDirectory = Active.DocumentDirectory;
+            if (saveFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            {
+                return;
+            }
+
+            // 执行命令
+            var cmd = new ThFanMaterialTableExtractCmd()
+            {
+                Areas = areas,
+                FilePath = saveFileDialog.FileName,
+            };
             cmd.Execute();
         }
 

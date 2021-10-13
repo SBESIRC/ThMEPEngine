@@ -55,20 +55,23 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem
             GTRooms.Clear();
             foreach (DataRow row in table.Rows)
             {
-                var roomANames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomA].ToString());
-                var roomBNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomB].ToString());
-                RoomInfoModel roomInfo = new RoomInfoModel();
-                roomInfo.roomA = roomANames;
-                roomInfo.roomB = roomBNames;
-                roomInfo.roomAHandle = GetLayoutType(row[roomAEvent].ToString());
-                roomInfo.roomBHandle = GetLayoutType(row[roomBEvent].ToString());
-                if (row[floor].ToString() != "All")
+                if (true == (row[0] as bool?).Value)
                 {
-                    roomInfo.floorName = row[floor].ToString();
-                }
-                roomInfo.connectType = GetConnectType(row[roomB].ToString());
+                    var roomANames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomA].ToString());
+                    var roomBNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomB].ToString());
+                    RoomInfoModel roomInfo = new RoomInfoModel();
+                    roomInfo.roomA = roomANames;
+                    roomInfo.roomB = roomBNames;
+                    roomInfo.roomAHandle = GetLayoutType(row[roomAEvent].ToString());
+                    roomInfo.roomBHandle = GetLayoutType(row[roomBEvent].ToString());
+                    if (row[floor].ToString() != "All")
+                    {
+                        roomInfo.floorName = row[floor].ToString();
+                    }
+                    roomInfo.connectType = GetConnectType(row[roomB].ToString());
 
-                GTRooms.Add(roomInfo);
+                    GTRooms.Add(roomInfo);
+                }
             }
         }
         

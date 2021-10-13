@@ -76,12 +76,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         {
             //小屋面数据只到大屋面
             var retRes = new List<CreateBlockInfo>();
-
-            //var maxRoofConvert = MaxRoofPipeConvert();
-            //var copyMaxRoofPipeToLiving = CopyY1LToLivingFloor(livingFloor, maxRoofConvert);
-            //if (copyMaxRoofPipeToLiving.Count > 0)
-            //    retRes.AddRange(copyMaxRoofPipeToLiving);
-
             var minToMaxRoofs = MinRoofToMaxRoof();
             if (minToMaxRoofs.Count > 0)
                 retRes.AddRange(minToMaxRoofs);

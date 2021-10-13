@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Buffer;
 
 namespace ThCADCore.NTS
 {
@@ -88,6 +89,21 @@ namespace ThCADCore.NTS
                     break;
             }
             return null;
+        }
+        
+        public static Polyline Buffer(this Line line, double distance, ThBufferEndCapStyle endCapStyle)
+        {
+            switch(endCapStyle)
+            {
+                case ThBufferEndCapStyle.Round:
+                    return line.ToNTSLineString().Buffer(distance, EndCapStyle.Round).ToDbObjects()[0] as Polyline;
+                case ThBufferEndCapStyle.Flat:
+                    return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
+                case ThBufferEndCapStyle.Square:
+                    return line.ToNTSLineString().Buffer(distance, EndCapStyle.Square).ToDbObjects()[0] as Polyline;
+                default:
+                    return new Polyline();
+            }
         }
     }
 }

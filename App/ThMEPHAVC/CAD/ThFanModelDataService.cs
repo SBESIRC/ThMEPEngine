@@ -1,7 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.FanSelection.Service;
+using TianHua.FanSelection.Function;
 using ThMEPEngineCore.Service.Hvac;
-using System.Collections.Generic;
 
 namespace ThMEPHVAC.CAD
 {
@@ -20,13 +21,16 @@ namespace ThMEPHVAC.CAD
             var subModel = ds.Models.Find(o => o.PID == identifier);
             if (model != null)
             {
-                if (subModel != null)
+                if (model.IsVariableSpeedModel())
                 {
-                    return new List<double>()
+                    if (subModel != null)
                     {
-                        FanAirVolumeService.CalcAirVolume(model),
-                        FanAirVolumeService.CalcAirVolume(subModel),
-                    }; 
+                        return new List<double>()
+                        {
+                            FanAirVolumeService.CalcAirVolume(model),
+                            FanAirVolumeService.CalcAirVolume(subModel),
+                        };
+                    }
                 }
                 else
                 {

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 using ThMEPHVAC.DrawService;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.Service;
@@ -19,7 +20,7 @@ using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
-    public class ThFanLayoutExtractCmd : IAcadCommand, IDisposable
+    public class ThFanLayoutExtractCmd : ThMEPBaseCommand, IDisposable
     {
         public ThFanLayoutConfigInfo thFanLayoutConfigInfo { set; get; }
         public ThFanLayoutExtractCmd()
@@ -117,7 +118,7 @@ FocusToCAD();
                 DbHelper.EnsureLayerOn("H-DUCT-VENT");
             }
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {
@@ -202,7 +203,7 @@ FocusToCAD();
             string strFanMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight);
             //插入风机侧元素
             //插入风机
-            InsertWAFFan(acadDatabase, point1,fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+            InsertWAFFan(acadDatabase , info.FanSideConfigInfo.FanConfigInfo, point1,fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise, strFanMark);
             //插入墙洞
@@ -290,7 +291,7 @@ FocusToCAD();
             string strFanMark = ThFanLayoutDealService.GetFanHoleMark(info.FanSideConfigInfo.MarkHeigthType, info.FanSideConfigInfo.FanMarkHeight);
             //插入风机侧元素
             //插入风机
-            InsertWEXHFan(acadDatabase, point1, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+            InsertWEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point1, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise, strFanMark);
             //插入墙洞
@@ -375,7 +376,7 @@ FocusToCAD();
             string strFanPower = ThFanLayoutDealService.GetFanPower(info.FanSideConfigInfo.FanConfigInfo.FanPower);
             string strFanWeight = ThFanLayoutDealService.GetFanWeight(info.FanSideConfigInfo.FanConfigInfo.FanWeight);
             string strFanNoise = ThFanLayoutDealService.GetFanNoise(info.FanSideConfigInfo.FanConfigInfo.FanNoise);
-            InsertCEXHFan(acadDatabase, point1, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
+            InsertCEXHFan(acadDatabase, info.FanSideConfigInfo.FanConfigInfo, point1, fanAngle, fontHeight, info.FanSideConfigInfo.FanConfigInfo.FanDepth
                 , info.FanSideConfigInfo.FanConfigInfo.FanWidth, info.FanSideConfigInfo.FanConfigInfo.FanLength, info.FanSideConfigInfo.FanConfigInfo.FanNumber
                 , strFanVolume, strFanPower, strFanWeight, strFanNoise);
             
@@ -455,7 +456,7 @@ FocusToCAD();
             InsertAirPortMark(acadDatabase, point3, p2, fontScale, "AH", strAirPortMark, "1", strAirPortMarkVolume);
 
         }
-        private void InsertWAFFan(AcadDatabase acadDatabase, Point3d pt, double angle, double fontHeight, double depth, double width, double length
+        private void InsertWAFFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle, double fontHeight, double depth, double width, double length
                             , string strNumber, string strVolume, string strPower, string strWeight, string strNoise, string strMark)
         {
             var WAFFan = new ThFanWAFModel();
@@ -472,9 +473,9 @@ FocusToCAD();
             WAFFan.FanNoise = strNoise;
             WAFFan.FanMark = strMark;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
-            toDbServiece.InsertWAFFan(acadDatabase, WAFFan);
+            toDbServiece.InsertWAFFan(acadDatabase, WAFFan, info);
         }
-        private void InsertWEXHFan(AcadDatabase acadDatabase, Point3d pt, double angle,double fontHeight, double depth, double width, double length
+        private void InsertWEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle,double fontHeight, double depth, double width, double length
                             , string strNumber, string srtVolume, string strPower, string strWeight, string strNoise, string strMark)
         {
             var WEXFan = new ThFanWEXHModel();
@@ -491,9 +492,9 @@ FocusToCAD();
             WEXFan.FanNoise = strNoise;
             WEXFan.FanMark = strMark;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
-            toDbServiece.InsertWEXHFan(acadDatabase, WEXFan);
+            toDbServiece.InsertWEXHFan(acadDatabase, WEXFan, info);
         }
-        private void InsertCEXHFan(AcadDatabase acadDatabase,Point3d pt, double angle,double fontHeigth,double depth,double width,double length
+        private void InsertCEXHFan(AcadDatabase acadDatabase, ThFanConfigInfo info, Point3d pt, double angle,double fontHeigth,double depth,double width,double length
             , string strNumber,string srtVolume,string strPower,string strWeight,string strNoise)
         {
             var CEXHFan = new ThFanCEXHModel();
@@ -509,7 +510,7 @@ FocusToCAD();
             CEXHFan.FanWeight = strWeight;
             CEXHFan.FanNoise = strNoise;
             ThFanToDBServiece toDbServiece = new ThFanToDBServiece();
-            toDbServiece.InsertCEXHFan(acadDatabase, CEXHFan);
+            toDbServiece.InsertCEXHFan(acadDatabase, CEXHFan, info);
         }
         private void InsertFanHole(AcadDatabase acadDatabase, Point3d pt, double angle,double fontHeight , double width,string strSize,string mark)
         {

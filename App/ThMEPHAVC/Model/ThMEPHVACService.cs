@@ -731,27 +731,6 @@ namespace ThMEPHVAC.Model
             else
                 return l1.StartPoint + vec1 * S;
         }
-        public static bool Is_in_polyline(Point3d p, Polyline pl)
-        {
-            bool is_out = true;
-            int edge_num = pl.NumberOfVertices - 1;
-            for (int i = 0; i < edge_num; ++i)
-            {
-                var p1 = pl.GetPoint3dAt(i);
-                var p2 = pl.GetPoint3dAt(i + 1);
-                var dir_vec = (p2 - p1).GetNormal();
-                var judge_dir_vec = (p - p1).GetNormal();
-                if (i == 0)
-                {
-                    is_out = dir_vec.CrossProduct(judge_dir_vec).Z > 0;
-                    continue;
-                }
-                var judge = dir_vec.CrossProduct(judge_dir_vec).Z > 0;
-                if (is_out ^ judge)
-                    return false;
-            }
-            return true;
-        }
         public static bool Is_out_polyline(DBObjectCollection lines, DBObjectCollection fence)
         {
             if (lines.Count > 0)
@@ -781,7 +760,7 @@ namespace ThMEPHVAC.Model
             }
             var pl = new Polyline();
             pl.CreatePolyline(pts);
-            return Is_in_polyline(p, pl);
+            return pl.Contains(p);
         }
         private static Line Search_p(Point3d p, DBObjectCollection lines, out Point3d other_p)
         {

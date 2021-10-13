@@ -10,5 +10,6 @@
         public const string Distance_Form_Beam_LayerName = "AI-喷头校核-喷头距梁是否过小";
         public const string Layout_Area_LayerName = "AI-喷头校核-可布置区域";
         public const string Beam_Checker_LayerName = "AI-喷头校核-较高的梁";
+        public const string Sprinkler_So_Dense_LayerName = "AI-喷头校核-区域喷头过密";
     }
 }

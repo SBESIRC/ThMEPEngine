@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
@@ -60,21 +61,45 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             {
                 if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem))
                 {
+                    DataColumn dataColumn = new DataColumn();
+                    dataColumn.DataType = typeof(Boolean);
+                    dataColumn.ColumnName = "Checked";
+                    dataColumn.DefaultValue = true;
+                    table.Columns.Add(dataColumn);
+                    table.Columns["Checked"].SetOrdinal(0);
                     ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable = table;
                     SetGridValue(VideoMonitoringGrid, table, GetConfigCollection(configTable, 0));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem))
                 {
+                    DataColumn dataColumn = new DataColumn();
+                    dataColumn.DataType = typeof(Boolean);
+                    dataColumn.ColumnName = "Checked";
+                    dataColumn.DefaultValue = true;
+                    table.Columns.Add(dataColumn);
+                    table.Columns["Checked"].SetOrdinal(0);
                     ThElectricalUIService.Instance.Parameter.intrusionAlarmSystemTable = table;
                     SetGridValue(IntrusionAlarmGrid, table, GetConfigCollection(configTable, 1));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.AccessControlSystem))
                 {
+                    DataColumn dataColumn = new DataColumn();
+                    dataColumn.DataType = typeof(Boolean);
+                    dataColumn.ColumnName = "Checked";
+                    dataColumn.DefaultValue = true;
+                    table.Columns.Add(dataColumn);
+                    table.Columns["Checked"].SetOrdinal(0);
                     ThElectricalUIService.Instance.Parameter.accessControlSystemTable = table;
                     SetGridValue(AccessControlGrid, table, GetConfigCollection(configTable, 2));
                 }
                 else if (table.TableName.Contains(ThElectricalUIService.Instance.Parameter.GuardTourSystem))
                 {
+                    DataColumn dataColumn = new DataColumn();
+                    dataColumn.DataType = typeof(Boolean);
+                    dataColumn.ColumnName = "Checked";
+                    dataColumn.DefaultValue = true;
+                    table.Columns.Add(dataColumn);
+                    table.Columns["Checked"].SetOrdinal(0);
                     ThElectricalUIService.Instance.Parameter.guardTourSystemTable = table;
                     GuardTourGrid.ItemsSource = table.DefaultView;
                     List<string> configLst = new List<string>() { "是", "否" };
@@ -132,7 +157,23 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             int columnCount = table.Columns.Count;
             for (int i = 0; i < columnCount; i++)
             {
-                if (i >= columnCount - 2)
+                if(i==0)
+                {
+                    var checkHeader = new CheckBox() { Name = "HeaderCheckBox" };
+                    checkHeader.IsChecked = true;
+                    checkHeader.Click += CheckHeader_Click;
+                    DataGridCheckBoxColumn column = new DataGridCheckBoxColumn();
+                    column.Header = checkHeader;
+                    column.ElementStyle = new Style(typeof(CheckBox));
+                    column.Binding = new Binding(table.Columns[i].ColumnName)
+                    {
+                        Mode = BindingMode.TwoWay,
+                        NotifyOnSourceUpdated = true,
+                        UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
+                    };
+                    dataGrid.Columns.Add(column);
+                }
+                else if (i >= columnCount - 2)
                 {
                     DataGridComboBoxColumn column = new DataGridComboBoxColumn();
                     column.Header = table.Columns[i].ColumnName;
@@ -360,7 +401,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 //设置填充listview
                 var dataSet = GetExcelContent(file);
                 SetListView(dataSet);
-
+                 
                 //存储成excel
                 var fileArray = file.Split("\\".ToCharArray());
                 var flieName = fileArray[fileArray.Length - 1];
@@ -417,6 +458,36 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void CheckHeader_Click(object sender, RoutedEventArgs e)
+        {
+            //聚焦到CAD
+            SetFocusToDwgView();
+            CheckBox checkBox = (CheckBox)sender;
+            DataTable table = new DataTable();
+            //发送命令
+            if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
+            {
+                table = ThElectricalUIService.Instance.Parameter.videoMonitoringSystemTable;
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.IntrusionAlarmSystem)
+            {
+                table = ThElectricalUIService.Instance.Parameter.intrusionAlarmSystemTable;
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.AccessControlSystem)
+            {
+                table = ThElectricalUIService.Instance.Parameter.accessControlSystemTable;
+            }
+            else if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.GuardTourSystem)
+            {
+                table = ThElectricalUIService.Instance.Parameter.guardTourSystemTable;
+            }
+            bool IsChecked = checkBox.IsChecked.Value;
+            for (int i = 0; i < table.Rows.Count; i++)
+            {
+                table.Rows[i][0] = IsChecked;
+            }
         }
     }
 }

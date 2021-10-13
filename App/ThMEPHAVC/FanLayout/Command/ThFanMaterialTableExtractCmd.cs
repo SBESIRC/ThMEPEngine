@@ -1,12 +1,19 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using AcHelper.Commands;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPHVAC.FanLayout.Service;
 using ThMEPHVAC.FanLayout.ViewModel;
+using Autodesk.AutoCAD.Geometry;
+using ThCADExtension;
+using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using ThMEPEngineCore.IO.ExcelService;
+using System.Data;
+using OfficeOpenXml;
+using System.IO;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
@@ -25,6 +32,8 @@ namespace ThMEPHVAC.FanLayout.Command
     }
     public class ThFanMaterialTableExtractCmd : IAcadCommand, IDisposable
     {
+        public string FilePath { set; private get; }
+        public Point3dCollection Areas { set; private get; }
         public void Dispose()
         {
             throw new NotImplementedException();
@@ -34,23 +43,28 @@ namespace ThMEPHVAC.FanLayout.Command
         {
             try
             {
-                var wafFanInfoList = ThFanExtractServiece.GetWAFFanConfigInfoList();
-                HandleFanInfoList(wafFanInfoList, "壁式轴流风机");
-                var WexhFanInfoList = ThFanExtractServiece.GetWEXHFanConfigInfoList();
-                HandleFanInfoList(wafFanInfoList, "壁式排气扇");
-                var cexhFanInfoList = ThFanExtractServiece.GetCEXHFanConfigInfoList();
-                HandleFanInfoList(wafFanInfoList, "吊顶式排气扇");
+                string configPath = ThCADCommon.FanMaterialTablePath();
+                using (var excelpackage = CreateModelExportExcelPackage(configPath))
+                {
+                    excelpackage.SaveAs(new FileInfo(FilePath));
+                }
+                var wafFanInfoList = ThFanExtractServiece.GetWAFFanConfigInfoList(Areas);
+                HandleFanInfoList(wafFanInfoList, FilePath, "壁式轴流风机");
+                var WexhFanInfoList = ThFanExtractServiece.GetWEXHFanConfigInfoList(Areas);
+                HandleFanInfoList(WexhFanInfoList, FilePath, "壁式排气扇");
+                var cexhFanInfoList = ThFanExtractServiece.GetCEXHFanConfigInfoList(Areas);
+                HandleFanInfoList(cexhFanInfoList, FilePath, "吊顶式排气扇");
             }
             catch (Exception ex)
             {
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-
-        private void HandleFanInfoList(List<ThFanConfigInfo> infoList , string type)
+        private void HandleFanInfoList(List<ThFanConfigInfo> infoList, string saveFile, string type)
         {
             var fanDictionary = new Dictionary<string, List<ThFanConfigInfo>>();
 
+            //整理数据，分组操作
             foreach (ThFanConfigInfo fan in infoList)
             {
                 string key = fan.FanNumber;
@@ -66,9 +80,8 @@ namespace ThMEPHVAC.FanLayout.Command
                 }
             }
 
-            //整理数据，合并，统计等操作
             List<FanFormItem> formItmes = new List<FanFormItem>();
-            foreach(var d in fanDictionary)
+            foreach (var d in fanDictionary)
             {
                 FanFormItem tmpItem = new FanFormItem();
                 tmpItem.StrType = type;
@@ -78,19 +91,80 @@ namespace ThMEPHVAC.FanLayout.Command
                 tmpItem.StrPressure = d.Value[0].FanPressure.ToString();
                 tmpItem.StrPower = d.Value[0].FanPower.ToString();
                 tmpItem.StrNoise = d.Value[0].FanNoise.ToString();
-                tmpItem.StrWeight = "";
+                tmpItem.StrWeight = d.Value[0].FanWeight.ToString();
                 tmpItem.StrCount = d.Value.Count.ToString();
-                tmpItem.StrRemark ="";
+                tmpItem.StrRemark = "";
                 formItmes.Add(tmpItem);
             }
 
-            if(type == "壁式轴流风机" && type == "壁式排气扇")
+            using (var excelpackage = CreateModelExportExcelPackage(saveFile))
             {
+                if (type == "壁式轴流风机")
+                {
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["壁式轴流风机"], formItmes);
+                    excelpackage.Save();
+                }
+                else if (type == "壁式排气扇")
+                {
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["壁式排气扇"], formItmes);
+                    excelpackage.Save();
 
+                }
+                else if (type == "吊顶式排气扇")
+                {
+                    SaveAsExecl(excelpackage.Workbook.Worksheets["吊顶式排气扇"], formItmes);
+                    excelpackage.Save();
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
-            else if(type == "吊顶式排气扇")
-            {
+        }
 
+        private ExcelPackage CreateModelExportExcelPackage(string filePath)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            return new ExcelPackage(new FileInfo(filePath));
+        }
+        private void SaveAsExecl( ExcelWorksheet _Sheet, List<FanFormItem> itemList)
+        {
+            var i = 3;
+
+            if(_Sheet.Name == "壁式轴流风机" || _Sheet.Name == "壁式排气扇")
+            {
+                foreach(var p in itemList)
+                {
+                    _Sheet.Cells[i, 1].Value = p.StrType;
+                    _Sheet.Cells[i, 2].Value = p.StrNumber;
+                    _Sheet.Cells[i, 3].Value = p.StrServiceArea;
+                    _Sheet.Cells[i, 4].Value = p.StrAirVolume;
+                    _Sheet.Cells[i, 5].Value = p.StrPressure;
+                    _Sheet.Cells[i, 6].Value = p.StrPower;
+                    _Sheet.Cells[i, 7].Value = "220/1/50";
+                    _Sheet.Cells[i, 8].Value = p.StrNoise;
+                    _Sheet.Cells[i, 9].Value = p.StrWeight;
+                    _Sheet.Cells[i, 10].Value = p.StrCount;
+                    _Sheet.Cells[i, 11].Value = p.StrRemark;
+                    i++;
+                }
+            }
+            else if(_Sheet.Name == "吊顶式排气扇")
+            {
+                foreach (var p in itemList)
+                {
+                    _Sheet.Cells[i, 1].Value = p.StrType;
+                    _Sheet.Cells[i, 2].Value = p.StrNumber;
+                    _Sheet.Cells[i, 3].Value = p.StrServiceArea;
+                    _Sheet.Cells[i, 4].Value = p.StrAirVolume;
+                    _Sheet.Cells[i, 5].Value = p.StrPower;
+                    _Sheet.Cells[i, 6].Value = "220/1/50";
+                    _Sheet.Cells[i, 7].Value = p.StrNoise;
+                    _Sheet.Cells[i, 8].Value = p.StrWeight;
+                    _Sheet.Cells[i, 9].Value = p.StrCount;
+                    _Sheet.Cells[i, 10].Value = p.StrRemark;
+                    i++;
+                }
             }
         }
     }

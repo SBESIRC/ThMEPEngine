@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
+
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Model
 {
     public class ThFaAreaLayoutParameter
@@ -19,8 +20,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Model
         public double AisleAreaThreshold { get; set; } = 0.025;
 
         public string BlkNameHeat = "";
-        public string BlkNameSmoke = ""; 
-
+        public string BlkNameSmoke = "";
+        public string BlkNameHeatPrf = "";
+        public string BlkNameSmokePrf = "";
+        public double priorityExtend = 0;
         public List<Point3d> stairPartResult { get; set; } = new List<Point3d>();
         public Dictionary<Polyline, ThFaSmokeCommon.layoutType> RoomType { get; set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
     }

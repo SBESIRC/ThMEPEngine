@@ -38,9 +38,14 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\KitchenSinkConnect.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\ObstacleEntities.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeConnectPipe.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLabelLayoutDirection.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\PipeLabelText.cs" />
+    <Compile Include="DrainageSystemAG\Bussiness\RoofCollisionCheck.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\ToiletRoomCleanout.cs" />
+    <Compile Include="DrainageSystemAG\Models\PointLabelInfo.cs" />
     <Compile Include="HydrantConnectPipe\Engine\ThOtherLineRecognitionEngine.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantPipeMarkService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantValveService.cs" />
@@ -62,6 +67,7 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoCloseChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerDistanceFromBoundarySoFarChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerSoDenseChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerBeamExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerColumnExtractor.cs" />
@@ -70,6 +76,7 @@
     <Compile Include="Sprinkler\Data\ThSprinklerHoleExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerRoomExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
+    <Compile Include="Sprinkler\Data\ThSprinklerWindowExtractor.cs" />
     <Compile Include="Sprinkler\Model\ThSprinklerModel.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCheckerLayer.cs" />
@@ -185,7 +192,6 @@
     <Compile Include="DrainageSystemAG\Bussiness\FloorDrainConvert.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeDrainConnect.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\PipeLineLabelLayout.cs" />
-    <Compile Include="DrainageSystemAG\Bussiness\RoomKitchenToiletLayout.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementEngine.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BasicElementVisitor.cs" />
     <Compile Include="DrainageSystemAG\DataEngine\BlockReferenceDataEngine.cs" />

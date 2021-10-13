@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace ThMEPHVAC.FanLayout.Service
@@ -13,10 +14,22 @@ namespace ThMEPHVAC.FanLayout.Service
             string strVolume = "风量：" + volume.ToString() + "CMH";
             return strVolume;
         }
+        public static double GetFanVolum(string volum)
+        {
+            var str = Regex.Replace(volum, @"[^\d.\d]", "");
+            double resDouble = double.Parse(str);
+            return resDouble;
+        }
         public static string GetFanPower(double power)
         {
-            string strPower = "电量："+power.ToString()+"W";
+            string strPower = "电量：" + power.ToString()+"W";
             return strPower;
+        }
+        public static double GetFanPower(string power)
+        {
+            var str = Regex.Replace(power, @"[^\d.\d]", "");
+            double resDouble = double.Parse(str);
+            return resDouble;
         }
         public static string GetFanWeight(double weight)
         {

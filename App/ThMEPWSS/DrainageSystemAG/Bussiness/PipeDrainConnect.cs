@@ -157,11 +157,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         var cornerDis = Math.Min(yPrjDisToConnect- pipeNoBayDis, yPrjDisToPoint- startNoBayDis);
                         if (cornerDis < _minConnectLineCornerRange) 
                         {
-                            bool connet = false;
-                            if (yPrjDisToConnect > yPrjDisToPoint)
-                                connet = (yPrjDisToConnect - yPrjDisToPoint) < startNoBayDis;
-                            else 
-                                connet = (yPrjDisToPoint - yPrjDisToConnect) < pipeNoBayDis;
+                            bool connet = yPrjDisToConnect < startNoBayDis || yPrjDisToPoint < pipeNoBayDis;
                             if (connet)
                             {
                                 //距离太小不弯折，直接连接
@@ -187,11 +183,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         var cornerDis = Math.Min(xPrjDisToConnect - pipeNoBayDis, xPrjDisToPoint - startNoBayDis);
                         if (cornerDis < _minConnectLineCornerRange)
                         {
-                            bool connet = false;
-                            if (xPrjDisToConnect > xPrjDisToPoint)
-                                connet = (xPrjDisToConnect - xPrjDisToPoint) < startNoBayDis;
-                            else
-                                connet = (xPrjDisToPoint - xPrjDisToConnect) < pipeNoBayDis;
+                            bool connet = xPrjDisToConnect < startNoBayDis || xPrjDisToPoint < pipeNoBayDis;
                             if (connet)
                             {
                                 //距离太小不弯折，直接连接
@@ -224,11 +216,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (cornerDis < _minConnectLineCornerRange)
                     {
                         //距离太小不弯折，直接连接
-                        bool connet = false;
-                        if (yPrjDisToConnect > yPrjDisToPoint)
-                            connet = (yPrjDisToConnect - yPrjDisToPoint) < startNoBayDis;
-                        else
-                            connet = (yPrjDisToPoint - yPrjDisToConnect) < pipeNoBayDis;
+                        bool connet = yPrjDisToConnect < startNoBayDis || yPrjDisToPoint < pipeNoBayDis;
                         if (connet)
                         {
                             //距离太小不弯折，直接连接
@@ -262,12 +250,8 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     var cornerDis = Math.Min(xPrjDisToConnect - pipeNoBayDis, xPrjDisToPoint - startNoBayDis);
                     if (cornerDis < _minConnectLineCornerRange)
                     {
-                        //距离太小不无湾，直接连接
-                        bool connet = false;
-                        if (xPrjDisToConnect > xPrjDisToPoint)
-                            connet = (xPrjDisToConnect - xPrjDisToPoint) < startNoBayDis;
-                        else
-                            connet = (xPrjDisToPoint - xPrjDisToConnect) < pipeNoBayDis;
+                        //距离太小不弯折，直接连接
+                        bool connet = xPrjDisToConnect<startNoBayDis || xPrjDisToPoint<pipeNoBayDis;
                         if (connet)
                         {
                             //距离太小不弯折，直接连接

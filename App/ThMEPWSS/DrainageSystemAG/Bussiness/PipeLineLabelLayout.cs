@@ -3,10 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Common;
 using ThMEPWSS.DrainageSystemAG.Models;
@@ -37,38 +33,38 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
         private double _labelTextXSpace = 100;
 
         List<CreateBlockInfo> _thisFloorPipes;
-        public ThCADCoreNTSSpatialIndex _obstacleSpatialIndex;
-        public List<Polyline> _obstacleEntities;
-        private List<Line> _obstacleLines;
-        public List<Polyline> _obstacleCreateEntities;
+        List<CreateBlockInfo> _orderLabelPipes;
+        List<RoofPointInfo> _labelRoofDrains;
+        ObstacleEntities _obstacleEntities;
         List<CreateBasicElement> createBasicElements;
-
-        List<Line> _floorSpliteLines;
-        List<double> _floorSpliteX;
-        double _floorSpliteY;
-        FloorFramed _spliteFloor;
+        PipeLabelText _pipeLabelText;
+        List<RoomModel> _cretateFloorRooms;
         FloorFramed _createFloor;
         double _createFloorSpliteY;
-
         public PipeLineLabelLayout(FloorFramed spliterfloor,double spliterY)
         {
-            _spliteFloor = spliterfloor;
-            _floorSpliteY = spliterY;
-            _floorSpliteLines = FramedReadUtil.FloorFrameSpliteLines(spliterfloor);
-            _floorSpliteX = _floorSpliteLines.Select(c => c.StartPoint.X).ToList();
             _thisFloorPipes = new List<CreateBlockInfo>();
-            _obstacleEntities = new List<Polyline>();
-            _obstacleCreateEntities = new List<Polyline>();
-            _obstacleLines = new List<Line>();
+            _orderLabelPipes = new List<CreateBlockInfo>();
+            _labelRoofDrains = new List<RoofPointInfo>();
             createBasicElements = new List<CreateBasicElement>();
+            _obstacleEntities = new ObstacleEntities();
+            _pipeLabelText = new PipeLabelText(spliterfloor, spliterY);
+            _cretateFloorRooms = new List<RoomModel>();
         }
-
-        public void InitFloorData(FloorFramed layerFloor,List<CreateBlockInfo> thisFloorBlocks, List<CreateBasicElement> thisBasicElement) 
+        public void AddObstacleEntitys(List<Entity> entitys)
+        {
+            if (null == entitys || entitys.Count < 1)
+                return;
+            _obstacleEntities.AddObstacleEntitys(entitys);
+        }
+        public void InitFloorData(FloorFramed layerFloor,List<CreateBlockInfo> thisFloorBlocks, List<RoomModel> thisFloorRooms) 
         {
             _createFloor = layerFloor;
-            ClearObstacle();
             _thisFloorPipes.Clear();
             createBasicElements.Clear();
+            _cretateFloorRooms.Clear();
+            if (null != thisFloorRooms && thisFloorRooms.Count > 0)
+                _cretateFloorRooms.AddRange(thisFloorRooms);
             var pipeTags = new List<string>
             {
                 "Y1L","Y2L", "NL","FL","PL","TL","DL"
@@ -94,111 +90,25 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     point = point - Vector3d.XAxis.MultiplyBy(150);
                     point = point - Vector3d.YAxis.MultiplyBy(150);
                     var pline = TextOutPolyLine(point, Vector3d.XAxis, 300, Vector3d.YAxis, 300);
-                    _obstacleEntities.Add(pline);
+                    _obstacleEntities.AddObstacleEntity(pline,false);
                 }
             }
-            if (null != thisBasicElement && thisBasicElement.Count > 0) 
-            {
-                //foreach (var item in thisBasicElement) 
-                //{
-                //    var isLine = item.baseCurce is Line;
-                //    if (!isLine)
-                //        continue;
-                //    var line = item.baseCurce as Line;
-                //    _obstacleLines.Add(line);
-                //}
-            }
         }
-        public void AddObstacleEntity(Entity entity)
+        public void InitRoofFloorPipes(List<CreateBlockInfo> roofY1Pipes,List<RoofPointInfo> thisFloorRoofDrain) 
         {
-            AddObstacle(entity);
-        }
-        public void AddObstacleEntity(Polyline pline)
-        {
-            if (null != pline && pline.Area < 10)
-                return;
-            _obstacleEntities.Add(pline);
-        }
-        public void AddObstacleEntitys(List<Entity> entitys)
-        {
-            if (null == entitys || entitys.Count < 1)
-                return;
-            foreach(var entity in entitys)
-                AddObstacle(entity);
-        }
-        public void AddObstacleEntitys(List<Polyline> polylines)
-        {
-            if (null == polylines || polylines.Count < 1)
-                return;
-            foreach (var pline in polylines) 
-            {
-                if (pline == null || pline.Area < 10)
-                    continue;
-                _obstacleEntities.Add(pline);
-            }
-            
-        }
-
-        void AddObstacle(Entity entity) 
-        {
-            Polyline polyline = null;
-            try
-            {
-                if (entity is BlockReference)
-                {
-                    var block = entity as BlockReference;
-                    var ntsPLine = entity.GeometricExtents.ToNTSPolygon();
-                    polyline = ntsPLine.ToDbPolylines().FirstOrDefault();
-                }
-                else if (entity is Polyline pLine)
-                {
-                    if (pLine.Area < 0.001)
-                        return;
-                    polyline = pLine;
-                }
-                else if (entity is Circle || entity is Arc)
-                {
-                    polyline = entity.GeometricExtents.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
-                }
-                else if (entity is Line)
-                {
-                    polyline = (entity as Line).Buffer(10);
-                }
-                else if (entity is DBText || entity is MText)
-                {
-                    polyline = entity.GeometricExtents.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
-                }
-            }
-            catch (Exception ex) 
-            {
-                polyline = null;
-            }
-            if(null != polyline)
-            {
-                _obstacleEntities.Add(polyline);
-            }
-        }
-        public void ClearObstacle()
-        {
-            _obstacleEntities.Clear();
-            _obstacleLines.Clear();
-            _obstacleCreateEntities.Clear();
+            if (null != roofY1Pipes && roofY1Pipes.Count > 0)
+                _orderLabelPipes.AddRange(roofY1Pipes);
+            if (null != thisFloorRoofDrain && thisFloorRoofDrain.Count > 0)
+                _labelRoofDrains.AddRange(thisFloorRoofDrain);
         }
         public List<CreateDBTextElement> SpliteFloorSpace(out List<CreateBasicElement> createBasics)
         {
-            var addDBColl = new DBObjectCollection();
-            _obstacleEntities.ForEach(c =>
-            {
-                if (null != c && c.Area > 10)
-                    addDBColl.Add(c);
-            });
-            _obstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(addDBColl);
-
-
+            _pipeLabelText.InitFloorData(_createFloor, _cretateFloorRooms);
+            _createFloorSpliteY = _pipeLabelText.GetCreateFloorSpliteY();
             createBasicElements.Clear();
             createBasics = new List<CreateBasicElement>();
             var allTexts = new List<CreateDBTextElement>();
-            List<double> spliteX = GetSpliteXBySpliteFloor();
+            List<double> spliteX = _pipeLabelText.GetSpliteXBySpliteFloor();
             double floorStartX = _createFloor.floorBlock.Position.X;
             double floorEndX = floorStartX + _createFloor.width;
             List<double> floorSpaceX = new List<double>();
@@ -211,32 +121,16 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 floorSpaceX.Add(x);
             }
             floorSpaceX = floorSpaceX.OrderBy(c => c).ToList();
-            var areaPipes = new List<LablePipe>();
+            var allPipeLabels = GetThisFloorAllLables();
             for (int i = 0; i < floorSpaceX.Count - 1; i++)
             {
-                areaPipes.Clear();
                 double minX = floorSpaceX[i];
                 double maxX = floorSpaceX[i + 1];
                 //获取该区域内的立管
-                var spacePipes = _thisFloorPipes.Where(c => c.createPoint.X > minX && c.createPoint.X < maxX).ToList();
+                var spacePipes = allPipeLabels.Where(c => c.BasePoint.X > minX && c.BasePoint.X < maxX).ToList();
                 if (spacePipes == null || spacePipes.Count < 1)
                     continue;
-                bool isClockwise = (i+1) % 2 == 1;
-                List<string> typeNames = spacePipes.Select(c => c.tag).ToList();
-                typeNames = typeNames.Distinct().ToList();
-                foreach (var name in typeNames)
-                {
-                    var typePipes = spacePipes.Where(c => c.tag.Equals(name)).ToList();
-                    var pipeIdNums = PipeIdNumber(typePipes, isClockwise);
-                    var pipeNum = string.Format("{0}{1}-", name, (i + 1));
-                    foreach (var pipe in typePipes)
-                    {
-                        var num = pipeIdNums.Where(c => c.Key.Equals(pipe.uid)).FirstOrDefault().Value;
-                        var realNum = string.Format("{0}{1}", pipeNum, num);
-                        areaPipes.Add(new LablePipe(pipe, realNum));
-                    }
-                }
-                var addText = LayoutTextAvoidObstacleEntity(minX, maxX, areaPipes);
+                var addText = LayoutTextAvoidObstacleEntity(minX, maxX, spacePipes);
                 if (null != addText && addText.Count > 0)
                     allTexts.AddRange(addText);
             }
@@ -245,51 +139,73 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             return allTexts;
         }
 
-        List<double> GetSpliteXBySpliteFloor()
+        List<PointLabelInfo> GetThisFloorAllLables()
         {
-            _createFloorSpliteY = _createFloor.datumPoint.Y + (_floorSpliteY - _spliteFloor.datumPoint.Y);
-            List<double> createSpliteX = new List<double>();
-            if (null == _floorSpliteX || _floorSpliteX.Count < 1)
-                return createSpliteX;
-            var oldPoistion = _spliteFloor.datumPoint.X;
-            var newPoistion = _createFloor.datumPoint.X;
-            foreach (var item in _floorSpliteX) 
+            var allLabels = new List<PointLabelInfo>();
+            //获取顺逆时针排布的立管
+            var clockwiseLabels = _pipeLabelText.ClockwiseLabelInfo(_thisFloorPipes);
+            if (clockwiseLabels.Count > 0)
+                allLabels.AddRange(clockwiseLabels);
+            var orderLabels = _pipeLabelText.OrderLabelInfo(_orderLabelPipes,"a");
+            if (orderLabels.Count > 0)
+                allLabels.AddRange(orderLabels);
+            //雨水斗表述信息
+            if (null != _labelRoofDrains && _labelRoofDrains.Count > 0) 
             {
-                var x = newPoistion + (item -oldPoistion);
-                createSpliteX.Add(x);
+                bool isMaxRoof = _createFloor.floorType.Contains("大屋面");
+                string gravityDN = isMaxRoof ? SetServicesModel.Instance.maxRoofGravityRainBucketRiserPipeDiameter.ToString() : SetServicesModel.Instance.minRoofGravityRainBucketRiserPipeDiameter.ToString();
+                string sideDN = isMaxRoof ? SetServicesModel.Instance.maxRoofSideDrainRiserPipeDiameter.ToString() : SetServicesModel.Instance.minRoofSideDrainRiserPipeDiameter.ToString();
+                foreach (var roofDrain in _labelRoofDrains) 
+                {
+                    if (!roofDrain.roofUid.Equals(_createFloor.floorUid))
+                        continue;
+                    if (roofDrain.equipmentType == EnumEquipmentType.gravityRainBucket)
+                    {
+                        //重力雨水斗
+                        PointLabelInfo pointLabel = new PointLabelInfo(roofDrain.centerPoint, Guid.NewGuid().ToString(), -1, "重力雨水斗");
+                        pointLabel.BottomText = gravityDN;
+                        allLabels.Add(pointLabel);
+                    }
+                    else if (roofDrain.equipmentType == EnumEquipmentType.sideRainBucket) 
+                    {
+                        //侧入雨水斗
+                        PointLabelInfo pointLabel = new PointLabelInfo(roofDrain.centerPoint, Guid.NewGuid().ToString(), -1, "侧入雨水斗");
+                        pointLabel.BottomText = sideDN;
+                        allLabels.Add(pointLabel);
+                    }
+                }
             }
-            createSpliteX = createSpliteX.OrderBy(c => c).ToList();
-            return createSpliteX;
-        } 
-        List<CreateDBTextElement> LayoutTextAvoidObstacleEntity(double minX, double maxX,List<LablePipe> areaAllPipe)
+            return allLabels;
+        }
+        List<CreateDBTextElement> LayoutTextAvoidObstacleEntity(double minX, double maxX, List<PointLabelInfo> pointLabelInfos)
         {
             var retText = new List<CreateDBTextElement>();
-            if (areaAllPipe ==null || areaAllPipe.Count < 1)
+            if (pointLabelInfos == null || pointLabelInfos.Count < 1)
                 return retText;
-            var pipeLayoutDir = new PipeLabelLayoutDirection(areaAllPipe, minX, maxX, _createFloorSpliteY);
+            var pipeLayoutDir = new PipeLabelLayoutDirection(pointLabelInfos, minX, maxX, _createFloorSpliteY);
             pipeLayoutDir.InitData(_pipeLabelNearDistance, _pipeLabelMaxDistance, _pipeLavelDirectionMoveStep);
             List<string> hisPipes = new List<string>();
             var yAxis = Vector3d.YAxis;
             //标注线的方向沿Y轴，
             //所有立管全部布置完毕后，以立管的圆心（容差10）为起点在Y轴正负方向找距离500范围内的的其他立管。若500范围内找到了立管则继续找，直到找不到为止，将找到的组成一队。
-            var tempPipes = new List<LablePipe>();
-            areaAllPipe.ForEach(c => tempPipes.Add(c));
+            var tempPipes = new List<PointLabelInfo>();
+            pointLabelInfos.ForEach(c => tempPipes.Add(c));
             //先进行分组，优先排布分组个数多的
-            List<List<LablePipe>> groupPipeLabels = new List<List<LablePipe>>();
+            List<List<PointLabelInfo>> groupPipeLabels = new List<List<PointLabelInfo>>();
             while (tempPipes.Count > 0) 
             {
                 var basePipe = tempPipes.FirstOrDefault();
-                var thisLinePipes = GetLinePipe(basePipe.pipeCenterPoint, tempPipes, Vector3d.YAxis, _pipeYAxisGroupDistance,_pipeXAxisGroupDistance);
-                hisPipes.AddRange(thisLinePipes.Select(c => c.createBlockUid).ToList());
-                tempPipes = tempPipes.Where(c => !hisPipes.Any(x => x.Equals(c.createBlockUid))).ToList();
+                var thisLinePipes = GetLinePipe(basePipe.BasePoint, tempPipes, Vector3d.YAxis, _pipeYAxisGroupDistance,_pipeXAxisGroupDistance);
+                hisPipes.AddRange(thisLinePipes.Select(c => c.BelongId).ToList());
+                tempPipes = tempPipes.Where(c => !hisPipes.Any(x => x.Equals(c.BelongId))).ToList();
                 groupPipeLabels.Add(thisLinePipes);
             }
             groupPipeLabels = groupPipeLabels.OrderByDescending(c => c.Count).ToList();
             foreach (var listPipe in groupPipeLabels) 
             {
-                var thisLinePipes = new List<LablePipe>();
+                var thisLinePipes = new List<PointLabelInfo>();
                 thisLinePipes.AddRange(listPipe);
-                var centerPoint = PointVectorUtil.PointsAverageValue(thisLinePipes.Select(c => c.pipeCenterPoint).ToList());
+                var centerPoint = PointVectorUtil.PointsAverageValue(thisLinePipes.Select(c => c.BasePoint).ToList());
                 GetTextHeightWidth(thisLinePipes, out double textHeight, out double textWidth);
                 textHeight += thisLinePipes.Count * _labelTextYSpace;
                 textWidth += _labelTextXSpace;
@@ -315,31 +231,40 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 }
 
                 //获取的的可布置点为最高点，或最低点
-                thisLinePipes = thisLinePipes.OrderBy(c => c.pipeCenterPoint.Y).ToList();
+                thisLinePipes = thisLinePipes.OrderBy(c => c.BasePoint.Y).ToList();
 
                 var lineStartPoint = createPoint;
-                string connectPipeIds = string.Join(",", thisLinePipes.Select(c => c.createBlockUid).ToArray());
+                string connectPipeIds = string.Join(",", thisLinePipes.Select(c => c.BelongId).ToArray());
 
                 var textStartPoint = lineStartPoint + layoutDir.outDirection.MultiplyBy(outXLength);
                 if (layoutDir.outDirection.X < 0)
                     textStartPoint = textStartPoint + layoutDir.outDirection.MultiplyBy(textWidth);
                 var textPLine = TextOutPolyLine(textStartPoint, Vector3d.XAxis, textWidth, Vector3d.YAxis, textHeight);
-                _obstacleCreateEntities.Add(textPLine);
+                _obstacleEntities.AddObstacleEntity(textPLine,true);
                 int plCount = 0;
                 for (int i = 0; i < thisLinePipes.Count; i++)
                 {
                     var pipe = thisLinePipes[i];
                     string txtLineLayer = ThWSSCommon.Layout_PipeRainTextLayerName;
-                    if (pipe.pipeAttrTag.ToUpper().Equals("FL") || pipe.pipeAttrTag.ToUpper().Equals("PL") || pipe.pipeAttrTag.ToUpper().Equals("TL"))
+                    if (pipe.UpText.ToUpper().Contains("FL") || pipe.UpText.ToUpper().Contains("PL") || pipe.UpText.ToUpper().Contains("TL"))
                     {
                         plCount += 1;
                         txtLineLayer = ThWSSCommon.Layout_PipeWastDrainTextLayerName;
                     }
+                    if (!string.IsNullOrEmpty(pipe.BottomText) && layoutDir.direction.Y > 0)
+                    {
+                        lineStartPoint = lineStartPoint + yAxis.MultiplyBy(textHeight / 2);
+                        textStartPoint = textStartPoint + yAxis.MultiplyBy(textHeight / 2);
+                    }
                     var textCreatePoint = textStartPoint + Vector3d.YAxis.MultiplyBy(_labelTextYSpace/3) +Vector3d.XAxis.MultiplyBy(_labelTextXSpace/2);
-                    var text = CreateDBText(pipe.pipeNumText, textCreatePoint, txtLineLayer, ThWSSCommon.Layout_TextStyle);
-
+                    var text = CreateDBText(pipe.UpText, textCreatePoint, txtLineLayer, ThWSSCommon.Layout_TextStyle);
+                    DBText btText = null;
+                    if (!string.IsNullOrEmpty(pipe.BottomText))
+                    {
+                        btText = CreateDBText(pipe.BottomText, textCreatePoint - yAxis.MultiplyBy(textHeight / 2 + 50), txtLineLayer, ThWSSCommon.Layout_TextStyle);
+                    }
                     var textLineEp = layoutDir.outDirection.X < 0 ? textStartPoint : textStartPoint + Vector3d.XAxis.MultiplyBy(textWidth);
-                    var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.createBlockUid, "LG_BSLJX");
+                    var s = new CreateBasicElement(_createFloor.floorUid, new Line(lineStartPoint, textLineEp), txtLineLayer, pipe.BelongId, "LG_BSLJX");
                     createBasicElements.Add(s);
                     if (i != thisLinePipes.Count - 1)
                     {
@@ -350,10 +275,14 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         textStartPoint = textStartPoint + yAxis.MultiplyBy(yDis + _labelTextYSpace);
                         lineStartPoint = lineStartPoint + yAxis.MultiplyBy(yDis + _labelTextYSpace);
                     }
-                    retText.Add(new CreateDBTextElement(_createFloor.floorUid, textStartPoint, text, pipe.createBlockUid, txtLineLayer, ThWSSCommon.Layout_TextStyle));
+                    retText.Add(new CreateDBTextElement(_createFloor.floorUid, textStartPoint, text, pipe.BelongId, txtLineLayer, ThWSSCommon.Layout_TextStyle));
+                    if (btText != null) 
+                    {
+                        retText.Add(new CreateDBTextElement(_createFloor.floorUid, btText.Position, btText, pipe.BelongId, txtLineLayer, ThWSSCommon.Layout_TextStyle));
+                    }
                 }
                 var startPipe = layoutDir.direction.Y < 0 ? thisLinePipes.Last() : thisLinePipes.First();
-                var lineSp = new Point3d(centerPoint.X, startPipe.pipeCenterPoint.Y, 0);
+                var lineSp = new Point3d(centerPoint.X, startPipe.BasePoint.Y, 0);
                 var lineEp = layoutDir.direction.Y < 0 ? createPoint : lineStartPoint;
                 var mainLine = new Line(lineSp, lineEp);
                 if (plCount > 0) 
@@ -369,23 +298,36 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     createBasicElements.Add(addLine);
                 }
                 //将主线加入到后续的避让线中
-                _obstacleLines.Add(mainLine);
+                _obstacleEntities.AddMainLine(mainLine);
             }
             return retText;
         }
-        void GetTextHeightWidth(List<LablePipe> lablePipes,out double height,out double width) 
+        void GetTextHeightWidth(List<PointLabelInfo> lablePipes,out double height,out double width) 
         {
             height = 0;
             width = 0;
             foreach (var item in lablePipes) 
             {
-                var text = CreateDBText(item.pipeNumText, item.pipeCenterPoint,"",ThWSSCommon.Layout_TextStyle);
-                var maxPoint = text.GeometricExtents.MaxPoint;
-                var minPoint = text.GeometricExtents.MinPoint;
-                var xDis =Math.Abs(maxPoint.X - minPoint.X);
-                var yDis = Math.Abs(maxPoint.Y - minPoint.Y);
-                height += yDis;
-                width = Math.Max(width, xDis);
+                if (!string.IsNullOrEmpty(item.UpText)) 
+                {
+                    var text = CreateDBText(item.UpText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
+                    var maxPoint = text.GeometricExtents.MaxPoint;
+                    var minPoint = text.GeometricExtents.MinPoint;
+                    var xDis = Math.Abs(maxPoint.X - minPoint.X);
+                    var yDis = Math.Abs(maxPoint.Y - minPoint.Y);
+                    height += yDis;
+                    width = Math.Max(width, xDis);
+                }
+                if (!string.IsNullOrEmpty(item.BottomText)) 
+                {
+                    var text = CreateDBText(item.BottomText, item.BasePoint, "", ThWSSCommon.Layout_TextStyle);
+                    var maxPoint = text.GeometricExtents.MaxPoint;
+                    var minPoint = text.GeometricExtents.MinPoint;
+                    var xDis = Math.Abs(maxPoint.X - minPoint.X);
+                    var yDis = Math.Abs(maxPoint.Y - minPoint.Y);
+                    height += yDis;
+                    width = Math.Max(width, xDis);
+                }
             }
         }
         bool CanAddTextInDir(Point3d centerPoint, CheckDirection checkDirection, double textHeight,double textLength,out Point3d createPoint,out double xOutLength) 
@@ -410,7 +352,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     break;
                 Line mainLine = new Line(centerPoint, startPoint);
                 var xStartPoint = startPoint;
-                if (CheckMainLineObstacleLines(mainLine))
+                if (_obstacleEntities.CheckMainLineObstacle(mainLine))
                 {
                     //和其它线有共线的情况
                     return false;
@@ -422,7 +364,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     if (xStartPoint.DistanceTo(startPoint) > xMaxLength)
                         break;
                     var textPLine = TextOutPolyLine(xStartPoint, sideDir, textLength, Vector3d.YAxis, textHeight);
-                    if (CheckBySpaceIndex(textPLine))
+                    if (_obstacleEntities.CheckBySpaceIndex(textPLine))
                     {
                         //可进一步判断辅线X轴方向是否符合要求
                         xStartPoint += sideDir.MultiplyBy(xStep);
@@ -440,71 +382,6 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             if (canAdd)
                 createPoint = startPoint;
             return canAdd;
-        }
-        bool CheckBySpaceIndex(Polyline textPLine)
-        {
-            bool isIntersect = false;
-            if (null == _obstacleSpatialIndex || textPLine == null || textPLine.Area < 10)
-                return isIntersect;
-            var crossPLines= _obstacleSpatialIndex.SelectCrossingPolygon(textPLine).Cast<Entity>();
-            isIntersect = crossPLines != null && crossPLines.Count() > 0;
-            var textGeo = textPLine.ToNTSPolygon();
-            foreach (var item in _obstacleCreateEntities)
-            {
-                if (isIntersect)
-                    break;
-                if (item == null || item.Area < 10)
-                    continue;
-                var itemGeo = item.ToNTSPolygon();
-                isIntersect = textGeo.Intersects(itemGeo) || textGeo.Crosses(itemGeo);
-            }
-            return isIntersect;
-        }
-        
-        bool CheckMainLineObstacleLines(Line mainLine) 
-        {
-            if (_obstacleLines == null || _obstacleLines.Count < 1)
-                return false;
-            var mainDir = (mainLine.EndPoint - mainLine.StartPoint).GetNormal();
-            bool isColl = false;
-            foreach (var line in _obstacleLines) 
-            {
-                if (isColl)
-                    break;
-                var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                //先判断方向
-                var dotDir = lineDir.DotProduct(mainDir);
-                if (Math.Abs(dotDir) < 0.95)
-                    continue;
-                //再判断是否共线，将线投影到mainLine上，再进行精确判断
-                var prjSp = line.StartPoint.PointToLine(mainLine);
-                var prjEp = line.EndPoint.PointToLine(mainLine);
-                if (prjSp.DistanceTo(line.StartPoint) > 10)
-                    continue;
-                var listPoints = new List<Point3d>(){ prjSp,prjEp };
-                listPoints = PointVectorUtil.PointsOrderByDirection(listPoints, mainDir,false).ToList();
-                var spVector = listPoints.First() - mainLine.StartPoint;
-                var epVector = listPoints.Last() - mainLine.EndPoint;
-                var spDot = spVector.DotProduct(mainDir);
-                if (spDot > -0.0001)
-                {
-                    if (spVector.Length < line.Length - 1)
-                    {
-                        isColl = true;
-                        break;
-                    }
-                }
-                else 
-                {
-                    var spDotEp = spVector.DotProduct(epVector);
-                    if (spDotEp < 0)
-                    {
-                        isColl = true;
-                        break;
-                    }
-                }
-            }
-            return isColl;
         }
         Polyline TextOutPolyLine(Point3d point,Vector3d xAxis,double xLength,Vector3d yAxis,double yLength) 
         {
@@ -524,44 +401,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             polyline.Closed = true;
             return polyline;
         }
-        Dictionary<string, int> PipeIdNumber(List<CreateBlockInfo> orderPipes, bool isClockwise)
-        {
-            Dictionary<string, int> idNums = new Dictionary<string, int>();
-            if (orderPipes == null || orderPipes.Count < 1)
-                return idNums;
-            if (orderPipes.Count == 1)
-            {
-                idNums.Add(orderPipes.First().uid, 1);
-            }
-            else
-            {
-                double midY = _createFloorSpliteY; //orderPipes.Sum(c => c.createPoint.Y) / orderPipes.Count;
-                var upPipes = orderPipes.Where(c => c.createPoint.Y >= midY).ToList();
-                var downPipes = orderPipes.Where(c => !upPipes.Any(x => x.uid.Equals(c.uid))).ToList();
-                if (isClockwise)
-                {
-                    upPipes = upPipes.OrderBy(c => c.createPoint.X).ToList();
-                    downPipes = downPipes.OrderByDescending(c => c.createPoint.X).ToList();
-                }
-                else
-                {
-                    upPipes = upPipes.OrderByDescending(c => c.createPoint.X).ToList();
-                    downPipes = downPipes.OrderBy(c => c.createPoint.X).ToList();
-                }
-                int i = 1;
-                foreach (var pipe in upPipes)
-                {
-                    idNums.Add(pipe.uid, i);
-                    i += 1;
-                }
-                foreach (var pipe in downPipes)
-                {
-                    idNums.Add(pipe.uid, i);
-                    i += 1;
-                }
-            }
-            return idNums;
-        }
+        
 
         DBText CreateDBText(string str, Point3d position,string layerName,string styleName)
         {
@@ -601,9 +441,9 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             return infotext;
         }
 
-        List<LablePipe> GetLinePipe(Point3d basePoint,List<LablePipe> areaAllPipe,Vector3d orderDir,double dirTolerance,double outTolerance)
+        List<PointLabelInfo> GetLinePipe(Point3d basePoint,List<PointLabelInfo> areaAllPipe,Vector3d orderDir,double dirTolerance,double outTolerance)
         {
-            var points = areaAllPipe.Select(c => c.pipeCenterPoint).ToList();
+            var points = areaAllPipe.Select(c => c.BasePoint).ToList();
             var targetPoints = new List<Point3d>();
             foreach (var point in points) 
             {
@@ -648,45 +488,14 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                 if (!isAdd)
                     break;
             }
-            var resPipe = new List<LablePipe>();
+            var resPipe = new List<PointLabelInfo>();
             foreach (var item in areaAllPipe) 
             {
-                if (nearPoints.Any(c => c.DistanceTo(item.pipeCenterPoint) < 1))
+                if (nearPoints.Any(c => c.DistanceTo(item.BasePoint) < 1))
                     resPipe.Add(item);
             }
             return resPipe;
         }
 
     }
-    class CheckDirection 
-    {
-        public Vector3d direction { get; }
-        public Vector3d outDirection { get; }
-        public double minDistance { get; }
-        public double maxDistance { get; }
-        public double dirSetp { get; set; }
-        public CheckDirection(Vector3d direction, Vector3d outDirection,double startDis,double maxDis,double step) 
-        {
-            this.direction = direction;
-            this.outDirection = outDirection;
-            this.minDistance = startDis<=0?0: startDis;
-            this.maxDistance = maxDis >= this.minDistance ? maxDis : this.minDistance;
-            this.dirSetp = step <= 0 ? 5 : step;
-        }
-    }
-    class LablePipe
-    {
-        public string createBlockUid { get; }
-        public string pipeAttrTag { get; }
-        public string pipeNumText { get; }
-        public Point3d pipeCenterPoint { get; }
-        public LablePipe(CreateBlockInfo blockInfo,string numText) 
-        {
-            this.createBlockUid = blockInfo.uid;
-            this.pipeAttrTag = blockInfo.tag;
-            this.pipeCenterPoint = new Point3d(blockInfo.createPoint.X, blockInfo.createPoint.Y, blockInfo.createPoint.Z);
-            this.pipeNumText = numText;
-        }
-    }
-
 }

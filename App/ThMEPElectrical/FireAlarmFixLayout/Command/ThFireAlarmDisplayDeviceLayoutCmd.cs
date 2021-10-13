@@ -142,9 +142,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThFaCommon.BlkNameListFixLayout;
+                var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_Fire, ThFaCommon.BlkName_Display_Floor };
-                var avoidBlkName = ThFaCommon.BlkNameListFixLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+
+                //导入块图层。free图层
+                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
                 var pts = ThFireAlarmUtils.getFrame();
@@ -157,9 +160,14 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 {
                     return;
                 }
-                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
 
-                //
+                //转回原点
+                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+                //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+                //var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
+
+                //布置
                 ThFixedPointLayoutService layoutService = null;
                 layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, cleanBlkName, avoidBlkName)
                 {

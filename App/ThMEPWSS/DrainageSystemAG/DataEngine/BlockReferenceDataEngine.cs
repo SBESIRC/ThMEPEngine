@@ -92,7 +92,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public List<EquipmentBlcokModel> GetPolylineEquipmentBlocks(Polyline polyline) 
+        public List<EquipmentBlcokModel> GetPolylineEquipmentBlocks(Polyline polyline, double disToDist = 30) 
         {
             var equipments = new List<EquipmentBlcokModel>();
             var tempModel = GetModelSpaceEquipmentBlocks(polyline);
@@ -101,7 +101,58 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             var tempExts = GetExtractEquipmentBlocks(polyline);
             if (null != tempExts && tempExts.Count > 0)
                 equipments.AddRange(tempExts);
-            return equipments;
+
+            return Distinct(equipments, disToDist);
+        }
+        private List<EquipmentBlcokModel> Distinct(List<EquipmentBlcokModel> targetBlocks,double disToDist) 
+        {
+            //去重，在一定范围内不能有同一类的数据
+            var retBlocks = new List<EquipmentBlcokModel>();
+            foreach (var item in targetBlocks)
+            {
+                if (null == item || item.blockReferences == null || item.blockReferences.Count < 1)
+                    continue;
+                var tempList = new List<BlockReference>();
+                foreach (var block in item.blockReferences)
+                {
+                    var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
+                    bool isAdd = true;
+                    foreach (var checkBlock in tempList)
+                    {
+                        if (!isAdd)
+                            break;
+                        var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
+                        isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
+                    }
+                    if (isAdd)
+                        tempList.Add(block);
+                }
+                bool addType = true;
+                foreach (var retItem in retBlocks)
+                {
+                    if (!addType || retItem.enumEquipmentType != item.enumEquipmentType)
+                        continue;
+                    addType = false;
+                    foreach (var block in tempList)
+                    {
+                        bool isAdd = true;
+                        var blockPt2d = new Point3d(block.Position.X, block.Position.Y, 0);
+                        foreach (var checkBlock in retItem.blockReferences)
+                        {
+                            if (!isAdd)
+                                break;
+                            var checkPoint2d = new Point3d(checkBlock.Position.X, checkBlock.Position.Y, 0);
+                            isAdd = checkPoint2d.DistanceTo(blockPt2d) > disToDist;
+                        }
+                        if (isAdd)
+                            retItem.blockReferences.Add(block);
+                    }
+                    break;
+                }
+                if (addType && tempList.Count > 0)
+                    retBlocks.Add(new EquipmentBlcokModel(item.enumEquipmentType, tempList));
+            }
+            return retBlocks;
         }
         public List<EquipmentBlcokModel> GetModelSpaceEquipmentBlocks(Polyline polyline) 
         {
@@ -222,6 +273,12 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
             GetVisitorDictionary(EnumEquipmentType.toilet, ref toiletNames);
             this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.toilet, toiletNames));
 
+            //获取厨房台盆
+            Dictionary<string, int> kitchenSinkNames = new Dictionary<string, int>();
+            kitchenSinkNames.Add("A-Kitchen-4",1);
+            GetVisitorDictionary(EnumEquipmentType.kitchenBasin, ref kitchenSinkNames);
+            this.equipmentBlcokVisitors.Add(new EquipmentBlcokVisitorModel(EnumEquipmentType.kitchenBasin, kitchenSinkNames));
+
             /* 楼梯块目前有问题，暂时不获取
             //获取楼梯块
             Dictionary<string, int> stairsNames = new Dictionary<string, int>();
@@ -326,6 +383,9 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                         break;
                     case "坐便器":
                         thisType = (int)EnumEquipmentType.toilet;
+                        break;
+                    case "厨房洗涤盆":
+                        thisType = (int)EnumEquipmentType.kitchenBasin;
                         break;
                 }
                 if (thisType != (int)type)

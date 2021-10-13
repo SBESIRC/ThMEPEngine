@@ -4,19 +4,14 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 using ThMEPWSS.HydrantConnectPipe.Service;
 using ThMEPWSS.Pipe;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.HydrantConnectPipe.Command
 {
@@ -64,7 +59,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-DIMS"));
                 }
-               
+
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -85,7 +80,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 using (var database = AcadDatabase.Active())
                 {
                     ImportBlockFile();
-                    
+
                     var input = ThWGeUtils.SelectPoints();//获取范围
                     if (input.Item1.IsEqualTo(input.Item2))
                     {
@@ -148,9 +143,9 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
                     if (ConfigInfo.isCoveredGraph)
                     {
-                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, hydrantValve, pipeMark,range);
+                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, hydrantValve, pipeMark, range);
                     }
-                    
+
                     var brLines = new List<ThHydrantBranchLine>();
                     foreach (var hydrant in hydrants)
                     {
@@ -188,16 +183,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
 
                     foreach (var brLine in brLines)
                     {
-//                        brLine.Draw(database);
                         if (ConfigInfo.isSetupValve)
                         {
                             brLine.InsertValve(database, otherPileLines, ConfigInfo.strMapScale);
                         }
-                        
+
                         if (ConfigInfo.isMarkSpecif)
                         {
                             brLine.InsertPipeMark(database, ConfigInfo.strMapScale);
                         }
+                        brLine.Draw(database);
                     }
 
                     pathService.Clear();

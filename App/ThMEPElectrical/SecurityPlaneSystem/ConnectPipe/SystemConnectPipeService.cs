@@ -792,23 +792,39 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         {
             Polyline newpolyline = new Polyline();
             newpolyline.AddVertexAt(0, oldPath.StartPoint.ToPoint2D(), 0, 0, 0);
-            newpolyline.AddVertexAt(1, turning.ToPoint2D(), 0, 0, 0);
-
+            
             int pathedgs = oldPath.Vertices().Count;
             if (pathedgs > 2)
             {
-                Line line = new Line(oldPath.GetPoint3dAt(1), oldPath.GetPoint3dAt(2));
-                Point3d point = line.GetClosestPointTo(turning, true);
-                newpolyline.AddVertexAt(2, point.ToPoint2D(), 0, 0, 0);
-                for (int i = 2; i < pathedgs; i++)
+                Line line = new Line(oldPath.GetPoint3dAt(1), oldPath.GetPoint3dAt(2)).ExtendLine(1000.0);
+                Line line1 = new Line(oldPath.StartPoint, turning);
+                Point3dCollection pts = new Point3dCollection();
+                pts = line.IntersectWithEx(line1);
+                if (pts.Count > 0)
                 {
-                    newpolyline.AddVertexAt(i + 1, oldPath.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    Point3d intersectPt = pts[0];
+                    newpolyline.AddVertexAt(1, intersectPt.ToPoint2D(), 0, 0, 0);
+                    for (int i = 2; i < pathedgs; i++)
+                    {
+                        newpolyline.AddVertexAt(i, oldPath.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
+                }
+                else
+                {
+                    newpolyline.AddVertexAt(1, turning.ToPoint2D(), 0, 0, 0);
+                    Point3d point = line.GetClosestPointTo(turning, true);
+                    newpolyline.AddVertexAt(2, point.ToPoint2D(), 0, 0, 0);
+                    for (int i = 2; i < pathedgs; i++)
+                    {
+                        newpolyline.AddVertexAt(i + 1, oldPath.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+                    }
                 }
             }
             else
             {
                 Line line = endLine;
                 Point3d point = line.GetClosestPointTo(turning, true);
+                newpolyline.AddVertexAt(1, turning.ToPoint2D(), 0, 0, 0);
                 newpolyline.AddVertexAt(2, point.ToPoint2D(), 0, 0, 0);
                 if (!point.IsPointOnLine(line))
                 {

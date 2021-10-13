@@ -95,7 +95,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 //处理数据
                 pointsWithDirection = new Dictionary<Point3d, Vector3d>();
                 //计算布置点位
-                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, equipmentType, acdb);
+                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, equipmentType, acdb, mPolygonShell);
                 //获取布置点位方向
                 LayoutOpt.PointsWithDirection(frame, holeList, layoutPoints, pointsWithDirection);
 

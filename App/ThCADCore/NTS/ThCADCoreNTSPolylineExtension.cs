@@ -1,24 +1,13 @@
 ﻿using System;
-using NetTopologySuite.Algorithm;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.LinearReferencing;
-using NetTopologySuite.Operation.Distance;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Algorithm;
+using NetTopologySuite.Geometries;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolylineExtension
     {
-        public static Line NearestSegment(this Polyline polygon, Point3d pt)
-        {
-            var geometry = polygon.ToNTSLineString();
-            var reference = new LocationIndexedLine(geometry);
-            var coordinates = DistanceOp.NearestPoints(geometry, pt.ToNTSPoint());
-            var location = reference.IndexOf(coordinates[0]);
-            return location.GetSegment(geometry).ToDbLine();
-        }
-
         public static Circle MinimumBoundingCircle(this Polyline polyline)
         {
             var mbc = new MinimumBoundingCircle(polyline.ToNTSLineString());
@@ -33,20 +22,6 @@ namespace ThCADCore.NTS
             var geom = polyline.ToNTSLineString();
             var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
             if (rectangle is Polygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        public static Polyline ConvexHull(this Polyline polyline)
-        {
-            var convexHull = new ConvexHull(polyline.ToNTSLineString());
-            var geometry = convexHull.GetConvexHull();
-            if (geometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }

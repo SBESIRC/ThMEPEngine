@@ -3,35 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using AcHelper;
-using Linq2Acad;
-using GeometryExtensions;
-using NFox.Cad;
-
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.GeoJSON;
-using ThMEPEngineCore.Config;
-
-using ThMEPEngineCore.AreaLayout.GridLayout.Command;
-using ThMEPEngineCore.AreaLayout.GridLayout.Data;
-using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
-
 using ThMEPElectrical.FireAlarm;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
 {
@@ -92,7 +68,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         }
 
 
-        public static List<Polyline> getPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale,  (double, double) size)
+        public static List<Polyline> getPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale, (double, double) size)
         {
             var blkBoundary = new List<Polyline>();
 
@@ -105,7 +81,8 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
             return blkBoundary;
         }
 
-        private static Polyline getBoundary(Point3d pt, Vector3d dir, double scale,  (double, double) size)
+
+        private static Polyline getBoundary(Point3d pt, Vector3d dir, double scale, (double, double) size)
         {
             var xDir = dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
             var pt0 = pt + dir * (size.Item2 * scale / 2) - xDir * (size.Item1 * scale / 2);
@@ -122,5 +99,19 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
 
             return boundray;
         }
+
+
+        public static double getPriorityExtendValue(List<string> blkNameList, double scale)
+        {
+            double extend = -1;
+            var size = new List<double>();
+            size.AddRange(blkNameList.Select(x => ThFaCommon.blk_size[x].Item1));
+            size.AddRange(blkNameList.Select(x => ThFaCommon.blk_size[x].Item2));
+
+            extend = size.OrderByDescending(x => x).First();
+            extend = extend * scale / 2;
+            return extend;
+        }
+
     }
 }

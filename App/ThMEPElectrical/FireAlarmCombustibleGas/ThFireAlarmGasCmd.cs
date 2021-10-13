@@ -98,15 +98,15 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThFaCommon.BlkNameListAreaLayout;
-
+                var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Gas, ThFaCommon.BlkName_Gas_ExplosionProf };
-
-                var avoidBlkName = ThFaCommon.BlkNameListAreaLayout.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
                 var layoutBlkNameGas = ThFaCommon.BlkName_Gas;
                 var layoutBlkNameProfGas = ThFaCommon.BlkName_Gas_ExplosionProf;
 
+                //导入块图层。free图层
+                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
                 var pts = ThFireAlarmUtils.getFrame();
@@ -129,7 +129,8 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 dataQuery.analysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                //dataQuery.getAreaSensorType();
+                var priorityExtend = ThFaAreaLayoutParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.extendPriority(priorityExtend);
                 var roomType = ThMEPElectrical.FireAlarmCombustibleGas.Service.ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
 
                 foreach (var frame in dataQuery.FrameHoleList)
@@ -138,24 +139,22 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                     DrawUtils.ShowGeometry(frame.Value, string.Format("l0hole"), 140);
                 }
 
-                var gasResult = new ThFaAreaLayoutResult();
-                var gasPrfResult = new ThFaAreaLayoutResult();
-
                 var layoutParameter = new ThFaAreaLayoutParameter();
-
                 layoutParameter.Scale = _scale;
                 layoutParameter.AisleAreaThreshold = 0.025;
                 layoutParameter.ProtectRadius = _radius;
                 layoutParameter.RoomType = roomType;
-                ThFireAlarmGasEngine.thFaGasLayoutEngine(dataQuery, gasResult, gasPrfResult, layoutParameter);
+                layoutParameter.BlkNameGas = layoutBlkNameGas;
+                layoutParameter.BlkNameGasPrf = layoutBlkNameProfGas;
+
+                ThFireAlarmGasEngine.thFaGasLayoutEngine(dataQuery,layoutParameter, out var layoutResult, out var blindsResult);
 
                 //转回到原始位置
-                gasResult.transformBack(transformer);
-                gasPrfResult.transformBack(transformer);
+                layoutResult.ForEach(x => x.transformBack(transformer));
 
                 //打印
-                ThFireAlarmInsertBlk.InsertBlock(gasResult.layoutPts.ToList(), _scale, layoutBlkNameGas, ThFaCommon.blk_layer[layoutBlkNameGas], false);
-                ThFireAlarmInsertBlk.InsertBlock(gasPrfResult.layoutPts.ToList(), _scale, layoutBlkNameProfGas, ThFaCommon.blk_layer[layoutBlkNameProfGas], false);
+                ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);
+
             }
         }
     }

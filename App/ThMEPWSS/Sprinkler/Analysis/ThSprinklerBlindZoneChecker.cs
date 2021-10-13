@@ -16,7 +16,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
     {
         public override void Clean(Polyline pline)
         {
-            Clean(ThSprinklerCheckerLayer.Blind_Zone_LayerName, pline);
+            CleanDimension(ThSprinklerCheckerLayer.Blind_Zone_LayerName, pline);
         }
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
