@@ -442,9 +442,28 @@ namespace ThMEPLighting.ParkingStall.Core
                 var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
                 if (noLaneLineParks != null && noLaneLineParks.Count > 0)
                     optimzeLightPlaceInfos.AddRange(noLaneLineParks);
+                // 去除排布点在区域外的排布点
+                var canInertorGroup = new List<LightPlaceInfo>();
+                foreach(var light in optimzeLightPlaceInfos) 
+                {
+                    bool isAdd = polygonInfo.ExternalProfile.Contains(light.Position);
+                    if (null != polygonInfo.InnerProfiles && polygonInfo.InnerProfiles.Count > 0) 
+                    {
+                        foreach (var innerPolyline in polygonInfo.InnerProfiles) 
+                        {
+                            if (!isAdd)
+                                break;
+                            isAdd = !innerPolyline.Contains(light.Position);
+                        }
+                    }
+                    if (isAdd)
+                        canInertorGroup.Add(light);
+                }
+                optimzeLightPlaceInfos.Clear();
+                optimzeLightPlaceInfos.AddRange(canInertorGroup);
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
-                //生成的灯图层前置
+                // 生成的灯图层前置
                 if (null == optimzeLightPlaceInfos || optimzeLightPlaceInfos.Count < 1)
                     return;
                 var lightBlockIds = new List<ObjectId>();
