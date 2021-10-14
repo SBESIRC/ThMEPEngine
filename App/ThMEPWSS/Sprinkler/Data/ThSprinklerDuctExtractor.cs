@@ -1,0 +1,273 @@
+﻿using System;
+using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Sprinkler.Model;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.Model.Hvac;
+using Autodesk.AutoCAD.DatabaseServices;
+
+namespace ThMEPWSS.Sprinkler.Data
+{
+    public class ThSprinklerDuctExtractor
+    {
+        public List<ThIfcDistributionFlowElement> Elements { get; set; }
+
+        public string Category { get; set; }
+
+        public ThSprinklerDuctExtractor()
+        {
+            Elements = new List<ThIfcDistributionFlowElement>();
+        }
+
+        public void Recognize(Database database, Point3dCollection polygon)
+        {
+            if (Category == "Duct")
+            {
+                DuctRecognizeFromCurrentDB(polygon, database, Matrix3d.Identity);
+                DuctRecognize(polygon, database);
+            }
+            else
+            {
+                FittingRecognizeFromCurrentDB(polygon, database, Matrix3d.Identity);
+                FittingRecognize(polygon, database);
+            }
+        }
+
+        private void DuctRecognizeFromCurrentDB(Point3dCollection polygon, Database database, Matrix3d matrix)
+        {
+            var dictionary = new Dictionary<Polyline, DuctModifyParam>();
+            ThSprinklerDuctService.Get_ducts_dic(out dictionary, database, matrix);
+
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dictionary.Keys.ToCollection());
+            var filter = spatialIndex.SelectCrossingPolygon(polygon);
+
+            dictionary.Where(o => filter.Contains(o.Key)).ForEach(o =>
+            {
+                var strs = o.Value.duct_size.Split('x');
+                var parameter = new ThIfcDuctSegmentParameters
+                {
+                    Outline = o.Key,
+                    Width = Convert.ToDouble(strs[0]),
+                    Height = Convert.ToDouble(strs[1]),
+                    Length = o.Value.sp.GetDistanceTo(o.Value.ep)
+                };
+                Elements.Add(new ThIfcDuctSegment(parameter));
+            });
+        }
+
+        private void DuctRecognize(Point3dCollection polygon, Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (var ent in acadDatabase.ModelSpace)
+                {
+                    if (ent is BlockReference blkRef)
+                    {
+                        if (blkRef.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
+                        var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
+                        if (IsBuildElementBlock(blockTableRecord))
+                        {
+                            var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                            DuctExtract(database, blkRef, mcs2wcs, polygon);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void DuctExtract(Database localDb, BlockReference blockReference, Matrix3d matrix, Point3dCollection polygon)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
+            {
+                if (blockReference.BlockTableRecord.IsValid)
+                {
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
+                    {
+                        var xRefDatabase = ThSprinklerDuctService.QueryXRefDatabase(localDb, blockReference.BlockTableRecord);
+                        if (xRefDatabase != null)
+                        {
+                            DuctRecognizeFromCurrentDB(polygon, xRefDatabase, matrix);
+
+                            // 提取图元信息
+                            foreach (var objId in blockTableRecord)
+                            {
+                                var dbObj = acadDatabase.Element<Entity>(objId);
+                                if (dbObj is BlockReference blockObj)
+                                {
+                                    if (blockObj.BlockTableRecord.IsNull)
+                                    {
+                                        continue;
+                                    }
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    DuctExtract(localDb, blockObj, mcs2wcs, polygon);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        private void FittingRecognizeFromCurrentDB(Point3dCollection polygon, Database database, Matrix3d matrix)
+        {
+            var dictionary = new Dictionary<Polyline, EntityModifyParam>();
+            ThSprinklerDuctService.Get_shapes_dic(out dictionary, database, matrix);
+            dictionary.ForEach(o =>
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { o.Key });
+                var filter = spatialIndex.SelectCrossingPolygon(polygon);
+                if (filter.Count > 0)
+                {
+                    if (o.Value.type == Category)
+                    {
+                        switch (o.Value.type)
+                        {
+                            case "Elbow":
+                                {
+                                    var parameter = new ThIfcDuctElbowParameters
+                                    {
+                                        //暂不考虑数据的相对顺序
+                                        Outline = o.Key,
+                                        PipeOpenWidth = o.Value.port_widths[0],
+                                    };
+                                    Elements.Add(new ThIfcDuctElbow(parameter));
+                                }
+                                break;
+                            case "Tee":
+                                {
+                                    var parameter = new ThIfcDuctTeeParameters
+                                    {
+                                        //暂不考虑数据的相对顺序
+                                        Outline = o.Key,
+                                        BranchDiameter = o.Value.port_widths[0],
+                                        MainBigDiameter = o.Value.port_widths[1],
+                                        MainSmallDiameter = o.Value.port_widths[2],
+                                    };
+                                    Elements.Add(new ThIfcDuctTee(parameter));
+                                }
+                                break;
+                            case "Cross":
+                                {
+                                    var parameter = new ThIfcDuctCrossParameters
+                                    {
+                                        //暂不考虑数据的相对顺序
+                                        Outline = o.Key,
+                                        BigEndWidth = o.Value.port_widths[0],
+                                        MainSmallEndWidth = o.Value.port_widths[1],
+                                        SideBigEndWidth = o.Value.port_widths[2],
+                                        SideSmallEndWidth = o.Value.port_widths[3],
+                                    };
+                                    Elements.Add(new ThIfcDuctCross(parameter));
+                                }
+                                break;
+                            case "Reducing":
+                                {
+                                    var parameter = new ThIfcDuctReducingParameters
+                                    {
+                                        //暂不考虑数据的相对顺序
+                                        Outline = o.Key,
+                                        BigEndWidth = o.Value.port_widths[0],
+                                        SmallEndWidth = o.Value.port_widths[1],
+                                    };
+                                    Elements.Add(new ThIfcDuctReducing(parameter));
+                                }
+                                break;
+                        }
+                    }
+                }
+            });
+        }
+
+        private void FittingRecognize(Point3dCollection polygon, Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                foreach (var ent in acadDatabase.ModelSpace)
+                {
+                    if (ent is BlockReference blkRef)
+                    {
+                        if (blkRef.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
+                        var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
+                        if (IsBuildElementBlock(blockTableRecord))
+                        {
+                            var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                            FittingExtract(database, blkRef, mcs2wcs, polygon);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void FittingExtract(Database localDb, BlockReference blockReference, Matrix3d matrix, Point3dCollection polygon)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
+            {
+                if (blockReference.BlockTableRecord.IsValid)
+                {
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
+                    {
+                        var xRefDatabase = ThSprinklerDuctService.QueryXRefDatabase(localDb, blockReference.BlockTableRecord);
+                        if (xRefDatabase != null)
+                        {
+                            FittingRecognizeFromCurrentDB(polygon, xRefDatabase, matrix);
+
+                            // 提取图元信息
+                            foreach (var objId in blockTableRecord)
+                            {
+                                var dbObj = acadDatabase.Element<Entity>(objId);
+                                if (dbObj is BlockReference blockObj)
+                                {
+                                    if (blockObj.BlockTableRecord.IsNull)
+                                    {
+                                        continue;
+                                    }
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    FittingExtract(localDb, blockObj, mcs2wcs, polygon);
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        private bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 暂时不支持动态块，外部参照，覆盖
+            if (blockTableRecord.IsDynamicBlock)
+            {
+                return false;
+            }
+
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
+        }
+    }
+}

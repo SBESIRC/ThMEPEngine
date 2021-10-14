@@ -445,8 +445,8 @@ namespace ThMEPHVAC.CAD
             //创建主路小端的端线
             Line mainSmallEndLine = new Line()
             {
-                StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
-                EndPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
+                StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.MainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
+                EndPoint = parameters.Center + new Vector3d(0.5 * parameters.MainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
             };
 
             //创建主路大端与侧路大端的圆弧过渡段
@@ -491,8 +491,8 @@ namespace ThMEPHVAC.CAD
             //创建辅助线，确定侧路大端管线与主路小端管线的交点
             Ray sideBigEndAuxiliaryRay = new Ray()
             {
-                BasePoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 0, 0),
-                SecondPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 10, 0)
+                BasePoint = parameters.Center + new Vector3d(-0.5 * parameters.MainSmallEndWidth, 0, 0),
+                SecondPoint = parameters.Center + new Vector3d(-0.5 * parameters.MainSmallEndWidth, 10, 0)
             };
             Circle sideBigEndAuxiliaryCircle = new Circle() 
             {
@@ -535,8 +535,8 @@ namespace ThMEPHVAC.CAD
             //创建辅助线，确定侧路小端管线与主路小端管线的交点
             Ray sideSmallEndAuxiliaryRay = new Ray()
             {
-                BasePoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 0, 0),
-                SecondPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 10, 0)
+                BasePoint = parameters.Center + new Vector3d(0.5 * parameters.MainSmallEndWidth, 0, 0),
+                SecondPoint = parameters.Center + new Vector3d(0.5 * parameters.MainSmallEndWidth, 10, 0)
             };
             Circle sideSmallEndAuxiliaryCircle = new Circle()
             {

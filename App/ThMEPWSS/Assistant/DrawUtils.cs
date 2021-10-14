@@ -831,6 +831,23 @@ namespace ThMEPWSS.Assistant
                 }
             }
         }
+        public static IEnumerable<Point2d> GetPoints(Geometry geo)
+        {
+            if (geo is Point pt)
+            {
+                yield return pt.ToAcGePoint2d();
+            }
+            else if (geo is GeometryCollection mls)
+            {
+                foreach (var _g in mls.Geometries)
+                {
+                    foreach (var r in GetPoints(_g))
+                    {
+                        yield return r;
+                    }
+                }
+            }
+        }
         public static IEnumerable<Geometry> GroupLinesByConnPoints<T>(List<T> geos, double radius) where T : Geometry
         {
             var lines = geos.SelectMany(o => GetLines(o)).Distinct().ToList();

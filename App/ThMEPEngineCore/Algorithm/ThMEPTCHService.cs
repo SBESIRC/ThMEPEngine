@@ -50,6 +50,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否是天正配件
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHFitting(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("DBHFITTING");
+        }
+
+        /// <summary>
         /// 是否为天正喷头
         /// </summary>
         /// <param name="entity"></param>

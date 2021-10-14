@@ -217,12 +217,7 @@ namespace ThMEPWSS.Command
                     {
                         if (item.equipmentType != EnumEquipmentType.balconyRiser && item.equipmentType != EnumEquipmentType.floorDrain)
                             continue;
-                        if (item.equipmentType == EnumEquipmentType.floorDrain && null != changeDrainToFDrainIds && changeDrainToFDrainIds.Any(c => c == item.belongBlockId))
-                        {
-                            item.dymBlockAttr.Clear();
-                            item.dymBlockAttr.Add("可见性", FloorDrainConvert.FloorDrainWMachineBlockDynName);
-                        }
-                        else if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
+                        if (item.equipmentType == EnumEquipmentType.balconyRiser && null != changeY1ToFLIds && changeY1ToFLIds.Any(c => c == item.belongBlockId)) 
                         {
                             item.tag = "FL";
                             item.layerName = ThWSSCommon.Layout_WastWaterPipeLayerName;

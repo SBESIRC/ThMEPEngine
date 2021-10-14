@@ -124,7 +124,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         /// </summary>
         public void PreGenerateDiagram(ThUNDPDrainageSystemDiagramCmd cmd)
         {
-            cmd.Execute();
+            cmd.SubExecute();
         }
     }
 }

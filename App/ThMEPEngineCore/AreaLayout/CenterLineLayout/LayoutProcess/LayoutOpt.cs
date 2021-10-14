@@ -18,6 +18,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
     {
         public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb, MPolygon mPolygonShell)
         {
+            if(pointsInLayoutList.Count == 0)
+            {
+                return new List<Point3d>();
+            }
 
             List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius); //1、初选
 

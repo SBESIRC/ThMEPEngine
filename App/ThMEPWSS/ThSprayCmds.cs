@@ -15,6 +15,11 @@ using ThMEPWSS.Bussiness;
 using ThMEPWSS.Command;
 using ThMEPWSS.Bussiness.LayoutBussiness;
 using ThMEPWSS.Sprinkler.Analysis;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.Sprinkler.Data;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPWSS
 {
@@ -149,6 +154,79 @@ namespace ThMEPWSS
             using (var cmd = new ThSprinklerLayoutAreaCmd())
             {
                 cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFGTQ", CommandFlags.Modal)]
+        public void THFGTQ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+
+                var results = new DBObjectCollection();
+                //天正风管
+                var engine = new ThTCHDuctRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                var temp = engine.Elements;
+                temp.OfType<ThIfcDuctSegment>().ForEach(o => results.Add(o.Parameters.Outline));
+
+                //天正配件
+                var fittingEngine = new ThTCHFittingRecognitionEngine();
+                //engine.Recognize(acadDatabase.Database, frame.Vertices());
+                fittingEngine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                var temp1 = fittingEngine.Elbows;
+                var temp2 = fittingEngine.Tees;
+                var temp3 = fittingEngine.Crosses;
+                var temp4 = fittingEngine.Reducings;
+                temp1.ForEach(o => results.Add(o.Parameters.Outline));
+                temp2.ForEach(o => results.Add(o.Parameters.Outline));
+                temp3.ForEach(o => results.Add(o.Parameters.Outline));
+                temp4.ForEach(o => results.Add(o.Parameters.Outline));
+
+                //AI风管及其配件
+                var list = new List<string> { "Duct", "Elbow", "Tee", "Cross", "Reducing" };
+                list.ForEach(o =>
+                {
+                    var thEngine = new ThSprinklerDuctExtractor();
+                    thEngine.Category = o;
+                    thEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                    var result = thEngine.Elements;
+                    result.OfType<ThIfcDuctSegment>().ForEach(o =>
+                    {
+                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                    });
+                    result.OfType<ThIfcDuctElbow>().ForEach(o =>
+                    {
+                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                    });
+                    result.OfType<ThIfcDuctTee>().ForEach(o =>
+                    {
+                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                    });
+                    result.OfType<ThIfcDuctCross>().ForEach(o =>
+                    {
+                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                    });
+                    result.OfType<ThIfcDuctReducing>().ForEach(o =>
+                    {
+                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                    });
+                });
+
+                results.OfType<Entity>().ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
 

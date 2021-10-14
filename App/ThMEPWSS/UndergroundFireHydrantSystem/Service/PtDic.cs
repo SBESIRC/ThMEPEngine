@@ -5,9 +5,12 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -77,20 +80,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 for (int j = i + 1; j < lineList.Count; j++)
                 {
                     l2 = lineList[j];
-                    if (l2.StartPoint.DistanceTo(l1.StartPoint) < tolerance ||
-                       l2.EndPoint.DistanceTo(l1.StartPoint) < tolerance ||
-                       l2.StartPoint.DistanceTo(l1.EndPoint) < tolerance ||
-                       l2.EndPoint.DistanceTo(l1.EndPoint) < tolerance)
+                    if (l1.GetLinesDist(l2) < tolerance)
                     {
                         fireHydrantSysIn.AddAdjsDic(l1, l2);
                         fireHydrantSysIn.AddAdjsDic(l2, l1);
                         continue;
                     }
-                    if (l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.StartPoint) < 10 ||
-                       l1.GetClosestPointTo(l2.StartPoint, false).DistanceTo(l2.EndPoint) < 10)
+                    if (l1.GetLineDist2(l2) < tolerance)
                     {
                         fireHydrantSysIn.AddAdjsDic(l1, l2);
                         fireHydrantSysIn.AddAdjsDic(l2, l1);
+                        continue;
+                    }
+                    if (l2.GetLineDist2(l1) < tolerance)
+                    {
+                        fireHydrantSysIn.AddAdjsDic(l1, l2);
+                        fireHydrantSysIn.AddAdjsDic(l2, l1);
+                        continue;
+                    }
+
+                    if (l1.LineIsIntersection(l2))
+                    {
+                        fireHydrantSysIn.AddAdjsDic(l1, l2);
+                        fireHydrantSysIn.AddAdjsDic(l2, l1);
+                        continue;
                     }
                 }
             }
@@ -128,6 +141,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         if (!fireHydrantSysIn.PtDNDic.ContainsKey(new LineSegEx(line)))
                         {
+                            if (Regex.IsMatch(dbtext.TextString, @"[\u4E00-\u9FA5]+$"))
+                            {
+                                continue;
+                            }
                             fireHydrantSysIn.PtDNDic.Add(new LineSegEx(line), dbtext.TextString);//贴边标注
                         }
                     }
@@ -190,6 +207,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 termPoint1.SetLines(fireHydrantSysIn, labelLine);
                 if (termPoint1.StartLine is null)
                 {
+                    var termPtEx = termPoint.PtEx;
+                    var OriginTermStartPtDic = GetOriginTermStartPtEx(fireHydrantSysIn, termPtEx, textSpatialIndex, labelLine);
+                    if (OriginTermStartPtDic.ContainsKey(pt))
+                    {
+                        termPoint.PipeNumber = OriginTermStartPtDic[pt].TextString;
+                        termPoint.Type = 2;
+                        if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
+                        {
+                            fireHydrantSysIn.TermPointDic.Remove(tpt);
+                            fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
+                        }
+                    }
                     return;
                 }
                 if (termPoint1.TextLine is null)
@@ -412,6 +441,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var visitedLines = new HashSet<Line>();
 
                 var textsSet = new HashSet<DBText>();
+                var lastLine = new Line();
+                var startPt = termStartPtEx._pt.ToPoint2D();
                 while (lineQueue.Count > 0)
                 {
                     var curLine = lineQueue.Dequeue();
@@ -419,8 +450,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     var lineBufferBounds = curLine.Buffer(10);
                     var selectedVerPipeBounds = verPipeBoundSpatialIndex.SelectCrossingPolygon(lineBufferBounds).Cast<Polyline>().ToList();
 
-                    var orderedTempPipeBounds
-                        = selectedVerPipeBounds.OrderBy(b => b.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(termStartPtEx._pt.ToPoint2D()));
+                    var orderedTempPipeBounds =
+                        selectedVerPipeBounds.OrderBy(b => b.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(startPt));
+
+                    //VerticalSorted(selectedVerPipeBounds, curLine, sprayIn, termStartPtEx);
+
+                    foreach (var b in orderedTempPipeBounds)
+                    {
+                        if (!orderedTermPolyLines.Contains(b))
+                            orderedTermPolyLines.Add(b);
+                    }
+
+                    //var orderedTempPipeBounds
+                    //    = selectedVerPipeBounds.OrderBy(b => b.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(termStartPtEx._pt.ToPoint2D()));
                     foreach (var b in orderedTempPipeBounds)
                     {
                         if (!orderedTermPolyLines.Contains(b))
@@ -445,7 +487,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             if (texts.Count > 0)
                             {
                                 foreach (var t in texts)
+                                {
+                                    var textStr = (t as DBText).TextString;
+                                    if (Regex.IsMatch(textStr, @"[\u4E00-\u9FA5]+$"))
+                                    {
+                                        continue;
+                                    }
                                     textsSet.Add(t as DBText);
+                                }
                             }
                             lineQueue.Enqueue(l);
                         }

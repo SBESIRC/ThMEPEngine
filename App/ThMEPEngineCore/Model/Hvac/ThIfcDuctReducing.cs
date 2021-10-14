@@ -27,6 +27,11 @@ namespace ThMEPEngineCore.Model.Hvac
         /// 旋转角度
         /// </summary>
         public double RotateAngle { get; set; }
+
+        /// <summary>
+        /// 几何外包框
+        /// </summary>
+        public Polyline Outline { get; set; }
     }
 
     public class ThIfcDuctReducing : ThIfcDuctFitting

@@ -4,6 +4,7 @@ using Linq2Acad;
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
@@ -49,13 +50,23 @@ namespace ThMEPWSS.Sprinkler.Analysis
             using (var acadDatabase = AcadDatabase.Active())
             {
                 var layerId = acadDatabase.Database.CreateAIBeamCheckerLayer();
-                foreach (Polyline pline in objs.Buffer(200))
+                var results = new DBObjectCollection();
+                objs.OfType<Polyline>().ForEach(o =>
                 {
-                    acadDatabase.ModelSpace.Add(pline);
-                    pline.LayerId = layerId;
-                    pline.ConstantWidth = 50;
-                }
+                    results.Add(o.Buffer(200).OfType<Polyline>().OrderByDescending(o => o.Area).First());
+                });
+                results.Outline().OfType<Polyline>().ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.LayerId = layerId;
+                    o.ConstantWidth = 50;
+                });
             }
+        }
+
+        public override void Extract(Database database, Polyline pline)
+        {
+            //
         }
     }
 }

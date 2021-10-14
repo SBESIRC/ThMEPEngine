@@ -57,12 +57,17 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
         {
             var allLines = new List<Line>();
             _laneLines.ForEach(c => allLines.Add(c));
+            allLines.AddRange(_innerLines);
+            var liens = ThMEPLineExtension.ExplodeCurves((new List<Polyline> { _outPolyline }).ToCollection()).Where(c => c is Line).Cast<Line>().ToList();
+            allLines.AddRange(liens);
             //先将不穿任何线的点聚在一起
             var retLightGroups = ConnectFirstNotCrossLines(_groupLightGroups, allLines,false,0);
             retLightGroups = retLightGroups.OrderBy(c => c.Sum(x => x.GroupCount)).ToList();
             //再将不穿车道线的点聚在一起，且中心点不穿框线
             retLightGroups = ConnectFirstNotCrossLines(retLightGroups, _laneLines, false,0);
-            //再将最近点不穿任何线，且点数少的连接
+            //再将最近点不穿任何车道线，且点数少的连接
+            allLines.Clear();
+            _laneLines.ForEach(c => allLines.Add(c));
             retLightGroups = ConnectFirstNotCrossLines(retLightGroups, allLines, true,2);
             return retLightGroups;
         }

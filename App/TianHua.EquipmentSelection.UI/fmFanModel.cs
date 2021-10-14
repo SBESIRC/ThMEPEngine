@@ -475,30 +475,31 @@ namespace TianHua.FanSelection.UI
 
         private List<MotorPower> GetListMotorPowerBySon(FanDataModel _FanMian)
         {
-            if (_FanMian.FanModelName == string.Empty) { return m_ListMotorPowerDouble; }
-            if (_FanMian.VentStyle == "轴流")
-            {
-                if (_FanMian.FanModelName.Contains("II"))
-                {
-                    return m_ListMotorPowerDouble.FindAll(p => p.Axial2LowSpeed == "1");
-                }
-                if (_FanMian.FanModelName.Contains("IV"))
-                {
-                    return m_ListMotorPowerDouble.FindAll(p => p.Axial4LowSpeed == "1");
-                }
-            }
-            else
-            {
-                if (_FanMian.FanModelName.Contains("II"))
-                {
-                    return m_ListMotorPowerDouble.FindAll(p => p.Centrifuge2LowSpeed == "1");
-                }
-                if (_FanMian.FanModelName.Contains("IV"))
-                {
-                    return m_ListMotorPowerDouble.FindAll(p => p.Centrifuge4LowSpeed == "1");
-                }
-            }
             return m_ListMotorPowerDouble;
+            //if (_FanMian.FanModelName == string.Empty) { return m_ListMotorPowerDouble; }
+            //if (_FanMian.VentStyle == "轴流")
+            //{
+            //    if (_FanMian.FanModelName.Contains("II"))
+            //    {
+            //        return m_ListMotorPowerDouble.FindAll(p => p.Axial2LowSpeed == "1");
+            //    }
+            //    if (_FanMian.FanModelName.Contains("IV"))
+            //    {
+            //        return m_ListMotorPowerDouble.FindAll(p => p.Axial4LowSpeed == "1");
+            //    }
+            //}
+            //else
+            //{
+            //    if (_FanMian.FanModelName.Contains("II"))
+            //    {
+            //        return m_ListMotorPowerDouble.FindAll(p => p.Centrifuge2LowSpeed == "1");
+            //    }
+            //    if (_FanMian.FanModelName.Contains("IV"))
+            //    {
+            //        return m_ListMotorPowerDouble.FindAll(p => p.Centrifuge4LowSpeed == "1");
+            //    }
+            //}
+            //return m_ListMotorPowerDouble;
         }
 
 

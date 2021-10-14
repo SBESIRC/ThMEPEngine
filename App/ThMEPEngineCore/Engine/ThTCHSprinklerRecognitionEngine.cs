@@ -139,10 +139,13 @@ namespace ThMEPEngineCore.Engine
                 var sprinkler = new ThSprinkler();
                 sprinkler.Outline = block.GeometricExtents.ToRectangle();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection{ sprinkler.Outline });
-                var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
-                if (sprinklerFilter.Count == 0)
+                if (polygon.Count > 0)
                 {
-                    continue;
+                    var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
+                    if (sprinklerFilter.Count == 0)
+                    {
+                        continue;
+                    }
                 }
 
                 sprinkler.Position = block.Position;
@@ -152,14 +155,14 @@ namespace ThMEPEngineCore.Engine
                     sprinkler.Category = "侧喷";
                     if (dictionary["横向镜像"] as string == "是")
                     {
-                        sprinkler.Direction = (new Vector3d(0, 1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) / Math.PI),
+                        sprinkler.Direction = Vector3d.YAxis
+                            .TransformBy(Matrix3d.Rotation(Convert.ToDouble(dictionary["旋转角度"]) * Math.PI / 180,
                                      Vector3d.ZAxis, Point3d.Origin));
                     }
                     else
                     {
-                        sprinkler.Direction = (new Vector3d(0, -1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) / Math.PI,
+                        sprinkler.Direction = Vector3d.YAxis
+                            .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) * Math.PI / 180,
                                      Vector3d.ZAxis, Point3d.Origin));
                     }
                 }
@@ -176,63 +179,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    throw new NotSupportedException();
-                }
-                Elements.Add(sprinkler);
-            }
-        }
-
-        public void RecognizeMS(Database database)
-        {
-            var engine = new ThTCHSprinklerExtractionEngine();
-            engine.ExtractFromMS(database);
-            Recognize(engine.Results);
-        }
-
-        public void Recognize(List<ThRawIfcDistributionElementData> dataList)
-        {
-            foreach (var data in dataList)
-            {
-                var block = data.Geometry as BlockReference;
-                if (block == null || !block.Bounds.HasValue)
-                {
-                    continue;
-                }
-
-                var sprinkler = new ThSprinkler();
-                sprinkler.Outline = block.GeometricExtents.ToRectangle();
-                sprinkler.Position = block.Position;
-                var dictionary = data.Data as Dictionary<string, object>;
-                if (block.Name.Contains("$TwtSys$00000131"))
-                {
-                    sprinkler.Category = "侧喷";
-                    if (dictionary["横向镜像"] as string == "是")
-                    {
-                        sprinkler.Direction = (new Vector3d(0, 1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) / Math.PI),
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
-                    else
-                    {
-                        sprinkler.Direction = (new Vector3d(0, -1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) / Math.PI,
-                                     Vector3d.ZAxis, Point3d.Origin));
-                    }
-                }
-                else if (block.Name.Contains("$TwtSys$00000125"))
-                {
-                    if (dictionary["遮挡管线"] as string == "是")
-                    {
-                        sprinkler.Category = "上喷";
-                    }
-                    else if (dictionary["遮挡管线"] as string == "否")
-                    {
-                        sprinkler.Category = "下喷";
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
+                    // throw new NotSupportedException();
                 }
                 Elements.Add(sprinkler);
             }

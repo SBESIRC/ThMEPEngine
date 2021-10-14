@@ -64,8 +64,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pipeMarkSite = markEngine.GetPipeMarkPoisition(ref markAngleDic);
             MarkLine.GetPipeMark(ref fireHydrantSysIn, pipeMarkSite, startPt);
             var markBool = fireHydrantSysIn.GetMarkLineList(lineList, markAngleDic);
-            
-            if(!markBool)
+
+            if (!markBool)
             {
                 MessageBox.Show("找不到环管标记所在直线");
                 return;

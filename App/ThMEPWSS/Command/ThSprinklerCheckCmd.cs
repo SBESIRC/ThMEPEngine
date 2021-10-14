@@ -5,6 +5,7 @@ using ThCADExtension;
 using AcHelper.Commands;
 using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Command;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
@@ -13,7 +14,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Command
 {
-    public class ThSprinklerCheckCmd : IAcadCommand, IDisposable
+    public class ThSprinklerCheckCmd : ThMEPBaseCommand, IDisposable
     {
         public static ThSprinklerCheckerVM SprinklerCheckerVM { get; set; }
 
@@ -22,7 +23,7 @@ namespace ThMEPWSS.Command
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase currentDb = AcadDatabase.Active())
@@ -32,13 +33,17 @@ namespace ThMEPWSS.Command
                 var data = DangerGradeDataManager.Query(SprinklerCheckerVM.Parameter.DangerGrade, range);
                 var checkBoxs = new List<bool>
                 {
-                    SprinklerCheckerVM.Parameter.CheckItem1,
+                    //SprinklerCheckerVM.Parameter.CheckItem1,
                     SprinklerCheckerVM.Parameter.CheckItem2,
                     SprinklerCheckerVM.Parameter.CheckItem3,
+                    SprinklerCheckerVM.Parameter.CheckItem4,
+                    SprinklerCheckerVM.Parameter.CheckItem5,
                     SprinklerCheckerVM.Parameter.CheckItem6,
                     SprinklerCheckerVM.Parameter.CheckItem7,
                     SprinklerCheckerVM.Parameter.CheckItem8,
                     SprinklerCheckerVM.Parameter.CheckItem9,
+                    SprinklerCheckerVM.Parameter.CheckItem10,
+                    SprinklerCheckerVM.Parameter.CheckItem11,
                     SprinklerCheckerVM.Parameter.CheckItem12,
                 };
 
@@ -50,13 +55,17 @@ namespace ThMEPWSS.Command
 
                 var checkers = new List<ThSprinklerChecker>
                     {
-                        new ThSprinklerBlindZoneChecker(),
+                        //new ThSprinklerBlindZoneChecker(),
                         new ThSprinklerDistanceFromBoundarySoFarChecker(),
                         new ThSprinklerRoomChecker(),
+                        new ThSprinklerParkingStallChecker{ BlockNameDict = SprinklerCheckerVM.Parameter.BlockNameDict},
+                        new ThSprinklerMechanicalParkingStallChecker{ BlockNameDict = SprinklerCheckerVM.Parameter.BlockNameDict},
                         new ThSprinklerDistanceBetweenSprinklerChecker(),
                         new ThSprinklerDistanceFromBoundarySoCloseChecker(),
                         new ThSprinklerDistanceFromBeamChecker{RoomFrames = polylines },
                         new ThSprinklerBeamChecker(),
+                        new ThSprinklerPipeChecker(),
+                        new ThSprinklerDuctChecker(),
                         new ThSprinklerSoDenseChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
                     };
                 checkers.ForEach(o =>
@@ -70,10 +79,8 @@ namespace ThMEPWSS.Command
                 //提取数据
                 var factory = new ThSprinklerDataSetFactory();
                 var geometries = factory.Create(currentDb.Database, new Point3dCollection()).Container;
-                //var engine = new ThTCHSprinklerRecognitionEngine();
-                //engine.RecognizeMS(currentDb.Database, frame.Vertices());
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
-                recognizeAllEngine.RecognizeMS(currentDb.Database);
+                recognizeAllEngine.RecognizeMS(currentDb.Database, new Point3dCollection());
 
                 var frame = new Extents3d();
                 polylines.ForEach(p => frame.AddExtents(p.GeometricExtents));
@@ -81,6 +88,7 @@ namespace ThMEPWSS.Command
                 {
                     if (checkBoxs[i])
                     {
+                        checkers[i].Extract(currentDb.Database, frame.ToRectangle());
                         checkers[i].Clean(frame.ToRectangle());
                         polylines.ForEach(p =>
                         {

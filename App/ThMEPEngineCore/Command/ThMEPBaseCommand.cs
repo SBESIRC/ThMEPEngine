@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Command
 {
     public abstract class ThMEPBaseCommand : IAcadCommand
     {
-        private Stopwatch _stopwatch = new Stopwatch();
+        protected Stopwatch _stopwatch = new Stopwatch();
 
         public string CommandName { get; set; }
         public string ActionName { get; set; } = "Execute";
@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Command
             }
             catch (Exception ex)
             {
-                Active.Editor.WriteMessage(ex.Message + "\n");       
+                Active.Editor.WriteMessage(ex.Message + "\n");
             }
         }
 

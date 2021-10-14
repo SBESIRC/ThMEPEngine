@@ -20,7 +20,7 @@ namespace ThCADCore.NTS
     {
         private STRtree<Geometry> Engine { get; set; }
         public bool AllowDuplicate { get; set; }
-        private Dictionary<DBObject, Geometry> Geometries { get; set; }
+        public Dictionary<DBObject, Geometry> Geometries { get; set; }
         private Lookup<Geometry, DBObject> GeometryLookup { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {

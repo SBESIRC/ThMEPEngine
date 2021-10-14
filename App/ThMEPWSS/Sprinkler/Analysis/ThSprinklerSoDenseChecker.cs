@@ -129,5 +129,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
         {
             return line.ToNTSLineString().Buffer(distance, EndCapStyle.Square).ToDbObjects()[0] as Polyline;
         }
+
+        public override void Extract(Database database, Polyline pline)
+        {
+            //
+        }
     }
 }

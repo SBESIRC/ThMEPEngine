@@ -85,7 +85,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 }
             });
             var spatialIndex = new ThCADCoreNTSSpatialIndex(structure.ToCollection());
-            return spatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+            return spatialIndex.SelectCrossingPolygon(polyline).OfType<Polyline>().ToList();
         }
 
         private void Present(List<List<Polyline>> layoutAreas)
@@ -166,6 +166,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var layerId = acadDatabase.Database.CreateAISprinklerDistanceFormBeamCheckerLayer();
                 Present(result, layerId);
             }
+        }
+
+        public override void Extract(Database database, Polyline pline)
+        {
+            //
         }
     }
 }

@@ -122,9 +122,13 @@ namespace TianHua.Hvac.UI.UI
             ViewModel.thFanLayoutConfigInfo.WAFConfigInfo = FanWAFWidget.GetFanWAFConfigInfo();
             ViewModel.thFanLayoutConfigInfo.WEXHConfigInfo = FanWEXHWidget.GetFanWEXHConfigInfo();
             ViewModel.thFanLayoutConfigInfo.CEXHConfigInfo = FanCEXHWidget.GetFanCEXHConfigInfo();
-            var cmd = new ThFanLayoutExtractCmd();
+            var cmd = new ThFanLayoutExtractCmd()
+            {
+                CommandName = "THXFJ",
+                ActionName = "插入",
+            };
             cmd.thFanLayoutConfigInfo = ViewModel.thFanLayoutConfigInfo;
-            cmd.SubExecute();
+            cmd.Execute();
         }
 
         private Point3dCollection SelectAreas()
@@ -188,6 +192,8 @@ namespace TianHua.Hvac.UI.UI
             // 执行命令
             var cmd = new ThFanMaterialTableExtractCmd()
             {
+                CommandName = "THXFJ",
+                ActionName = "导出材料表",
                 Areas = areas,
                 FilePath = saveFileDialog.FileName,
             };

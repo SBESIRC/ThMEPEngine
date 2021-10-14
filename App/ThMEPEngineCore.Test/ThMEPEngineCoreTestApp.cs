@@ -636,6 +636,31 @@ namespace ThMEPEngineCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THFGTQ", CommandFlags.Modal)]
+        public void THFGTQ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+
+                //天正风管
+                var engine = new ThTCHDuctRecognitionEngine();
+                engine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                var temp = engine.Elements;
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THTESTAREA", CommandFlags.Modal)]
         public void ThBuildArea()
         {

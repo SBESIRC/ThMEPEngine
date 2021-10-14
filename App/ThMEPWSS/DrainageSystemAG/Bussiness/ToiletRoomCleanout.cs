@@ -79,7 +79,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                             var toiletPoint = thisRoomToilets.First().blockCenterPoint;
                             canLayoutDir = GetLayoutDirByToiles(pipe.createPoint, canLayoutDir, toiletPoint);
                             if (canLayoutDir.Count > 1)
-                                canLayoutDir = GetLayoutDirByMaxDisToiles(pipe.createPoint, canLayoutDir, toiletPoint);
+                                canLayoutDir = GetLayoutDirByMinAngleToiles(pipe.createPoint, canLayoutDir, toiletPoint);
                         }
                         else 
                         {
@@ -91,7 +91,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                         continue;
                     var dir = canLayoutDir.First();
                     var angle = Vector3d.YAxis.GetAngleTo(dir, Vector3d.ZAxis);
-                    var createPoint = pipe.createPoint;
+                    var createPoint = pipe.createPoint + dir.MultiplyBy(DrainSysAGCommon.GetBlockCircleRadius(pipe, "可见性1"));
                     var block = new CreateBlockInfo(_floorUid, ThWSSCommon.Layout_CleanoutBlockName, ThWSSCommon.Layout_FloorDrainBlockWastLayerName, createPoint, EnumEquipmentType.other);
                     block.spaceId = room.thIFCRoom.Uuid;
                     block.rotateAngle = angle;
@@ -146,26 +146,24 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
             }
             return canLayoutDirs;
         }
-        List<Vector3d> GetLayoutDirByMaxDisToiles(Point3d plPoint, List<Vector3d> checkDirs, Point3d totilePoint)
+        List<Vector3d> GetLayoutDirByMinAngleToiles(Point3d plPoint, List<Vector3d> checkDirs, Point3d totilePoint)
         {
             var canLayoutDirs = new List<Vector3d>();
-            Vector3d maxSpaceDir = new Vector3d();
-            var maxDis = double.MinValue;
+            var minAngleDir = new Vector3d();
+            var minAngle = double.MaxValue;
+            var checkDir = (totilePoint - plPoint);
             foreach (var dir in checkDirs)
             {
-                var otherDir = dir.CrossProduct(Vector3d.ZAxis).GetNormal();
-                var checkDir = (totilePoint - plPoint);
-                var dot = Math.Abs(checkDir.DotProduct(dir));
-                var dot2 =Math.Abs(checkDir.DotProduct(otherDir));
-                var dis = Math.Abs(dot - dot2);
-                if (maxDis < dis) 
+                var angle = dir.GetAngleTo(checkDir, Vector3d.ZAxis);
+                angle %= (Math.PI * 2);
+                if (minAngle > angle)
                 {
-                    maxSpaceDir = dir;
-                    maxDis = dis;
+                    minAngleDir = dir;
+                    minAngle = angle;
                 }
             }
-            if (maxDis > -1)
-                canLayoutDirs.Add(maxSpaceDir);
+            if (minAngle< 10)
+                canLayoutDirs.Add(minAngleDir);
             return canLayoutDirs;
         }
         List<Vector3d> GetLayoutDirByMaxDisRoomLine(Point3d plPoint, List<Vector3d> checkDirs, List<Line> roomLines)

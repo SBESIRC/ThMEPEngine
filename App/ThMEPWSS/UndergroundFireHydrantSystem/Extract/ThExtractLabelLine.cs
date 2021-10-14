@@ -63,7 +63,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
                    layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-DIMS";
+                   layer.ToUpper() == "W-FRPT-HYDT-DIMS"||
+                   layer.ToUpper() == "TWT_TEXT";
         }
 
         

@@ -20,6 +20,18 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
         {
             return ThCADCoreNTSDistance.Distance(fireHydrant.FireHydrantObb,pipe.PipePosition);
         }
+        public static bool PipeIsContainBranchLine(ThHydrantPipe pipe, List<Line> branchLines)
+        {
+            foreach(var l in branchLines)
+            {
+                double dist = l.DistanceToPoint(pipe.PipePosition);
+                if(dist < 10.0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public static bool HydrantIsContainPipe(ThHydrant fireHydrant, List<ThHydrantPipe> pipes)
         {
             double minDist = 9999.0;
