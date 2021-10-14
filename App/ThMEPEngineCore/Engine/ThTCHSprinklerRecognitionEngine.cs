@@ -179,7 +179,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    // throw new NotSupportedException();
                 }
                 Elements.Add(sprinkler);
             }

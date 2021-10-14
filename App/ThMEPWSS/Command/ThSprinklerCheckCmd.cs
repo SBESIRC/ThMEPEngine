@@ -33,7 +33,7 @@ namespace ThMEPWSS.Command
                 var data = DangerGradeDataManager.Query(SprinklerCheckerVM.Parameter.DangerGrade, range);
                 var checkBoxs = new List<bool>
                 {
-                    SprinklerCheckerVM.Parameter.CheckItem1,
+                    //SprinklerCheckerVM.Parameter.CheckItem1,
                     SprinklerCheckerVM.Parameter.CheckItem2,
                     SprinklerCheckerVM.Parameter.CheckItem3,
                     SprinklerCheckerVM.Parameter.CheckItem4,
@@ -42,6 +42,7 @@ namespace ThMEPWSS.Command
                     SprinklerCheckerVM.Parameter.CheckItem7,
                     SprinklerCheckerVM.Parameter.CheckItem8,
                     SprinklerCheckerVM.Parameter.CheckItem9,
+                    SprinklerCheckerVM.Parameter.CheckItem10,
                     SprinklerCheckerVM.Parameter.CheckItem11,
                     SprinklerCheckerVM.Parameter.CheckItem12,
                 };
@@ -54,7 +55,7 @@ namespace ThMEPWSS.Command
 
                 var checkers = new List<ThSprinklerChecker>
                     {
-                        new ThSprinklerBlindZoneChecker(),
+                        //new ThSprinklerBlindZoneChecker(),
                         new ThSprinklerDistanceFromBoundarySoFarChecker(),
                         new ThSprinklerRoomChecker(),
                         new ThSprinklerParkingStallChecker{ BlockNameDict = SprinklerCheckerVM.Parameter.BlockNameDict},
@@ -63,6 +64,7 @@ namespace ThMEPWSS.Command
                         new ThSprinklerDistanceFromBoundarySoCloseChecker(),
                         new ThSprinklerDistanceFromBeamChecker{RoomFrames = polylines },
                         new ThSprinklerBeamChecker(),
+                        new ThSprinklerPipeChecker(),
                         new ThSprinklerDuctChecker(),
                         new ThSprinklerSoDenseChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
                     };
@@ -77,8 +79,6 @@ namespace ThMEPWSS.Command
                 //提取数据
                 var factory = new ThSprinklerDataSetFactory();
                 var geometries = factory.Create(currentDb.Database, new Point3dCollection()).Container;
-                //var engine = new ThTCHSprinklerRecognitionEngine();
-                //engine.RecognizeMS(currentDb.Database, frame.Vertices());
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
                 recognizeAllEngine.RecognizeMS(currentDb.Database, new Point3dCollection());
 

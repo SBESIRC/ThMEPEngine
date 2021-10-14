@@ -12,7 +12,7 @@ namespace ThMEPWSS.Sprinkler.Model
         public Dictionary<string, List<string>> BlockNameDict { get; set; }
         public ThSprinklerModel()
         {
-            checkItem1 = true;
+            //checkItem1 = true;
             checkItem2 = true;
             checkItem3 = true;
             checkItem4 = true;
@@ -20,7 +20,7 @@ namespace ThMEPWSS.Sprinkler.Model
             checkItem7 = true;
             checkItem8 = true;
             checkItem9 = true;
-            checkItem11 = false;
+            checkItem10 = true;
             checkItem12 = true;
             areaDensity = 2400;
             aboveBeamHeight = 900;
@@ -248,6 +248,23 @@ namespace ThMEPWSS.Sprinkler.Model
             {
                 aboveBeamHeight = value;
                 RaisePropertyChanged("AboveBeamHeight");
+            }
+        }
+
+        private bool checkItem10;
+        /// <summary>
+        /// 喷头是否连管
+        /// </summary>
+        public bool CheckItem10
+        {
+            get
+            {
+                return checkItem10;
+            }
+            set
+            {
+                checkItem10 = value;
+                RaisePropertyChanged("CheckItem10");
             }
         }
 
