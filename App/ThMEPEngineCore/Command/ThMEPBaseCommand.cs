@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Command
 {
     public abstract class ThMEPBaseCommand : IAcadCommand
     {
-        private Stopwatch _stopwatch = new Stopwatch();
+        protected Stopwatch _stopwatch = new Stopwatch();
 
         public string CommandName { get; set; }
         public string ActionName { get; set; } = "Execute";

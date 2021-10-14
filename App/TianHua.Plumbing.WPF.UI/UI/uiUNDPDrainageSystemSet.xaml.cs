@@ -43,11 +43,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             TextBox txtBox = sender as TextBox;
             string strText = txtBox.Text;
-            if (strText.Length >= 5)
-                (sender as TextBox).Text = Convert.ToString(9999);
+            if (strText.Length >= 6)
+                (sender as TextBox).Text = Convert.ToString(99999);
             else
             {
-                int max = 9999;
+                int max = 99999;
                 int min = 4000;
                 int number = int.Parse(strText);
                 if (number < min)

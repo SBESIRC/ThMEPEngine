@@ -390,7 +390,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 pipeNumber1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;//立管标号 1
             }
-            if (pipeNumber1.Equals(""))
+            if (pipeNumber1?.Equals("")==true)
             {
                 GetBranchType1(branchPt, ref fireHydrantSysOut, stpt, tpts[1], ValveDic, fireHydrantSysIn, true);
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, 3);
@@ -517,7 +517,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             if (fireHydrantSysIn.TermPointDic.ContainsKey(pt2))
             {
-                if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber.Equals(""))
+                if (!fireHydrantSysIn.TermPointDic[pt2].PipeNumber?.Equals("") == true)
                 {
                     GetBranchType2(branchPt, ref fireHydrantSysOut, stpt1, pt2, new Dictionary<Point3dEx, List<Point3dEx>>(), fireHydrantSysIn);
 
@@ -571,7 +571,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pt1 = new Point3dEx(0, 0, 0);
             foreach (var pt in tpts)
             {
-                if (fireHydrantSysIn.TermPointDic[pt].PipeNumber.Contains("水泵接合器"))
+                if (fireHydrantSysIn.TermPointDic[pt].PipeNumber?.Contains("水泵接合器") == true)
                 {
                     pt1 = new Point3dEx(pt._pt);
                     ptls.Remove(pt1);

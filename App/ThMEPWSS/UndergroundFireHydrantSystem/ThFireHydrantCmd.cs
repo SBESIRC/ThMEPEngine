@@ -41,6 +41,11 @@ namespace ThMEPWSS.Command
             }
         }
 
+        public override void AfterExecute()
+        {
+            Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+        }
+
         public void CreateFireHydrantSystem(AcadDatabase curDb)
         {
             var opt = new PromptPointOptions("请指定环管标记起点: \n");
@@ -49,6 +54,7 @@ namespace ThMEPWSS.Command
             {
                 return;
             }
+
             var loopStartPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
             var selectArea = Common.Utils.SelectAreas();//生成候选区域
             var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数

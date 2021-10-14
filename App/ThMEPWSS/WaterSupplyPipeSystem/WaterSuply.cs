@@ -489,6 +489,39 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             return rectList;
         }
 
+        public static Point3d CreateFloorPt(ThStoreys sobj)
+        {
+            var spt = sobj.ObjectId.GetBlockPosition();//获取楼层分割线的起始点
+            var ptX = spt.X + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("基点 X"));
+            var ptY = spt.Y + Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("基点 Y"));
+
+            return new Point3d(ptX, ptY, 0);
+        }
+
+        public static Polyline CreateFloorRect(ThStoreys sobj)
+        {
+            var pt = new Point3d[5];
+
+            var spt = sobj.ObjectId.GetBlockPosition();//获取楼层分割线的起始点
+            var height = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("高度"));
+            var width = Convert.ToDouble(sobj.ObjectId.GetDynBlockValue("宽度"));
+            var offset1 = new Point3d(width, 0, 0);
+            var offset2 = new Point3d(width, -height, 0);
+            var offset3 = new Point3d(0, -height, 0);
+
+            pt[0] = spt;
+            pt[1] = offset1.TransformBy(sobj.Data.BlockTransform);
+            pt[2] = offset2.TransformBy(sobj.Data.BlockTransform);
+            pt[3] = offset3.TransformBy(sobj.Data.BlockTransform);
+            pt[4] = spt;
+
+            var pline = new Polyline();
+            for(int i = 0; i < 5; i++)
+            {
+                pline.AddVertexAt(i, pt[i].ToPoint2D(), 0 ,0, 0);
+            }
+            return pline;
+        }
 
         public static List<List<Point3dCollection>> CreateFloorAreaList(List<ThIfcSpatialElement> elements)//创建所有楼层的分区列表
         {
@@ -514,6 +547,60 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             }
 
             return FloorAreaList;
+        }
+
+        public static Polyline CreateFloorAreaList(ThIfcSpatialElement element)//创建当前楼层的框选
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            var FloorArea = new Polyline();
+            var obj = element;
+            {
+                if (obj is ThStoreys)
+                {
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (br.IsDynamicBlock)
+                    {
+                        if (sobj.StoreyType.ToString().Contains("StandardStorey"))
+                        {
+                            {
+                                FloorArea = CreateFloorRect(sobj);
+                            }
+
+                        }
+                    }
+                    
+                }
+            }
+
+            return FloorArea;
+        }
+
+        public static Point3d CreateFloorPt(ThIfcSpatialElement element)//创建当前楼层的框选
+        {
+            using var acadDatabase = AcadDatabase.Active();
+            var FloorPt = new Point3d();
+            var obj = element;
+            {
+                if (obj is ThStoreys)
+                {
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (br.IsDynamicBlock)
+                    {
+                        if (sobj.StoreyType.ToString().Contains("StandardStorey"))
+                        {
+                            {
+                                FloorPt = CreateFloorPt(sobj);
+                            }
+
+                        }
+                    }
+
+                }
+            }
+
+            return FloorPt;
         }
 
         public static List<List<int>> CreateFloorNumList(List<string> FloorNum) //提取每张图纸的楼层号

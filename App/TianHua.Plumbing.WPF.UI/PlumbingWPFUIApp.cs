@@ -164,6 +164,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
+        /// 地下喷淋系统图
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THDXPLXTT", CommandFlags.Modal)]
+        public void THDXPLXTT()
+        {
+            var uiDrainage = new uiUNDSpraySystem();
+            AcadApp.ShowModelessWindow(uiDrainage);
+        }
+
+        /// <summary>
         /// 消火栓连管
         /// </summary>
         [CommandMethod("TIANHUACAD", "THDXXHS", CommandFlags.Modal)]
