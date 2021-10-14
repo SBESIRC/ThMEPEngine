@@ -7,8 +7,8 @@
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
              xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
-                    Title="喷头校核" SizeToContent="Manual" Height="430" 
-                    Width="190" MaxWidth="190" MaxHeight="430"
+                    Title="喷头校核" SizeToContent="Manual" Height="470" 
+                    Width="190" MaxWidth="190" MaxHeight="470"
              mc:Ignorable="d">
     <Window.Resources>
         <ResourceDictionary>
@@ -22,7 +22,7 @@
             <RowDefinition Height="50"></RowDefinition>
             <RowDefinition Height="40"/>
             <RowDefinition Height="8"></RowDefinition>
-            <RowDefinition Height="220"></RowDefinition>
+            <RowDefinition Height="255"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
         <StackPanel Margin="0,3,0,0" Grid.Row="0" Orientation="Vertical">
@@ -76,6 +76,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0">
                     <CheckBox x:Name="chkItem1" Margin="0,3,0,0" Content="1.盲区检测（喷头间距过大）" IsThreeState="False"
@@ -84,11 +86,15 @@
                               IsChecked="{Binding Parameter.CheckItem2,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <CheckBox x:Name="chkItem3" Margin="0,3,0,0" Content="3.房间是否布置喷头" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem3,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox x:Name="chkItem6" Margin="0,3,0,0" Content="4.喷头间距是否过小" IsThreeState="False"
+                    <CheckBox x:Name="chkItem4" Margin="0,3,0,0" Content="4.车位上方喷头" IsThreeState="False"
+                              IsChecked="{Binding Parameter.CheckItem4,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox x:Name="chkItem5" Margin="0,3,0,0" Content="5.机械车位侧喷" IsThreeState="False"
+                              IsChecked="{Binding Parameter.CheckItem5,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                    <CheckBox x:Name="chkItem6" Margin="0,3,0,0" Content="6.喷头间距是否过小" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem6,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox x:Name="chkItem7" Margin="0,3,0,0" Content="5.喷头距边是否过小" IsThreeState="False"
+                    <CheckBox x:Name="chkItem7" Margin="0,3,0,0" Content="7.喷头距边是否过小" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem7,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
-                    <CheckBox x:Name="chkItem8" Margin="0,3,0,0" Content="6.喷头距梁是否过小" IsThreeState="False"
+                    <CheckBox x:Name="chkItem8" Margin="0,3,0,0" Content="8.喷头距梁是否过小" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem8,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <StackPanel Margin="0,3,0,3" Orientation="Horizontal">
                         <Grid>
@@ -97,7 +103,7 @@
                                 <ColumnDefinition Width="auto"></ColumnDefinition>
                                 <ColumnDefinition Width="auto"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
-                            <CheckBox x:Name="chkItem9" Grid.Column="0" Content="7.高于" IsThreeState="False"
+                            <CheckBox x:Name="chkItem9" Grid.Column="0" Content="9.高于" IsThreeState="False"
                                   IsChecked="{Binding Parameter.CheckItem9,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                             </CheckBox>
                             <cus:InputTextBox TextBoxInputType="InputInteger" Name="tbAboveBeam" Grid.Column="1" Width="40" Margin="3,0,0,0"
@@ -117,7 +123,7 @@
                             <TextBlock Margin="3,0,0,0" Grid.Column="2" Name="lblAboveBeam" Text="mm的梁" MouseDown="lblAboveBeam_MouseDown"></TextBlock>
                         </Grid>
                     </StackPanel>
-                    <CheckBox x:Name="chkItem11" Margin="0,0.5,0,0" Content="8.宽度大于1200的风管" IsThreeState="False"
+                    <CheckBox x:Name="chkItem11" Margin="0,0.5,0,0" Content="10.宽度大于1200的风管" IsThreeState="False"
                               IsChecked="{Binding Parameter.CheckItem11,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
                     <StackPanel Margin="0,3.5,0,3" Orientation="Horizontal">
                         <Grid>
@@ -132,7 +138,7 @@
                             </Grid.ColumnDefinitions>
                             <CheckBox x:Name="chkItem12" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" IsThreeState="False"
                                   IsChecked="{Binding Parameter.CheckItem12,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-                                <TextBlock Text="9.区域喷头过密"></TextBlock>
+                                <TextBlock Text="11.区域喷头过密"></TextBlock>
                             </CheckBox>
                             <TextBlock Grid.Row="1" Grid.Column="1" Margin="12,1,0,0" Name="tbMiddle" Text="三排（列）或以上喷头间" MouseDown="tbMiddle_MouseDown"/>
                             <StackPanel Grid.Row="2" Grid.Column="1" Margin="12,1,0,0">

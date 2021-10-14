@@ -2,30 +2,34 @@
 using System.ComponentModel;
 using ThMEPWSS.Sprinkler.Analysis;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.Sprinkler.Model
 {
     public class ThSprinklerModel : INotifyPropertyChanged
     {
         public ObservableCollection<string> DangerGrades { get; set; }
+        public Dictionary<string, List<string>> BlockNameDict { get; set; }
         public ThSprinklerModel()
         {
-            checkSprinklerType = SprinklerType.Up;
-            sprinklerRange = SprinklerRange.Standard;
-            var items = DangerGradeDataManager.Datas.Select(o => o.DangerGrade).Distinct();
-            DangerGrades = new ObservableCollection<string>(items);
-            dangerGrade = items.ToList()[2];
-            aboveBeamHeight = 900;
-            areaDensity = 2400;
             checkItem1 = true;
             checkItem2 = true;
             checkItem3 = true;
+            checkItem4 = true;
             checkItem6 = true;
             checkItem7 = true;
             checkItem8 = true;
             checkItem9 = true;
             checkItem11 = false;
             checkItem12 = true;
+            areaDensity = 2400;
+            aboveBeamHeight = 900;
+            checkSprinklerType = SprinklerType.Up;
+            sprinklerRange = SprinklerRange.Standard;
+            var items = DangerGradeDataManager.Datas.Select(o => o.DangerGrade).Distinct();
+            DangerGrades = new ObservableCollection<string>(items);
+            dangerGrade = items.ToList()[2];
+            BlockNameDict = new Dictionary<string, List<string>>();
         }
 
         private SprinklerType checkSprinklerType;
@@ -125,6 +129,40 @@ namespace ThMEPWSS.Sprinkler.Model
             {
                 checkItem3 = value;
                 RaisePropertyChanged("CheckItem3");
+            }
+        }
+
+        private bool checkItem4;
+        /// <summary>
+        /// 车位上方喷头
+        /// </summary>
+        public bool CheckItem4
+        {
+            get
+            {
+                return checkItem4;
+            }
+            set
+            {
+                checkItem4 = value;
+                RaisePropertyChanged("CheckItem4");
+            }
+        }
+
+        private bool checkItem5;
+        /// <summary>
+        /// 机械车位侧喷
+        /// </summary>
+        public bool CheckItem5
+        {
+            get
+            {
+                return checkItem5;
+            }
+            set
+            {
+                checkItem5 = value;
+                RaisePropertyChanged("CheckItem5");
             }
         }
 

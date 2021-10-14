@@ -155,14 +155,14 @@ namespace ThMEPEngineCore.Engine
                     sprinkler.Category = "侧喷";
                     if (dictionary["横向镜像"] as string == "是")
                     {
-                        sprinkler.Direction = (new Vector3d(0, 1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) / Math.PI),
+                        sprinkler.Direction = Vector3d.YAxis
+                            .TransformBy(Matrix3d.Rotation(Convert.ToDouble(dictionary["旋转角度"]) * Math.PI / 180,
                                      Vector3d.ZAxis, Point3d.Origin));
                     }
                     else
                     {
-                        sprinkler.Direction = (new Vector3d(0, -1, 0))
-                        .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) / Math.PI,
+                        sprinkler.Direction = Vector3d.YAxis
+                            .TransformBy(Matrix3d.Rotation((Convert.ToDouble(dictionary["旋转角度"]) + 180) * Math.PI / 180,
                                      Vector3d.ZAxis, Point3d.Origin));
                     }
                 }

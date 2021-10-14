@@ -217,6 +217,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             if (uiSprinklerCheckers != null && uiSprinklerCheckers.IsLoaded)
                 return;
+            ThSprinklerCheckCmd.SprinklerCheckerVM.Parameter.BlockNameDict =
+                uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             uiSprinklerCheckers = new SprinklerCheckersUI(ThSprinklerCheckCmd.SprinklerCheckerVM);
             uiSprinklerCheckers.WindowStartupLocation = System.Windows.WindowStartupLocation.CenterScreen;
             AcadApp.ShowModelessWindow(uiSprinklerCheckers);

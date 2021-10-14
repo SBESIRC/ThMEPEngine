@@ -28,6 +28,26 @@ namespace ThMEPWSS.Sprinkler.Service
         }
 
         /// <summary>
+        /// 4.车位上方喷头
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public static ObjectId CreateAISprinklerParkingStallCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Parking_Stall_Checker_LayerName, 1);
+        }
+
+        /// <summary>
+        /// 5.机械车位侧喷
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public static ObjectId CreateAISprinklerMechanicalParkingStallCheckerLayer(this Database database)
+        {
+            return database.CreateAILayer(ThSprinklerCheckerLayer.Mechanical_Parking_Stall_Checker_LayerName, 6);
+        }
+
+        /// <summary>
         /// 6.喷头间距是否过小
         /// </summary>
         /// <param name="database"></param>
