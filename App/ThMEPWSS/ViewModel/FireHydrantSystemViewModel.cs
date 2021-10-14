@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
+using NFox.Cad;
 using System.Collections.Generic;
 
 namespace ThMEPWSS.ViewModel
@@ -28,10 +29,11 @@ namespace ThMEPWSS.ViewModel
                     {
                         break;
                     }
+                    
                     using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
                     {
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管标记",
-                                    pt.Value, new Scale3d(1, 1, 1), 0);
+                                    pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0);
                     }
                 }
             }
@@ -57,7 +59,7 @@ namespace ThMEPWSS.ViewModel
                         valueDic.Add("节点1", "A");
                         valueDic.Add("节点2", "A'");
                         var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记",
-                                    pt.Value, new Scale3d(1, 1, 1), 0, valueDic);
+                                    pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0, valueDic);
                     }
                 }
             }

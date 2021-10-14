@@ -63,7 +63,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "W-FRPT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "W-RAIN-NOTE";
+                   layer.ToUpper() == "W-RAIN-NOTE"||
+                   layer.ToUpper() == "TWT_TEXT";
         }
 
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
