@@ -301,6 +301,7 @@ namespace TianHua.AutoCAD.ThCui
             CreateWGroundSystemPanel(tab);
             CreateWUndergroundPlanPanel(tab);
             CreateWUndergroundSystemPanel(tab);
+            CreateWSprinklerPanel(tab);
             CreateWDetailAxonometryPanel(tab);
             CreateWValidationPanel(tab);
         }
@@ -362,14 +363,6 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("WUNDERGROUNDPLAN", "地下平面图");
             var row = panel.AddNewRibbonRow();
 
-            row.AddNewButton("消防喷头",
-                "天华喷头工具",
-                "THPL",
-                "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
-                "IDI_THCAD_THPLPT_SMALL",
-                "IDI_THCAD_THPLPT_LARGE",
-                RibbonButtonStyle.LargeWithText);
-
             row.AddNewButton("冲洗点位",
                 "天华冲洗点位",
                 "THDXCX",
@@ -414,6 +407,28 @@ namespace TianHua.AutoCAD.ThCui
                 "天华地下压力排水系统图",
                 "IDI_THCAD_THDXPSXTT_SMALL",
                 "IDI_THCAD_THDXPSXTT_LARGE",
+                RibbonButtonStyle.LargeWithText);
+        }
+
+        private static void CreateWSprinklerPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("WSPRINKLER", "消防喷淋");
+            var row = panel.AddNewRibbonRow();
+
+            row.AddNewButton("喷头布置",
+                "天华喷头布置",
+                "THPL",
+                "天华喷头布置",
+                "IDI_THCAD_THPLPT_SMALL",
+                "IDI_THCAD_THPLPT_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("喷头校核",
+                "天华喷头校核",
+                "THPTJH",
+                "天华喷头校核",
+                "IDI_THCAD_THPTJH_SMALL",
+                "IDI_THCAD_THPTJH_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
 
