@@ -92,8 +92,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 {
                     var geometryCollection = new List<Polygon>();
                     foreach (var geo in geom)
-                        if (geo is Polygon polygon && polygon.Area > 10) 
+                        if (geo is Polygon polygon && polygon.Area > 10)
+                        {
+                            //对于边界上面积小于bufferArea的盲区，直接忽略它
+                            if (!room.Contains(polygon.Buffer(10)) && polygon.Area < bufferArea)
+                                continue;
                             geometryCollection.Add(polygon);
+                        }
                     blind = new MultiPolygon(geometryCollection.ToArray());
                 }
                 //一次只处理一个polygon
@@ -184,12 +189,6 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 targetToMove = polygon;
             else if (blind is MultiPolygon multi)
                 targetToMove = multi.First() as Polygon;
-            //对于边界上面积小于bufferArea的盲区，直接忽略它
-            if(!room.Contains(targetToMove.Buffer(10))&& targetToMove.Area < bufferArea)
-            {
-                this.blind = this.blind.Difference(targetToMove);
-                return;
-            }
             //需要去除的区域的中心点
             var center = FireAlarmUtils.AdjustedCenterPoint(targetToMove);
             //能探测到中心点的布置区域
