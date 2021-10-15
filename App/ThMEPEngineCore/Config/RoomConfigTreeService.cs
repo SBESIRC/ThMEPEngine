@@ -142,7 +142,7 @@ namespace ThMEPEngineCore.Config
             return false;
         }
 
-        public static List<string> getRoomTag(this List<RoomTableTree> roomTree, string roomName)
+        private static List<string> getSingleRoomTag(this List<RoomTableTree> roomTree, string roomName)
         {
             List<string> roomTages = new List<string>();
             foreach (var treeNode in roomTree)
@@ -155,12 +155,26 @@ namespace ThMEPEngineCore.Config
 
                else if (thisNode.child.Count > 0)
                 {
-                    roomTages = getRoomTag(thisNode.child, roomName);
+                    roomTages = getSingleRoomTag(thisNode.child, roomName);
                     if (roomTages.Count > 0)
                     {
                         return roomTages;
                     }
                 }
+            }
+
+            return roomTages;
+        }
+
+
+        public static List<string> getRoomTag(this List<RoomTableTree> roomTree, string roomName)
+        {
+            List<string> roomTages = new List<string>();
+            List<string> roomNameList = roomName.Split(';').ToList();
+
+            foreach (var name in roomNameList)
+            {
+                roomTages.AddRange(getSingleRoomTag(roomTree, name));
             }
 
             return roomTages;

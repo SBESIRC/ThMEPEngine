@@ -65,6 +65,12 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 return;
             }
 
+            ////转回原点
+            //var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+            ////var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+            ////newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+            ////var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
+
             var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
 
             DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
