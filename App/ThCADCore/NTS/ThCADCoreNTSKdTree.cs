@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
-using NetTopologySuite.Index.KdTree;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Index.KdTree;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -57,5 +58,14 @@ namespace ThCADCore.NTS
             return nodes.Select(n =>n.Coordinate.ToAcGePoint3d()).ToList();
         }
 
+        public Point3dCollection SelectAll()
+        {
+            var points = new Point3dCollection();
+            Nodes.ForEach(o =>
+            {
+                points.Add(o.Key.Coordinate.ToAcGePoint3d());
+            });
+            return points;
+        }
     }
 }

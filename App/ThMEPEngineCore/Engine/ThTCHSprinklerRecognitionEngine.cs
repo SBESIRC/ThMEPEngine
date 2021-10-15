@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -128,27 +129,36 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)
         {
+            Polyline frame = null;
+            if (polygon.Count != 0)
+            {
+                frame = new Polyline()
+                {
+                    Closed = true,
+                };
+                frame.CreatePolyline(polygon);
+            }
             foreach (var data in dataList)
             {
                 var block = data.Geometry as BlockReference;
-                if (block == null || !block.Bounds.HasValue)
+                if (block == null 
+                    || !block.Bounds.HasValue 
+                    || !(block.Name.Contains("$TwtSys$00000131") || block.Name.Contains("$TwtSys$00000125")))
                 {
                     continue;
                 }
-                
-                var sprinkler = new ThSprinkler();
-                sprinkler.Outline = block.GeometricExtents.ToRectangle();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection{ sprinkler.Outline });
-                if (polygon.Count > 0)
+
+                var outline = block.GeometricExtents.ToRectangle();
+                if (frame != null && !frame.Intersects(outline))
                 {
-                    var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
-                    if (sprinklerFilter.Count == 0)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
-                sprinkler.Position = block.Position;
+                var sprinkler = new ThSprinkler()
+                {
+                    Outline = outline,
+                    Position = block.Position,
+                };
                 var dictionary = data.Data as Dictionary<string, object>;
                 if (block.Name.Contains("$TwtSys$00000131"))
                 {
@@ -179,7 +189,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    // throw new NotSupportedException();
+                    throw new NotSupportedException();
                 }
                 Elements.Add(sprinkler);
             }

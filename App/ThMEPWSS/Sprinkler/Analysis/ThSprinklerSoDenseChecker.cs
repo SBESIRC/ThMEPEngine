@@ -74,22 +74,33 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var results = new HashSet<Line>();
             lineDirection.ForEach(o =>
             {
+                var record = new HashSet<int>();
                 for (int i = 0; i < o.Count; i++)
                 {
-                    var beMerged = false;
-                    for (int j = i + 1; j < o.Count; j++)
+                    if (record.Contains(i))
                     {
-                        if (o[i].Distance(o[j]) < 1.0)
+                        continue;
+                    }
+                    record.Add(i);
+                    var beMerged = false;
+                    var mergedLine = new Line(o[i].StartPoint, o[i].EndPoint);
+                    for (int j = 0; j < o.Count; j++)
+                    {
+                        if (record.Contains(j))
                         {
-                            o[i] = CreateLine(o[i], o[j]);
-                            o.RemoveAt(j);
-                            j = i + 1;
+                            continue;
+                        }
+                        if (mergedLine.Distance(o[j]) < 1.0)
+                        {
+                            mergedLine = CreateLine(mergedLine, o[j]);
+                            record.Add(j);
                             beMerged = true;
+                            j = -1;
                         }
                     }
                     if (beMerged)
                     {
-                        results.Add(o[i]);
+                        results.Add(mergedLine);
                     }
                 }
             });

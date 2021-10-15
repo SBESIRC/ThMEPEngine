@@ -72,8 +72,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                 }
                             });
                         });
-
-                        points.ForEach(p => result.Add(new Line(o.Position, p)));
+                        SelectDistinct(points).OfType<Point3d>().ForEach(p => result.Add(new Line(o.Position, p)));
                     }
                 });
             return result;
@@ -91,6 +90,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
         public override void Extract(Database database, Polyline pline)
         {
             //
+        }
+
+        private Point3dCollection SelectDistinct(List<Point3d> points)
+        {
+            var kdTree = new ThCADCoreNTSKdTree(1.0);
+            points.ForEach(o => kdTree.InsertPoint(o));
+            return kdTree.SelectAll();
         }
     }
 }
