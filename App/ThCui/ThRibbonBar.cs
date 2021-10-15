@@ -408,6 +408,14 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THDXPSXTT_SMALL",
                 "IDI_THCAD_THDXPSXTT_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("喷淋",
+                "天华地下喷淋系统图",
+                "THDXPLXTT",
+                "天华地下喷淋系统图",
+                "IDI_THCAD_THDXPLXTT_SMALL",
+                "IDI_THCAD_THDXPLXTT_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateWSprinklerPanel(RibbonTabSource tab)

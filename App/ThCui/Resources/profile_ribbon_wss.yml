@@ -58,6 +58,8 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "压力排水"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "喷淋"
+          attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlWSPRINKLER"
     name: "WSPRINKLER"

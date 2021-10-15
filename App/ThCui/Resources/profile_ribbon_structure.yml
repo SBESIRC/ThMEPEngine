@@ -63,7 +63,11 @@ panels:
     items:
         - text: "消火栓"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "压力排水"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "喷淋"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWSPRINKLER"
     name: "WSPRINKLER"
     title: "消防喷淋"
