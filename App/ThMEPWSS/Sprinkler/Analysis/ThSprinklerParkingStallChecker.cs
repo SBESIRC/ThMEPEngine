@@ -84,7 +84,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 BlockNames = parkingStallBlkNames,
             };
             parkingStallExtractor.Extract(database, pline.Vertices());
-            ParkingStalls = parkingStallExtractor.ParkingStalls.Cast<Polyline>().ToCollection();
+            ParkingStalls = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToCollection();
         }
 
         private List<string> QueryBlkNames(string category)

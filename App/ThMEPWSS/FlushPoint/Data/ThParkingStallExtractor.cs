@@ -17,7 +17,7 @@ namespace ThMEPWSS.FlushPoint.Data
     {
         public List<Curve> ParkingStalls { get; set; }
         public List<string> BlockNames { get; set; }
-        private List<string> LayerNames { get; set; }
+        public List<string> LayerNames { get; set; }
         public ThParkingStallExtractor()
         {
             Category = BuiltInCategory.ParkingStall.ToString();

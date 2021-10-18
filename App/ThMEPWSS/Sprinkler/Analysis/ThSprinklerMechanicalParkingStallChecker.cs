@@ -112,9 +112,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var parkingStallExtractor = new ThParkingStallExtractor()
                 {
                     BlockNames = parkingStallBlkNames,
+                    LayerNames = new List<string>(),
                 };
                 parkingStallExtractor.Extract(database, pline.Vertices());
-                ParkingStalls = parkingStallExtractor.ParkingStalls.Cast<Polyline>().ToCollection();
+                ParkingStalls = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToCollection();
             }
         }
 
