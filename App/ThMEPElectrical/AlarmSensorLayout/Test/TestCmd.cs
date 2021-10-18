@@ -37,18 +37,35 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //选择点
-                var per = Active.Editor.GetEntity("请选择Mpolygon");
-                if (per.Status != PromptStatus.OK)
+                //选择区域
+                Active.Editor.WriteLine("\n请选择所有MPolygon形式的可布置区域");
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var frame = acadDatabase.Element<MPolygon>(per.ObjectId);
-                Polygon polygon = frame.ToNTSPolygon();
-                Polyline shell = polygon.Shell.ToDbPolyline();
-                acadDatabase.ModelSpace.Add(shell);
-                foreach (var hole in polygon.Holes)
-                    acadDatabase.ModelSpace.Add(hole.ToDbPolyline());
+                var objs = new ObjectIdCollection();
+                objs = result.Value.GetObjectIds().ToObjectIdCollection();
+                foreach (ObjectId objId in objs)
+                {
+                    var frame = acadDatabase.Element<MPolygon>(objId);
+                    Polygon polygon = frame.ToNTSPolygon();
+                    Polyline shell = polygon.Shell.ToDbPolyline();
+                    shell.Layer = "AI-可布区域";
+                    acadDatabase.ModelSpace.Add(shell);
+                    foreach (var hole in polygon.Holes)
+                    {
+                        var dbhole = hole.ToDbPolyline();
+                        dbhole.Layer = "AI-可布置区域洞";
+                        acadDatabase.ModelSpace.Add(dbhole);
+                    }
+                }
+                ////选择点
+                //var per = Active.Editor.GetEntity("请选择Mpolygon");
+                //if (per.Status != PromptStatus.OK)
+                //{
+                //    return;
+                //}
             }
         }
 
@@ -111,19 +128,40 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                     layouts.Add(polygon.ToDbMPolygon());
                 }
 
+                //var layoutList = getMPoly(frame, "AI-可布区域", transformer, false);//AI-可布区域
+
                 var rst = Active.Editor.GetDouble(new PromptDoubleOptions("Input protection radius:"));
                 if (rst.Status != PromptStatus.OK)
                     return;
                 var radius = rst.Value;
 
                 var layoutCmd = new AlarmSensorLayoutCmd();
-                layoutCmd.frame = frame;
-                layoutCmd.holeList = holeList;
-                layoutCmd.layoutList = layouts;
-                layoutCmd.wallList = wallList;
-                layoutCmd.protectRadius = radius;
-                layoutCmd.equipmentType = BlindType.VisibleArea;
-                layoutCmd.Execute();
+
+                //输入区域
+                InputArea input_Area = null;
+
+                //区域分割
+                SpaceDivider spaceDivider = new SpaceDivider();
+                spaceDivider.Compute(frame, layouts);
+                input_Area = new InputArea(frame, layouts, holeList, wallList, null, null, null, spaceDivider.UCSs);
+                //输入参数
+                var equipmentParameter = new EquipmentParameter(radius, BlindType.CoverArea);
+                //初始化布点引擎
+                sensorOpt = new BeamSensorOpt(input_Area, equipmentParameter);
+                sensorOpt.Calculate();
+                //输出参数
+                var blinds = sensorOpt.Blinds;
+                var layoutPoints = sensorOpt.PlacePoints;
+                ShowPoints(layoutPoints);
+                ShowBlind(blinds);
+
+                //layoutCmd.frame = frame;
+                //layoutCmd.holeList = holeList;
+                //layoutCmd.layoutList = layouts;
+                //layoutCmd.wallList = wallList;
+                //layoutCmd.protectRadius = radius;
+                //layoutCmd.equipmentType = BlindType.VisibleArea;
+                //layoutCmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THASLM", CommandFlags.Modal)]
@@ -225,74 +263,36 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
             }
         }
 
-        //private void ShowLines()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        foreach (var id1 in lineId_list)
-        //        {
-        //            id1.Erase();
-        //        }
-        //        lineId_list.Clear();
-        //        Point3d p0, p1;
-        //        //画上边线
-        //        for (int i = 0; i < sensorOpt.vLines.Count; i++)
-        //        {
-        //            p0 = new Point3d(sensorOpt.Positions[0][i].X, sensorOpt.Positions[0][i].Y + 5800, 0);
-        //            p1 = new Point3d(sensorOpt.Positions[0][i].X, sensorOpt.Positions[0][i].Y, 0);
-        //            var line = new Line(p0, p1);
-        //            line.ColorIndex = 1;
-        //            var id = acadDatabase.ModelSpace.Add(line);
-        //            id.Rotate(center, -angle);
-        //            lineId_list.Add(id);
-        //        }
-        //        //画竖线
-        //        for (int i = 0; i < sensorOpt.hLines.Count; i++)
-        //        {
-        //            for (int j = 0; j < sensorOpt.vLines.Count; j++)
-        //            {
-        //                p0 = new Point3d(sensorOpt.Positions[i][j].X, sensorOpt.Positions[i][j].Y, 0);
-        //                if (i != sensorOpt.hLines.Count - 1)
-        //                    p1 = new Point3d(sensorOpt.Positions[i + 1][j].X, sensorOpt.Positions[i + 1][j].Y, 0);
-        //                else
-        //                    p1 = new Point3d(sensorOpt.Positions[i][j].X, sensorOpt.Positions[i][j].Y - 5800, 0);
-        //                var line = new Line(p0, p1);
-        //                line.ColorIndex = 1;
-        //                var id = acadDatabase.ModelSpace.Add(line);
-        //                id.Rotate(center, -angle);
-        //                lineId_list.Add(id);
-        //            }
-        //        }
-        //        //画左边线
-        //        for (int i = 0; i < sensorOpt.hLines.Count; i++)
-        //        {
-        //            p0 = new Point3d(sensorOpt.Positions[i][0].X-5800, sensorOpt.Positions[i][0].Y, 0);
-        //            p1 = new Point3d(sensorOpt.Positions[i][0].X, sensorOpt.Positions[i][0].Y, 0);
-        //            var line = new Line(p0, p1);
-        //            line.ColorIndex = 1;
-        //            var id = acadDatabase.ModelSpace.Add(line);
-        //            id.Rotate(center, -angle);
-        //            lineId_list.Add(id);
-        //        }
-        //        //画横线
-        //        for (int i = 0; i < sensorOpt.hLines.Count; i++)
-        //        {
-        //            for (int j = 0; j < sensorOpt.vLines.Count; j++)
-        //            {
-        //                p0 = new Point3d(sensorOpt.Positions[i][j].X, sensorOpt.Positions[i][j].Y, 0);
-        //                if (j != sensorOpt.vLines.Count - 1)
-        //                    p1 = new Point3d(sensorOpt.Positions[i][j + 1].X, sensorOpt.Positions[i][j + 1].Y, 0);
-        //                else
-        //                    p1 = new Point3d(sensorOpt.Positions[i][j].X+5800, sensorOpt.Positions[i][j].Y, 0);
-        //                var line = new Line(p0, p1);
-        //                line.ColorIndex = 1;
-        //                var id = acadDatabase.ModelSpace.Add(line);
-        //                id.Rotate(center, -angle);
-        //                lineId_list.Add(id);
-        //            }
-        //        }
-        //    }
-        //}
+        private void ShowPoints(List<Point3d> layoutPoints)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var id in pointId_list)
+                {
+                    id.Erase();
+                }
+                pointId_list.Clear();
+                foreach (var p in layoutPoints)
+                {
+                    var circle = new Circle(p, Vector3d.ZAxis, 100);
+                    circle.ColorIndex = 4;
+                    var id = acadDatabase.ModelSpace.Add(circle);
+                    pointId_list.Add(id);
+                }
+            }
+        }
+
+        private void ShowBlind(List<Polyline> blinds)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var blind in blinds)
+                {
+                    blind.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(blind);
+                }
+            }
+        }
 
         private static List<Polyline> getPoly(Polyline frame, string sLayer, ThMEPOriginTransformer transformer, bool onlyContains)
         {
@@ -339,6 +339,53 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                 return plInFrame;
             }
         }
+
+        private static List<MPolygon> getMPoly(Polyline frame, string sLayer, ThMEPOriginTransformer transformer, bool onlyContains)
+        {
+
+            var layoutArea = ExtractMPolygon(frame, sLayer, transformer, onlyContains);
+            var layoutList = layoutArea.Select(x => x.Value).ToList();
+
+            return layoutList;
+
+        }
+        private static Dictionary<MPolygon, MPolygon> ExtractMPolygon(Polyline bufferFrame, string LayerName, ThMEPOriginTransformer transformer, bool onlyContain)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line = acadDatabase.ModelSpace
+                      .OfType<MPolygon>()
+                      .Where(o => o.Layer == LayerName);
+
+                List<MPolygon> lineList = line.Select(x => x.Clone() as MPolygon).ToList();
+
+                var mplInFrame = new Dictionary<MPolygon, MPolygon>();
+
+                foreach (MPolygon mpl in lineList)
+                {
+                    if (mpl != null)
+                    {
+                        var mplTrans = mpl.Clone() as MPolygon;
+
+                        transformer.Transform(mplTrans);
+                        mplInFrame.Add(mpl, mplTrans);
+                    }
+                }
+                if (onlyContain == false)
+                {
+                    mplInFrame = mplInFrame.Where(o => bufferFrame.Contains(o.Value.Shell()) || bufferFrame.Intersects(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+                else
+                {
+                    mplInFrame = mplInFrame.Where(o => bufferFrame.Contains(o.Value.Shell())).ToDictionary(x => x.Key, x => x.Value);
+                }
+
+
+                return mplInFrame;
+            }
+        }
+
         private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
         {
             var tol = 1000;

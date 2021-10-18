@@ -102,7 +102,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     blind = new MultiPolygon(geometryCollection.ToArray());
                 }
                 //一次只处理一个polygon
-                RemoveBlind(blind);
+                if (!blind.IsEmpty)
+                    RemoveBlind(blind);
             }
         }
         //删点
