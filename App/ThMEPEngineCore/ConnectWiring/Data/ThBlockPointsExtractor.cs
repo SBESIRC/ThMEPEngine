@@ -50,37 +50,127 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filterlist = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.BlockName) == string.Join(",", configBlockd) &
-                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-                var blocks = new List<Entity>();
-                var status = Active.Editor.SelectAll(filterlist);
-                if (status.Status == PromptStatus.OK)
-                {
-                    foreach (ObjectId obj in status.Value.GetObjectIds())
-                    {
-                        blocks.Add(acadDatabase.Element<Entity>(obj));
-                    }
-                }
+                var blocks = acadDatabase.ModelSpace
+                    .OfType<BlockReference>().ToList();
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(blocks.ToCollection());
+                blocks = spatialIndex.SelectCrossingPolygon(pts).Cast<BlockReference>().ToList();
+                
                 var pline = new Polyline()
                 {
                     Closed = true,
                 };
                 pline.CreatePolyline(pts);
                 resBlocks = new List<BlockReference>();
+                blocks = FilterBlock(blocks); 
                 blocks.Where(o =>
                 {
-                    var geoPts = o.GeometricExtents;
-                    var position = new Point3d((geoPts.MinPoint.X + geoPts.MaxPoint.X) / 2, (geoPts.MinPoint.Y + geoPts.MaxPoint.Y) / 2, 0);
-                    return pline.Contains(position);
+                    return pline.Contains(o.Position);
                 })
-                .Cast<BlockReference>()
                 .ForEachDbObject(o => resBlocks.Add(o));
             }
+        }
+
+        /// <summary>
+        /// 筛选需要的块
+        /// </summary>
+        /// <param name="blocks"></param>
+        /// <returns></returns>
+        private List<BlockReference> FilterBlock(List<BlockReference> blocks)
+        {
+            List<BlockReference> resBlocks = new List<BlockReference>();
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                foreach (var ent in blocks)
+                {
+                    if (ent is BlockReference blkRef)
+                    {
+                        if (blkRef.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
+                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        resBlocks.AddRange(DoExtract(blkRef, mcs2wcs, acad));
+                    }
+                }
+            }
+
+            return resBlocks;
+        }
+
+        /// <summary>
+        /// 执行筛选
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <param name="matrix"></param>
+        /// <returns></returns>
+        private List<BlockReference> DoExtract(BlockReference blockReference, Matrix3d matrix, AcadDatabase acadDatabase)
+        {
+            var results = new List<BlockReference>();
+            if (!blockReference.BlockTableRecord.IsNull)
+            {
+                if (configBlockd.Any(x => x == blockReference.Name))
+                {
+                    results.Add(blockReference);
+                    return results;
+                }
+
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                var objs = new ObjectIdCollection();
+                if (IsBuildElementBlock(blockTableRecord))
+                {
+                    foreach (var objId in blockTableRecord)
+                    {
+                        objs.Add(objId);
+                    }
+
+                    foreach (ObjectId objId in objs)
+                    {
+                        var dbObj = acadDatabase.Element<Entity>(objId);
+                        if (dbObj is BlockReference blockObj)
+                        {
+                            if (blockObj.BlockTableRecord.IsNull)
+                            {
+                                continue;
+                            }
+
+                            var resBlock = dbObj.Clone() as BlockReference;
+                            resBlock.TransformBy(matrix);
+                            var mcs2wcs = resBlock.BlockTransform.PreMultiplyBy(matrix);
+                            results.AddRange(DoExtract(resBlock, mcs2wcs, acadDatabase));
+                        }
+                    }
+                }
+            }
+
+            return results;
+        }
+
+        /// <summary>
+        /// 判断是否是不需要的块
+        /// </summary>
+        /// <param name="blockTableRecord"></param>
+        /// <returns></returns>
+        private bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 暂时不支持动态块，外部参照，覆盖
+            if (blockTableRecord.IsDynamicBlock)
+            {
+                return false;
+            }
+
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

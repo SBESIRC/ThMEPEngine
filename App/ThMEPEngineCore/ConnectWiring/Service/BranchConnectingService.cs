@@ -13,8 +13,9 @@ namespace ThMEPEngineCore.ConnectWiring.Service
 {
     public class BranchConnectingService
     {
-        double disTol = 1;
+        //double disTol = 1;
         double TesslateLength = 50;
+        double mergeDis = 500;
         public Polyline CreateBranch(Polyline wiring, List<BlockReference> blocks)
         {
             return ConnectToBlock(wiring, blocks);
@@ -28,20 +29,19 @@ namespace ThMEPEngineCore.ConnectWiring.Service
         /// <returns></returns>
         private Polyline ConnectToBlock(Polyline wiring, List<BlockReference> blocks)
         {
-            var sBlock = blocks.Where(x => x.Position.DistanceTo(wiring.StartPoint) < disTol).FirstOrDefault();
-            var eBlock = blocks.Where(x => x.Position.DistanceTo(wiring.EndPoint) < disTol).FirstOrDefault();
-
-            if (sBlock != null)
+            var sBlocks = blocks.Where(x => x.Position.DistanceTo(wiring.StartPoint) < mergeDis).ToList();
+            var eBlocks = blocks.Where(x => x.Position.DistanceTo(wiring.EndPoint) < mergeDis).ToList();
+            if (sBlocks.Count > 0)
             {
-                var objs = CAD.ThDrawTool.Explode(sBlock);
-                objs = ExplodeToBasic(objs);
-                wiring = TrimWiring(wiring, objs);
+                var objs = sBlocks.SelectMany(x => CAD.ThDrawTool.Explode(x).Cast<Entity>()).ToList();
+                var exObjs = ExplodeToBasic(objs);
+                wiring = TrimWiring(wiring, exObjs);
             }
-            if (eBlock != null)
+            if (eBlocks.Count > 0)
             {
-                var objs = CAD.ThDrawTool.Explode(eBlock);
-                objs = ExplodeToBasic(objs);
-                wiring = TrimWiring(wiring, objs);
+                var objs = eBlocks.SelectMany(x => CAD.ThDrawTool.Explode(x).Cast<Entity>()).ToList();
+                var exObjs = ExplodeToBasic(objs);
+                wiring = TrimWiring(wiring, exObjs);
             }
 
             return wiring;
@@ -55,6 +55,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
         /// <returns></returns>
         private Polyline TrimWiring(Polyline wiring, DBObjectCollection blockGeos)
         {
+            var blockLst = blockGeos.Cast<Curve>().ToList();
             blockGeos.Add(wiring);
             var nodeGeo = blockGeos.ToNTSNodedLineStrings();
             var handleLine = wiring;
@@ -62,6 +63,16 @@ namespace ThMEPEngineCore.ConnectWiring.Service
             {
                 var resLine = nodeGeo.ToDbObjects()
                     .Select(x => x as Polyline)
+                    .Where(x=> blockLst.All(y => {
+                        if (y is Line || y is Polyline)
+                        {
+                            return y.StartPoint.DistanceTo(x.StartPoint) > 1
+                            && y.EndPoint.DistanceTo(x.StartPoint) > 1
+                            && y.StartPoint.DistanceTo(x.EndPoint) > 1
+                            && y.EndPoint.DistanceTo(x.EndPoint) > 1;
+                        }
+                        return true;
+                    }))
                     .OrderByDescending(x => x.Length)
                     .FirstOrDefault();
                 if (resLine != null)
@@ -77,11 +88,11 @@ namespace ThMEPEngineCore.ConnectWiring.Service
         /// </summary>
         /// <param name="objs"></param>
         /// <returns></returns>
-        private DBObjectCollection ExplodeToBasic(DBObjectCollection objs)
+        private DBObjectCollection ExplodeToBasic(List<Entity> objs)
         {
             //理想是炸到Line,Arc,Circle,Ellipse,目前不支持对椭圆的处理，这里不抛出不支持的异常
             var results = new DBObjectCollection();
-            objs.Cast<Entity>().Where(o => o is Curve).ForEach(c =>
+            objs.Where(o => o is Curve).ForEach(c =>
             {
                 if (c is Line)
                 {
