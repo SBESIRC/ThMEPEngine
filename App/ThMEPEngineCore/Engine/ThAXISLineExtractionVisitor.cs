@@ -24,6 +24,14 @@ namespace ThMEPEngineCore.Engine
             {
                 elements.AddRange(HandleMline(mline, matrix));
             }
+            else if (dbObj is Arc arc)
+            {
+                elements.AddRange(HandleArc(arc, matrix));
+            }
+            else if (dbObj is Circle circle) 
+            {
+                elements.AddRange(HandleCircle(circle, matrix));
+            }
         }
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
@@ -44,8 +52,8 @@ namespace ThMEPEngineCore.Engine
         public override bool CheckLayerValid(Entity entity)
         {
             var layer = entity.Layer;
-            return layer.Contains("AXIS") && 
-                !layer.Contains("CRCL") && 
+            return layer.Contains("AXIS") &&
+                !layer.Contains("CRCL") &&
                 !layer.Contains("NUMB") &&
                 !layer.Contains("DIMS");
         }
@@ -90,6 +98,25 @@ namespace ThMEPEngineCore.Engine
             {
                 Geometry = entity,
             };
+        }
+
+        private List<ThRawIfcBuildingElementData> HandleArc(Arc arc, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            if (IsBuildElement(arc) && CheckLayerValid(arc))
+            {
+                results.Add(CreateBuildingElementData(arc.GetTransformedCopy(matrix)));
+            }
+            return results;
+        }
+        private List<ThRawIfcBuildingElementData> HandleCircle(Circle circle, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            if (IsBuildElement(circle) && CheckLayerValid(circle))
+            {
+                results.Add(CreateBuildingElementData(circle.GetTransformedCopy(matrix)));
+            }
+            return results;
         }
     }
 }

@@ -4,11 +4,11 @@ namespace ThMEPEngineCore.Model
 {
     public class ThAXISLine : ThIfcBuildingElement
     {
-        public static ThAXISLine Create(Line line)
+        public static ThAXISLine Create(Curve curve)
         {
             return new ThAXISLine()
             {
-                Outline = line,
+                Outline = curve,
             };
         }
     }
