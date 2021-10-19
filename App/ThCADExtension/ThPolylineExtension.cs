@@ -95,7 +95,7 @@ namespace ThCADExtension
             var segment = new PolylineSegment(
                 arc.StartPoint.ToPoint2D(),
                 arc.EndPoint.ToPoint2D(),
-                arc.BulgeFromCurve(false));
+                arc.BulgeFromCurve(arc.Normal.DotProduct(Vector3d.ZAxis) < 0));
             return segment.TessellateSegmentWithChord(chord).ToPolyline();
         }
 
@@ -156,7 +156,7 @@ namespace ThCADExtension
             var segment = new PolylineSegment(
                 arc.StartPoint.ToPoint2D(),
                 arc.EndPoint.ToPoint2D(),
-                arc.BulgeFromCurve(false));
+                arc.BulgeFromCurve(arc.Normal.DotProduct(Vector3d.ZAxis) < 0));
             return segment.TessellateSegmentWithArc(length).ToPolyline();
         }
 
