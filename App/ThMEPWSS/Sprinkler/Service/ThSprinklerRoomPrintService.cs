@@ -35,8 +35,6 @@ namespace ThMEPWSS.Sprinkler.Service
                     var ObjIds = new ObjectIdCollection();
                     var clone = entity.Clone() as Entity;
                     ObjIds.Add(acadDatabase.ModelSpace.Add(clone));
-                    clone.ColorIndex = colorIndex;
-                    clone.Layer = LayerName;
 
                     var oHatch = new Hatch();
                     var normal = new Vector3d(0.0, 0.0, 1.0);
@@ -52,6 +50,7 @@ namespace ThMEPWSS.Sprinkler.Service
                     oHatch.Associative = true;
                     oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
                     oHatch.EvaluateHatch(true);
+                    clone.Erase();
                 }
                 else if (entity is MPolygon mPolygon)
                 {

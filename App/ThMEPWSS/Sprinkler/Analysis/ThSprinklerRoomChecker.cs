@@ -77,16 +77,19 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var objs = acadDatabase.ModelSpace
                     .OfType<Hatch>()
                     .Where(o => o.Layer == layerName).ToCollection();
-                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                spatialIndex.SelectCrossingPolygon(bufferPoly)
-                            .OfType<Hatch>()
-                            .ToList()
-                            .ForEach(o =>
-                            {
-                                o.UpgradeOpen();
-                                o.Erase();
-                            });
+                if (objs.Count > 0) 
+                {
+                    var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    spatialIndex.SelectCrossingPolygon(bufferPoly)
+                                .OfType<Hatch>()
+                                .ToList()
+                                .ForEach(o =>
+                                {
+                                    o.UpgradeOpen();
+                                    o.Erase();
+                                });
+                }
             }
         }
 
