@@ -40,6 +40,11 @@ namespace TianHua.Hvac.UI.Command
                 return;
             }
             var fan = new ThDbModelFan(fan_id);
+            if (fan.air_volume < 0)
+            {
+                ThMEPHVACService.Prompt_msg("所选风机不带风量");
+                return;
+            }
             var fjf_param = Get_duct_info(fan, out string air_volume, out ThMEPHVACParam fpm_param);
             if (string.IsNullOrEmpty(air_volume))
             {

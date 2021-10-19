@@ -142,6 +142,8 @@ namespace ThMEPHVAC.Model
             foreach (var id in fanIds)
             {
                 var fan = new ThDbModelFan(id);
+                if (fan.air_volume < 0)
+                    continue;
                 var ext_len = Math.Max(fan.FanInlet.Width, fan.FanOutlet.Width);
                 var l = new Line(fan.FanInletBasePoint, fan.FanOutletBasePoint);
                 var poly = ThMEPHVACService.Get_line_extend(l, ext_len);
