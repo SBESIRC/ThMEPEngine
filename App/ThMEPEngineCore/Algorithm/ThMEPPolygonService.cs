@@ -11,7 +11,6 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.IO;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Features;
 using System.Collections.Generic;
@@ -56,13 +55,14 @@ namespace ThMEPEngineCore.Algorithm
                             lines.Add(line.ToDbline());
                         }
                     }
-                    var merge = new ThListLineMerge(ThLineUnionService.UnionLineList(lines));
-                    while (merge.Needtomerge(out Line refline, out Line moveline))
-                    {
-                        merge.Domoveparallellines(refline, moveline);
-                    }
-                    merge.Simplifierlines();
-                    return merge.Lines;
+                    return lines;
+                    //var merge = new ThListLineMerge(ThLineUnionService.UnionLineList(lines));
+                    //while (merge.Needtomerge(out Line refline, out Line moveline))
+                    //{
+                    //    merge.Domoveparallellines(refline, moveline);
+                    //}
+                    //merge.Simplifierlines();
+                    //return merge.Lines;
                 }
             }
         }
@@ -186,7 +186,7 @@ namespace ThMEPEngineCore.Algorithm
 
         public static AcPolygon Filter(AcPolygon pline)
         {
-            if(pline.Area > AREA_TOLERANCE)
+            if (pline.Area > AREA_TOLERANCE)
             {
                 return pline;
             }
