@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -15,7 +16,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class LoopMarkPt//提取环管标记点
     {
         public DBObjectCollection DBObjs { get; set; }
-        public void Extract(Database database, Point3dCollection polygon)
+        public LoopMarkPt()
+        {
+            DBObjs = new DBObjectCollection();
+        }
+        public void Extract(Database database, SprayIn sprayIn)
         {
             var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
@@ -27,12 +32,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     .ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                foreach(var polygon in sprayIn.FloorRectDic.Values)
+                {
+                    var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                    dbObjs.Cast<Entity>()
+                        .ForEach(e => DBObjs.Add(e));
+                }
             }
-        }
-        private bool IsTargetLayer(string layer)
-        {
-            return layer.ToUpper() == "W-FRPT-NOTE";
         }
         private bool IsTraget(BlockReference blockReference)
         {

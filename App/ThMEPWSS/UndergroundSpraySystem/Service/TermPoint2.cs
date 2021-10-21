@@ -78,11 +78,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 var line = new Line(PtEx._pt.OffsetX(-500), PtEx._pt.OffsetX(400));
                 string str1 = ExtractText(spatialIndex, line.GetRect());
                 PipeNumber = str1;
-                ;
-                if(PipeNumber is null)
-                {
-                    ;
-                }
+
                 return;
             }
             string str = ExtractText(spatialIndex, TextLine.GetRect());
@@ -129,8 +125,5 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             Type = 4;
         }
-
-
-
     }
 }

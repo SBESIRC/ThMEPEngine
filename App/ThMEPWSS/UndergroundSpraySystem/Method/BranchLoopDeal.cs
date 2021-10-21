@@ -57,12 +57,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             break;
                         }
                     }
-                    //if (loopFlag)
-                    //{
-                    //    break;
-                    //}
                 }
-
             }
         }
     }

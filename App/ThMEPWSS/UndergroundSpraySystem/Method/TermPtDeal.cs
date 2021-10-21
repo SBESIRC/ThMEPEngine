@@ -4,6 +4,7 @@ using Catel.Linq;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -22,16 +23,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 try
                 {
-                    if(pt._pt.DistanceTo(new Point3d(122550.113186337, 143346.780445487, 0)) < 1)
-                    {
-                        ;
-                    }
                     bool flag = false;
                     if(sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                     {
-                        if(!sprayIn.PtTextDic[pt].First().Equals(""))//且标注不为空
+                        if(sprayIn.PtTextDic[pt].First() is null)
                         {
-                            return;//直接退出
+                            sprayIn.PtTextDic.Remove(pt);//删掉空标注
+                        }
+                        else if(!sprayIn.PtTextDic[pt].First().Equals(""))//标注不是null, 且不为 ""
+                        {
+                            continue;//直接退出
                         }
                         else//标注为空
                         {
@@ -86,17 +87,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach(var pt in sprayIn.Verticals)//每个圈圈的中心点
             {
-                if (pt._pt.DistanceTo(new Point3d(255973.8074, 480703.1846, 0)) < 10)
-                {
-                    ;
-                }
                 try
                 {
                     CreateTermPtDic2(pt, ref sprayIn, textSpatialIndex);
                 }
                 catch
                 {
-                    ;
+                    
                 }
             }
             foreach (var pt in sprayIn.PtDic.Keys)
@@ -107,7 +104,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 catch
                 {
-                    ;
+                    
                 }
             }
         }
@@ -116,7 +113,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             if(sprayIn.PtTextDic.ContainsKey(pt))
             {
-                return;
+                if(sprayIn.PtTextDic[pt].First() is null || sprayIn.PtTextDic[pt].First().Equals(""))
+                {
+                    ;
+                }
+                else
+                {
+                    return;
+                }
+                
             }
             var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, pt, textSpatialIndex);
     
@@ -133,7 +138,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
 
         public static void CreateTermPtDic3(Point3dEx pt, ref SprayIn sprayIn)
         {
-
+            //ToDo
         }
 
         private static Dictionary<Point3dEx, DBText> GetOriginTermStartPtEx(SprayIn sprayIn, Point3dEx termPtEx,
@@ -180,20 +185,20 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         {
                             curLine = selectedLines[0] as Line;
                             var ptEx = new Point3dEx(curLine.StartPoint);
-                            termPtPolyline = CreatePolyline(ptEx, 100);
+                            termPtPolyline = CreatePolyline(ptEx, 120);
                             selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
                             if (selected.Count == 1)
                             {
-                                termStartPtEx = ptEx;
+                                termStartPtEx = new Point3dEx(curPt);
                                 break;
                             }
 
                             ptEx = new Point3dEx(curLine.EndPoint);
-                            termPtPolyline = CreatePolyline(ptEx, 100);
+                            termPtPolyline = CreatePolyline(ptEx, 120);
                             selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
                             if (selected.Count == 1)
                             {
-                                termStartPtEx = ptEx;
+                                termStartPtEx = new Point3dEx(curPt);
                                 break;
                             }
                             if (!visited2.Contains(curLine.StartPoint))
@@ -245,8 +250,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var orderedTempPipeBounds =                     
                         selectedVerPipeBounds.OrderBy(b => b.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(startPt));
 
-                    //VerticalSorted(selectedVerPipeBounds, curLine, sprayIn, termStartPtEx);
-
                     foreach (var b in orderedTempPipeBounds)
                     {
                         if (!orderedTermPolyLines.Contains(b))
@@ -266,8 +269,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         {
                             if (visitedLines.Contains(l)) continue;
 
-                            var lineBounds = CreateLineHalfBuffer(l, 200);
+                            var lineBounds = CreateLineHalfBuffer(l, 300);
+                            
                             var texts = textIndex.SelectCrossingPolygon(lineBounds);
+
                             if (texts.Count > 0)
                             {
                                 foreach (var t in texts)

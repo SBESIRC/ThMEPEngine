@@ -22,10 +22,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     try
                     {
                         var pt = branchLoop[i];
-                        if(pt._pt.DistanceTo(new Point3d(18365944.9519, 21122117.1979, 0)) < 50)
-                        {
-                            ;
-                        }
+
                         if (sprayIn.PtTypeDic[branchLoop[i]].Contains("Alarm"))
                         {
                             alarmNums += 1;
@@ -103,11 +100,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        ;
                     }
-                    
                 }
-                ;
+                
                 foreach(var subLoop in spraySystem.SubLoops)
                 {
                     try
@@ -139,7 +134,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        ;
+                        
                     }
                     
                 }
@@ -155,12 +150,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        ;
+                        
                     }
-                    
-                  
                 }
-                
             }
         }
 
@@ -303,7 +295,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        ;
+                        
                     }
                 }
             }
@@ -380,9 +372,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        ;
+                        
                     }
-
                 }
             }
         }

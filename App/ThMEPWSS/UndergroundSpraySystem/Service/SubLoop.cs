@@ -17,13 +17,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             double floorHeight = sprayIn.FloorHeight;
             foreach (var rstPath in spraySystem.SubLoops)
             {
+                if(!spraySystem.SubLoopPtDic.ContainsKey(rstPath.First()))
+                {
+                    continue;
+                }
+                if (!spraySystem.SubLoopPtDic.ContainsKey(rstPath.Last()))
+                {
+                    continue;
+                }
                 var stPt1 = spraySystem.SubLoopPtDic[rstPath.First()];
+                var endPt = spraySystem.SubLoopPtDic[rstPath.Last()];//次环的结束点
+
                 var stPt = stPt1;
                 bool pressure = true;
                 bool firstBranch = true;
                 int branchLoopNum = 0;
                 int branchIndex = 1;//次环上的支路索引
-                var endPt = spraySystem.SubLoopPtDic[rstPath.Last()];//次环的结束点
+                
                 bool waterPumpFlag = false;
                 var branchs = new List<Point3dEx>();
                 var branchLoopPtDic = new Dictionary<Point3dEx, Point3d>();
@@ -70,16 +80,32 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 bool firstFlag = true;
                 for(int i = branchNums - 1; i >=0; i--)
                 {
-                    var pt = branchs[i];
-                    waterPumpFlag = GetBranchPt(pt, endPt, sprayOut, spraySystem, sprayIn, ref firstBranch,
-                        branchIndex, waterPumpFlag, firstFlag, ref branchLoopPtDic, ref branchPtDic);
-                    firstFlag = false;
-                    branchIndex++;
+                    try
+                    {
+                        var pt = branchs[i];
+                        waterPumpFlag = GetBranchPt(pt, endPt, sprayOut, spraySystem, sprayIn, ref firstBranch,
+                            branchIndex, waterPumpFlag, firstFlag, ref branchLoopPtDic, ref branchPtDic);
+                        firstFlag = false;
+                        branchIndex++;
+                    }
+                    catch(Exception ex)
+                    {
+                        
+                    }
+                    
                 }
                 for(int i = branchLoopPtDic.Count - 1; i >= 0; i--)
                 {
-                    spraySystem.BranchLoopPtDic.Add(branchLoopPtDic.ElementAt(i).Key, branchLoopPtDic.ElementAt(i).Value);
-                    spraySystem.BranchPtDic.Add(branchPtDic.ElementAt(i).Key, branchPtDic.ElementAt(i).Value);
+                    try
+                    {
+                        spraySystem.BranchLoopPtDic.Add(branchLoopPtDic.ElementAt(i).Key, branchLoopPtDic.ElementAt(i).Value);
+                        spraySystem.BranchPtDic.Add(branchPtDic.ElementAt(i).Key, branchPtDic.ElementAt(i).Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        
+                    }
+                    
                 }
                 
             }
@@ -150,9 +176,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             branchLoopPtDic.Add(curPt, pt.OffsetY(height));
             branchPtDic.Add(curPt, pt.OffsetY(height));
             firstBranch = false;
+            if(!spraySystem.BranchDic.ContainsKey(curPt))
+            {
+                return false;
+            }
             if (spraySystem.BranchDic[curPt].Count == 1)//单支路
             {
                 var tpt = spraySystem.BranchDic[curPt][0];
+                if(!sprayIn.TermPtTypeDic.ContainsKey(tpt))
+                {
+                    return false;
+                }
                 if (sprayIn.TermPtTypeDic[tpt] == 3 && !firstBranch)//支路末端是水泵接合器, 且不是第一个支路
                 {
                     waterPumpFlag = true;

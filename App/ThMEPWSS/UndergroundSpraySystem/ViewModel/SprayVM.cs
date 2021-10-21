@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Uitl;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
@@ -91,9 +93,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                 }
             }
         }
-
-        
-
     }
 
     public static class SprayViewModel
@@ -116,7 +115,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                     using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
                     {
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
-                                    pt.Value, new Scale3d(1, 1, 1), 0);
+                                    pt.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0);
                     }
                 }
             }

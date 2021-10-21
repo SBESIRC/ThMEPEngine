@@ -43,6 +43,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 for (int i = 1; i < rstPath.Count - 1; i++)
                 {
                     var pt = rstPath[i];
+                    if (pt._pt.DistanceTo(new Point3d(18250785.313748,21210777.2878823, 0)) < 10)
+                    {
+                        ;
+                    }
                     var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
                     var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                     var type = sprayIn.PtTypeDic[pt];

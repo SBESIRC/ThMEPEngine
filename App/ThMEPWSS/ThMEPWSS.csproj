@@ -532,6 +532,7 @@
     <Compile Include="UndergroundSpraySystem\General\PtTools.cs" />
     <Compile Include="UndergroundSpraySystem\General\Rect.cs" />
     <Compile Include="UndergroundSpraySystem\Method\BranchDeal.cs" />
+    <Compile Include="UndergroundSpraySystem\Method\BranchDeal2.cs" />
     <Compile Include="UndergroundSpraySystem\Method\BranchLoopDeal.cs" />
     <Compile Include="UndergroundSpraySystem\Method\Draw.cs" />
     <Compile Include="UndergroundSpraySystem\Method\SubLoopDeal.cs" />
@@ -548,6 +549,7 @@
     <Compile Include="UndergroundSpraySystem\Model\SprayOut.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SprayPipe.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem.cs" />
+    <Compile Include="UndergroundSpraySystem\Model\SpraySystem2.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Verticalpipe2.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Valve.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Verticalpipe.cs" />
@@ -557,7 +559,9 @@
     <Compile Include="UndergroundSpraySystem\Service\BranchLoop.cs" />
     <Compile Include="UndergroundSpraySystem\Service\DepthSearch.cs" />
     <Compile Include="UndergroundSpraySystem\Service\Dics.cs" />
+    <Compile Include="UndergroundSpraySystem\Service\LoopCheck.cs" />
     <Compile Include="UndergroundSpraySystem\Service\MainLoop.cs" />
+    <Compile Include="UndergroundSpraySystem\Service\MainLoop2.cs" />
     <Compile Include="UndergroundSpraySystem\Service\PipeLine.cs" />
     <Compile Include="UndergroundSpraySystem\Service\SpraySys.cs" />
     <Compile Include="UndergroundSpraySystem\Service\StoreyLine.cs" />

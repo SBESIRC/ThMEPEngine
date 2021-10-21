@@ -6,6 +6,7 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
@@ -25,13 +26,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(e => e is BlockReference)
                    .Where(o => !IsTCHPipeFitting(o))
+                   .Where(o => !o.IsTCHValve())
+                   .Where(o => !o.IsTCHText())
                    .ToList();
 
                 var Results1 = acadDatabase
                    .ModelSpace
                    .OfType<Circle>()
+                   .Where(o => o.Radius < 120 && o.Radius > 30)
                    .ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
@@ -71,17 +74,51 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             return verticals;
         }
 
-
         private void ExplodeCircle(Entity entity, DBObjectCollection DBObjs)
         {
-            if(entity is BlockReference bkr)
+            try
             {
-                var objs = new DBObjectCollection();
-                bkr.Explode(objs);
-                objs.Cast<Entity>()
-                    .Where(e => e is Circle)
-                    .Where(e => (e as Circle).Radius < 120 && (e as Circle).Radius > 30)
-                    .ForEach(e => DBObjs.Add(e));
+                if (entity is BlockReference bkr)
+                {
+                    if (NotExplodeBlock(bkr))
+                    {
+                        return;
+                    }
+                }
+                if (entity is BlockReference || entity.GetType().Name.Contains("ImpCurve"))
+                {
+                    var objs = new DBObjectCollection();
+                    entity.Explode(objs);
+                    objs.Cast<Entity>()
+                        .Where(e => e is Circle)
+                        .Where(e => (e as Circle).Radius < 120 && (e as Circle).Radius > 30)
+                        .ForEach(e => DBObjs.Add(e));
+                    return;
+                }
+            }
+            catch
+            {
+                ;
+            }
+        }
+
+        private bool NotExplodeBlock(BlockReference bkr)
+        {
+            try
+            {
+                var name = bkr.GetEffectiveName();
+                if(name.Contains("潜水泵") || 
+                   name.Contains("报警阀") ||
+                   name.Contains("xhs") ||
+                   name.Contains("灭火器"))
+                {
+                    return true;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
             }
         }
         public static bool IsTCHPipeFitting(Entity entity)

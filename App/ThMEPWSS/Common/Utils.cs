@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Common
@@ -42,7 +43,7 @@ namespace ThMEPWSS.Common
                 using (var acadDatabase = AcadDatabase.Active())
                 {
                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.FloorFraming,
-                    propmptResult.Value, new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "楼层编号", "1" } });
+                    propmptResult.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "楼层编号", "1" } });
                 }
             }
         }
@@ -63,7 +64,7 @@ namespace ThMEPWSS.Common
             var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点\n", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
+                return Tuple.Create(leftDownPt.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
             }
             else
             {

@@ -9,6 +9,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class SpraySystem
     {
         public List<Point3dEx> MainLoop { get; set; }//主环路
+        public List<List<Point3dEx>> MainLoops { get; set; }//无嵌套环路
         public List<List<Point3dEx>> SubLoops { get; set; }//次环路
         public List<List<Point3dEx>> BranchLoops { get; set; }//报警阀环路
         public Dictionary<Point3dEx, List<Point3dEx>> BranchDic { get; set; }//支路
@@ -28,6 +29,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public SpraySystem()
         {
             MainLoop = new List<Point3dEx>();
+            MainLoops = new List<List<Point3dEx>>();
             SubLoops = new List<List<Point3dEx>>();
             BranchLoops = new List<List<Point3dEx>>();
             BranchDic = new Dictionary<Point3dEx, List<Point3dEx>>();

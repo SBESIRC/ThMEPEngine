@@ -143,7 +143,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 foreach(var pt1 in pts)
                 {
-                    if(pt._pt.DistanceTo(pt1._pt) < 10)
+                    if(pt._pt.DistanceTo(pt1._pt) < 20)
                     {
                         sprayIn.PtTypeDic.AddType(pt, ptType);
                     }
@@ -156,12 +156,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
         {
             foreach (var ptls in rstPaths)
             {
-                foreach (var pt in ptls)
+                for (int i = 0; i < ptls.Count; i++)
                 {
-                    if(pt._pt.DistanceTo(new Point3d(1523882.21890678, 1113897.9979779, 0)) < 10)
-                    {
-                        ;
-                    }
+                    var pt = ptls[i];
                     if(sprayIn.PtDic[pt].Count == 1)
                     {
                         continue;
