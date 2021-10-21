@@ -36,9 +36,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override bool IsDistributionElement(Entity entity)
         {
-            BlockReference blkref = entity as BlockReference;
-            return BlockNameSet.Contains(blkref.Name) ||
-                blkref.Id.GetAttributesInBlockReferenceEx().Any(o => o.Value == "SI");
+            if (entity is BlockReference blkref)
+            {
+                return BlockNameSet.Contains(ThMEPXRefService.OriginalFromXref(blkref.GetEffectiveName())) ||
+                    blkref.Id.GetAttributesInBlockReferenceEx().Any(o => o.Value == "SI");
+            }
+            return false;
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
