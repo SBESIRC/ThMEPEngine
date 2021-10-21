@@ -158,7 +158,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     var text2 = new Text(termPt.PipeNumber, textPt);
                                     var texts = new List<DBText>() { text2.DbText };
 
-                                    if (spraySystem.BlockExtents.Geometries.Count() == 0)//外包框数目为0
+                                    if (spraySystem.BlockExtents.SelectAll().Count == 0)//外包框数目为0
                                     {
                                         spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
                                         break;
