@@ -2,9 +2,10 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
 
-namespace ThMEPHVAC.Alg
+namespace ThMEPHVAC.Algorithm
 {
     public class ThMEPHAVCBounds
     {
@@ -23,7 +24,7 @@ namespace ThMEPHVAC.Alg
             pl.CreatePolyline(points);
             return pl;
         }
-        public static Polyline getValveBounds(BlockReference valve, Valve_modify_param param)
+        public static Polyline getValveBounds(BlockReference valve, ValveModifyParam param)
         {
             var dirVec = ThMEPHVACService.Get_dir_vec_by_angle_3(valve.Rotation);
             var rightDirVec = ThMEPHVACService.Get_right_vertical_vec(dirVec);

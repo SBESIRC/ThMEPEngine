@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
 using NFox.Cad;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -11,11 +12,11 @@ namespace ThMEPHVAC.Model
     {
         private Point3d move_srt_p;
         private ThCADCoreNTSSpatialIndex valves_index;
-        private Dictionary<Polyline, Valve_modify_param> valves_dic;// 阀外包框到阀参数的映射
+        private Dictionary<Polyline, ValveModifyParam> valves_dic;// 阀外包框到阀参数的映射
         private ThCADCoreNTSSpatialIndex mufflers_index;
-        private Dictionary<Polyline, Muffler_modify_param> mufflers_dic;// 软接外包框到软接参数的映射
+        private Dictionary<Polyline, MufflerModifyParam> mufflers_dic;// 软接外包框到软接参数的映射
         private ThCADCoreNTSSpatialIndex holes_index;
-        private Dictionary<Polyline, Hole_modify_param> holes_dic;// 开洞外包框到开洞参数的映射
+        private Dictionary<Polyline, HoleModifyParam> holes_dic;// 开洞外包框到开洞参数的映射
 
         public ThModifyDuctConnComponent(Point3d move_srt_p)
         {
@@ -92,7 +93,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Do_update_muffler(double new_width, Muffler_modify_param muffler)
+        private void Do_update_muffler(double new_width, MufflerModifyParam muffler)
         {
             //洞和阀应该分开
             var dir_vec = -ThMEPHVACService.Get_dir_vec_by_angle(muffler.rotate_angle - Math.PI * 0.5);
@@ -103,7 +104,7 @@ namespace ThMEPHVAC.Model
             muffler_service.Insert_muffler(insert_p, muffler);
             ThDuctPortsDrawService.Clear_graph(muffler.handle);
         }
-        private void Do_update_hole(double new_width, Hole_modify_param hole)
+        private void Do_update_hole(double new_width, HoleModifyParam hole)
         {
             //洞和阀应该分开
             var dir_vec = -ThMEPHVACService.Get_dir_vec_by_angle(hole.rotate_angle - Math.PI * 0.5);
@@ -113,7 +114,7 @@ namespace ThMEPHVAC.Model
             hole_service.Insert_hole(insert_p, new_width, hole.len, hole.rotate_angle);
             ThDuctPortsDrawService.Clear_graph(hole.handle);
         }
-        private void Do_update_valve(double new_width, Point2d new_p, Valve_modify_param valve)
+        private void Do_update_valve(double new_width, Point2d new_p, ValveModifyParam valve)
         {
             if (valve.valve_visibility == "多叶调节风阀")
             {

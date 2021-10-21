@@ -4,8 +4,10 @@ using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPEngineCore.Model.Hvac;
+using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Model;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -21,7 +23,7 @@ namespace TianHua.Hvac.UI.Command
             var type = ThDuctPortsInterpreter.Get_entity_type(objIds);
             if (type == "Duct" || type == "Vertical_bypass")
             {
-                var ids = Get_center_line(objIds, out Duct_modify_param param);
+                var ids = Get_center_line(objIds, out DuctModifyParam param);
                 if (ids == null || ids.Length == 0)
                     return;
                 var dlg = new fmDuctModify(param.air_volume, param.duct_size);
@@ -56,9 +58,9 @@ namespace TianHua.Hvac.UI.Command
             }
             return null;
         }
-        private ObjectId[] Get_center_line(ObjectId[] objIds, out Duct_modify_param param)
+        private ObjectId[] Get_center_line(ObjectId[] objIds, out DuctModifyParam param)
         {
-            param = new Duct_modify_param();
+            param = new DuctModifyParam();
             var list = ThDuctPortsInterpreter.Get_value_list(objIds);
             if (list == null)
             {
@@ -66,7 +68,7 @@ namespace TianHua.Hvac.UI.Command
                 return null;
             }
             var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
-            param = ThDuctPortsInterpreter.Get_duct_param(list, groupId.Handle);
+            param = ThHvacAnalysisComponent.AnayDuctparam(list, groupId.Handle);
             if (param.type == "")
             {
                 ThMEPHVACService.Prompt_msg("该管段未包含XData");

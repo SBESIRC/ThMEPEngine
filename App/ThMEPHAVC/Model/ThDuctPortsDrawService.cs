@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -309,7 +310,7 @@ namespace ThMEPHVAC.Model
             if (properity.Contains("宽度或直径"))
                 properity.SetValue("宽度或直径", width);
         }
-        public static void Set_muffler_dyn_block_properity(ObjectId obj, Muffler_modify_param muffler)
+        public static void Set_muffler_dyn_block_properity(ObjectId obj, MufflerModifyParam muffler)
         {
             var data = new ThBlockReferenceData(obj);
             var properity = data.CustomProperties;

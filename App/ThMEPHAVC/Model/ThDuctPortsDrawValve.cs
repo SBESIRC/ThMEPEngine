@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -58,7 +59,7 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsDrawService.Set_hole_dyn_block_properity(obj, width, len);
             }
         }
-        public void Insert_muffler(Point2d insert_p, Muffler_modify_param muffler)
+        public void Insert_muffler(Point2d insert_p, MufflerModifyParam muffler)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {

@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
+using ThMEPEngineCore.Model.Hvac;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -196,7 +198,7 @@ namespace ThMEPHVAC.Model
                 if (item.Key.Bounds.Value.IsEqualTo(value))
                 {
                     var id = bounds_2_id_dic[item.Key];
-                    var cur_duct = ThDuctPortsInterpreter.Get_duct_by_id(id);
+                    var cur_duct = ThHvacAnalysisComponent.GetDuctParamById(id);
                     if (cur_duct.type == "Duct")
                     {
                         var sp = new Point3d(cur_duct.sp.X, cur_duct.sp.Y, 0);
@@ -340,8 +342,8 @@ namespace ThMEPHVAC.Model
         }
         private void Delete_text_dim_valve()
         {
-            ThDuctPortsInterpreter.Get_valves_dic(out Dictionary<Polyline, Valve_modify_param> valves_dic);
-            ThDuctPortsInterpreter.Get_texts_dic(out Dictionary<Polyline, Text_modify_param> text_dic);
+            ThDuctPortsInterpreter.Get_valves_dic(out Dictionary<Polyline, ValveModifyParam> valves_dic);
+            ThDuctPortsInterpreter.Get_texts_dic(out Dictionary<Polyline, TextModifyParam> text_dic);
             var port_mark = ThDuctPortsReadComponent.Read_blk_by_name("风口标注");
             var dims = ThDuctPortsReadComponent.Read_dimension();
             var leaders = ThDuctPortsReadComponent.Read_leader();
@@ -359,7 +361,7 @@ namespace ThMEPHVAC.Model
                 Delete_port_leader(leaders, line);
             }
         }
-        private void Delete_text(Dictionary<Polyline, Text_modify_param> text_dic, Line l)
+        private void Delete_text(Dictionary<Polyline, TextModifyParam> text_dic, Line l)
         {
             var texts_index = new ThCADCoreNTSSpatialIndex(text_dic.Keys.ToCollection());
             var poly = ThMEPHVACService.Get_line_extend(l, 4000);//在风管附近两千范围内的text
@@ -380,7 +382,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Delete_valve(Dictionary<Polyline, Valve_modify_param> valves_dic, Line l)
+        private void Delete_valve(Dictionary<Polyline, ValveModifyParam> valves_dic, Line l)
         {
             var valves_index = new ThCADCoreNTSSpatialIndex(valves_dic.Keys.ToCollection());
             var poly = ThMEPHVACService.Get_line_extend(l, 1);
@@ -478,7 +480,7 @@ namespace ThMEPHVAC.Model
             {
                 if (bounds_2_id_dic.Keys.Contains(cur_poly))
                 {
-                    var cur_entity = ThDuctPortsInterpreter.Get_shape_by_id(bounds_2_id_dic[cur_poly]);
+                    var cur_entity = ThHvacAnalysisComponent.GetConnectorParamById(bounds_2_id_dic[cur_poly]);
                     if (cur_entity.type == "Elbow" || cur_entity.type == "Tee" || cur_entity.type == "Cross")
                     {
                         var center_p = ThDuctPortsShapeService.Get_entity_center_p(cur_entity);
@@ -565,7 +567,7 @@ namespace ThMEPHVAC.Model
         {
             var p = Get_polyline(poly);
             var id = bounds_2_id_dic[p];
-            var ports_dic = ThDuctPortsReadComponent.GetPortsOfGroup(id);
+            var ports_dic = ThHvacAnalysisComponent.GetPortsOfGroup(id);
             var port_pts = ports_dic.Values.Select(v => v.Item1).ToList();
             var pts = Move_pts_to_org(port_pts);
             for (int i = 0; i < pts.Count; ++i)

@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using NFox.Cad;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -18,23 +19,23 @@ namespace ThMEPHVAC.Model
         private Matrix3d org_dis_mat;
         private ThDuctPortsDrawService service;
         private DBObjectCollection hoses_bounds;                     // 软接外包框
-        private Dictionary<Polyline, Fan_modify_param> fans_dic;     // 风机外包框到文字参数的映射
-        private Dictionary<Polyline, Port_modify_param> ports_dic;   // 风口外包框到文字参数的映射
-        private Dictionary<Polyline, Text_modify_param> texts_dic;   // 文字外包框到文字参数的映射
-        private Dictionary<Polyline, Duct_modify_param> ducts_dic;   // 管段外包框到管段参数的映射
-        private Dictionary<Polyline, Entity_modify_param> shapes_dic;// 连接件外包框到连接件参数的映射
+        private Dictionary<Polyline, FanModifyParam> fans_dic;     // 风机外包框到文字参数的映射
+        private Dictionary<Polyline, PortModifyParam> ports_dic;   // 风口外包框到文字参数的映射
+        private Dictionary<Polyline, TextModifyParam> texts_dic;   // 文字外包框到文字参数的映射
+        private Dictionary<Polyline, DuctModifyParam> ducts_dic;   // 管段外包框到管段参数的映射
+        private Dictionary<Polyline, EntityModifyParam> shapes_dic;// 连接件外包框到连接件参数的映射
         private ThCADCoreNTSSpatialIndex hoses_index;
         private ThCADCoreNTSSpatialIndex fans_index;
         private ThCADCoreNTSSpatialIndex ports_index;
         private ThCADCoreNTSSpatialIndex texts_index;
         private ThCADCoreNTSSpatialIndex ducts_index;
         private ThCADCoreNTSSpatialIndex shapes_index;
-        private Duct_modify_param cur_line;
+        private DuctModifyParam cur_line;
         private ThMEPHVACParam in_param;
         private Polyline cur_duct_geo;
         private ThModifyDuctConnComponent duct_conn_service;
         private bool is_visit_duct_conn_duct;// 只处理一次管道连管道的情况
-        public ThDuctPortsModifyDuct(ObjectId[] ids, string modify_size, Duct_modify_param param)
+        public ThDuctPortsModifyDuct(ObjectId[] ids, string modify_size, DuctModifyParam param)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -176,7 +177,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Do_update_port(List<Port_modify_param> cross_port, string modify_size)
+        private void Do_update_port(List<PortModifyParam> cross_port, string modify_size)
         {
             var line = ThMEPHVACService.Covert_duct_to_line(cur_line);
             var dir_vec = ThMEPHVACService.Get_edge_direction(line);
@@ -209,13 +210,13 @@ namespace ThMEPHVAC.Model
                     throw new NotImplementedException("z equals 0");
             }
         }
-        private List<Port_modify_param> Search_neig_port()
+        private List<PortModifyParam> Search_neig_port()
         {
             var width = ThMEPHVACService.Get_width(cur_line.duct_size);
             var line = ThMEPHVACService.Covert_duct_to_line(cur_line);
             var bounds = ThMEPHVACService.Get_line_extend(line, width);
             var res = ports_index.SelectCrossingPolygon(bounds);
-            var port_param = new List<Port_modify_param>();
+            var port_param = new List<PortModifyParam>();
             foreach (Polyline pl in res)
             {
                 if (ports_dic.ContainsKey(pl))
@@ -228,7 +229,7 @@ namespace ThMEPHVAC.Model
             using (var db = AcadDatabase.Active())
             {
                 is_direct_duct = false;
-                Search_connected_shape(detect_p, out int port_idx, out Entity_modify_param shape);
+                Search_connected_shape(detect_p, out int port_idx, out EntityModifyParam shape);
                 if (shape.handle == ObjectId.Null.Handle)
                 {
                     Do_proc_duct_conn_duct(modify_duct_width, detect_p, out Point2d other_p);
@@ -275,7 +276,7 @@ namespace ThMEPHVAC.Model
         }
         private void Do_proc_reducing(int port_idx,
                                       string modify_size,
-                                      Entity_modify_param red,
+                                      EntityModifyParam red,
                                       out bool is_direct_duct,
                                       ref Point2d detect_p)
         {
@@ -331,7 +332,7 @@ namespace ThMEPHVAC.Model
             else
                 throw new NotImplementedException("Reducing cross multi fan");
         }
-        private void Do_proc_elbow(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        private void Do_proc_elbow(int port_idx, string modify_duct_width, EntityModifyParam elbow, ref Point2d detect_p)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_duct_width);
             if (elbow.port_widths[0] > modify_width)
@@ -346,8 +347,8 @@ namespace ThMEPHVAC.Model
                     Proc_elbow_extend(elbow, e, modify_duct_width, ref detect_p);
             }
         }
-        private void Proc_elbow_extend(Entity_modify_param elbow,
-                                       Entity_modify_param reducing,
+        private void Proc_elbow_extend(EntityModifyParam elbow,
+                                       EntityModifyParam reducing,
                                        string modify_duct_width,
                                        ref Point2d detect_p)
         {
@@ -377,7 +378,7 @@ namespace ThMEPHVAC.Model
                 Create_reducing_by_reducing(reducing, elbow_other_port, p, conn_duct.duct_size, modify_width);
             }
         }
-        private void Proc_elbow_shrink(int port_idx, string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        private void Proc_elbow_shrink(int port_idx, string modify_duct_width, EntityModifyParam elbow, ref Point2d detect_p)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_duct_width);
             Create_elbow_by_elbow(true, modify_duct_width, elbow, ref detect_p,
@@ -390,7 +391,7 @@ namespace ThMEPHVAC.Model
         }
         private void Create_elbow_by_elbow(bool is_shrink,
                                            string modify_duct_width,
-                                           Entity_modify_param elbow,
+                                           EntityModifyParam elbow,
                                            ref Point2d detect_p,
                                            out double shrink_change_len,
                                            out double open_angle,
@@ -415,7 +416,7 @@ namespace ThMEPHVAC.Model
             elbow_other_port = detect_p.IsEqualTo(new_elbow.pos[0]) ? new_elbow.pos[1] : new_elbow.pos[0];
             ThDuctPortsDrawService.Clear_graph(elbow.handle);
         }
-        private void Create_reducing_by_reducing(Entity_modify_param reducing,
+        private void Create_reducing_by_reducing(EntityModifyParam reducing,
                                                  Point2d elbow_other_port,
                                                  Point2d reducing_other_port,
                                                  string conn_duct_size,
@@ -426,7 +427,7 @@ namespace ThMEPHVAC.Model
             Update_reducing(reducing_geo);
             ThDuctPortsDrawService.Clear_graph(reducing.handle);
         }
-        private void Proc_elbow_conn_duct(string modify_duct_width, Entity_modify_param elbow, ref Point2d detect_p)
+        private void Proc_elbow_conn_duct(string modify_duct_width, EntityModifyParam elbow, ref Point2d detect_p)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_duct_width);
             var dir_vec = (cur_line.ep - cur_line.sp).GetNormal();
@@ -446,12 +447,12 @@ namespace ThMEPHVAC.Model
             }
             detect_p = p;
         }
-        private void Do_proc_tee(int port_idx, string modify_duct_size, Entity_modify_param tee, ref Point2d detect_p)
+        private void Do_proc_tee(int port_idx, string modify_duct_size, EntityModifyParam tee, ref Point2d detect_p)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_duct_size);
             var mat = ThDuctPortsShapeService.Create_tee_trans_mat(tee);
             var tee_geo = ThDuctPortsReDrawFactory.Create_tee(tee, port_idx, modify_width);
-            Search_tee_neig_duct(port_idx, tee.pos, out List<Duct_modify_param> connect_duct);
+            Search_tee_neig_duct(port_idx, tee.pos, out List<DuctModifyParam> connect_duct);
             var new_tee = ThMEPHVACService.Create_special_modify_param("Tee", mat, start_handle, tee_geo.flg, tee_geo.center_line);
             Update_new_shape(tee_geo, mat, new_tee);
             Update_shape_conn_duct(port_idx, new_tee, connect_duct);
@@ -460,11 +461,11 @@ namespace ThMEPHVAC.Model
             detect_p = l.EndPoint.TransformBy(mat).ToPoint2D();
             ThDuctPortsDrawService.Clear_graph(tee.handle);
         }
-        private void Do_proc_cross(int port_idx, string modify_duct_size, Entity_modify_param cross, ref Point2d detect_p)
+        private void Do_proc_cross(int port_idx, string modify_duct_size, EntityModifyParam cross, ref Point2d detect_p)
         {
             var mat = ThDuctPortsShapeService.Create_cross_trans_mat(cross, modify_duct_size, port_idx);
             var cross_geo = ThDuctPortsReDrawFactory.Create_cross(cross, modify_duct_size, port_idx);
-            Search_tee_neig_duct(port_idx, cross.pos, out List<Duct_modify_param> connect_duct);
+            Search_tee_neig_duct(port_idx, cross.pos, out List<DuctModifyParam> connect_duct);
             var new_cross = ThMEPHVACService.Create_special_modify_param("Cross", mat, start_handle, cross_geo.flg, cross_geo.center_line);
             Update_new_shape(cross_geo, mat, new_cross);
             Update_shape_conn_duct(port_idx, new_cross, connect_duct);
@@ -474,8 +475,8 @@ namespace ThMEPHVAC.Model
             ThDuctPortsDrawService.Clear_graph(cross.handle);
         }
         private void Update_shape_conn_duct(int port_idx,
-                                            Entity_modify_param new_shape,
-                                            List<Duct_modify_param> connect_duct)
+                                            EntityModifyParam new_shape,
+                                            List<DuctModifyParam> connect_duct)
         {
             int inc = 0;
             for (int i = 0; i < new_shape.pos.Count; ++i)
@@ -511,14 +512,14 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsDrawService.Clear_graph(reducing.handle);
             }
         }
-        private Entity_modify_param Search_reducing_with_elbow(Point2d p, string type)
+        private EntityModifyParam Search_reducing_with_elbow(Point2d p, string type)
         {
             // 查找变径与弯头连接的连接件
             var p3 = new Point3d(p.X, p.Y, 0);
             var detect_pl = ThMEPHVACService.Create_detect_poly(p3);
             var res = shapes_index.SelectCrossingPolygon(detect_pl);
             if (res.Count != 1 && res.Count != 2)
-                return new Entity_modify_param();
+                return new EntityModifyParam();
             foreach (Polyline pl in res)
             {
                 if (shapes_dic.ContainsKey(pl))
@@ -528,7 +529,7 @@ namespace ThMEPHVAC.Model
                         return param;
                 }
             }
-            return new Entity_modify_param();
+            return new EntityModifyParam();
         }
         private double Get_elbow_shrink_change(double org_width, double modify_width, double open_angle)
         {
@@ -543,25 +544,25 @@ namespace ThMEPHVAC.Model
                                                           out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
             ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
         }
-        private void Update_new_shape(Line_Info geo, Matrix3d mat, Entity_modify_param new_param)
+        private void Update_new_shape(Line_Info geo, Matrix3d mat, EntityModifyParam new_param)
         {
             service.Draw_shape(geo, org_dis_mat * mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
                                                        out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
             ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, new_param);
         }
-        private Duct_modify_param Search_2_port_neig_duct(Point2d p)
+        private DuctModifyParam Search_2_port_neig_duct(Point2d p)
         {
             var p3 = new Point3d(p.X, p.Y, 0);
             var detect_pl = ThMEPHVACService.Create_detect_poly(p3);
             var res = ducts_index.SelectCrossingPolygon(detect_pl);
             if (res.Count != 1)
-                return new Duct_modify_param();
+                return new DuctModifyParam();
             var duct_bounds = res[0] as Polyline;
-            return ducts_dic.ContainsKey(duct_bounds) ? ducts_dic[duct_bounds] : new Duct_modify_param();
+            return ducts_dic.ContainsKey(duct_bounds) ? ducts_dic[duct_bounds] : new DuctModifyParam();
         }
-        private void Search_tee_neig_duct(int cur_port_idx, List<Point2d> tee_port_pos, out List<Duct_modify_param> connect_duct)
+        private void Search_tee_neig_duct(int cur_port_idx, List<Point2d> tee_port_pos, out List<DuctModifyParam> connect_duct)
         {
-            connect_duct = new List<Duct_modify_param>();
+            connect_duct = new List<DuctModifyParam>();
             for (int i = 0; i < tee_port_pos.Count; ++i)
             {
                 if (i == cur_port_idx)
@@ -575,7 +576,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Draw_reducing_connect_duct(Duct_modify_param connect_duct, string modify_size, out bool is_direct_duct)
+        private void Draw_reducing_connect_duct(DuctModifyParam connect_duct, string modify_size, out bool is_direct_duct)
         {
             is_direct_duct = false;
             double width = ThMEPHVACService.Get_width(modify_size);
@@ -586,7 +587,7 @@ namespace ThMEPHVAC.Model
                 Create_duct_by_duct(connect_duct, p1, p2, width, modify_size);
             }
         }
-        private void Create_duct_by_duct(Duct_modify_param connect_line,
+        private void Create_duct_by_duct(DuctModifyParam connect_line,
                                          Point2d sp,
                                          Point2d ep,
                                          double width,
@@ -602,7 +603,7 @@ namespace ThMEPHVAC.Model
             Update_port(modify_size);
         }
         private void Draw_elbow_connect_duct(double shrink_change_len,
-                                             Duct_modify_param conn_duct,
+                                             DuctModifyParam conn_duct,
                                              string modify_duct_width,
                                              Point2d detect_p)
         {
@@ -640,7 +641,7 @@ namespace ThMEPHVAC.Model
                 Update_reducing(reducing_geo);
             }
         }
-        private void Draw_shape_connect_duct(List<Duct_modify_param> connect_duct)
+        private void Draw_shape_connect_duct(List<DuctModifyParam> connect_duct)
         {
             foreach (var conn_duct in connect_duct)
             {
@@ -698,13 +699,13 @@ namespace ThMEPHVAC.Model
             detect2 = ep.TransformBy(mat);
             ThDuctPortsDrawService.Remove_group_by_comp(id);
         }
-        private void Search_connected_shape(Point2d detect_p, out int port_idx, out Entity_modify_param shape)
+        private void Search_connected_shape(Point2d detect_p, out int port_idx, out EntityModifyParam shape)
         {
             port_idx = -1;
             var p = new Point3d(detect_p.X, detect_p.Y, 0);
             var detect_pl = ThMEPHVACService.Create_detect_poly(p);
             var res = shapes_index.SelectCrossingPolygon(detect_pl);
-            shape = new Entity_modify_param();
+            shape = new EntityModifyParam();
             if (res.Count == 1)
             {
                 var pl = res[0] as Polyline;

@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using System;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.DrawService
@@ -24,7 +25,7 @@ namespace ThMEPHVAC.DrawService
             var angle = srtDuctDirection.GetAngleTo(-Vector3d.YAxis) - Math.PI / 3;
             start_id = service.Insert_start_flag(srt_flag_pos, angle);
         }
-        public void Draw_duct(Duct_modify_param param, Matrix3d mat)
+        public void Draw_duct(DuctModifyParam param, Matrix3d mat)
         {
             double w = ThMEPHVACService.Get_width(param.duct_size);
 

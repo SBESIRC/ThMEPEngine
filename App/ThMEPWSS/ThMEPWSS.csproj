@@ -82,7 +82,6 @@
     <Compile Include="Sprinkler\Data\ThSprinklerRoomExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerShearWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerWindowExtractor.cs" />
-    <Compile Include="Sprinkler\Model\ThSprinklerDuctParam.cs" />
     <Compile Include="Sprinkler\Model\ThSprinklerModel.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCheckerLayer.cs" />

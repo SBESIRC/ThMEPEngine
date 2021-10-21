@@ -2,17 +2,17 @@
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHVAC.Model
+namespace ThMEPEngineCore.Model.Hvac
 {
-    public class Fan_modify_param
+    public class FanModifyParam
     {
         public string fan_name;
-        public Fan_modify_param(string fan_name) 
+        public FanModifyParam(string fan_name) 
         {
             this.fan_name = fan_name;
         }
     }
-    public class Port_modify_param
+    public class PortModifyParam
     {
         public Point2d pos;
         public Handle handle;
@@ -20,16 +20,16 @@ namespace ThMEPHVAC.Model
         public double port_width;
         public double port_height;
         public double rotate_angle;
-        public Port_modify_param() { }
+        public PortModifyParam() { }
     }
-    public class Text_modify_param
+    public class TextModifyParam
     {
         public Point3d pos;
         public Handle handle;
         public Point2d center_point;
         public string text_string;
         public double rotate_angle;
-        public Text_modify_param(Handle handle, Point2d center_point, string text_string,
+        public TextModifyParam(Handle handle, Point2d center_point, string text_string,
                                  double rotate_angle, Point3d pos)
         {
             this.pos = pos;
@@ -39,7 +39,7 @@ namespace ThMEPHVAC.Model
             this.rotate_angle = rotate_angle;
         }
     }
-    public class Hole_modify_param
+    public class HoleModifyParam
     {
         public Handle handle;
         public string hole_name;
@@ -48,9 +48,9 @@ namespace ThMEPHVAC.Model
         public double rotate_angle;
         public double len;
         public double width;
-        public Hole_modify_param() { }
+        public HoleModifyParam() { }
     }
-    public class Muffler_modify_param
+    public class MufflerModifyParam
     {
         public Handle handle;
         public string name;
@@ -63,7 +63,7 @@ namespace ThMEPHVAC.Model
         public double text_height;
         public double rotate_angle;
     }
-    public class Valve_modify_param
+    public class ValveModifyParam
     {
         public Handle handle;
         public string valve_name;
@@ -75,9 +75,9 @@ namespace ThMEPHVAC.Model
         public double height;
         public double text_angle;
         public double text_height;
-        public Valve_modify_param() { }
+        public ValveModifyParam() { }
     }
-    public class Entity_modify_param
+    public class EntityModifyParam
     {
         public string type;
         public Handle handle;
@@ -85,7 +85,7 @@ namespace ThMEPHVAC.Model
         public List<Point2d> pos;
         public List<Point2d> pos_ext;
         public List<double> port_widths;
-        public Entity_modify_param()
+        public EntityModifyParam()
         {
             type = string.Empty;
             pos = new List<Point2d>();
@@ -94,7 +94,7 @@ namespace ThMEPHVAC.Model
             start_id = ObjectId.Null.Handle;
             port_widths = new List<double>();
         }
-        public Entity_modify_param(string type,
+        public EntityModifyParam(string type,
                                    Handle start_id,
                                    List<Point2d> pos,
                                    List<Point2d> pos_ext,
@@ -108,7 +108,7 @@ namespace ThMEPHVAC.Model
             handle = ObjectId.Null.Handle;
         }
     }
-    public class Duct_modify_param
+    public class DuctModifyParam
     {
         public Point2d sp;          // 管段起点
         public Point2d ep;          // 管段终点
@@ -118,8 +118,8 @@ namespace ThMEPHVAC.Model
         public string duct_size;
         public double air_volume;
         public double elevation;
-        public Duct_modify_param() { }
-        public Duct_modify_param(string duct_size,
+        public DuctModifyParam() { }
+        public DuctModifyParam(string duct_size,
                                  double air_volume,
                                  double elevation,
                                  Point2d sp,
@@ -132,7 +132,7 @@ namespace ThMEPHVAC.Model
             this.duct_size = duct_size;
             this.air_volume = air_volume;
         }
-        public Duct_modify_param(string duct_size, 
+        public DuctModifyParam(string duct_size, 
                                  double air_volume,
                                  double elevation,
                                  Point2d sp,
@@ -148,10 +148,10 @@ namespace ThMEPHVAC.Model
             this.start_handle = start_handle;
         }
     }
-    public class VT_elbow_modify_param
+    public class VTElbowModifyParam
     {
         public Handle handle;
         public Point2d detect_p;
-        public VT_elbow_modify_param() { }
+        public VTElbowModifyParam() { }
     }
 }

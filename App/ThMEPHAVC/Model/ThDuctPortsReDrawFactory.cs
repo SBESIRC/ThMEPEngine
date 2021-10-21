@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsReDrawFactory
     {
-        public static Line_Info Create_reducing(Entity_modify_param reducing, int port_idx, string modify_size, bool is_axis)
+        public static Line_Info Create_reducing(EntityModifyParam reducing, int port_idx, string modify_size, bool is_axis)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_size);
             reducing.port_widths[port_idx] = modify_width;
@@ -31,7 +32,7 @@ namespace ThMEPHVAC.Model
             ThMEPHVACService.Get_duct_ports(l, out List<Point3d> ports, out List<Point3d> ports_ext);
             return new Line_Info(geo, flg, center_line, ports, ports_ext);
         }
-        public static Line_Info Create_tee(Entity_modify_param tee, int port_idx, double modify_width)
+        public static Line_Info Create_tee(EntityModifyParam tee, int port_idx, double modify_width)
         {
             var branch_vec = tee.pos[0] - tee.pos_ext[0];
             var main_small_vec = tee.pos[2] - tee.pos_ext[2];
@@ -40,7 +41,7 @@ namespace ThMEPHVAC.Model
             tee.port_widths[port_idx] = modify_width;
             return ThDuctPortsFactory.Create_tee(tee.port_widths[1], tee.port_widths[0], tee.port_widths[2], type);
         }
-        public static Line_Info Create_cross(Entity_modify_param cross, string modify_duct_size, int port_idx)
+        public static Line_Info Create_cross(EntityModifyParam cross, string modify_duct_size, int port_idx)
         {
             var modify_width = ThMEPHVACService.Get_width(modify_duct_size);
             var org_width = cross.port_widths[port_idx];

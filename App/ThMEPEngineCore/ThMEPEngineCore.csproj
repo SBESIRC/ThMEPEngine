@@ -179,6 +179,8 @@
     <Compile Include="Engine\ThFireCompartmentOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentOutlineRecognitionEngine.cs" />
+    <Compile Include="Service\Hvac\ThHvacAnalysisComponent.cs" />
+    <Compile Include="Service\Hvac\ThHvacGetComponent.cs" />
     <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThRailingBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
@@ -258,6 +260,7 @@
     <Compile Include="IO\ExcelService\ReadExcelService.cs" />
     <Compile Include="IO\IOService\IOOperateService.cs" />
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
+    <Compile Include="Model\Hvac\ThModifyParam.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Model\ThSprinkler.cs" />

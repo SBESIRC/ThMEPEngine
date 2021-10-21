@@ -28,7 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alg\ThMEPHAVCBounds.cs" />
+    <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
@@ -53,7 +53,6 @@
     <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanWAFViewModel.cs" />
-    <Compile Include="Model\ModifyParam.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
@@ -83,7 +82,6 @@
     <Compile Include="Model\ThMEPHVACService.cs" />
     <Compile Include="Model\ThModifyDuctConnComponent.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
-    <Compile Include="Model\ThTee.cs" />
     <Compile Include="Model\ThVerticalBypassFactory.cs" />
     <Compile Include="Model\ThVTee.cs" />
     <Compile Include="CAD\ThDuctParameter.cs" />
@@ -93,19 +91,11 @@
     <Compile Include="CAD\ThHvacValveDbExtension.cs" />
     <Compile Include="CAD\ThInletOutletDuctDrawEngine.cs" />
     <Compile Include="Command\ThModelBaseExtractCmd.cs" />
-    <Compile Include="Duct\ThValveExtension.cs" />
     <Compile Include="CAD\ThValvesAndHolesInsertEngine.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
-    <Compile Include="Duct\GraphSerializeService.cs" />
-    <Compile Include="Duct\ThDraught.cs" />
-    <Compile Include="Duct\ThDraughtDesignEngine.cs" />
-    <Compile Include="Duct\ThDuctDesignEngine.cs" />
-    <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
-    <Compile Include="Duct\ThDuctLineSimplifier.cs" />
     <Compile Include="Duct\ThDuctUtils.cs" />
-    <Compile Include="Duct\ThGraphExtension.cs" />
     <Compile Include="Model\DuctSpecModel.cs" />
     <Compile Include="Model\ThValve.cs" />
     <Compile Include="IO\ThDuctInOutMappingJsonReader.cs" />
