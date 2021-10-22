@@ -3,7 +3,10 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Triangulate;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,6 +78,30 @@ namespace ThMEPStructure.GirderConnect.Utils
                 trans.Commit();
             }
             return points;
+        }
+
+        /// <summary>
+        /// 获取多个多边形
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <returns></returns>
+        public static MultiLineString GetPolylines(AcadDatabase acdb)
+        {
+            var tvs = new List<TypedValue>();
+            tvs.Add(new TypedValue((int)DxfCode.Start, RXClass.GetClass(typeof(Polyline)).DxfName));
+            var sf = new SelectionFilter(tvs.ToArray());
+            var result = Active.Editor.GetSelection(sf);
+
+            DBObjectCollection objs = new DBObjectCollection();
+            if (result.Status == PromptStatus.OK)
+            {
+                //anoother way
+                //result.Value.GetObjectIds().Select(o => acdb.Element<Entity>(o)).Where(o => o is Polyline)
+                //    .Cast<Polyline>().ToList();
+                result.Value.GetObjectIds().Select(o => acdb.Element<Polyline>(o)).ToList();
+
+            }
+            return objs.ToMultiLineString();
         }
 
         /// <summary>

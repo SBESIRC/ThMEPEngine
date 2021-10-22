@@ -144,10 +144,69 @@ namespace ThMEPStructure.GirderConnect.ConnectProcess
         /// <param name="points"></param>
         public static void DelaunayTriangulationConnect(Point3dCollection points)
         {
-            List<Polyline> triangles = new List<Polyline>();
             HashSet<Line> lines = new HashSet<Line>();
             Dictionary<Tuple<Point3d, Point3d>, int> linesType = new Dictionary<Tuple<Point3d, Point3d>, int>(); //0 ：初始化 1：最长线 
             foreach (Entity diagram in points.DelaunayTriangulation())
+            {
+                if (diagram is Polyline pl)
+                {
+                    Line maxLine = new Line();
+                    double maxLen = 0.0;
+                    for (int i = 0; i < pl.NumberOfVertices - 1; ++i) // pl.NumberOfVertices == 4
+                    {
+                        Line line = new Line(pl.GetPoint3dAt(i), pl.GetPoint3dAt(i + 1));
+                        linesType.Add(new Tuple<Point3d, Point3d>(line.StartPoint, line.EndPoint), 0);
+                        lines.Add(line);
+                        if (line.Length > maxLen)
+                        {
+                            maxLen = line.Length;
+                            maxLine = line;
+                        }
+                    }
+                    linesType[new Tuple<Point3d, Point3d>(maxLine.StartPoint, maxLine.EndPoint)] = 1;
+                    if (linesType.ContainsKey(new Tuple<Point3d, Point3d>(maxLine.EndPoint, maxLine.StartPoint)))
+                    {
+                        linesType[new Tuple<Point3d, Point3d>(maxLine.EndPoint, maxLine.StartPoint)] = 1;
+                    }
+                }
+            }
+            foreach (var line in linesType.Keys)
+            {
+                if (linesType[line] == 0 && linesType.ContainsKey(new Tuple<Point3d, Point3d>(line.Item2, line.Item1)) && linesType[new Tuple<Point3d, Point3d>(line.Item2, line.Item1)] == 0)
+                {
+                    ShowInfo.DrawLine(line.Item1, line.Item2, 130);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 使用带有约束的德劳内三角划分进行初步链接
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="polylines">约束</param>
+        public static void ConformingDelaunayTriangulationConnect(Point3dCollection points, MultiLineString polylines)
+        {
+            var objs = new DBObjectCollection();
+            var builder = new ConformingDelaunayTriangulationBuilder();
+            var sites = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPointFromCoords(points.ToNTSCoordinates());
+            builder.SetSites(sites);
+            builder.Constraints = polylines;
+            var triangles = builder.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory);
+            foreach (var geometry in triangles.Geometries)
+            {
+                if (geometry is Polygon polygon)
+                {
+                    objs.Add(polygon.Shell.ToDbPolyline());
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+
+            HashSet<Line> lines = new HashSet<Line>();
+            Dictionary<Tuple<Point3d, Point3d>, int> linesType = new Dictionary<Tuple<Point3d, Point3d>, int>(); //0 ：初始化 1：最长线 
+            foreach (Entity diagram in objs)
             {
                 if (diagram is Polyline pl)
                 {
@@ -185,15 +244,39 @@ namespace ThMEPStructure.GirderConnect.ConnectProcess
         ///  每次只切一刀，将一个多边形切成两个多边形，然后分别对切割后的多边形进行递归切割
         ///  递归边界：如果多边形的边小于5，不会再切割；如果多边形的边等于5，是否切割需要进行判断；
         /// </summary>
-        /// <param name="polyline">要分割的图形（多于4边）</param>
+        /// <param name="tuples">要分割的图形（多于4边）</param>
         /// <returns>分割后的图形</returns>
-        public static List<List<Tuple<Point3d, Point3d>>> SplitPolyline(List<Tuple<Point3d, Point3d>> polyline)
+        public static void SplitPolyline(List<Tuple<Point3d, Point3d>> tuples, List<List<Tuple<Point3d, Point3d>>> tupleLines)
         {
+            int n = tuples.Count;
+            if(n <= 5)
+            {
+                tupleLines.Add(tuples);
+                return;
+            }
+            Polyline polyline = LineDealer.Tuples2Polyline(tuples);
+            double area = polyline.Area;
 
             //每一🔪肯定是尽可能从中间去切开，找到能把切开后面积的方差最小的，如有面积相似的，找连接线长最短的（连接线长*面积的方差和最小的？）
+            double minArea = double.MaxValue;
+            double minDis = double.MaxValue;
+            double minCmp = double.MaxValue;
+            int halfCnt = (n + 1) / 2;
 
-            List<List<Tuple<Point3d, Point3d>>> polylines = new List<List<Tuple<Point3d, Point3d>>>();
-            return polylines;
+            //Tuples2Polyline get Area/2:halfArea
+
+            //get minArea, record best split
+            for (int i = 0; i < (n + 1) / 2; ++i)
+            {
+                //get tuplesA & areaA
+                //get tuplesB & areaB
+                //curCmp =  ((areaA - halfArea)^2 + (areaB - halfArea)^2) * dis;
+                //if(curCmp < cmp)
+                //{
+                //  minCmp = curCmp;
+                //}
+
+            }
         }
 
         /// <summary>
@@ -202,37 +285,44 @@ namespace ThMEPStructure.GirderConnect.ConnectProcess
         /// <param name="polylineA"></param>
         /// <param name="polylineB"></param>
         /// <returns></returns>
-        public static List<Tuple<Point3d, Point3d>> MergePolyline(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB)
+        public static List<Tuple<Point3d, Point3d>> MergePolyline(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB, double tolerance = 1)
         {
             HashSet<Tuple<Point3d, Point3d>> lineVisited = new HashSet<Tuple<Point3d, Point3d>>();
-            foreach(var line in polylineA)
+            foreach (var line in polylineA)
             {
                 lineVisited.Add(line);
             }
-            foreach(var line in polylineB)
+            foreach (var line in polylineB)
             {
                 var converseLine = new Tuple<Point3d, Point3d>(line.Item2, line.Item1);
                 if (lineVisited.Contains(converseLine))
                 {
                     lineVisited.Remove(converseLine);
                     continue;
-                    //break;
                 }
                 lineVisited.Add(line);
             }
-            return lineVisited.ToList(); //new List<Tuple<Point3d, Point3d>>();
+            return LineDealer.OrderTuples(lineVisited.ToList());
         }
 
         /// <summary>
-        /// 针对5 + 3边形，转变成6边形, 然后分成两个4边形
+        /// 针对(2*n+1) + (3)边形，转变成偶数边形, 然后分成多个小边形
         /// </summary>
         /// <param name="polylineA"></param>
         /// <param name="polylineB"></param>
         /// <returns></returns>
-        public static List<List<Tuple<Point3d, Point3d>>> Case5p3(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB)
+        public static void CaseOddP3(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB)
         {
             List<Tuple<Point3d, Point3d>> sixLines = MergePolyline(polylineA, polylineB);
-            return SplitPolyline(sixLines);
+            List<List<Tuple<Point3d, Point3d>>> polylines = new List<List<Tuple<Point3d, Point3d>>>();
+            SplitPolyline(sixLines, polylines);
+            foreach (var lines in polylines)
+            {
+                foreach (var line in lines)
+                {
+                    ShowInfo.DrawLine(line.Item1, line.Item2, 130);
+                }
+            }
         }
     }
 }

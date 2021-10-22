@@ -56,9 +56,9 @@ namespace ThMEPStructure.GirderConnect.Test
         [CommandMethod("TIANHUACAD", "THVD", CommandFlags.Modal)]
         public void THVD()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var points = GetObject.GetCenters(acadDatabase);
+                var points = GetObject.GetCenters(acdb);
                 var voronoiDiagram = new VoronoiDiagramBuilder();
                 voronoiDiagram.SetSites(points.ToNTSGeometry());
                 //foreach (Polygon polygon in voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory).Geometries) //同等效力
@@ -72,13 +72,13 @@ namespace ThMEPStructure.GirderConnect.Test
         [CommandMethod("TIANHUACAD", "THDT", CommandFlags.Modal)] //此为copy
         public void ThDelaunayTriangulation()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var points = GetObject.GetCenters(acadDatabase);
+                var points = GetObject.GetCenters(acdb);
                 foreach (Entity diagram in points.DelaunayTriangulation())
                 {
                     diagram.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(diagram);
+                    acdb.ModelSpace.Add(diagram);
                 }
             }
         }
@@ -86,9 +86,9 @@ namespace ThMEPStructure.GirderConnect.Test
         [CommandMethod("TIANHUACAD", "THVDC", CommandFlags.Modal)]
         public void ThVVD()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var points = GetObject.GetCenters(acadDatabase);
+                var points = GetObject.GetCenters(acdb);
                 ConnectMainBeam.VoronoiDiagramConnect(points);
             }
         }
@@ -96,10 +96,21 @@ namespace ThMEPStructure.GirderConnect.Test
         [CommandMethod("TIANHUACAD", "THDTC", CommandFlags.Modal)]
         public void THDTC()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var points = GetObject.GetCenters(acadDatabase);
+                var points = GetObject.GetCenters(acdb);
                 ConnectMainBeam.DelaunayTriangulationConnect(points);
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THCDTC", CommandFlags.Modal)]
+        public void THCDTC()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var points = GetObject.GetCenters(acdb);
+                var polylines = GetObject.GetPolylines(acdb);
+                ConnectMainBeam.ConformingDelaunayTriangulationConnect(points, polylines);
             }
         }
 
