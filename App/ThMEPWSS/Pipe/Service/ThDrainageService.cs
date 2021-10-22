@@ -18,7 +18,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using System.Text;
     using System.Text.RegularExpressions;
     using System.Windows.Forms;
-    using ThCADCore.NTS;
     using ThCADExtension;
     using ThMEPEngineCore.Algorithm;
     using ThMEPEngineCore.Engine;
@@ -40,13 +39,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
     using System.Diagnostics;
     using Newtonsoft.Json.Linq;
     using StoreyContext = Pipe.Model.StoreyContext;
-    public static class TempExts
-    {
-        public static Point2d ToPoint2d(this Point pt)
-        {
-            return new Point2d(pt.X, pt.Y);
-        }
-    }
     public class TempGeoFac
     {
         public static IEnumerable<GLineSegment> GetMinConnSegs(List<GLineSegment> segs)
@@ -663,7 +655,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     var heights = new List<int>(allStoreys.Count);
                     var s = NARCOTRAFICANTE;
                     var _vm = FloorHeightsViewModel.Instance;
-                    bool test(string x, int t)
+                    static bool test(string x, int t)
                     {
                         var m = Regex.Match(x, MUSCULOTENDINOUS);
                         if (m.Success)
@@ -4591,6 +4583,37 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
             {
+                var kvs = new HashSet<KeyValuePair<Point2d, string>>(geoData.WrappingPipeRadius);
+                var okKvs = new HashSet<KeyValuePair<Point2d, string>>();
+                geoData.WrappingPipeRadius.Clear();
+                foreach (var wp in geoData.WrappingPipes)
+                {
+                    var gf = wp.ToPolygon().ToIPreparedGeometry();
+                    var _kvs = kvs.Except(okKvs).Where(x => gf.Intersects(x.Key.ToNTSPoint())).ToList();
+                    var strs = _kvs.Select(x => x.Value).ToList();
+                    var nums = strs.Select(x => double.TryParse(x, out double v) ? v : double.NaN).Where(x => !double.IsNaN(x)).ToList();
+                    if (nums.Count > ADRENOCORTICOTROPHIC)
+                    {
+                        var min = nums.Min();
+                        var str = strs.First(x => double.Parse(x) == min);
+                        foreach (var kv in _kvs)
+                        {
+                            kvs.Remove(kv);
+                        }
+                        foreach (var kv in _kvs)
+                        {
+                            if (kv.Value == str)
+                            {
+                                kvs.Add(kv);
+                                okKvs.Add(kv);
+                                break;
+                            }
+                        }
+                    }
+                }
+                geoData.WrappingPipeRadius.AddRange(kvs);
+            }
+            {
                 var v = UNDERACHIEVEMENT;
                 for (int i = NARCOTRAFICANTE; i < geoData.WrappingPipes.Count; i++)
                 {
@@ -4824,7 +4847,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
             {
-                if (entityLayer is THESAURUSACCEDE)
+                if (entityLayer is THESAURUSACCEDE or THESAURUSPRELIMINARY)
                 {
                     if (entity is Line line)
                     {
@@ -5041,7 +5064,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             if (dxfName == THESAURUSINOFFENSIVE)
             {
-                if (entityLayer is THESAURUSACCEDE)
+                if (entityLayer is THESAURUSACCEDE or THESAURUSPRELIMINARY)
                 {
                     dynamic o = entity.AcadObject;
                     string UpText = o.UpText;
@@ -5445,7 +5468,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
-        static bool CollectRoomDataAtCurrentModelSpaceOnly = UNTRACEABLENESS;
+        static bool CollectRoomDataAtCurrentModelSpaceOnly = THESAURUSSEMBLANCE;
     }
     public class DrainageService
     {
@@ -5473,8 +5496,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
         public static List<KeyValuePair<string, Geometry>> CollectRoomData(AcadDatabase adb)
         {
-            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer?.ToUpper() is THESAURUSPERSPIRATION or THESAURUSTHROTTLE)
-                .SelectNotNull(ConvertToPolygon).ToList();
+            var ranges = new HashSet<Geometry>(adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer?.ToUpper() is THESAURUSPERSPIRATION or THESAURUSTHROTTLE)
+                .SelectNotNull(ConvertToPolygon).ToList());
             var names = adb.ModelSpace.Where(x => x.Layer?.ToUpper() is THESAURUSSQUASHY or THESAURUSMANNERISM).SelectNotNull(entity =>
             {
                 if (entity is MText mtx)
@@ -5497,7 +5520,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
                 return null;
             }).ToList();
-            var f = GeoFac.CreateIntersectsSelector(ranges);
+            var f = GeoFac.CreateIntersectsSelector(ranges.ToList());
             var list = new List<KeyValuePair<string, Geometry>>(names.Count);
             foreach (var name in names)
             {
@@ -5508,12 +5531,21 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[NARCOTRAFICANTE]));
                     }
-                    else
+                    else if (l.Count > NARCOTRAFICANTE)
                     {
-                        foreach (var geo in l)
+                        var tmp = l.Select(x => x.Area).Where(x => x > NARCOTRAFICANTE).ToList();
+                        if (tmp.Count > NARCOTRAFICANTE)
                         {
-                            DrawGeometryLazy(geo);
-                            ranges.Remove(geo);
+                            var min = tmp.Min();
+                            foreach (var geo in l)
+                            {
+                                if (geo.Area == min)
+                                {
+                                    list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), geo));
+                                    foreach (var x in l) ranges.Remove(x);
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
@@ -7853,44 +7885,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 {
                     Geometry = blkref.GetTransformedCopy(matrix),
                 });
-            }
-        }
-    }
-    public static class GeometryExtensions
-    {
-        public static Geometry Clone(this Geometry geo)
-        {
-            if (geo is null) return null;
-            if (geo is Point pt) return Clone(pt);
-            if (geo is LineString ls) return Clone(ls);
-            if (geo is Polygon pl) return Clone(pl);
-            if (geo is MultiPoint mpt) return new MultiPoint(mpt.Geometries.Cast<Point>().Select(Clone).ToArray());
-            if (geo is MultiLineString mls) return new MultiLineString(mls.Geometries.Cast<LineString>().Select(Clone).ToArray());
-            if (geo is MultiPolygon mpl) return new MultiPolygon(mpl.Geometries.Cast<Polygon>().Select(Clone).ToArray());
-            throw new NotSupportedException();
-        }
-        public static Coordinate Clone(Coordinate o) => new Coordinate(o.X, o.Y);
-        public static Point Clone(Point o) => new Point(o.X, o.Y);
-        public static LineString Clone(LineString o) => new LineString(o.Coordinates);
-        public static Polygon Clone(Polygon o) => new Polygon(o.Shell);
-        public static IEnumerable<Point> Clone(this IEnumerable<Point> geos) => geos.Select(Clone);
-        public static IEnumerable<LineString> Clone(this IEnumerable<LineString> geos) => geos.Select(Clone);
-        public static IEnumerable<Polygon> Clone(this IEnumerable<Polygon> geos) => geos.Select(Clone);
-        public static IEnumerable<Geometry> ToBaseGeometries(this Geometry geometry)
-        {
-            if (geometry is Point or LineString or Polygon)
-            {
-                yield return geometry;
-            }
-            else if (geometry is GeometryCollection colle)
-            {
-                foreach (var geo in colle.Geometries)
-                {
-                    foreach (var r in ToBaseGeometries(geo))
-                    {
-                        yield return r;
-                    }
-                }
             }
         }
     }

@@ -17,7 +17,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 {
     public class PlumbingWPFUIApp : IExtensionApplication
     {
-        
+
         uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
@@ -55,9 +55,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public void ThCreateWaterSuplySystemDiagramWithUI()
         {
             var file = CadCache.CurrentFile;
-            if (file == null) return ;
+            if (file == null) return;
             var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
-            if (!ok) return ;
+            if (!ok) return;
             var w = new uiDrainageSystem();
             w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
             w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
@@ -188,13 +188,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THXHSXTT", CommandFlags.Modal)]
         public void THXHSXTT()
         {
-            var file = CadCache.CurrentFile;
-            if (file == null) return;
-            var ok = !CadCache.Locks.Contains(CadCache.WaterGroupLock);
-            if (!ok) return;
-            var w = new uiFireControlSystem();
-            w.Loaded += (s, e) => { CadCache.Locks.Add(CadCache.WaterGroupLock); };
-            w.Closed += (s, e) => { CadCache.Locks.Remove(CadCache.WaterGroupLock); };
+            var w = uiFireControlSystem.TryCreate();
+            if (w == null) return;
             AcadApp.ShowModelessWindow(w);
         }
 

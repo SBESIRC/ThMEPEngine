@@ -25,7 +25,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
     using ThMEPWSS.Assistant;
     using ThMEPWSS.Pipe.Service;
     using NFox.Cad;
-    using ThCADCore.NTS;
     using Autodesk.AutoCAD.Colors;
     using System.Runtime.Remoting;
     using System.IO;
@@ -53,13 +52,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
     using ThMEPEngineCore.Model.Common;
     using NetTopologySuite.Operation.Buffer;
     using StoreyContext = Pipe.Model.StoreyContext;
-    public static class TempExts
-    {
-        public static Point2d ToPoint2d(this Point pt)
-        {
-            return new Point2d(pt.X, pt.Y);
-        }
-    }
     public class TempGeoFac
     {
         public static IEnumerable<GLineSegment> GetMinConnSegs(List<GLineSegment> segs)
@@ -96,6 +88,19 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         }
         public static IEnumerable<GLineSegment> TryExtend(GLineSegment s1, GLineSegment s2, double extend)
         {
+            var v1 = s1.ToVector2d();
+            var v2 = s2.ToVector2d();
+            var dg = v1.GetAngleTo(v2).AngleToDegree();
+            if (dg <= THESAURUSFACTOR)
+            {
+                var dis = s1.ToLineString().Distance(s2.ToLineString());
+                if (dis <= NARCOTRAFICANTE) yield break;
+                if (s1.StartPoint.GetDistanceTo(s2.StartPoint).EqualsTo(dis, THESAURUSCONSUL)) yield return new GLineSegment(s1.StartPoint, s2.StartPoint);
+                if (s1.StartPoint.GetDistanceTo(s2.EndPoint).EqualsTo(dis, THESAURUSCONSUL)) yield return new GLineSegment(s1.StartPoint, s2.EndPoint);
+                if (s1.EndPoint.GetDistanceTo(s2.StartPoint).EqualsTo(dis, THESAURUSCONSUL)) yield return new GLineSegment(s1.EndPoint, s2.StartPoint);
+                if (s1.EndPoint.GetDistanceTo(s2.EndPoint).EqualsTo(dis, THESAURUSCONSUL)) yield return new GLineSegment(s1.EndPoint, s2.EndPoint);
+                yield break;
+            }
             var pt = s1.Extend(extend).ToLineString().Intersection(s2.Extend(extend).ToLineString()) as Point;
             if (pt != null)
             {
@@ -476,11 +481,11 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             {
                 var dict = ThMEPWSS.ViewModel.BlockConfigService.GetBlockNameListDict();
                 dict.TryGetValue(THESAURUSLETTERED, out List<string> lstVertical);
-                if (lstVertical != null) this.立式空调内机Names = new HashSet<string>(lstVertical);
+                if (lstVertical != null) this.VerticalAiringMachineNames = new HashSet<string>(lstVertical);
                 dict.TryGetValue(DISTEMPEREDNESS, out List<string> lstHanging);
-                if (lstHanging != null) this.挂式空调内机Names = new HashSet<string>(lstHanging);
-                this.立式空调内机Names ??= new HashSet<string>();
-                this.挂式空调内机Names ??= new HashSet<string>();
+                if (lstHanging != null) this.HangingAiringMachineNames = new HashSet<string>(lstHanging);
+                this.VerticalAiringMachineNames ??= new HashSet<string>();
+                this.HangingAiringMachineNames ??= new HashSet<string>();
             }
             if (HandleGroupAtCurrentModelSpaceOnly)
             {
@@ -680,7 +685,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 }
             }
             {
-                if (entityLayer is THESAURUSACCEDE)
+                if (entityLayer is THESAURUSACCEDE or THESAURUSPRELIMINARY)
                 {
                     if (entity is Line line)
                     {
@@ -896,7 +901,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             }
             else if (dxfName == THESAURUSINOFFENSIVE)
             {
-                if (entityLayer is THESAURUSACCEDE)
+                if (entityLayer is THESAURUSACCEDE or THESAURUSPRELIMINARY)
                 {
                     dynamic o = entity.AcadObject;
                     string UpText = o.UpText;
@@ -1002,21 +1007,22 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         {
             return GetEffectiveName(brName);
         }
-        HashSet<string> 立式空调内机Names;
-        HashSet<string> 挂式空调内机Names;
+        HashSet<string> VerticalAiringMachineNames;
+        HashSet<string> HangingAiringMachineNames;
         private void handleBlockReference(BlockReference br, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
         {
             if (!br.ObjectId.IsValid || !br.BlockTableRecord.IsValid) return;
             if (!br.Visible) return;
             if (IsLayerVisible(br))
             {
-                var name = GetEffectiveBRName(br.GetEffectiveName());
-                if (name is THERMODYNAMICIST or KNICKERBOCKERED || 立式空调内机Names.Contains(name))
+                var _name = br.GetEffectiveName();
+                var name = GetEffectiveBRName(_name);
+                if (name is THERMODYNAMICIST or KNICKERBOCKERED || VerticalAiringMachineNames.Contains(name))
                 {
                     reg(fs, br.Bounds.ToGRect().TransformBy(matrix), geoData.AiringMachine_Vertical);
                     return;
                 }
-                if (name is MACHAIRODONTINAE || 挂式空调内机Names.Contains(name))
+                if (name is MACHAIRODONTINAE || HangingAiringMachineNames.Contains(name))
                 {
                     reg(fs, br.Bounds.ToGRect().TransformBy(matrix), geoData.AiringMachine_Hanging);
                     return;
@@ -1070,7 +1076,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 }
                 if (!isInXref)
                 {
-                    if (name.Contains(THESAURUSBACTERIA) || name is INAPPREHENSIBILIS)
+                    if ((name.Contains(THESAURUSBACTERIA) || name is INAPPREHENSIBILIS) && _name.Count(x => x == POLYCRYSTALLINE) < PHOTOGONIOMETER)
                     {
                         var bd = br.Bounds.ToGRect().TransformBy(matrix);
                         reg(fs, bd, floorDrains);
@@ -3639,7 +3645,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     var heights = new List<int>(allStoreys.Count);
                     var s = NARCOTRAFICANTE;
                     var _vm = FloorHeightsViewModel.Instance;
-                    bool test(string x, int t)
+                    static bool test(string x, int t)
                     {
                         var m = Regex.Match(x, MUSCULOTENDINOUS);
                         if (m.Success)
@@ -4319,7 +4325,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var segs = vecs.ToGLineSegments(basePt).Skip(ADRENOCORTICOTROPHIC).ToList();
                                                     Dr.SetLabelStylesForRainNote(DrawLineSegmentsLazy(segs).ToArray());
                                                     var pt1 = segs.Last().EndPoint;
-                                                    var pt2 = pt1.OffsetXY(UNDERACHIEVEMENT,-THESAURUSALCOVE);
+                                                    var pt2 = pt1.OffsetXY(UNDERACHIEVEMENT, -THESAURUSALCOVE);
                                                     Dr.SetLabelStylesForRainNote(DrawTextLazy(bk.GetWaterBucketChName(), THESAURUSDETEST, pt1));
                                                     Dr.SetLabelStylesForRainNote(DrawTextLazy(bk.DN, THESAURUSDETEST, pt2));
                                                 }
@@ -6523,7 +6529,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     var _wlinesGeos = wlinesGeos.Where(x => _cpsf(x).Count > NARCOTRAFICANTE).ToList();
                     var _wlinesGeosf = F(_wlinesGeos);
                     var gs = GeoFac.GroupGeometries(item.CondensePipes.Concat(_wlinesGeos).ToList());
-                    List<Geometry> GetNearAringMachine(Geometry cp)
+                    List<Geometry> GetNearAringMachines(Geometry cp)
                     {
                         return F(item.AiringMachine_Vertical.Concat(item.AiringMachine_Hanging).Except(ok_airing_machines).ToList())(cp.Envelope.Buffer(THESAURUSDIRECTIVE));
                     }
@@ -6544,7 +6550,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                 if (cps.Count == PHOTOGONIOMETER)
                                 {
                                     drData.HasNonBrokenCondensePipes.Add(label);
-                                    var airingMachine = GeoFac.NearestNeighbourGeometryF(GetNearAringMachine(GeoFac.CreateGeometryEx(cps)))(GeoFac.CreateGeometryEx(cps));
+                                    var airingMachine = GeoFac.NearestNeighbourGeometryF(GetNearAringMachines(GeoFac.CreateGeometryEx(cps)))(GeoFac.CreateGeometryEx(cps));
                                     if (airingMachine != null)
                                     {
                                         if (item.AiringMachine_Hanging.Contains(airingMachine))
@@ -6559,9 +6565,9 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var _cps = F(item.CondensePipes.Except(ok_cps).ToList())(G(_wlinesGeosf(pipe)));
                                     if (_cps.Count == PHOTOGONIOMETER)
                                     {
-                                        var a1 = GeoFac.NearestNeighbourGeometryF(GetNearAringMachine(_cps[NARCOTRAFICANTE]))(_cps[NARCOTRAFICANTE]);
+                                        var a1 = GeoFac.NearestNeighbourGeometryF(GetNearAringMachines(_cps[NARCOTRAFICANTE]))(_cps[NARCOTRAFICANTE]);
                                         if (a1 != null) ok_airing_machines.Add(a1);
-                                        var a2 = GeoFac.NearestNeighbourGeometryF(GetNearAringMachine(_cps[ADRENOCORTICOTROPHIC]))(_cps[ADRENOCORTICOTROPHIC]);
+                                        var a2 = GeoFac.NearestNeighbourGeometryF(GetNearAringMachines(_cps[ADRENOCORTICOTROPHIC]))(_cps[ADRENOCORTICOTROPHIC]);
                                         if (a2 != null) ok_airing_machines.Add(a2);
                                         if (item.AiringMachine_Hanging.Contains(a1) && item.AiringMachine_Hanging.Contains(a2))
                                         {
@@ -6584,7 +6590,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     {
                                         var cp = cps[NARCOTRAFICANTE];
                                         todoD[cp] = label;
-                                        var airingMachine = GeoFac.NearestNeighbourGeometryF(GetNearAringMachine(cp))(cp);
+                                        var airingMachine = GeoFac.NearestNeighbourGeometryF(GetNearAringMachines(cp))(cp);
                                         if (airingMachine != null)
                                         {
                                             if (item.AiringMachine_Hanging.Contains(airingMachine))
@@ -7353,33 +7359,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         }
         public static List<KeyValuePair<string, Geometry>> CollectRoomData(AcadDatabase adb)
         {
-            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == THESAURUSPERSPIRATION).Select(x => x.ToNTSPolygon()).Cast<Geometry>().ToList();
-            var names = adb.ModelSpace.OfType<MText>().Where(x => x.Layer == THESAURUSSQUASHY).Select(x => new CText() { Text = x.Text, Boundary = x.ExplodeToDBObjectCollection().OfType<DBText>().First().Bounds.ToGRect() }).ToList();
-            var f = GeoFac.CreateIntersectsSelector(ranges);
-            var list = new List<KeyValuePair<string, Geometry>>(names.Count);
-            foreach (var name in names)
-            {
-                if (name.Boundary.IsValid)
-                {
-                    var l = f(name.Boundary.ToPolygon());
-                    if (l.Count == ADRENOCORTICOTROPHIC)
-                    {
-                        list.Add(new KeyValuePair<string, Geometry>(name.Text.Trim(), l[NARCOTRAFICANTE]));
-                    }
-                    else
-                    {
-                        foreach (var geo in l)
-                        {
-                            ranges.Remove(geo);
-                        }
-                    }
-                }
-            }
-            foreach (var range in ranges.Except(list.Select(kv => kv.Value)))
-            {
-                list.Add(new KeyValuePair<string, Geometry>(THESAURUSREDOUND, range));
-            }
-            return list;
+            return new List<KeyValuePair<string, Geometry>>();
         }
     }
     public class WaterBucketItem : IEquatable<WaterBucketItem>
@@ -7738,6 +7718,37 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         }
                     }
                 }
+            }
+            {
+                var kvs = new HashSet<KeyValuePair<Point2d, string>>(geoData.WrappingPipeRadius);
+                var okKvs = new HashSet<KeyValuePair<Point2d, string>>();
+                geoData.WrappingPipeRadius.Clear();
+                foreach (var wp in geoData.WrappingPipes)
+                {
+                    var gf = wp.ToPolygon().ToIPreparedGeometry();
+                    var _kvs = kvs.Except(okKvs).Where(x => gf.Intersects(x.Key.ToNTSPoint())).ToList();
+                    var strs = _kvs.Select(x => x.Value).ToList();
+                    var nums = strs.Select(x => double.TryParse(x, out double v) ? v : double.NaN).Where(x => !double.IsNaN(x)).ToList();
+                    if (nums.Count > ADRENOCORTICOTROPHIC)
+                    {
+                        var min = nums.Min();
+                        var str = strs.First(x => double.Parse(x) == min);
+                        foreach (var kv in _kvs)
+                        {
+                            kvs.Remove(kv);
+                        }
+                        foreach (var kv in _kvs)
+                        {
+                            if (kv.Value == str)
+                            {
+                                kvs.Add(kv);
+                                okKvs.Add(kv);
+                                break;
+                            }
+                        }
+                    }
+                }
+                geoData.WrappingPipeRadius.AddRange(kvs);
             }
             {
                 var v = UNDERACHIEVEMENT;
@@ -8217,8 +8228,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const int THESAURUSBELOVED = 211;
         public const int INSTITUTIONALIZATION = 213;
         public const int OBOEDIENTIARIUS = 111;
-        public const string THESAURUSPERSPIRATION = "AI-空间框线";
-        public const string THESAURUSSQUASHY = "AI-空间名称";
         public const string THESAURUSLIBERTINE = "重力雨水斗";
         public const string THESAURUSBEATITUDE = "侧入式雨水斗";
         public const string SUPERHETERODYNE = "87雨水斗";

@@ -27,14 +27,6 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <WrapPanel Grid.Row="0" Orientation="Vertical" Grid.Column="0" Grid.ColumnSpan="2">
-            <Label Content="生成对象" Width="Auto" FontWeight="Bold"></Label>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <RadioButton GroupName="CreationTypeGroup" IsChecked="{Binding IsTower}" Margin="5,0,10,0" Content="塔楼"/>
-                <!--管理用房部分暂时没有实现，界面也没有做，暂时不显示给用户-->
-                <RadioButton IsEnabled="False" Visibility="Hidden"  GroupName="CreationTypeGroup" IsChecked="{Binding IsManagementBuilding}"  Content="管理用房" Margin="10,0,10,0"/>
-            </StackPanel>
-            
-            <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
             <StackPanel >
                 <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                     <Label Content="楼层线间距：" Height="25" VerticalContentAlignment="Center"/>
@@ -96,24 +88,25 @@
                                    Text="{Binding CountsGeneral,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
                 <Label Grid.Row="1"  Grid.Column="2" Content="个" Margin="5,0,0,0" HorizontalAlignment="Left"></Label>
 
-                <Label Grid.Row="2" Grid.Column="0" Content="消火栓类型"></Label>
-                <ComboBox Grid.Row="2"  Grid.Column="1" Grid.ColumnSpan="2" Height="22" 
+                <Label Grid.Row="2" Grid.Column="0" Content="避难层消火栓："></Label>
+                <cus:InputTextBox Grid.Row="2" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
+                
+                <Label Grid.Row="3" Grid.Column="0" Content="消火栓类型"></Label>
+                <ComboBox Grid.Row="3"  Grid.Column="1" Grid.ColumnSpan="2" Height="22" 
                            HorizontalAlignment="Stretch"
                           ItemsSource="{Binding FireTypes,Mode=OneWay,NotifyOnSourceUpdated=True}"
                           SelectedItem="{Binding ComBoxFireTypeSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
-
-                <Label Grid.Row="3" Grid.Column="0" Content="避难层消火栓："></Label>
-                <cus:InputTextBox Grid.Row="3" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Grid.Row="3" Grid.Column="2"  Content="个" Margin="5,0,0,0"></Label>
-                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="存在手台泵接驳口" VerticalAlignment="Center"
-                          VerticalContentAlignment="Center" IsChecked="{Binding HaveHandPumpConnection,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+                <Label Grid.Row="2" Grid.Column="2"  Content="个" Margin="5,0,0,0"></Label>
+                <CheckBox Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Content="设置手台泵接驳口" VerticalAlignment="Center"
+                          VerticalContentAlignment="Center" IsChecked="{Binding HaveHandPumpConnection,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" Checked="CheckBox_Checked"/>
             </Grid>
             <Label Content="最高成环楼层:" Width="Auto" FontWeight="Black" Height="25"></Label>
             <StackPanel Orientation="Horizontal">
                 <RadioButton GroupName="CreationLayerGroup" Margin="5,0,10,0" IsChecked="{Binding IsRoofRing}" Content="屋顶"/>
                 <RadioButton GroupName="CreationLayerGroup" Margin="10,0,0,0" IsChecked="{Binding IsTopLayerRing}" Content="顶层"/>
             </StackPanel>
-            <CheckBox Content="试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
+            <CheckBox Content="设置试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
+            <Button x:Name="btnSetHighlevelNozzleAndSemiPlatformNozzle" Click="btnSetHighlevelNozzleAndSemiPlatformNozzle_Click" Height="25" Width="150"></Button>
         </WrapPanel>
         
         <StackPanel  Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0">

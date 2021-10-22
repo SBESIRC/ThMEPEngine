@@ -1,0 +1,64 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.SetHighlevelNozzleAndSemiPlatformNozzleUI"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    xmlns:cvt="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
+                    WindowStartupLocation="CenterOwner"
+                    Title=""
+                    Width="223"
+                    SizeToContent="Height"
+                    mc:Ignorable="d" >
+    <Window.Resources>
+        <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+        <Style TargetType="Label">
+            <Setter Property="Width" Value="90"/>
+            <Setter Property="Margin" Value="0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+    </Window.Resources>
+    <StackPanel Orientation="Vertical" Margin="5">
+        <DataGrid BorderThickness="0" ItemsSource="{Binding Items,Mode=TwoWay}" MaxHeight="126" RowHeight="24" AllowDrop="False" x:Name="dg" HorizontalScrollBarVisibility="Disabled">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="立管编号" Width="60" CanUserSort="False" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center" Height="20" Text="{Binding PipeId}"></TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="连管方式" Width="95" CanUserSort="False" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ComboBox Height="20" ItemsSource="{Binding PipeConnectionTypes}" SelectedItem="{Binding PipeConnectionType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="半平台" Width="45" CanUserSort="False" >
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox HorizontalAlignment="Center" Height="20" IsChecked="{Binding IsHalfPlatform,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel x:Name="sp">
+            <CheckBox Margin="0,5,0,0" x:Name="cbxAdditionalFireHydrantShallBeSetOnTheFirstFloor" IsChecked="{Binding AdditionalFireHydrantShallBeSetOnTheFirstFloor}">一层额外设置消火栓</CheckBox>
+            <StackPanel IsEnabled="{Binding IsChecked,ElementName=cbxAdditionalFireHydrantShallBeSetOnTheFirstFloor}" Orientation="Vertical" Margin="5,0,0,0">
+                <RadioButton IsChecked="{Binding AdditionalFireHydrant, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=YesNo}">一层平台设消火栓 顶层平台不设</RadioButton>
+                <RadioButton IsChecked="{Binding AdditionalFireHydrant, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=NoYes}">一层平台不设消火栓 顶层平台设</RadioButton>
+                <RadioButton IsChecked="{Binding AdditionalFireHydrant, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=NoNo}">一层平台顶层平台都不设消火栓</RadioButton>
+            </StackPanel>
+        </StackPanel>
+        <DockPanel LastChildFill="False">
+            <Button Margin="10,10,0,5" DockPanel.Dock="Left" Width="50" Click="btnOk">确定</Button>
+            <Button Margin="5,10,10,5" DockPanel.Dock="Right" Width="50" Click="btnCancel">取消</Button>
+        </DockPanel>
+
+    </StackPanel>
+</cus:ThCustomWindow>

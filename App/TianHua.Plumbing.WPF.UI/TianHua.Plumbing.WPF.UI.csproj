@@ -127,6 +127,9 @@
     <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
       <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml.cs">
+      <DependentUpon>SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiFireHydrantSystem.xaml.cs">
       <DependentUpon>uiFireHydrantSystem.xaml</DependentUpon>
     </Compile>
@@ -258,6 +261,10 @@
     <Page Include="UI\uiDrainageSysAboveGround.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\uiFireHydrantSystem.xaml">
       <SubType>Designer</SubType>

@@ -119,7 +119,92 @@ namespace ThMEPWSS.Pipe.Model
         public Point2d ContraPoint;
         public GRect Boundary;
     }
+    public class SetHighlevelNozzleAndSemiPlatformNozzlesViewModel : NotifyPropertyChangedBase
+    {
+        public static readonly SetHighlevelNozzleAndSemiPlatformNozzlesViewModel Singleton = new SetHighlevelNozzleAndSemiPlatformNozzlesViewModel();
+        static readonly string[] _PipeConnectionTypes = new string[] { "低位", "高位-板上", "高位-板下", };
+        public class Item : NotifyPropertyChangedBase
+        {
+            int _PipeId;
+            public int PipeId
+            {
+                get => _PipeId;
+                set
+                {
+                    if (value != _PipeId)
+                    {
+                        _PipeId = value;
+                        OnPropertyChanged(nameof(PipeId));
+                    }
+                }
+            }
 
+            public IEnumerable<string> PipeConnectionTypes => _PipeConnectionTypes;
+            string _PipeConnectionType;
+            public string PipeConnectionType
+            {
+                get => _PipeConnectionType;
+                set
+                {
+                    if (value != _PipeConnectionType)
+                    {
+                        _PipeConnectionType = value;
+                        OnPropertyChanged(nameof(PipeConnectionType));
+                    }
+                }
+            }
+
+            bool _IsHalfPlatform;
+            public bool IsHalfPlatform
+            {
+                get => _IsHalfPlatform;
+                set
+                {
+                    if (value != _IsHalfPlatform)
+                    {
+                        _IsHalfPlatform = value;
+                        OnPropertyChanged(nameof(IsHalfPlatform));
+                    }
+                }
+            }
+        }
+
+        public enum AdditionalFireHydrantEnum
+        {
+            YesNo,
+            NoYes,
+            NoNo,
+        }
+
+        public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
+        bool _AdditionalFireHydrantShallBeSetOnTheFirstFloor;
+        public bool AdditionalFireHydrantShallBeSetOnTheFirstFloor
+        {
+            get => _AdditionalFireHydrantShallBeSetOnTheFirstFloor;
+            set
+            {
+                if (value != _AdditionalFireHydrantShallBeSetOnTheFirstFloor)
+                {
+                    _AdditionalFireHydrantShallBeSetOnTheFirstFloor = value;
+                    OnPropertyChanged(nameof(AdditionalFireHydrantShallBeSetOnTheFirstFloor));
+                }
+            }
+        }
+
+        AdditionalFireHydrantEnum _AdditionalFireHydrant;
+        public AdditionalFireHydrantEnum AdditionalFireHydrant
+        {
+            get => _AdditionalFireHydrant;
+            set
+            {
+                if (value != _AdditionalFireHydrant)
+                {
+                    _AdditionalFireHydrant = value;
+                    OnPropertyChanged(nameof(AdditionalFireHydrant));
+                }
+            }
+        }
+    }
     public class FloorHeightsViewModel : NotifyPropertyChangedBase
     {
         public static readonly FloorHeightsViewModel Instance = new FloorHeightsViewModel();

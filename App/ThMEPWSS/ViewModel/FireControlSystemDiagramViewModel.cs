@@ -6,33 +6,20 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPWSS.Model;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.ViewModel
 {
     public class ZoneSetupViewModel : NotifyPropertyChangedBase
     {
-        public ZoneSetupViewModel() 
-        {
-            var dnValues = new List<int>
-            {
-                (int)EnumPipeDiameter.DN100,
-                (int)EnumPipeDiameter.DN150,
-                (int)EnumPipeDiameter.DN200,
-            };
-            var corrRaise = CommonUtil.EnumDescriptionToList(typeof(EnumPipeDiameter), dnValues);
-            corrRaise.ForEach(c => DNListItems.Add(c));
-            DNSelectItem = DNListItems.Where(c => c.Value == (int)EnumPipeDiameter.DN100).FirstOrDefault();
-        }
         private int _zoneID;
-
         public int ZoneID
         {
-            get 
-            { return _zoneID; }
-            set 
-            { 
+            get => _zoneID;
+            set
+            {
                 _zoneID = value;
-                RaisePropertyChanged("ZoneID");
+                RaisePropertyChanged(nameof(ZoneID));
             }
         }
         /// <summary>
@@ -42,10 +29,10 @@ namespace ThMEPWSS.ViewModel
         /// <summary>
         /// 开始楼层
         /// </summary>
-        public string StartFloor 
+        public string StartFloor
         {
             get { return _startFloor; }
-            set 
+            set
             {
                 _startFloor = value;
                 RaisePropertyChanged("StartFloor");
@@ -58,16 +45,16 @@ namespace ThMEPWSS.ViewModel
         /// <summary>
         /// 结束楼层
         /// </summary>
-        public string EndFloor 
+        public string EndFloor
         {
             get { return _endFloor; }
-            set 
+            set
             {
                 _endFloor = value;
                 RaisePropertyChanged("EndFloor");
             }
         }
-        public bool IsEffective() 
+        public bool IsEffective()
         {
             if (string.IsNullOrEmpty(this._startFloor) && string.IsNullOrEmpty(this._endFloor))
             {
@@ -77,11 +64,9 @@ namespace ThMEPWSS.ViewModel
             {
                 return false;
             }
-            else 
+            else
             {
-                int intStart = -9999;
-                int intEnd = 9999;
-                if(!int.TryParse(_startFloor,out intStart) || !int.TryParse(_endFloor,out intEnd)) 
+                if (!int.TryParse(_startFloor, out int intStart) || !int.TryParse(_endFloor, out int intEnd))
                     return false;
                 if (intStart >= intEnd)
                     return false;
@@ -90,20 +75,18 @@ namespace ThMEPWSS.ViewModel
         }
         public int? GetIntStartFloor()
         {
-            if (!string.IsNullOrEmpty(this._startFloor)) 
+            if (!string.IsNullOrEmpty(this._startFloor))
             {
-                int intStart = -9999;
-                if (int.TryParse(_startFloor, out intStart)) 
+                if (int.TryParse(_startFloor, out int intStart))
                     return intStart;
             }
             return null;
         }
-        public int? GetIntEndFloor() 
+        public int? GetIntEndFloor()
         {
             if (!string.IsNullOrEmpty(this._endFloor))
             {
-                int endStart = -9999;
-                if (int.TryParse(_endFloor, out endStart))
+                if (int.TryParse(_endFloor, out int endStart))
                     return endStart;
             }
             return null;
@@ -112,8 +95,8 @@ namespace ThMEPWSS.ViewModel
         /// <summary>
         /// 分区管径
         /// </summary>
-        private ObservableCollection<UListItemData> _DNListItems = new ObservableCollection<UListItemData>();
-        public ObservableCollection<UListItemData> DNListItems
+        private ObservableCollection<string> _DNListItems = new ObservableCollection<string>() { "DN100", "DN150", "DN200" };
+        public ObservableCollection<string> DNListItems
         {
             get
             {
@@ -121,43 +104,53 @@ namespace ThMEPWSS.ViewModel
             }
             set
             {
-                _DNListItems = value;
-                this.RaisePropertyChanged();
+                if (_DNListItems != value)
+                {
+                    _DNListItems = value;
+                    this.RaisePropertyChanged(nameof(DNListItems));
+                }
             }
         }
         /// <summary>
         /// 管径选择项
         /// </summary>
-        private UListItemData _dnSelectItem { get; set; }
-        public UListItemData DNSelectItem
+        private string _dnSelectItem = "DN100";
+        public string DNSelectItem
         {
             get { return _dnSelectItem; }
             set
             {
-                _dnSelectItem = value;
-                this.RaisePropertyChanged();
+                if (_dnSelectItem != value)
+                {
+                    _dnSelectItem = value;
+                    this.RaisePropertyChanged(nameof(DNSelectItem));
+                }
             }
         }
     }
     public class FireControlSystemDiagramViewModel : NotifyPropertyChangedBase
     {
-        public FireControlSystemDiagramViewModel()
+        public static readonly FireControlSystemDiagramViewModel Singleton = CreateDefaultViewModel();
+        public FireControlSystemDiagramViewModel() { }
+        public static FireControlSystemDiagramViewModel CreateDefaultViewModel()
         {
-            ZoneConfigs = new ObservableCollection<ZoneSetupViewModel>();
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 1, StartFloor = "1" });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 2 });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 3 });
-            ZoneConfigs.Add(new ZoneSetupViewModel() { ZoneID = 4 });
-
-            FireTypes = new ObservableCollection<UListItemData>();
-            FireTypes.Add(new UListItemData("单栓", 1));
-            FireTypes.Add(new UListItemData("单栓带卷盘", 2));
-            ComBoxFireTypeSelectItem = FireTypes.FirstOrDefault();
-
-            HaveHandPumpConnection = false;
-            HaveTestFireHydrant = true;
+            var o = new FireControlSystemDiagramViewModel
+            {
+                ZoneConfigs = new ObservableCollection<ZoneSetupViewModel>
+            {
+                new ZoneSetupViewModel() { ZoneID = 1, StartFloor = "1" },
+                new ZoneSetupViewModel() { ZoneID = 2 },
+                new ZoneSetupViewModel() { ZoneID = 3 },
+                new ZoneSetupViewModel() { ZoneID = 4 },
+            },
+                FireTypes = new ObservableCollection<string> { "单栓", "单栓带卷盘", },
+                HaveHandPumpConnection = false,
+                HaveTestFireHydrant = true,
+            };
+            o.ComBoxFireTypeSelectItem = o.FireTypes.FirstOrDefault();
+            o.SetHighlevelNozzleAndSemiPlatformNozzleParams = SetHighlevelNozzleAndSemiPlatformNozzlesViewModel.Singleton;
+            return o;
         }
-
         private double _FaucetFloor = 1800; //mm
         /// <summary>
         /// 楼层线间距
@@ -226,7 +219,7 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
-        private bool _isRoofRing =true;
+        private bool _isRoofRing = true;
         /// <summary>
         /// 屋顶成环
         /// </summary>
@@ -264,8 +257,8 @@ namespace ThMEPWSS.ViewModel
         /// <summary>
         /// 塔楼（生成对象）
         /// </summary>
-        public bool IsTower 
-        { 
+        public bool IsTower
+        {
             get
             {
                 return _isTower;
@@ -284,18 +277,18 @@ namespace ThMEPWSS.ViewModel
         public bool IsManagementBuilding
         {
             get { return _isManagementBuilding; }
-            set 
-            { 
+            set
+            {
                 _isManagementBuilding = value;
                 RaisePropertyChanged("IsManagementBuilding");
             }
         }
-        
+
         private bool _haveTestFireHydrant { get; set; }
-        public bool HaveTestFireHydrant 
+        public bool HaveTestFireHydrant
         {
             get { return _haveTestFireHydrant; }
-            set 
+            set
             {
                 _haveTestFireHydrant = value;
                 RaisePropertyChanged("HaveTestFireHydrant");
@@ -316,36 +309,48 @@ namespace ThMEPWSS.ViewModel
         }
 
         private bool _haveHandPumpConnection { get; set; }
-        public bool HaveHandPumpConnection 
+        public bool HaveHandPumpConnection
         {
             get { return _haveHandPumpConnection; }
-            set 
+            set
             {
                 _haveHandPumpConnection = value;
                 RaisePropertyChanged("HaveHandPumpConnection");
             }
         }
 
-        private ObservableCollection<UListItemData> _fireTypes { get; set; }
-        public ObservableCollection<UListItemData> FireTypes 
+        private ObservableCollection<string> _fireTypes;
+        public ObservableCollection<string> FireTypes
         {
             get { return _fireTypes; }
-            set 
+            set
             {
                 _fireTypes = value;
                 RaisePropertyChanged("FireTypes");
             }
         }
-        private UListItemData _comboxFireTypeSelect { get; set; }
-        public UListItemData ComBoxFireTypeSelectItem 
+        private string _comboxFireTypeSelect;
+        public string ComBoxFireTypeSelectItem
         {
             get { return _comboxFireTypeSelect; }
-            set 
+            set
             {
                 _comboxFireTypeSelect = value;
                 RaisePropertyChanged("ComBoxFireTypeSelectItem");
             }
         }
-
+        SetHighlevelNozzleAndSemiPlatformNozzlesViewModel _SetHighlevelNozzleAndSemiPlatformNozzleParams;
+        public SetHighlevelNozzleAndSemiPlatformNozzlesViewModel SetHighlevelNozzleAndSemiPlatformNozzleParams
+        {
+            get => _SetHighlevelNozzleAndSemiPlatformNozzleParams;
+            set
+            {
+                if (value != _SetHighlevelNozzleAndSemiPlatformNozzleParams)
+                {
+                    _SetHighlevelNozzleAndSemiPlatformNozzleParams = value;
+                    OnPropertyChanged(nameof(SetHighlevelNozzleAndSemiPlatformNozzleParams));
+                }
+            }
+        }
     }
 }

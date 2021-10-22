@@ -27,7 +27,6 @@
     using ThMEPWSS.Assistant;
     using ThMEPWSS.Pipe.Service;
     using NFox.Cad;
-    using ThCADCore.NTS;
     using Autodesk.AutoCAD.Colors;
     using System.Runtime.Remoting;
     using System.IO;
@@ -1383,7 +1382,7 @@
         }
         public static List<KeyValuePair<string, Geometry>> CollectRoomData(AcadDatabase adb)
         {
-            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-空间框线").Select(x => x.ToNTSPolygon()).Cast<Geometry>().ToList();
+            var ranges = adb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-空间框线").Select(x => ThCADCore.NTS.ThCADCoreNTSDbExtension.ToNTSPolygon(x)).Cast<Geometry>().ToList();
             var names = adb.ModelSpace.OfType<MText>().Where(x => x.Layer == "AI-空间名称").Select(x => new CText() { Text = x.Text, Boundary = x.ExplodeToDBObjectCollection().OfType<DBText>().First().Bounds.ToGRect() }).ToList();
             var f = GeoFac.CreateIntersectsSelector(ranges);
             var list = new List<KeyValuePair<string, Geometry>>(names.Count);
@@ -2979,7 +2978,7 @@
             });
         }
         public static CommandContext commandContext { get => ThDrainageService.commandContext; set => ThDrainageService.commandContext = value; }
-        
+
         public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel)
         {
             FocusMainWindow();

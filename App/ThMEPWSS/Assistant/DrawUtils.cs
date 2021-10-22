@@ -14,7 +14,6 @@ using Autodesk.AutoCAD.Internal;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using System.Windows.Forms;
 using NetTopologySuite.Geometries;
-using ThCADCore.NTS;
 using AcHelper;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.JsonExtensionsNs;
@@ -29,6 +28,7 @@ using NFox.Cad;
 using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Algorithm;
+using ThCADCoreNTSService = ThCADCore.NTS.ThCADCoreNTSService;
 
 namespace ThMEPWSS.Assistant
 {
@@ -813,7 +813,7 @@ namespace ThMEPWSS.Assistant
                 var arr = ls.Coordinates;
                 for (int i = 0; i < arr.Length - 1; i++)
                 {
-                    var seg= new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
+                    var seg = new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
                     if (seg.IsValid)
                     {
                         yield return seg;
@@ -835,7 +835,7 @@ namespace ThMEPWSS.Assistant
         {
             if (geo is Point pt)
             {
-                yield return pt.ToAcGePoint2d();
+                yield return pt.ToPoint2d();
             }
             else if (geo is GeometryCollection mls)
             {
@@ -1460,6 +1460,7 @@ namespace ThMEPWSS.Assistant
     }
     public class _DrawingTransaction : IDisposable
     {
+        public DBText dBText;
         public readonly Dictionary<string, ObjectId> TextStyleIdDict = new Dictionary<string, ObjectId>();
         public bool NoDraw;
         public bool? AbleToDraw = null;
@@ -1483,6 +1484,7 @@ namespace ThMEPWSS.Assistant
         {
             try
             {
+                dBText?.Dispose();
                 if (!NoDraw)
                 {
                     if (AbleToDraw != false)
@@ -1614,6 +1616,7 @@ namespace ThMEPWSS.Assistant
 
     public static class HighlightHelper
     {
+
         public static Point2d GetCurrentViewSize()
         {
             double h = (double)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("VIEWSIZE");
@@ -1669,6 +1672,22 @@ namespace ThMEPWSS.Assistant
     }
     public static class DrawUtils
     {
+        public static (double, double) GetDBTextSize(string text, double height, double widthFactor, string style)
+        {
+            if (string.IsNullOrEmpty(text) || height <= 0 || widthFactor <= 0) return (0, 0);
+            var dbt = _DrawingTransaction.Current?.dBText ?? new DBText();
+            if (_DrawingTransaction.Current != null && _DrawingTransaction.Current.dBText == null)
+            {
+                _DrawingTransaction.Current.dBText = dbt;
+            }
+            dbt.TextString = text;
+            dbt.Height = height;
+            dbt.WidthFactor = widthFactor;
+            var id = GetTextStyleId(style);
+            if (id.IsValid) dbt.TextStyleId = id;
+            var r = dbt.Bounds.ToGRect();
+            return (r.Width, r.Height);
+        }
         public static DocumentLock DocLock => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
 
         public static _DrawingTransaction DrawingTransaction => new _DrawingTransaction();
@@ -2161,7 +2180,7 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawGeometryLazy(Geometry geo, Action<List<Entity>> cb = null)
         {
-            var ents = geo.ToDbObjects().OfType<Entity>().ToList();
+            var ents = ThCADCore.NTS.ThCADCoreNTSDbExtension.ToDbObjects(geo).OfType<Entity>().ToList();
             cb?.Invoke(ents);
             DrawEntitiesLazy(ents);
         }
@@ -2178,7 +2197,7 @@ namespace ThMEPWSS.Assistant
         {
             ObjectId blockRefId;//存储要插入的块参照的Id
             Database db = spaceId.Database;//获取数据库对象
-            //以读的方式打开块表
+                                           //以读的方式打开块表
             BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
             //如果没有blockName表示的块，则程序返回
             if (!bt.Has(blockName)) return ObjectId.Null;
@@ -2190,7 +2209,7 @@ namespace ThMEPWSS.Assistant
             if (layer != null) br.Layer = layer;//设置块参照的层名
             br.Rotation = rotateAngle;//设置块参照的旋转角度
             ObjectId btrId = bt[blockName];//获取块表记录的Id
-            //打开块表记录
+                                           //打开块表记录
             BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
             //添加可缩放性支持
             if (record.Annotative == AnnotativeStates.True)
@@ -2215,14 +2234,14 @@ namespace ThMEPWSS.Assistant
         public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
         {
             Database db = spaceId.Database;//获取数据库对象
-            //以读的方式打开块表
+                                           //以读的方式打开块表
             BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
             //如果没有blockName表示的块，则程序返回
             if (!bt.Has(blockName)) return ObjectId.Null;
             //以写的方式打开空间（模型空间或图纸空间）
             BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
             ObjectId btrId = bt[blockName];//获取块表记录的Id
-            //打开块表记录
+                                           //打开块表记录
             BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
             //创建一个块参照并设置插入点
             BlockReference br = new BlockReference(position, bt[blockName]);
@@ -2230,8 +2249,8 @@ namespace ThMEPWSS.Assistant
             if (layer != null) br.Layer = layer;//设置块参照的层名
             br.Rotation = rotateAngle;//设置块参照的旋转角度
             space.AppendEntity(br);//为了安全，将块表状态改为读 
-            //判断块表记录是否包含属性定义
-            if (record.HasAttributeDefinitions)
+                                   //判断块表记录是否包含属性定义
+            if (attNameValues != null && record.HasAttributeDefinitions)
             {
                 //若包含属性定义，则遍历属性定义
                 foreach (ObjectId id in record)
@@ -2385,9 +2404,14 @@ namespace ThMEPWSS.Assistant
         }
         public static Polyline DrawLineSegmentBufferLazy(GLineSegment seg, double bufSize)
         {
-            var pl = ThCADCoreNTSOperation.Buffer(seg.ToCadLine(), bufSize);
-            DrawEntityLazy(pl);
-            return pl;
+            int i = 0;
+            var pline = new Polyline();
+            foreach (var pt in (seg.Buffer(bufSize) as Polygon).Shell.Coordinates.Select(x => x.ToPoint2d()))
+            {
+                pline.AddVertexAt(i++, pt, 0, 0, 0);
+            }
+            DrawEntityLazy(pline);
+            return pline;
         }
         public static Polyline DrawPolyLineLazy(Coordinate[] coordinates)
         {

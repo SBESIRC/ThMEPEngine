@@ -50,6 +50,7 @@
     <Compile Include="HydrantConnectPipe\Service\ThHydrantPipeMarkService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThHydrantValveService.cs" />
     <Compile Include="HydrantConnectPipe\Service\ThOtherPipeLineService.cs" />
+    <Compile Include="Hydrant\ThFireControlSystem.cs" />
     <Compile Include="Hydrant\Data\ThHydrantArchitectureWallExtractor.cs" />
     <Compile Include="Hydrant\Data\ThHydrantShearwallExtractor.cs" />
     <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
@@ -102,7 +103,6 @@
     <Compile Include="Command\ThPipeDrawCmd.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADData.cs" />
     <Compile Include="DrainageSystemAD\Data\ThDrainageSDADExtractor.cs" />
-    <Compile Include="Common\LevelFloorUtil.cs" />
     <Compile Include="DrainageSystemAD\Engine\ThDrainageADConvertEngine.cs" />
     <Compile Include="DrainageSystemAD\Service\ThDrainageADDiameterDim.cs" />
     <Compile Include="DrainageSystemAG\Bussiness\RaisePipeConvert.cs" />
@@ -124,15 +124,6 @@
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDMessageServie.cs" />
     <Compile Include="Engine\ThRoomBuilderEngineWSS.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDSpaceDirectionService.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantBase.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantLayout.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Bussiness\FireHydrantSystem.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Bussiness\InputDataConvert.cs" />
-    <Compile Include="FireProtectionSystemDiagram\FireProtectionSysCommon.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Models\CreateBlockElement.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Models\FloorDataModel.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Models\LineElementCreate.cs" />
-    <Compile Include="FireProtectionSystemDiagram\Services\CreateBlockService.cs" />
     <Compile Include="FlushPoint\Data\ThFpArchitectureExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThFpColumnExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThFpShearwallExtractor.cs" />
@@ -176,7 +167,6 @@
     <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThDrainSystemAboveGroundCmd.cs" />
-    <Compile Include="Command\ThFireControlSystemDiagramCmd.cs" />
     <Compile Include="Command\ThHydrantProtectionRadiusCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
