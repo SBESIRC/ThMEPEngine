@@ -287,6 +287,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
+                <Command Local="THFGLD" Global="THFGLD" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -296,6 +297,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
+                <Command Local="THFGLD" Global="THFGLD" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -305,6 +307,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
+                <Command Local="THFGLD" Global="THFGLD" />
             </Commands>
         </ComponentEntry>
     </Components>
