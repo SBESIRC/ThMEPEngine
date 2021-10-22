@@ -18,9 +18,6 @@ using Autodesk.AutoCAD.Colors;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Triangulate;
-using NetTopologySuite.LinearReferencing;
-using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
-using ThMEPEngineCore.CAD;
 
 namespace ThCADCore.Test
 {
@@ -463,7 +460,6 @@ namespace ThCADCore.Test
                     }
                 }
             }
-
             return layerRecord.ObjectId;
         }
 
@@ -927,53 +923,30 @@ namespace ThCADCore.Test
             }
         }
 
-
-
-
-
-
-
-
-
-
-
-
-
-        [CommandMethod("TIANHUACAD", "DRAW_A_CONVEXHULL", CommandFlags.Modal)]
-
+        [CommandMethod("TIANHUACAD", "THCH", CommandFlags.Modal)]
         public void DRAW_A_CONVEXHULL()
         {
-            // 1、获取选定的点 存储到点集中（使用的技术：选择集）
-            var selected = new List<Point3d>();
-            selected = get_selected_points();
+            var points = Algorithms.GetConvexHull(GetPoints());
 
-            // 2、调用GetConvexHull算法，输入点集，输出有序的点集
-            var points = new List<Point3d>();
-            points = Algorithms.GetConvexHull(selected);
-
-
-            //// 3、画线，连接有序点集，形成一个凸包。
-            //if (points.Count <= 1)
-            //{
-            //    return;
-            //}
-            //for (int i = 0; i < points.Count; ++i)
-            //{
-            //    int pre = i == 0 ? points.Count - 1 : i - 1;
-            //    draw_line(points[pre], points[i]);
-            //}
-
+            if (points.Count <= 1)
+            {
+                return;
+            }
+            for (int i = 0; i < points.Count; ++i)
+            {
+                int pre = i == 0 ? points.Count - 1 : i - 1;
+                draw_line(points[pre], points[i]);
+            }
         }
 
-        public static List<Point3d> get_selected_points()
+        public static List<Point3d> GetPoints()
         {
             Document doc = Application.DocumentManager.MdiActiveDocument;
             Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
 
             var points = new List<Point3d>();
-            Autodesk.AutoCAD.EditorInput.Editor edd;
 
-            PromptSelectionResult psr = ed.GetSelection(); // 输入命令后再选择
+            PromptSelectionResult psr = ed.GetSelection();
             SelectionSet ss = psr.Value;
             using (Transaction trans = doc.TransactionManager.StartTransaction())
             {
@@ -997,8 +970,8 @@ namespace ThCADCore.Test
             line.AddToCurrentSpace();
         }
 
-
-        [CommandMethod("TIANHUACAD", "ThVD", CommandFlags.Modal)]
+        //维诺图
+        [CommandMethod("TIANHUACAD", "THVD", CommandFlags.Modal)]
         public void ThVD()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -1013,190 +986,14 @@ namespace ThCADCore.Test
                 {
                     points.Add(acadDatabase.Element<Entity>(obj).GeometricExtents.CenterPoint());
                 }
-
-                Dictionary<Point3d, Polygon> pt2Polygon = new Dictionary<Point3d, Polygon>();
-                //Dictionary<Polygon, Point3d> polygon2Pt = new Dictionary<Polygon, Point3d>();
-                //Dictionary<Line, Polygon> line2Polygon = new Dictionary<Line, Polygon>();
-                Dictionary<Line, Point3d> line2pt = new Dictionary<Line, Point3d>();/////////////////////////////////////////////////////////////pointlist
-                Dictionary<Point3d, List<Line>> pt2lines = new Dictionary<Point3d, List<Line>>(); // 通过柱中点找到柱维诺图边界的点
-
                 var voronoiDiagram = new VoronoiDiagramBuilder();
                 voronoiDiagram.SetSites(points.ToNTSGeometry());
-
                 //foreach (Polygon polygon in voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory).Geometries) //同等效力
                 foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
                 {
-                    //HostApplicationServices.WorkingDatabase.AddToModelSpace(polygon.ToDbEntity());
-                    //foreach (var polyline in polygon.ToDbPolylines()) //实际只有一个
-                    var polyline = polygon.ToDbPolylines().First();
-                    {
-                        foreach (Point3d pt in points)
-                        {
-                            if (polyline.Contains(pt))
-                            {
-                                pt2Polygon.Add(pt, polygon);
-                                //polygon2Pt.Add(polygon, pt);
-                                List<Line> aroundLines = new List<Line>();
-                                //根据边能找到所在的多边形所包含的那个点（柱）
-                                for (int i = 0; i < polyline.NumberOfVertices - 1; ++i)
-                                {
-                                    Line border = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt(i + 1));
-                                    line2pt.Add(border, pt);
-                                    aroundLines.Add(border);
-                                }
-                                if (!pt2lines.ContainsKey(pt))
-                                {
-                                    pt2lines.Add(pt, aroundLines.OrderByDescending(l => l.Length).ToList());
-                                }
-                                //if (pt2lines.ContainsKey(pt))
-                                //{
-                                //    pt2lines[pt].AddRange(aroundLines);
-                                //} 
-                                //else
-                                //{
-                                //    pt2lines.Add(pt, aroundLines);
-                                //}
-                                //pt2lines[pt] = pt2lines[pt].OrderByDescending(l => l.Length).ToList();
-                            }
-                        }
-                    }
-                }
-
-                foreach(Point3d pt in points)
-                {
-                    HostApplicationServices.WorkingDatabase.AddToModelSpace(pt2Polygon[pt].ToDbEntity());//
-                    connectNaighbor(pt, pt2lines, line2pt);
-                }
-
-            }
-        }
-
-
-        public void connectNaighbor(Point3d point, Dictionary<Point3d, List<Line>> pt2lines, Dictionary<Line, Point3d> line2pt)
-        {
-            //foreach (var polyline in pt2Polygon[point].ToDbPolylines())+
-            int cnt = 0;
-            foreach(var line in pt2lines[point])
-            {
-                if(cnt > 3)
-                {
-                    break;
-                }
-                Line tmpLine = new Line(line.EndPoint, line.StartPoint);
-                //if(line2pt.ContainsKey(tmpLine))
-                foreach(var l in line2pt.Keys)
-                {
-                    if(l == tmpLine)
-                    {
-                        draw_line(point, line2pt[tmpLine], 130);
-                    }
-                    //foreach (var pt in line2pts[tmpLine])
-                    //{
-                    //    if(pt != point)
-                    //    {
-                    //        draw_line(point, pt, 130);
-                    //        //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(point, pt));
-                    //    }
-                    //}
-                }
-                ++cnt;
-            }
-        }
-
-
-        [CommandMethod("TIANHUACAD", "ThBP", CommandFlags.Modal)]
-        public void ThBP()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var points = new Point3dCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    points.Add(acadDatabase.Element<Entity>(obj).GeometricExtents.CenterPoint());
-                }
-
-                List<Polyline> triangles = new List<Polyline>();
-                HashSet<Line> lines = new HashSet<Line>();
-                Dictionary<Tuple<Point3d, Point3d>, int> linesType = new Dictionary<Tuple<Point3d, Point3d>, int>(); // 1：最长线 0 ：初始化
-                foreach (Entity diagram in points.DelaunayTriangulation())
-                {
-                    if (diagram is Polyline pl)
-                    {
-                        Line maxLine = new Line();
-                        double maxLen = 0.0;
-                        for(int i = 0; i < pl.NumberOfVertices - 1; ++i) // pl.NumberOfVertices == 4
-                        {
-                            Line l = new Line(pl.GetPoint3dAt(i), pl.GetPoint3dAt(i + 1));
-                            linesType.Add(new Tuple<Point3d, Point3d>(l.StartPoint, l.EndPoint), 0);
-                            lines.Add(l);
-                            if(l.Length > maxLen)
-                            {
-                                maxLen = l.Length;
-                                maxLine = l;
-                            }
-                        }
-                        linesType[new Tuple<Point3d, Point3d>(maxLine.StartPoint, maxLine.EndPoint)] = 1;
-                        if(linesType.ContainsKey(new Tuple<Point3d, Point3d>(maxLine.EndPoint, maxLine.StartPoint)))
-                        {
-                            linesType[new Tuple<Point3d, Point3d>(maxLine.EndPoint, maxLine.StartPoint)] = 1;
-                        }
-                    }
-                }
-                foreach (var l in linesType.Keys)
-                {
-                    if (linesType[l] == 0 && linesType.ContainsKey(new Tuple<Point3d, Point3d>(l.Item2, l.Item1)) && linesType[new Tuple<Point3d, Point3d>(l.Item2, l.Item1)] == 0)
-                    {
-                        draw_line(l.Item1, l.Item2, 130);
-                    }
+                    HostApplicationServices.WorkingDatabase.AddToModelSpace(polygon.ToDbEntity());
                 }
             }
         }
-        [CommandMethod("TIANHUACAD", "CLSP", CommandFlags.Modal)]
-        public void CLSP()
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                MPolygon mPolygon = getMpolygon();
-                PromptDoubleResult result2 = Active.Editor.GetDistance("\n请输入差值距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                List<Line> lines = CenterLineSimplify.CLSimplify(mPolygon, 20);
-                mPolygon.UpgradeOpen();
-                mPolygon.Erase();
-                mPolygon.DowngradeOpen();
-            }
-        }
-
-        public static MPolygon getMpolygon()
-        {
-            MPolygon mPolygon;
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return null;
-                }
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acdb.Element<Entity>(obj));
-                }
-                mPolygon = objs.BuildMPolygon();
-                acdb.ModelSpace.Add(mPolygon);
-                mPolygon.SetDatabaseDefaults();
-            }
-            return mPolygon;
-        }
-
     }
 }

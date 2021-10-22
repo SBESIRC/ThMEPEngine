@@ -166,10 +166,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             for (int i = 0; i < Xcnt; i += 2)
             //for (int i = Xcnt - 1; i >= 0; i -= 2)
             {
-                Point3d ptA = new Point3d((i * pt01.X + (Xcnt - i) * pt0.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt0.Y) / Xcnt, 0);//Apt01_0
-                Point3d ptB = new Point3d((i * pt01.X + (Xcnt - i) * pt1.X) / Xcnt, (i * pt01.Y + (Xcnt - i) * pt1.Y) / Xcnt, 0);//Bpt01_1
-                Point3d ptC = new Point3d((i * pt23.X + (Xcnt - i) * pt2.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt2.Y) / Xcnt, 0);//Cpt23_2
-                Point3d ptD = new Point3d((i * pt23.X + (Xcnt - i) * pt3.X) / Xcnt, (i * pt23.Y + (Xcnt - i) * pt3.Y) / Xcnt, 0);//Dpt23_3
+                Point3d ptA = new Point3d(((Xcnt - i) * pt01.X + i * pt0.X) / Xcnt, ((Xcnt - i) * pt01.Y + i * pt0.Y) / Xcnt, 0);//Apt01_0
+                Point3d ptB = new Point3d(((Xcnt - i) * pt01.X + i * pt1.X) / Xcnt, ((Xcnt - i) * pt01.Y + i * pt1.Y) / Xcnt, 0);//Bpt01_1
+                Point3d ptC = new Point3d(((Xcnt - i) * pt23.X + i * pt2.X) / Xcnt, ((Xcnt - i) * pt23.Y + i * pt2.Y) / Xcnt, 0);//Cpt23_2
+                Point3d ptD = new Point3d(((Xcnt - i) * pt23.X + i * pt3.X) / Xcnt, ((Xcnt - i) * pt23.Y + i * pt3.Y) / Xcnt, 0);//Dpt23_3
 
                 Point3d ptAD = CenterOfTwoPoints(ptA, ptD);//AD中点
                 Point3d ptBC = CenterOfTwoPoints(ptB, ptC);//BC中点
@@ -178,10 +178,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 for (int j = 0; j < Ycnt; j += 2)
                 //for (int j = Ycnt - 1; j >= 0; j -= 2)
                 {
-                    Point3d ptAD_A = new Point3d((j * ptAD.X + (Ycnt - j) * ptA.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptA.Y) / Ycnt, 0);
-                    Point3d ptAD_D = new Point3d((j * ptAD.X + (Ycnt - j) * ptD.X) / Ycnt, (j * ptAD.Y + (Ycnt - j) * ptD.Y) / Ycnt, 0);
-                    Point3d ptBC_B = new Point3d((j * ptBC.X + (Ycnt - j) * ptB.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptB.Y) / Ycnt, 0);
-                    Point3d ptBC_C = new Point3d((j * ptBC.X + (Ycnt - j) * ptC.X) / Ycnt, (j * ptBC.Y + (Ycnt - j) * ptC.Y) / Ycnt, 0);
+                    Point3d ptAD_A = new Point3d(((Ycnt - j) * ptAD.X + j * ptA.X) / Ycnt, ((Ycnt - j) * ptAD.Y + j * ptA.Y) / Ycnt, 0);
+                    Point3d ptAD_D = new Point3d(((Ycnt - j) * ptAD.X + j * ptD.X) / Ycnt, ((Ycnt - j) * ptAD.Y + j * ptD.Y) / Ycnt, 0);
+                    Point3d ptBC_B = new Point3d(((Ycnt - j) * ptBC.X + j * ptB.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptB.Y) / Ycnt, 0);
+                    Point3d ptBC_C = new Point3d(((Ycnt - j) * ptBC.X + j * ptC.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptC.Y) / Ycnt, 0);
                     if (flag)
                     {
                         flag = false;
@@ -195,7 +195,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 }
                 for (int j = 0; j < Ycnt; ++j)
                 {
-                    ptsInUncoverRectangle.Add(new Point3d((j * pt01.X + (Ycnt - j) * pt23.X) / Ycnt, (j * pt01.Y + (Ycnt - j) * pt23.Y) / Ycnt, 0));
+                    ptsInUncoverRectangle.Add(new Point3d(((Ycnt - j) * pt01.X + j * pt23.X) / Ycnt, ((Ycnt - j) * pt01.Y + j * pt23.Y) / Ycnt, 0));
                 }
                 ptsInUncoverRectangle.Add(ptAD);//
                 ptsInUncoverRectangle.Add(ptBC);//
