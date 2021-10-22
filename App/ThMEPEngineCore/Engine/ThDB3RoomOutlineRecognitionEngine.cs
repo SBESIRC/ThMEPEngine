@@ -33,7 +33,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new System.NotImplementedException();
+            var visitor = new ThDB3RoomOutlineExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database, dbObjs);
+            Results.AddRange(visitor.Results);
         }
     }
     public class ThDB3RoomOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
@@ -86,7 +93,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new System.NotImplementedException();
+            var engine = new ThDB3RoomOutlineExtractionEngine();
+            engine.ExtractFromMS(database, dbObjs);
+            Recognize(engine.Results, new Point3dCollection());
         }
     }
 }
