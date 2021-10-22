@@ -18,9 +18,14 @@ namespace ThMEPEngineCore.Model.Hvac
         /// </summary>
         public double Height { get; set; }
         /// <summary>
+        /// 中心标高
+        /// </summary>
+        public double MarkHeight { get; set; }
+        /// <summary>
         /// 几何外包框
         /// </summary>
         public Polyline Outline { get; set; }
+        
     }
 
     public class ThIfcDuctSegment : ThIfcFlowSegment

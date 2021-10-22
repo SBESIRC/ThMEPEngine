@@ -31,6 +31,12 @@ namespace ThMEPHVAC.FanLayout.Service
             double resDouble = double.Parse(str);
             return resDouble;
         }
+        public static void GetDuctWidthAndHeight(string size,out double width,out double height)
+        {
+            var str = size.Split('x');
+            width = double.Parse(str[0]);
+            height = double.Parse(str[1]);
+        }
         public static string GetFanWeight(double weight)
         {
             string strWeight = weight.ToString() + "kg";

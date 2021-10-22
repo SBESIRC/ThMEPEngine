@@ -32,9 +32,14 @@
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="FanConnect\Command\ThFanConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Model\ThFanMainLineModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanTreeModel.cs" />
+    <Compile Include="FanLayout\Command\ThFanHoleExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanMaterialTableExtractCmd.cs" />
     <Compile Include="FanLayout\Engine\ThFanCEXHRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Engine\ThFanDuctRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWAFRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWEXHRecognitionEngine.cs" />
@@ -183,6 +188,10 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="FanConnect\Engine\" />
+    <Folder Include="FanConnect\Service\" />
+    <Folder Include="FanConnect\ViewModel\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
