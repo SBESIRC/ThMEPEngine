@@ -7,6 +7,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.FanLayout.Service;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.FanLayout.Engine
 {
@@ -56,7 +57,7 @@ namespace ThMEPHVAC.FanLayout.Engine
                     {
                         return false;
                     }
-                    var ductParam = ThDuctPortsInterpreter.Get_duct_by_id(ductObjId);
+                    var ductParam = ThHvacAnalysisComponent.GetDuctParamById(ductObjId);
                     ThFanLayoutDealService.GetDuctWidthAndHeight(ductParam.duct_size, out holeWidth, out holeHeight);
                     info.width = holeWidth;
                     info.height = holeHeight;
