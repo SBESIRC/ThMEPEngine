@@ -122,7 +122,7 @@ namespace ThMEPLighting.FEI
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public List<Curve> GetMainEvacuate(Polyline polyline,string name) 
+        public List<Curve> GetMainEvacuate(Polyline polyline, string name) 
         {
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())

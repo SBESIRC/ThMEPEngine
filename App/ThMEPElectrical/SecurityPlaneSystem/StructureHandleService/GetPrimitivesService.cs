@@ -95,14 +95,6 @@ namespace ThMEPElectrical.StructureHandleService
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);
 
-                foreach (var room in rooms)
-                {
-                    //if (room.Boundary is MPolygon mPolygon)
-                    //{
-                    //    var mPolygonLoops = mPolygon.Loops();
-                    //    room.Boundary = mPolygonLoops[0];
-                    //}
-                }
                 return rooms;
             }
         }

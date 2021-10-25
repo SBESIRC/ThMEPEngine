@@ -77,7 +77,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
                     {
-                        var lines = new List<Polyline>();
+                         var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
                         using (var stringReader = new StringReader(res))
                         using (var jsonReader = new JsonTextReader(stringReader))

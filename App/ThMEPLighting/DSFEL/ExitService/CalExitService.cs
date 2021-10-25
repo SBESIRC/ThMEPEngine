@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Model;
 using ThMEPLighting.DSFEL.Model;
 
 namespace ThMEPLighting.DSFEL.ExitService
@@ -20,21 +21,22 @@ namespace ThMEPLighting.DSFEL.ExitService
         /// </summary>
         /// <param name="roomInfo"></param>
         /// <param name="doors"></param>
-        public List<ExitModel> CalExit(List<KeyValuePair<Polyline, string>> roomInfo, List<Polyline> doors)
+        public List<ExitModel> CalExit(List<ThIfcRoom> roomInfo, List<Polyline> doors)
         {
             List<ExitModel> exitModels = new List<ExitModel>();
             List<Polyline> bufferDoors = doors.Select(x => x.Buffer(tol)[0] as Polyline).ToList();
             foreach (var door in bufferDoors)
             {
-                var intersectRooms = roomInfo.Where(x => x.Key.Intersects(door)).ToList();
+                var intersectRooms = roomInfo.Where(x => (x.Boundary as Polyline).Intersects(door)).ToList();
                 ExitModel exit = new ExitModel();
                 if (intersectRooms.Count == 1)
                 {
-                    if(CalDoorOpenDir(door, intersectRooms[0].Key))
+                    Polyline roomBound = intersectRooms[0].Boundary as Polyline;
+                    if (CalDoorOpenDir(door, roomBound))
                     {
                         exit.exitType = ExitType.SafetyExit;
-                        exit.room = intersectRooms[0].Key;
-                        exit.positin = GetLayoutPosition(intersectRooms[0].Key, door);
+                        exit.room = roomBound;
+                        exit.positin = GetLayoutPosition(roomBound, door);
                         exitModels.Add(exit);
                     }
                 }
@@ -42,17 +44,12 @@ namespace ThMEPLighting.DSFEL.ExitService
                 {
                     foreach (var room in intersectRooms)
                     {
-                        if (CalDoorOpenDir(door, room.Key) && CheckIsExit(intersectRooms.Where(x=>x.Key != room.Key).ToList()))
+                        Polyline roomBound = room.Boundary as Polyline;
+                        if (CalDoorOpenDir(door, roomBound) && CheckIsExit(intersectRooms.Where(x=>x.Boundary != room.Boundary).ToList()))
                         {
                             exit.exitType = ExitType.EvacuationExit;
-                            exit.room = room.Key;
-                            exit.positin = GetLayoutPosition(room.Key, door);
-                            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-                            //{
-                            //    db.ModelSpace.Add(new Circle(exit.positin, Vector3d.ZAxis, 1000));
-                            //    db.ModelSpace.Add(room.Key);
-                            //    db.ModelSpace.Add(door.Clone() as Polyline);
-                            //}
+                            exit.room = roomBound;
+                            exit.positin = GetLayoutPosition(roomBound, door);
                             exitModels.Add(exit);
                             break;
                         }
@@ -68,9 +65,9 @@ namespace ThMEPLighting.DSFEL.ExitService
         /// </summary>
         /// <param name="roomInfo"></param>
         /// <returns></returns>
-        private bool CheckIsExit(List<KeyValuePair<Polyline, string>> roomInfo)
+        private bool CheckIsExit(List<ThIfcRoom> roomInfo)
         {
-            return roomInfo.Any(z => DSFELConfigCommon.EvacuationExitArea.Where(y => y.Contains(z.Value)).Count() > 0);
+            return roomInfo.Any(z => DSFELConfigCommon.EvacuationExitArea.Any(y => z.Tags.Any(x => y.Contains(x))));
         }
 
         /// <summary>

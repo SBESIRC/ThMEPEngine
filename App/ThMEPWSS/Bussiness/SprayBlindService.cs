@@ -75,10 +75,6 @@ namespace ThMEPWSS.Bussiness
             {
                 //保护类型
                 var sprayRadii = spray.Radii as Polyline;
-                //if (!(ThWSSUIService.Instance.Parameter.blindAreaType == BlindAreaType.Rectangle))
-                //{
-
-                //}
                 sprayRadii = spray.ArcRadii.TessellateCircleWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength);
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
@@ -118,14 +114,7 @@ namespace ThMEPWSS.Bussiness
             {
                 blindAreas.AddRange(holeArea.Difference(dBObjects).OfType<Polyline>().ToList());
             }
-            //using (AcadDatabase ad = AcadDatabase.Active())
-            //{
-            //    foreach (var item in protectAreas)
-            //    {
-            //        item.ColorIndex = 4;
-            //        ad.ModelSpace.Add(item);
-            //    }
-            //}
+
             return blindAreas;
         }
 

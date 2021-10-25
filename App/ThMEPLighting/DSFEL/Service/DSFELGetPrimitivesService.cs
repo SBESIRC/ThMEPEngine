@@ -12,6 +12,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPLighting.DSFEL.Service
 {
@@ -78,6 +79,42 @@ namespace ThMEPLighting.DSFEL.Service
         }
 
         /// <summary>
+        /// 获取房间
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public Dictionary<ThIfcRoom, List<Polyline>> GetRoomInfo(Polyline polyline)
+        {   
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var roomEngine = new ThRoomOutlineExtractionEngine();
+                roomEngine.ExtractFromMS(acdb.Database);
+                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+
+                var markEngine = new ThRoomMarkExtractionEngine();
+                markEngine.ExtractFromMS(acdb.Database);
+                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+
+                var boundaryEngine = new ThRoomOutlineRecognitionEngine();
+                boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
+                var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var markRecEngine = new ThRoomMarkRecognitionEngine();
+                markRecEngine.Recognize(markEngine.Results, polyline.Vertices());
+                var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
+                var builder = new ThRoomBuilderEngine();
+                builder.Build(rooms, marks);
+
+                var roomInfos = new Dictionary<ThIfcRoom, List<Polyline>>();
+                foreach (var room in rooms)
+                {
+                    var holes = CalRoomBoundary(room);
+                    roomInfos.Add(room, holes);
+                }
+                return roomInfos;
+            }
+        }
+
+        /// <summary>
         /// 获取门框线
         /// </summary>
         /// <param name="polyline"></param>
@@ -120,6 +157,11 @@ namespace ThMEPLighting.DSFEL.Service
                     originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
+            }
+
+            if (objs.Count <= 0)
+            {
+                objs = ThMEPPolygonService.CenterLine(frame).ToCollection();
             }
 
             List<Curve> resLines = new List<Curve>();
@@ -199,5 +241,101 @@ namespace ThMEPLighting.DSFEL.Service
             }
         }
 
+        /// <summary>
+        /// 获取区域内的主要疏散路径或辅助
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public List<Curve> GetMainEvacuate(Polyline polyline, string name)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var exitLines = acdb.ModelSpace
+                .OfType<Curve>()
+                .Where(x => x.Layer == name);
+                exitLines.ForEach(x =>
+                {
+                    var transCurve = x.Clone() as Curve;
+                    originTransformer.Transform(transCurve);
+                    objs.Add(transCurve);
+                });
+            }
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+            return sprayLines;
+        }
+
+        /// <summary>
+        /// 获取出入口图块
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public List<BlockReference> GetEvacuationExitBlock(Polyline polyline)
+        {
+            var objs = new DBObjectCollection();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var exitBlock = acdb.ModelSpace
+                .OfType<BlockReference>()
+                .Where(x => !x.BlockTableRecord.IsNull)
+                .Where(x =>
+                {
+                    var name = x.GetEffectiveName();
+                    return name == ThMEPLightingCommon.FEI_EXIT_NAME100 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME101 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME102 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME103 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME140 ||
+                     name == ThMEPLightingCommon.FEI_EXIT_NAME141;
+
+                });
+                exitBlock.ForEach(x =>
+                {
+                    var transBlock = x.Clone() as BlockReference;
+                    originTransformer.Transform(transBlock);
+                    objs.Add(transBlock);
+                });
+            }
+
+            List<BlockReference> blocks = new List<BlockReference>();
+            foreach (BlockReference obj in objs)
+            {
+                if (polyline.Contains(obj.Position))
+                {
+                    blocks.Add(obj);
+                }
+            }
+
+            return blocks;
+        }
+
+        /// <summary>
+        /// 提取throom的房间框线
+        /// </summary>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        private List<Polyline> CalRoomBoundary(ThIfcRoom room)
+        {
+            List<Polyline> holes = new List<Polyline>();
+            if (room.Boundary is Polyline polyline)
+            {
+                room.Boundary = polyline;
+            }
+            else if (room.Boundary is MPolygon mPolygon)
+            {
+                var mPolygonLoops = mPolygon.Loops();
+                room.Boundary = mPolygonLoops[0];
+                if (mPolygonLoops.Count > 1)
+                {
+                    for (int i = 1; i < mPolygonLoops.Count(); i++)
+                    {
+                        holes.Add(mPolygonLoops[0]);
+                    }
+                }
+            }
+
+            return holes;
+        }
     }
 }
