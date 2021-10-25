@@ -21,7 +21,7 @@ namespace ThMEPWSS.Service
         {
             frames = frames.OrderByDescending(x => x.Area).ToList();
 
-            Dictionary<Polyline, List<Polyline>> holeDic = new Dictionary<Polyline, List<Polyline>>(); //外包框和洞口
+            var holeDic = new Dictionary<Polyline, List<Polyline>>(); //外包框和洞口
             while (frames.Count > 0)
             {
                 var firFrame = frames[0];

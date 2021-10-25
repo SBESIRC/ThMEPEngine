@@ -41,7 +41,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 .Select(o => o.Position)
                 .ToList();
             var service = new CalSprayBlindAreaService(Matrix3d.Identity);
-            service.CalSprayBlindArea(sprinklersData, pline, holes);
+            service.CalSprayBlindArea(sprinklersData, pline, holes, RadiusA * Math.Sqrt(2));
         }
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
