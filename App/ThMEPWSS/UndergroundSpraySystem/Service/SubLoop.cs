@@ -134,9 +134,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             double xGap = 500;
             if (branchLoopNum % 2 == 1)
             {
-                int nums = branchLoopNum / 2;
-                xGap = 5150 * nums + 1500 * (spraySystem.SubLoopAlarmsDic[curPt][0] - 1) + 2500 + 
-                     spraySystem.SubLoopFireAreasDic[curPt][0] * 5500 - 2500 * nums + 1500;
+                int nums = branchLoopNum / 2;//支环（报警阀间）数量
+                xGap = 5150 * nums //5150——支环点到支环结束点的长度
+                    + sprayIn.PipeGap * (spraySystem.SubLoopAlarmsDic[curPt][0] - 1) //报警阀间距
+                    + 2500 //最后一个报警阀到防火分区的间距
+                    + spraySystem.SubLoopFireAreasDic[curPt][0] * 3000 //防火分区数目
+                    + 2500 * spraySystem.SubLoopFireAreasDic[curPt][0];  //2500——防火分区的间距  
                 double minX = Math.Min(stPt.X + xGap, spraySystem.SubLoopPtDic[rstPath.Last()].X);
                 sprayOut.PipeLine.Add(new Line(stPt, new Point3d(minX, stPt.Y, 0)));
             }
@@ -144,12 +147,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(xGap)));
             }
-            double sigma = 0.03;
-            var height = sprayIn.FloorHeight * sigma;
+            var height = 300;
             var pt = stPt.OffsetY(-height);
             sprayOut.PipeLine.Add(new Line(stPt, pt));
 
-            //sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(xGap)));
             spraySystem.BranchLoopPtDic.Add(curPt, stPt.OffsetY(-height));
             return stPt.OffsetX(xGap);
         }
@@ -165,8 +166,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             SprayIn sprayIn, ref bool firstBranch, int branchIndex, bool waterPumpFlag, bool firstFlag,
             ref Dictionary<Point3dEx, Point3d> branchLoopPtDic, ref Dictionary<Point3dEx, Point3d> branchPtDic)
         {
-            var height = sprayIn.FloorHeight * 0.06;
-            double gap = -branchIndex * 1400 - 3200 * Convert.ToInt32(waterPumpFlag);
+            var height = 600;//sprayIn.FloorHeight * 0.06;
+            double gap = -branchIndex * sprayIn.PipeGap - 3200 * Convert.ToInt32(waterPumpFlag);
             if (firstFlag)
             {
                 gap = -1000;

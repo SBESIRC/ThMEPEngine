@@ -17,7 +17,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public AlarmValveSys(Point3d stPt, int alarmValveIndex, double floorHeight)
         {
             StPt = stPt;
-            PipeLength = floorHeight * (0.455 - 0.06 * alarmValveIndex);
+            PipeLength = floorHeight - 5200 - 600 * alarmValveIndex - 750;
             EndPt = StPt.OffsetY(1550 + PipeLength);
             ;
         }

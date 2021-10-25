@@ -11,7 +11,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
     {
         public SprayVMSet()
         {
-            FloorLineSpace = 10000;
+            FloorLineSpace = 15000;
         }
         private double floorLineSpace { get; set; }
         /// <summary>

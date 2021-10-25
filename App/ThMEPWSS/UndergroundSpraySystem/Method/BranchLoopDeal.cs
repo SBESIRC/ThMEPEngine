@@ -46,7 +46,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         visited.Add(pts[i]);
                         var flag = false;
                         var branchLoop = new List<Point3dEx>();
-                        DepthSearch.DfsBranchLoop(pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag);
+                        DepthSearch.DfsBranchLoop(pts[i], pts[j], tempPath, ref visited, ref branchLoop, sprayIn, ref flag, pts);
                         if (branchLoop.Count > 5 && flag)
                         {
                             usedPtNUms.Add(i);

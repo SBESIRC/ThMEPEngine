@@ -116,22 +116,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
         public static void DfsBranchLoop(Point3dEx cur, Point3dEx targetPt, List<Point3dEx> tempPath, ref HashSet<Point3dEx> visited,
-           ref List<Point3dEx> rstPath, SprayIn sprayIn, ref bool flag)
+           ref List<Point3dEx> rstPath, SprayIn sprayIn, ref bool flag, List<Point3dEx> pts)
         {
-            if(cur._pt.DistanceTo(new Point3d(97787.4347048253, 472840.190621032, 0)) < 1)
-            {
-                ;
-            }
             if (cur.Equals(targetPt))//找到目标点，返回最终路径
             {
                 tempPath.Add(cur);
                 rstPath.AddRange(tempPath);
                 return;
             }
+            
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
             foreach (Point3dEx p in neighbors)
             {
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
+                if (pts.Contains(p) && !p.Equals(targetPt)) 
+                    continue;
                 if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
                 {
                     flag = true;
@@ -139,7 +138,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 
                 tempPath.Add(p);
                 visited.Add(p);
-                DfsBranchLoop(p, targetPt, tempPath, ref visited, ref rstPath, sprayIn, ref flag);
+                DfsBranchLoop(p, targetPt, tempPath, ref visited, ref rstPath, sprayIn, ref flag, pts);
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }

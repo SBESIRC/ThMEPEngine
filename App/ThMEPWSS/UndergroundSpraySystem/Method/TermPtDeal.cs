@@ -24,6 +24,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 try
                 {
                     bool flag = false;
+                    if(pt._pt.DistanceTo(new Point3d(18269360.4158,21145157.9294, 0)) < 10)
+                    {
+                        ;
+                    }
                     if(sprayIn.PtTextDic.ContainsKey(pt))//当前点存在标注
                     {
                         if(sprayIn.PtTextDic[pt].First() is null)

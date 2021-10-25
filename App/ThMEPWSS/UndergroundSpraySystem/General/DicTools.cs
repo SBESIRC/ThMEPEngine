@@ -100,33 +100,52 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             var ptOffsetDic = new Dictionary<Point3dEx, Point3d>();
             foreach(var pt in sprayIn.PtDic.Keys)
             {
-                if(sprayIn.PtDic[pt].Count == 1)
+                if(pt._pt.DistanceTo(new Point3d(18294056.2876, 21162391.4571, 0)) < 10)
                 {
-                    var point = pt._pt;
-                    var f1 = pt._pt.GetFloor(sprayIn.FloorRectDic);
-                    if(f1.Equals(""))
+
+                }
+                if (pt._pt.DistanceTo(new Point3d(18294024.7330, 19662352.8282, 0)) < 10)
+                {
+
+                }
+                
+                var point = pt._pt;
+                var f1 = pt._pt.GetFloor(sprayIn.FloorRectDic);
+                if(f1.Equals(""))
+                {
+                    continue;
+                }
+                var jizhunPt = sprayIn.FloorPtDic[f1];
+                var offsetPt = new Point3d(point.X - jizhunPt.X, point.Y - jizhunPt.Y, 0);
+                ptOffsetDic.Add(pt, offsetPt);
+                
+            }
+            var usedPt = new List<Point3dEx>();
+            foreach(var pt1 in ptOffsetDic.Keys)
+            {
+                if(usedPt.Contains(pt1))
+                {
+                    continue;
+                }
+                foreach(var pt2 in ptOffsetDic.Keys)
+                {
+                    if(usedPt.Contains(pt2))
                     {
                         continue;
                     }
-                    var jizhunPt = sprayIn.FloorPtDic[f1];
-                    var offsetPt = new Point3d(point.X - jizhunPt.X, point.Y - jizhunPt.Y, 0);
-                    ptOffsetDic.Add(pt, offsetPt);
-                }
-            }
-            foreach(var pt1 in ptOffsetDic.Keys)
-            {
-                foreach(var pt2 in ptOffsetDic.Keys)
-                {
                     if(pt1._pt.DistanceTo(pt2._pt) > maxDist && ptOffsetDic[pt1].DistanceTo(ptOffsetDic[pt2]) < minDist)
                     {
                         AddPtDicItem(sprayIn, pt1, pt2);
 
                         sprayIn.ThroughPt.AddItem(pt1);
                         sprayIn.ThroughPt.AddItem(pt2);
+                        usedPt.Add(pt1);
+                        usedPt.Add(pt2);
                     }
                 }
             }
-            
+            ;
+            ;
         }
 
         public static void CreatePtTypeDic(List<Point3dEx> pts, string ptType, SprayIn sprayIn)
@@ -139,16 +158,40 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 
         public static void CreatePtTypeDic1(List<Point3dEx> pts, string ptType, ref SprayIn sprayIn)
         {
-            foreach (var pt in sprayIn.PtDic.Keys)
+            var restPts = new List<Point3dEx>();
+            restPts.AddRange(pts);
+            foreach (var pt1 in pts)
             {
-                foreach(var pt1 in pts)
+                if(pt1._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815,0))<10)
                 {
-                    if(pt._pt.DistanceTo(pt1._pt) < 20)
+                    ;
+                }
+                foreach (var pt in sprayIn.PtDic.Keys)
+                {
+                    if (pt._pt.DistanceTo(pt1._pt) < 20)
                     {
                         sprayIn.PtTypeDic.AddType(pt, ptType);
+                        restPts.Remove(pt1);
+                        break;
                     }
                 }
             }
+            foreach(var pt2 in restPts)
+            {
+                foreach(var pt in sprayIn.PtDic.Keys)
+                {
+                    if (pt._pt.DistanceTo(pt2._pt) < 500)
+                    {
+                        if(sprayIn.PtDic[pt].Count == 3)
+                        {
+                            ;
+                            sprayIn.PtTypeDic.AddType(pt, ptType);
+                            break;
+                        }
+                    }
+                }
+            }
+            ;
         }
 
 

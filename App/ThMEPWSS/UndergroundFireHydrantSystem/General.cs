@@ -15,6 +15,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             return new Point3d(x, y, 0);
         }
 
+        public static Point3d GetMidPt(DBText dBText)//获取文字的中心点
+        {
+            var pt1 = dBText.GeometricExtents.MaxPoint;
+            var pt2 = dBText.GeometricExtents.MinPoint;
+            return GetMidPt(pt1, pt2);
+        }
+
+
         public static double GetLinesDist(this Line l1, Line l2)
         {
             var dist1 = l1.StartPoint.DistanceTo(l2.StartPoint);

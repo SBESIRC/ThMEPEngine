@@ -26,6 +26,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 try
                 {
+                    if(pt._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815, 0))<10)
+                    {
+                        ;
+                    }
                     double fireNums = 0;
                     
                     if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
@@ -38,11 +42,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         continue;//跳过这个点
                     }
                     var stPt = spraySystem.BranchPtDic[pt];//图纸绘制起始点
-                    if(!spraySystem.BranchDic.ContainsKey(pt))//支路列表没有这个点
+                    var stPt4 = spraySystem.BranchPtDic[pt];//图纸绘制支路4起始点
+                    if (!spraySystem.BranchDic.ContainsKey(pt))//支路列表没有这个点
                     {
                         continue;//跳过这个点
                     }
                     var tpts = spraySystem.BranchDic[pt];
+                    if(tpts.Count > 1)
+                    {
+                        ;
+                    }
                     bool hasAutoValve = true;
                     foreach(var tpt in tpts)
                     {
@@ -66,10 +75,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                     foreach (var tpt in tpts)// tpt 支路端点
                     {
-                        if(tpt._pt.DistanceTo(new Point3d(18233832.6440811, 21207404.319614, 0)) < 10)
-                        {
-                            ;
-                        }
                         try
                         {
                             if (!sprayIn.TermPtDic.ContainsKey(tpt))
@@ -78,7 +83,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
 
                             var termPt = sprayIn.TermPtDic[tpt];
-                            
+                            bool signelBranch = true;
                             if (termPt.Type == 1)//防火分区
                             {
                                 if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))
@@ -103,6 +108,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 sprayOut.PipeLine.Add(new Line(firePt, new Point3d(firePt.X, stPt.Y, 0)));
                                 branchNums++;
                                 lastFirePt = new Point3d(fireStpt.X, fireStpt.Y, 0);
+                                if(firePt.X > spraySystem.MaxOffSetX)
+                                {
+                                    spraySystem.MaxOffSetX = firePt.X;
+                                }
                             }
                             if (termPt.Type == 2)//其他楼层
                             {
@@ -122,9 +131,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                         continue;
                                     }
                                     var termPt1 = sprayIn.TermPtDic[cpt];
-                                    var firePt = fireStpt.OffsetXY(-throughIndex * 5500 - 1500, -sprayIn.FloorHeight);
-                                    var pt1 = new Point3d(fireStpt.X - 500 * index, stPt.Y, 0);
-                                    var pt2 = new Point3d(pt1.X, firePt.Y + 0.06 * sprayIn.FloorHeight * (index + 1), 0);
+                                    var firePt = fireStpt.OffsetXY(-throughIndex * 5500 - sprayIn.PipeGap, -sprayIn.FloorHeight);
+                                    var pt1 = new Point3d(fireStpt.X - 500 * (index + 1), stPt.Y, 0);
+                                    var pt2 = new Point3d(pt1.X, firePt.Y + 600 * (index + 1), 0);
                                     var pt3 = new Point3d(firePt.X, pt2.Y, 0);
                                     sprayOut.PipeLine.Add(new Line(stPt, pt1));
                                     sprayOut.PipeLine.Add(new Line(pt1, pt2));
@@ -139,22 +148,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
                             if (termPt.Type == 3)//水泵接合器
                             {
-                                var pumpPt = new Point3d(stPt.X, sprayOut.PipeInsertPoint.Y + 0.13 * sprayIn.FloorHeight, 0);
+                                var pumpPt = new Point3d(stPt.X, sprayOut.PipeInsertPoint.Y + 1300, 0);
                                 sprayOut.PipeLine.Add(new Line(stPt, pumpPt));
                                 sprayOut.WaterPumps.Add(new WaterPump(pumpPt));
                             }
                             if (termPt.Type == 4)
                             {
                                 bool needEvade = true;//默认需要躲避
-                                var pt1 = new Point3d(stPt.X, sprayOut.PipeInsertPoint.Y + 0.06 * sprayIn.FloorHeight, 0);
+                                var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 600, 0);
                                 var pt2 = pt1.OffsetX(650);
-                                var pt3 = pt2.OffsetY(0.13 * sprayIn.FloorHeight);
+                                var pt3 = pt2.OffsetY(1300);
                                 double length = GetLength(termPt.PipeNumber) + 100;
                                 double stepSize = 450;
                                 int indx = 0;
                                 while (needEvade)
                                 {
-                                    var textPt = pt3.OffsetXY(-length, 0.09 * sprayIn.FloorHeight + stepSize * indx);
+                                    var textPt = pt3.OffsetXY(-length, 900 + stepSize * indx);
                                     var text2 = new Text(termPt.PipeNumber, textPt);
                                     var texts = new List<DBText>() { text2.DbText };
 
@@ -175,9 +184,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     }
                                     indx++;
                                 }
-                                var pt4 = pt3.OffsetY(0.09 * sprayIn.FloorHeight + stepSize * indx);
+                                var pt4 = pt3.OffsetY(900 + stepSize * indx);
                                 var pt5 = pt4.OffsetX(-length);
-                                sprayOut.PipeLine.Add(new Line(stPt, pt1));
+                                if(signelBranch)
+                                {
+                                    sprayOut.PipeLine.Add(new Line(stPt4, pt1));
+
+                                }
                                 sprayOut.PipeLine.Add(new Line(pt1, pt2));
                                 sprayOut.PipeLine.Add(new Line(pt2, pt3));
                                 sprayOut.NoteLine.Add(new Line(pt3, pt4));
@@ -185,6 +198,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
                                 var text = new Text(termPt.PipeNumber, pt5);
                                 sprayOut.Texts.Add(text);
+                                stPt4 = stPt4.OffsetX(600);
+                                signelBranch = false;
                             }
                         }
                         catch (Exception ex)

@@ -117,6 +117,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var alarmPts = alarmValve.Extract(database, selectArea);
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
+            var alarmText = new AlarmText();
+            alarmText.Extract(database, sprayIn);//提取报警阀文字
+            alarmText.CreateAlarmTextDic(sprayIn, alarmPts);//生成报警阀文字字典对
+
             var loopMarkPt = new LoopMarkPt();//环管标记点
             loopMarkPt.Extract(database, sprayIn);
             loopMarkPt.CreateStartPts(pipeLines, ref sprayIn, startPt);//获取环管的起始终止点
@@ -163,7 +167,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             //Draw.SubLoop(acadDatabase, spraySystem);
 
             BranchLoopDeal.Get(ref visited, sprayIn, spraySystem);
-            //Draw.BranchLoop(acadDatabase, spraySystem);
+            Draw.BranchLoop(acadDatabase, spraySystem);
             SubLoopDeal.SetType(sprayIn, spraySystem);
 
             BranchDeal.Get(ref visited, sprayIn, spraySystem);
@@ -238,6 +242,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             try
             {
                 Branch.Get(sprayOut, spraySystem, sprayIn);
+                StoreyLine.Get2(sprayOut, spraySystem, sprayIn);
             }
             catch (Exception ex)
             {

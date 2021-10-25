@@ -26,6 +26,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Point3d TempSubLoopStartPt { get; set; }//存放次环的起始绘制点
         public ThCADCoreNTSSpatialIndex BlockExtents { get; set; }//存放文字和模块的外包框
 
+        public double MaxOffSetX { get; set; }//存放最远楼板线边界
+
         public SpraySystem()
         {
             MainLoop = new List<Point3dEx>();
@@ -45,6 +47,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             FireAreaStPtDic = new Dictionary<Point3dEx, Point3d>();
             TempSubLoopStartPt = new Point3d();
             BlockExtents = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+            MaxOffSetX = 20000;
         }
     }
 }

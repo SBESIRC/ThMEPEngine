@@ -11,6 +11,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     {
         public double FloorLength { get; set; }//楼层线宽
         public double FloorHeight { get; set; }//楼层高
+        public double PipeGap { get; set; }//管道通用间距
         public Point3dEx LoopStartPt { get; set; }//环管起点
         public Point3dEx LoopEndPt { get; set; }//环管终点
         public List<Line> PipeLines { get; set; }//管道
@@ -27,10 +28,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<string, Point3d> FloorPtDic { get; set; }//楼板号及其标注点
         public List<Point3dEx> ThroughPt { get; set; }//穿越点
         public List<Point3dEx> CurThroughPt { get; set; }//当前层穿越点
+        public Dictionary<Point3dEx, string> AlarmTextDic { get; set; }//报警阀文字
+        public Dictionary<string, double> floorNumberYDic { get; set; }//楼层的Y
 
         public SprayIn(SprayVM _UiConfigs) 
         {
             FloorLength = 80000;
+            PipeGap = 1900;
             FloorHeight = _UiConfigs.SetViewModel.FloorLineSpace;
             FloorRectDic = _UiConfigs.FloorRect;
             FloorPtDic = _UiConfigs.FloorPt;
@@ -47,6 +51,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             TermPtDic = new Dictionary<Point3dEx, TermPoint2>();
             ThroughPt = new List<Point3dEx>();
             CurThroughPt = new List<Point3dEx>();
+            AlarmTextDic = new Dictionary<Point3dEx, string>();
+            floorNumberYDic = new Dictionary<string, double>();
         }
     }
 }

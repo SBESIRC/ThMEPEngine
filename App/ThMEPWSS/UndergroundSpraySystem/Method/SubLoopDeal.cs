@@ -65,15 +65,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     try
                     {
                         var pt = rstPath[i];
-                        if (sprayIn.PtDic[pt].Count == 3 && sprayIn.PtTypeDic[pt].Contains("MainLoop"))
+                        if(sprayIn.PtDic[pt].Count == 3)
                         {
-                            sprayIn.PtTypeDic[pt] = "Branch";
-                            spraySystem.SubLoopBranchDic[rstPath[0]] += 1;
-                            spraySystem.SubLoopBranchDic[rstPath.Last()] += 1;
-                            spraySystem.SubLoopBranchPtDic[rstPath.First()].Add(pt);
-                            spraySystem.SubLoopBranchPtDic[rstPath.Last()].Add(pt);
+                            if (sprayIn.PtTypeDic[pt].Contains("MainLoop"))
+                            {
+                                sprayIn.PtTypeDic[pt] = "Branch";
+                                spraySystem.SubLoopBranchDic[rstPath[0]] += 1;
+                                spraySystem.SubLoopBranchDic[rstPath.Last()] += 1;
+                                spraySystem.SubLoopBranchPtDic[rstPath.First()].Add(pt);
+                                spraySystem.SubLoopBranchPtDic[rstPath.Last()].Add(pt);
 
+                            }
+                            else
+                            {
+                                ;
+                            }
                         }
+                        
                     }
                     catch
                     {

@@ -52,13 +52,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             for(int j = 0; j < spraySystem.MainLoops.Count; j++)
             {
                 var rstPath = spraySystem.MainLoops[j];
-                var height = 0.06 * sprayIn.FloorHeight;
+                var height = 600;//0.06 * sprayIn.FloorHeight;
                 var stPt1 = sprayOut.PipeInsertPoint.OffsetX(lastGap);
                 var stPt = stPt1;
                 double floorHeight = sprayIn.FloorHeight;
-                double alarmGap = 1500;
+                double alarmGap = sprayIn.PipeGap;
                 int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
-                var pipeLen = 0.79 * sprayIn.FloorHeight;
+                var pipeLen = floorHeight - 1800;
                 var pt1 = stPt.OffsetY(-height);
                 var spt1 = stPt.OffsetX(1000);
                 var ept1 = pt1.OffsetX(500);
@@ -92,23 +92,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     var preType = sprayIn.PtTypeDic[rstPath[i - 1]];
                     var nextType = sprayIn.PtTypeDic[rstPath[i + 1]];
                     var type = sprayIn.PtTypeDic[pt];
-                    if(pt._pt.DistanceTo(new Point3d(754823.329194008, 513816.1021144, 0)) < 10)
-                    {
-                        ;
-                    }
+
                     if (type.Contains("AlarmValve"))
                     {
                         var alarmValve = new AlarmValveSys(stPt, fireAreaIndex, floorHeight);
 
                         spraySystem.BranchPtDic.Add(pt, alarmValve.EndPt);
                         sprayOut.AlarmValves.Add(alarmValve);//插入湿式报警阀平面
-                        spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(1700, 4900));
+                        if (sprayIn.AlarmTextDic.ContainsKey(pt))
+                        {
+                            var text = new Text(sprayIn.AlarmTextDic[pt], stPt.OffsetXY(-200, -550));
+                            sprayOut.Texts.Add(text);
+                        }
+                        spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 5200));
                         stPt = stPt.OffsetX(alarmGap);
-                        //if (nextType.Contains("AlarmValve"))
-                        //{
-                        //    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(alarmGap)));
-                        //    stPt = stPt.OffsetX(alarmGap);
-                        //}
+
                         if (!spraySystem.BranchDic.ContainsKey(pt))
                         {
                             continue;
