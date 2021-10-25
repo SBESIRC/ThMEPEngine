@@ -17,7 +17,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
     {
         public override void Clean(Polyline pline)
         {
-            CleanHatch(ThSprinklerCheckerLayer.Room_Checker_LayerName, pline);
+            CleanHatch(ThWSSCommon.Room_Checker_LayerName, pline);
         }
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
@@ -99,7 +99,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 foreach (Entity e in objs)
                 {
-                    var service = new ThSprinklerRoomPrintService(acadDatabase.Database, ThSprinklerCheckerLayer.Room_Checker_LayerName);
+                    var service = new ThSprinklerRoomPrintService(acadDatabase.Database, ThWSSCommon.Room_Checker_LayerName);
                     var colorIndex = 2;
                     service.Print(e, colorIndex);
                 }

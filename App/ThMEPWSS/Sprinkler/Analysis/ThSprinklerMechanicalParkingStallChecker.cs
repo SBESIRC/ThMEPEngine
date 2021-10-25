@@ -85,7 +85,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline pline)
         {
-            CleanPline(ThSprinklerCheckerLayer.Mechanical_Parking_Stall_Checker_LayerName, pline);
+            CleanPline(ThWSSCommon.Mechanical_Parking_Stall_Checker_LayerName, pline);
         }
 
         private void Present(DBObjectCollection objs)

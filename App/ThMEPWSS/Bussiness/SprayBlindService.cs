@@ -135,13 +135,13 @@ namespace ThMEPWSS.Bussiness
         {
             using (var db = AcadDatabase.Active())
             {
-                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Layout_BlindArea_LayerName);
-                db.Database.UnFrozenLayer(ThWSSCommon.Layout_BlindArea_LayerName);
-                db.Database.UnPrintLayer(ThWSSCommon.Layout_BlindArea_LayerName);
+                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Blind_Zone_LayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.Blind_Zone_LayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.Blind_Zone_LayerName);
 
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
-                    area.Layer = ThWSSCommon.Layout_BlindArea_LayerName;
+                    area.Layer = ThWSSCommon.Blind_Zone_LayerName;
                     area.ColorIndex = 10;
                     area.ConstantWidth = 50;
                     db.ModelSpace.Add(area);

@@ -55,7 +55,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline pline)
         {
-            CleanPline(ThSprinklerCheckerLayer.Pipe_Checker_LayerName, pline);
+            CleanPline(ThWSSCommon.Pipe_Checker_LayerName, pline);
         }
 
         private void Present(List<Point3d> results)

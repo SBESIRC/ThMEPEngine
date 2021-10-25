@@ -133,14 +133,14 @@ namespace ThMEPWSS.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Layout_BlindArea_LayerName);
-                acadDatabase.Database.UnLockLayer(ThWSSCommon.Layout_BlindArea_LayerName);
-                acadDatabase.Database.UnOffLayer(ThWSSCommon.Layout_BlindArea_LayerName);
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Blind_Zone_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.Blind_Zone_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.Blind_Zone_LayerName);
                 var bufferPoly = polyline.Buffer(-1)[0] as Polyline;
                 var objs = new DBObjectCollection();
                 var blindLines = acadDatabase.ModelSpace
                     .OfType<Polyline>()
-                    .Where(o => o.Layer == ThWSSCommon.Layout_BlindArea_LayerName);
+                    .Where(o => o.Layer == ThWSSCommon.Blind_Zone_LayerName);
                 blindLines.ForEach(x => objs.Add(x));
 
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
@@ -154,7 +154,7 @@ namespace ThMEPWSS.Service
 
                 var blindSolid = acadDatabase.ModelSpace
                     .OfType<Hatch>()
-                    .Where(o => o.Layer == ThWSSCommon.Layout_BlindArea_LayerName);
+                    .Where(o => o.Layer == ThWSSCommon.Blind_Zone_LayerName);
                 blindSolid.ForEachDbObject(o => objs.Add(o));
 
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);

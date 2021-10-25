@@ -85,7 +85,6 @@
     <Compile Include="Sprinkler\Data\ThSprinklerWindowExtractor.cs" />
     <Compile Include="Sprinkler\Model\ThSprinklerModel.cs" />
     <Compile Include="Sprinkler\Service\ThHandleContainsService.cs" />
-    <Compile Include="Sprinkler\Service\ThSprinklerCheckerLayer.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCleanEntityService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerCreateLayoutAreaService.cs" />
     <Compile Include="Sprinkler\Service\ThSprinklerDuctService.cs" />

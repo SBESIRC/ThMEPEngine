@@ -130,8 +130,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline pline)
         {
-            CleanPline(ThSprinklerCheckerLayer.Duct_Checker_LayerName, pline);
-            CleanDimension(ThSprinklerCheckerLayer.Duct_Blind_Zone_LayerName, pline);
+            CleanPline(ThWSSCommon.Duct_Checker_LayerName, pline);
+            CleanDimension(ThWSSCommon.Duct_Blind_Zone_LayerName, pline);
         }
 
         private void Present(DBObjectCollection objs)

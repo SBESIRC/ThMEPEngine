@@ -7,10 +7,8 @@
         public const string SprayDownBlockName = "下喷喷头";                                   //下喷喷头名
         public const string SprayLayerName = "W-FRPT-SPRL";                                    //喷淋图层名          
         public const string Layout_Line_LayerName = "AI-Sprinkler-喷头布置轴线";               //喷淋轴线图层名
-        public const string Layout_BlindArea_LayerName = "AI-Sprinkler-保护盲区";              //喷淋盲区图层
         public const string Layout_Error_Spray_LayerName = "AI-Sprinkler-无法处理";            //有问题的喷淋图层标识图层
         public const string Layout_Origin_Spray_LayerName = "AI-Sprinkler-原始喷头";           //原始的喷淋图层标识图层
-        public const string Layout_Area_LayerName = "AI-Sprinkler-可布置区域";                 //可布置区域图层
 
         public const string MopPoolBlockName = "A-Kitchen-9";                                   //拖把池图块名
         public const string WashingMachineBlockName = "A-Toilet-9";                             //洗衣机图块名
@@ -67,5 +65,19 @@
         public const string Layout_LevelLayerName = "W-NOTE";
         public const string Layout_ConnectionReserveBlcokName = "接驳预留";
 
+        public const string Blind_Zone_LayerName = "AI-喷头校核-盲区检测";
+        public const string From_Boundary_So_Far_LayerName = "AI-喷头校核-喷头距边是否过大";
+        public const string Room_Checker_LayerName = "AI-喷头校核-房间是否布置喷头";
+        public const string Parking_Stall_Checker_LayerName = "AI-喷头校核-车位上方喷头";
+        public const string Mechanical_Parking_Stall_Checker_LayerName = "AI-喷头校核-机械车位侧喷";
+        public const string Sprinkler_Distance_LayerName = "AI-喷头校核-喷头间距是否过小";
+        public const string From_Boundary_So_Close_LayerName = "AI-喷头校核-喷头距边是否过小";
+        public const string Distance_Form_Beam_LayerName = "AI-喷头校核-喷头距梁是否过小";
+        public const string Layout_Area_LayerName = "AI-喷头校核-可布置区域";
+        public const string Beam_Checker_LayerName = "AI-喷头校核-较高的梁";
+        public const string Pipe_Checker_LayerName = "AI-喷头校核-喷头是否连管";
+        public const string Duct_Checker_LayerName = "AI-喷头校核-宽度大于1200的风管";
+        public const string Duct_Blind_Zone_LayerName = "AI-喷头校核-风管下喷盲区";
+        public const string Sprinkler_So_Dense_LayerName = "AI-喷头校核-区域喷头过密";
     }
 }
