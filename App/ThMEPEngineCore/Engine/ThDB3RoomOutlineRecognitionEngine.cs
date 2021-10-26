@@ -80,13 +80,21 @@ namespace ThMEPEngineCore.Engine
             {
                 if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
                 {
-                    var room = ThIfcRoom.Create(polyline);
-                    var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
-                    if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
+                    var curves = new DBObjectCollection() { polyline };
+                    curves = ThRoomOutlineSimplifier.Simplify(curves);
+                    curves = ThRoomOutlineSimplifier.MakeValid(curves);
+                    curves = ThRoomOutlineSimplifier.Simplify(curves);
+                    if (curves.Count == 1)
                     {
-                        room.Name = properties.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
+                        var outline = curves[0] as Polyline;
+                        var room = ThIfcRoom.Create(outline);
+                        var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
+                        if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
+                        {
+                            room.Name = properties.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
+                        }
+                        Elements.Add(room);
                     }
-                    Elements.Add(room);
                 }
             });
         }
