@@ -75,20 +75,22 @@ namespace ThCADCore.NTS
             return results.ToCollection<DBObject>();
         }
 
-        public static DBObjectCollection BuildArea(this DBObjectCollection objs)
+        public static DBObjectCollection BuildArea(this DBObjectCollection objs, bool dissolveSharedEdges = true)
         {
             var poylgons = new DBObjectCollection();
-            Geometry geometry = objs.BuildAreaGeometry();
+            Geometry geometry = objs.BuildAreaGeometry(dissolveSharedEdges);
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());
             }
             else if (geometry is MultiPolygon mPolygons)
             {
-                mPolygons.Geometries.Cast<Polygon>().Where(o=>o.Area>1.0).ForEach(o =>
-                {
-                    poylgons.Add(o.ToDbEntity());
-                });
+                // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
+                // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
+                mPolygons.Geometries.OfType<Polygon>().Where(o => o.Area > 1.0 && o.Area > o.Length).ForEach(o =>
+                   {
+                       poylgons.Add(o.ToDbEntity());
+                   });
             }
             else
             {
@@ -114,9 +116,10 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
+        public static Geometry BuildAreaGeometry(this DBObjectCollection objs, bool dissolveSharedEdges = true)
         {
             var builder = new ThCADCoreNTSBuildArea();
+            builder.DissolveSharedEdges = dissolveSharedEdges;
             return builder.Build(objs.ToMultiLineString());
         }
     }
