@@ -67,8 +67,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
                     //输出参数
                     blinds = sensorOpt.Blinds;
                     layoutPoints = sensorOpt.PlacePoints;
-                    ShowPoints();
-                    ShowBlind();
+                    //ShowPoints();
+                    //ShowBlind();
                     //ShowDetect();
                 
             }

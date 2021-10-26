@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Algorithm.Distance;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
@@ -79,7 +80,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         public void CalBlindArea()
         {
             var poly = OverlayNGRobust.Union(Detect.ToArray());
-            blind = room.Difference(poly);
+            blind = OverlayNGRobust.Overlay(room, poly, SpatialFunction.Difference);
         }
         //加点
         public void AddPoints()
@@ -239,7 +240,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             Positions.Add(target);
             var det = DetectCalculator.CalculateDetect(target, room, Radius, IsDetectVisible);
             Detect.Add(det);
-            this.blind = this.blind.Difference(det);
+            this.blind = OverlayNGRobust.Overlay(this.blind, det, SpatialFunction.Difference);
             //if (this.blind.Area == oldArea)
             //    this.blind = this.blind.Difference(targetToMove);
         }
