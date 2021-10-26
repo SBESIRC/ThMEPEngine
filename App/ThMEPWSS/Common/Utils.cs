@@ -23,7 +23,7 @@ namespace ThMEPWSS.Common
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
-                if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
+                //if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
                 {
                     using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
                     {

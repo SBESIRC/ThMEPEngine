@@ -27,7 +27,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            throw new NotSupportedException();
+            var visitor = new ThRoomMarkExtractionVisitor
+            {
+                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
+            };
+            var extractor = new ThAnnotationElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
     public class ThRoomMarkRecognitionEngine : ThAnnotationElementRecognitionEngine

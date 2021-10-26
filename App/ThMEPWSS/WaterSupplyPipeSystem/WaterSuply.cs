@@ -18,6 +18,7 @@ using System.Windows;
 using ThMEPWSS.WaterSupplyPipeSystem.model;
 using ThMEPWSS.WaterSupplyPipeSystem.tool;
 using ThMEPWSS.Pipe.Engine;
+using ThMEPWSS.WaterSupplyPipeSystem.Data;
 
 namespace ThMEPWSS.WaterSupplyPipeSystem
 {
@@ -121,9 +122,13 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
             //统计厨房数
             //创建厨房识别引擎
 
-            var markEngine = new ThRoomMarkRecognitionEngine();
-            markEngine.RecognizeMS(acadDatabase.Database, selectArea);
-            var ele = markEngine.Elements;
+            //提取本地块内的房间名称
+            var markExtractEngine = new ThWaterRoomMarkExtractionEngine();
+            markExtractEngine.Extract(acadDatabase.Database);
+
+            var markRecognizeEngine = new ThRoomMarkRecognitionEngine();
+            markRecognizeEngine.Recognize(markExtractEngine.Results, selectArea);
+            var ele = markRecognizeEngine.Elements;
 
             //var engineKitchen = new ThDB3RoomMarkRecognitionEngine();
             //engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
@@ -264,7 +269,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
                         var CleanTools = new List<CleaningToolsSystem>();
                         for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
                         {
-                            try
+                            try 
                             {
                                 var cleanToolsInSubArea = allCleanToolsSpatialIndex.SelectCrossingPolygon(floorAreaList[i][j]);
                                 var allBlockNames = engine.Datas.Select(ct => ct.Data as string);

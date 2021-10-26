@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
 using System.Windows;
 using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
@@ -52,7 +53,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     {
                         var blockConfig = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
 
-                        viewModel.InsertPt = optRes.Value;
+                        viewModel.InsertPt = optRes.Value.TransformBy(Active.Editor.UCS2WCS());
                         cmd.Execute(blockConfig);
                     }
                 }

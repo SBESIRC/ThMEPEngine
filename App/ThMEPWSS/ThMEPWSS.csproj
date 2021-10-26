@@ -574,6 +574,8 @@
     <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
+    <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\CleaningToolsSystem.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\Details.cs" />
     <Compile Include="WaterSupplyPipeSystem\model\Elevation.cs" />
