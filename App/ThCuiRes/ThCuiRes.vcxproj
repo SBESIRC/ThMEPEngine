@@ -306,6 +306,10 @@
     <Image Include="Images\THFJKX_dark_large.ico" />
     <Image Include="Images\THPTJH_dark_small.ico" />    
     <Image Include="Images\THPTJH_dark_large.ico" />
+    <Image Include="Images\THFGLD_dark_small.ico" />    
+    <Image Include="Images\THFGLD_dark_large.ico" />
+    <Image Include="Images\THFHJS_dark_small.ico" />    
+    <Image Include="Images\THFHJS_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />
