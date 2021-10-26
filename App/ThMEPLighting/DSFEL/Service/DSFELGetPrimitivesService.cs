@@ -145,6 +145,7 @@ namespace ThMEPLighting.DSFEL.Service
         /// <returns></returns>
         public List<Line> GetCentterLines(Polyline frame, List<Polyline> polylines)
         {
+#if (ACAD2016 || ACAD2018)
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -183,6 +184,9 @@ namespace ThMEPLighting.DSFEL.Service
             parkingLines.AddRange(otherPLines);
 
             return parkingLines.SelectMany(x => x).ToList();
+#else
+            return new List<Line>();
+#endif
         }
 
         /// <summary>
