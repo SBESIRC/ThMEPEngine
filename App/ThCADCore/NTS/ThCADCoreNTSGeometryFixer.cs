@@ -13,9 +13,14 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSGeometryFixer
     {
-        public static DBObjectCollection MakeValid(this DBObjectCollection polygons)
+        public static DBObjectCollection Fix(this DBObjectCollection polygons)
         {
             return GeometryFixer.Fix(polygons.ToNTSMultiPolygon()).ToDbCollection();
+        }
+
+        public static DBObjectCollection Fix(this AcPolygon polygon)
+        {
+            return GeometryFixer.Fix(polygon.ToNTSPolygon()).ToDbCollection();
         }
     }
 }

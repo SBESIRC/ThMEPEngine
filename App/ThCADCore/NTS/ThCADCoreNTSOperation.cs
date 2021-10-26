@@ -78,7 +78,19 @@ namespace ThCADCore.NTS
         public static DBObjectCollection BuildArea(this DBObjectCollection objs, bool dissolveSharedEdges = true)
         {
             var poylgons = new DBObjectCollection();
-            Geometry geometry = objs.BuildAreaGeometry(dissolveSharedEdges);
+            var filters = new DBObjectCollection();
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    polyline.Fix().OfType<Entity>().ForEach(e => filters.Add(e));
+                }
+                else
+                {
+                    filters.Add(o);
+                }
+            });
+            Geometry geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());

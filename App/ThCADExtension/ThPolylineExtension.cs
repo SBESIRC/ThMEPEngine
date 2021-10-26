@@ -81,7 +81,9 @@ namespace ThCADExtension
             var segments = new PolylineSegmentCollection(poly);
             var tessellateSegments = new PolylineSegmentCollection();
             segments.ForEach(s => tessellateSegments.AddRange(s.TessellateSegmentWithChord(chord)));
-            return tessellateSegments.ToPolyline();
+            var results = tessellateSegments.ToPolyline();
+            results.Closed = poly.Closed;
+            return results;
         }
 
         /// <summary>
@@ -142,7 +144,9 @@ namespace ThCADExtension
             var segments = new PolylineSegmentCollection(poly);
             var tessellateSegments = new PolylineSegmentCollection();
             segments.ForEach(s => tessellateSegments.AddRange(s.TessellateSegmentWithArc(length)));
-            return tessellateSegments.ToPolyline();
+            var results = tessellateSegments.ToPolyline();
+            results.Closed = poly.Closed;
+            return results;
         }
 
         /// <summary>
