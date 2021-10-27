@@ -21,6 +21,7 @@ namespace ThMEPHVAC.FanLayout.Command
 {
     class ThFanHoleExtractCmd : ThMEPBaseCommand, IDisposable
     {
+        static public string StrMapScale = "1:100";
         public void Dispose()
         {
         }
@@ -45,17 +46,41 @@ namespace ThMEPHVAC.FanLayout.Command
         }
         public bool GetTuplePoints(out Tuple<Point3d, Point3d> pts, string tips1, string tips2)
         {
-            var point1 = Active.Editor.GetPoint(tips1);
-            if (point1.Status != PromptStatus.OK)
+            var ppo = new PromptPointOptions(tips1);
+            ppo.Keywords.Add("S","S", "设置(S)");
+            ppo.AppendKeywordsToMessage = true;
+
+            var point1 = Active.Editor.GetPoint(ppo);
+            if(point1.Status == PromptStatus.Keyword)
+            {
+                if (point1.StringResult == "S")
+                {
+                    //输入出图比例
+                    var options = new PromptKeywordOptions("\n选择处理方式");
+                    options.Keywords.Add("1:50", "A", "1:50(A)");
+                    options.Keywords.Add("1:100", "B", "1:100(B)");
+                    options.Keywords.Add("1:150", "C", "1:150(C)");
+                    options.Keywords.Add("1:200", "D", "1:200(D)");
+                    options.Keywords.Default = StrMapScale;
+                    var result = Active.Editor.GetKeywords(options);
+                    if (result.Status == PromptStatus.OK)
+                    {
+                        StrMapScale = result.StringResult;
+                    }
+                }
+                point1 = Active.Editor.GetPoint(tips1);
+            }
+            if(point1.Status!= PromptStatus.OK)
             {
                 pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
                 return false;
             }
-            var ppo = new PromptPointOptions(tips2);
-            ppo.UseBasePoint = true;
-            ppo.BasePoint = point1.Value;
 
-            var point2 = Active.Editor.GetPoint(ppo);
+            var ppo1 = new PromptPointOptions(tips2);
+            ppo1.UseBasePoint = true;
+            ppo1.BasePoint = point1.Value;
+
+            var point2 = Active.Editor.GetPoint(ppo1);
             if (point2.Status != PromptStatus.OK)
             {
                 pts = Tuple.Create(new Point3d(0, 0, 0), new Point3d(0, 0, 0));
@@ -74,10 +99,12 @@ namespace ThMEPHVAC.FanLayout.Command
                 {
                     ImportBlockFile();
                     Tuple<Point3d, Point3d> tuplePts1;
-                    if (!GetTuplePoints(out tuplePts1, "\n请选择洞口插入的基点位置：", "\n请选择洞口插入的第二点（方向）："))
+                    if (!GetTuplePoints(out tuplePts1, "\n请选择洞口插入的基点位置", "\n请选择洞口插入的第二点（方向）："))
                     {
                         return;
                     }
+
+                    double fontHeight = ThFanLayoutDealService.GetFontHeight(0, StrMapScale);
                     var point1 = tuplePts1.Item1;
                     var point2 = tuplePts1.Item2;
 
@@ -93,10 +120,11 @@ namespace ThMEPHVAC.FanLayout.Command
                     var ductEngine = new ThFanDuctRecognitionEngine();
                     if (ductEngine.GetDuctInfo(tmpAre.Vertices(),out info))
                     {
+                        info.fontHeight = fontHeight;
                         //插入风管
                         string strSize = ThFanLayoutDealService.GetFanHoleSize(info.width, info.height, 100);
                         string strMark = ThFanLayoutDealService.GetFanHoleMark(1, info.markHeight - 0.05);
-                        InsertFanHole(database, point1, holeAngle, info.height, info.width + 100, strSize, strMark);
+                        InsertFanHole(database, point1, holeAngle, info.fontHeight, info.width + 100, strSize, strMark);
                     }
                 }
             }

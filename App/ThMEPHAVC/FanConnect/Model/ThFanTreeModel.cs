@@ -27,10 +27,24 @@ namespace ThMEPHVAC.FanConnect.Model
             Parent = null;
             Item = item;
         }
-
         public void InsertChild(ThFanTreeNode<T> child)
         {
             Children.Add(child);
+        }
+        public ThFanTreeNode<T> GetChild(int index)
+        {
+            return Children[index];
+        }
+        public int ChildIndex(ThFanTreeNode<T> child)
+        {
+            for(int i = 0; i < Children.Count();i++)
+            {
+                if(Children[i] == child)
+                {
+                    return i;
+                }
+            }
+            return -1;
         }
     }
     public class ThFanTreeModel
