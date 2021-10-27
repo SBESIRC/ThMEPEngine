@@ -196,7 +196,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             //这样做的意义是，保证至少有一个可布置区域
             if (Objs.Count == 0)
             {
-                var MaxAreaSpace = Difference(frame, dBObjects.Union(dBNoHighObjects)).Cast<AcPolygon>().OrderByDescending(o => o.Area).FirstOrDefault();
+                var MaxAreaSpace = Difference(frame, dBObjects.Union(dBNoHighObjects).Union(Holes)).Cast<AcPolygon>().OrderByDescending(o => o.Area).FirstOrDefault();
                 if (!MaxAreaSpace.IsNull())
                 {
                     Objs.AddRange(MaxAreaSpace.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0));
