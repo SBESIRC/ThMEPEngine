@@ -1,0 +1,62 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.LoadCalculation.UI.AccidentAirConfig"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="事故排风">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,15,0,10">
+            <RadioButton Name="RadioBtnTrue" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="True">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="70"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="按指标计算" Margin="0,0,5,0"></Label>
+                </Grid>
+            </RadioButton>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"></RowDefinition>
+                    <RowDefinition Height="*"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
+                    <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="区域占比：" Margin="0,0,5,0"></Label>
+                    <TextBox Grid.Column="2" x:Name="ProportionTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                </StackPanel>
+                <StackPanel Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
+                    <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="换气次数：" Margin="0,0,5,0"></Label>
+                    <TextBox Grid.Column="2" x:Name="AirNumTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="次/h" ></Label>
+                </StackPanel>
+
+
+            </Grid>
+
+            <RadioButton Name="RadioBtnFalse" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="False">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0*"></ColumnDefinition>
+                        <ColumnDefinition Width="70"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
+                    <TextBox Grid.Column="2" x:Name="TotalTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h" ></Label>
+                </Grid>
+            </RadioButton>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,0">
+            <cus:ImageButton Content="保存" Width="50" Height="20"  TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Width="50" Height="20"  TabIndex="1" Click="CancleButton_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

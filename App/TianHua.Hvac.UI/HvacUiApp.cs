@@ -68,5 +68,22 @@ namespace TianHua.Hvac.UI
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THFHJS", CommandFlags.Modal)]
+        public void THFHJS()
+        {
+            using (var cmd = new ThHvacLoadCalculationCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THSWTF", CommandFlags.Modal)]
+        public void THSWTF()
+        {
+            using (var cmd = new ThHvacOutdoorVentilationCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

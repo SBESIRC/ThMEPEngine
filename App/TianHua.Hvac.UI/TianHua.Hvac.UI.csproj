@@ -64,6 +64,8 @@
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
+    <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
@@ -98,6 +100,38 @@
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="HvacUiApp.cs" />
+    <Compile Include="LoadCalculation\LoadCalculationViewModel.cs" />
+    <Compile Include="LoadCalculation\SerializableHelper.cs" />
+    <Compile Include="LoadCalculation\UI\AccidentAirConfig.xaml.cs">
+      <DependentUpon>AccidentAirConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\AirCompensationConfig.xaml.cs">
+      <DependentUpon>AirCompensationConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\ColdNormConfig.xaml.cs">
+      <DependentUpon>ColdNormConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\ExhaustConfig.xaml.cs">
+      <DependentUpon>ExhaustConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\LampblackAirConfig.xaml.cs">
+      <DependentUpon>LampblackAirConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\LampblackConfig.xaml.cs">
+      <DependentUpon>LampblackConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\LoadCalculationMainUI.xaml.cs">
+      <DependentUpon>LoadCalculationMainUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\OutdoorParameterSetting.xaml.cs">
+      <DependentUpon>OutdoorParameterSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\ReshAirVolumeConfig.xaml.cs">
+      <DependentUpon>ReshAirVolumeConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LoadCalculation\UI\RoomFunctionConfig.xaml.cs">
+      <DependentUpon>RoomFunctionConfig.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThHvacUIService.cs" />
     <Compile Include="UI\uiFanCEXHWidget.xaml.cs">
@@ -219,6 +253,46 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="LoadCalculation\UI\AccidentAirConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\AirCompensationConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\ColdNormConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\ExhaustConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\LampblackAirConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\LampblackConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\LoadCalculationMainUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\OutdoorParameterSetting.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\ReshAirVolumeConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="LoadCalculation\UI\RoomFunctionConfig.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiFanCEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

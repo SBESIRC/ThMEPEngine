@@ -145,6 +145,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "疏散指示灯图块.dwg");
         }
 
+        // 按指标计算负荷图块
+        public static string LoadCalculationDwgPath()
+        {
+            return Path.Combine(SupportPath(), "按指标计算负荷.dwg");
+        }
+
         // 房间名称分类处理
         public static string RoomConfigPath()
         {
