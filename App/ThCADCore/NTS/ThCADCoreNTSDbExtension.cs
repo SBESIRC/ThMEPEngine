@@ -56,12 +56,12 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static DBObjectCollection ToDbCollection(this Polygon polygon)
+        public static DBObjectCollection ToDbCollection(this Polygon polygon, double tolerance = 1.0)
         {
             var objs = new DBObjectCollection();
             if (polygon.NumInteriorRings > 0)
             {
-                objs = polygon.ToDbMPolygonEx();
+                objs = polygon.ToDbMPolygonEx(tolerance);
             }
             else
             {
