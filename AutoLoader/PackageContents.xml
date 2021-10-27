@@ -468,6 +468,8 @@
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
+                <Command Local="THFHJS" Global="THFHJS" />
+                <Command Local="THSWTF" Global="THSWTF" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -482,6 +484,8 @@
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
+                <Command Local="THFHJS" Global="THFHJS" />
+                <Command Local="THSWTF" Global="THSWTF" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -496,6 +500,8 @@
                 <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
                 <Command Local="THDKFPMXG" Global="THDKFPMXG" />
+                <Command Local="THFHJS" Global="THFHJS" />
+                <Command Local="THSWTF" Global="THSWTF" />
             </Commands>
         </ComponentEntry>
     </Components>
