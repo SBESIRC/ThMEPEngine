@@ -90,23 +90,26 @@ namespace ThCADCore.NTS
                     filters.Add(o);
                 }
             });
-            Geometry geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
-            if (geometry is Polygon polygon)
+            if(filters.Count > 0)
             {
-                poylgons.Add(polygon.ToDbEntity());
-            }
-            else if (geometry is MultiPolygon mPolygons)
-            {
-                // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
-                // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
-                mPolygons.Geometries.OfType<Polygon>().Where(o => o.Area > 1.0 && o.Area > o.Length).ForEach(o =>
-                   {
-                       poylgons.Add(o.ToDbEntity());
-                   });
-            }
-            else
-            {
-                throw new NotSupportedException();
+                var geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
+                if (geometry is Polygon polygon)
+                {
+                    poylgons.Add(polygon.ToDbEntity());
+                }
+                else if (geometry is MultiPolygon mPolygons)
+                {
+                    // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
+                    // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
+                    mPolygons.Geometries.OfType<Polygon>().Where(o => o.Area > 1.0 && o.Area > o.Length).ForEach(o =>
+                    {
+                        o.ToDbCollection().OfType<Entity>().ForEach(e => poylgons.Add(e));
+                    });
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
             return poylgons;
         }
@@ -116,7 +119,7 @@ namespace ThCADCore.NTS
             Geometry geometry = objs.BuildAreaGeometry();
             if (geometry is Polygon polygon)
             {
-                return polygon.ToDbMPolygon();
+                return polygon.ToDbMPolygonEx().OfType<MPolygon>().First();
             }
             else if (geometry is MultiPolygon mPolygons)
             {

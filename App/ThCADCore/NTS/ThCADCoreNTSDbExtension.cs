@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetARX;
+using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
@@ -47,12 +48,26 @@ namespace ThCADCore.NTS
         {
             if (polygon.NumInteriorRings > 0)
             {
-                return polygon.ToDbMPolygon();
+                return polygon.ToDbMPolygonEx().OfType<MPolygon>().First();
             }
             else
             {
                 return polygon.Shell.ToDbPolyline();
             }
+        }
+
+        public static DBObjectCollection ToDbCollection(this Polygon polygon)
+        {
+            var objs = new DBObjectCollection();
+            if (polygon.NumInteriorRings > 0)
+            {
+                objs = polygon.ToDbMPolygonEx();
+            }
+            else
+            {
+                objs.Add(polygon.Shell.ToDbPolyline());
+            }
+            return objs;
         }
 
         public static List<Polyline> ToDbPolylines(this MultiLineString geometries)
