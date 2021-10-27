@@ -48,6 +48,7 @@
                                 <Directory Id="DIR_Autoloader_Contents_Support" Name="Support">
                                     <Directory Id="DIR_Autoloader_Contents_Support_DesignData" Name="DesignData" />
                                     <Directory Id="DIR_Autoloader_Contents_Support_SecurityPlaneConfig" Name="SecurityPlaneConfig" />
+                                    <Directory Id="DIR_Autoloader_Contents_Support_LoadCalculationConfig" Name="LoadCalculationConfig" />
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Standards" Name="Standards">
                                 </Directory>
