@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(int count, string systemName)
+        public void Routing(int count, string systemName, bool wall = false, bool column = false)
         {
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
@@ -50,7 +50,7 @@ namespace ThMEPEngineCore.ConnectWiring
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
 
             BranchConnectingService branchConnecting = new BranchConnectingService();
-            var data = GetData(holes, outFrame, block);
+            var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
             {
                 var configBlocks = info.loopInfoModels.First().blockNames;
@@ -166,12 +166,12 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取数据
         /// </summary>
         /// <returns></returns>
-        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, BlockReference block)
+        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, BlockReference block, bool wall, bool column)
         {
             List<ThGeometry> geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory();
+                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory(wall, column);
                 factory.holes = holes;
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());
