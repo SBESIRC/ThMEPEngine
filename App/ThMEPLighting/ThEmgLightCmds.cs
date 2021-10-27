@@ -49,7 +49,7 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                //获取外包矿
+                //获取外包框
                 var frameList = selectFrame();
 
                 if (frameList.Count == 0)

@@ -53,7 +53,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var pts = ThFireAlarmUtils.getFrame();
+            var pts = ThFireAlarmUtils.getFrameBlk ();
             if (pts.Count == 0)
             {
                 return;
@@ -77,6 +77,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
             DrawUtils.ShowGeometry(dataQuery.Columns.Select(x => x.Boundary).ToList(), "l0Column", 3);
             DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
+            DrawUtils.ShowGeometry(dataQuery.Holes .Select(x => x.Boundary).ToList(), "l0hole", 140);
 
             //洞,必须先做找到框线
             dataQuery.analysisHoles();
@@ -85,7 +86,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             foreach (var frame in dataQuery.FrameList)
             {
                 DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
+                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
                 DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
             }
 
@@ -167,7 +168,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.getFrame();
+                var pts = ThFireAlarmUtils.getFrameBlk();
                 if (pts.Count == 0)
                 {
                     return;
@@ -178,8 +179,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 {
                     return;
                 }
-
-                //
 
                 //转回原点
                 var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
