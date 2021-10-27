@@ -255,10 +255,18 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         private void SavaExcel(string url)
         {
             DataSet dataSet = new DataSet();
-            dataSet.Merge(((DataView)VideoMonitoringGrid.ItemsSource).Table);
-            dataSet.Merge(((DataView)IntrusionAlarmGrid.ItemsSource).Table);
-            dataSet.Merge(((DataView)AccessControlGrid.ItemsSource).Table);
-            dataSet.Merge(((DataView)GuardTourGrid.ItemsSource).Table);
+            var VideoMonitoringTable = ((DataView)VideoMonitoringGrid.ItemsSource).Table;
+            VideoMonitoringTable.Columns.RemoveAt(0);
+            dataSet.Merge(VideoMonitoringTable);
+            var IntrusionAlarmTable = ((DataView)IntrusionAlarmGrid.ItemsSource).Table;
+            IntrusionAlarmTable.Columns.RemoveAt(0);
+            dataSet.Merge(IntrusionAlarmTable);
+            var AccessControlTable = ((DataView)AccessControlGrid.ItemsSource).Table;
+            AccessControlTable.Columns.RemoveAt(0);
+            dataSet.Merge(AccessControlTable);
+            var GuardTourTable = ((DataView)GuardTourGrid.ItemsSource).Table;
+            GuardTourTable.Columns.RemoveAt(0);
+            dataSet.Merge(GuardTourTable);
             dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.Configs]);
             //dataSet.Merge(configSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl]);
 
@@ -401,17 +409,10 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 //设置填充listview
                 var dataSet = GetExcelContent(file);
                 SetListView(dataSet);
-                 
-                //存储成excel
-                var fileArray = file.Split("\\".ToCharArray());
-                var flieName = fileArray[fileArray.Length - 1];
-                string newPath = configFolderUrl + "\\" + flieName;
-                ReadExcelService excelService = new ReadExcelService();
-                excelService.ConvertExcelToDataSet(dataSet, newPath);
 
                 //设置默认值
                 SetDefaultValue();
-                configList.SelectedItem = flieName;
+                configList.SelectedItem = Path.GetFileName(file);
             }
         }
 
