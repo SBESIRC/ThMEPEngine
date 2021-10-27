@@ -49,42 +49,28 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
+                //获取外包矿
+                var frameList = selectFrame();
+
+                if (frameList.Count == 0)
                 {
                     return;
                 }
 
+                //获取转换点
+                var pt = frameList.First().StartPoint;
+                ThMEPOriginTransformer transformer = new ThMEPOriginTransformer(pt);
+                frameList.ForEach(x => transformer.Transform(x));
+
+                //处理外包框
+                var frameTransProcess = HandleFrame(frameList);
+
                 var scale = LayoutUISettingService.Instance.scale;
                 var blkType = LayoutUISettingService.Instance.blkType;
-
-
                 var blkName = blkType == 0 ? ThMEPLightingCommon.EmgLightBlockName : ThMEPLightingCommon.EmgLightDoubleBlockName;
 
-                foreach (ObjectId obj in result.Value.GetObjectIds())
+                foreach (var nFrame in frameTransProcess)
                 {
-                    ////获取外包框
-                    var frame = acdb.Element<Polyline>(obj);
-                    var transOriPt = frame.StartPoint;
-                    var transformer = new ThMEPOriginTransformer(transOriPt);
-                    var nFrame = processFrame(frame, transformer);
-                    if (nFrame.Area < 1)
-                    {
-                        continue;
-                    }
-
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
                     var bufferTransFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
                     var shrinkTransFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
@@ -152,75 +138,39 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择布置区域框线",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
+                //获取外包框
+                var frameList = selectFrame();
+                if (frameList.Count == 0)
                 {
                     return;
                 }
 
-                //获取ALE起点
-                PromptSelectionOptions sOptions = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择配电箱",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(BlockReference )).DxfName,
-                };
-
-                filter = ThSelectionFilterTool.Build(dxfNames);
-
-                var sResult = Active.Editor.GetSelection(sOptions, filter);
-                if (sResult.Status != PromptStatus.OK)
+                var ALEOri = selectALE();
+                if (ALEOri == null)
                 {
                     return;
                 }
-                var ALEOri = (acdb.Element<BlockReference>(sResult.Value.GetObjectIds().First()) as BlockReference);
 
                 //确定位移中心
                 var transOriPt = ALEOri.Position;
-                if (Math.Abs(transOriPt.X) < 10E7)
-                {
-                    transOriPt = new Point3d();
-                }
-
                 var transformer = new ThMEPOriginTransformer(transOriPt);
 
-                var frameList = new List<Polyline>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    //获取外包框
-                    var frame = acdb.Element<Polyline>(obj);
-                    var nFrame = processFrame(frame, transformer);
-                    if (nFrame.Area < 1)
-                    {
-                        continue;
-                    }
+                //转换框线
+                frameList.ForEach(x => transformer.Transform(x));
 
-                    frameList.Add(nFrame);
-                }
+                //处理外包框
+                var frameTransProcess = HandleFrame(frameList);
 
-                var frameListHoles = frameAnalysisService.analysisHoles(frameList);
+                //处理洞
+                var frameListHoles = frameAnalysisService.analysisHoles(frameTransProcess);
 
                 foreach (var nFrameHoles in frameListHoles)
                 {
 
                     var nFrame = nFrameHoles.Key;
                     var nHoles = nFrameHoles.Value;
+
+                    DrawUtils.ShowGeometry(nFrame, EmgLightCommon.LayerFrame, 130, 35);
 
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
                     var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
@@ -262,18 +212,134 @@ namespace ThMEPLighting
             }
         }
 
-        private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
+        /// <summary>
+        /// 选取框线
+        /// </summary>
+        /// <returns></returns>
+        private static List<Polyline> selectFrame()
         {
+            var frameList = new List<Polyline>();
+
+            // 获取框线
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return frameList;
+            }
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {   //获取外包框
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameList.Add(frame.WashClone() as Polyline);
+                }
+            }
+
+            return frameList;
+        }
+
+        /// <summary>
+        /// 选取ALE块
+        /// </summary>
+        /// <returns></returns>
+        private static BlockReference selectALE()
+        {
+            BlockReference blk = null;
+            //获取ALE起点
+            PromptSelectionOptions sOptions = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "请选择配电箱",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+             {
+                    RXClass.GetClass(typeof(BlockReference )).DxfName,
+             };
+
+            var filter = ThSelectionFilterTool.Build(dxfNames);
+
+            var sResult = Active.Editor.GetSelection(sOptions, filter);
+            if (sResult.Status != PromptStatus.OK)
+            {
+                return blk;
+            }
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var ALEOri = (acdb.Element<BlockReference>(sResult.Value.GetObjectIds().First()) as BlockReference);
+                blk = ALEOri;
+            }
+            return blk;
+        }
+
+        /// <summary>
+        /// 处理外包框线
+        /// </summary>
+        /// <param name="frameLst"></param>
+        /// <returns></returns>
+        private List<Polyline> HandleFrame(List<Polyline> frameList)
+        {
+            List<Polyline> resPolys = new List<Polyline>();
+
+            foreach (var frame in frameList)
+            {
+                var nFrame = processFrame(frame);
+                if (nFrame != null)
+                {
+                    resPolys.Add(nFrame);
+                }
+            }
+
+            return resPolys;
+        }
+
+        /// <summary>
+        /// 处理每一个外包框
+        /// 根据讨论不用1000间距。不闭合框线直接硬连
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        private static Polyline processFrame(Polyline frame)
+        {
+            Polyline nFrame = null;
             var tol = 1000;
-            //获取外包框
-            var frameClone = frame.WashClone() as Polyline;
-            //处理外包框
-            transformer.Transform(frameClone);
-            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
+
+            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
+            // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
+            if (nFrameNormal.Area > 10)
+            {
+                nFrameNormal = nFrameNormal.DPSimplify(1);
+                nFrame = nFrameNormal;
+            }
 
             return nFrame;
-
         }
+
+        //private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
+        //{
+        //    var tol = 1000;
+        //    //获取外包框
+        //    var frameClone = frame.WashClone() as Polyline;
+        //    //处理外包框
+        //    transformer.Transform(frameClone);
+        //    Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
+
+        //    return nFrame;
+
+        //}
 
         [CommandMethod("TIANHUACAD", "THtestIntersection", CommandFlags.Modal)]
         public void thTestIntersection()

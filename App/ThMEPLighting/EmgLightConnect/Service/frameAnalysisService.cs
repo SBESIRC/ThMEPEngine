@@ -29,14 +29,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         frameList[j].Closed = true;
                         ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(frameList[i], frameList[j]);
 
-                        //has bug!
-                        if (relation.IsContains || relation.IsOverlaps)
+                        if (relation.IsContains)
                         {
                             holes.Add(frameList[j]);
                             allHoles.Add(frameList[j]);
                         }
-
-                      else  if (relation.IsOverlaps)
+                        else if (relation.IsIntersects && relation.IsOverlaps)
                         {
                             var polyCollection = new DBObjectCollection() { frameList[i] };
                             var overlap = frameList[i].Intersection(polyCollection);
