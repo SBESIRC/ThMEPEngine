@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -13,7 +10,6 @@ using GeometryExtensions;
 
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
@@ -22,6 +18,8 @@ using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
+using ThMEPEngineCore.Algorithm;
+using NFox.Cad;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
 {
@@ -98,13 +96,11 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
 
         public static bool isAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
         {
-            var objs = new DBObjectCollection();
-            objs.Add(frame);
-            HoleList.ForEach(x => objs.Add(x));
-            var geometry = objs.BuildAreaGeometry();
-            var isAisleArea = ThMEPEngineCoreGeUtils.IsAisleArea(geometry, shrinkValue, threshold);
-
-            return isAisleArea;
+            return ThMEPPolygonShapeRecognitionService.IsAisle(
+                frame,
+                HoleList,
+                shrinkValue,
+                threshold);
         }
 
         public static void addResult(List<ThLayoutPt> layoutResult, List<Polyline> blindsResult, Dictionary<Point3d, Vector3d> localPts, List<Polyline> localBlinds, string blkName)
