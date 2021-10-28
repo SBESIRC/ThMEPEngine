@@ -1,12 +1,9 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
-using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
@@ -277,7 +274,7 @@ namespace ThMEPEngineCore
                 var geos = objs
                     .OfType<Entity>()
                     .Select(o => new ThGeometry() { Boundary = o })
-                    .ToList(); 
+                    .ToList();
                 ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
             }
         }

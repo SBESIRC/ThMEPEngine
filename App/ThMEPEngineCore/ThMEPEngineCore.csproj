@@ -693,6 +693,7 @@
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
+    <Compile Include="ThMEPEngineCoreExtractCmds.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
     <Compile Include="ThMEPEngineCoreLayerUtils.cs" />
