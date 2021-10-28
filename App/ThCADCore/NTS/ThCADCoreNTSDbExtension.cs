@@ -48,26 +48,12 @@ namespace ThCADCore.NTS
         {
             if (polygon.NumInteriorRings > 0)
             {
-                return polygon.ToDbMPolygonEx().OfType<MPolygon>().First();
+                return polygon.ToDbMPolygon();
             }
             else
             {
                 return polygon.Shell.ToDbPolyline();
             }
-        }
-
-        public static DBObjectCollection ToDbCollection(this Polygon polygon, double tolerance = 1.0)
-        {
-            var objs = new DBObjectCollection();
-            if (polygon.NumInteriorRings > 0)
-            {
-                objs = polygon.ToDbMPolygonEx(tolerance);
-            }
-            else
-            {
-                objs.Add(polygon.Shell.ToDbPolyline());
-            }
-            return objs;
         }
 
         public static List<Polyline> ToDbPolylines(this MultiLineString geometries)

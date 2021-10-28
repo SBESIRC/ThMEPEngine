@@ -75,7 +75,7 @@ namespace ThCADCore.NTS
             return results.ToCollection<DBObject>();
         }
 
-        public static DBObjectCollection BuildArea(this DBObjectCollection objs, bool dissolveSharedEdges = true)
+        public static DBObjectCollection BuildArea(this DBObjectCollection objs)
         {
             // 对每个Polygon进行修复
             var filters = new DBObjectCollection();
@@ -90,29 +90,36 @@ namespace ThCADCore.NTS
 
             // 获取面域
             var poylgons = new DBObjectCollection();
-            var geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
+            var geometry = filters.BuildAreaGeometry();
             if (geometry is Polygon polygon)
             {
-                // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
-                // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
-                if (polygon.Area > 1.0 && polygon.Area > polygon.Length)
-                {
-                    polygon.ToDbCollection().OfType<Entity>().ForEach(e => poylgons.Add(e));
-                }
+                poylgons.AddGeometryToDbCollection(polygon);
             }
             else if (geometry is MultiPolygon mPolygons)
             {
                 mPolygons.Geometries.OfType<Polygon>().ForEach(o =>
                 {
-                    // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
-                    // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
-                    if (o.Area > 1.0 && o.Area > o.Length)
-                    {
-                        o.ToDbCollection().OfType<Entity>().ForEach(e => poylgons.Add(e));
-                    }
+                    poylgons.AddGeometryToDbCollection(o);
                 });
             }
             return poylgons;
+        }
+
+        private static void AddGeometryToDbCollection(this DBObjectCollection objs, Polygon polygon)
+        {
+            // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
+            // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
+            if (polygon.Area > 1.0 && polygon.Area > polygon.Length)
+            {
+                if (polygon.NumInteriorRings > 0)
+                {
+                    polygon.ToDbMPolygonEx(1.0).OfType<Entity>().ForEach(o => objs.Add(o));
+                }
+                else if (polygon.Shell != null)
+                {
+                    objs.Add(polygon.Shell.ToDbPolyline());
+                }
+            }
         }
 
         public static MPolygon BuildMPolygon(this DBObjectCollection objs)
@@ -132,11 +139,11 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Geometry BuildAreaGeometry(this DBObjectCollection objs, bool dissolveSharedEdges = true)
+        public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
         {
             var builder = new ThCADCoreNTSBuildArea
             {
-                DissolveSharedEdges = dissolveSharedEdges
+                DissolveSharedEdges = false
             };
             return builder.Build(objs.ToMultiLineString());
         }
