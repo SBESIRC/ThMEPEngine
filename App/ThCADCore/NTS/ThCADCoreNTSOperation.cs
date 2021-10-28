@@ -120,7 +120,7 @@ namespace ThCADCore.NTS
             Geometry geometry = objs.BuildAreaGeometry();
             if (geometry is Polygon polygon)
             {
-                return polygon.ToDbMPolygonEx().OfType<MPolygon>().First();
+                return polygon.ToDbMPolygon();
             }
             else if (geometry is MultiPolygon mPolygons)
             {
@@ -134,8 +134,10 @@ namespace ThCADCore.NTS
 
         public static Geometry BuildAreaGeometry(this DBObjectCollection objs, bool dissolveSharedEdges = true)
         {
-            var builder = new ThCADCoreNTSBuildArea();
-            builder.DissolveSharedEdges = dissolveSharedEdges;
+            var builder = new ThCADCoreNTSBuildArea
+            {
+                DissolveSharedEdges = dissolveSharedEdges
+            };
             return builder.Build(objs.ToMultiLineString());
         }
     }

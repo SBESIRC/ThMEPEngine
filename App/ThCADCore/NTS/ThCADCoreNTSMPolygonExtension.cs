@@ -17,7 +17,6 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSMPolygonExtension
     {
-        [Obsolete("该方法已被弃用，请使用ToDbMPolygonEx代替")]
         public static MPolygon ToDbMPolygon(this Polygon polygon)
         {
             if (polygon.IsValid)
