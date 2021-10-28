@@ -138,7 +138,18 @@ namespace ThMEPWSS.Pipe.Model
                     }
                 }
             }
-
+            bool _HasFireHydrant;
+            public bool HasFireHydrant
+            {
+                get => _HasFireHydrant;
+                set
+                {
+                    if (value != _HasFireHydrant)
+                    {
+                        _HasFireHydrant = value; OnPropertyChanged(nameof(HasFireHydrant));
+                    }
+                }
+            }
             public IEnumerable<string> PipeConnectionTypes => _PipeConnectionTypes;
             string _PipeConnectionType;
             public string PipeConnectionType
@@ -171,25 +182,13 @@ namespace ThMEPWSS.Pipe.Model
 
         public enum AdditionalFireHydrantEnum
         {
+            YesYes,
             YesNo,
             NoYes,
             NoNo,
         }
 
         public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
-        bool _AdditionalFireHydrantShallBeSetOnTheFirstFloor;
-        public bool AdditionalFireHydrantShallBeSetOnTheFirstFloor
-        {
-            get => _AdditionalFireHydrantShallBeSetOnTheFirstFloor;
-            set
-            {
-                if (value != _AdditionalFireHydrantShallBeSetOnTheFirstFloor)
-                {
-                    _AdditionalFireHydrantShallBeSetOnTheFirstFloor = value;
-                    OnPropertyChanged(nameof(AdditionalFireHydrantShallBeSetOnTheFirstFloor));
-                }
-            }
-        }
 
         AdditionalFireHydrantEnum _AdditionalFireHydrant;
         public AdditionalFireHydrantEnum AdditionalFireHydrant
@@ -351,7 +350,7 @@ namespace ThMEPWSS.Pipe.Model
             double floorHeight = 0.00;
             for (int floor = 1; floor < maxFloorNum + 2; floor++)
             {
-                if(floor == 1)
+                if (floor == 1)
                 {
                     floorHeight = 0;
                 }
@@ -364,7 +363,7 @@ namespace ThMEPWSS.Pipe.Model
                     floorHeight += _GeneralFloor;
 
                 }
-                floorHeightDic.Add(Convert.ToString(floor),(floor==1? "±" : "")+ (floorHeight / 1000.0).ToString("0.00"));
+                floorHeightDic.Add(Convert.ToString(floor), (floor == 1 ? "±" : "") + (floorHeight / 1000.0).ToString("0.00"));
             }
 
             return floorHeightDic;

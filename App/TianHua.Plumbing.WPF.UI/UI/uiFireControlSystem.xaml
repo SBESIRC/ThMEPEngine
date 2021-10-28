@@ -34,10 +34,10 @@
                     <Button x:Name="btnHeights" Click="btnHeights_Click" Width="80">层高设置</Button>
                 </StackPanel>
                 <StackPanel Orientation="Horizontal">
-                <cus:InputTextBox TextBoxInputType="InputDouble" Height="20" Width="80" VerticalAlignment="Center" NumCanMinus="False" Text="{Binding FaucetFloor,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
-                <Label Content="mm" Width="Auto" Margin="5,0,0,0"/>
-                    </StackPanel>
-                
+                    <cus:InputTextBox TextBoxInputType="InputDouble" Height="20" Width="80" VerticalAlignment="Center" NumCanMinus="False" Text="{Binding FaucetFloor,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
+                    <Label Content="mm" Width="Auto" Margin="5,0,0,0"/>
+                </StackPanel>
+
             </StackPanel>
             <Border Height="1" BorderThickness="0,1,0,0" Margin="0,5,0,0"/>
             <Label Content="分区设置(从低到高)" Width="Auto" Margin="0,5,0,5"></Label>
@@ -58,7 +58,7 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTemplateColumn Header="管径" Width="60" CanUserSort="False" >
+                    <DataGridTemplateColumn Header="环管管径" Width="60" CanUserSort="False" >
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <ComboBox Height="20" ItemsSource="{Binding DNListItems,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding DNSelectItem,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
@@ -82,7 +82,7 @@
                 </Grid.ColumnDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Content="单元编号："/>
                 <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False" Grid.Row="0" Grid.Column="1" Height="22" Grid.ColumnSpan="2" Text="{Binding Serialnumber,Mode=TwoWay,ValidatesOnNotifyDataErrors=True,UpdateSourceTrigger=PropertyChanged}"/>
-                
+
                 <Label Grid.Row="1" Grid.Column="0" Content="普通层消火栓："></Label>
                 <cus:InputTextBox Grid.Row="1" Grid.Column="1"  Height="22" HintText="" NumCanMinus="False" TextBoxInputType="InputInteger"
                                    Text="{Binding CountsGeneral,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
@@ -90,7 +90,7 @@
 
                 <Label Grid.Row="2" Grid.Column="0" Content="避难层消火栓："></Label>
                 <cus:InputTextBox Grid.Row="2" HintText="" Grid.Column="1" TextBoxInputType="InputInteger" Height="22" Text="{Binding CountsRefuge,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"/>
-                
+
                 <Label Grid.Row="3" Grid.Column="0" Content="消火栓类型"></Label>
                 <ComboBox Grid.Row="3"  Grid.Column="1" Grid.ColumnSpan="2" Height="22" 
                            HorizontalAlignment="Stretch"
@@ -105,10 +105,12 @@
                 <RadioButton GroupName="CreationLayerGroup" Margin="5,0,10,0" IsChecked="{Binding IsRoofRing}" Content="屋顶"/>
                 <RadioButton GroupName="CreationLayerGroup" Margin="10,0,0,0" IsChecked="{Binding IsTopLayerRing}" Content="顶层"/>
             </StackPanel>
-            <CheckBox Content="设置试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
-            <Button x:Name="btnSetHighlevelNozzleAndSemiPlatformNozzle" Click="btnSetHighlevelNozzleAndSemiPlatformNozzle_Click" Height="25" Width="150"></Button>
+            <DockPanel LastChildFill="False">
+                <CheckBox DockPanel.Dock="Left" Content="设置试验消火栓" Margin="0,10,0,5"  VerticalContentAlignment="Center" IsChecked="{Binding HaveTestFireHydrant}"></CheckBox>
+                <Button DockPanel.Dock="Right" x:Name="btnSetHighlevelNozzleAndSemiPlatformNozzle" Click="btnSetHighlevelNozzleAndSemiPlatformNozzle_Click" Height="25">高级设置</Button>
+            </DockPanel>
         </WrapPanel>
-        
+
         <StackPanel  Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,5,0,0">
             <cus:ImageButton ImageTextLocation="TextOnly" Content="生成" Width="50" Height="24" Name="OK" Click="OK_Click"></cus:ImageButton>
         </StackPanel>

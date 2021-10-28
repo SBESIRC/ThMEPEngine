@@ -34,7 +34,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             InitializeComponent();
             this.vm = vm;
             this.DataContext = vm;
-            btnSetHighlevelNozzleAndSemiPlatformNozzle.Content = "设置高位接管&半平台接管";
         }
         private List<string> CheckFloorInput()
         {
@@ -114,6 +113,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 //ThMEPWSS.Common.Utils.FocusToCAD();
                 //var cmd = new ThFireControlSystemDiagramCmd(vm);
                 //cmd.Execute();
+
                 cb ??= ThMEPWSS.FireProtectionSystemNs.ThFireControlSystemCmd.ExecuteTH;
                 cb(vm);
             }

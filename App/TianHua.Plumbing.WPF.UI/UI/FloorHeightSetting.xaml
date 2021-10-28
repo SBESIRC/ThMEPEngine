@@ -19,7 +19,10 @@
             </StackPanel>
             <Separator></Separator>
             <CheckBox Margin="5,0" IsChecked="{Binding ExistsSpecialFloor}">存在特殊楼层</CheckBox>
-            <TextBox x:Name="tbx" Margin="5" Text="{Binding SpecialFloors}" IsEnabled="{Binding ExistsSpecialFloor}"></TextBox>
+            <DockPanel IsEnabled="{Binding ExistsSpecialFloor}">
+                <Button DockPanel.Dock="Right" x:Name="btnConfirm" Margin="5">确认</Button>
+                <TextBox x:Name="tbx" Margin="5" Text="{Binding SpecialFloors}"></TextBox>
+            </DockPanel>
             <DataGrid IsEnabled="{Binding ExistsSpecialFloor}" Margin="5" Height="130" BorderThickness="0,1,0,1" Background="Transparent" CanUserAddRows="False" AutoGenerateColumns="False" HeadersVisibility="Column"
                       ItemsSource="{Binding Items,Mode=TwoWay}" RowHeight="24">
                 <DataGrid.Columns>
