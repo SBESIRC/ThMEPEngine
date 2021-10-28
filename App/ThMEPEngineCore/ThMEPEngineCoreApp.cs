@@ -23,8 +23,6 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm_New;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.ConnectWiring;
 
 namespace ThMEPEngineCore
 {
@@ -276,7 +274,7 @@ namespace ThMEPEngineCore
                         engine1.Extract(acadDatabase.Database);
                         engine1.Results.ForEach(o => results.Add(o.Geometry));
                     }
-                    else if(result3.StringResult == "平台")
+                    else if (result3.StringResult == "平台")
                     {
                         var engine1 = new ThDB3ShearWallExtractionEngine();
                         engine1.Extract(acadDatabase.Database);
@@ -954,7 +952,7 @@ namespace ThMEPEngineCore
                 pdo.AllowNone = false;
                 pdo.AllowArbitraryInput = true;
                 var pdr = Active.Editor.GetDouble(pdo);
-                if(pdr.Status == PromptStatus.OK)
+                if (pdr.Status == PromptStatus.OK)
                 {
                     hersLength = pdr.Value;
                 }
@@ -1011,16 +1009,16 @@ namespace ThMEPEngineCore
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
                 engine.Elements.Cast<ThIfcStair>().ForEach(o =>
                 {
-                if (o.PlatForLayout.Count != 0)
-                {
-                    var pline = new Polyline();
-                    o.PlatForLayout.ForEach(p =>
+                    if (o.PlatForLayout.Count != 0)
                     {
-                        pline.CreatePolyline(new Point3dCollection(p.ToArray()));
-                        pline.Closed = true;
-                        acadDatabase.ModelSpace.Add(pline);
-                    });
-                        
+                        var pline = new Polyline();
+                        o.PlatForLayout.ForEach(p =>
+                        {
+                            pline.CreatePolyline(new Point3dCollection(p.ToArray()));
+                            pline.Closed = true;
+                            acadDatabase.ModelSpace.Add(pline);
+                        });
+
                     }
 
                     if (o.HalfPlatForLayout.Count != 0)
@@ -1105,45 +1103,6 @@ namespace ThMEPEngineCore
                 aStarOptimizeRoute.SetObstacle(holes);
                 //var res = aStarOptimizeRoute.Plan(pt, line);
                 //acdb.ModelSpace.Add(res);
-            }
-        }
-        [CommandMethod("TIANHUACAD", "THBuildPolyGeo", CommandFlags.Modal)]
-        public void THBuildPolyGeo()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())            
-            {
-                var pso = new PromptSelectionOptions();
-                pso.MessageForAdding = "\n选择要导出的Polyline";
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var psr = Active.Editor.GetSelection(pso, filter);
-                if (psr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in psr.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-
-                objs = objs.BuildArea();
-
-                //输出
-                var fileInfo = new FileInfo(Active.Document.Name);
-                var path = fileInfo.Directory.FullName;
-                objs.OfType<Entity>().ForEach(p =>
-                {
-                    var thGeo = new ThGeometry()
-                    {
-                        Boundary = p,
-                    };
-                    ThGeoOutput.Output(new List<ThGeometry> { thGeo }, path, fileInfo.Name + Guid.NewGuid().ToString());
-                });
             }
         }
     }

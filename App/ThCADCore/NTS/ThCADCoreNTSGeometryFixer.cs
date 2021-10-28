@@ -1,11 +1,4 @@
-﻿using System;
-using NFox.Cad;
-using System.Linq;
-using Dreambuild.AutoCAD;
-using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.OverlayNG;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Utilities;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 

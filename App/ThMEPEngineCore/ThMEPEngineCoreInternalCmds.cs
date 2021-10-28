@@ -1,10 +1,16 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore
@@ -242,6 +248,37 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(line);
                     line.SetDatabaseDefaults();
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THEXPORTGEOJSON", CommandFlags.Modal)]
+        public void ThExportGeoJSON()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var psr = Active.Editor.GetSelection(filter);
+                if (psr.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in psr.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Polyline>(obj));
+                }
+                objs = objs.BuildArea();
+
+                var geos = objs
+                    .OfType<Entity>()
+                    .Select(o => new ThGeometry() { Boundary = o })
+                    .ToList(); 
+                ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
             }
         }
     }
