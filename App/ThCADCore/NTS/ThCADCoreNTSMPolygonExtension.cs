@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Algorithm.Locate;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -207,7 +209,10 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection DifferenceMP(this MPolygon mPolygon, DBObjectCollection objs)
         {
-            return mPolygon.ToNTSPolygon().Difference(objs.UnionGeometries()).ToDbCollection(true);
+            return OverlayNGRobust.Overlay(
+                mPolygon.ToNTSPolygon(), 
+                objs.UnionGeometries(), 
+                SpatialFunction.Difference).ToDbCollection(true);
         }
     }
 }
