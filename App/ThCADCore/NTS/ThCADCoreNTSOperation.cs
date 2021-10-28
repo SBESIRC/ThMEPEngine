@@ -77,39 +77,40 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection BuildArea(this DBObjectCollection objs, bool dissolveSharedEdges = true)
         {
-            var poylgons = new DBObjectCollection();
+            // 对每个Polygon进行修复
             var filters = new DBObjectCollection();
-            objs.OfType<Entity>().ForEach(o =>
+            objs.OfType<Polyline>().ForEach(o =>
             {
-                if (o is Polyline polyline)
-                {
-                    polyline.Fix().OfType<Entity>().ForEach(e => filters.Add(e));
-                }
-                else
-                {
-                    filters.Add(o);
-                }
+                o.Fix().OfType<Polyline>().ForEach(e => filters.Add(e));
             });
-            if(filters.Count > 0)
+            if (filters.Count == 0)
             {
-                var geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
-                if (geometry is Polygon polygon)
+                return new DBObjectCollection();
+            }
+
+            // 获取面域
+            var poylgons = new DBObjectCollection();
+            var geometry = filters.BuildAreaGeometry(dissolveSharedEdges);
+            if (geometry is Polygon polygon)
+            {
+                // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
+                // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
+                if (polygon.Area > 1.0 && polygon.Area > polygon.Length)
                 {
-                    poylgons.Add(polygon.ToDbEntity());
+                    polygon.ToDbCollection().OfType<Entity>().ForEach(e => poylgons.Add(e));
                 }
-                else if (geometry is MultiPolygon mPolygons)
+            }
+            else if (geometry is MultiPolygon mPolygons)
+            {
+                mPolygons.Geometries.OfType<Polygon>().ForEach(o =>
                 {
                     // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
                     // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
-                    mPolygons.Geometries.OfType<Polygon>().Where(o => o.Area > 1.0 && o.Area > o.Length).ForEach(o =>
+                    if (o.Area > 1.0 && o.Area > o.Length)
                     {
                         o.ToDbCollection().OfType<Entity>().ForEach(e => poylgons.Add(e));
-                    });
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                    }
+                });
             }
             return poylgons;
         }

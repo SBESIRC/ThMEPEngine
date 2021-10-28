@@ -98,25 +98,5 @@ namespace ThCADCore.NTS
         {
             return geometry.ToDbObjects(keepHoles).ToCollection();
         }
-
-        public static Point3d GetMaximumInscribedCircleCenter(this DBObjectCollection curves)
-        {
-            var builder = new ThCADCoreNTSBuildArea();
-            var geometry = builder.Build(curves.ToMultiLineString());
-            if (geometry is Polygon polygon)
-            {
-                return polygon.GetMaximumInscribedCircleCenter();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
-        public static Point3d GetCentroid(this DBObjectCollection curves)
-        {
-            var hull = ConvexHull.Create(curves.ToMultiLineString());
-            return Centroid.GetCentroid(hull).ToAcGePoint3d();
-        }
     }
 }
