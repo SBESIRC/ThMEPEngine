@@ -24,11 +24,12 @@ namespace ThMEPWSS.Common
             using (var acadDatabase = AcadDatabase.Active())
             {
                 //if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
+                //{
+                    
+                //}
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
-                    {
-                        var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
-                    }
+                    var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming), true);//楼层框定
                 }
             }
             while (true)

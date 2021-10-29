@@ -26,6 +26,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
+                   .Where(o => o is BlockReference || o.GetType().Name.Contains("ImpCurve"))
+                   .Where(o => !IsNotTargetLayer(o.Layer))
                    .Where(o => !IsTCHPipeFitting(o))
                    .Where(o => !o.IsTCHValve())
                    .Where(o => !o.IsTCHText())
@@ -64,6 +66,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
                 sprayIn.Verticals = GetVerticals();
             }
+        }
+
+        private bool IsNotTargetLayer(string layer)
+        {
+            return layer.Contains("W-RAIN-PIPE") ||
+                   layer.Contains("W-FRPT-HYDT-PIPE");
         }
 
         public List<Point3dEx> GetVerticals()

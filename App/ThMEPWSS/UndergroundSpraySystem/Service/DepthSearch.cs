@@ -102,10 +102,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 rstPath.AddRange(tempPath);
                 return;
             }
+            if(!sprayIn.PtDic.ContainsKey(cur))
+            {
+                ;
+            }
             var neighbors = sprayIn.PtDic[cur];//当前点的邻接点
             foreach (Point3dEx p in neighbors)
             {
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
+                if(!sprayIn.PtTypeDic.ContainsKey(p))
+                {
+                    continue;
+                }
                 if (sprayIn.PtTypeDic[p].Contains("AlarmValve")) continue;
                 tempPath.Add(p);
                 visited.Add(p);
@@ -120,7 +128,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         {
             if (cur.Equals(targetPt))//找到目标点，返回最终路径
             {
-                tempPath.Add(cur);
+                //tempPath.Add(cur);
                 rstPath.AddRange(tempPath);
                 return;
             }
@@ -131,6 +139,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 if (!p.Equals(targetPt) && visited.Contains(p)) continue;
                 if (pts.Contains(p) && !p.Equals(targetPt)) 
                     continue;
+                if (!sprayIn.PtTypeDic.ContainsKey(p))
+                {
+                    continue;
+                }
                 if (sprayIn.PtTypeDic[p].Contains("AlarmValve"))
                 {
                     flag = true;

@@ -3,12 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
 using ThMEPWSS.Uitl.ExtensionsNs;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.Block;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
@@ -26,17 +21,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 try
                 {
-                    if(pt._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815, 0))<10)
+                    double fireNums = 0;
+
+                    if (pt._pt.DistanceTo(new Point3d(18240983.2767, 21199036.1798, 0)) < 10)
                     {
                         ;
                     }
-                    double fireNums = 0;
-                    
                     if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
                     {
                         fireNums = spraySystem.SubLoopFireAreasDic[pt][0];
-                    }
-                    
+                    }                  
                     if(!spraySystem.BranchPtDic.ContainsKey(pt))//支管图纸绘制起始点不存在
                     {
                         continue;//跳过这个点
@@ -48,10 +42,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         continue;//跳过这个点
                     }
                     var tpts = spraySystem.BranchDic[pt];
-                    if(tpts.Count > 1)
-                    {
-                        ;
-                    }
+
                     bool hasAutoValve = true;
                     foreach(var tpt in tpts)
                     {
@@ -84,6 +75,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                             var termPt = sprayIn.TermPtDic[tpt];
                             bool signelBranch = true;
+                            string DN = "";
+                            foreach(var vpt in sprayIn.TermDnDic.Keys)
+                            {
+                                if(tpt._pt.DistanceTo(vpt._pt) < 100)//端点管径标注包含当前点
+                                {
+                                    DN = sprayIn.TermDnDic[vpt];
+                                }
+                            }
+
                             if (termPt.Type == 1)//防火分区
                             {
                                 if (!spraySystem.FireAreaStPtDic.ContainsKey(pt))
@@ -102,7 +102,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 }
 
                                 var firePt = fireStpt.OffsetX((fireNums - branchNums - 1) * 5500);
-                                var fireDistrict = new FireDistrictRight(firePt, termPt);
+                                
+                                var fireDistrict = new FireDistrictRight(firePt, termPt, DN);
                                 sprayOut.FireDistricts.Add(fireDistrict);
                                 sprayOut.PipeLine.Add(new Line(stPt, new Point3d(firePt.X, stPt.Y, 0)));
                                 sprayOut.PipeLine.Add(new Line(firePt, new Point3d(firePt.X, stPt.Y, 0)));
@@ -150,12 +151,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             {
                                 var pumpPt = new Point3d(stPt.X, sprayOut.PipeInsertPoint.Y + 1300, 0);
                                 sprayOut.PipeLine.Add(new Line(stPt, pumpPt));
-                                sprayOut.WaterPumps.Add(new WaterPump(pumpPt));
+                                sprayOut.WaterPumps.Add(new WaterPump(pumpPt, termPt.PipeNumber, DN));
                             }
                             if (termPt.Type == 4)
                             {
                                 bool needEvade = true;//默认需要躲避
-                                var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 600, 0);
+                                var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 400, 0);
                                 var pt2 = pt1.OffsetX(650);
                                 var pt3 = pt2.OffsetY(1300);
                                 double length = GetLength(termPt.PipeNumber) + 100;
@@ -191,13 +192,24 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     sprayOut.PipeLine.Add(new Line(stPt4, pt1));
 
                                 }
-                                sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                                if(spraySystem.ValveDic.ContainsKey(tpt))
+                                {
+                                    sprayOut.PipeLine.Add(new Line(pt1, pt1.OffsetX(175)));
+                                    sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetX(-175)));
+                                    sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt1.OffsetX(175)));
+                                }
+                                else
+                                {
+                                    sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                                }
                                 sprayOut.PipeLine.Add(new Line(pt2, pt3));
                                 sprayOut.NoteLine.Add(new Line(pt3, pt4));
                                 sprayOut.NoteLine.Add(new Line(pt4, pt5));
                                 sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
-                                var text = new Text(termPt.PipeNumber, pt5);
+                                var text = new Text(termPt.PipeNumber.Split('喷')[0], pt5);
+                                var dn = new Text(DN, pt5.OffsetXY(150, -400));
                                 sprayOut.Texts.Add(text);
+                                sprayOut.Texts.Add(dn);
                                 stPt4 = stPt4.OffsetX(600);
                                 signelBranch = false;
                             }
@@ -214,7 +226,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     ;
                 }
-
             }
         }
 

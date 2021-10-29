@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -15,6 +16,44 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 var alarmNums = 0;//支路数
                 var fireAreaNums = 0;//防火分区数
+
+                //判断报警阀的输出顺序
+                bool indexOrder = true;
+                try
+                {
+                    var alarmText = "";
+                    for (int i = 1; i < branchLoop.Count - 1; i++)
+                    {
+                        var pt = branchLoop[i];
+                        var type = sprayIn.PtTypeDic[pt];
+                        if (type.Contains("AlarmValve"))
+                        {
+                            if (sprayIn.AlarmTextDic.ContainsKey(pt))
+                            {
+                                if (alarmText.Equals(""))
+                                {
+                                    alarmText = System.Text.RegularExpressions.Regex.Replace(sprayIn.AlarmTextDic[pt], @"[^0-9]+", "");
+                                    continue;
+                                }
+                                var alarmText2 = System.Text.RegularExpressions.Regex.Replace(sprayIn.AlarmTextDic[pt], @"[^0-9]+", "");
+                                if (Convert.ToInt32(alarmText) > Convert.ToInt32(alarmText2))
+                                {
+                                    indexOrder = false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
+                if (!indexOrder)
+                {
+                    branchLoop.Reverse();
+                }
+
                 for (int i = 1; i < branchLoop.Count - 1; i++)
                 {
                     try
@@ -90,13 +129,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 spraySystem.BranchDic.Add(pt, termPts);
                                 if (valvePts.Count != 0)
                                 {
-                                    spraySystem.ValveDic.Add(pt, valvePts);
+                                    foreach(var tpt in termPts)
+                                    {
+                                        spraySystem.ValveDic.Add(tpt, true);
+
+                                    }
                                 }
                             }
                         }
                     }
                     catch
                     {
+                        ;
                         
                     }
                 }
@@ -117,7 +161,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                     catch
                     {
-                        
+                        ;
                     }
                 }
             }

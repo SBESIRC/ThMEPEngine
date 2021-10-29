@@ -99,10 +99,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
                         spraySystem.BranchPtDic.Add(pt, alarmValve.EndPt);
                         sprayOut.AlarmValves.Add(alarmValve);//插入湿式报警阀平面
-                        if (sprayIn.AlarmTextDic.ContainsKey(pt))
+                        foreach (var apt in sprayIn.AlarmTextDic.Keys)
                         {
-                            var text = new Text(sprayIn.AlarmTextDic[pt], stPt.OffsetXY(-200, -550));
-                            sprayOut.Texts.Add(text);
+                            if (apt._pt.DistanceTo(pt._pt) < 50)
+                            {
+                                var text = new Text(sprayIn.AlarmTextDic[apt], stPt.OffsetXY(-200, -550));
+                                sprayOut.Texts.Add(text);
+                            }
                         }
                         spraySystem.FireAreaStPtDic.Add(pt, spt3.OffsetXY(alarmGap, 5200));
                         stPt = stPt.OffsetX(alarmGap);

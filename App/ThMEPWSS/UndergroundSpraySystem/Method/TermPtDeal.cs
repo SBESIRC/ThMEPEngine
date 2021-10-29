@@ -1,7 +1,9 @@
-﻿ using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Catel.Linq;
 using DotNetARX;
+using GeometryExtensions;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -24,7 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 try
                 {
                     bool flag = false;
-                    if(pt._pt.DistanceTo(new Point3d(18269360.4158,21145157.9294, 0)) < 10)
+                    if(pt._pt.DistanceTo(new Point3d(18367083.8131, 21124583.2218, 0)) < 10)
                     {
                         ;
                     }
@@ -87,13 +89,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         }
 
 
-        public static void CreateTermPtDic(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex)
+        public static void CreateTermPtDic(this SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex, 
+            ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
-            foreach(var pt in sprayIn.Verticals)//每个圈圈的中心点
+            foreach(var pt in sprayIn.Verticals)
             {
                 try
                 {
-                    CreateTermPtDic2(pt, ref sprayIn, textSpatialIndex);
+                    if(pt._pt.DistanceTo(new Point3d(18399664.2717, 21206988.0413, 0)) < 10)
+                    {
+                        ;
+                    }
+                    GetCollectiveLabelDic(pt, ref sprayIn, textSpatialIndex, pipeDNSpatialIndex);
                 }
                 catch
                 {
@@ -104,7 +111,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 try
                 {
-                    CreateTermPtDic3(pt, ref sprayIn);
+                    GetNoVerticalLabelDic(pt, ref sprayIn);
                 }
                 catch
                 {
@@ -113,8 +120,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
-        public static void CreateTermPtDic2(Point3dEx pt, ref SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex)
+        public static void GetCollectiveLabelDic(Point3dEx pt, ref SprayIn sprayIn, ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
+            //集体标注处理
             if(sprayIn.PtTextDic.ContainsKey(pt))
             {
                 if(sprayIn.PtTextDic[pt].First() is null || sprayIn.PtTextDic[pt].First().Equals(""))
@@ -125,11 +133,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     return;
                 }
-                
             }
-            var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, pt, textSpatialIndex);
-    
-            foreach(var pt2 in OriginTermStartPtDic.Keys)
+            var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, pt, textSpatialIndex, pipeDNSpatialIndex);
+
+            foreach (var pt2 in OriginTermStartPtDic.Keys)
             {
                 var tpt = new TermPoint2(pt2);
                 tpt.PipeNumber = OriginTermStartPtDic[pt2].TextString;
@@ -140,18 +147,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             }
         }
 
-        public static void CreateTermPtDic3(Point3dEx pt, ref SprayIn sprayIn)
+        public static void GetNoVerticalLabelDic(Point3dEx pt, ref SprayIn sprayIn)
         {
+            //无立管标注的处理
             //ToDo
         }
 
         private static Dictionary<Point3dEx, DBText> GetOriginTermStartPtEx(SprayIn sprayIn, Point3dEx termPtEx,
-            ThCADCoreNTSSpatialIndex textIndex)
+            ThCADCoreNTSSpatialIndex textIndex, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
         {
-            var rstText2PipeBoundDic = new Dictionary<Point3dEx, DBText>();
-
-            //get terminal origin point
-            var termStartPtEx = new Point3dEx(Point3d.Origin);
             var verPipeCenters = sprayIn.Verticals;
             var verPipeBounds = verPipeCenters.Select(c =>
             {
@@ -159,14 +163,29 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 return pl;
             }
             );
-
             var verPipeBoundSpatialIndex = new ThCADCoreNTSSpatialIndex(verPipeBounds.ToList().ToCollection());
-
-            var termPtPolyline = CreatePolyline(termPtEx, 100);
-            var selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
 
             var leaderLines = sprayIn.LeadLines;
             var leaderLineSpatialIndex = new ThCADCoreNTSSpatialIndex(leaderLines.ToCollection());
+
+            var termStartPtEx = GetTermStartPtEx(termPtEx, leaderLineSpatialIndex, verPipeBoundSpatialIndex);
+            if(termStartPtEx._pt.DistanceTo(new Point3d(18399982.3078,21207490.5105,0)) <10)
+            {
+            }
+            var rstText2PipeBoundDic = GetTermPtTextDic(sprayIn, termStartPtEx, textIndex, pipeDNSpatialIndex,
+                                          leaderLineSpatialIndex, verPipeBoundSpatialIndex);
+
+            return rstText2PipeBoundDic;
+        }
+
+        private static Point3dEx GetTermStartPtEx(Point3dEx termPtEx, ThCADCoreNTSSpatialIndex leaderLineSpatialIndex, 
+            ThCADCoreNTSSpatialIndex verPipeBoundSpatialIndex)
+        {
+            //get terminal origin point
+            var termStartPtEx = new Point3dEx(Point3d.Origin);
+            var termPtPolyline = CreatePolyline(termPtEx, 100);
+            var selected = verPipeBoundSpatialIndex.SelectCrossingPolygon(termPtPolyline);
+
             if (selected.Count > 0)
             {
                 var curPtBounds = selected[0];
@@ -227,11 +246,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
                 }
             }
+            return termStartPtEx;
+        }
+
+        private static Dictionary<Point3dEx, DBText> GetTermPtTextDic(SprayIn sprayIn, Point3dEx termStartPtEx,
+            ThCADCoreNTSSpatialIndex textIndex, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex, 
+            ThCADCoreNTSSpatialIndex leaderLineSpatialIndex, ThCADCoreNTSSpatialIndex verPipeBoundSpatialIndex)
+        {
+            var rstText2PipeBoundDic = new Dictionary<Point3dEx, DBText>();
 
             //map vertical pipe point to text
             var originPtExBounds = CreatePolyline(termStartPtEx);
             var selectedLeaderLines = leaderLineSpatialIndex.SelectCrossingPolygon(originPtExBounds);
-            
+
             if (selectedLeaderLines.Count == 1)
             {
                 List<Polyline> orderedTermPolyLines = new List<Polyline>();
@@ -242,6 +269,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 var visitedLines = new HashSet<Line>();
 
                 var textsSet = new HashSet<DBText>();
+                var DnSet = new HashSet<DBText>();//保存管径
                 var lastLine = new Line();
                 var startPt = termStartPtEx._pt.ToPoint2D();
                 while (lineQueue.Count > 0)
@@ -251,7 +279,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     var lineBufferBounds = curLine.Buffer(10);
                     var selectedVerPipeBounds = verPipeBoundSpatialIndex.SelectCrossingPolygon(lineBufferBounds).Cast<Polyline>().ToList();
 
-                    var orderedTempPipeBounds =                     
+                    var orderedTempPipeBounds =
                         selectedVerPipeBounds.OrderBy(b => b.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(startPt));
 
                     foreach (var b in orderedTempPipeBounds)
@@ -274,13 +302,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                             if (visitedLines.Contains(l)) continue;
 
                             var lineBounds = CreateLineHalfBuffer(l, 300);
-                            
-                            var texts = textIndex.SelectCrossingPolygon(lineBounds);
 
+                            var texts = textIndex.SelectCrossingPolygon(lineBounds);
+                            var dn = pipeDNSpatialIndex.SelectCrossingPolygon(lineBounds);
+                            if(texts.Count == 0 || dn.Count == 0)
+                            {
+                                ;
+                            }
                             if (texts.Count > 0)
                             {
                                 foreach (var t in texts)
                                     textsSet.Add(t as DBText);
+                            }
+                            if (dn.Count > 0)
+                            {
+                                foreach (var t in dn)
+                                    DnSet.Add(t as DBText);
                             }
                             lineQueue.Enqueue(l);
                         }
@@ -294,7 +331,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     }
 
                     visitedLines.Add(curLine);
-                    if(lastLine.StartPoint.DistanceTo(new Point3d(0,0,0))>1)
+                    if (lastLine.StartPoint.DistanceTo(new Point3d(0, 0, 0)) > 1)
                     {
                         if (curLine.StartPoint.DistanceTo(lastLine.StartPoint) > curLine.EndPoint.DistanceTo(lastLine.StartPoint))
                         {
@@ -304,26 +341,42 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     lastLine = curLine;
                 }
 
-                var orderedTexts = textsSet.OrderBy(t => t.GeometricExtents.MinPoint.ToPoint2D().GetDistanceTo(termStartPtEx._pt.ToPoint2D())).ToList();
-
+                var orderedTexts = textsSet.OrderBy(t => t.GeometricExtents.MinPoint.TransformBy(Active.Editor.WCS2UCS()).Y).ToList();
+                var orderDNs = DnSet.OrderBy(t => t.GeometricExtents.MinPoint.TransformBy(Active.Editor.WCS2UCS()).Y).ToList();
                 var dbTextIndex = orderedTexts.Count - 1;
                 var pipeBoundsIndex = orderedTermPolyLines.Count - 1;
-
                 while (dbTextIndex >= 0 && pipeBoundsIndex >= 0)
                 {
                     var bounds = orderedTermPolyLines[pipeBoundsIndex].GeometricExtents;
                     var centerPt = PtTools.GetMidPt(bounds.MaxPoint, bounds.MinPoint);
                     var text = orderedTexts[dbTextIndex];
                     rstText2PipeBoundDic.Add(new Point3dEx(centerPt), text);
+
                     dbTextIndex--;
+                    pipeBoundsIndex--;
+                }
+
+                var dnIndex = orderDNs.Count - 1;
+                pipeBoundsIndex = orderedTermPolyLines.Count - 1;
+                while (dnIndex >= 0 && pipeBoundsIndex >= 0)
+                {
+                    var bounds = orderedTermPolyLines[pipeBoundsIndex].GeometricExtents;
+                    var centerPt = PtTools.GetMidPt(bounds.MaxPoint, bounds.MinPoint);
+                    var text = orderDNs[dnIndex].TextString;
+                    var targetPt = new Point3d(18399910.5175,21207031.1996, 0);
+                    if (centerPt.DistanceTo(targetPt) <100)
+                    {
+                        ;
+                    }
+                    sprayIn.TermDnDic.Add(new Point3dEx(centerPt), text);
+
+                    dnIndex--;
                     pipeBoundsIndex--;
                 }
             }
 
             return rstText2PipeBoundDic;
         }
-
-
         private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
         {
             var pl = new Polyline();

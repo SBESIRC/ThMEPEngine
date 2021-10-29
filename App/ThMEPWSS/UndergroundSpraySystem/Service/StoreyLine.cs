@@ -53,10 +53,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             Point3d insertPt = sprayOut.InsertPoint.Cloned();
             foreach (var fNumber in floors.Keys)
             {
-                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 3000, insertPt.Y, 0)));
+                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
                 insertPt = insertPt.OffsetY(fHeight);
             }
-            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 3000, insertPt.Y, 0)));
+            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
         }
     }
 }

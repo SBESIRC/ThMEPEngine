@@ -14,7 +14,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public List<List<Point3dEx>> BranchLoops { get; set; }//报警阀环路
         public Dictionary<Point3dEx, List<Point3dEx>> BranchDic { get; set; }//支路
         public Dictionary<Point3dEx, List<Point3dEx>> BranchThroughDic { get; set; }//穿越点支路
-        public Dictionary<Point3dEx, List<Point3dEx>> ValveDic { get; set; }
+        public Dictionary<Point3dEx, bool> ValveDic { get; set; }//端点是否存在阀门
         public Dictionary<Point3dEx, List<int>> SubLoopAlarmsDic { get; set; }//支路的报警阀数目
         public Dictionary<Point3dEx, List<int>> SubLoopFireAreasDic { get; set; }//支路的防火分区数目
         public Dictionary<Point3dEx, int> SubLoopBranchDic { get; set; }//次环支路数目
@@ -36,7 +36,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             BranchLoops = new List<List<Point3dEx>>();
             BranchDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             BranchThroughDic = new Dictionary<Point3dEx, List<Point3dEx>>();
-            ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();
+            ValveDic = new Dictionary<Point3dEx, bool>();
             SubLoopAlarmsDic = new Dictionary<Point3dEx, List<int>>();
             SubLoopFireAreasDic = new Dictionary<Point3dEx, List<int>>();
             SubLoopBranchDic = new Dictionary<Point3dEx, int>();

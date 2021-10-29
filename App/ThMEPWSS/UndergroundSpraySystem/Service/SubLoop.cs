@@ -52,6 +52,25 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         }
                         if (type.Equals("BranchLoop"))
                         {
+                            var branchNums = branchs.Count;
+                            bool firstFlag = true;
+                            for (int j = branchNums - 1; j >= 0; j--)
+                            {
+                                try
+                                {
+                                    var bpt = branchs[j];
+                                    waterPumpFlag = GetBranchPt(bpt, stPt, sprayOut, spraySystem, sprayIn, ref firstBranch,
+                                        branchIndex, waterPumpFlag, firstFlag, ref branchLoopPtDic, ref branchPtDic);
+                                    firstFlag = false;
+                                    branchIndex++;
+                                }
+                                catch (Exception ex)
+                                {
+
+                                }
+
+                            }
+                            branchs.Clear();
                             stPt = GetBranchLoopPt(pt, stPt, sprayOut, spraySystem, sprayIn, branchLoopNum, rstPath);
                             branchLoopNum++;
                         }
@@ -61,14 +80,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         }
                         if (type.Equals("Branch"))
                         {
-
                             branchs.Add(pt);
                         }
                         
-                        if (nextType.Equals("SubLoop") && i != rstPath.Count - 2)
+                        if (nextType.Equals("SubLoop"))
                         {
-                            sprayOut.PipeLine.Add(new Line(stPt, spraySystem.SubLoopPtDic[rstPath[i + 1]]));
+                            if(i != rstPath.Count - 2)
+                            {
+                                sprayOut.PipeLine.Add(new Line(stPt, spraySystem.SubLoopPtDic[rstPath[i + 1]]));
+
+                            }
+                            else
+                            {
+                                ;
+                            }
                         }
+                        
                     }
                     catch
                     {
@@ -76,24 +103,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
                     
                 }
-                var branchNums = branchs.Count;
-                bool firstFlag = true;
-                for(int i = branchNums - 1; i >=0; i--)
-                {
-                    try
-                    {
-                        var pt = branchs[i];
-                        waterPumpFlag = GetBranchPt(pt, endPt, sprayOut, spraySystem, sprayIn, ref firstBranch,
-                            branchIndex, waterPumpFlag, firstFlag, ref branchLoopPtDic, ref branchPtDic);
-                        firstFlag = false;
-                        branchIndex++;
-                    }
-                    catch(Exception ex)
-                    {
-                        
-                    }
-                    
-                }
+                
+                
+                
                 for(int i = branchLoopPtDic.Count - 1; i >= 0; i--)
                 {
                     try
@@ -166,11 +178,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             SprayIn sprayIn, ref bool firstBranch, int branchIndex, bool waterPumpFlag, bool firstFlag,
             ref Dictionary<Point3dEx, Point3d> branchLoopPtDic, ref Dictionary<Point3dEx, Point3d> branchPtDic)
         {
-            var height = 600;//sprayIn.FloorHeight * 0.06;
+            var height = 400;//sprayIn.FloorHeight * 0.06;
             double gap = -branchIndex * sprayIn.PipeGap - 3200 * Convert.ToInt32(waterPumpFlag);
             if (firstFlag)
             {
-                gap = -1000;
+                gap = -3600;//
             }
             var pt = stPt.OffsetX(gap);
             sprayOut.PipeLine.Add(new Line(pt, pt.OffsetY(height)));

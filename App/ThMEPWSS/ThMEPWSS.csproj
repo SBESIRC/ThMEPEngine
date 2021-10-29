@@ -527,6 +527,7 @@
     <Compile Include="UndergroundSpraySystem\Method\TermPtDeal.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmText.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmValve.cs" />
+    <Compile Include="UndergroundSpraySystem\Model\DNLine.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Floor.cs" />
     <Compile Include="UndergroundSpraySystem\Model\FlowIndicator.cs" />
     <Compile Include="UndergroundSpraySystem\Model\LeadLine.cs" />

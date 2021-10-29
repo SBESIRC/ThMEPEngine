@@ -21,38 +21,58 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             bool flag = true;
             foreach (var pt in mainPathList[0])
             {
-                visited.Add(pt);
-                if (sprayIn.PtTypeDic[pt].Contains("SubLoop"))
+                try
                 {
-                    if (flag)
+                    visited.Add(pt);
+                    if (!sprayIn.PtTypeDic.ContainsKey(pt))
                     {
-                        sePts.Add(pt);
-                        flag = false;
                         continue;
                     }
-                    else
+                    if (sprayIn.PtTypeDic[pt].Contains("SubLoop"))
                     {
-                        sePts.Add(pt);
-                        subLoopPts.Add(new List<Point3dEx>(sePts));
-                        sePts.Clear();
-                        flag = true;
-                        continue;
+                        if (flag)
+                        {
+                            sePts.Add(pt);
+                            flag = false;
+                            continue;
+                        }
+                        else
+                        {
+                            sePts.Add(pt);
+                            subLoopPts.Add(new List<Point3dEx>(sePts));
+                            sePts.Clear();
+                            flag = true;
+                            continue;
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    ;
+                }
+                
             }
 
             foreach (var sePt in subLoopPts)
             {
-                tempPath.Clear();
-                tempPath.Add(sePt[0]);
-                visited.Add(sePt[0]);
-                var subLoop = new List<Point3dEx>();
-                DepthSearch.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
-                spraySystem.SubLoops.Add(subLoop);
-                spraySystem.SubLoopBranchDic.Add(subLoop.First(), 0);
-                spraySystem.SubLoopBranchDic.Add(subLoop.Last(), 0);
-                spraySystem.SubLoopBranchPtDic.Add(subLoop.First(), new List<Point3dEx>());
-                spraySystem.SubLoopBranchPtDic.Add(subLoop.Last(), new List<Point3dEx>());
+                try
+                {
+                    tempPath.Clear();
+                    tempPath.Add(sePt[0]);
+                    visited.Add(sePt[0]);
+                    var subLoop = new List<Point3dEx>();
+                    DepthSearch.DfsSubLoop(sePt[0], sePt[1], tempPath, ref visited, ref subLoop, sprayIn);
+                    spraySystem.SubLoops.Add(subLoop);
+                    spraySystem.SubLoopBranchDic.Add(subLoop.First(), 0);
+                    spraySystem.SubLoopBranchDic.Add(subLoop.Last(), 0);
+                    spraySystem.SubLoopBranchPtDic.Add(subLoop.First(), new List<Point3dEx>());
+                    spraySystem.SubLoopBranchPtDic.Add(subLoop.Last(), new List<Point3dEx>());
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
+                
             }
         }
 

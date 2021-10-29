@@ -34,6 +34,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var opt = new PromptPointOptions("指定喷淋系统图插入点: \n");
 
             var propPtRes = Active.Editor.GetPoint(opt);
+            InsertPoint = new Point3d();
             if (propPtRes.Status == PromptStatus.OK)
             {
                 InsertPoint = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());

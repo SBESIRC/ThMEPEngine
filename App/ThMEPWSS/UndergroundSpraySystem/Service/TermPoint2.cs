@@ -53,7 +53,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var adjs = sprayIn.LeadLineDic[StartLine];
             if (adjs.Count > 1)
             {
-                return;
+                ;
             }
             double minDist = 100;
             foreach (var l in sprayIn.LeadLines)

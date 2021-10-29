@@ -15,15 +15,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
     {
         public static void MainLoop(AcadDatabase acadDatabase, List<List<Point3dEx>> mainPathList)
         {
-            var path0 = mainPathList[0];
-            for (int i = 0; i < mainPathList[0].Count - 1; i++)
+            foreach(var path in mainPathList)
             {
-                var pt1 = path0[i]._pt;
-                var pt2 = path0[i + 1]._pt;
-                var line = new Line(pt1, pt2);
-                line.LayerId = DbHelper.GetLayerId("0");
-                acadDatabase.CurrentSpace.Add(line);
+                for (int i = 0; i < mainPathList[0].Count - 1; i++)
+                {
+                    var pt1 = path[i]._pt;
+                    var pt2 = path[i + 1]._pt;
+                    var line = new Line(pt1, pt2);
+                    line.LayerId = DbHelper.GetLayerId("0");
+                    acadDatabase.CurrentSpace.Add(line);
+                }
             }
+            
         }
         public static void SubLoop(AcadDatabase acadDatabase, SpraySystem spraySystem)
         {

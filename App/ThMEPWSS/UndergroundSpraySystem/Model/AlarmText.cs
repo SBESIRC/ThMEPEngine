@@ -94,7 +94,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         if(textStr[0] > 'a' && textStr[0] < 'z')
                         {
                             Regex rex = new Regex(@"^\d+$");//^开始，\d匹配一个数字字符，+出现至少一次，$结尾
-                            if (rex.IsMatch(textStr.Substring(0)))
+                            if (rex.IsMatch(textStr[1].ToString()))
                             {
                                 DBObjs.Add(text);
                             }
@@ -107,10 +107,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         {
                             continue;
                         }
-                        if (textStr[0] > 'a' && textStr[0] < 'z')
+                        if (textStr[0] >= 'a' && textStr[0] <= 'z')
                         {
                             Regex rex = new Regex(@"^\d+$");
-                            if (rex.IsMatch(textStr.Substring(0)))
+                            if (rex.IsMatch(textStr[1].ToString()))
                             {
                                 DBObjs.Add(text2);
                             }
@@ -129,10 +129,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var spatialIndex = new ThCADCoreNTSSpatialIndex(DBObjs);
             foreach (var pt in alarmPts)
             {
+                if(pt._pt.DistanceTo(new Point3d(18364992.5894, 21122847.2703, 0)) < 10)
+                {
+                    ;
+                }
                 int tolerance = 200;
                 while(true)
                 {
-                    if(tolerance > 600)
+                    if(tolerance > 1000)
                     {
                         if (sprayIn.AlarmTextDic.ContainsKey(pt))
                         {

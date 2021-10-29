@@ -11,6 +11,7 @@ using ThCADExtension;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -151,6 +152,38 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
             }
         }
+
+        public static void CreateDNDic(SprayIn sprayIn, DBObjectCollection PipeDN, List<Line> lineList)
+        {
+            foreach (var dn in PipeDN)//创建DN字典对
+            {
+                var dbtext = dn as DBText;
+                var cenPt = General.GetMidPt(dbtext.GeometricExtents.MaxPoint, dbtext.GeometricExtents.MinPoint);
+                var checkPt = new Point3d(dbtext.Position.X, cenPt.Y, 0);
+                if (Math.Abs(dbtext.Rotation - Math.PI / 2) < 0.035)
+                {
+                    checkPt = new Point3d(cenPt.X, dbtext.Position.Y, 0);
+                }
+
+                foreach (var line in lineList)
+                {
+                    var ang = line.Angle;
+                    if (ang.IsParallelTo(dbtext.Rotation) &&
+                       line.GetClosestPointTo(dbtext.Position, false).DistanceTo(checkPt) < 400)
+                    {
+                        if (!sprayIn.PtDNDic.ContainsKey(new LineSegEx(line)))
+                        {
+                            if (Regex.IsMatch(dbtext.TextString, @"[\u4E00-\u9FA5]+$"))
+                            {
+                                continue;
+                            }
+                            sprayIn.PtDNDic.Add(new LineSegEx(line), dbtext.TextString);//贴边标注
+                        }
+                    }
+                }
+            }
+        }
+
 
         public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
@@ -808,6 +841,58 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                         }
                         cnt = fireHydrantSysIn.PtDic[curPt].Count;
+                    }
+                }
+            }
+        }
+
+        public static void CreateBranchDNDic(SprayIn sprayIn, ThCADCoreNTSSpatialIndex pipeDNSpatialIndex)
+        {
+            foreach (var pt in sprayIn.PtDic.Keys)
+            {
+                var visited = new HashSet<Point3dEx>();
+                var cnt = sprayIn.PtDic[pt].Count;
+                var curPt = pt;
+
+                var nextPt = sprayIn.PtDic[pt][0];
+                if (cnt == 1)
+                {
+                    while (cnt < 3)
+                    {
+                        var breakFlag = false;
+                        var line = new Line(curPt._pt, nextPt._pt);
+                        if (line.Length < 1)
+                        {
+                            return;
+                        }
+                        visited.Add(curPt);
+                        var area = line.Buffer(200);
+                        var dbObjs = pipeDNSpatialIndex.SelectCrossingPolygon(area);
+                        if (dbObjs.Count > 0)
+                        {
+                            foreach (var db in dbObjs)
+                            {
+                                if (db is DBText dBText)
+                                {
+                                    if (dBText.Rotation.IsParallelTo(line.Angle))
+                                    {
+                                        sprayIn.TermDnDic.Add(pt, dBText.TextString);
+                                        breakFlag = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (breakFlag) break;
+                        curPt = new Point3dEx(nextPt._pt);
+                        foreach (var pt1 in sprayIn.PtDic[curPt])
+                        {
+                            if (!visited.Contains(pt1))
+                            {
+                                nextPt = pt1;
+                            }
+                        }
+                        cnt = sprayIn.PtDic[curPt].Count;
                     }
                 }
             }

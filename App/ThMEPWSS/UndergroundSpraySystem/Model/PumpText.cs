@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
 {
@@ -54,7 +55,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                   (layer.Contains("-DIMS") ||
                    layer.Contains("-NOTE") ||
                    layer.Contains("-FRPT-HYDT-DIMS") ||
-                   layer.Contains("-SHET-PROF"));
+                   layer.Contains("-SHET-PROF")) || 
+                   layer.Contains("TWT-TEXT");
         }
         private bool IsTCHNote(Entity entity)
         {
@@ -75,14 +77,40 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 var dbObjs = new DBObjectCollection();
                 entity.Explode(dbObjs);
-                dbObjs.Cast<Entity>()
-                    .Where(e => e.IsTCHText())
-                    .Where(e => !(e.ExplodeTCHText()[0] as DBText).TextString.StartsWith("DN"))
-                    .ForEach(e => DBObjs.Add(e.ExplodeTCHText()[0]));
-                dbObjs.Cast<Entity>()
-                    .Where(e => e is DBText)
-                    .Where(e => !(e as DBText).TextString.StartsWith("DN"))
-                    .ForEach(e => DBObjs.Add(e));
+                foreach(var db in dbObjs)
+                {
+                    if((db as Entity).IsTCHText())
+                    {
+                        var textStr = "";//保存当前标注
+                        var location = new Point3d();//保存标注的位置
+                        var first = true;
+                        foreach(var text in (db as Entity).ExplodeTCHText())
+                        {
+                            var st = (text as DBText).TextString;
+                            if (!st.StartsWith("DN"))
+                            {
+                                textStr += (text as DBText).TextString;
+                            }
+                            if(first)
+                            {
+                                location = (text as DBText).Position.OffsetXY(-50, -50);
+                                first = false;
+                            }
+                        }
+                        var dbText = new Block.Text(textStr.Split('喷')[0], location, "W-NOTE").DbText;
+                        DBObjs.Add(dbText);
+                    }
+
+                    if(db is DBText text2)
+                    {
+                        var st = text2.TextString;
+                        if (!st.StartsWith("DN"))
+                        {
+                            var dbText = new Block.Text(st.Split('喷')[0], text2.Position, "W-NOTE").DbText;
+                            DBObjs.Add(dbText);
+                        }
+                    }
+                }
             }
             catch
             {

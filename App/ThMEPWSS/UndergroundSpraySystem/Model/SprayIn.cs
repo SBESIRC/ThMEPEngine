@@ -31,6 +31,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, string> AlarmTextDic { get; set; }//报警阀文字
         public Dictionary<string, double> floorNumberYDic { get; set; }//楼层的Y
 
+        public Dictionary<Point3dEx, string> TermDnDic { get; set; }//端点及其管径标注
+        public Dictionary<Point3dEx, string> SlashDic { get; set; }//斜点的DN字典对
+        public Dictionary<LineSegEx, string> PtDNDic { get; set; }//当前点的DN字典对
+
         public SprayIn(SprayVM _UiConfigs) 
         {
             FloorLength = 80000;
@@ -53,6 +57,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             CurThroughPt = new List<Point3dEx>();
             AlarmTextDic = new Dictionary<Point3dEx, string>();
             floorNumberYDic = new Dictionary<string, double>();
+            TermDnDic = new Dictionary<Point3dEx, string>();
+            SlashDic = new Dictionary<Point3dEx, string>();
+            PtDNDic = new Dictionary<LineSegEx, string>();
         }
     }
 }
