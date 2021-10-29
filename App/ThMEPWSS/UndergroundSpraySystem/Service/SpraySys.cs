@@ -103,14 +103,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowPts = flowIndicator.CreatePts();
             pipeLines.PipeLineSplit(flowPts);
 
-            
-                
             pipeLines.CreatePtDic(sprayIn);
             using (var db = AcadDatabase.Active())
             {
                 var groups = db.Groups;
                 var entIds = groups.SelectMany(g => g.GetAllEntityIds().ToList());
-                var ents = entIds.Select(e => db.Element<Entity>(e)).ToCollection();
+                var ents = entIds.Select(e => db.Element<Entity>(e)).Where(e => e.Layer.Contains("SPRL-PIPE")).ToCollection();
                 var pts = new List<Point3dEx>();
                 foreach (var ent in ents)
                 {
@@ -118,57 +116,72 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     (ent as Entity).Explode(lines);
                     foreach (var line in lines)
                     {
-                        var pt1 = new Point3dEx((line as Line).StartPoint);
-                        var pt2 = new Point3dEx((line as Line).EndPoint);
-                        if (sprayIn.PtDic.ContainsKey(pt1))
+                        if (line is Polyline)
                         {
-                            if(sprayIn.PtDic[pt1].Count == 1)
-                            {
-                                if(!sprayIn.PtDic[pt1][0].Equals(pt2))
-                                {
-                                    sprayIn.PtDic[pt1].Add(pt2);
-                                    if(!sprayIn.PtTypeDic.ContainsKey(pt2))
-                                    {
-                                        sprayIn.PtTypeDic[pt2] = "MainLoop";
-                                    }
-                                    if (!sprayIn.PtTypeDic.ContainsKey(pt1))
-                                    {
-                                        sprayIn.PtTypeDic[pt1] = "MainLoop";
-                                    }
-                                    if (!sprayIn.PtDic.ContainsKey(pt2))
-                                    {
-                                        sprayIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
-                                    }
-                                    break;
-                                }
-                                
-                            }
+                            ;
+                            var pt1 = new Point3dEx((line as Polyline).StartPoint);
+                            pts.Add(pt1);
                         }
-                        if (sprayIn.PtDic.ContainsKey(pt2))
+                        if (line is Line)
                         {
-                            if (sprayIn.PtDic[pt2].Count == 1)
+                            var pt1 = new Point3dEx((line as Line).StartPoint);
+                            var pt2 = new Point3dEx((line as Line).EndPoint);
+                            if (sprayIn.PtDic.ContainsKey(pt1))
                             {
-                                if (!sprayIn.PtDic[pt2][0].Equals(pt1))
+                                if (sprayIn.PtDic[pt1].Count == 1)
                                 {
-                                    sprayIn.PtDic[pt2].Add(pt1);
-                                    if (!sprayIn.PtTypeDic.ContainsKey(pt2))
+                                    if (!sprayIn.PtDic[pt1][0].Equals(pt2))
                                     {
-                                        sprayIn.PtTypeDic[pt2] = "MainLoop";
+                                        sprayIn.PtDic[pt1].Add(pt2);
+                                        if (!sprayIn.PtTypeDic.ContainsKey(pt2))
+                                        {
+                                            sprayIn.PtTypeDic[pt2] = "MainLoop";
+                                        }
+                                        if (!sprayIn.PtTypeDic.ContainsKey(pt1))
+                                        {
+                                            sprayIn.PtTypeDic[pt1] = "MainLoop";
+                                        }
+                                        if (!sprayIn.PtDic.ContainsKey(pt2))
+                                        {
+                                            sprayIn.PtDic.Add(pt2, new List<Point3dEx>() { pt1 });
+                                        }
+                                        break;
                                     }
-                                    if (!sprayIn.PtTypeDic.ContainsKey(pt1))
-                                    {
-                                        sprayIn.PtTypeDic[pt1] = "MainLoop";
-                                    }
-                                    if (!sprayIn.PtDic.ContainsKey(pt1))
-                                    {
-                                        sprayIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
-                                    }
-                                    break;
+
                                 }
                             }
+                            if (sprayIn.PtDic.ContainsKey(pt2))
+                            {
+                                if (sprayIn.PtDic[pt2].Count == 1)
+                                {
+                                    if (!sprayIn.PtDic[pt2][0].Equals(pt1))
+                                    {
+                                        sprayIn.PtDic[pt2].Add(pt1);
+                                        if (!sprayIn.PtTypeDic.ContainsKey(pt2))
+                                        {
+                                            sprayIn.PtTypeDic[pt2] = "MainLoop";
+                                        }
+                                        if (!sprayIn.PtTypeDic.ContainsKey(pt1))
+                                        {
+                                            sprayIn.PtTypeDic[pt1] = "MainLoop";
+                                        }
+                                        if (!sprayIn.PtDic.ContainsKey(pt1))
+                                        {
+                                            sprayIn.PtDic.Add(pt1, new List<Point3dEx>() { pt2 });
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
                         }
+
+                        
+ 
+                        
                     }
+                    ;
                 }
+                ;
             }
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
 

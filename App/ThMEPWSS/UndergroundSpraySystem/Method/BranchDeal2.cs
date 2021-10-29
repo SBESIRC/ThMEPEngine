@@ -137,6 +137,62 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 }
                             }
                         }
+                        //else if (sprayIn.PtDic[branchLoop[i]].Count == 3)
+                        //{
+                        //    var termPts = new List<Point3dEx>();
+                        //    var valvePts = new List<Point3dEx>();
+                        //    var flowPts = new List<Point3dEx>();
+                        //    Queue<Point3dEx> q = new Queue<Point3dEx>();
+                        //    q.Enqueue(pt);
+                        //    HashSet<Point3dEx> visited2 = new HashSet<Point3dEx>();
+                        //    visited.Add(pt);
+                        //    while (q.Count > 0)
+                        //    {
+                        //        var curPt = q.Dequeue();
+                        //        if (sprayIn.PtTypeDic.ContainsKey(curPt))
+                        //        {
+                        //            if (sprayIn.PtTypeDic[curPt].Contains("Valve"))
+                        //            {
+                        //                valvePts.Add(pt);
+                        //            }
+                        //            if (sprayIn.PtTypeDic[curPt].Contains("Flow"))
+                        //            {
+                        //                flowPts.Add(pt);
+                        //            }
+                        //        }
+                        //        if (sprayIn.ThroughPt.Contains(curPt))//当前点是楼层穿越点
+                        //        {
+                        //            termPts.Add(curPt);
+                        //            sprayIn.CurThroughPt.AddItem(curPt);
+                        //            continue;
+                        //        }
+                        //        var adjs = sprayIn.PtDic[curPt];
+                        //        if (adjs.Count == 1)
+                        //        {
+                        //            termPts.Add(curPt);
+                        //            continue;
+                        //        }
+
+                        //        foreach (var adj in adjs)
+                        //        {
+                        //            if (branchLoop.Contains(adj))
+                        //                continue;
+
+                        //            if (visited2.Contains(adj))
+                        //            {
+                        //                continue;
+                        //            }
+
+                        //            visited2.Add(adj);
+                        //            q.Enqueue(adj);
+                        //        }
+                        //    }
+                        //    if (spraySystem.BranchDic.ContainsKey(pt))
+                        //    {
+                        //        continue;
+                        //    }
+                        //    spraySystem.BranchDic.Add(pt, termPts);
+                        //}
                     }
                     catch
                     {

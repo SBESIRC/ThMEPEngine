@@ -57,7 +57,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 var stPt = stPt1;
                 double floorHeight = sprayIn.FloorHeight;
                 double alarmGap = sprayIn.PipeGap;
-                int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][0];
+                int alarmValveNums = spraySystem.SubLoopAlarmsDic[rstPath.Last()][j];
                 var pipeLen = floorHeight - 1800;
                 var pt1 = stPt.OffsetY(-height);
                 var spt1 = stPt.OffsetX(1000);
@@ -134,6 +134,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
                         }
                     }
+                    //else if(sprayIn.PtDic[pt].Count == 3)
+                    //{
+                    //    sprayOut.PipeLine.Add(new Line(stPt.OffsetX(15000), stPt.OffsetXY(15000, 1200)));
+                    //    spraySystem.BranchPtDic.Add(pt, stPt.OffsetXY(15000, 1200));
+                    //}
                 }
                 lastGap += 1000 + 1700 + (alarmValveNums - 1) * alarmGap + 1000 + 1700 + fireAreaNum * 5500 + 1500;
                 lastInsertPt = spt1;

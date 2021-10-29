@@ -17,7 +17,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach(var path in mainPathList)
             {
-                for (int i = 0; i < mainPathList[0].Count - 1; i++)
+                for (int i = 0; i < path.Count - 1; i++)
                 {
                     var pt1 = path[i]._pt;
                     var pt2 = path[i + 1]._pt;

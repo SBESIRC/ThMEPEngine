@@ -23,7 +23,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     double fireNums = 0;
 
-                    if (pt._pt.DistanceTo(new Point3d(18240983.2767, 21199036.1798, 0)) < 10)
+                    if (pt._pt.DistanceTo(new Point3d(925921.5, 418704.7, 0)) < 10)
                     {
                         ;
                     }
@@ -155,6 +155,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
                             if (termPt.Type == 4)
                             {
+
                                 bool needEvade = true;//默认需要躲避
                                 var pt1 = new Point3d(stPt4.X, sprayOut.PipeInsertPoint.Y + 400, 0);
                                 var pt2 = pt1.OffsetX(650);

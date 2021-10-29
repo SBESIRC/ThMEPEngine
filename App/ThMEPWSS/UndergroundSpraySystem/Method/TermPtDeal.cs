@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 try
                 {
                     bool flag = false;
-                    if(pt._pt.DistanceTo(new Point3d(18367083.8131, 21124583.2218, 0)) < 10)
+                    if(pt._pt.DistanceTo(new Point3d(931860.4,506050.1, 0)) < 10)
                     {
                         ;
                     }
@@ -96,7 +96,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             {
                 try
                 {
-                    if(pt._pt.DistanceTo(new Point3d(18399664.2717, 21206988.0413, 0)) < 10)
+                    if(pt._pt.DistanceTo(new Point3d(931860.4, 506050.1, 0)) < 10)
                     {
                         ;
                     }
@@ -135,7 +135,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
             }
             var OriginTermStartPtDic = GetOriginTermStartPtEx(sprayIn, pt, textSpatialIndex, pipeDNSpatialIndex);
-
+            if(OriginTermStartPtDic.Count == 0)
+            {
+                var tpt = new TermPoint2(pt);
+                tpt.SetLines(sprayIn);
+                tpt.SetPipeNumber(textSpatialIndex);
+                tpt.SetType();
+                var strs = new List<string>() { tpt.PipeNumber, tpt.PipeNumber2 };
+                sprayIn.PtTextDic.Add(pt, strs);
+                sprayIn.TermPtTypeDic.Add(pt, tpt.Type);
+                sprayIn.TermPtDic.Add(pt, tpt);
+            }
             foreach (var pt2 in OriginTermStartPtDic.Keys)
             {
                 var tpt = new TermPoint2(pt2);
