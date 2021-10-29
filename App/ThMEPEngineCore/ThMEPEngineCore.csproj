@@ -149,6 +149,7 @@
     <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
     <Compile Include="ConnectWiring\Service\BranchConnectingService.cs" />
     <Compile Include="ConnectWiring\Service\LineTypeService.cs" />
+    <Compile Include="ConnectWiring\Service\MultiLoopService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
