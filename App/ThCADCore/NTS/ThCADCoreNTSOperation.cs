@@ -63,6 +63,7 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        [Obsolete("该方法已被弃用")]
         public static DBObjectCollection LineMerge(this DBObjectCollection objs)
         {
             var merger = new LineMerger();

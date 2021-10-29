@@ -333,31 +333,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THLineMerger", CommandFlags.Modal)]
-        public void THLineMerger()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result1 = Active.Editor.GetSelection();
-                if (result1.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var dbLst = new DBObjectCollection();
-                foreach (var obj in result1.Value.GetObjectIds())
-                {
-                    dbLst.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-                foreach (Entity diagram in dbLst.LineMerge())
-                {
-                    diagram.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(diagram);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THPileGroup", CommandFlags.Modal)]
         public void THPileGroup()
         {
