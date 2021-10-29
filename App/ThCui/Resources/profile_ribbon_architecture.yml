@@ -124,6 +124,8 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "整体修改"
             attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "风管留洞"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEAFAS"
     name: "EAFAS"

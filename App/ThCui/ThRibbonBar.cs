@@ -117,6 +117,16 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THDKFPMXG_SMALL",
                     "IDI_THCAD_THDKFPMXG_LARGE",
                     RibbonButtonStyle.SmallWithText);
+
+                // 风管留洞
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("风管留洞",
+                    "天华风管留洞",
+                    "THFGLD",
+                    "天华风管留洞",
+                    "IDI_THCAD_THFGLD_SMALL",
+                    "IDI_THCAD_THFGLD_LARGE",
+                    RibbonButtonStyle.SmallWithText);
             }
         }
 
