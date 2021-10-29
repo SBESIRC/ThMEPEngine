@@ -212,6 +212,17 @@ namespace ThMEPWSS.JsonExtensionsNs
 }
 namespace ThMEPWSS.CADExtensionsNs
 {
+    public static class NTSExtensions
+    {
+        public static Point3d ToPoint3d(this Coordinate c) => new(c.X, c.Y, 0);
+        public static Point3d ToPoint3d(this Point p) => new(p.X, p.Y, 0);
+        public static Point2d ToPoint2d(this Coordinate c) => new(c.X, c.Y);
+        public static Point2d ToPoint2d(this Point p) => new(p.X, p.Y);
+        public static Point ToNTSPoint(this Point3d p) => new(p.X, p.Y);
+        public static Point ToNTSPoint(this Point2d p) => new(p.X, p.Y);
+        public static Coordinate ToNTSCoordinate(this Point3d p) => new(p.X, p.Y);
+        public static Coordinate ToNTSCoordinate(this Point2d p) => new(p.X, p.Y);
+    }
     public static class CADExtensions
     {
         public static IEnumerable<GLineSegment> ToGLineSegments(this LineString lineString)

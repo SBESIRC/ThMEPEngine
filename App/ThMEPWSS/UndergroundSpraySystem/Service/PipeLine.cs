@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
@@ -11,6 +12,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
     {
         public static void Split(SprayOut sprayOut)//横向管线打断
         {
+            sprayOut.PipeLine = PipeLineList.CleanLaneLines3(sprayOut.PipeLine);//merge
+
             double tolerance = 1;
             double gap = 100;
             var horizontalPipe = new List<Line>();//横管
@@ -29,7 +32,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     horizontalPipe.Add(line);
                     continue;
                 }
-                ;//其他情况
             }
             foreach(var line in horizontalPipe.ToList())//遍历横管
             {
@@ -45,7 +47,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         (spt.Y - spt2.Y) * (spt.Y - ept2.Y) < 0)
                     {
                         vertical.Add(line2);
-                        
                     }
                 }
                 if(vertical.Count == 0)

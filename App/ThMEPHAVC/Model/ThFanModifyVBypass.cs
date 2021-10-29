@@ -3,6 +3,7 @@ using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -11,9 +12,9 @@ namespace ThMEPHVAC.Model
         public ThVTee vt;
         private Tolerance tor;
         private Matrix2d dis_mat;
-        private List<VT_elbow_modify_param> vt_elbows;
+        private List<VTElbowModifyParam> vt_elbows;
         private ThModifyDuctConnComponent duct_conn_service;
-        public ThFanModifyVBypass(ObjectId[] ids, string modify_size, Duct_modify_param param)
+        public ThFanModifyVBypass(ObjectId[] ids, string modify_size, DuctModifyParam param)
         {
             using (var db = AcadDatabase.Active())
             {

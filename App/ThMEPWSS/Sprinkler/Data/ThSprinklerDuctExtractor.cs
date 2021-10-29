@@ -5,7 +5,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
-using ThMEPWSS.Sprinkler.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;

@@ -91,6 +91,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     e.Handled = true;
                 }
             };
+            btnConfirm.Click += (s, e) => { update(); };
         }
         private void btnCancel(object sender, RoutedEventArgs e)
         {

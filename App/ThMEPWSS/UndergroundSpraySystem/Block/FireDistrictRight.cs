@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using ThCADExtension;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Service;
@@ -18,19 +19,24 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public string Area { get; set; }
         public Dictionary<int, string> FloorDic { get; set; }
         public TermPoint2 TermPt { get; set; }
-        public FireDistrictRight(Point3d stPt, TermPoint2 termPoint)
+        private string PipeDN { get; set; }
+        public FireDistrictRight(Point3d stPt, TermPoint2 termPoint, string DN)
         {
             StPt = stPt;
-            FloorNum = termPoint.PipeNumber.Replace("接至", "");
+            FloorNum = termPoint.PipeNumber.Replace("接至", "").Split('喷')[0];
             TermPt = termPoint;
+            PipeDN = DN;
         }
         public void InsertBlock(AcadDatabase acadDatabase)
         {
-            BlocksImport.ImportElementsFromStdDwg();
+            //BlocksImport.ImportElementsFromStdDwg();
 
             InsertLine(acadDatabase, StPt, StPt.OffsetX(300), "W-FRPT-SPRL-PIPE");
-
-            if(TermPt.HasSignalValve)
+            if(!PipeDN.Equals(""))
+            {
+                InsertText(acadDatabase, StPt.OffsetXY(50, 50), PipeDN);
+            }
+            if (TermPt.HasSignalValve)
             {
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "遥控信号阀",
                     StPt.OffsetX(300), new Scale3d(1, 1, 1), 0);
@@ -107,7 +113,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXY(3190, -2500),
                 new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "标高", "h+1.50" } });
-            //objID.SetDynBlockValue("翻转状态2", x);
+            SetDynBlockValue(objID, "翻转状态2", 1);
+            //var data = new ThBlockReferenceData(objID);
+            //data.CustomProperties.SetValue("翻转状态2", 1);
 
             InsertLine(acadDatabase, StPt.OffsetXY(1346, -114), StPt.OffsetXY(1753, -690), "W-FRPT-SPRL-DIMS");
             InsertLine(acadDatabase, StPt.OffsetXY(1753, -690), StPt.OffsetXY(3640, -690), "W-FRPT-SPRL-DIMS");
@@ -131,7 +139,36 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertSolid(acadDatabase, StPt.OffsetXY(3497, -2546), StPt.OffsetXY(3320, -2646), StPt.OffsetXY(3362, -2698));
             InsertSolid(acadDatabase, StPt.OffsetXY(3615, -2927), StPt.OffsetXY(3523, -3107), StPt.OffsetXY(3469, -3068));
         }
-
+        private static void SetDynBlockValue(ObjectId blockId, string propName, object value)
+        {
+            var props = blockId.GetDynProperties();//获得动态块的所有动态属性
+            //遍历动态属性
+            foreach (DynamicBlockReferenceProperty prop in props)
+            {
+                //如果动态属性的名称与输入的名称相同且为可读
+                if (prop.ReadOnly == false && prop.PropertyName == propName)
+                {
+                    //判断动态属性的类型并通过类型转化设置正确的动态属性值
+                    switch (prop.PropertyTypeCode)
+                    {
+                        case 3:
+                        case (short)DynBlockPropTypeCode.Short://短整型
+                            prop.Value = Convert.ToInt16(value);
+                            break;
+                        case (short)DynBlockPropTypeCode.Long://长整型
+                            prop.Value = Convert.ToInt64(value);
+                            break;
+                        case (short)DynBlockPropTypeCode.Real://实型
+                            prop.Value = Convert.ToDouble(value);
+                            break;
+                        default://其它
+                            prop.Value = value;
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer)
         {
             var line = new Line(pt1, pt2)

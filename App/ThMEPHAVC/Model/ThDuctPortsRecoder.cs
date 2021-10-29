@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -37,7 +38,7 @@ namespace ThMEPHVAC.Model
                                                ObjectIdList center_ids,
                                                ObjectIdList ports_ids,
                                                ObjectIdList ext_ports_ids,
-                                               Duct_modify_param param)
+                                               DuctModifyParam param)
         {
             using (var db = AcadDatabase.Active())
             {
@@ -68,7 +69,7 @@ namespace ThMEPHVAC.Model
                                            ObjectIdList center_ids,
                                            ObjectIdList ports_ids,
                                            ObjectIdList ext_ports_ids,
-                                           Entity_modify_param param)
+                                           EntityModifyParam param)
         {
             using (var db = AcadDatabase.Active())
             {

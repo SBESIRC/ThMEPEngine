@@ -21,12 +21,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public FireDistrictLeft(Point3d stPt, TermPoint2 termPoint)
         {
             StPt = stPt;
-            FloorNum = termPoint.PipeNumber.Replace("接至", "");
+            FloorNum = termPoint.PipeNumber.Replace("接至", "").Split('喷')[0];
             TermPt = termPoint;
         }
         public void InsertBlock(AcadDatabase acadDatabase)
         {
-            BlocksImport.ImportElementsFromStdDwg();
+            //BlocksImport.ImportElementsFromStdDwg();
 
             InsertLine(acadDatabase, StPt, StPt.OffsetXReverse(300), "W-FRPT-SPRL-PIPE");
 
@@ -91,9 +91,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
 
             InsertLine(acadDatabase, StPt.OffsetXReverse(1640), StPt.OffsetXReverseY(1640, -410), "W-FRPT-DRAI-PIPE");
 
-            objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXReverseY(3190, -2500),
+            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-SPRL-DIMS", "标高", StPt.OffsetXReverseY(3190, -2500),
                 new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "标高", "h+1.50" } });
-            //objID.SetDynBlockValue("翻转状态2", x);
 
             InsertLine(acadDatabase, StPt.OffsetXReverseY(1346, -114), StPt.OffsetXReverseY(1753, -690), "W-FRPT-SPRL-DIMS");
             InsertLine(acadDatabase, StPt.OffsetXReverseY(1753, -690), StPt.OffsetXReverseY(3640, -690), "W-FRPT-SPRL-DIMS");

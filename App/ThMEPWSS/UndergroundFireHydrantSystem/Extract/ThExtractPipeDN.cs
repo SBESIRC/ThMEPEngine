@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -33,96 +34,105 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 DBObjsResult = new DBObjectCollection();
                 foreach (var db in DBObjs)
                 {
-                    if(db is DBPoint)
+                    try
                     {
-                        continue;
-                    }
-                    if (db is DBText)
-                    {
-                        if ((db as DBText).TextString.Contains("DN"))
-                        {
-                            DBObjsResult.Add((DBObject)db);
-                        }
-                    }
-                    else if (db is Line)
-                    {
-                        continue;
-                    }
-                    else if (db is BlockReference)
-                    {
-                        if ((db as BlockReference).GetEffectiveName().Equals("消火栓环管标记"))
+                        if (db is DBPoint)
                         {
                             continue;
                         }
-                        if ((db as BlockReference).GetEffectiveName().Equals("消火栓环管节点标记"))
+                        if (db is DBText)
                         {
-                            continue;
-                        }
-                        var objID = (db as BlockReference).ObjectId;
-                        var val = objID.GetDynBlockValue("可见性");
-                        ;
-                        if (val?.Contains("DN") == true)
-                        {
-                            var DNtext = new DBText();
-                            DNtext.TextString = val;
-                            DNtext.Position = (db as BlockReference).Position;
-                            DNtext.Rotation = (db as BlockReference).Rotation;
-                            DBObjsResult.Add(DNtext);
-                        }
-                        else
-                        {
-                            var objs = new DBObjectCollection();
-                            (db as BlockReference).Explode(objs);
-                            ;
-                            foreach (var obj in objs)
+                            if ((db as DBText).TextString.Contains("DN"))
                             {
-                                if (obj is DBText)
+                                DBObjsResult.Add((DBObject)db);
+                            }
+                        }
+                        else if (db is Line)
+                        {
+                            continue;
+                        }
+                        else if (db is BlockReference)
+                        {
+                            if ((db as BlockReference).GetEffectiveName().Equals("消火栓环管标记"))
+                            {
+                                continue;
+                            }
+                            if ((db as BlockReference).GetEffectiveName().Equals("消火栓环管节点标记"))
+                            {
+                                continue;
+                            }
+                            var objID = (db as BlockReference).ObjectId;
+                            var val = objID.GetDynBlockValue("可见性");
+                            ;
+                            if (val?.Contains("DN") == true)
+                            {
+                                var DNtext = new DBText();
+                                DNtext.TextString = val;
+                                DNtext.Position = (db as BlockReference).Position;
+                                DNtext.Rotation = (db as BlockReference).Rotation;
+                                DBObjsResult.Add(DNtext);
+                            }
+                            else
+                            {
+                                var objs = new DBObjectCollection();
+                                (db as BlockReference).Explode(objs);
+                                ;
+                                foreach (var obj in objs)
                                 {
-                                    ;
-                                }
-                                else if (obj is BlockReference)
-                                {
-                                    var objs1 = new DBObjectCollection();
-                                    (obj as BlockReference).Explode(objs1);
-                                    foreach (var obj1 in objs1)
+                                    if (obj is DBText)
                                     {
-                                        if (obj1 is DBText)
+                                        ;
+                                    }
+                                    else if (obj is BlockReference)
+                                    {
+                                        var objs1 = new DBObjectCollection();
+                                        (obj as BlockReference).Explode(objs1);
+                                        foreach (var obj1 in objs1)
                                         {
-                                            if ((obj1 as DBText)?.TextString.Contains("DN") == true)
+                                            if (obj1 is DBText)
                                             {
-                                                ;
+                                                if ((obj1 as DBText)?.TextString.Contains("DN") == true)
+                                                {
+                                                    ;
+                                                }
+                                                else
+                                                {
+                                                    continue;
+                                                }
                                             }
                                             else
                                             {
                                                 continue;
                                             }
                                         }
-                                        else
-                                        {
-                                            continue;
-                                        }
+                                    }
+                                    else
+                                    {
+                                        continue;
                                     }
                                 }
-                                else
+                            }
+                        }
+                        else
+                        {
+                            var objs = new DBObjectCollection();
+                            (db as Entity).Explode(objs);
+                            ;
+                            foreach (var obj in objs)
+                            {
+                                if (obj is DBText)
                                 {
-                                    continue;
+                                    if((obj as DBText).TextString.StartsWith("DN"))
+                                        DBObjsResult.Add((DBObject)obj);
                                 }
                             }
                         }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        var objs = new DBObjectCollection();
-                        (db as Entity).Explode(objs);
                         ;
-                        foreach (var obj in objs)
-                        {
-                            if (obj is DBText)
-                            {
-                                DBObjsResult.Add((DBObject)obj);
-                            }
-                        }
                     }
+                    
 
                 }
                 return DBObjsResult;

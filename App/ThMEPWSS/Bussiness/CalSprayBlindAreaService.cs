@@ -20,10 +20,10 @@ namespace ThMEPWSS.Bussiness
             Matrix = matrix;
         }
 
-        public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)
+        public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes, double protectRange)
         {
             var transSpray = sprays.Select(x => x.TransformBy(Matrix.Inverse())).ToList();
-            var sprayData = SprayDataOperateService.CalSprayPoint(transSpray, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
+            var sprayData = SprayDataOperateService.CalSprayPoint(transSpray, vDir, tDir, protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
             blindArea.ForEach(x => x.TransformBy(Matrix));
 

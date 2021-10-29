@@ -4,6 +4,7 @@ using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.CAD;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -18,7 +19,7 @@ namespace ThMEPHVAC.Model
             duct_size_style = "TH-STYLE3";
             this.duct_size_layer = duct_size_layer;
         }
-        public void Draw_duct_text(Duct_modify_param param, string scale)
+        public void Draw_duct_text(DuctModifyParam param, string scale)
         {
             ThMEPHVACService.Seperate_size_info(param.duct_size, out double w, out double h);
             var sp = new Point3d(param.sp.X, param.sp.Y, 0);
@@ -226,7 +227,7 @@ namespace ThMEPHVAC.Model
             else
                 elevation_size.TransformBy(Matrix3d.Displacement(dir_vec * seperate_dis) * mat);
         }
-        public void Re_draw_text(Text_modify_param cur_t, string modify_size, ThMEPHVACParam in_param)
+        public void Re_draw_text(TextModifyParam cur_t, string modify_size, ThMEPHVACParam in_param)
         {
             double h = ThMEPHVACService.Get_text_height(in_param.scale);
             var id = Dreambuild.AutoCAD.DbHelper.GetTextStyleId(duct_size_style);

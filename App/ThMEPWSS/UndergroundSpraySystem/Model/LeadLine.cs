@@ -66,7 +66,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                   (layer.Contains("-DIMS") ||
                    layer.Contains("-NOTE") ||
                    layer.Contains("-FRPT-HYDT-DIMS") ||
-                   layer.Contains("-SHET-PROF"));
+                   layer.Contains("-SHET-PROF")) ||
+                   layer.Contains("TWT_TEXT");
         }
         private bool IsTCHNote(Entity entity)
         {

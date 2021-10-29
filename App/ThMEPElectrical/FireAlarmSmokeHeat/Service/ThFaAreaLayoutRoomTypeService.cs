@@ -75,14 +75,16 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
                     }
                 }
 
-                if (room.Boundary is MPolygon)
+                //如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
+                if (typeInt == ThFaSmokeCommon.layoutType.noName)
                 {
-                    frameSensorType.Add(roomFrameDict[room], typeInt);
+                    typeInt = ThFaSmokeCommon.layoutType.smoke;
                 }
-                else if (room.Boundary is Polyline frame)
-                {
-                    frameSensorType.Add(frame, typeInt);
-                }
+
+
+                frameSensorType.Add(roomFrameDict[room], typeInt);
+                DrawUtils.ShowGeometry(roomFrameDict[room].GetPoint3dAt(0), string.Format("roomName:{0}", roomName), "l0roomName", 121, 25, 200);
+
             }
 
             return frameSensorType;

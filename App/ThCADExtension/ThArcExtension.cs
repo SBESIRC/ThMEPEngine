@@ -199,5 +199,15 @@ namespace ThCADExtension
             }
             return Tuple.Create(isOverlap, startAngle, endAngle, AngleRange);
         }
+
+        // 顺时针
+        public static bool IsClockWise(this Arc arc)
+        {
+            // 通常情况下arc是counter-clockwise
+            // 我们不能“显示”创建一个clockwise的arc
+            // 只有在mirror的情况下，arc才”看起来“是clockwise的
+            // https://forums.autodesk.com/t5/autocad-forum/how-to-find-whether-an-arc-is-clockwise-or-counter-clockwise-in/td-p/7657875
+            return arc.Normal.DotProduct(Vector3d.ZAxis) < 0;
+        }
     }
 }

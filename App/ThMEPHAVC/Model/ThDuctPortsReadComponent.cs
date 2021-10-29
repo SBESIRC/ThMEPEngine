@@ -3,10 +3,10 @@ using System.Linq;
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
-using ThMEPHVAC.Alg;
+using ThMEPHVAC.Algorithm;
 
 namespace ThMEPHVAC.Model
 {
@@ -193,69 +193,6 @@ namespace ThMEPHVAC.Model
                         var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
                         var type = (string)values.ElementAt(0).Value;
                         if (type != "Port")
-                            continue;
-                        var portIndex = (string)values.ElementAt(1).Value; // 0, 1 ,2
-                        rst.Add(portIndex, (entity as DBPoint).Position);
-                    }
-                }
-            }
-            return rst;
-        }
-        public static Dictionary<string, Tuple<Point3d, string>> GetPortsOfGroup(ObjectId groupId)
-        {
-            var rst = new Dictionary<string, Tuple<Point3d, string>>();
-
-            var id2GroupDic = GetObjectId2GroupDic();
-            if (!id2GroupDic.ContainsKey(groupId))
-                return rst;
-            var groupObj = id2GroupDic[groupId];
-            var allObjIdsInGroup = groupObj.GetAllEntityIds();
-            using (var db = AcadDatabase.Active())
-            {
-                foreach (var id in allObjIdsInGroup)
-                {
-                    var entity = db.Element<Entity>(id);
-                    if (!(entity is DBPoint))
-                        continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
-                    if (ptXdata != null)
-                    {
-                        var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        var type = (string)values.ElementAt(0).Value;
-                        if (type != "Port")
-                            continue;
-                        var portIndex = (string)values.ElementAt(1).Value; // 0, 1 ,2
-                        var portWidth = (string)values.ElementAt(2).Value;
-                        rst.Add(portIndex, new Tuple<Point3d, string>((entity as DBPoint).Position, portWidth));
-                    }
-                }
-            }
-            return rst;
-        }
-        public static Dictionary<string, Point3d> GetPortExtsOfGroup(ObjectId groupId)
-        {
-            var rst = new Dictionary<string, Point3d>();
-
-            var id2GroupDic = GetObjectId2GroupDic();
-            if (!id2GroupDic.ContainsKey(groupId))
-                return rst;
-
-            var groupObj = id2GroupDic[groupId];
-
-            var allObjIdsInGroup = groupObj.GetAllEntityIds();
-            using (var db = AcadDatabase.Active())
-            {
-                foreach (var id in allObjIdsInGroup)
-                {
-                    var entity = db.Element<Entity>(id);
-                    if (!(entity is DBPoint))
-                        continue;
-                    var ptXdata = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
-                    if (ptXdata != null)
-                    {
-                        var values = ptXdata.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        var type = (string)values.ElementAt(0).Value;
-                        if (type != "PortExt")
                             continue;
                         var portIndex = (string)values.ElementAt(1).Value; // 0, 1 ,2
                         rst.Add(portIndex, (entity as DBPoint).Position);

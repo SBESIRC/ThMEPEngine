@@ -13,13 +13,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
 {
     public static class PtTools
     {
-        public static void AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
+        public static bool AddNewPtDic(this SprayIn sprayIn, DBObjectCollection objs, Point3d pt, ref List<Line> lines)
         {
             double tolerance = 100;
             if(objs.Count != 2)
             {
                 //不是两根线，不必进行连接
-                return;
+                return false;
             }
             
             var l1 = objs[0] as Line;
@@ -46,14 +46,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             //点集中不存在，就算了
             if(!sprayIn.PtDic.ContainsKey(pt1) || !sprayIn.PtDic.ContainsKey(pt2))
             {
-                return;
+                return false;
             }
             //点集中邻接点数大于1也算了
             if(sprayIn.PtDic[pt1].Count != 1 || sprayIn.PtDic[pt2].Count != 1)
             {
-                return;
+                return false;
             }
             lines.Add(new Line(pt1._pt, pt2._pt));
+            return true;
         }
 
         public static Point3d Cloned(this Point3d pt)

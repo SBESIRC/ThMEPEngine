@@ -53,11 +53,11 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 var pt = FindOutsideVertex(basinline, outline);
                 if (GetOutsidePipe(pt, basinline))
-                {                              
+                {
                     Pipes.Add(Create(pt));
                 }
                 else
-                {                 
+                {
                     Pipes.Add(Create(pt));
                     Pipes.Add(Create(Addpipe(boundary, basinline, pype, outline)));
                 }
@@ -83,27 +83,27 @@ namespace ThMEPWSS.Pipe.Engine
         private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
         {
             var vertices = outline.Vertices();
-            var vertices1 = boundary.Vertices();          
+            var vertices1 = boundary.Vertices();
             double dst = double.MaxValue;
             int num = 0;
             for (int i = 0; i < vertices.Count; i++)//判断管井中点距外廓距离
             {
                 double dst1 = double.MaxValue;
-                for (int j=0;j< vertices1.Count;j++)
+                for (int j = 0; j < vertices1.Count; j++)
                 {
-                   if(dst1> vertices[i].DistanceTo(vertices1[j]))
+                    if (dst1 > vertices[i].DistanceTo(vertices1[j]))
                     {
                         dst1 = vertices[i].DistanceTo(vertices1[j]);
-                    }                   
+                    }
                 }
-                if(dst>dst1)
+                if (dst > dst1)
                 {
                     dst = dst1;
                     num = i;
                 }
             }
             return vertices[num];
-        }    
+        }
         private Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
         {
             var vertices = outline.Vertices();
@@ -150,10 +150,10 @@ namespace ThMEPWSS.Pipe.Engine
             Line line2 = new Line(evaluate, evaluate1);
             outline.IntersectWith(line2, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
             return pts.Count == 0;
-        }    
+        }
         private static bool GetOutsidePipe(Point3d pt, BlockReference basinline)
         {
-            if((pt.X<= basinline.Position.X+500)&& (pt.X >= basinline.Position.X-500))
+            if ((pt.X <= basinline.Position.X + 500) && (pt.X >= basinline.Position.X - 500))
             {
                 return true;
             }
@@ -247,24 +247,25 @@ namespace ThMEPWSS.Pipe.Engine
             Double dst = double.MaxValue;
             int a = 0;
             for (int i = 0; i < vertices.Count; i++)
-            { if(dst>vertices[i].DistanceTo(basinline.Position))
+            {
+                if (dst > vertices[i].DistanceTo(basinline.Position))
                 {
                     dst = vertices[i].DistanceTo(basinline.Position);
                     a = i;
                 }
             }
-            if (a > 0&&a< vertices.Count-1)
+            if (a > 0 && a < vertices.Count - 1)
             {
-                return vertices[a]+ ThWPipeCommon.WELL_TO_WALL_OFFSET * ( vertices[a].GetVectorTo(vertices[a+1]).GetNormal()+ vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
+                return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
             }
-            else if(a==0)
+            else if (a == 0)
             {
                 return vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
             }
             else
             {
-                return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a].GetVectorTo(vertices[a-1]).GetNormal() + vertices[a-1].GetVectorTo(vertices[a - 2]).GetNormal());
+                return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a].GetVectorTo(vertices[a - 1]).GetNormal() + vertices[a - 1].GetVectorTo(vertices[a - 2]).GetNormal());
             }
-        }      
+        }
     }
 }

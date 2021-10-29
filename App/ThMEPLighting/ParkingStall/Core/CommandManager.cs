@@ -27,6 +27,7 @@ namespace ThMEPLighting.ParkingStall.Core
     public class CommandManager
     {
         private Light_Place_Type lightDirection = Light_Place_Type.LONG_EDGE;
+        public List<string> ErrorMsgs = new List<string>();
         public CommandManager() 
         {
             lightDirection = ThParkingStallService.Instance.LightDirection;
@@ -371,16 +372,24 @@ namespace ThMEPLighting.ParkingStall.Core
 
         public void LaneSubGroupOptimization()
         {
+            ErrorMsgs.Clear();
             var wallPolygonInfos = EntityPicker.MakeUserPickPolys();
             if (wallPolygonInfos.Count == 0)
+            {
+                ErrorMsgs.Add("没有选中任何有效的框线，不进行后续操作");
                 return;
+            }
 
             //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            bool addAlert = false;
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var curves = GetLanes(polygonInfo.ExternalProfile);
                 if (null == curves || curves.Count < 1)
+                {
+                    addAlert = true;
                     continue;
+                }
                 using (AcadDatabase acdb = AcadDatabase.Active())
                 {
                     LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, null); 
@@ -465,7 +474,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
                 // 生成的灯图层前置
                 if (null == optimzeLightPlaceInfos || optimzeLightPlaceInfos.Count < 1)
-                    return;
+                    continue;
                 var lightBlockIds = new List<ObjectId>();
                 foreach (var lightBlock in optimzeLightPlaceInfos)
                 {
@@ -475,6 +484,9 @@ namespace ThMEPLighting.ParkingStall.Core
                 }
                 LoadCraterClear.ChangeBlockDrawOrders(lightBlockIds);
             }
+       
+            if(addAlert)
+                ErrorMsgs.Add("框线内没有找到车道线，请确认数据正确后，再进行后续操作。");
         }
 
         public void SideLaneConnect()

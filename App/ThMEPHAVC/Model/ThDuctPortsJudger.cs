@@ -353,7 +353,7 @@ namespace ThMEPHVAC.Model
             {
                 var engine = new ThAXISLineRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, new Point3dCollection());
-                return engine.Elements.Select(o => o.Outline).ToCollection();
+                return engine.Elements.Where(o=>o.Outline is Line).Select(o => o.Outline).ToCollection();
             }
         }
     }

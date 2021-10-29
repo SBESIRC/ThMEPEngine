@@ -41,26 +41,43 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             base.AfterExecute();
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
+
+
         public void CreateSpraySystem(AcadDatabase curDb)
         {
-            var startPt = SpraySys.GetInsertPt();//环管起始点
-            if(startPt.Equals(new Point3d()))
+            Point3d startPt;
+            if (!SpraySys.GetInsertPt(curDb, out startPt))
             {
                 return;
             }
             var selectArea = _UiConfigs.SelectedArea;//生成候选区域
-            var sprayOut = new SprayOut();//输出参数
-            var sprayIn = new SprayIn(_UiConfigs);//输入参数
-            var spraySystem = new SpraySystem();
 
-            if(!SpraySys.GetInput(curDb, sprayIn, selectArea, startPt))//提取输入参数
+            var sprayOut = new SprayOut();//输出参数
+            if(sprayOut.InsertPoint.Equals(new Point3d()))
             {
                 return;
             }
-            SpraySys.Processing(curDb, sprayIn, spraySystem);
-            SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
+            var sprayIn = new SprayIn(_UiConfigs);//输入参数
+            var spraySystem = new SpraySystem();
+
+            var loopFlag = true;
+
+            if (!SpraySys.GetInput(curDb, sprayIn, selectArea, startPt))//提取输入参数
+            {
+                return;
+            }
+
+            loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
+
+            if(loopFlag)
+            {
+                SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
+            }
+            else
+            {
+                SpraySys.GetOutput2(sprayIn, spraySystem, sprayOut);
+            }
             sprayOut.Draw(curDb);
-            ;
         }
     }
 }

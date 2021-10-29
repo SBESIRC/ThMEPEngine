@@ -34,11 +34,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayIn.LeadLineDic.AddItem(l1, l2);
                         continue;
                     }
-                    if(l1.LineIsIntersection(l2))
+                    if (l1.LineIsIntersection(l2))
                     {
-                        sprayIn.LeadLineDic.AddItem(l2, l1);
-                        sprayIn.LeadLineDic.AddItem(l1, l2);
-                        continue;
+                        if (l1.GetLineDist2(l2) < 200 || l2.GetLineDist2(l1) < 200)
+                        {
+                            sprayIn.LeadLineDic.AddItem(l2, l1);
+                            sprayIn.LeadLineDic.AddItem(l1, l2);
+                            continue;
+                        }
+                        else
+                        {
+                            ;
+                        }
+                            
                     }
                 }
             }

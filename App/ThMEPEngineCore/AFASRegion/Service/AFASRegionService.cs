@@ -194,10 +194,13 @@ namespace ThMEPEngineCore.AFASRegion.Service
             }
             //新的需求，如果可布置区域内缩500一个区域都缩不出来，则选择最大的那个区域，进行内缩200
             //这样做的意义是，保证至少有一个可布置区域
-            if(Objs.Count==0)
+            if (Objs.Count == 0)
             {
-                var MaxAreaSpace = Difference(frame, dBObjects.Union(dBNoHighObjects)).Cast<AcPolygon>().OrderByDescending(o =>o.Area).First();
-                Objs.AddRange(MaxAreaSpace.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0));
+                var MaxAreaSpace = Difference(frame, dBObjects.Union(dBNoHighObjects).Union(Holes)).Cast<AcPolygon>().OrderByDescending(o => o.Area).FirstOrDefault();
+                if (!MaxAreaSpace.IsNull())
+                {
+                    Objs.AddRange(MaxAreaSpace.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0));
+                }
             }
             return Objs.ToCollection();
         }

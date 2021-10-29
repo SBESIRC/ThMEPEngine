@@ -31,9 +31,13 @@ namespace ThMEPEngineCore.ConnectWiring.Data
         public BlockReference powerBlock;
         public List<Polyline> holes = new List<Polyline>();
         private List<ThGeometry> Geos { get; set; }
-        public ThFireAlarmWiringDateSetFactory()
+        bool hasWall;
+        bool hasColumn;
+        public ThFireAlarmWiringDateSetFactory(bool wall, bool column)
         {
             Geos = new List<ThGeometry>();
+            hasWall = wall;
+            hasColumn = column;
         }
         protected override ThMEPDataSet BuildDataSet()
         {
@@ -48,20 +52,26 @@ namespace ThMEPEngineCore.ConnectWiring.Data
             UpdateTransformer(collection);
             var extractors = new List<ThExtractorBase>()
                 {
-                    new ThArchitectureExtractor()   //建筑墙
-                    {
-                    },
-                    new ThShearwallExtractor()      //剪力墙
-                    {
-                    },
-                    new ThColumnExtractor()         //柱
-                    {
-                    },
                     new ThFaRoomExtractor()           //房间
                     {
                         holes = holes,
                     },
                 };
+            if (hasWall)
+            {
+                extractors.Add(new ThArchitectureExtractor()   //建筑墙
+                {
+                });
+                extractors.Add(new ThShearwallExtractor()      //剪力墙
+                {
+                }); 
+            }
+            if (hasColumn)
+            {
+                extractors.Add(new ThColumnExtractor()         //柱
+                {
+                });
+            }
             extractors.ForEach(o => o.Extract(database, collection));
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
@@ -142,20 +152,28 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                 var nFrame = ThMEPFrameService.NormalizeEx(frame);
                 if (nFrame.Area > 1)
                 {
-                    var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
-                    laneLineEngine.Recognize(acadDatabase.Database, nFrame.Vertices());
-                    var lines = laneLineEngine.Spaces.Select(o => o.Boundary).ToCollection();
+                    var objs = new DBObjectCollection();
+                    var centerLines = acadDatabase.ModelSpace
+                    .OfType<Curve>()
+                    .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME ||
+                    o.Layer == ThMEPEngineCoreCommon.CENTER_LINE_LAYER);
+                    foreach (var cLine in centerLines)
+                    {
+                        var transCurve = cLine.Clone() as Curve;
+                        objs.Add(transCurve);
+                    }
+
                     var centerPt = nFrame.GetCentroidPoint();
                     var transformer = new ThMEPOriginTransformer(centerPt);
-                    transformer.Transform(lines);
+                    transformer.Transform(objs);
                     transformer.Transform(nFrame);
 
-                    var curves = ThLaneLineSimplifier.Simplify(lines, 1500);
-                    lines = ThCADCoreNTSGeometryClipper.Clip(nFrame, curves.ToCollection());
-                    transformer.Reset(lines);
+                    var curves = ThLaneLineSimplifier.Simplify(objs, 1500);
+                    objs = ThCADCoreNTSGeometryClipper.Clip(nFrame, curves.ToCollection());
+                    transformer.Reset(objs);
 
                     //处理车道线
-                    var handleLines = ThMEPLineExtension.LineSimplifier(lines, 500, 100.0, 2.0, Math.PI / 180.0);
+                    var handleLines = ThMEPLineExtension.LineSimplifier(objs, 500, 100.0, 2.0, Math.PI / 180.0);
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(frame, handleLines, out List<List<Line>> otherPLines);
                     parkingLines.AddRange(otherPLines);

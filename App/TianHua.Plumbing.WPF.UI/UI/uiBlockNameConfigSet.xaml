@@ -20,8 +20,8 @@
 
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="0,5,0,5" HorizontalAlignment="Center">
 
-            <cus:ImageButton Content="增加外参"  HorizontalAlignment="Right" ImageTextLocation="TextOnly" Name="btnSet1" Click="BtnSet_Click"  Margin="0,5,0,5" Width="80"  TabIndex="3"></cus:ImageButton>
-            <cus:ImageButton Content="增加本图"  HorizontalAlignment="Right" ImageTextLocation="TextOnly" Name="btnSet2" Click="BtnSet2_Click"  Margin="30,5,0,5" Width="80"  TabIndex="3"></cus:ImageButton>
+            <cus:ImageButton Content="增加"  HorizontalAlignment="Right" ImageTextLocation="TextOnly" Name="btnSet1" Click="BtnSet_Click"  Margin="0,5,0,5" Width="50"  TabIndex="3"></cus:ImageButton>
+            <!--<cus:ImageButton Content="增加本图"  HorizontalAlignment="Right" ImageTextLocation="TextOnly" Name="btnSet2" Click="BtnSet2_Click"  Margin="30,5,0,5" Width="80"  TabIndex="3"></cus:ImageButton>-->
 
         </StackPanel>
 

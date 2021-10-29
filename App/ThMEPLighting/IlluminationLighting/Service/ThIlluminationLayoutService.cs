@@ -107,14 +107,11 @@ namespace ThMEPLighting.IlluminationLighting.Service
 
         public static bool isAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
         {
-            var objs = new DBObjectCollection();
-            objs.Add(frame);
-            HoleList.ForEach(x => objs.Add(x));
-            var geometry = objs.BuildAreaGeometry();
-            var isAisleArea = ThMEPEngineCoreGeUtils.IsAisleArea(geometry, shrinkValue, threshold);
-
-            return isAisleArea;
+            return ThMEPPolygonShapeRecognitionService.IsAisle(
+                frame,
+                HoleList,
+                shrinkValue,
+                threshold);
         }
-
     }
 }

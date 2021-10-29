@@ -8,6 +8,7 @@ using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
 using ThCADCore.NTS;
 using NetTopologySuite.Geometries;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -287,7 +288,7 @@ namespace ThMEPHVAC.Model
                 style = "TH-DIM50";
             return style;
         }
-        public static Duct_modify_param Create_duct_modify_param(DBObjectCollection center_line,
+        public static DuctModifyParam Create_duct_modify_param(DBObjectCollection center_line,
                                                                  string duct_size,
                                                                  string elevation,
                                                                  double air_volume,
@@ -298,12 +299,12 @@ namespace ThMEPHVAC.Model
                 var line = center_line[0] as Line;
                 var sp = line.StartPoint.ToPoint2D();
                 var ep = line.EndPoint.ToPoint2D();
-                return new Duct_modify_param(duct_size, air_volume, Double.Parse(elevation), sp, ep, start_handle);
+                return new DuctModifyParam(duct_size, air_volume, Double.Parse(elevation), sp, ep, start_handle);
             }
             else
                 throw new NotImplementedException();
         }
-        public static Duct_modify_param Create_duct_modify_param(DBObjectCollection center_line,
+        public static DuctModifyParam Create_duct_modify_param(DBObjectCollection center_line,
                                                                  string duct_size,
                                                                  double air_volume,
                                                                  ThMEPHVACParam param,
@@ -317,12 +318,12 @@ namespace ThMEPHVAC.Model
                 var height = Get_height(duct_size);
                 bool is_first = duct_size == param.in_duct_size;
                 double elevation = is_first ? param.elevation : (param.elevation * 1000 + param.main_height - height) / 1000;
-                return new Duct_modify_param(duct_size, air_volume, elevation, sp, ep, start_handle);
+                return new DuctModifyParam(duct_size, air_volume, elevation, sp, ep, start_handle);
             }
             else
                 throw new NotImplementedException();
         }
-        public static Entity_modify_param Create_special_modify_param( string type,
+        public static EntityModifyParam Create_special_modify_param( string type,
                                                                        Matrix3d mat,
                                                                        Handle start_handle,
                                                                        DBObjectCollection flange,
@@ -346,9 +347,9 @@ namespace ThMEPHVAC.Model
                 var flg = flange[inc++] as Line;
                 port_widths.Add(flg.Length - 90);
             }
-            return new Entity_modify_param(type, start_handle, pos_list, pos_ext_list, port_widths);
+            return new EntityModifyParam(type, start_handle, pos_list, pos_ext_list, port_widths);
         }
-        public static Entity_modify_param Create_reducing_modify_param(Line_Info cur_seg, Handle start_handle)
+        public static EntityModifyParam Create_reducing_modify_param(Line_Info cur_seg, Handle start_handle)
         {
             if (cur_seg.center_line.Count > 0)
             {
@@ -361,7 +362,7 @@ namespace ThMEPHVAC.Model
                 var l1 = cur_seg.flg[0] as Line;
                 var l2 = cur_seg.flg[1] as Line;
                 var ports_width = new List<double>() { l1.Length - 90, l2.Length - 90 };
-                return new Entity_modify_param("Reducing", start_handle, pos_list, pos_ext_list, ports_width);
+                return new EntityModifyParam("Reducing", start_handle, pos_list, pos_ext_list, ports_width);
             }
             else
                 throw new NotImplementedException();
@@ -566,7 +567,7 @@ namespace ThMEPHVAC.Model
         {
             Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(message);
         }
-        public static Line Covert_duct_to_line(Duct_modify_param param)
+        public static Line Covert_duct_to_line(DuctModifyParam param)
         {
             var sp_2 = param.sp;
             var ep_2 = param.ep;

@@ -125,7 +125,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// 对第一步布置后的情况进行加点以覆盖完全部需覆盖区域（此步会产生冗余点）
         /// </summary>
         /// <param name="mPolygon">需覆盖带洞多边形边界</param>
-        /// <param name="fstPoints">第一步布置的点位</param>
+        /// <param name="points">第一步布置的点位</param>
         /// <param name="pointsInLayoutList">可能布置的点位</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>加电后的点集合</returns>
@@ -244,7 +244,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     points.Add(node.Key);
                 }
             }
-            return points;
+            return points.Distinct().ToList();
         }
 
         /// <summary>

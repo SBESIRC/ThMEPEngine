@@ -866,6 +866,8 @@ namespace Dreambuild.AutoCAD
         /// <returns>The convex hull.</returns>
         public static List<Point3d> GetConvexHull(List<Point3d> source)
         {
+            if (source.Count < 3)
+                return source;
             var points = new List<Point3d>();
             var collection = new List<Point3d>();
             var num = 0;

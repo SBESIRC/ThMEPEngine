@@ -42,7 +42,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline polyline)
         {
-            CleanPline(ThSprinklerCheckerLayer.Beam_Checker_LayerName, polyline);
+            CleanPline(ThWSSCommon.Beam_Checker_LayerName, polyline);
         }
 
         private void Present(DBObjectCollection objs)

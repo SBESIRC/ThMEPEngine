@@ -660,30 +660,5 @@ namespace ThMEPEngineCore.Test
                 var temp = engine.Elements;
             }
         }
-
-        [CommandMethod("TIANHUACAD", "THTESTAREA", CommandFlags.Modal)]
-        public void ThBuildArea()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-                Geometry geometry = objs.BuildAreaGeometry();
-
-                var isAisleArea = ThMEPEngineCoreGeUtils.IsAisleArea(geometry);
-
-                Active.Editor.WriteMessageWithReturn($"\nIs Aisle Area: {isAisleArea}");
-            }
-        }
     }
 }

@@ -42,6 +42,8 @@ namespace ThMEPHVAC.CAD
                 Model = FanObjectId;
                 Data = new ThBlockReferenceData(FanObjectId);
                 air_volume = GetFanVolume();
+                if (air_volume < 0)
+                    return;
                 low_air_volume = GetLowFanVolume();
                 var obj = FanObjectId.GetDBObject();
                 if (obj is BlockReference reference)
@@ -78,12 +80,13 @@ namespace ThMEPHVAC.CAD
                 str_air_volume = volums[0].ToString();
                 return volums[0];
             }
-            if (volums.Count == 2)
+            else if (volums.Count == 2)
             {
                 str_air_volume = volums[0].ToString() + "/" + volums[1].ToString();
                 return volums[1];
             }
-            throw new NotImplementedException("输入风量格式错误");
+            else
+                return -1;
         }
         private double GetLowFanVolume()
         {

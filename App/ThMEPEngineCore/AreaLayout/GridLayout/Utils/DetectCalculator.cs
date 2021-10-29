@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             else if(detect is MultiPolygon multi)
             {
                 foreach (Polygon poly in multi)
-                    if (FireAlarmUtils.PolygonContainPoint(region, position))
+                    if (FireAlarmUtils.PolygonContainPoint(poly, position))
                         return poly;
             }
             return Polygon.Empty;

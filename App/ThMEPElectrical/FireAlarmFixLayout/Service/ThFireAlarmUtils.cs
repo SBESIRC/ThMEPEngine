@@ -6,11 +6,12 @@ using System.IO;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-
+using Autodesk.AutoCAD.Runtime;
 
 using AcHelper;
 using Linq2Acad;
 using NFox.Cad;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
@@ -71,6 +72,80 @@ namespace ThMEPElectrical.FireAlarm.Service
                 }
 
                 return pts;
+            }
+        }
+
+        public static Point3dCollection getFrameBlk()
+        {
+            Point3dCollection pts = new Point3dCollection();
+
+            // 获取框线
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return pts;
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                List<BlockReference> frameLst = new List<BlockReference>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acadDatabase.Element<BlockReference>(obj);
+                    frameLst.Add(frame.Clone() as BlockReference);
+                }
+
+                List<Polyline> frames = new List<Polyline>();
+                foreach (var frameBlock in frameLst)
+                {
+                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    if (frame != null)
+                    {
+                        frames.Add(frame);
+                    }
+                }
+
+                var frameL = frames.OrderByDescending(x => x.Area).FirstOrDefault();
+
+                if (frameL != null && frameL.Area > 10)
+                {
+                    frameL = processFrame(frameL);
+                }
+                if (frameL != null && frameL.Area > 10)
+                {
+                  pts = frameL.Vertices();
+                }
+            }
+
+            return pts;
+        }
+
+
+        private static List<Entity> GetBlockInfo(BlockReference blockReference)
+        {
+            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var results = new List<Entity>();
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                foreach (var objId in blockTableRecord)
+                {
+                    var dbObj = acadDatabase.Element<Entity>(objId).Clone() as Entity;
+                    dbObj.TransformBy(matrix);
+                    results.Add(dbObj);
+                }
+                return results;
             }
         }
 
@@ -309,11 +384,16 @@ namespace ThMEPElectrical.FireAlarm.Service
 
         private static Polyline processFrame(Polyline frame)
         {
+            Polyline nFrame = null;
             var tol = 1000;
-            //获取外包框
-            var frameClone = frame.WashClone() as Polyline;
-            //处理外包框
-            Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
+
+            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
+            // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
+            if (nFrameNormal.Area > 10)
+            {
+                nFrameNormal = nFrameNormal.DPSimplify(1);
+                nFrame = nFrameNormal;
+            }
 
             return nFrame;
 

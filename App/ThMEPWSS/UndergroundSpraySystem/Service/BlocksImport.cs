@@ -18,6 +18,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
     {
         public static bool ImportElementsFromStdDwg()
         {
+
             var file = ThCADCommon.WSSDwgPath();
             if (!File.Exists(file))
             {

@@ -4,11 +4,14 @@ using Linq2Acad;
 using Catel.Linq;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using ThMEPWSS.Bussiness;
 using ThMEPEngineCore.Model;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -16,20 +19,29 @@ namespace ThMEPWSS.Sprinkler.Analysis
     {
         public override void Clean(Polyline pline)
         {
-            CleanDimension(ThSprinklerCheckerLayer.Blind_Zone_LayerName, pline);
+            CleanPline(ThWSSCommon.Blind_Zone_LayerName, pline);
         }
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var distanceCheck = DistanceCheck(sprinklers, pline);
-            if (distanceCheck.Count > 0) 
-            {
-                var results = BuildingCheck(geometries, distanceCheck, pline);
-                if (results.Count > 0)
-                {
-                    Present(results);
-                }
-            }
+            var holes = new List<Polyline>();
+            var polygon = pline.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor")
+                                                         && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
+                                                         || (g.Properties["Category"] as string).Contains("Room")))
+                                             .Select(g => g.Boundary)
+                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                                             .OfType<Polyline>()
+                                             .ToList();
+            holes.AddRange(geometriesFilter);
+            var sprinklersData = sprinklers
+                .OfType<ThSprinkler>()
+                .Where(o => o.Category == Category)
+                .Where(o => pline.Contains(o.Position))
+                .Select(o => o.Position)
+                .ToList();
+            var service = new CalSprayBlindAreaService(Matrix3d.Identity);
+            service.CalSprayBlindArea(sprinklersData, pline, holes, RadiusA * Math.Sqrt(2));
         }
 
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)

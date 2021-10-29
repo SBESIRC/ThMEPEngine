@@ -43,35 +43,42 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
                 foreach (var db in DBObjs)
                 {
-                    if(db is DBPoint)
+                    try
                     {
-                        continue;
-                    }
-                    if (db is Line line)//线段直接添加
-                    {
-                        DBObjResults.Add(line);
-                    }
-                    else if (db is Polyline pline)//多段线打断添加
-                    {
-                        
-                        for (int i = 0; i < pline.NumberOfVertices - 1; i++)
+                        if (db is DBPoint)
                         {
-                            var pt1 = pline.GetPoint3dAt(i).ToPoint2D().ToPoint3d();
-                            var pt2 = pline.GetPoint3dAt(i + 1).ToPoint2D().ToPoint3d();
-                            DBObjResults.Add(new Line(pt1, pt2));
+                            continue;
                         }
-                    }
-                    else
-                    {
-                        var br = new DBObjectCollection();
-                        (db as Entity).Explode(br);
-                        foreach (var l in br)
+                        if (db is Line line)//线段直接添加
                         {
-                            if (l is Line line1)
+                            DBObjResults.Add(line);
+                        }
+                        else if (db is Polyline pline)//多段线打断添加
+                        {
+
+                            for (int i = 0; i < pline.NumberOfVertices - 1; i++)
                             {
-                                DBObjResults.Add(line1);
+                                var pt1 = pline.GetPoint3dAt(i).ToPoint2D().ToPoint3d();
+                                var pt2 = pline.GetPoint3dAt(i + 1).ToPoint2D().ToPoint3d();
+                                DBObjResults.Add(new Line(pt1, pt2));
                             }
                         }
+                        else
+                        {
+                            var br = new DBObjectCollection();
+                            (db as Entity).Explode(br);
+                            foreach (var l in br)
+                            {
+                                if (l is Line line1)
+                                {
+                                    DBObjResults.Add(line1);
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        ;
                     }
                 }
             }

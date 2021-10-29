@@ -33,13 +33,14 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.2.0")]
-[assembly: AssemblyFileVersion("1.6.2.0")]
+[assembly: AssemblyVersion("1.6.3.0")]
+[assembly: AssemblyFileVersion("1.6.3.0")]
 
 #if (ACAD2016 || ACAD2018) 
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreCGALCmds))]
 #endif
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreApp))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreRoomCmds))]
+[assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreExtractCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreInternalCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.AFASRegion.ThAFASCmd))]

@@ -119,7 +119,91 @@ namespace ThMEPWSS.Pipe.Model
         public Point2d ContraPoint;
         public GRect Boundary;
     }
+    public class SetHighlevelNozzleAndSemiPlatformNozzlesViewModel : NotifyPropertyChangedBase
+    {
+        public static readonly SetHighlevelNozzleAndSemiPlatformNozzlesViewModel Singleton = new SetHighlevelNozzleAndSemiPlatformNozzlesViewModel();
+        static readonly string[] _PipeConnectionTypes = new string[] { "低位", "高位-板上", "高位-板下", };
+        public class Item : NotifyPropertyChangedBase
+        {
+            int _PipeId;
+            public int PipeId
+            {
+                get => _PipeId;
+                set
+                {
+                    if (value != _PipeId)
+                    {
+                        _PipeId = value;
+                        OnPropertyChanged(nameof(PipeId));
+                    }
+                }
+            }
+            bool _HasFireHydrant;
+            public bool HasFireHydrant
+            {
+                get => _HasFireHydrant;
+                set
+                {
+                    if (value != _HasFireHydrant)
+                    {
+                        _HasFireHydrant = value; OnPropertyChanged(nameof(HasFireHydrant));
+                    }
+                }
+            }
+            public IEnumerable<string> PipeConnectionTypes => _PipeConnectionTypes;
+            string _PipeConnectionType;
+            public string PipeConnectionType
+            {
+                get => _PipeConnectionType;
+                set
+                {
+                    if (value != _PipeConnectionType)
+                    {
+                        _PipeConnectionType = value;
+                        OnPropertyChanged(nameof(PipeConnectionType));
+                    }
+                }
+            }
 
+            bool _IsHalfPlatform;
+            public bool IsHalfPlatform
+            {
+                get => _IsHalfPlatform;
+                set
+                {
+                    if (value != _IsHalfPlatform)
+                    {
+                        _IsHalfPlatform = value;
+                        OnPropertyChanged(nameof(IsHalfPlatform));
+                    }
+                }
+            }
+        }
+
+        public enum AdditionalFireHydrantEnum
+        {
+            YesYes,
+            YesNo,
+            NoYes,
+            NoNo,
+        }
+
+        public ObservableCollection<Item> Items { get; set; } = new ObservableCollection<Item>();
+
+        AdditionalFireHydrantEnum _AdditionalFireHydrant;
+        public AdditionalFireHydrantEnum AdditionalFireHydrant
+        {
+            get => _AdditionalFireHydrant;
+            set
+            {
+                if (value != _AdditionalFireHydrant)
+                {
+                    _AdditionalFireHydrant = value;
+                    OnPropertyChanged(nameof(AdditionalFireHydrant));
+                }
+            }
+        }
+    }
     public class FloorHeightsViewModel : NotifyPropertyChangedBase
     {
         public static readonly FloorHeightsViewModel Instance = new FloorHeightsViewModel();
@@ -266,7 +350,7 @@ namespace ThMEPWSS.Pipe.Model
             double floorHeight = 0.00;
             for (int floor = 1; floor < maxFloorNum + 2; floor++)
             {
-                if(floor == 1)
+                if (floor == 1)
                 {
                     floorHeight = 0;
                 }
@@ -279,7 +363,7 @@ namespace ThMEPWSS.Pipe.Model
                     floorHeight += _GeneralFloor;
 
                 }
-                floorHeightDic.Add(Convert.ToString(floor),(floor==1? "±" : "")+ (floorHeight / 1000.0).ToString("0.00"));
+                floorHeightDic.Add(Convert.ToString(floor), (floor == 1 ? "±" : "") + (floorHeight / 1000.0).ToString("0.00"));
             }
 
             return floorHeightDic;

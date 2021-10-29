@@ -33,7 +33,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new System.NotImplementedException();
+            var visitor = new ThDB3RoomOutlineExtractionVisitor()
+            {
+                LayerFilter = ThDbLayerManager.Layers(database),
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database, dbObjs);
+            Results.AddRange(visitor.Results);
         }
     }
     public class ThDB3RoomOutlineRecognitionEngine : ThSpatialElementRecognitionEngine
@@ -73,20 +80,30 @@ namespace ThMEPEngineCore.Engine
             {
                 if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
                 {
-                    var room = ThIfcRoom.Create(polyline);
-                    var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
-                    if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
+                    var curves = new DBObjectCollection() { polyline };
+                    curves = ThRoomOutlineSimplifier.Simplify(curves);
+                    curves = ThRoomOutlineSimplifier.MakeValid(curves);
+                    curves = ThRoomOutlineSimplifier.Simplify(curves);
+                    if (curves.Count == 1)
                     {
-                        room.Name = properties.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
+                        var outline = curves[0] as Polyline;
+                        var room = ThIfcRoom.Create(outline);
+                        var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
+                        if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
+                        {
+                            room.Name = properties.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
+                        }
+                        Elements.Add(room);
                     }
-                    Elements.Add(room);
                 }
             });
         }
 
         public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new System.NotImplementedException();
+            var engine = new ThDB3RoomOutlineExtractionEngine();
+            engine.ExtractFromMS(database, dbObjs);
+            Recognize(engine.Results, new Point3dCollection());
         }
     }
 }

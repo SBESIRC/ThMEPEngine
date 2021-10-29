@@ -16,6 +16,23 @@ using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    public class ThMEPCommandService : ThMEPEngineCore.Command.ThMEPBaseCommand
+    {
+        readonly Action cb;
+        public ThMEPCommandService(Action cb)
+        {
+            this.cb = cb;
+        }
+
+        public override void SubExecute()
+        {
+            cb();
+        }
+        public static void Execute(Action cb, string cmdName)
+        {
+            new ThMEPCommandService(cb) { CommandName = cmdName }.Execute();
+        }
+    }
     public class ThWRainPipeSystem : IThWDraw, IEquatable<ThWRainPipeSystem>, IComparable<ThWRainPipeSystem>
     {
         /// <summary>

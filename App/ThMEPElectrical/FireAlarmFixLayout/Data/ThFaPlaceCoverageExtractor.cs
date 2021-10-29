@@ -54,13 +54,19 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public override List<ThGeometry> BuildGeometries()
         {
+            var tol = 100;//10cm2
+
             var geos = new List<ThGeometry>();
             CanLayoutAreas.ForEach(o =>
             {
-                var geometry = new ThGeometry();
-                geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                geometry.Boundary = o;
-                geos.Add(geometry);
+                if (o.GetArea() > tol)
+                {
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                }
+
             });
             return geos;
         }
@@ -80,7 +86,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             //获取可布置区域
             var poly = pts.CreatePolyline();
             CanLayoutAreas = cmd.DivideRoomWithPlacementRegion(poly);
-          //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
+            //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
         }
 
         public void Print(Database database)

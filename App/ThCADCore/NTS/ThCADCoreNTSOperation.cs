@@ -63,6 +63,7 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        [Obsolete("该方法已被弃用")]
         public static DBObjectCollection LineMerge(this DBObjectCollection objs)
         {
             var merger = new LineMerger();
@@ -77,24 +78,49 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)
         {
+            // 对每个Polygon进行修复
+            var filters = new DBObjectCollection();
+            objs.OfType<Polyline>().ForEach(o =>
+            {
+                o.Fix().OfType<Polyline>().ForEach(e => filters.Add(e));
+            });
+            if (filters.Count == 0)
+            {
+                return new DBObjectCollection();
+            }
+
+            // 获取面域
             var poylgons = new DBObjectCollection();
-            Geometry geometry = objs.BuildAreaGeometry();
+            var geometry = filters.BuildAreaGeometry();
             if (geometry is Polygon polygon)
             {
-                poylgons.Add(polygon.ToDbEntity());
+                poylgons.AddGeometryToDbCollection(polygon);
             }
             else if (geometry is MultiPolygon mPolygons)
             {
-                mPolygons.Geometries.Cast<Polygon>().Where(o=>o.Area>1.0).ForEach(o =>
+                mPolygons.Geometries.OfType<Polygon>().ForEach(o =>
                 {
-                    poylgons.Add(o.ToDbEntity());
+                    poylgons.AddGeometryToDbCollection(o);
                 });
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
             return poylgons;
+        }
+
+        private static void AddGeometryToDbCollection(this DBObjectCollection objs, Polygon polygon)
+        {
+            // 若仅给定固定精度，则无法处理狭长区域的舍入问题，故利用区域长度和面积进行判断
+            // 狭长区域底边近似于Polygon.Length的一半，利用近似面积公式S=l*h，忽略平均高度小于2的区域
+            if (polygon.Area > 1.0 && polygon.Area > polygon.Length)
+            {
+                if (polygon.NumInteriorRings > 0)
+                {
+                    polygon.ToDbMPolygonEx(1.0).OfType<Entity>().ForEach(o => objs.Add(o));
+                }
+                else if (polygon.Shell != null)
+                {
+                    objs.Add(polygon.Shell.ToDbPolyline());
+                }
+            }
         }
 
         public static MPolygon BuildMPolygon(this DBObjectCollection objs)
@@ -116,7 +142,10 @@ namespace ThCADCore.NTS
 
         public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
         {
-            var builder = new ThCADCoreNTSBuildArea();
+            var builder = new ThCADCoreNTSBuildArea
+            {
+                DissolveSharedEdges = false
+            };
             return builder.Build(objs.ToMultiLineString());
         }
     }

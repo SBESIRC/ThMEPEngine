@@ -26,21 +26,37 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 if(floors[fNumber].Contains(loopStPt))
                 {
-                    sprayOut.PipeInsertPoint = insertPt.OffsetXY(300, 0.9 * height);
+                    sprayOut.PipeInsertPoint = insertPt.OffsetXY(300, height - 800);
                     sprayOut.CurrentFloor = fNumber;
                 }
-                sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
+                //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
                 string text = fNumber + "F(建筑)";
                 sprayOut.Texts.Add(new Block.Text(text, insertPt.OffsetY(200), "W-NOTE"));
+                sprayIn.floorNumberYDic.Add(fNumber, insertPt.Y);
                 insertPt = insertPt.OffsetY(height);
+
             }
-            sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
+            //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
             string text1 = " ";
             if(floors.Keys.Last().Contains("B1"))
             {
                 text1 = "地库顶板";
             }
             sprayOut.Texts.Add(new Block.Text(text1, insertPt.OffsetY(200), "W-NOTE"));
+        }
+
+        public static void Get2(SprayOut sprayOut, SpraySystem spraySystem, SprayIn sprayIn)
+        {
+            //绘制楼板线
+            var floors = sprayIn.FloorRectDic;
+            double fHeight = sprayIn.FloorHeight;
+            Point3d insertPt = sprayOut.InsertPoint.Cloned();
+            foreach (var fNumber in floors.Keys)
+            {
+                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
+                insertPt = insertPt.OffsetY(fHeight);
+            }
+            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
         }
     }
 }

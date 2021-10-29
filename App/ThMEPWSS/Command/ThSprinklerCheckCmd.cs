@@ -33,7 +33,7 @@ namespace ThMEPWSS.Command
                 var data = DangerGradeDataManager.Query(SprinklerCheckerVM.Parameter.DangerGrade, range);
                 var checkBoxs = new List<bool>
                 {
-                    //SprinklerCheckerVM.Parameter.CheckItem1,
+                    SprinklerCheckerVM.Parameter.CheckItem1,
                     SprinklerCheckerVM.Parameter.CheckItem2,
                     SprinklerCheckerVM.Parameter.CheckItem3,
                     SprinklerCheckerVM.Parameter.CheckItem4,
@@ -55,7 +55,7 @@ namespace ThMEPWSS.Command
 
                 var checkers = new List<ThSprinklerChecker>
                     {
-                        //new ThSprinklerBlindZoneChecker(),
+                        new ThSprinklerBlindZoneChecker(),
                         new ThSprinklerDistanceFromBoundarySoFarChecker(),
                         new ThSprinklerRoomChecker(),
                         new ThSprinklerParkingStallChecker{ BlockNameDict = SprinklerCheckerVM.Parameter.BlockNameDict},

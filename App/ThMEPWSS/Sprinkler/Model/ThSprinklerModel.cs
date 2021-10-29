@@ -12,7 +12,7 @@ namespace ThMEPWSS.Sprinkler.Model
         public Dictionary<string, List<string>> BlockNameDict { get; set; }
         public ThSprinklerModel()
         {
-            //checkItem1 = true;
+            checkItem1 = true;
             checkItem2 = true;
             checkItem3 = true;
             checkItem4 = true;

@@ -3,7 +3,6 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.General;
-using ThMEPWSS.UndergroundSpraySystem.Service;
 using DotNetARX;
 using System;
 
@@ -17,19 +16,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public AlarmValveSys(Point3d stPt, int alarmValveIndex, double floorHeight)
         {
             StPt = stPt;
-            PipeLength = floorHeight * (0.455 - 0.06 * alarmValveIndex);
+            PipeLength = floorHeight - 2600 - 2550 - 600 * alarmValveIndex;
             EndPt = StPt.OffsetY(1550 + PipeLength);
-            ;
         }
         public void Insert(AcadDatabase acadDatabase)
         {
-            BlocksImport.ImportElementsFromStdDwg();
-
             InsertLine(acadDatabase, StPt, StPt.OffsetY(150));
             InsertLine(acadDatabase, StPt.OffsetY(450), StPt.OffsetY(550));
             InsertLine(acadDatabase, StPt.OffsetY(850), StPt.OffsetY(1250));
             InsertLine(acadDatabase, StPt.OffsetY(1550), StPt.OffsetY(1550 + PipeLength));
-           
 
             InsertLine(acadDatabase, StPt.OffsetXY(-150, 700), StPt.OffsetXY(-150, 1300), "W-FRPT-SPRL-EQPM");
             InsertLine(acadDatabase, StPt.OffsetXY(-300, 1300), StPt.OffsetXY(-150, 1300), "W-FRPT-SPRL-EQPM");
@@ -38,7 +33,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXY(300, 250), StPt.OffsetXY(300, 400), "W-FRPT-DRAI-PIPE");
 
             InsertBlock(acadDatabase, "遥控信号阀", StPt.OffsetY(150));
-            InsertBlock(acadDatabase, "湿式报警阀系统", StPt.OffsetY(550));
+            InsertBlock(acadDatabase, "湿式报警阀系统", StPt.OffsetXY(150, 700), "W-FRPT-SPRL-EQPM", 1, Math.PI);
             InsertBlock(acadDatabase, "遥控信号阀", StPt.OffsetY(1250));
             InsertBlock(acadDatabase, "截止阀", StPt.OffsetXY(300, 550));
             InsertBlock(acadDatabase, "水力警铃", StPt.OffsetXY(-300, 1300));

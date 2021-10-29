@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.DrawService;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.Service;
@@ -405,7 +406,7 @@ FocusToCAD();
                 Point3d pt3 = point2 + (vector * (200 + 320));
                 string pipeSize = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPipeConfigInfo.AirPipeLength, info.AirPipeConfigInfo.AirPipeHeight);
                 ThMEPHVACDrawService drawService = new ThMEPHVACDrawService("平时排风", mapScale, pt1, -vector);
-                Duct_modify_param param = new Duct_modify_param(pipeSize, 100, info.AirPipeConfigInfo.AirPipeMarkHeight, pt1.ToPoint2D(), pt2.ToPoint2D());
+                DuctModifyParam param = new DuctModifyParam(pipeSize, 100, info.AirPipeConfigInfo.AirPipeMarkHeight, pt1.ToPoint2D(), pt2.ToPoint2D());
                 drawService.Draw_duct(param, Matrix3d.Identity);
                 //
                 Line centerLine1 = new Line(pt0, pt1);

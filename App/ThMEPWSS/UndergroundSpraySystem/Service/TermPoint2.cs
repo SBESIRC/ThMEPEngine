@@ -8,6 +8,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
+using DotNetARX;
+using Linq2Acad;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 {
@@ -51,7 +53,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var adjs = sprayIn.LeadLineDic[StartLine];
             if (adjs.Count > 1)
             {
-                return;
+                ;
             }
             double minDist = 100;
             foreach (var l in sprayIn.LeadLines)
@@ -78,16 +80,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 var line = new Line(PtEx._pt.OffsetX(-500), PtEx._pt.OffsetX(400));
                 string str1 = ExtractText(spatialIndex, line.GetRect());
                 PipeNumber = str1;
-                ;
-                if(PipeNumber is null)
-                {
-                    ;
-                }
+
                 return;
             }
-            string str = ExtractText(spatialIndex, TextLine.GetRect());
+            string str = ExtractText(spatialIndex, CreateLineHalfBuffer(TextLine, 300));
             PipeNumber = str;
-            var str2 = ExtractText(spatialIndex, TextLine.GetRect(false));
+            var str2 = ExtractText(spatialIndex, CreateLineHalfBuffer(TextLine, 300));
             PipeNumber2 = str2;
             if (PipeNumber2 is null)
             {
@@ -96,8 +94,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
 
         }
 
+        private static Polyline CreateLineHalfBuffer(Line line, int tolerance = 50)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+
+            var spt = line.StartPoint;
+            var ept = line.EndPoint;
+            pts.Add(spt.ToPoint2D()); // low left
+            pts.Add(spt.OffsetY(tolerance).ToPoint2D()); // high left
+            pts.Add(ept.OffsetY(tolerance).ToPoint2D()); // low right
+            pts.Add(ept.ToPoint2D()); // high right
+            pts.Add(spt.ToPoint2D()); // low left
+            pl.CreatePolyline(pts);
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                currentDb.CurrentSpace.Add(pl);
+            }
+            return pl;
+        }
+
+
         private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex, Tuple<Point3d, Point3d> tuplePoint)
         {
+            ;
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
             var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             var pipeNumber = "";
@@ -110,6 +130,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             return pipeNumber;
         }
+
+        private string ExtractText(ThCADCoreNTSSpatialIndex spatialIndex, Polyline selectArea)
+        {
+            var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+            var pipeNumber = "";
+            double dist = 1000;
+            if(DBObjs.Count == 1)
+            {
+                pipeNumber = (DBObjs[0] as DBText).TextString;
+            }
+            foreach (var obj in DBObjs)
+            {
+                if (obj is DBText br)
+                {
+                    var curDist = Math.Min(br.Position.DistanceTo(selectArea.StartPoint), 
+                                           br.Position.DistanceTo(selectArea.GetPoint3dAt(3)));
+                    if (curDist < dist)
+                    {
+                        pipeNumber = br.TextString;
+                        dist = curDist;
+                    }
+                }
+            }
+            return pipeNumber;
+        }
+
+
         public void SetType()
         {
             if(PipeNumber.Contains("防火分区"))
@@ -129,8 +176,5 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             Type = 4;
         }
-
-
-
     }
 }

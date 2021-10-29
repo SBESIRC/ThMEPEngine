@@ -151,9 +151,11 @@ namespace ThMEPEngineCore.Engine
                 parameter.Height = Convert.ToDouble(dictionary["厚度"]);
                 var start_x = Convert.ToDouble(dictionary["始端 X 坐标"]);
                 var start_y = Convert.ToDouble(dictionary["始端 Y 坐标"]);
+                var start_z = Convert.ToDouble(dictionary["始端 Z 坐标"]);
                 var end_x = Convert.ToDouble(dictionary["末端 X 坐标"]);
                 var end_y = Convert.ToDouble(dictionary["末端 Y 坐标"]);
                 parameter.Length = Math.Sqrt(Math.Pow(start_x - end_x, 2) + Math.Pow(start_y - end_y, 2));
+                parameter.MarkHeight = (start_z - parameter.Height / 2.0) / 1000.0;
                 Elements.Add(new ThIfcDuctSegment(parameter));
             }
         }

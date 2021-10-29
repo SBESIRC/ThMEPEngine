@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
             List<Curve> curves = new List<Curve>();
-            var objs = datas.Select(o => o.Geometry).Where(o => o is Line).ToCollection();
+            var objs = datas.Select(o => o.Geometry).Where(o => o is Curve).ToCollection();
             if (polygon.Count > 0)
             {
                 ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs.Cast<Curve>().ToList();
             }
-            curves.Cast<Line>().ForEach(o => Elements.Add(ThAXISLine.Create(o)));
+            curves.Cast<Curve>().ForEach(o => Elements.Add(ThAXISLine.Create(o)));
         }
     }
 }

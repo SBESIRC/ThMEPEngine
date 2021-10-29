@@ -47,6 +47,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             {
                 Detect.Add((new Circle(pt, Vector3d.ZAxis, radius)).ToNTSPolygon());
             }
+            //using (Linq2Acad.AcadDatabase acdb = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    ShowInfo.ShowGeometry(mPolygon.ToNTSGeometry(),acdb ,1);
+            //}
             return mPolygon.ToNTSPolygon().Difference(OverlayNGRobust.Union(Detect.ToArray()));
         }
 

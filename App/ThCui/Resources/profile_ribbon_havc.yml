@@ -50,8 +50,6 @@ panels:
     name: "WUNDERGROUNDPLAN"
     title: "地下平面图"
     items:
-        - text: "消防喷头"
-          attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "冲洗点位"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "潜水泵"
@@ -66,6 +64,17 @@ panels:
         - text: "消火栓"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "压力排水"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "喷淋"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlWSPRINKLER"
+    name: "WSPRINKLER"
+    title: "消防喷淋"
+    items:
+        - text: "喷头布置"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "喷头校核"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWDETAILAXONOMETRY"
@@ -114,6 +123,8 @@ panels:
           - text: "风管修改"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "整体修改"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "风管留洞"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlEAFAS"

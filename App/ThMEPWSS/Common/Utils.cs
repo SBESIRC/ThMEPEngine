@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.Common
@@ -22,12 +23,13 @@ namespace ThMEPWSS.Common
             using (Active.Document.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
             {
-                if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
+                //if (!acadDatabase.Blocks.Contains(WaterSuplyBlockNames.FloorFraming))
+                //{
+                    
+                //}
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
-                    {
-                        var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming));//楼层框定
-                    }
+                    var objID = acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(WaterSuplyBlockNames.FloorFraming), true);//楼层框定
                 }
             }
             while (true)
@@ -42,7 +44,7 @@ namespace ThMEPWSS.Common
                 using (var acadDatabase = AcadDatabase.Active())
                 {
                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.FloorFraming,
-                    propmptResult.Value, new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "楼层编号", "1" } });
+                    propmptResult.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { { "楼层编号", "1" } });
                 }
             }
         }
@@ -63,7 +65,7 @@ namespace ThMEPWSS.Common
             var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点\n", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
+                return Tuple.Create(leftDownPt.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()));
             }
             else
             {

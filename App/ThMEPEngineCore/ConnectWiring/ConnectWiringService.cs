@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(int count, string systemName)
+        public void Routing(int count, string systemName, bool wall = false, bool column = false)
         {
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
@@ -47,30 +47,37 @@ namespace ThMEPEngineCore.ConnectWiring
             {
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
-            var allBlocks = thBlockPointsExtractor.resBlocks;
+            var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
 
             BranchConnectingService branchConnecting = new BranchConnectingService();
-            var data = GetData(holes, outFrame, block);
+            var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
             {
                 var configBlocks = info.loopInfoModels.First().blockNames;
-                var resBlocks = allBlocks.Where(x => !x.BlockTableRecord.IsNull)
+                var resBlocks = allBlocks
                 .Where(x =>
                 {
-                    var name = x.GetEffectiveName();
+                    var name = x.Name;
                     return configBlocks.Contains(name);
                 }).ToList();
                 if (data.Count > 0 && resBlocks.Count > 0)
                 {
-                    var blockGeos = GetBlockPts(resBlocks, configBlocks);
+                    var maxNum = count;
+                    if (info.loopInfoModels.First().LineType == "E-FAS-WIRE4")
+                    {
+                        maxNum = 1;
+                    }
+
+                    var blockGeos = GetBlockPts(resBlocks);
                     ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
+                    allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
-                    var res = thCableRouter.RouteCable(dataGeoJson, count);
+                    var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
                     {
-                        var lines = new List<Polyline>();
+                         var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
                         using (var stringReader = new StringReader(res))
                         using (var jsonReader = new JsonTextReader(stringReader))
@@ -159,12 +166,12 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取数据
         /// </summary>
         /// <returns></returns>
-        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, BlockReference block)
+        public List<ThGeometry> GetData(List<Polyline> holes, Polyline outFrame, BlockReference block, bool wall, bool column)
         {
             List<ThGeometry> geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory();
+                ThFireAlarmWiringDateSetFactory factory = new ThFireAlarmWiringDateSetFactory(wall, column);
                 factory.holes = holes;
                 factory.powerBlock = block;
                 var data = factory.Create(acadDatabase.Database, outFrame.Vertices());
@@ -175,13 +182,37 @@ namespace ThMEPEngineCore.ConnectWiring
         }
 
         /// <summary>
+        /// 除连线块意外其他块当作洞口处理
+        /// </summary>
+        /// <param name="allBlocks"></param>
+        /// <param name="resBlocks"></param>
+        /// <returns></returns>
+        private List<ThGeometry> GetBlockHoles(List<BlockReference> allBlocks, List<BlockReference> resBlocks)
+        {
+            var holeBlocks = allBlocks.Except(resBlocks).ToList();
+            var geos = new List<ThGeometry>();
+            if (holeBlocks.Count > 0)
+            {
+                holeBlocks.ForEach(o =>
+                {
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.Hole.ToString());
+                    geometry.Boundary = o.ToOBB(o.BlockTransform);
+                    geos.Add(geometry);
+                });
+            }
+
+            return geos;
+        }
+
+        /// <summary>
         /// 获取连接点位
         /// </summary>
         /// <returns></returns>
-        private List<ThGeometry> GetBlockPts(List<BlockReference> allBlocks, List<string> blockNames)
+        private List<ThGeometry> GetBlockPts(List<BlockReference> allBlocks)
         {
             var geos = new List<ThGeometry>();
-            if (allBlocks.Count > 0 && blockNames.Count > 0)
+            if (allBlocks.Count > 0)
             {
                 allBlocks.ForEach(o =>
                 {

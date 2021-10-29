@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Algorithm.Locate;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -23,13 +25,50 @@ namespace ThCADCore.NTS
                 var shell = polygon.Shell.ToDbPolyline();
                 if(shell.Area<=1.0) 
                 {
-                    //防止近视与线的闭合Polyline的问题
+                    //防止近似与线的闭合Polyline的问题
                     return new MPolygon();
                 }
                 holes = polygon.Holes.Select(o=>o.ToDbPolyline()).Where(o=>o.Area>1.0).Cast<Curve>().ToList();
                 return ThMPolygonTool.CreateMPolygon(shell, holes);
             }
             return new MPolygon();
+        }
+
+        public static DBObjectCollection ToDbMPolygonEx(this Polygon polygon, double tolerance = 1.0)
+        {
+            var objs = new DBObjectCollection();
+            var shell = polygon.Shell.ToDbPolyline();
+            if (shell.Area <= 1.0)
+            {
+                //防止近似与线的闭合Polyline的问题
+                return objs;
+            }
+            var holes = new List<Curve>();
+            polygon.Holes
+                .Select(o => o.ToDbPolyline())
+                .Where(o => o.Area > 1.0)
+                .ForEach(o =>
+                {
+                    // 若Hole和Shell的距离很近，拆分成两个区域
+                    if (o.Distance(shell) <= tolerance)
+                    {
+                        objs.Add(o);
+                        shell = shell.Difference(o.Buffer(tolerance).OfType<Polyline>().First()).OfType<Polyline>().First();
+                    }
+                    else
+                    {
+                        holes.Add(o);
+                    }
+                });
+            if (holes.Count > 0)
+            {
+                objs.Add(ThMPolygonTool.CreateMPolygon(shell, holes));
+            }
+            else
+            {
+                objs.Add(shell);
+            }
+            return objs;
         }
 
         public static Geometry ToNTSGeometry(this MPolygon mPolygon)
@@ -169,7 +208,10 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection DifferenceMP(this MPolygon mPolygon, DBObjectCollection objs)
         {
-            return mPolygon.ToNTSPolygon().Difference(objs.UnionGeometries()).ToDbCollection(true);
+            return OverlayNGRobust.Overlay(
+                mPolygon.ToNTSPolygon(), 
+                objs.UnionGeometries(), 
+                SpatialFunction.Difference).ToDbCollection(true);
         }
     }
 }

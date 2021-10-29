@@ -85,7 +85,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Clean(Polyline pline)
         {
-            CleanPline(ThSprinklerCheckerLayer.Mechanical_Parking_Stall_Checker_LayerName, pline);
+            CleanPline(ThWSSCommon.Mechanical_Parking_Stall_Checker_LayerName, pline);
         }
 
         private void Present(DBObjectCollection objs)
@@ -112,9 +112,10 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var parkingStallExtractor = new ThParkingStallExtractor()
                 {
                     BlockNames = parkingStallBlkNames,
+                    LayerNames = new List<string>(),
                 };
                 parkingStallExtractor.Extract(database, pline.Vertices());
-                ParkingStalls = parkingStallExtractor.ParkingStalls.Cast<Polyline>().ToCollection();
+                ParkingStalls = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToCollection();
             }
         }
 

@@ -28,13 +28,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Alg\ThMEPHAVCBounds.cs" />
+    <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="FanConnect\Command\ThFanConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Model\ThFanMainLineModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanTreeModel.cs" />
+    <Compile Include="FanLayout\Command\ThFanHoleExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanMaterialTableExtractCmd.cs" />
     <Compile Include="FanLayout\Engine\ThFanCEXHRecognitionEngine.cs" />
+    <Compile Include="FanLayout\Engine\ThFanDuctRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWAFRecognitionEngine.cs" />
     <Compile Include="FanLayout\Engine\ThFanWEXHRecognitionEngine.cs" />
@@ -53,7 +58,20 @@
     <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanWAFViewModel.cs" />
-    <Compile Include="Model\ModifyParam.cs" />
+    <Compile Include="LoadCalculation\Command\ThCreatLoadCalculationTableCmd.cs" />
+    <Compile Include="LoadCalculation\Command\ThInsertRoomFunctionCmd.cs" />
+    <Compile Include="LoadCalculation\Command\ThRoomFunctionExtractCmd.cs" />
+    <Compile Include="LoadCalculation\Command\ThRoomFunctionNumIncreaseCmd.cs" />
+    <Compile Include="LoadCalculation\Extension\MathExtension.cs" />
+    <Compile Include="LoadCalculation\Model\ConfigDataModel.cs" />
+    <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromConfig.cs" />
+    <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromUI.cs" />
+    <Compile Include="LoadCalculation\Model\OutdoorParameterData.cs" />
+    <Compile Include="LoadCalculation\Service\GetPrimitivesService.cs" />
+    <Compile Include="LoadCalculation\Service\InsertBlockService.cs" />
+    <Compile Include="LoadCalculation\Service\LogicService.cs" />
+    <Compile Include="LoadCalculation\Service\ModelDataDbSourceService.cs" />
+    <Compile Include="LoadCalculation\Service\ThLoadCalculationUIService.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
     <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
@@ -83,7 +101,6 @@
     <Compile Include="Model\ThMEPHVACService.cs" />
     <Compile Include="Model\ThModifyDuctConnComponent.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
-    <Compile Include="Model\ThTee.cs" />
     <Compile Include="Model\ThVerticalBypassFactory.cs" />
     <Compile Include="Model\ThVTee.cs" />
     <Compile Include="CAD\ThDuctParameter.cs" />
@@ -93,25 +110,18 @@
     <Compile Include="CAD\ThHvacValveDbExtension.cs" />
     <Compile Include="CAD\ThInletOutletDuctDrawEngine.cs" />
     <Compile Include="Command\ThModelBaseExtractCmd.cs" />
-    <Compile Include="Duct\ThValveExtension.cs" />
     <Compile Include="CAD\ThValvesAndHolesInsertEngine.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
-    <Compile Include="Duct\GraphSerializeService.cs" />
-    <Compile Include="Duct\ThDraught.cs" />
-    <Compile Include="Duct\ThDraughtDesignEngine.cs" />
-    <Compile Include="Duct\ThDuctDesignEngine.cs" />
-    <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
-    <Compile Include="Duct\ThDuctLineSimplifier.cs" />
     <Compile Include="Duct\ThDuctUtils.cs" />
-    <Compile Include="Duct\ThGraphExtension.cs" />
     <Compile Include="Model\DuctSpecModel.cs" />
     <Compile Include="Model\ThValve.cs" />
     <Compile Include="IO\ThDuctInOutMappingJsonReader.cs" />
     <Compile Include="IO\ThDuctJsonReader.cs" />
     <Compile Include="IO\ThDuctParameterJsonReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
     <Compile Include="ThModelExtractionVisitor.cs" />
@@ -193,6 +203,11 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="FanConnect\Engine\" />
+    <Folder Include="FanConnect\Service\" />
+    <Folder Include="FanConnect\ViewModel\" />
+    <Folder Include="LoadCalculation\Engine\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

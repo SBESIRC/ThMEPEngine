@@ -16,8 +16,5 @@ namespace ThMEPWSS.UndergroundSpraySystem.Class
         public const string SubLoop = "次环";
         public const string PangTong = "旁通";
         public const string Branch = "支路";
-        public const string X = "";
-      
-
     }
 }

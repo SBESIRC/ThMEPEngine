@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetARX;
+using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;

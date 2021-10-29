@@ -1,16 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPWSS.Model;
+using ThMEPWSS.Utils;
 using ThMEPWSS.Service;
 using ThMEPWSS.Uitl.ShadowIn2D;
-using ThMEPWSS.Utils;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Bussiness
 {
@@ -69,28 +70,25 @@ namespace ThMEPWSS.Bussiness
             ShadowService shadowService = new ShadowService();
             List<Polyline> protectAreas = new List<Polyline>();
             ThCADCoreNTSService.Instance.ArcTessellationLength = (int)ThWSSUIService.Instance.Parameter.blindAreaType;
+            holes = holes.ToCollection().UnionPolygons().OfType<Polyline>().ToList();
             foreach (var spray in sprays)
             {
                 //保护类型
                 var sprayRadii = spray.Radii as Polyline;
-                //if (!(ThWSSUIService.Instance.Parameter.blindAreaType == BlindAreaType.Rectangle))
-                //{
-                    
-                //}
-                sprayRadii = spray.ArcRadii.ToNTSPolygon().ToDbPolylines()[0];
+                sprayRadii = spray.ArcRadii.TessellateCircleWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength);
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
                 //计算真实的保护区域
                 var area = sprayRadii.Intersection(new DBObjectCollection() { polyline })
-                    .Cast<Polyline>()
+                    .OfType<Polyline>()
                     .Where(y => y.Contains(spray.Position))
                     .FirstOrDefault();
                 if (area != null)
                 {
                     area = area.Difference(intersectPolys.ToCollection())
-                    .Cast<Polyline>()
+                    .OfType<Polyline>()
                     .Where(y => y.Contains(spray.Position))
-                    .SelectMany(z => z.Buffer(1).Cast<Polyline>())
+                    .SelectMany(z => z.Buffer(1).OfType<Polyline>())
                     .FirstOrDefault();
                 }
                 if (area != null)
@@ -100,7 +98,7 @@ namespace ThMEPWSS.Bussiness
                 }
             }
             ThCADCoreNTSService.Instance.ArcTessellationLength = 1000;
-            var sprayArea = SprayLayoutDataUtils.Radii(protectAreas).Cast<Polyline>().ToList();
+            var sprayArea = SprayLayoutDataUtils.Radii(protectAreas).OfType<Polyline>().ToList();
             CalHolesService calHolesService = new CalHolesService();
             var holeDic = calHolesService.CalHoles(sprayArea);
             var frames = holeDic.Keys.ToList();
@@ -108,22 +106,15 @@ namespace ThMEPWSS.Bussiness
 
             //计算边界盲区
             List<Polyline> blindAreas = new List<Polyline>();
-            blindAreas.AddRange(polyline.Difference(frames.ToCollection()).Cast<Polyline>().ToList());
+            blindAreas.AddRange(polyline.Difference(frames.ToCollection()).OfType<Polyline>().ToList());
 
             //计算洞口盲区
             var dBObjects = holes.ToCollection();
             foreach (var holeArea in holeDic.SelectMany(x => x.Value))
             {
-                blindAreas.AddRange(holeArea.Difference(dBObjects).Cast<Polyline>().ToList());
+                blindAreas.AddRange(holeArea.Difference(dBObjects).OfType<Polyline>().ToList());
             }
-            //using (AcadDatabase ad = AcadDatabase.Active())
-            //{
-            //    foreach (var item in protectAreas)
-            //    {
-            //        item.ColorIndex = 4;
-            //        ad.ModelSpace.Add(item);
-            //    }
-            //}
+
             return blindAreas;
         }
 
@@ -135,14 +126,14 @@ namespace ThMEPWSS.Bussiness
         {
             using (var db = AcadDatabase.Active())
             {
-                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Layout_BlindArea_LayerName);
-                db.Database.UnFrozenLayer(ThWSSCommon.Layout_BlindArea_LayerName);
-                db.Database.UnPrintLayer(ThWSSCommon.Layout_BlindArea_LayerName);
+                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Blind_Zone_LayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.Blind_Zone_LayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.Blind_Zone_LayerName);
 
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
-                    area.Layer = ThWSSCommon.Layout_BlindArea_LayerName;
-                    area.ColorIndex = 10;
+                    area.Layer = ThWSSCommon.Blind_Zone_LayerName;
+                    area.ColorIndex = 1;
                     area.ConstantWidth = 50;
                     db.ModelSpace.Add(area);
 

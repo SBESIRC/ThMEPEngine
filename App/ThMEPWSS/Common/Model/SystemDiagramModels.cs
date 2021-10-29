@@ -518,6 +518,16 @@ namespace ThMEPWSS.Uitl
             if (ok) return new GRect(minX, minY, maxX, maxY);
             return default;
         }
+        public LinearRing ToLinearRing(Matrix3d matrix)
+        {
+            if (this.IsNull) return null;
+            if (matrix == Matrix3d.Identity) return this.ToLinearRing();
+            var p1 = this.LeftTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p2 = this.LeftButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p3 = this.RightTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p4 = this.RightButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            return new LinearRing(new Coordinate[] { p1, p2, p3, p4, p1 });
+        }
         public GRect TransformBy(Matrix3d matrix)
         {
             if (this.IsNull) return this;
@@ -1147,14 +1157,6 @@ namespace ThMEPWSS.Uitl
         public static bool EqualsTo(this double value1, double value2, double tollerance)
         {
             return value2 - tollerance <= value1 && value1 <= value2 + tollerance;
-        }
-        public static Point3d ToPoint3d(this Coordinate coordinate)
-        {
-            return new Point3d(coordinate.X, coordinate.Y, coordinate.Z);
-        }
-        public static Point2d ToPoint2d(this Coordinate coordinate)
-        {
-            return new Point2d(coordinate.X, coordinate.Y);
         }
         public static bool InRange(this double value, double std, double tollerance)
         {

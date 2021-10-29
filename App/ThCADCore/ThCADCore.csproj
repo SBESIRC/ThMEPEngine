@@ -41,6 +41,7 @@
     <Compile Include="NTS\ThCADCoreNTSDbObjCollectionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryFilter.cs" />
+    <Compile Include="NTS\ThCADCoreNTSGeometryFixer.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometrySmoother.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSInscribedCircle.cs" />
@@ -125,7 +126,7 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="2.3.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.4.0" />
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
   </ItemGroup>

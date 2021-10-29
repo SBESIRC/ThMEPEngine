@@ -11,6 +11,7 @@ using ThMEPEngineCore.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 {
@@ -46,51 +47,14 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                     objs.Add(hole);
                 }
                 MPolygon mPolygonShell = objs.BuildMPolygon();
-                //Get Can not Layout Area List
                 List<Polyline> nonDeployableArea = new List<Polyline>();
-                if (holeList.Count != 0)
-                {
-                    foreach (var pl in holeList)
-                    {
-                        nonDeployableArea.Add(pl);
-                    }
-                }
-                if (layoutList.Count != 0)
-                {
-                    foreach (var layout in layoutList)
-                    {
-                        var layoutHole = layout.Holes();
-                        nonDeployableArea.AddRange(layoutHole);
-                        layoutHole.ForEach(x => objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), x.ToNTSPolygon()).ToDbCollection());
-                    }
-                }
 
-                if (wallList.Count != 0)
-                {
-                    foreach (var pl in wallList)
-                    {
-                        nonDeployableArea.Add(pl);
-                        objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), pl.ToNTSPolygon()).ToDbCollection();
-                    }
-                }
-                if (columns.Count != 0)
-                {
-                    foreach (var pl in columns)
-                    {
-                        nonDeployableArea.Add(pl);
-                        objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), pl.ToNTSPolygon()).ToDbCollection();
-                    }
-                }
-                if (prioritys.Count != 0)
-                {
-                    foreach (var pl in prioritys)
-                    {
-                        nonDeployableArea.Add(pl);
-                    }
-                }
+                GetInputs(objs, nonDeployableArea);
+
                 MPolygon mPolygon = objs.BuildMPolygon();
                 acdb.ModelSpace.Add(mPolygon);
                 mPolygon.SetDatabaseDefaults();
+
 
                 //处理数据
                 pointsWithDirection = new Dictionary<Point3d, Vector3d>();
@@ -114,7 +78,6 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 #if DEBUG
                 //显示适配信息
                 ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
-
                 //显示布置点及方向
                 foreach (var dir in pointsWithDirection)
                 {
@@ -124,6 +87,81 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 //显示盲区
                 ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
 #endif      
+            }
+        }
+
+
+        public void GetInputs(DBObjectCollection objs, List<Polyline> nonDeployableArea)
+        {
+            var room = objs.BuildMPolygon().ToNTSPolygon();
+            foreach (var hole in holeList)
+            {
+                nonDeployableArea.Add(hole);
+                var geo = room.Difference(hole.ToNTSPolygon());
+                if (geo is Polygon polygon)
+                {
+                    room = polygon;
+                }
+                else if (geo is GeometryCollection collection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in collection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
+            foreach (var wall in wallList)
+            {
+                nonDeployableArea.Add(wall);
+                var geo = room.Difference(wall.ToNTSPolygon());
+                if (geo is Polygon polygon)
+                {
+                    room = polygon;
+                }
+                else if (geo is GeometryCollection collection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in collection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
+
+            foreach (var wall in wallList)
+            {
+                nonDeployableArea.Add(wall);
+                var geo = room.Difference(wall.ToNTSPolygon());
+                if (geo is Polygon polygon)
+                {
+                    room = polygon;
+                }
+                else if (geo is GeometryCollection collection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in collection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
+            foreach (var pl in prioritys)
+            {
+                nonDeployableArea.Add(pl);
+            }
+            objs = room.ToDbCollection();
+            foreach (var layout in layoutList)
+            {
+                var layoutHole = layout.Holes();
+                nonDeployableArea.AddRange(layoutHole);
+                layoutHole.ForEach(x => objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), x.ToNTSPolygon()).ToDbCollection());
             }
         }
     }

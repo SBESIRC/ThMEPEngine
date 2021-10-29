@@ -4,11 +4,11 @@ using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPWSS.Sprinkler.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPWSS.Sprinkler.Service
 {

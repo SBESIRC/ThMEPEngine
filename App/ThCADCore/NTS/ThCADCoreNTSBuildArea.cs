@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
+using NetTopologySuite.Operation.Polygonize;
 
 namespace ThCADCore.NTS
 {
@@ -56,14 +57,22 @@ namespace ThCADCore.NTS
     /// </summary>
     public class ThCADCoreNTSBuildArea
     {
+        public bool DissolveSharedEdges { get; set; }
+
+        public ThCADCoreNTSBuildArea()
+        {
+            DissolveSharedEdges = true;
+        }
+
         public Geometry Build(MultiLineString lineStrings)
         {
-            var polys = lineStrings.Polygonize();
+            var polygonizer = new Polygonizer();
+            polygonizer.Add(lineStrings);
+            var polys = polygonizer.GetPolygons();
             if (polys.Count == 0)
             {
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection();
             }
-
             if (polys.Count == 1)
             {
                 return polys.First();
@@ -75,7 +84,15 @@ namespace ThCADCore.NTS
                 faces.Add(ThCADCoreNTSPolygonFace.Create(poly));
             }
 
+            /* Build a MultiPolygon composed only by faces with an
+            * even number of ancestors */
             var polygons = CollectFacesWithEvenAncestors(FindFaceHoles(faces));
+            if (!DissolveSharedEdges)
+            {
+                return polygons;
+            }
+
+            /* Run a single overlay operation to dissolve shared edges */
             return CascadedPolygonUnion.Union(polygons.Geometries);
         }
 

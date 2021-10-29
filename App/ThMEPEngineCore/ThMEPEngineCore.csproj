@@ -117,6 +117,7 @@
     <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPPolygonService.cs" />
+    <Compile Include="Algorithm\ThMEPPolygonShapeRecognitionService.cs" />
     <Compile Include="Algorithm\ThMEPRegionService.cs" />
     <Compile Include="Algorithm\ThMEPTCHService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
@@ -179,6 +180,8 @@
     <Compile Include="Engine\ThFireCompartmentOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentOutlineRecognitionEngine.cs" />
+    <Compile Include="Service\Hvac\ThHvacAnalysisComponent.cs" />
+    <Compile Include="Service\Hvac\ThHvacGetComponent.cs" />
     <Compile Include="Engine\ThParkingStallExtractionVisitor.cs" />
     <Compile Include="Engine\ThRailingBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
@@ -258,6 +261,7 @@
     <Compile Include="IO\ExcelService\ReadExcelService.cs" />
     <Compile Include="IO\IOService\IOOperateService.cs" />
     <Compile Include="Model\Electrical\ThEStoreys.cs" />
+    <Compile Include="Model\Hvac\ThModifyParam.cs" />
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
@@ -689,6 +693,7 @@
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
+    <Compile Include="ThMEPEngineCoreExtractCmds.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
     <Compile Include="ThMEPEngineCoreLayerUtils.cs" />
@@ -771,7 +776,7 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="2.3.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.4.0" />
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="NPOI">

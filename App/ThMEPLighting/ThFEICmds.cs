@@ -146,13 +146,13 @@ namespace ThMEPLighting
                 {
                     DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                     //获取房间
-                    var rooms = dsFELGetPrimitivesService.GetUsefulRooms(pline.Key);
+                    var rooms = dsFELGetPrimitivesService.GetRoomInfo(pline.Key);
 
                     //获取门 
                     var doors = dsFELGetPrimitivesService.GetDoor(pline.Key);
 
                     //获取中心线
-                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(pline.Key, rooms.Select(x => x.Key).ToList());
+                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(pline.Key, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());
 
                     //获取结构信息
                     dsFELGetPrimitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
@@ -161,10 +161,12 @@ namespace ThMEPLighting
                     List<Polyline> holes = new List<Polyline>(pline.Value);
                     holes.AddRange(columns);
                     holes.AddRange(walls);
+                    holes.AddRange(rooms.SelectMany(x => x.Value).ToList());
 
                     //布置
+                    var thRooms = rooms.Select(x => x.Key).ToList();
                     LayoutService layoutService = new LayoutService();
-                    layoutService.LayoutFELService(rooms, doors, centerLines, holes);
+                    layoutService.LayoutFELService(thRooms, doors, centerLines, holes);
                 }
             }
         }

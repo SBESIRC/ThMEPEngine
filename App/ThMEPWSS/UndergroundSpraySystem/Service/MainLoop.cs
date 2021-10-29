@@ -5,6 +5,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.Block;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundSpraySystem.Model;
+using System.Linq;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Service
 {
@@ -49,18 +50,19 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     if (sprayIn.PtTypeDic[pt].Contains("Branch"))
                     {
                         stPt = GetBranchPt(pt, stPt, sprayOut, spraySystem, sprayIn.PtTypeDic[nextPt],
-                            floorHeight * 0.06, sprayIn);
+                            400, sprayIn);
                         continue;
                     }
                     if (sprayIn.PtTypeDic[pt].Contains("PangTong"))
                     {
-                        stPt = GetPangTongPt(stPt, sprayOut, floorHeight * 0.06, pangTong);
+                        stPt = GetPangTongPt(stPt, sprayOut, 600, pangTong);
                         pangTong = !pangTong;
                         continue;
                     }
-                    if (sprayIn.PtTypeDic[pt].Contains("DieValve"))
+                    if (sprayIn.PtTypeDic[pt].Contains("SignalValve"))
                     {
-                        ;
+                        GetSignalValvePt(stPt, sprayOut, sprayIn);
+                        continue;
                     }
                 }
                 catch
@@ -69,7 +71,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
                 
             }
-            GetDetail(stPt, sprayOut, floorHeight * 0.06);
+            GetDetail(stPt, sprayOut, sprayIn, 600);
+
         }
         private static Point3d GetMainPt(Point3d stPt, ref SprayOut sprayOut)
         {
@@ -81,10 +84,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             double floorHeight, SpraySystem spraySystem, SprayIn sprayIn)
         {
 
-            double height = 0.12 * floorHeight;
+            double height = 1200;
             var pt = stPt;
-           
-            
+
             if(spraySystem.SubLoopPtDic.ContainsKey(curPt))
             {
                 spraySystem.SubLoopPtDic.Remove(curPt);
@@ -104,7 +106,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             if (flag == 1)
             {
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
-                pt = stPt.OffsetX(5150 * branchLoopNums + 1500 * (alarmNums - 1) + 2500);
+                pt = stPt.OffsetX(5150 * branchLoopNums + sprayIn.PipeGap * (alarmNums - 1) + 2500);
                 sprayOut.PipeLine.Add(new Line(stPt, pt));
                 spraySystem.TempSubLoopStartPt = new Point3d(stPt.X, stPt.Y, 0);
                 spraySystem.SubLoopPtDic.Add(curPt, stPt.OffsetY(-height));//保存支环的起始点
@@ -134,15 +136,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     }
 
                     var branchNums = spraySystem.SubLoopBranchDic[curPt];//支路数
-                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * 1400 + waterPumpNum * 3200)));
-                    stPt = stPt.OffsetX(branchNums * 1400 + waterPumpNum * 3200);
+                    sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000)));
+                    stPt = stPt.OffsetX(branchNums * sprayIn.PipeGap + waterPumpNum * 5000);
                 }
                 sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
                 spraySystem.SubLoopPtDic.Add(curPt, stPt.OffsetY(-height));//保存支环的起始点
                 pt = spraySystem.TempSubLoopStartPt;
                 if (spraySystem.SubLoopAlarmsDic.ContainsKey(curPt))//支路的报警阀数目
                 {
-                    pt = pt.OffsetX(5150 * branchLoopNums + 1500 * (alarmNums - 1) + 2500);
+                    pt = pt.OffsetX(5150 * branchLoopNums + sprayIn.PipeGap * (alarmNums - 1) + 2500);
                 }
                 if (spraySystem.SubLoopFireAreasDic.ContainsKey(curPt))//支路的防火分区数目
                 {
@@ -183,11 +185,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     stPt = stPt.OffsetX(3200);//起点右移
                 }
             }
-            double dist = 1000;
-            if (nextPtType.Contains("Branch"))
-            {
-                dist = 1400;
-            }
+            double dist = sprayIn.PipeGap;
+            //if (nextPtType.Contains("Branch"))
+            //{
+            //    dist = sprayIn.PipeGap;
+            //}
             var pt = stPt.OffsetX(dist);
             sprayOut.PipeLine.Add(new Line(stPt, pt));
             sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(height)));
@@ -203,10 +205,47 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             spraySystem.BranchPtDic.Add(curPt, stPt.OffsetY(height));
             return pt;
         }
-        private static void GetDetail(Point3d stPt, SprayOut sprayOut, double height)
+        private static void GetSignalValvePt(Point3d stPt, SprayOut sprayOut, SprayIn sprayIn)
+        {
+            double valveGapX = sprayIn.PipeGap / 2;
+            double ValveGap = 300;
+            var insertPt = stPt.OffsetX(-valveGapX);
+            sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", insertPt));
+            foreach(var line in sprayOut.PipeLine)
+            {
+                if(line.GetClosestPointTo(insertPt, false).DistanceTo(insertPt) < 10)
+                {
+                    sprayOut.PipeLine.Remove(line);
+                    if(line.StartPoint.X < line.EndPoint.X)
+                    {
+                        sprayOut.PipeLine.Add(new Line(line.StartPoint, insertPt));
+                        sprayOut.PipeLine.Add(new Line(line.EndPoint, insertPt.OffsetX(ValveGap)));
+                    }
+                    else
+                    {
+                        sprayOut.PipeLine.Add(new Line(line.EndPoint, insertPt));
+                        sprayOut.PipeLine.Add(new Line(line.StartPoint, insertPt.OffsetX(ValveGap)));
+                    }
+                    break;
+                }
+            }
+        }
+        private static void GetDetail(Point3d stPt, SprayOut sprayOut, SprayIn sprayIn, double height)
         {
             sprayOut.PipeLine.Add(new Line(stPt, stPt.OffsetY(-height)));
             sprayOut.PipeLine.Add(new Line(sprayOut.PipeInsertPoint.OffsetY(-height), stPt.OffsetY(-height)));
+
+
+            //绘制楼板线
+            var floors = sprayIn.FloorRectDic;
+            double fHeight = sprayIn.FloorHeight;
+            Point3d insertPt = sprayOut.InsertPoint.Cloned();
+            foreach (var fNumber in floors.Keys)
+            {
+                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(stPt.X + 3000, insertPt.Y, 0)));
+                insertPt = insertPt.OffsetY(fHeight);
+            }
+            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(stPt.X + 3000, insertPt.Y, 0)));
         }
     }
 }

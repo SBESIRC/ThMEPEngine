@@ -23,12 +23,26 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             //基于竖管连接管线
             var pipeLinesSaptialIndex = new ThCADCoreNTSSpatialIndex(pipeLines.ToCollection());
             var lines = new List<Line>();
+            var connectVreticals = new List<Point3dEx>();
             foreach (var ver in sprayIn.Verticals)
             {
+                if(ver._pt.DistanceTo(new Point3d(927732.7, 419553, 0)) < 200)
+                {
+                    ;
+                }
                 var rect = ver._pt.GetRect();
                 var dbObjs = pipeLinesSaptialIndex.SelectCrossingPolygon(rect);
-                sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+                var flag = sprayIn.AddNewPtDic(dbObjs, ver._pt, ref lines);
+                if(flag)
+                {
+                    connectVreticals.Add(ver);
+                }
             }
+            foreach(var cv in connectVreticals)
+            {
+                sprayIn.Verticals.Remove(cv);
+            }
+            
             pipeLines.AddRange(lines);
             return pipeLines;
         }
@@ -41,7 +55,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 500, 2);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 2);//打断部分 自动连接
 
             foreach (var gl in GLineConnectList)
             {
@@ -150,7 +164,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
 
             return pipeLineList;
-
         }
     }
 }

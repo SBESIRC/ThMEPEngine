@@ -185,8 +185,6 @@ namespace ThMEPWSS.Command
                 var bt = acadDatabase.Element<BlockTable>(acadDatabase.Database.BlockTableId);//创建BlockTable
                 var BlockSize = ThWCompute.CreateBlockSizeList(bt);//获取并添加 block 尺寸
 
-                
-
                 var maxHouseholdNums = 0;
                 for (int i = 0; i < floorNumbers; i++)
                 {

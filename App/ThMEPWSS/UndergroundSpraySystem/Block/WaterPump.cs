@@ -11,13 +11,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
     public class WaterPump
     {
         public Point3d StPt { get; set; }
-        public WaterPump(Point3d stPt)
+        private string PumpText { get; set; }
+        private string PipeDN { get; set; }
+        public WaterPump(Point3d stPt, string text, string DN)
         {
             StPt = stPt;
+            PumpText = text;
+            PipeDN = DN;
         }
         public void Insert(AcadDatabase acadDatabase)
         {
-            BlocksImport.ImportElementsFromStdDwg();
+            //BlocksImport.ImportElementsFromStdDwg();
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
                     StPt.OffsetXY(-3200, 1200), new Scale3d(1, 1, 1), 0);
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "水泵接合器接口",
@@ -48,7 +52,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt.OffsetXY(-2529, 1412), StPt.OffsetXY(-2829, 2012), "W-NOTE");
             InsertLine(acadDatabase, StPt.OffsetXY(670, 2012), StPt.OffsetXY(-2829, 2012), "W-NOTE");
 
-            InsertText(acadDatabase, StPt.OffsetXY(-2829, 2012), "接至室外中区消火栓水泵接合器");
+            InsertText(acadDatabase, StPt.OffsetXY(-2829, 2012), PumpText);
+            if(!PipeDN.Equals(""))
+            {
+                InsertText(acadDatabase, StPt.OffsetXY(-2000, 1600), PipeDN + "*2");
+            }
+
         }
 
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer = "W-FRPT-SPRL-PIPE")

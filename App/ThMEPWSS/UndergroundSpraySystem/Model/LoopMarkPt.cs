@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -15,7 +16,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class LoopMarkPt//提取环管标记点
     {
         public DBObjectCollection DBObjs { get; set; }
-        public void Extract(Database database, Point3dCollection polygon)
+        public LoopMarkPt()
+        {
+            DBObjs = new DBObjectCollection();
+        }
+        public void Extract(Database database, SprayIn sprayIn)
         {
             var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
@@ -27,13 +32,49 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     .ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                foreach(var polygon in sprayIn.FloorRectDic.Values)
+                {
+                    var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                    dbObjs.Cast<Entity>()
+                        .ForEach(e => DBObjs.Add(e));
+                }
             }
         }
-        private bool IsTargetLayer(string layer)
+
+        public bool Extract(Database database, Point3d insertPt)
         {
-            return layer.ToUpper() == "W-FRPT-NOTE";
+            var objs = new DBObjectCollection();
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var Results = acadDatabase
+                    .ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => IsTraget(o))
+                    .ToList();
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                var dbObjs = spatialIndex.SelectCrossingPolygon(CreatePolyline(insertPt));
+                if(dbObjs.Count > 0)
+                {
+                    return true;
+                }
+                return false;
+
+            }
         }
+        private static Polyline CreatePolyline(Point3d c, int tolerance = 50)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
+            pts.Add(new Point2d(c.X - tolerance, c.Y + tolerance)); // high left
+            pts.Add(new Point2d(c.X + tolerance, c.Y + tolerance)); // high right
+            pts.Add(new Point2d(c.X + tolerance, c.Y - tolerance)); // low right
+            pts.Add(new Point2d(c.X - tolerance, c.Y - tolerance)); // low left
+            pl.CreatePolyline(pts);
+            return pl;
+        }
+
         private bool IsTraget(BlockReference blockReference)
         {
             var blkName = blockReference.GetEffectiveName().ToUpper();

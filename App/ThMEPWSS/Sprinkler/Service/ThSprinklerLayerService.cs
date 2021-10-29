@@ -14,7 +14,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerBlindZoneCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Blind_Zone_LayerName, 1);
+            return database.CreateAILayer(ThWSSCommon.Blind_Zone_LayerName, 1);
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceFormBoundarySoFarCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.From_Boundary_So_Far_LayerName, 6);
+            return database.CreateAILayer(ThWSSCommon.From_Boundary_So_Far_LayerName, 6);
         }
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerParkingStallCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Parking_Stall_Checker_LayerName, 1);
+            return database.CreateAILayer(ThWSSCommon.Parking_Stall_Checker_LayerName, 1);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerMechanicalParkingStallCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Mechanical_Parking_Stall_Checker_LayerName, 6);
+            return database.CreateAILayer(ThWSSCommon.Mechanical_Parking_Stall_Checker_LayerName, 6);
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Sprinkler_Distance_LayerName, 4);
+            return database.CreateAILayer(ThWSSCommon.Sprinkler_Distance_LayerName, 4);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceFormBoundarySoCloseCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.From_Boundary_So_Close_LayerName, 4);
+            return database.CreateAILayer(ThWSSCommon.From_Boundary_So_Close_LayerName, 4);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerLayoutAreaLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Layout_Area_LayerName, 3);
+            return database.CreateAILayer(ThWSSCommon.Layout_Area_LayerName, 3);
         }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerDistanceFormBeamCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Distance_Form_Beam_LayerName, 4);
+            return database.CreateAILayer(ThWSSCommon.Distance_Form_Beam_LayerName, 4);
         }
 
         /// <summary>
@@ -94,7 +94,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAIBeamCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Beam_Checker_LayerName, 1);
+            return database.CreateAILayer(ThWSSCommon.Beam_Checker_LayerName, 1);
         }
 
         /// <summary>
@@ -104,7 +104,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAIPipeCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Pipe_Checker_LayerName, 1);
+            return database.CreateAILayer(ThWSSCommon.Pipe_Checker_LayerName, 1);
         }
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAIDuctCheckerLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Duct_Checker_LayerName, 40);
+            return database.CreateAILayer(ThWSSCommon.Duct_Checker_LayerName, 40);
         }
 
         /// <summary>
@@ -124,7 +124,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// <returns></returns>
         public static ObjectId CreateAISprinklerSoDenseLayer(this Database database)
         {
-            return database.CreateAILayer(ThSprinklerCheckerLayer.Sprinkler_So_Dense_LayerName, 6);
+            return database.CreateAILayer(ThWSSCommon.Sprinkler_So_Dense_LayerName, 6);
         }
     }
 }

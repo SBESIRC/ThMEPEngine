@@ -22,5 +22,14 @@ namespace ThMEPHVAC
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THFGLD", CommandFlags.Modal)]
+        public void THFGLDEXTRACT()
+        {
+            using (var cmd = new ThFanHoleExtractCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

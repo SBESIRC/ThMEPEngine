@@ -22,6 +22,11 @@ namespace ThMEPLighting
             {
                 var packageManager = new CommandManager();
                 packageManager.LaneSubGroupOptimization();
+                if (null != packageManager.ErrorMsgs && packageManager.ErrorMsgs.Count > 0) 
+                {
+                    string msg = string.Join("，", packageManager.ErrorMsgs.ToArray());
+                    Active.Database.GetEditor().WriteMessage(msg);
+                }
             }
         }
 

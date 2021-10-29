@@ -7,6 +7,7 @@ using ThMEPWSS.ViewModel;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.BlockNameConfig
 {
@@ -54,8 +55,24 @@ namespace ThMEPWSS.BlockNameConfig
 
                 var entId = nestedEntRes.ObjectId;
                 var dbObj = acadDatabase.Element<Entity>(entId);
-                var blockName = dbObj.BlockName.Split(new char[] { '|' ,'$'}).Last().Trim();
-                if(blockName.Contains("*"))
+                string blockName = "";
+                if (dbObj is BlockReference br)
+                {
+                    blockName = ThMEPXRefService.OriginalFromXref(br.GetEffectiveName());
+                }
+                else
+                {
+                    foreach (ObjectId id in nestedEntRes.GetContainers())
+                    {
+                        var dbObj2 = acadDatabase.Element<Entity>(id);
+                        if (dbObj2 is BlockReference br2)
+                        {
+                            blockName = ThMEPXRefService.OriginalFromXref(br2.GetEffectiveName());
+                            break;
+                        }
+                    }
+                }
+                if (blockName.Equals(""))
                 {
                     return;
                 }

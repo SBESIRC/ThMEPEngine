@@ -3,12 +3,13 @@ using System.Linq;
 using System.Collections.Generic;
 using Linq2Acad;
 using DotNetARX;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
-using ThMEPHVAC.Alg;
+using ThMEPHVAC.Algorithm;
 
 namespace ThMEPHVAC.Model
 {
@@ -16,7 +17,7 @@ namespace ThMEPHVAC.Model
     {
         public static void Get_basic_param(ObjectId[] obj_list, out ThMEPHVACParam param, out Point2d start_point)
         {
-            var list = Do_get_value_list(obj_list, ThHvacCommon.RegAppName_Duct_Param);
+            var list = ThHvacAnalysisComponent.GetValueList(obj_list, ThHvacCommon.RegAppName_Duct_Param);
             var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
             if (!values.Any())
             {
@@ -46,15 +47,9 @@ namespace ThMEPHVAC.Model
             var blk = obj_list[0].GetEntity() as BlockReference;
             start_point = blk.Position.ToPoint2D();
         }
-        public static Entity_modify_param Get_shape_by_id(ObjectId id)
+        public static void Get_vt_elbow(out List<VTElbowModifyParam> vt_elbows)
         {
-            var ids = new ObjectId[] { id };
-            var entity_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return Get_entity_param(entity_list, id.Handle);
-        }
-        public static void Get_vt_elbow(out List<VT_elbow_modify_param> vt_elbows)
-        {
-            vt_elbows = new List<VT_elbow_modify_param>();
+            vt_elbows = new List<VTElbowModifyParam>();
             var vt_elbows_ids = ThDuctPortsReadComponent.Read_group_ids_by_type("Vertical_elbow");
             foreach (var id in vt_elbows_ids)
             {
@@ -63,44 +58,38 @@ namespace ThMEPHVAC.Model
                     vt_elbows.Add(param);
             }
         }
-        public static Duct_modify_param Get_duct_by_id(ObjectId id)
+        public static VTElbowModifyParam Get_vt_elbow_by_id(ObjectId id)
         {
             var ids = new ObjectId[] { id };
-            var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return Get_duct_param(duct_list, id.Handle);
-        }
-        public static VT_elbow_modify_param Get_vt_elbow_by_id(ObjectId id)
-        {
-            var ids = new ObjectId[] { id };
-            var duct_list = Do_get_value_list(ids, ThHvacCommon.RegAppName_Duct_Info);
+            var duct_list = ThHvacAnalysisComponent.GetValueList(ids, ThHvacCommon.RegAppName_Duct_Info);
             return Get_vt_elbow_param(duct_list, id.Handle);
         }
-        public static void Get_ducts_dic(out Dictionary<Polyline, Duct_modify_param> dic)
+        public static void Get_ducts_dic(out Dictionary<Polyline, DuctModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Duct_modify_param>();
+            dic = new Dictionary<Polyline, DuctModifyParam>();
             var ductIds = ThDuctPortsReadComponent.Read_group_ids_by_type("Duct");
             var tor = new Tolerance(1.5, 1.5);
             foreach (var id in ductIds)
             {
-                var param = Get_duct_by_id(id);
+                var param = ThHvacAnalysisComponent.GetDuctParamById(id);
                 if (param.handle == ObjectId.Null.Handle || param.sp.IsEqualTo(param.ep, tor))
                     continue;
                 var poly = Create_duct_extends(param);
                 dic.Add(poly, param);                    
             }
         }
-        public static void Get_shapes_dic(out Dictionary<Polyline, Entity_modify_param> dic)
+        public static void Get_shapes_dic(out Dictionary<Polyline, EntityModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Entity_modify_param>();
+            dic = new Dictionary<Polyline, EntityModifyParam>();
             var id2geo_dic = ThDuctPortsReadComponent.Read_group_id2geo_dic();
             foreach (var id in id2geo_dic.Keys)
             {
-                var param = Get_shape_by_id(id);
+                var param = ThHvacAnalysisComponent.GetConnectorParamById(id);
                 if (param.handle != ObjectId.Null.Handle)
                     dic.Add(id2geo_dic[id], param);
             }
         }
-        private static Polyline Create_duct_extends(Duct_modify_param param)
+        private static Polyline Create_duct_extends(DuctModifyParam param)
         {
             var dir_vec = (param.ep - param.sp).GetNormal();
             var sp2 = param.sp - dir_vec;
@@ -111,9 +100,9 @@ namespace ThMEPHVAC.Model
             var width = ThMEPHVACService.Get_width(param.duct_size);
             return ThMEPHVACService.Get_line_extend(l, width + 2);//对管段的外包框上下左右都扩1
         }        
-        public static void Get_texts_dic(out Dictionary<Polyline, Text_modify_param> dic)
+        public static void Get_texts_dic(out Dictionary<Polyline, TextModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Text_modify_param>();
+            dic = new Dictionary<Polyline, TextModifyParam>();
             var texts = ThDuctPortsReadComponent.Read_duct_texts();
             foreach (var t in texts)
             {
@@ -134,27 +123,29 @@ namespace ThMEPHVAC.Model
                 list.Add(poly);
             }
         }
-        public static void Get_fan_dic(out Dictionary<Polyline, Fan_modify_param> dic)
+        public static void Get_fan_dic(out Dictionary<Polyline, FanModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Fan_modify_param>();
+            dic = new Dictionary<Polyline, FanModifyParam>();
             var fanIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("轴流风机");
             fanIds.AddRange(ThDuctPortsReadComponent.Read_blk_ids_by_name("离心风机"));
             foreach (var id in fanIds)
             {
                 var fan = new ThDbModelFan(id);
+                if (fan.air_volume < 0)
+                    continue;
                 var ext_len = Math.Max(fan.FanInlet.Width, fan.FanOutlet.Width);
                 var l = new Line(fan.FanInletBasePoint, fan.FanOutletBasePoint);
                 var poly = ThMEPHVACService.Get_line_extend(l, ext_len);
                 dic.Add(poly, Get_fan_param(id));
             }
         }
-        public static void Get_valves_dic(out Dictionary<Polyline, Valve_modify_param> dic)
+        public static void Get_valves_dic(out Dictionary<Polyline, ValveModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Valve_modify_param>();
+            dic = new Dictionary<Polyline, ValveModifyParam>();
             Get_valves_dic_by_name(dic, "风阀");
             Get_valves_dic_by_name(dic, "防火阀");
         }
-        public static void Get_valves_dic_by_name(Dictionary<Polyline, Valve_modify_param> dic, string valve_name)
+        public static void Get_valves_dic_by_name(Dictionary<Polyline, ValveModifyParam> dic, string valve_name)
         {
             var valveIds = ThDuctPortsReadComponent.Read_blk_ids_by_name(valve_name);
             foreach (var id in valveIds)
@@ -165,9 +156,9 @@ namespace ThMEPHVAC.Model
                 dic.Add(poly, param);
             }
         }
-        public static void Get_holes_dic(out Dictionary<Polyline, Hole_modify_param> dic)
+        public static void Get_holes_dic(out Dictionary<Polyline, HoleModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Hole_modify_param>();
+            dic = new Dictionary<Polyline, HoleModifyParam>();
             var holeIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("洞口");
             foreach (var id in holeIds)
             {
@@ -177,9 +168,9 @@ namespace ThMEPHVAC.Model
                 dic.Add(poly, Get_hole_param(id, "洞口"));
             }
         }
-        public static void Get_muffler_dic(out Dictionary<Polyline, Muffler_modify_param> dic)
+        public static void Get_muffler_dic(out Dictionary<Polyline, MufflerModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Muffler_modify_param>();
+            dic = new Dictionary<Polyline, MufflerModifyParam>();
             var holeIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("阻抗复合式消声器");
             foreach (var id in holeIds)
             {
@@ -189,9 +180,9 @@ namespace ThMEPHVAC.Model
                 dic.Add(poly, Get_muffler_param(id, "阻抗复合式消声器"));
             }
         }
-        public static void Get_ports_dic(out Dictionary<Polyline, Port_modify_param> dic)
+        public static void Get_ports_dic(out Dictionary<Polyline, PortModifyParam> dic)
         {
-            dic = new Dictionary<Polyline, Port_modify_param>();
+            dic = new Dictionary<Polyline, PortModifyParam>();
             var holeIds = ThDuctPortsReadComponent.Read_blk_ids_by_name("风口-AI研究中心");
             foreach (var id in holeIds)
             {
@@ -201,22 +192,22 @@ namespace ThMEPHVAC.Model
                 dic.Add(poly, Get_port_param(id));
             }
         }
-        private static Text_modify_param Get_text_param(DBText text)
+        private static TextModifyParam Get_text_param(DBText text)
         {
-            return new Text_modify_param(text.Handle,
+            return new TextModifyParam(text.Handle,
                                          text.Bounds.Value.CenterPoint().ToPoint2D(),
                                          text.TextString,
                                          text.Rotation,
                                          text.Position);
         }
-        private static Fan_modify_param Get_fan_param(ObjectId id)
+        private static FanModifyParam Get_fan_param(ObjectId id)
         {
-            var param = new Fan_modify_param(id.GetBlockName());
+            var param = new FanModifyParam(id.GetBlockName());
             return param;
         }
-        private static Valve_modify_param Get_valve_param(ObjectId id, string valve_name)
+        private static ValveModifyParam Get_valve_param(ObjectId id, string valve_name)
         {
-            var param = new Valve_modify_param();
+            var param = new ValveModifyParam();
             ThDuctPortsDrawService.Get_valve_dyn_block_properity(id, out Point3d insert_p, out double width,
                     out double height, out double text_angle, out double rotate_angle, out string valve_visibility);
             var dir_vec = ThMEPHVACService.Get_dir_vec_by_angle(rotate_angle - Math.PI * 0.5);
@@ -232,9 +223,9 @@ namespace ThMEPHVAC.Model
             param.text_angle = text_angle;
             return param;
         }
-        private static Hole_modify_param Get_hole_param(ObjectId id, string hole_name)
+        private static HoleModifyParam Get_hole_param(ObjectId id, string hole_name)
         {
-            var param = new Hole_modify_param();
+            var param = new HoleModifyParam();
             ThDuctPortsDrawService.Get_hole_dyn_block_properity(id, out Point3d insert_p, out double len, out double width, out double rotate_angle);
             param.handle = id.Handle;
             param.hole_name = hole_name;
@@ -245,9 +236,9 @@ namespace ThMEPHVAC.Model
             param.rotate_angle = rotate_angle;
             return param;
         }
-        private static Muffler_modify_param Get_muffler_param(ObjectId id, string muffler_name)
+        private static MufflerModifyParam Get_muffler_param(ObjectId id, string muffler_name)
         {
-            var param = new Muffler_modify_param();
+            var param = new MufflerModifyParam();
             ThDuctPortsDrawService.Get_muffler_dyn_block_properity(id, out Point3d insert_p, out string visibility, out double len,
                                                                    out double height, out double width, out double text_height, out double rotate_angle);
             param.handle = id.Handle;
@@ -262,9 +253,9 @@ namespace ThMEPHVAC.Model
             param.rotate_angle = rotate_angle;
             return param;
         }
-        public static Port_modify_param Get_port_param(ObjectId id)
+        public static PortModifyParam Get_port_param(ObjectId id)
         {
-            var param = new Port_modify_param();
+            var param = new PortModifyParam();
             ThDuctPortsDrawService.Get_port_dyn_block_properity(id, out Point3d pos, out string port_range,
                 out double port_height, out double port_width, out double rotate_angle);
             param.handle = id.Handle;
@@ -275,37 +266,9 @@ namespace ThMEPHVAC.Model
             param.pos = pos.ToPoint2D();
             return param;
         }
-        public static Duct_modify_param Get_duct_param(TypedValueList list, Handle group_handle)
+        public static VTElbowModifyParam Get_vt_elbow_param(TypedValueList list, Handle group_handle)
         {
-            var param = new Duct_modify_param();
-            var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-            if (!values.Any())
-                return param;
-            if (values.Count() != 5)
-                return param;
-            int inc = 0;
-            param.handle = group_handle;
-            param.start_handle = ThMEPHVACService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
-            param.type = (string)values.ElementAt(inc++).Value;
-            if (param.type != "Duct" && param.type != "Vertical_bypass")
-                return param;
-            param.air_volume = Double.Parse((string)values.ElementAt(inc++).Value);
-            param.elevation = Double.Parse((string)values.ElementAt(inc++).Value);
-            param.duct_size = (string)values.ElementAt(inc++).Value;
-            using (var db = AcadDatabase.Active())
-            {
-                var id = db.Database.GetObjectId(false, group_handle, 0);
-                var portIndex2PositionDic = ThDuctPortsReadComponent.GetPortsOfGroup(id);
-                if (portIndex2PositionDic.Count == 0)
-                    return param;
-                param.sp = portIndex2PositionDic["0"].Item1.ToPoint2D();
-                param.ep = portIndex2PositionDic["1"].Item1.ToPoint2D();
-            }
-            return param;
-        }
-        public static VT_elbow_modify_param Get_vt_elbow_param(TypedValueList list, Handle group_handle)
-        {
-            var param = new VT_elbow_modify_param();
+            var param = new VTElbowModifyParam();
             var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
             if (!values.Any())
                 return param;
@@ -322,45 +285,6 @@ namespace ThMEPHVAC.Model
                 param.detect_p = portIndex2PositionDic["0"].ToPoint2D();
             }
             return param;
-        }
-        private static Entity_modify_param Get_entity_param(TypedValueList list, Handle group_handle)
-        {
-            var param = new Entity_modify_param();
-            if (list.Count > 0)
-            {
-                var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                int inc = 0;
-                param.handle = group_handle;
-                param.start_id = ThMEPHVACService.Covert_obj_to_handle(values.ElementAt(inc++).Value);
-                param.type = (string)values.ElementAt(inc++).Value;
-                if (!values.Any() || param.type == "Duct")
-                    return param;
-                using (var db = AcadDatabase.Active())
-                {
-                    var id = db.Database.GetObjectId(false, group_handle, 0);
-                    var portIndex2PositionDic = ThDuctPortsReadComponent.GetPortsOfGroup(id);
-                    var portExtIndex2PositionDic = ThDuctPortsReadComponent.GetPortExtsOfGroup(id);
-                    for (int i = 0; i < portIndex2PositionDic.Count; ++i)
-                    {
-                        param.pos.Add(portIndex2PositionDic[i.ToString()].Item1.ToPoint2D());
-                        param.pos_ext.Add(portExtIndex2PositionDic[i.ToString()].ToPoint2D());
-                        param.port_widths.Add(Double.Parse(portIndex2PositionDic[i.ToString()].Item2));
-                    }
-                }
-            }
-            return param;
-        }
-        public static TypedValueList Do_get_value_list(IEnumerable<ObjectId> g_ids, string reg_app_name)
-        {
-            var list = new TypedValueList();
-            foreach (var g_id in g_ids)
-            {
-                list = g_id.GetXData(reg_app_name);
-                if (list == null)
-                    continue;
-                break;
-            }
-            return list;
         }
         public static string Get_entity_type(ObjectId id)
         {
@@ -405,7 +329,7 @@ namespace ThMEPHVAC.Model
                     var g_ids = id.GetGroups();
                     if (g_ids == null)
                         continue;
-                    list = Do_get_value_list(g_ids, ThHvacCommon.RegAppName_Duct_Info);
+                    list = ThHvacAnalysisComponent.GetValueList(g_ids, ThHvacCommon.RegAppName_Duct_Info);
                     if (list == null)
                         continue;
                     if (list.Count != 0)

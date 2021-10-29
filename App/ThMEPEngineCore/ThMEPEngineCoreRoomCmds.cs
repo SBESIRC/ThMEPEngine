@@ -90,10 +90,20 @@ namespace ThMEPEngineCore
                 var engine = new ThDB3RoomMarkRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
                 acadDatabase.Database.CreateAIRoomMarkLayer();
-                engine.Elements.Cast<ThIfcTextNote>().Select(o => o.Geometry).ForEach(o =>
+                var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
+                engine.Elements.Cast<ThIfcTextNote>().ForEach(o =>
                 {
-                    acadDatabase.ModelSpace.Add(o);
-                    o.Layer = ThMEPEngineCoreLayerUtils.ROOMMARK;
+                    var dbText = new DBText
+                    {
+                        TextString = o.Text,
+                        TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                        Height = 300,
+                        WidthFactor = 0.7,
+                        Justify = AttachmentPoint.MiddleCenter,
+                        LayerId = markLayerId,
+                    };
+                    dbText.AlignmentPoint = o.Geometry.GetMaximumInscribedCircleCenter();
+                    acadDatabase.ModelSpace.Add(dbText);
                 });
             }
         }

@@ -3,6 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -43,8 +45,9 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             double min, double max, double radius, double adjust, double buffer)
         {
             //生成区域
-            var geom = boundary.ToNTSPolygon().Intersection(room);
-            if(geom is Polygon polygon)
+            var geom = OverlayNGRobust.Overlay(boundary.ToNTSPolygon(),room, SpatialFunction.Intersection);
+            //var geom = boundary.ToNTSPolygon().Intersection(room);
+            if (geom is Polygon polygon)
                 area = polygon;
             else if(geom is GeometryCollection geometrycollection)
             {

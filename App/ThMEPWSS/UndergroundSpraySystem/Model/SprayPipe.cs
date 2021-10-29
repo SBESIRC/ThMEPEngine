@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
@@ -8,7 +9,6 @@ using ThCADCore.NTS;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using ThMEPWSS.UndergroundSpraySystem.General;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Model
@@ -20,21 +20,46 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public SprayPipe()
         {
             PipeLines = new List<Line>();
+            DBObjs = new DBObjectCollection();
         }
+        public void Extract(Database database, SprayIn sprayIn)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var lines = ThDrainageSystemServiceGeoCollector.GetLines(
+                        acadDatabase.ModelSpace.OfType<Entity>().ToList(),
+                        layer => IsTargetLayer(layer));
+                foreach (var pline in sprayIn.FloorRectDic.Values)
+                {
+                    var dbObjs = GeoFac
+                    .CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())(pline.ToNTSPolygon())
+                    .SelectMany(x => x.ToDbCollection().OfType<DBObject>())
+                    .ToCollection();
+                    dbObjs.Cast<Entity>()
+                        .ForEach(e => DBObjs.Add(e));
+                }
+            }
+        }
+
         public void Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var lines = ThDrainageSystemServiceGeoCollector.GetLines(
-                    acadDatabase.ModelSpace.OfType<Entity>().ToList(),
-                    layer => layer.Contains("W-FRPT") &&
-                             layer.Contains("SPRL") &&
-                             layer.Contains("PIPE"));
+                        acadDatabase.ModelSpace.OfType<Entity>().ToList(),
+                        layer => IsTargetLayer(layer));
                 DBObjs = GeoFac
-                    .CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())(polygon.ToRect().ToPolygon())
-                    .SelectMany(x => x.ToDbCollection().OfType<DBObject>())
-                    .ToCollection();
+                        .CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())(polygon.ToRect().ToPolygon())
+                        .SelectMany(x => x.ToDbCollection().OfType<DBObject>())
+                        .ToCollection();
             }
+        }
+
+        private bool IsTargetLayer(string layer)
+        {
+            return layer.Contains("W-FRPT") &&
+                   layer.Contains("SPRL") &&
+                   layer.Contains("PIPE");
         }
 
         public List<Line> CreateSprayLines()

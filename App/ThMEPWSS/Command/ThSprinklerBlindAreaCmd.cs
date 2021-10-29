@@ -119,7 +119,7 @@ namespace ThMEPWSS.Command
                 return newPt.TransformBy(matrix);
             }).ToList();
             CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
-            calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
+            calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes, ThWSSUIService.Instance.Parameter.protectRange);
 
             return true;
         }

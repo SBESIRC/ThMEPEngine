@@ -44,8 +44,6 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                try
-                {
                     //输入区域
                     InputArea input_Area = null;
                     if (ucs != null && ucs.Count > 0)
@@ -69,16 +67,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
                     //输出参数
                     blinds = sensorOpt.Blinds;
                     layoutPoints = sensorOpt.PlacePoints;
-                    ShowPoints();
-                    ShowBlind();
+                    //ShowPoints();
+                    //ShowBlind();
                     //ShowDetect();
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-
-              
+                
             }
         }
 

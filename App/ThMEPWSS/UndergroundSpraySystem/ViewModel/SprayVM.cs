@@ -3,15 +3,18 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Uitl;
+using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.WaterSupplyPipeSystem;
 
 namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
@@ -91,35 +94,38 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                 }
             }
         }
-
-        
-
     }
 
     public static class SprayViewModel
     {
         public static void InsertNodeMark()
         {
-            
-            ThMEPWSS.Common.Utils.FocusMainWindow();
+            Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
-                while (true)
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    var opt = new PromptPointOptions("请指定喷淋总管标记插入点: \n");
-                    var pt = Active.Editor.GetPoint(opt);
-                    if (pt.Status != PromptStatus.OK)
-                    {
-                        break;
-                    }
-                    using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
-                    {
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
-                                    pt.Value, new Scale3d(1, 1, 1), 0);
-                    }
+                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("喷淋总管标记"), true);
                 }
             }
+            
+            //Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
+            while (true)
+            {
+                var opt = new PromptPointOptions("请指定喷淋总管标记插入点: \n");
+                var pt = Active.Editor.GetPoint(opt);
+                if (pt.Status != PromptStatus.OK)
+                {
+                    break;
+                }
+                using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+                {
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
+                                pt.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0);
+                }
+            }
+            
         }
     }
 }

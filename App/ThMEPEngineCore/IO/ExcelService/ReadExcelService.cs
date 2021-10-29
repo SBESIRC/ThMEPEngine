@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.IO.ExcelService
                         {
                             IRow row = sheet.GetRow(i);
                             if (row == null) continue;
-
+                            if (row.Hidden.Value==true) continue;
                             DataRow dataRow = dataTable.NewRow();
                             for (int j = row.FirstCellNum; j < cellCount; ++j)
                             {

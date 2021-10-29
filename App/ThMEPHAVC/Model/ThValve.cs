@@ -203,8 +203,6 @@ namespace ThMEPHVAC.Model
                     checkvalve.ValveOffsetFromCenter = silencer.ValveOffsetFromCenter - checkvalve.Length;
                 }
             }
-            //if (is_exhaust) //非送风场景 止回阀旋转180°
-            //    checkvalve.ValveOffsetFromCenter = -checkvalve.ValveOffsetFromCenter - checkvalve.Length;
             valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
             if (!is_exhaust && have_silencer)
                 valves.Add(silencer);
@@ -287,23 +285,6 @@ namespace ThMEPHVAC.Model
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_CHECK_VALVE_HEIGHT,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
                 ValvePosionType = valveposiontype,
-            };
-        }
-
-        private ThValve CreateElectricValve(string fanlayer)
-        {
-            return new ThValve()
-            {
-                Length = 200,
-                Width = Parameters.DuctWidth,
-                RotationAngle = Parameters.RotationAngle,
-                ValvePosition = Parameters.GroupInsertPoint,
-                ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
-                ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),
-                ValveVisibility = ThDuctUtils.ElectricValveModelName(),
-                WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
-                LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
-                VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
             };
         }
     }
