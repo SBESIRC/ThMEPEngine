@@ -21,7 +21,6 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             dbSourceService = new ModelDataDbSourceService();
             using (Linq2Acad.AcadDatabase acad=Linq2Acad.AcadDatabase.Active())
             {
-                //dbSourceService.Save(acad.Database);
                 dbSourceService.Load(acad.Database);
                 rowData = dbSourceService.dataModel;
             }
@@ -39,7 +38,6 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
             using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
             {
-                //dbSourceService.dataModel = rowData;
                 dbSourceService.Save(acad.Database);
             }
             this.Close();

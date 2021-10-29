@@ -1,9 +1,5 @@
-﻿using System;
+﻿using System.Data;
 using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPHVAC.LoadCalculation.Model
 {
@@ -15,6 +11,8 @@ namespace ThMEPHVAC.LoadCalculation.Model
 
         public static string LoadCalculationTableName = "天华负荷计算表";
         public static string LoadCalculationTableLayer = "AI-负荷通风标注";
+
+        public static string DefaultRoomNumber = "N-1F-01";
         public static DataTable RoomFunctionConfigTable { get; set; }
         public static Dictionary<string,string> RoomFunctionConfigDic { get; set; }
 

@@ -19,13 +19,40 @@ namespace ThMEPHVAC.LoadCalculation.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.RoomFunctionLayer);
+                acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.LoadCalculationTableLayer);
                 acadDatabase.Database.ImportBlock(LoadCalculationParameterFromConfig.RoomFunctionBlockName);
+                acadDatabase.Database.ImportTableStyles(LoadCalculationParameterFromConfig.LoadCalculationTableName);
+            }
+        }
+        
+        public static void InsertTable(List<Table> tables)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                foreach (var table in tables)
+                {
+                    table.TableStyle = acad.TableStyles.ElementOrDefault(LoadCalculationParameterFromConfig.LoadCalculationTableName).ObjectId;
+                    table.Layer = LoadCalculationParameterFromConfig.LoadCalculationTableLayer;
+                    acad.ModelSpace.Add(table);
+                }
             }
         }
 
-        public static void InsertSpecifyBlock(string RoomFunctionName, Point3d point)
+        public static void DeleteTable(List<Table> tables)
         {
-            
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {                
+                foreach (var table in tables)
+                {
+                    table.UpgradeOpen();
+                    table.Erase();
+                    table.DowngradeOpen();
+                }
+            }
+        }
+
+        public static void InsertRoomFunctionBlock(string roomNumber ,string roomFunctionName, Point3d point)
+        {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var objId = acadDatabase.Database.InsertBlock(
@@ -37,7 +64,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                     true,
                     new Dictionary<string, string>()
                     {
-                        { "房间编号","N-1F-01" },{ "房间功能",RoomFunctionName },{ "房间净高","3.00" }
+                        { "房间编号",roomNumber },{ "房间功能",roomFunctionName },{ "房间净高","3.00" }
                     });
                 var blkref = acadDatabase.Element<BlockReference>(objId, true);
             }
@@ -63,6 +90,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
             }
         }
 
+        #region Import
         /// <summary>
         /// 导入图块
         /// </summary>
@@ -92,5 +120,21 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
         }
+
+        /// <summary>
+        /// 导入表格样式
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="name"></param>
+        /// <param name="layer"></param>
+        private static void ImportTableStyles(this Database database, string tableStyles)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LoadCalculationDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.TableStyles.Import(blockDb.TableStyles.ElementOrDefault(tableStyles), false);
+            }
+        }
+        #endregion
     }
 }

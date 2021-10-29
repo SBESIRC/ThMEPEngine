@@ -2,10 +2,9 @@
 using AcHelper;
 using Linq2Acad;
 using ThMEPEngineCore.Command;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
-using ThMEPHVAC.LoadCalculation.Model;
 using ThMEPHVAC.LoadCalculation.Service;
+using ThMEPHVAC.LoadCalculation.Model;
 
 namespace ThMEPHVAC.LoadCalculation.Command
 {
@@ -13,7 +12,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
     {
         public ThInsertRoomFunctionCmd()
         {
-            this.CommandName = "THNTFJ";
+            this.CommandName = "THFJBHCR";
             this.ActionName = "暖通房间块布置";
         }
         public void Dispose()
@@ -32,13 +31,8 @@ namespace ThMEPHVAC.LoadCalculation.Command
                     return;
                 }
                 string roomFunctionName = ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName;
-                ImportRoomFunctionBlock(roomFunctionName, ppr.Value);
+                InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value);
             }
-        }
-
-        private void ImportRoomFunctionBlock(string roomFunctionName, Point3d value)
-        {
-            InsertBlockService.InsertSpecifyBlock(roomFunctionName, value);
         }
     }
 }

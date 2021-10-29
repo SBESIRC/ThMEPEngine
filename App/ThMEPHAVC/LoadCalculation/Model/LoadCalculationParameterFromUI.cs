@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace ThMEPHVAC.LoadCalculation.Model
 {
     public class LoadCalculationParameterFromUI
     {
         public string RoomFunctionName { get; set; } //房间功能名称
-        public List<DynamicLoadCalculationModelData> ModelDataList { get;set; }
-
+        public List<DynamicLoadCalculationModelData> ModelDataList { get; set; }
         public bool chk_Area { get; set; } //UI-CheckBox-面积
         public bool chk_ColdL { get; set; } //UI-CheckBox-冷负荷
         public bool chk_ColdW { get; set; } //UI-CheckBox-冷水量
@@ -27,5 +22,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
         public bool chk_AccidentExhaust { get; set; } //UI-CheckBox-事故排风量
         public bool chk_NormalAirVolume { get; set; } //UI-CheckBox-平时排风量
         public bool chk_NormalFumeSupplementary { get; set; } //UI-CheckBox-平时补风量
+
+        public bool HasPrefix { get; set; } = true; //前缀
+        public string PerfixContent { get; set; } = "N-1F-"; //前缀内容
+        public string StartingNum { get; set; } = "01"; //起始序号
     }
 }

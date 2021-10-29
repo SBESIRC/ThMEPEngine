@@ -10,9 +10,9 @@ namespace ThMEPHVAC
 {
     public class ThLoadCalculationSystemCmd
     {
-        [CommandMethod("TIANHUACAD", "THNTFJ", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFJBHCR", CommandFlags.Modal)]
         //天华暖通房间块布置
-        public void THNTFJ()
+        public void THFJBHCR()
         {
             using (var cmd = new ThInsertRoomFunctionCmd())
             {
@@ -20,9 +20,9 @@ namespace ThMEPHVAC
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THTQFJ", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFJGN", CommandFlags.Modal)]
         //天华提取房间功能
-        public void THTQFJ()
+        public void THFJGN()
         {
             using (var cmd = new ThRoomFunctionExtractCmd())
             {
@@ -34,7 +34,7 @@ namespace ThMEPHVAC
         //天华生成负荷通风计算表
         public void THSCFH()
         {
-            using (var cmd = new CreatLoadCalculationTableCmd())
+            using (var cmd = new ThCreatLoadCalculationTableCmd())
             {
                 cmd.Execute();
             }

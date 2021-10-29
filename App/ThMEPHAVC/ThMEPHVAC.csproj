@@ -58,9 +58,10 @@
     <Compile Include="FanLayout\ViewModel\ThFanLayoutConfigInfo.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanLayoutViewModel.cs" />
     <Compile Include="FanLayout\ViewModel\ThFanWAFViewModel.cs" />
-    <Compile Include="LoadCalculation\Command\CreatLoadCalculationTableCmd.cs" />
+    <Compile Include="LoadCalculation\Command\ThCreatLoadCalculationTableCmd.cs" />
     <Compile Include="LoadCalculation\Command\ThInsertRoomFunctionCmd.cs" />
     <Compile Include="LoadCalculation\Command\ThRoomFunctionExtractCmd.cs" />
+    <Compile Include="LoadCalculation\Command\ThRoomFunctionNumIncreaseCmd.cs" />
     <Compile Include="LoadCalculation\Extension\MathExtension.cs" />
     <Compile Include="LoadCalculation\Model\ConfigDataModel.cs" />
     <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromConfig.cs" />

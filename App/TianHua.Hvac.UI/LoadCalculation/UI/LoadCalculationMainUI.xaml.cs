@@ -410,6 +410,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             {
                 RoomFunctionConfig room = new RoomFunctionConfig(viewModel.DynamicModelData[index].RoomFunction);
                 room.Owner = this;
+                room.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 var ret = room.ShowDialog();
                 if (ret == false)
                 {
@@ -464,7 +465,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             string roomName = textBlock.Text;
             ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName = roomName;
 
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THNTFJ");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBHCR");
             FocusToCAD();
         }
 
@@ -620,6 +621,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
 
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSCFH");
             FocusToCAD();
+            this.Close();
         }
 
 
@@ -631,6 +633,16 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void UpdateBtn_Click(object sender, RoutedEventArgs e)
         {
             SaveUIAnnotateContent();
+            var ModelDataList = new List<DynamicLoadCalculationModelData>();
+            foreach (var config in viewModel.DynamicModelData)
+            {
+                ModelDataList.Add(config);
+            }
+            ThLoadCalculationUIService.Instance.Parameter.ModelDataList = ModelDataList;
+
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THSCFH");
+            FocusToCAD();
+            this.Close();
         }
         #endregion
 

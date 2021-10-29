@@ -1,22 +1,25 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Data;
+using Linq2Acad;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Data;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Command;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO.ExcelService;
 using ThMEPHVAC.LoadCalculation.Model;
 using ThMEPHVAC.LoadCalculation.Service;
+using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
+using AcHelper;
 
 namespace ThMEPHVAC.LoadCalculation.Command
 {
@@ -26,7 +29,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
         string defaultFile = "房间功能映射表.xlsx";
         public ThRoomFunctionExtractCmd()
         {
-            this.CommandName = "THTQFJ";
+            this.CommandName = "THFJGN";
             this.ActionName = "提取房间功能";
         }
         public void Dispose()
@@ -38,13 +41,39 @@ namespace ThMEPHVAC.LoadCalculation.Command
         {
             using (var database = AcadDatabase.Active())
             {
-                var frame = ThWindowInteraction.GetPolyline(
-                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                var pts = frame.Vertices();
-                if (pts.Count < 3)
+                //初始化
+                int StartingNo;
+                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.StartingNum, out StartingNo))
                 {
                     return;
                 }
+
+                // 获取房间框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { LoadCalculationParameterFromConfig.Room_Layer_Name });
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                ObjectIdCollection dBObject = new ObjectIdCollection();
+                var dbobjs = new DBObjectCollection();
+                foreach (ObjectId objid in result.Value.GetObjectIds())
+                {
+                    dBObject.Add(objid);
+                    dbobjs.Add(database.Element<Entity>(objid));
+                }
+                
+
                 if (LoadCalculationParameterFromConfig.RoomFunctionConfigDic.IsNull())
                 {
                     LoadCalculationParameterFromConfig.RoomFunctionConfigTable = LoadRoomFunctionConfig();
@@ -53,10 +82,10 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 //初始化图纸(导入图层/图块等)
                 InsertBlockService.initialization();
 
-                //var roomBuilder = new ThRoomBuilderEngine();
-                //var rooms = roomBuilder.BuildFromMS(database.Database, pts);
-                var roomEngine = new ThRoomOutlineRecognitionEngine();
-                roomEngine.RecognizeMS(database.Database, pts);
+                var Rectangle = dbobjs.GeometricExtents().ToRectangle();
+                var pts = Rectangle.Vertices();
+                var roomEngine = new ThDB3RoomOutlineRecognitionEngine();
+                roomEngine.RecognizeMS(database.Database, dBObject);
                 var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markEngine = new ThDB3RoomMarkRecognitionEngine();
                 markEngine.Recognize(database.Database, pts);
@@ -64,24 +93,20 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 var roomBuilder = new ThRoomBuilderEngine();
                 roomBuilder.Build(rooms, marks);
 
-                foreach (var room in rooms)
+                var startPt = Rectangle.StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(startPt);
+
+                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+                var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
+
+                
+
+                LogicService logicService = new LogicService();
+                var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo);
+
+                foreach (var item in roomfunctions)
                 {
-                    var roomfunctions = room.Tags.SelectMany(tag => LoadCalculationParameterFromConfig.RoomFunctionConfigDic.Where(o => CompareRoom(o.Key, tag)).Select(o => o.Value));
-                    string roomfunction = roomfunctions.LastOrDefault();
-                    if (!string.IsNullOrEmpty(roomfunction))
-                    {
-                        var roomBoundary = room.Boundary;
-                        var center = Point3d.Origin;
-                        if (roomBoundary is Polyline polyline)
-                        {
-                            center = polyline.GetMaximumInscribedCircleCenter();
-                        }
-                        if (roomBoundary is MPolygon Mpolygon)
-                        {
-                            center = Mpolygon.GetMaximumInscribedCircleCenter();
-                        }
-                        InsertBlockService.InsertSpecifyBlock(roomfunction, center);
-                    }
+                    InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, item.Item1);
                 }
             }
         }

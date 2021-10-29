@@ -65,6 +65,7 @@
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
+    <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
@@ -102,6 +103,9 @@
     <Compile Include="HvacUiApp.cs" />
     <Compile Include="LoadCalculation\LoadCalculationViewModel.cs" />
     <Compile Include="LoadCalculation\SerializableHelper.cs" />
+    <Compile Include="LoadCalculation\UI\RoomNumber.xaml.cs">
+      <DependentUpon>RoomNumber.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoadCalculation\UI\AccidentAirConfig.xaml.cs">
       <DependentUpon>AccidentAirConfig.xaml</DependentUpon>
     </Compile>
@@ -253,6 +257,10 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="LoadCalculation\UI\RoomNumber.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="LoadCalculation\UI\AccidentAirConfig.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

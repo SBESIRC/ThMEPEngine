@@ -5,29 +5,26 @@ using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using NFox.Cad;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 using ThMEPHVAC.LoadCalculation.Model;
 using ThMEPHVAC.LoadCalculation.Service;
+using ThCADExtension;
 
 namespace ThMEPHVAC.LoadCalculation.Command
 {
-    public class CreatLoadCalculationTableCmd : ThMEPBaseCommand, IDisposable
+    public class ThCreatLoadCalculationTableCmd : ThMEPBaseCommand, IDisposable
     {
         public void Dispose()
         {
             //
         }
 
-        public CreatLoadCalculationTableCmd()
+        public ThCreatLoadCalculationTableCmd()
         {
             this.CommandName = "THSCFH";
             this.ActionName = "生成负荷通风计算表";
@@ -77,17 +74,14 @@ namespace ThMEPHVAC.LoadCalculation.Command
 
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
+                var loadCalculationtables = getPrimitivesService.GetLoadCalculationTables();
+                var curves = getPrimitivesService.GetLoadCalculationCurves();
 
                 LogicService logicService = new LogicService();
-                var tables=logicService.InsertLoadCalculationTable(rooms.Select(o => o.Boundary).ToList(), roomFunctionBlocks);
-
-                using(AcadDatabase acad=AcadDatabase.Active())
-                {
-                    foreach (var table in tables)
-                    {
-                        acad.ModelSpace.Add(table);
-                    }
-                }
+                List<Table> Deprecatedtables;
+                var tables=logicService.InsertLoadCalculationTable(database.Database,rooms.Select(o => o.Boundary).ToList(), roomFunctionBlocks, loadCalculationtables, curves,out Deprecatedtables);
+                InsertBlockService.InsertTable(tables);
+                InsertBlockService.DeleteTable(Deprecatedtables);
             }
         }
     }

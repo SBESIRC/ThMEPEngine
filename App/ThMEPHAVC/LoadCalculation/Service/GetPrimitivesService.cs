@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
+using ThMEPHVAC.LoadCalculation.Model;
 
 namespace ThMEPHVAC.LoadCalculation.Service
 {
@@ -24,9 +25,34 @@ namespace ThMEPHVAC.LoadCalculation.Service
             {
                 var roomFunctionBlks = acdb.ModelSpace
                 .OfType<BlockReference>()
-                .Where(o => o.GetEffectiveName() == "AI-暖通-房间功能")
+                .Where(o => o.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName)
                 .ToList();
                 return roomFunctionBlks;
+            }
+        }
+
+        public List<Table> GetLoadCalculationTables()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var tables = acdb.ModelSpace
+                .OfType<Table>()
+                .Where(o => o.Layer== LoadCalculationParameterFromConfig.LoadCalculationTableLayer && o.TableStyleName== LoadCalculationParameterFromConfig.LoadCalculationTableName)
+                .ToList();
+                return tables;
+            }
+        }
+
+        public List<Curve> GetLoadCalculationCurves()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var curves = acdb.ModelSpace
+                .OfType<Curve>()
+                .Where(o => o.Layer == LoadCalculationParameterFromConfig.LoadCalculationTableLayer)
+                .Select(o=>o.Clone() as Curve)
+                .ToList();
+                return curves;
             }
         }
     }
