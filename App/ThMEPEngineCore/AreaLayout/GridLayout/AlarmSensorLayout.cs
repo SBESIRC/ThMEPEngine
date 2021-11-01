@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 using ThCADCore.NTS;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
@@ -19,8 +20,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
 
         //输入区域参数
         public Polygon room { get; private set; }//房间区域
-        protected List<Polygon> layouts { get; private set; } = new List<Polygon>();//可布置区域
+        public List<Polygon> layouts { get; private set; } = new List<Polygon>();//可布置区域
         public List<Polyline> detects { get; private set; }//探测区域
+
+        public List<Coordinate> columnCenters { get; private set; } = new List<Coordinate>();//柱子中心
         protected Dictionary<Polyline, double> UCS { get; private set; } = new Dictionary<Polyline, double>();//UCS，弧度
         //输入设施参数
         protected double Radius;
@@ -44,12 +47,12 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
             m_blinds = new List<Polyline>();
             //生成房间区域
             room = inputArea.room.ToNTSPolygon();
-            foreach(var hole in inputArea.holes)
+            foreach (var hole in inputArea.holes)
             {
-                var geo = room.Difference(hole.ToNTSPolygon());
+                var geo = OverlayNGRobust.Overlay(room, hole.ToNTSPolygon(), SpatialFunction.Difference);
                 if (geo is Polygon polygon)
                     room = polygon;
-                else if(geo is GeometryCollection collection)
+                else if (geo is GeometryCollection collection)
                 {
                     Polygon tmpPoly = Polygon.Empty;
                     foreach (var poly in collection)
@@ -60,10 +63,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
                     room = tmpPoly;
                 }
             }
-                
-            foreach(var wall in inputArea.walls)
+
+            foreach (var wall in inputArea.walls)
             {
-                var geo = room.Difference(wall.ToNTSPolygon());
+                var geo = OverlayNGRobust.Overlay(room, wall.ToNTSPolygon(), SpatialFunction.Difference);
                 if (geo is Polygon polygon)
                     room = polygon;
                 else if (geo is GeometryCollection collection)
@@ -79,7 +82,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
             }
             foreach (var column in inputArea.columns)
             {
-                var geo = room.Difference(column.ToNTSPolygon());
+                var geo = OverlayNGRobust.Overlay(room, column.ToNTSPolygon(), SpatialFunction.Difference);
                 if (geo is Polygon polygon)
                     room = polygon;
                 else if (geo is GeometryCollection collection)
@@ -106,14 +109,19 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
                 var layoutRegion = NTSlayout.Difference(OverlayNGRobust.Union(holesInLayout.ToArray()));
                 if (layoutRegion is Polygon polygon)
                     layouts.Add(polygon);
-                else if(layoutRegion is MultiPolygon multi)
+                else if (layoutRegion is MultiPolygon multi)
                 {
                     foreach (Polygon poly in multi)
                         layouts.Add(poly);
                 }
             }
+            foreach (var column in inputArea.columns)
+            {
+                var centerPoint = column.GetCentroidPoint().ToNTSCoordinate();
+                columnCenters.Add(centerPoint);
+            }
             //生成UCS
-            foreach(var record in inputArea.UCS)
+            foreach (var record in inputArea.UCS)
             {
                 double angle = Math.Atan2(record.Value.Y, record.Value.X);
                 if (angle > Math.PI / 4)

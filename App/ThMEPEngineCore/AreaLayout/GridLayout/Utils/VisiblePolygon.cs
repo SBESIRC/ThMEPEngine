@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             var bounds = ConvertToSegments(polygon);
             var sorted = SortPoints(position, bounds);
             var start = new Coordinate(position.X + 1, position.Y);
-            List<int> heap=new List<int>();
+            List<int> heap = new List<int>();
             List<int> map = Enumerable.Repeat(-1, bounds.Count).ToList();
             for (int i = 0; i < bounds.Count; i++)
             {
@@ -47,7 +47,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                 if (active)
                     insert(i, heap, position, bounds, start, map);
             }
-            for(int i=0;i<sorted.Length;)
+            for (int i = 0; i < sorted.Length;)
             {
                 var extend = false;
                 var shorten = false;
@@ -74,13 +74,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                     i++;
                     if (i >= sorted.Length) break;
                 } while (sorted[i].angle < sorted[orig].angle + Epsilon);
-                if(extend)
+                if (extend)
                 {
                     vis_vertexs.Add(vertex);
                     var cur = intersectLines(bounds[heap[0]].P0, bounds[heap[0]].P1, position, vertex);
-                    if (cur != null && !equal(cur,vertex)) vis_vertexs.Add(cur);
+                    if (cur != null && !equal(cur, vertex)) vis_vertexs.Add(cur);
                 }
-                else if(shorten)
+                else if (shorten)
                 {
                     var add1 = intersectLines(bounds[old_segment].P0, bounds[old_segment].P1, position, vertex);
                     if (add1 != null) vis_vertexs.Add(add1);
@@ -92,10 +92,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             return new Polygon(new LinearRing(vis_vertexs.ToArray()));
         }
         //计算半径有限的可见多边形
-        public static Polygon ComputeWithRadius(Coordinate position, Polygon polygon,double radius, int numPoints = 20)
+        public static Polygon ComputeWithRadius(Coordinate position, Polygon polygon, double radius, int numPoints = 20)
         {
             //探测圆
-            var circle = new Circle(new Point3d(position.X,position.Y,0), Vector3d.ZAxis, radius);
+            var circle = new Circle(new Point3d(position.X, position.Y, 0), Vector3d.ZAxis, radius);
             var circle_polygon = circle.ToNTSPolygon(numPoints);
             circle.Dispose();
             //房间点数少，先求可见多边形，再与圆求交
@@ -143,15 +143,15 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         {
             var poly = outer.Buffer(0.001) as Polygon;
             var objs = new List<Polygon>();
-            foreach(Coordinate coordinate in inner.Shell.Coordinates)
-                objs.Add(ComputeWithRadius(coordinate, poly,radius));
+            foreach (Coordinate coordinate in inner.Shell.Coordinates)
+                objs.Add(ComputeWithRadius(coordinate, poly, radius));
             //求交集
             NetTopologySuite.Geometries.Geometry geometry = objs[0];
             for (int i = 1; i < objs.Count; i++)
                 if (geometry.Intersects(objs[i]))
                     geometry = geometry.Intersection(objs[i]);
                 else return null;
-                
+
             return geometry;
         }
         //将polygons转成线段集合
@@ -165,7 +165,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                 Coordinate p2 = new Coordinate(polygon.Shell.Coordinates[i + 1].X, polygon.Shell.Coordinates[i + 1].Y);
                 segments.Add(new LineSegment(p1, p2));
             }
-                
+
             //添加内部的洞
             foreach (var hole in polygon.Holes)
             {
@@ -175,7 +175,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                     Coordinate p2 = new Coordinate(hole.Coordinates[j + 1].X, hole.Coordinates[j + 1].Y);
                     segments.Add(new LineSegment(p1, p2));
                 }
-                    
+
             }
             return segments;
         }
@@ -196,12 +196,12 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         //向量的角度制形式
         private static double angle(Coordinate a, Coordinate b)
         {
-            var ans= Math.Atan2(b.Y - a.Y, b.X - a.X) * 180.0 / Math.PI;
+            var ans = Math.Atan2(b.Y - a.Y, b.X - a.X) * 180.0 / Math.PI;
             if (ans == -180) ans = 180;
             return ans;
         }
         //角abc的度数
-        private static double angle2(Coordinate a,Coordinate b,Coordinate c)
+        private static double angle2(Coordinate a, Coordinate b, Coordinate c)
         {
             var a1 = angle(a, b);
             var a2 = angle(b, c);
@@ -210,7 +210,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             if (a3 > 360.0) a3 -= 360.0;
             return a3;
         }
-        private static bool equal(Coordinate a,Coordinate b)
+        private static bool equal(Coordinate a, Coordinate b)
         {
             if (a == null || b == null)
                 return false;
@@ -234,7 +234,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         private static void insert(int index, List<int> heap, Coordinate position, List<LineSegment> segments, Coordinate destination, List<int> map)
         {
             var intersect = intersectLines(segments[index].P0, segments[index].P1, position, destination);
-            if (intersect==null)
+            if (intersect == null)
                 return;
             var cur = heap.Count;
             heap.Add(index);
@@ -257,7 +257,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             var inter2 = intersectLines(segments[index2].P0, segments[index2].P1, position, destination);
             if (inter1 == null || inter2 == null)
                 return false;
-            if(!equal(inter1,inter2))
+            if (!equal(inter1, inter2))
             {
                 var d1 = inter1.Distance(position);
                 var d2 = inter2.Distance(position);
@@ -274,7 +274,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             }
             return a1 < a2;
         }
-        private static void remove(int index,List<int>heap,Coordinate position,List<LineSegment>segments,Coordinate destination,List<int>map)
+        private static void remove(int index, List<int> heap, Coordinate position, List<LineSegment> segments, Coordinate destination, List<int> map)
         {
             map[heap[index]] = -1;
             if (index == heap.Count - 1)
@@ -282,13 +282,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                 heap.RemoveAt(index);
                 return;
             }
-            heap[index] = heap[heap.Count - 1];heap.RemoveAt(heap.Count - 1);
+            heap[index] = heap[heap.Count - 1]; heap.RemoveAt(heap.Count - 1);
             map[heap[index]] = index;
             var cur = index;
             var parent = (cur - 1) / 2;
-            if (cur != 0 && lessThan(heap[cur], heap[parent], position, segments, destination)) 
+            if (cur != 0 && lessThan(heap[cur], heap[parent], position, segments, destination))
             {
-                while (cur > 0) 
+                while (cur > 0)
                 {
                     parent = (cur - 1) / 2;
                     if (!lessThan(heap[cur], heap[parent], position, segments, destination))
@@ -303,7 +303,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             }
             else
             {
-                while(true)
+                while (true)
                 {
                     var left = 2 * cur + 1;
                     var right = left + 1;

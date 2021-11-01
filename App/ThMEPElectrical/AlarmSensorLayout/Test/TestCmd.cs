@@ -16,6 +16,7 @@ using NetTopologySuite.Geometries;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout;
+using NetTopologySuite.Algorithm;
 
 namespace ThMEPElectrical.AlarmSensorLayout.Test
 {
@@ -117,6 +118,8 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
 
                 var wallList = getPoly(frame, "AI-墙", transformer, false);
 
+                var columnList = getPoly(frame, "AI-柱", transformer, false);
+
                 var layoutHoleList = getPoly(frame, "AI-可布置区域洞", transformer, false);
 
                 List<MPolygon> layouts = new List<MPolygon>();
@@ -137,13 +140,10 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
 
                 var layoutCmd = new AlarmSensorLayoutCmd();
 
-                //输入区域
-                InputArea input_Area = null;
-
                 //区域分割
                 SpaceDivider spaceDivider = new SpaceDivider();
                 spaceDivider.Compute(frame, layouts);
-                input_Area = new InputArea(frame, layouts, holeList, wallList, null, null, null, spaceDivider.UCSs);
+                InputArea input_Area = new InputArea(frame, layouts, holeList, wallList, columnList, null, null, spaceDivider.UCSs);
                 //输入参数
                 var equipmentParameter = new EquipmentParameter(radius, BlindType.CoverArea);
                 //初始化布点引擎
@@ -212,6 +212,8 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
 
                 var wallList = getPoly(frame, "AI-墙", transformer, false);
 
+                var columnList = getPoly(frame, "AI-柱", transformer, false);
+
                 var layoutHoleList = getPoly(frame, "AI-可布置区域洞", transformer, false);
 
                 List<MPolygon> layouts = new List<MPolygon>();
@@ -223,42 +225,25 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                     layouts.Add(polygon.ToDbMPolygon());
                 }
 
-                SpaceDivider groupOpt = new SpaceDivider();
-                groupOpt.Compute(frame, layouts);
+                //区域分割
+                SpaceDivider spaceDivider = new SpaceDivider();
+                spaceDivider.Compute(frame, layouts);
+                //输入参数
+                InputArea input_Area = new InputArea(frame, layouts, holeList, wallList, columnList, null, null, spaceDivider.UCSs);
+                var equipmentParameter = new EquipmentParameter(6700, BlindType.CoverArea);
 
-                foreach (var id in UCS_List)
+                //初始化布点引擎
+                sensorOpt = new BeamSensorOpt(input_Area, equipmentParameter);
+
+                var dbroom = sensorOpt.room.ToDbMPolygon();
+                dbroom.ColorIndex = 5;
+                acadDatabase.ModelSpace.Add(dbroom);
+
+                foreach (var hole in holeList)
                 {
-                    id.Erase();
-                }
-                UCS_List.Clear();
-
-                //foreach (var layout in groupOpt.layouts)
-                //{
-                //    var dblayout = layout.ent;
-                //    dblayout.ColorIndex = layout.GroupID;
-                //    var id = acadDatabase.ModelSpace.Add(dblayout);
-                //    circle_List.Add(id);
-
-                //    var dbline = new Line(layout.ent.GetCentroidPoint(), layout.ent.GetCentroidPoint() + new Vector3d(300, 0, 0));
-                //    dbline.Rotate(dbline.StartPoint, layout.angle / 180 * Math.PI);
-                //    dbline.ColorIndex = layout.GroupID;
-                //    id = acadDatabase.ModelSpace.Add(dbline);
-                //    circle_List.Add(id);
-                //}
-                foreach (var group in groupOpt.UCSs)
-                {
-                    var dbucs = group.Key;
-                    dbucs.ColorIndex = 5;
-
-                    //var dbline = new Line(dbucs.GetCentroidPoint(), dbucs.GetCentroidPoint() + new Vector3d(3000, 0, 0));
-                    //dbline.Rotate(dbline.StartPoint, group.Value / 180 * Math.PI);
-                    //dbline.ColorIndex = 5;
-                    //var id = acadDatabase.ModelSpace.Add(dbline);
-                    //UCS_List.Add(id);
-
-                    //dbucs.Rotate(dbucs.GetCentroidPoint(),-group.Value / 180 * Math.PI);
-                    var id = acadDatabase.ModelSpace.Add(dbucs);
-                    UCS_List.Add(id);
+                    var dbhole = hole.ToNTSPolygon().ToDbMPolygon();
+                    dbhole.ColorIndex = 4;
+                    acadDatabase.ModelSpace.Add(dbhole);
                 }
             }
         }
@@ -267,11 +252,6 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                foreach (var id in pointId_list)
-                {
-                    id.Erase();
-                }
-                pointId_list.Clear();
                 foreach (var p in layoutPoints)
                 {
                     var circle = new Circle(p, Vector3d.ZAxis, 100);

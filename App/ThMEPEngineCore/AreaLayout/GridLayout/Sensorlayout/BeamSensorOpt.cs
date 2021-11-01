@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Algorithm.Distance;
+using NetTopologySuite.Algorithm.Locate;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
@@ -17,17 +18,20 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Method;
 
 namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
 {
-   public class BeamSensorOpt : AlarmSensorLayout
+    public class BeamSensorOpt : AlarmSensorLayout
     {
-        public List<UCSOpt1> UCSs { get; set; } = new List<UCSOpt1>();//UCS列表
+        public List<UnderUCSOpt> underUCSs { get; set; } = new List<UnderUCSOpt>();//地下UCS列表
+        public List<UpUCSOpt> upUCSs { get; set; } = new List<UpUCSOpt>();//地上UCS列表
         public List<Coordinate> Positions { get; set; } = new List<Coordinate>();//交点位置
         public List<Polygon> Detect { get; set; } = new List<Polygon>();//每个点的探测范围
-        
+
         private ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex;
-        private double bufferDist =500;
+        private double bufferDist = 500;
         private double bufferArea = 500000;
+        private double innerBufferArea = 30000;//内部盲区
         private double bufferAreaToMove = 20000;
         private NetTopologySuite.Geometries.Geometry blind;
+        public bool IsUpOrUnder;//地上图纸还是地下图纸
 
         public BeamSensorOpt(InputArea inputArea, EquipmentParameter parameter)
             : base(inputArea, parameter)
@@ -36,21 +40,45 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             foreach (var layout in layouts)
                 dBObjectCollection.Add(layout.ToDbMPolygon());
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);//建立关于可布置区域的索引
-            foreach (var record in UCS)
-                UCSs.Add(new UCSOpt1(record.Key, record.Value, room, layouts, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
+
+            IsUpOrUnder = CheckUpOrUnder();
+            if (IsUpOrUnder)
+            {
+                foreach (var record in UCS)
+                    underUCSs.Add(new UnderUCSOpt(record.Key, record.Value, room, layouts, columnCenters, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
+            }
+            else
+            {
+                foreach (var record in UCS)
+                    upUCSs.Add(new UpUCSOpt(record.Key, record.Value, room, layouts, MinGap, MaxGap, Radius, AdjustGap, bufferDist));
+            }
         }
 
         public override void Calculate()
         {
-            if (layouts.Count==0)
+            if (layouts.Count == 0)
                 return;
-            //每个UCS分别布点
-            foreach(var UCS in UCSs)
+            if (IsUpOrUnder)
             {
-                UCS.CalculatePlace();
-                foreach(var p in UCS.PlacePoints)
-                    Positions.Add(p);
+                //每个UCS分别布点
+                foreach (var UCS in underUCSs)
+                {
+                    UCS.CalculatePlace();
+                    foreach (var p in UCS.PlacePoints)
+                        Positions.Add(p);
+                }
             }
+            else
+            {
+                //每个UCS分别布点
+                foreach (var UCS in upUCSs)
+                {
+                    UCS.CalculatePlace();
+                    foreach (var p in UCS.PlacePoints)
+                        Positions.Add(p);
+                }
+            }
+
             //计算每个点的覆盖区域
             CalDetectArea();
             //计算盲区
@@ -69,6 +97,27 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             //转化盲区
             ConvertBlind();
         }
+
+        //判断是地上图纸还是地下图纸
+        private bool CheckUpOrUnder()
+        {
+            double AverageLayoutArea = layouts.Sum(o => o.Area) / layouts.Count;//可布置区域平均面积
+
+            int squareNum = 0;
+            foreach (var layout in layouts)
+            {
+                var MinRect = layout.Shell.ToDbPolyline().OBB();
+                double length = MinRect.GetLineSegmentAt(0).Length;
+                double width = MinRect.GetLineSegmentAt(1).Length;
+                var l_w = Math.Abs(length / width);
+                if (l_w > 0.5 && l_w < 2)
+                    squareNum++;
+            }
+            double SquareProportion = 1.0 * squareNum / layouts.Count;
+
+            return (AverageLayoutArea > 1e7 && SquareProportion > 0.5 && layouts.Count > 5 && columnCenters.Count > 10);
+        }
+
         //计算探测范围
         public void CalDetectArea()
         {
@@ -87,7 +136,6 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         {
             while (blind.Area > 100)
             {
-                var old_blind = blind.Area;
                 //先处理掉非polygon的元素
                 if (blind is GeometryCollection geom)
                 {
@@ -96,11 +144,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                         if (geo is Polygon polygon && polygon.Area > 10)
                         {
                             //对于边界上面积小于bufferArea的盲区，直接忽略它
-                            if (!room.Contains(polygon.Buffer(10)) && polygon.Area < bufferArea)
+                            if ((!room.Contains(polygon.Buffer(10)) && polygon.Area < bufferArea) || (polygon.Area < innerBufferArea))
                                 continue;
                             geometryCollection.Add(polygon);
                         }
-                    blind = new MultiPolygon(geometryCollection.ToArray());
+                    blind = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(geometryCollection.ToArray());
                 }
                 //一次只处理一个polygon
                 if (!blind.IsEmpty)
@@ -110,14 +158,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         //删点
         public void DeletePoints()
         {
-            for(int i=0;i<Positions.Count;)
+            for (int i = Positions.Count - 1; i >= 0; i--)
             {
                 if (IsMovable(i))
                 {
                     Positions.RemoveAt(i);
                     Detect.RemoveAt(i);
                 }
-                else i++;
             }
         }
         //移点
@@ -132,15 +179,38 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 //计算该点单独负责的区域
                 var resp = Detect[i].Copy();
                 var nears = FindNearPoints(i);
+                if (nears.Count > 0)
+                {
+                    var nearest = nears.OrderBy(o => Positions[o].Distance(Positions[i])).First();
+                    if (Positions[nearest].Distance(Positions[i]) < 800)
+                    {
+                        var midPoint = new Coordinate((Positions[nearest].X + Positions[i].X) / 2, (Positions[nearest].Y + Positions[i].Y) / 2);
+                        if (layout.Contains(new Point(midPoint)))
+                        {
+                            var small_idx = i < nearest ? i : nearest;
+                            var large_idx = i > nearest ? i : nearest;
+                            Positions.RemoveAt(large_idx);
+                            Positions.RemoveAt(small_idx);
+                            Detect.RemoveAt(large_idx);
+                            Detect.RemoveAt(small_idx);
+                            Positions.Add(midPoint);
+                            Detect.Add(DetectCalculator.CalculateDetect(midPoint, room, Radius, IsDetectVisible));
+                        }
+                        continue;
+                    }
+                }
                 var polylist = new List<Polygon>();
                 foreach (var j in nears)
                     polylist.Add(Detect[j]);
-                resp = resp.Difference(OverlayNGRobust.Union(polylist.ToArray())).Buffer(-10);
+                var unionpoly = OverlayNGRobust.Union(polylist.ToArray());
+                resp = OverlayNGRobust.Overlay(resp, unionpoly, SpatialFunction.Difference).Buffer(-10);
+                //resp = resp.Difference(OverlayNGRobust.Union(polylist.ToArray())).Buffer(-10);
 
                 var smaller = layout.Buffer(-400);
+                Coordinate adjustPoint = null;
                 if (smaller.IsEmpty)
                 {
-                    var adjustPoint = FireAlarmUtils.AdjustedCenterPoint(layout);
+                    adjustPoint = FireAlarmUtils.AdjustedCenterPoint(layout);
                     if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
                     {
                         Positions[i] = adjustPoint;
@@ -148,26 +218,18 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     }
                     continue;
                 }
-                //var adjust = Methods.AdjustedCenterPoint(layout);
-                //if (DetectCalculator.CalculateDetect(adjust, room, Radius, IsDetectVisible).Contains(resp))
-                //{
-                //    Positions[i] = adjust;
-                //    continue;
-                //}
-                if (smaller.Contains(new Point(Positions[i]))) continue;
+                var locator = new SimplePointInAreaLocator(smaller);
+                if (locator.Locate(Positions[i]) == Location.Interior)
+                    continue;
                 if (smaller is Polygon polygon)
-                {
-                    var adjustPoint = FireAlarmUtils.GetClosePointOnPolygon(polygon, Positions[i]);
-                    if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
-                        Positions[i] = adjustPoint;
-                    continue;
-                }
+                    adjustPoint = FireAlarmUtils.GetClosePointOnPolygon(polygon, Positions[i]);
                 else if (smaller is MultiPolygon multiPolygon)
+                    adjustPoint = FireAlarmUtils.GetClosePointOnMultiPolygon(multiPolygon, Positions[i]);
+                var Detecti = DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible);
+                if (Detecti.Contains(resp))
                 {
-                    var adjustPoint = FireAlarmUtils.GetClosePointOnMultiPolygon(multiPolygon, Positions[i]);
-                    if (DetectCalculator.CalculateDetect(adjustPoint, room, Radius, IsDetectVisible).Contains(resp))
-                        Positions[i] = adjustPoint;
-                    continue;
+                    Positions[i] = adjustPoint;
+                    Detect[i] = Detecti;
                 }
             }
         }
@@ -175,7 +237,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         private List<int> FindNearPoints(int index)
         {
             var nears = new List<int>();
-            for(int i=0;i<Positions.Count;i++)
+            for (int i = 0; i < Positions.Count; i++)
             {
                 if (i != index && Positions[i].Distance(Positions[index]) < 2 * Radius)
                     nears.Add(i);
@@ -208,7 +270,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             foreach (var layout in dblayouts)
                 polygon_layouts.Add(layout.ToNTSPolygon());
             //存在无解的盲区
-            if(polygon_layouts.Count==0)
+            if (polygon_layouts.Count == 0)
             {
                 this.blind = this.blind.Difference(targetToMove);
                 return;
@@ -253,10 +315,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 return false;
             else
             {
-                NetTopologySuite.Geometries.Geometry poly = Detect[points[0]];
-                for (int i = 1; i < points.Count; i++)
-                    poly = poly.Union(Detect[points[i]]);
-                resp = resp.Difference(poly);
+                var nearDetects = new List<Polygon>();
+                for (int i = 0; i < points.Count; i++)
+                    nearDetects.Add(Detect[points[i]]);
+                var poly = OverlayNGRobust.Union(nearDetects.ToArray());
+                resp = OverlayNGRobust.Overlay(resp, poly, SpatialFunction.Difference);
             }
 
             return resp.Area < bufferAreaToMove;
@@ -264,7 +327,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         //转化布置点集
         private void ConvertPoints()
         {
-            foreach(var point in Positions)
+            foreach (var point in Positions)
                 m_placePoints.Add(new Point3d(point.X, point.Y, 0));
         }
         //转化盲区
@@ -275,7 +338,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 m_blinds.Add(polygon1.Shell.ToDbPolyline());
                 return;
             }
-                
+
             if (blind is GeometryCollection geom)
             {
                 var geometryCollection = new List<Polygon>();

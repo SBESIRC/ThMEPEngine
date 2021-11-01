@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
     public static class DetectCalculator
     {
         //计算圆形保护区域
-        public static Polygon CalculateRoundDetect(Coordinate position,Polygon region,double radius,int numPoints=20)
+        public static Polygon CalculateRoundDetect(Coordinate position, Polygon region, double radius, int numPoints = 20)
         {
             if (!FireAlarmUtils.PolygonContainPoint(region, position))
                 return Polygon.Empty;
@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
             var detect = circle_polygon.Intersection(region);
             if (detect is Polygon polygon)
                 return polygon;
-            else if(detect is MultiPolygon multi)
+            else if (detect is MultiPolygon multi)
             {
                 foreach (Polygon poly in multi)
                     if (FireAlarmUtils.PolygonContainPoint(poly, position))
@@ -35,7 +35,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         {
             if (!FireAlarmUtils.PolygonContainPoint(region, position))
                 return Polygon.Empty;
-            else return VisiblePolygon.ComputeWithRadius(position, region, radius,numPoints);
+            else return VisiblePolygon.ComputeWithRadius(position, region, radius, numPoints);
         }
         /// <summary>
         /// 计算盲区
@@ -46,7 +46,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         /// <param name="isVisible">true是可见盲区，false是圆形盲区</param>
         /// <param name="numPoints">离散圆顶点数</param>
         /// <returns></returns>
-        public static Polygon CalculateDetect(Coordinate position,Polygon region,double radius,bool isVisible,int numPoints=20)
+        public static Polygon CalculateDetect(Coordinate position, Polygon region, double radius, bool isVisible, int numPoints = 20)
         {
             if (isVisible)
                 return CalculateVisibleDetect(position, region, radius, numPoints);

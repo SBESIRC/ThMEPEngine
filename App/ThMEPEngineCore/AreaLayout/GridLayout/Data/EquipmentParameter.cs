@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
         public double ProtectRadius = 5.8 * 1e3;//保护半径
         public BlindType blindType = BlindType.VisibleArea; //盲区类型
         public double MinGap = 5300;
-        public double MaxGap = 8200;
+        public double MaxGap = 8100;
         public double AdjustGap = 7600;
 
 
@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
             ProtectRadius = paraRadius;
             blindType = paraType;
             MinGap = paraRadius / 58 * 53;
-            MaxGap = paraRadius / 58 * 82;
+            MaxGap = paraRadius / 58 * 81;
             AdjustGap = paraRadius / 58 * 76;
         }
     }
