@@ -200,7 +200,7 @@ namespace ThControlLibraryWPF.CustomControl
                         //单个输入时可能时修改小数点位置，这里需要单独判断
                         TextChange[] change = new TextChange[e.Changes.Count];
                         e.Changes.CopyTo(change, 0);
-                        if (change[0].AddedLength > 0 && change[0].Offset > txtStr.Length)
+                        if (change[0].AddedLength > 0 && change[0].Offset < txtStr.Length)
                         {
                             var addCh = txtStr[change[0].Offset];
                             if (addCh.ToString().Equals("."))
@@ -268,11 +268,12 @@ namespace ThControlLibraryWPF.CustomControl
                     continue;
                 if (!haveDPoint)
                     haveDPoint = c == 46;
-                if (haveDPoint && addDpointInt > -1 && firstDPointIndex < 0)
+                if (haveDPoint && firstDPointIndex < 0)
                     firstDPointIndex = i;
                 if (addDpointInt > -1 && haveDPoint && i < addDpointInt)
                 {
                     haveDPoint = false;
+                    firstDPointIndex = -1;
                     continue;
                 }
                 bool isAdd = false;
@@ -286,6 +287,11 @@ namespace ThControlLibraryWPF.CustomControl
                 else if (c == 46 || (c >= 48 && c <= 57))
                 {
                     isAdd = true;
+                }
+                if (isAdd && firstDPointIndex > -1 && MaxDecimalPlaces > 0)
+                {
+                    int decimalCount = i - firstDPointIndex;
+                    isAdd = decimalCount <= MaxDecimalPlaces;
                 }
                 if (!isAdd)
                     continue;
