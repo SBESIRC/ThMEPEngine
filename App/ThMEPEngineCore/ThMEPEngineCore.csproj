@@ -131,6 +131,8 @@
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\ShowInfo.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UnderUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UpUCSOpt.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
@@ -206,8 +208,6 @@
     <Compile Include="AreaLayout\GridLayout\Data\InputArea.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\BeamSensorOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\SpaceDivider.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UCSOpt.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UCSOpt1.cs" />
     <Compile Include="AreaLayout\GridLayout\Utils\DetectCalculator.cs" />
     <Compile Include="AreaLayout\GridLayout\Utils\FireAlarmUtils.cs" />
     <Compile Include="AreaLayout\GridLayout\Utils\VisiblePolygon.cs" />
