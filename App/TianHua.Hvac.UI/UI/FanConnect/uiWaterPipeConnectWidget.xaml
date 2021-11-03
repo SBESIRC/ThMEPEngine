@@ -1,0 +1,147 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.UI.FanConnect.uiWaterPipeConnectWidget"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
+             mc:Ignorable="d" 
+             Title="水管连接" Width="415.198" Height="400.142">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
+            <local1:FanLayoutIntToVisibilty x:Key="layoutVisibiltyConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="365" VerticalAlignment="Top" Width="200">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Vertical" Grid.Row="0">
+                    <Label x:Name="label" Content="系统选择："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,00,00">
+                        <RadioButton x:Name="radioButton" Content="水系统" Margin="0,0,20,0"
+                         IsChecked="{Binding SystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
+                        />
+                        <RadioButton x:Name="radioButton1" Content="冷媒系统"
+                         IsChecked="{Binding SystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
+                         />
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="1">
+                    <Label x:Name="label1" Content="水平同异程："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,00,00">
+                        <RadioButton x:Name="radioButton2" Content="异程" Margin="0,0,32,0"
+                         IsChecked="{Binding HorizontalType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
+                         />
+                        <RadioButton x:Name="radioButton3" Content="同程"
+                         IsChecked="{Binding HorizontalType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
+                         />
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="2">
+                    <Label x:Name="label2" Content="水系统管制："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
+                        <RadioButton x:Name="radioButton4" Content="两管制" Margin="0,0,20,0"
+                         IsChecked="{Binding PipeSystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
+                         />
+                        <RadioButton x:Name="radioButton5" Content="四管制"
+                         IsChecked="{Binding PipeSystemType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
+                         />
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="3">
+                    <Label x:Name="label3" Content="生成水管："/>
+                    <WrapPanel Orientation="Vertical"  Margin="20,0,0,0">
+                        <CheckBox x:Name="checkBox" Content="空调冷热水管" Margin="0,0,0,5" IsChecked="{Binding IsCodeAndHotPipe}"/>
+                        <CheckBox x:Name="checkBox1" Content="冷凝水管" Margin="0,0,0,5" IsChecked="{Binding IsCWPipe}"/>
+                        <CheckBox x:Name="checkBox2" Content="空调冷却水管" IsChecked="{Binding IsCoolPipe}"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="4">
+                    <Label x:Name="label4" Content="空调水比摩阻控制："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
+                        <ComboBox x:Name="comboBox" Width="80"/>
+                        <Label x:Name="label5" Content="Pa/m"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="5">
+                    <Label x:Name="label6" Content="水管起点中心标高："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
+                        <Label x:Name="label7" Content="h+"/>
+                        <TextBox x:Name="textBox" Height="20" TextWrapping="Wrap" Width="50" Text="{Binding MarkHeigth}" VerticalContentAlignment="Center"/>
+                        <Label x:Name="label8" Content="m"/>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="6">
+                    <CheckBox x:Name="checkBox3" Content="穿框线处生成阀门" IsChecked="{Binding IsGenerValve}"/>
+                    <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
+                        <Label x:Name="label9" Content="已选：10个框线" Margin="0,0,10,0"/>
+                        <Button x:Name="button2" Content="选择" Width="35"/>
+                    </WrapPanel>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <GroupBox x:Name="groupBox1" Header="阀门选择" HorizontalAlignment="Left" Height="285" VerticalAlignment="Top" Width="200" Margin="205,0,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Vertical" Grid.Row="0">
+                    <Label x:Name="label10" Content="供水管："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
+                        <ListBox x:Name="listBox" Height="80" Width="70">
+                            <ListBoxItem Content="闸阀"></ListBoxItem>
+                            <ListBoxItem Content="球阀"></ListBoxItem>
+                            <ListBoxItem Content="柱塞阀"></ListBoxItem>
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
+                            <ListBoxItem Content="快开阀"></ListBoxItem>
+                        </ListBox>
+                        <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
+                            <Button x:Name="button3" Content="->" Width="25" Margin="0,15,0,10"/>
+                            <Button x:Name="button4" Content="&lt;-" Width="25"/>
+                        </WrapPanel>
+                        <ListBox x:Name="listBox1" Height="80" Width="70">
+                        </ListBox>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Row="1">
+                    <Label x:Name="label11" Content="回水管："/>
+                    <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
+                        <ListBox x:Name="listBox2" Height="80" Width="70">
+                            <ListBoxItem Content="闸阀"></ListBoxItem>
+                            <ListBoxItem Content="球阀"></ListBoxItem>
+                            <ListBoxItem Content="住塞阀"></ListBoxItem>
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
+                            <ListBoxItem Content="快开阀"></ListBoxItem>
+                            <ListBoxItem Content="平衡阀"></ListBoxItem>
+                        </ListBox>
+                        <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
+                            <Button x:Name="button5" Content="->" Width="25" Margin="0,15,0,10"/>
+                            <Button x:Name="button6" Content="&lt;-" Width="25"/>
+                        </WrapPanel>
+                        <ListBox x:Name="listBox3" Height="80" Width="70">
+                        </ListBox>
+                    </WrapPanel>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0">
+                    <Label x:Name="label12" Content="出图比例："/>
+                    <ComboBox x:Name="comboBox1" Width="110"/>
+                </StackPanel>
+            </Grid>
+        </GroupBox>
+        <Button x:Name="btnGeneraSPM" Content="生成水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,290,0,0" Height="35" Click="btnGeneraSPM_Click"/>
+        <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,330,0,0" Height="35" Click="btnUpdateSPM_Click"/>
+    </Grid>
+</cus:ThCustomWindow>

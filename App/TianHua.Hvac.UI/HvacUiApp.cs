@@ -67,7 +67,14 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
+        [CommandMethod("TIANHUACAD", "THSPM", CommandFlags.Modal)]
+        public void THSPM()
+        {
+            using (var cmd = new ThHvacSpmCmd())
+            {
+                cmd.Execute();
+            }
+        }
         [CommandMethod("TIANHUACAD", "THFHJS", CommandFlags.Modal)]
         public void THFHJS()
         {

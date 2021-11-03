@@ -47,12 +47,11 @@ namespace ThMEPHVAC.FanConnect.Model
             return -1;
         }
     }
-    public class ThFanTreeModel
+    public class ThFanTreeModel<T>
     {
-        public ThFanTreeNode<Line> RootNode { set; get; }
+        public ThFanTreeNode<T> RootNode { set; get; }
         public ThFanTreeModel()
         {
-            RootNode = new ThFanTreeNode<Line>(new Line());
         }
         //遍历树，找到对应的节点
         public ThFanTreeNode<Line> FandTreeNode(Line line)

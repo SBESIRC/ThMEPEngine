@@ -68,6 +68,7 @@
     <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
     <Compile Include="Command\ThHvacPortModifyCmd.cs" />
+    <Compile Include="Command\ThHvacSpmCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
     <Compile Include="fmBypass.cs">
@@ -138,6 +139,9 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThHvacUIService.cs" />
+    <Compile Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml.cs">
+      <DependentUpon>uiWaterPipeConnectWidget.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiFanCEXHWidget.xaml.cs">
       <DependentUpon>uiFanCEXHWidget.xaml</DependentUpon>
     </Compile>
@@ -257,6 +261,10 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
+    <Page Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LoadCalculation\UI\RoomNumber.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -322,5 +330,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
