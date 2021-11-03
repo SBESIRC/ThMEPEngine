@@ -3,7 +3,6 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
@@ -65,9 +64,14 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public override bool IsDistributionElement(Entity entity)
+        public override bool IsDistributionElement(Entity e)
         {
-            return entity.IsTCHDuct();
+            return e.IsTCHDuct();
+        }
+
+        public override bool CheckLayerValid(Entity e)
+        {
+            return true;
         }
     }
 }

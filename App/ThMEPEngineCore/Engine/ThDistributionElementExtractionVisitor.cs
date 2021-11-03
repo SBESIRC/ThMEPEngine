@@ -17,13 +17,13 @@ namespace ThMEPEngineCore.Engine
 
         public abstract void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix);
         public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
-        public virtual bool IsDistributionElement(Entity entity)
+        public virtual bool IsDistributionElement(Entity e)
         {
             return false;
         }
-        public virtual bool CheckLayerValid(Entity curve)
+        public virtual bool CheckLayerValid(Entity e)
         {
-            return LayerFilter.Contains(curve.Layer);
+            return LayerFilter.Contains(e.Layer);
         }
         public virtual bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {

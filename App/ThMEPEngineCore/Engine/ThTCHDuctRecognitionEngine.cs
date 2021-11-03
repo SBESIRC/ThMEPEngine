@@ -4,8 +4,6 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
@@ -40,10 +38,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHDuctExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
-                };
+                var visitor = new ThTCHDuctExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
                 acadDatabase.ModelSpace
                     .OfType<Entity>()
@@ -63,10 +58,7 @@ namespace ThMEPEngineCore.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHDuctExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
-                };
+                var visitor = new ThTCHDuctExtractionVisitor();
                 if (visitor.IsBuildElementBlockReference(blkRef))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
