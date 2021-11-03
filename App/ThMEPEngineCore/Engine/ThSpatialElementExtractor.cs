@@ -107,6 +107,11 @@ namespace ThMEPEngineCore.Engine
                                 }
                                 if (visitor.IsSpatialElementBlockReference(blockObj))
                                 {
+                                    if (visitor.CheckLayerValid(blockObj) && visitor.IsSpatialElement(blockObj))
+                                    {
+                                        visitor.DoExtract(results, blockObj, matrix);
+                                        continue;
+                                    }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     results.AddRange(DoExtract(blockObj, mcs2wcs, visitor));
                                 }

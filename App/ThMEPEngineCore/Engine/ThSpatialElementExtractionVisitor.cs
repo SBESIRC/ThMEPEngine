@@ -24,15 +24,17 @@ namespace ThMEPEngineCore.Engine
 
         public virtual bool IsSpatialElement(Entity entity)
         {
-            return entity.ObjectId.IsValid;
+            return false;
         }
+
         public virtual bool CheckLayerValid(Entity curve)
         {
             return LayerFilter.Where(o => string.Compare(curve.Layer, o, true) == 0).Any();
         }
+
         public virtual bool IsSpatialElementBlock(BlockTableRecord blockTableRecord)
         {
-            // 暂时不支持动态块，外部参照，覆盖
+            // 忽略动态块
             if (blockTableRecord.IsDynamicBlock)
             {
                 return false;
@@ -52,6 +54,7 @@ namespace ThMEPEngineCore.Engine
 
             return true;
         }
+
         public virtual bool IsSpatialElementBlockReference(BlockReference blockReference)
         {
             return blockReference.BlockTableRecord.IsValid;

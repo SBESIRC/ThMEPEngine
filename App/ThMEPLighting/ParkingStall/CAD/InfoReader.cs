@@ -41,28 +41,28 @@ namespace ThMEPLighting.ParkingStall.CAD
             using (var acadDb = AcadDatabase.Active())
             {
                 var parkingStallRecognitionEngine = new ThParkingStallRecognitionEngine();
-                parkingStallRecognitionEngine.Visitor.LayerFilter.Clear();
                 GetLayerBlockNames(acadDb.Database);
                 switch (ThParkingStallService.Instance.ParkingSource) 
                 {
-                    case Common.EnumParkingSource.OnlyLayerName:
-                        //仅图层获取
-                        foreach (var layerName in m_layerNames)
-                            parkingStallRecognitionEngine.Visitor.LayerFilter.Add(layerName);
-                        m_blockNames.Clear();
-                        m_layerNames.Clear();
-                        break;
-                    case Common.EnumParkingSource.OnlyBlockName:
-                        //仅通过图块名称获取
-                        parkingStallRecognitionEngine.Visitor.CheckQualifiedLayer = (Entity e) => true;
-                        parkingStallRecognitionEngine.Visitor.CheckQualifiedBlockName = CheckLayerBlockNameQualified;
-                        m_layerNames.Clear();
-                        break;
+                    //case Common.EnumParkingSource.OnlyLayerName:
+                    //    //仅图层获取
+                    //    foreach (var layerName in m_layerNames)
+                    //        parkingStallRecognitionEngine.Visitor.LayerFilter.Add(layerName);
+                    //    m_blockNames.Clear();
+                    //    m_layerNames.Clear();
+                    //    break;
+                    //case Common.EnumParkingSource.OnlyBlockName:
+                    //    //仅通过图块名称获取
+                    //    parkingStallRecognitionEngine.CheckQualifiedLayer = (Entity e) => true;
+                    //    parkingStallRecognitionEngine.CheckQualifiedBlockName = CheckNameQualified;
+                    //    m_layerNames.Clear();
+                    //    break;
                     case Common.EnumParkingSource.BlokcAndLayer:
-                        //图块名称和图层名称都可以
-                        parkingStallRecognitionEngine.Visitor.CheckQualifiedLayer = CheckLayerBlockNameQualified;
-                        parkingStallRecognitionEngine.Visitor.CheckQualifiedBlockName = CheckLayerBlockNameQualified;
+                        parkingStallRecognitionEngine.CheckQualifiedLayer = CheckLayerBlockNameQualified;
+                        parkingStallRecognitionEngine.CheckQualifiedBlockName = CheckLayerBlockNameQualified;
                         break;
+                    default:
+                        throw new NotSupportedException();
                 }
                 parkingStallRecognitionEngine.Recognize(acadDb.Database, m_previewWindow);
 

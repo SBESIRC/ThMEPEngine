@@ -1,99 +1,97 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThParkingStallExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThParkingStallExtractionEngine : ThSpatialElementExtractionEngine
     {
-        public ThParkingStallExtractionVisitor Visitor { get; set; }
-        public ThParkingStallExtractionEngine()
-        {
-            Visitor = new ThParkingStallExtractionVisitor();
-        }
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+
         public override void Extract(Database database)
         {
-            if (Visitor.LayerFilter.Count == 0)
+            var visitor = new ThParkingStallExtractionVisitor()
             {
-                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
+                LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
+            };
+            if (CheckQualifiedLayer != null)
+            {
+                visitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
             }
-            var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(Visitor);
+            if (CheckQualifiedBlockName != null)
+            {
+                visitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
+            }
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
             extractor.Extract(database);
-            Results.AddRange(Visitor.Results);
+            Results.AddRange(visitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            if (Visitor.LayerFilter.Count == 0)
+            var visitor = new ThParkingStallExtractionVisitor()
             {
-                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
+                LayerFilter = ThParkingStallLayerManager.XrefLayers(database),
+            };
+            if (CheckQualifiedLayer != null)
+            {
+                visitor.CheckQualifiedLayer = this.CheckQualifiedLayer;
             }
-            var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(Visitor);
+            if (CheckQualifiedBlockName != null)
+            {
+                visitor.CheckQualifiedBlockName = this.CheckQualifiedBlockName;
+            }
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
             extractor.ExtractFromMS(database);
-            Results.AddRange(Visitor.Results);
+            Results.AddRange(visitor.Results);
+        }
+
+        public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
+        {
+            throw new NotImplementedException();
         }
     }
     public class ThParkingStallRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public ThParkingStallExtractionVisitor Visitor { get; set; }
-        public ThParkingStallRecognitionEngine()
-        {
-            Visitor = new ThParkingStallExtractionVisitor();
-        }
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            if (Visitor.LayerFilter.Count == 0)
-            {
-                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
-            }
             var engine = new ThParkingStallExtractionEngine()
             {
-                Visitor = this.Visitor,
+                CheckQualifiedLayer = this.CheckQualifiedLayer,
+                CheckQualifiedBlockName = this.CheckQualifiedBlockName,
             };
             engine.Extract(database);
-            Recognize(Transfer(engine.Results), polygon);
+            Recognize(engine.Results, polygon);
         }
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            if (Visitor.LayerFilter.Count == 0)
-            {
-                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
-            }
             var engine = new ThParkingStallExtractionEngine()
             {
-                Visitor = this.Visitor,
+                CheckQualifiedLayer = this.CheckQualifiedLayer,
+                CheckQualifiedBlockName = this.CheckQualifiedBlockName,
             };
             engine.ExtractFromMS(database);
-            Recognize(Transfer(engine.Results), polygon);
+            Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, ObjectIdCollection dbObjs)
         {
-            throw new System.NotImplementedException();
-        }
-
-        private List<ThRawIfcSpatialElementData> Transfer(List<ThRawIfcDistributionElementData> datas)
-        {
-            var results = new List<ThRawIfcSpatialElementData>();
-            datas.ForEach(o =>
-            {
-                results.Add(new ThRawIfcSpatialElementData()
-                {
-                    Data=o.Data,
-                    Geometry=o.Geometry
-                });
-            });
-            return results;
+            throw new NotImplementedException();
         }
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)

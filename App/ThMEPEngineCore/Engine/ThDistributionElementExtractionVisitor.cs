@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Engine
         }
         public virtual bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
-            // 暂时不支持动态块，外部参照，覆盖
+            // 忽略动态块
             if (blockTableRecord.IsDynamicBlock)
             {
                 return false;

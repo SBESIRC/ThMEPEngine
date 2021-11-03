@@ -1,33 +1,37 @@
 ﻿using System;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThParkingStallExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThParkingStallExtractionVisitor : ThSpatialElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
         public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
         public ThParkingStallExtractionVisitor()
         {
             CheckQualifiedLayer = CheckLayerIsValid;
-            CheckQualifiedBlockName = (Entity entity) => true;
+            CheckQualifiedBlockName = CheckBlockNameIsValid;
         }
-        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj)
+        {
+            throw new NotImplementedException();
+        }
+        public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference br)
             {
                 HandleBlockReference(elements, br, matrix);
             }
         }
-        public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
+        public override void DoXClip(List<ThRawIfcSpatialElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
             if (xclip.IsValid)
@@ -36,10 +40,17 @@ namespace ThMEPEngineCore.Engine
                 elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
             }
         }
-
-        private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference br, Matrix3d matrix)
+        public override bool IsSpatialElement(Entity entity)
         {
-            if (IsDistributionElement(br))
+            return CheckQualifiedBlockName(entity);
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return CheckQualifiedLayer(curve);
+        }
+        private void HandleBlockReference(List<ThRawIfcSpatialElementData> elements, BlockReference br, Matrix3d matrix)
+        {
+            if (IsSpatialElement(br))
             {
                 var objs = CAD.ThDrawTool.Explode(br);
                 objs = ExplodeToBasic(objs);
@@ -48,7 +59,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     var solid = obb.ToSolid();
                     solid.TransformBy(matrix);
-                    elements.Add(new ThRawIfcDistributionElementData()
+                    elements.Add(new ThRawIfcSpatialElementData()
                     {
                         Geometry = solid.ToPolyline(),
                         Data = br.GetEffectiveName(),
@@ -56,7 +67,6 @@ namespace ThMEPEngineCore.Engine
                 }
             }
         }
-
         private Polyline ToObb(DBObjectCollection basicCurves)
         {
             var curves = new DBObjectCollection();
@@ -85,7 +95,6 @@ namespace ThMEPEngineCore.Engine
             }
             return new Polyline() { Closed = true };
         }
-
         private DBObjectCollection ExplodeToBasic(DBObjectCollection objs)
         {
             //理想是炸到Line,Arc,Circle,Ellipse,目前不支持对椭圆的处理，这里不抛出不支持的异常
@@ -111,22 +120,13 @@ namespace ThMEPEngineCore.Engine
                 });
             return results;
         }
-
-        public override bool IsDistributionElement(Entity entity)
+        private bool CheckLayerIsValid(Entity e) 
         {
-            return CheckQualifiedBlockName(entity);
+            return LayerFilter.Where(o => string.Compare(e.Layer, o, true) == 0).Any();
         }
-
-        public override bool CheckLayerValid(Entity curve)
+        private bool CheckBlockNameIsValid(Entity e)
         {
-            return CheckQualifiedLayer(curve);
-        }
-        private bool CheckLayerIsValid(Entity curve) 
-        {
-            var name = ThMEPXRefService.OriginalFromXref(curve.Layer);
-            if (string.IsNullOrEmpty(name))
-                return false;
-            return LayerFilter.Contains(name);
+            return e is BlockReference;
         }
     }
 }
