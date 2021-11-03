@@ -16,13 +16,13 @@
             <StackPanel Orientation="Horizontal"  Focusable="False" Margin="0,5,0,10">
                 <Label Content="建设地：" Margin="10,0,10,0"/>
                 <ComboBox IsEnabled="True" Name="CityCmb" Width="150" Margin="0,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" Background="White" SelectionChanged="ComboBox_SelectionChanged">
-                    <ComboBoxItem Content="武汉" Tag="1" IsSelected="True"></ComboBoxItem>
-                    <ComboBoxItem Content="上海" Tag="2"></ComboBoxItem>
-                    <ComboBoxItem Content="输入室外参数" Tag="3"></ComboBoxItem>
+                    <ComboBoxItem Content="输入室外参数" Tag="1" IsSelected="True"></ComboBoxItem>
+                    <ComboBoxItem Content="武汉" Tag="2"></ComboBoxItem>
+                    <ComboBoxItem Content="上海" Tag="3"></ComboBoxItem>
                 </ComboBox>
             </StackPanel>
             <StackPanel Focusable="False" Margin="5,0,5,5">
-                <DataGrid x:Name="OutdoorParameterTable"  AutoGenerateColumns="False" RowBackground="White" Background="White">
+                <DataGrid x:Name="OutdoorParameterTable" AutoGenerateColumns="False" RowBackground="White" Background="White" BorderThickness="1,1,1,0">
                     <DataGrid.ColumnHeaderStyle>
                         <Style TargetType="DataGridColumnHeader">
                             <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
@@ -40,7 +40,8 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>
-                                        <cus:InputTextBox Height="30" TextBoxInputType="InputString" Text="{Binding Path=Title,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center" IsReadOnly="True" />
+                                        <cus:InputTextBox Height="30" TextBoxInputType="InputString" Text="{Binding Path=Title,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center" IsReadOnly="True">
+                                        </cus:InputTextBox>
                                     </Grid>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -49,7 +50,22 @@
                             <DataGridTemplateColumn.CellTemplate >
                                 <DataTemplate >
                                     <Grid>
-                                        <cus:InputTextBox Height="30" TextBoxInputType="InputString" Text="{Binding Path=SummerTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center" IsReadOnly="{Binding Path=SummerTemperatureReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+                                        <cus:InputTextBox Height="30" TextBoxInputType="InputDouble" MaxDecimalPlaces="1" InputMethod.IsInputMethodEnabled="False" Text="{Binding Path=SummerTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" BorderThickness="0" TextAlignment="Center" IsReadOnly="{Binding Path=SummerTemperatureReadOnly,Mode=TwoWay,UpdateSourceTrigger=LostFocus}">
+                                            <cus:InputTextBox.Style>
+                                                <Style TargetType="cus:InputTextBox">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsReadOnly" Value="True">
+                                                            <Setter Property="Background" Value="#F2F2F2"></Setter>
+                                                            <Setter Property="Foreground" Value="#AAAAAA"></Setter>
+                                                        </Trigger>
+                                                        <Trigger Property="IsReadOnly" Value="False" >
+                                                            <Setter Property="Background" Value="White"></Setter>
+                                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </cus:InputTextBox.Style>
+                                        </cus:InputTextBox> 
                                     </Grid>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -58,7 +74,22 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>
-                                        <cus:InputTextBox Height="30" TextBoxInputType="InputString" Text="{Binding Path=WinterTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center" IsReadOnly="{Binding Path=WinterTemperatureReadOnly,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                                        <cus:InputTextBox Height="30" TextBoxInputType="InputDouble" MaxDecimalPlaces="1" InputMethod.IsInputMethodEnabled="False" Text="{Binding Path=WinterTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" BorderThickness="0" TextAlignment="Center" IsReadOnly="{Binding Path=WinterTemperatureReadOnly,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" >
+                                            <cus:InputTextBox.Style>
+                                                <Style TargetType="cus:InputTextBox">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsReadOnly" Value="True">
+                                                            <Setter Property="Background" Value="#F2F2F2"></Setter>
+                                                            <Setter Property="Foreground" Value="#AAAAAA"></Setter>
+                                                        </Trigger>
+                                                        <Trigger Property="IsReadOnly" Value="False" >
+                                                            <Setter Property="Background" Value="White"></Setter>
+                                                            <Setter Property="Foreground" Value="Black"></Setter>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </cus:InputTextBox.Style>
+                                        </cus:InputTextBox>
                                     </Grid>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
@@ -69,8 +100,8 @@
             </StackPanel>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,5,5">
-            <cus:ImageButton Content="保存" Width="50" Height="20"  TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
-            <cus:ImageButton Content="取消" Width="50" Height="20"  TabIndex="1" Click="CancleButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="保存" Width="50" Height="20" IsDefault="True" TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Width="50" Height="20" IsCancel="True" TabIndex="1" Click="CancleButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

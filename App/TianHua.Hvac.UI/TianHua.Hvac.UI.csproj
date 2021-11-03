@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
+    <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
@@ -102,8 +103,12 @@
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="HvacUiApp.cs" />
+    <Compile Include="LoadCalculation\DoubleConvert.cs" />
     <Compile Include="LoadCalculation\LoadCalculationViewModel.cs" />
     <Compile Include="LoadCalculation\SerializableHelper.cs" />
+    <Compile Include="LoadCalculation\UI\ExtractRoomFunction.xaml.cs">
+      <DependentUpon>ExtractRoomFunction.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoadCalculation\UI\RoomNumber.xaml.cs">
       <DependentUpon>RoomNumber.xaml</DependentUpon>
     </Compile>
@@ -261,9 +266,9 @@
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml">
-      <SubType>Designer</SubType>
+    <Page Include="LoadCalculation\UI\ExtractRoomFunction.xaml">
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="LoadCalculation\UI\RoomNumber.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -309,6 +314,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiFanCEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -330,6 +339,5 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

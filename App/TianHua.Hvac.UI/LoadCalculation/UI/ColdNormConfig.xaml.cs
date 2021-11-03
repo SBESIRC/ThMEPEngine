@@ -39,6 +39,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             NormTxt.Text = data.NormValue.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
+            this.NormTxt.Focus();
+            this.NormTxt.SelectionStart = this.NormTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -49,9 +51,38 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            this._data.NormValue = double.Parse(NormTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            if (string.IsNullOrEmpty(NormTxt.Text))
+            {
+                this._data.NormValue = null;
+            }
+            else
+            {
+                this._data.NormValue = double.Parse(NormTxt.Text);
+            }
+            this._data.TotalValue = 0;
+            if(int.TryParse(TotalTxt.Text,out int num))
+            {
+                this._data.TotalValue = num;
+            }
             this.Close();
+        }
+
+        private void RadioBtnTrue_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!NormTxt.IsNull() && !TotalTxt.IsNull())
+            {
+                NormTxt.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnFalse_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!NormTxt.IsNull()  && !TotalTxt.IsNull())
+            {
+                NormTxt.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+            }
         }
     }
 }

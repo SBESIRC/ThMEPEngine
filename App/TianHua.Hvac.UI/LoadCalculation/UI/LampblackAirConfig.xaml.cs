@@ -40,6 +40,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             ProportionTxt.Text = data.NormValue.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
+            this.ProportionTxt.Focus();
+            this.ProportionTxt.SelectionStart = this.ProportionTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -50,9 +52,38 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            this._data.NormValue = double.Parse(ProportionTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            if (string.IsNullOrEmpty(ProportionTxt.Text))
+            {
+                this._data.NormValue = null;
+            }
+            else
+            {
+                this._data.NormValue = double.Parse(ProportionTxt.Text);
+            }
+            this._data.TotalValue = 0;
+            if (int.TryParse(TotalTxt.Text, out int num))
+            {
+                this._data.TotalValue = num;
+            }
             this.Close();
+        }
+
+        private void RadioBtnTrue_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!ProportionTxt.IsNull() && !TotalTxt.IsNull())
+            {
+                ProportionTxt.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnFalse_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!ProportionTxt.IsNull() && !TotalTxt.IsNull())
+            {
+                ProportionTxt.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+            }
         }
     }
 }

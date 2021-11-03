@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,15,0,10">
-            <RadioButton Name="RadioBtnTrue" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="True">
+            <RadioButton Name="RadioBtnTrue" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="True" Checked="RadioBtnTrue_Checked">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -27,21 +27,21 @@
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
                 </Grid.RowDefinitions>
-                <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
+                <StackPanel x:Name="panel1" Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
                     <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="人员密度：" Margin="0,0,5,0"></Label>
-                    <TextBox Grid.Column="2" x:Name="PersonnelDensityTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="PersonnelDensityTxt" TextBoxInputType="InputInteger" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="人/m2" ></Label>
                 </StackPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
+                <StackPanel Name="panel2" Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
                     <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="新风指标：" Margin="0,0,5,0"></Label>
-                    <TextBox Grid.Column="2" x:Name="FreshAirNormTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="FreshAirNormTxt" TextBoxInputType="InputDouble" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h·人" ></Label>
                 </StackPanel>
 
 
             </Grid>
 
-            <RadioButton Name="RadioBtnFalse" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="False">
+            <RadioButton Name="RadioBtnFalse" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="False" Checked="RadioBtnFalse_Checked">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0*"></ColumnDefinition>
@@ -50,14 +50,14 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
-                    <TextBox Grid.Column="2" x:Name="TotalTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputInteger" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h" ></Label>
                 </Grid>
             </RadioButton>
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,0">
-            <cus:ImageButton Content="保存" Width="50" Height="20"  TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
-            <cus:ImageButton Content="取消" Width="50" Height="20"  TabIndex="1" Click="CancleButton_Click"></cus:ImageButton>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,5">
+            <cus:ImageButton Content="保存" Width="50" Height="20" IsDefault="True" TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Width="50" Height="20" IsCancel="True" TabIndex="1" Margin="0,0,10,0" Click="CancleButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

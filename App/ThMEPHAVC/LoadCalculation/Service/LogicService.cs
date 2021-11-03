@@ -29,14 +29,9 @@ namespace ThMEPHVAC.LoadCalculation.Service
             ThCADCoreNTSSpatialIndex tableSpatialIndex = new ThCADCoreNTSSpatialIndex(tableDic.Keys.ToCollection());
             ThCADCoreNTSSpatialIndex curveSpatialIndex = new ThCADCoreNTSSpatialIndex(curves.ToCollection());
             var dbSourceService = new ModelDataDbSourceService();
-            double summerVentilationT;
-            double winterVentilationT;
-            dbSourceService.Load(database);
-            if (!double.TryParse(dbSourceService.dataModel.SummerTemperature.Replace("°C", ""), out summerVentilationT)
-                || !double.TryParse(dbSourceService.dataModel.WinterTemperature.Replace("°C", ""), out winterVentilationT))
-            {
-                throw new Exception("获取室外通风温度异常！");
-            }
+            dbSourceService.LoadSWTF(database);
+            double summerVentilationT = dbSourceService.dataModel.SummerTemperature;
+            double winterVentilationT = dbSourceService.dataModel.WinterTemperature;
             foreach (Entity roomBoundary in rooms)
             {
                 var SelectWindowobjs = blkSpatialIndex.SelectCrossingPolygon(roomBoundary);
@@ -135,6 +130,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
             Table table = new Table()
             {
                 Position = tablePoint,
+                TableStyle= Active.Database.Tablestyle
             };
 
             var TableData = CalculateData(roomBoundary, block, summerVentilationT, winterVentilationT);
@@ -211,39 +207,59 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 }
                 tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_Area, "面积(m²)", Area.ToString()));
             }
+            bool showColdL = false;
+            bool showHotL = false;
             //Column 2
             {
-                coldL = modeldata.ColdNorm.ByNorm ? (modeldata.ColdNorm.NormValue * Area / 1000).Ceiling(1) : modeldata.ColdNorm.TotalValue;
-                hotL = modeldata.HotNorm.ByNorm ? (modeldata.HotNorm.NormValue * Area / 1000).Ceiling(1) : modeldata.HotNorm.TotalValue;
-                if (!ThLoadCalculationUIService.Instance.Parameter.chk_ColdL && !ThLoadCalculationUIService.Instance.Parameter.chk_HotL)
+                if (!modeldata.ColdNorm.ByNorm || (modeldata.ColdNorm.NormValue.HasValue && modeldata.ColdNorm.NormValue.Value > 0))
                 {
-                    tuples.Add(new Tuple<bool, string, string>(false, "冷/热负荷(kW)", string.Format("{0}/{1}", coldL, hotL)));
+                    showColdL = true;
+                    coldL = modeldata.ColdNorm.ByNorm ? (modeldata.ColdNorm.NormValue.Value * Area / 1000).Ceiling(1) : modeldata.ColdNorm.TotalValue;
+                }
+                if (!modeldata.HotNorm.ByNorm || (modeldata.HotNorm.NormValue.HasValue && modeldata.HotNorm.NormValue.Value > 0))
+                {
+                    showHotL = true;
+                    hotL = modeldata.HotNorm.ByNorm ? (modeldata.HotNorm.NormValue.Value * Area / 1000).Ceiling(1) : modeldata.HotNorm.TotalValue;
+                }
+                if ((!ThLoadCalculationUIService.Instance.Parameter.chk_ColdL || !showColdL) && (!ThLoadCalculationUIService.Instance.Parameter.chk_HotL || !showHotL))
+                {
+                    tuples.Add(new Tuple<bool, string, string>(false, "冷/热负荷(kW)", string.Format("{0}/{1}", coldL.ToString("f1"), hotL.ToString("f1"))));
                 }
                 else
                 {
-                    tuples.Add(new Tuple<bool, string, string>(true, "冷/热负荷(kW)", string.Format("{0}/{1}", ThLoadCalculationUIService.Instance.Parameter.chk_ColdL ? coldL.ToString() : "-",
-                      ThLoadCalculationUIService.Instance.Parameter.chk_HotL ? hotL.ToString() : "-")));
+                    tuples.Add(new Tuple<bool, string, string>(true, "冷/热负荷(kW)", string.Format("{0}/{1}", (ThLoadCalculationUIService.Instance.Parameter.chk_ColdL && showColdL) ? coldL.ToString("f1") : "-",
+                      (ThLoadCalculationUIService.Instance.Parameter.chk_HotL && showHotL) ? hotL.ToString("f1") : "-")));
                 }
             }
             //Column 3
+            bool showColdW = false;
+            bool showHotW = false;
             {
-                coldW = (coldL / 1.163 / modeldata.CWaterTemperature).Ceiling(1);
-                hotW = (hotL / 1.163 / modeldata.HWaterTemperature).Ceiling(1);
-                if (!ThLoadCalculationUIService.Instance.Parameter.chk_ColdW && !ThLoadCalculationUIService.Instance.Parameter.chk_HotW)
+                if (showColdL && modeldata.CWaterTemperature.HasValue && modeldata.CWaterTemperature.Value > 0)
+                {
+                    showColdW = true;
+                    coldW = (coldL / 1.163 / modeldata.CWaterTemperature.Value).Ceiling(1);
+                }
+                if (showHotL && modeldata.HWaterTemperature.HasValue && modeldata.HWaterTemperature.Value > 0)
+                {
+                    showHotW = true;
+                    hotW = (hotL / 1.163 / modeldata.HWaterTemperature.Value).Ceiling(1);
+                }
+                if ((!ThLoadCalculationUIService.Instance.Parameter.chk_ColdW || !showColdW) && (!ThLoadCalculationUIService.Instance.Parameter.chk_HotW || showHotW))
                 {
                     tuples.Add(new Tuple<bool, string, string>(false, "冷/热水量(m3/h)", string.Format("{0}/{1}", coldW, hotW)));
                 }
                 else
                 {
-                    tuples.Add(new Tuple<bool, string, string>(true, "冷/热水量(m3/h)", string.Format("{0}/{1}", ThLoadCalculationUIService.Instance.Parameter.chk_ColdW ? coldW.ToString() : "-",
-                      ThLoadCalculationUIService.Instance.Parameter.chk_HotW ? hotW.ToString() : "-")));
+                    tuples.Add(new Tuple<bool, string, string>(true, "冷/热水量(m3/h)", string.Format("{0}/{1}", (ThLoadCalculationUIService.Instance.Parameter.chk_ColdW && showColdW) ? coldW.ToString() : "-",
+                      (ThLoadCalculationUIService.Instance.Parameter.chk_HotW && showHotW) ? hotW.ToString() : "-")));
                 }
             }
             //Column 4
             {
                 foreach (var item in LoadCalculationParameterFromConfig.WPipeDiameterConfig[ThLoadCalculationUIService.Instance.Parameter.chk_ColdWP_Index])
                 {
-                    if (coldW > item.Key)
+                    if (coldW < item.Key)
                     {
                         coldWP = item.Value;
                         break;
@@ -251,49 +267,49 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 }
                 foreach (var item in LoadCalculationParameterFromConfig.WPipeDiameterConfig[ThLoadCalculationUIService.Instance.Parameter.chk_HotWP_Index])
                 {
-                    if (hotW > item.Key)
+                    if (hotW < item.Key)
                     {
                         hotWP = item.Value;
                         break;
                     }
                 }
-                if (!ThLoadCalculationUIService.Instance.Parameter.chk_ColdWP && !ThLoadCalculationUIService.Instance.Parameter.chk_HotWP)
+                if ((!ThLoadCalculationUIService.Instance.Parameter.chk_ColdWP || !showColdW) && !(ThLoadCalculationUIService.Instance.Parameter.chk_HotWP || !showHotW))
                 {
                     tuples.Add(new Tuple<bool, string, string>(false, "空调冷/热水管径", string.Format("{0}/{1}", coldWP, hotWP)));
                 }
                 else
                 {
-                    tuples.Add(new Tuple<bool, string, string>(true, "空调冷/热水管径", string.Format("{0}/{1}", ThLoadCalculationUIService.Instance.Parameter.chk_ColdWP ? "DN" + coldWP.ToString() : "-",
-                      ThLoadCalculationUIService.Instance.Parameter.chk_HotWP ? "DN" + hotWP.ToString() : "-")));
+                    tuples.Add(new Tuple<bool, string, string>(true, "空调冷/热水管径", string.Format("{0}/{1}", (ThLoadCalculationUIService.Instance.Parameter.chk_ColdWP && showColdW) ? "DN" + coldWP.ToString() : "-",
+                      (ThLoadCalculationUIService.Instance.Parameter.chk_HotWP && showHotW) ? "DN" + hotWP.ToString() : "-")));
                 }
             }
             //Column 5
             {
-                if (coldWP < 25)
+                if (coldL < 25)
                 {
                     CondensateWP = 25;
                 }
-                else if (coldWP < 100)
+                else if (coldL < 100)
                 {
                     CondensateWP = 32;
                 }
-                else if (coldWP < 300)
+                else if (coldL < 300)
                 {
                     CondensateWP = 40;
                 }
-                else if (coldWP < 800)
+                else if (coldL < 800)
                 {
                     CondensateWP = 50;
                 }
-                else if (coldWP < 1600)
+                else if (coldL < 1600)
                 {
                     CondensateWP = 80;
                 }
-                else if (coldWP < 3000)
+                else if (coldL < 3000)
                 {
                     CondensateWP = 100;
                 }
-                else if (coldWP < 12000)
+                else if (coldL < 12000)
                 {
                     CondensateWP = 125;
                 }
@@ -301,37 +317,62 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 {
                     CondensateWP = 150;
                 }
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_CondensateWP, "冷凝水管径", "De" + CondensateWP));
+                tuples.Add(new Tuple<bool, string, string>(showColdL && ThLoadCalculationUIService.Instance.Parameter.chk_CondensateWP, "冷凝水管径", "DN" + CondensateWP));
             }
             //Column 6
             {
-                ReshAir = modeldata.ReshAir.ByNorm ? ((int)Math.Ceiling(Area * modeldata.ReshAir.PersonnelDensity * modeldata.ReshAir.ReshAirNormValue)).CeilingInteger(50) : (int)modeldata.ReshAir.TotalValue;
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AirVolume, "新风量(m3/h)", ReshAir.ToString()));
+                if (!modeldata.ReshAir.ByNorm || (modeldata.ReshAir.ReshAirNormValue.HasValue && modeldata.ReshAir.ReshAirNormValue.Value > 0 && modeldata.ReshAir.PersonnelDensity.HasValue && modeldata.ReshAir.PersonnelDensity.Value > 0))
+                {
+                    ReshAir = modeldata.ReshAir.ByNorm ? ((int)Math.Ceiling(Area * modeldata.ReshAir.PersonnelDensity.Value * modeldata.ReshAir.ReshAirNormValue.Value)).CeilingInteger(50) : (int)modeldata.ReshAir.TotalValue;
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AirVolume, "新风量(m3/h)", ReshAir.ToString()));
+                }
             }
+            bool showLampblack = false;
             //Column 7
             {
-                Lampblack = modeldata.Lampblack.ByNorm ? ((int)Math.Ceiling(Area * modeldata.Lampblack.Proportion * roomHeigth * modeldata.Lampblack.AirNum)).CeilingInteger(50) : (int)modeldata.Lampblack.TotalValue;
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeExhaust, "排油烟(m3/h)", Lampblack.ToString()));
+                if (modeldata.Lampblack.ByNorm && modeldata.Lampblack.AirNum.HasValue && modeldata.Lampblack.AirNum.Value > 0)
+                {
+                    showLampblack = true;
+                    Lampblack = ((int)Math.Ceiling(Area * modeldata.Lampblack.Proportion * roomHeigth * modeldata.Lampblack.AirNum.Value)).CeilingInteger(50);
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeExhaust, "排油烟(m3/h)", Lampblack.ToString()));
+                }
+                else if (!(modeldata.Lampblack.ByNorm && modeldata.Lampblack.TotalValue.HasValue && modeldata.Lampblack.TotalValue.Value > 0))
+                {
+                    showLampblack = true;
+                    Lampblack = modeldata.Lampblack.TotalValue.Value;
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeExhaust, "排油烟(m3/h)", Lampblack.ToString()));
+                }
             }
             //Column 8
             {
-                FumeSupplementary = modeldata.LampblackAir.ByNorm ? ((int)Math.Ceiling(Lampblack * modeldata.LampblackAir.NormValue)).CeilingInteger(50) : modeldata.LampblackAir.TotalValue;
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeSupplementary, "油烟补风(m3/h)", FumeSupplementary.ToString()));
+                if (!modeldata.LampblackAir.ByNorm || (showLampblack && modeldata.LampblackAir.NormValue.HasValue && modeldata.LampblackAir.NormValue.Value > 0))
+                {
+                    FumeSupplementary = modeldata.LampblackAir.ByNorm ? ((int)Math.Ceiling(Lampblack * modeldata.LampblackAir.NormValue.Value)).CeilingInteger(50) : modeldata.LampblackAir.TotalValue;
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeSupplementary, "油烟补风(m3/h)", FumeSupplementary.ToString()));
+                }
             }
             //Column 9
             {
-                AccidentExhaust = modeldata.AccidentAir.ByNorm ? ((int)Math.Ceiling(Area * modeldata.AccidentAir.Proportion * roomHeigth * modeldata.AccidentAir.AirNum)).CeilingInteger(50) : (int)modeldata.AccidentAir.TotalValue;
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AccidentExhaust, "事故排风(m3/h)", AccidentExhaust.ToString()));
+                if (modeldata.AccidentAir.ByNorm && modeldata.AccidentAir.AirNum.HasValue && modeldata.AccidentAir.AirNum.Value > 0)
+                {
+                    AccidentExhaust = ((int)Math.Ceiling(Area * modeldata.AccidentAir.Proportion * roomHeigth * modeldata.AccidentAir.AirNum.Value)).CeilingInteger(50);
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AccidentExhaust, "事故排风(m3/h)", AccidentExhaust.ToString()));
+                }
+                else if (!modeldata.AccidentAir.ByNorm && modeldata.AccidentAir.TotalValue.HasValue && modeldata.AccidentAir.TotalValue.Value > 0)
+                {
+                    AccidentExhaust = modeldata.AccidentAir.TotalValue.Value;
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AccidentExhaust, "事故排风(m3/h)", AccidentExhaust.ToString()));
+                }
             }
             //Column 10
             {
-                if (modeldata.Exhaust.ByNorm == 1)
+                if (modeldata.Exhaust.ByNorm == 1 && modeldata.Exhaust.NormValue.HasValue && modeldata.Exhaust.NormValue.Value > 0)
                 {
-                    NormalAirVolume = ((int)Math.Ceiling(Area * roomHeigth * modeldata.Exhaust.NormValue)).CeilingInteger(50);
+                    NormalAirVolume = ((int)Math.Ceiling(Area * roomHeigth * modeldata.Exhaust.NormValue.Value)).CeilingInteger(50);
                 }
-                else if (modeldata.Exhaust.ByNorm == 2)
+                else if (modeldata.Exhaust.ByNorm == 2 && modeldata.Exhaust.TotalValue.HasValue && modeldata.Exhaust.TotalValue.Value > 0)
                 {
-                    NormalAirVolume = modeldata.Exhaust.TotalValue;
+                    NormalAirVolume = modeldata.Exhaust.TotalValue.Value;
                 }
                 else
                 {
@@ -339,29 +380,32 @@ namespace ThMEPHVAC.LoadCalculation.Service
                     int HeatBalanceValue = 0;
                     if (modeldata.Exhaust.CapacityType == 1)
                     {
-                        HeatBalanceValue = (int)Math.Ceiling(3600 * modeldata.Exhaust.TransformerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.TransformerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
                     }
                     else if (modeldata.Exhaust.CapacityType == 2)
                     {
-                        HeatBalanceValue = (int)Math.Ceiling(3600 * modeldata.Exhaust.BoilerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.BoilerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
                     }
                     else
                     {
-                        HeatBalanceValue = (int)Math.Ceiling(3600 * modeldata.Exhaust.FirewoodCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.FirewoodCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
                     }
                     NormalAirVolume = Math.Max(NormalAirNewVolume, HeatBalanceValue).CeilingInteger(50);
                 }
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_NormalAirVolume, "平时排风(m3//h)", NormalAirVolume.ToString()));
+                if (NormalAirVolume > 0)
+                {
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_NormalAirVolume, "平时排风(m3//h)", NormalAirVolume.ToString()));
+                }
             }
             //Column 11
             {
-                if (modeldata.Exhaust.ByNorm == 1)
+                if (modeldata.Exhaust.ByNorm == 1 && modeldata.AirCompensation.NormValue.HasValue && modeldata.AirCompensation.NormValue.Value > 0)
                 {
-                    NormalFumeSupplementary = ((int)Math.Ceiling(NormalAirVolume * modeldata.AirCompensation.NormValue)).CeilingInteger(50);
+                    NormalFumeSupplementary = ((int)Math.Ceiling(NormalAirVolume * modeldata.AirCompensation.NormValue.Value)).CeilingInteger(50);
                 }
-                else if (modeldata.Exhaust.ByNorm == 2)
+                else if (modeldata.Exhaust.ByNorm == 2 && modeldata.AirCompensation.TotalValue.HasValue && modeldata.AirCompensation.TotalValue.Value > 0)
                 {
-                    NormalFumeSupplementary = modeldata.AirCompensation.TotalValue;
+                    NormalFumeSupplementary = modeldata.AirCompensation.TotalValue.Value;
                 }
                 else
                 {
@@ -374,7 +418,10 @@ namespace ThMEPHVAC.LoadCalculation.Service
                         NormalFumeSupplementary = (NormalAirVolume + modeldata.AirCompensation.FirewoodCapacity * modeldata.AirCompensation.CombustionAirVolume).CeilingInteger(50);
                     }
                 }
-                tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_NormalFumeSupplementary, "平时补风量(m3//h)", NormalFumeSupplementary.ToString()));
+                if (NormalFumeSupplementary > 0)
+                {
+                    tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_NormalFumeSupplementary, "平时补风量(m3//h)", NormalFumeSupplementary.ToString()));
+                }
             }
             return tuples;
         }

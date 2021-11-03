@@ -41,6 +41,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             ProportionTxt.Text = data.Proportion.ToString();
             AirNumTxt.Text = data.AirNum.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
+            this.ProportionTxt.Focus();
+            this.ProportionTxt.SelectionStart = this.ProportionTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -51,10 +53,48 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            this._data.Proportion = double.Parse(ProportionTxt.Text);
-            this._data.AirNum = int.Parse(AirNumTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            this._data.Proportion = 0;
+            if (double.TryParse(ProportionTxt.Text, out double num))
+            {
+                this._data.Proportion = num;
+            }
+            if (string.IsNullOrEmpty(AirNumTxt.Text))
+            {
+                this._data.AirNum = null;
+            }
+            else
+            {
+                this._data.AirNum = int.Parse(AirNumTxt.Text);
+            }
+            if (string.IsNullOrEmpty(TotalTxt.Text))
+            {
+                this._data.TotalValue = null;
+            }
+            else
+            {
+                this._data.TotalValue = int.Parse(TotalTxt.Text);
+            }
             this.Close();
+        }
+
+        private void RadioBtnTrue_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!ProportionTxt.IsNull() && !AirNumTxt.IsNull() && !TotalTxt.IsNull())
+            {
+                ProportionTxt.IsEnabled = true;
+                AirNumTxt.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnFalse_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!ProportionTxt.IsNull() && !AirNumTxt.IsNull() && !TotalTxt.IsNull())
+            {
+                ProportionTxt.IsEnabled = false;
+                AirNumTxt.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+            }
         }
     }
 }

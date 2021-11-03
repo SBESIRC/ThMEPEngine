@@ -28,7 +28,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             InitializeComponent();
             this._data = data;
 
-            if(data.ByNorm==1)
+            if (data.ByNorm == 1)
             {
                 RadioBtnType1.IsChecked = true;
                 RadioBtnType2.IsChecked = false;
@@ -49,7 +49,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             NormTxt.Text = data.NormValue.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
             BreatheNumTxt.Text = data.BreatheNum.ToString();
-            if(data.CapacityType==1)
+            if (data.CapacityType == 1)
             {
                 CapacityType1.IsChecked = true;
             }
@@ -66,6 +66,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             FirewoodCapacityTxt.Text = data.FirewoodCapacity.ToString();
             HeatDissipationTxt.Text = data.HeatDissipation.ToString();
             RoomTemperatureTxt.Text = data.RoomTemperature.ToString();
+            this.NormTxt.Focus();
+            this.NormTxt.SelectionStart = this.NormTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -76,8 +78,22 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnType1.IsChecked.Value ? 1 : RadioBtnType2.IsChecked.Value ? 2 : 3;
-            this._data.NormValue = int.Parse(NormTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            if (string.IsNullOrEmpty(NormTxt.Text))
+            {
+                this._data.NormValue = null;
+            }
+            else
+            {
+                this._data.NormValue = int.Parse(NormTxt.Text);
+            }
+            if (string.IsNullOrEmpty(TotalTxt.Text))
+            {
+                this._data.TotalValue = null;
+            }
+            else
+            {
+                this._data.TotalValue = int.Parse(TotalTxt.Text);
+            }
             this._data.BreatheNum = int.Parse(BreatheNumTxt.Text);
             this._data.CapacityType = CapacityType1.IsChecked.Value ? 1 : CapacityType2.IsChecked.Value ? 2 : 3;
             this._data.TransformerCapacity = int.Parse(TransformerCapacityTxt.Text);
@@ -86,6 +102,45 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             this._data.HeatDissipation = int.Parse(HeatDissipationTxt.Text);
             this._data.RoomTemperature = int.Parse(RoomTemperatureTxt.Text);
             this.Close();
+        }
+
+        private void RadioBtnType1_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!NormTxt.IsNull() && !TotalTxt.IsNull() && !panel1.IsNull() && !panel2.IsNull() && !panel3.IsNull() && !panel4.IsNull())
+            {
+                NormTxt.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+                panel1.IsEnabled = false;
+                panel2.IsEnabled = false;
+                panel3.IsEnabled = false;
+                panel4.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnType2_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!NormTxt.IsNull() && !TotalTxt.IsNull() && !panel1.IsNull() && !panel2.IsNull() && !panel3.IsNull() && !panel4.IsNull())
+            {
+                NormTxt.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+                panel1.IsEnabled = false;
+                panel2.IsEnabled = false;
+                panel3.IsEnabled = false;
+                panel4.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnType3_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!NormTxt.IsNull() && !TotalTxt.IsNull() && !panel1.IsNull() && !panel2.IsNull() && !panel3.IsNull() && !panel4.IsNull())
+            {
+                NormTxt.IsEnabled = false;
+                TotalTxt.IsEnabled = false;
+                panel1.IsEnabled = true;
+                panel2.IsEnabled = true;
+                panel3.IsEnabled = true;
+                panel4.IsEnabled = true;
+            }
         }
     }
 }

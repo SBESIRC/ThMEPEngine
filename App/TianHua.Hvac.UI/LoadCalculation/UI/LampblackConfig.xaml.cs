@@ -28,7 +28,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             InitializeComponent();
             this._data = data;
 
-            if(data.ByNorm)
+            if (data.ByNorm)
             {
                 RadioBtnTrue.IsChecked = true;
                 RadioBtnFalse.IsChecked = false;
@@ -41,6 +41,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             ProportionTxt.Text = data.Proportion.ToString();
             AirNumTxt.Text = data.AirNum.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
+            this.AirNumTxt.Focus();
+            this.AirNumTxt.SelectionStart = this.AirNumTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -52,9 +54,43 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
             this._data.Proportion = double.Parse(ProportionTxt.Text);
-            this._data.AirNum = int.Parse(AirNumTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            if (string.IsNullOrEmpty(AirNumTxt.Text))
+            {
+                this._data.AirNum = null;
+            }
+            else
+            {
+                this._data.AirNum = int.Parse(AirNumTxt.Text);
+            }
+            if (string.IsNullOrEmpty(TotalTxt.Text))
+            {
+                this._data.TotalValue = null;
+            }
+            else
+            {
+                this._data.TotalValue = int.Parse(TotalTxt.Text);
+            }
             this.Close();
+        }
+
+        private void RadioBtnTrue_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!panel1.IsNull() && !panel2.IsNull() && !TotalTxt.IsNull())
+            {
+                panel1.IsEnabled = true;
+                panel2.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnFalse_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!panel1.IsNull() && !panel2.IsNull() && !TotalTxt.IsNull())
+            {
+                panel1.IsEnabled = false;
+                panel2.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+            }
         }
     }
 }

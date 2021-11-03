@@ -29,7 +29,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
         /// <summary>
         /// 冷水温差-column3-int
         /// </summary>
-        public int CWaterTemperature { get; set; }
+        public int? CWaterTemperature { get; set; }
 
         /// <summary>
         /// 热指标-column4-class
@@ -39,7 +39,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
         /// <summary>
         /// 热水温差-column5-int
         /// </summary>
-        public int HWaterTemperature { get; set; }
+        public int? HWaterTemperature { get; set; }
 
         /// <summary>
         /// 新风量-column6&7-class
@@ -162,11 +162,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private double normValue;
+        private double? normValue;
         /// <summary>
         /// 指标量
         /// </summary>
-        public double NormValue
+        public double? NormValue
         {
             get
             {
@@ -200,7 +200,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        public double GetTrueValue
+        public double? GetTrueValue
         {
             get
             {
@@ -223,7 +223,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (ByNorm)
                     return Brushes.White;
                 else
-                    return Brushes.LightGreen;
+                    return Brushes.Pink;
             }
         }
     }
@@ -254,11 +254,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private double personnelDensity;
+        private double? personnelDensity;
         /// <summary>
         /// 人员密度
         /// </summary>
-        public double PersonnelDensity
+        public double? PersonnelDensity
         {
             get
             {
@@ -274,11 +274,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int reshAirNormValue;
+        private double? reshAirNormValue;
         /// <summary>
         /// 新风指标
         /// </summary>
-        public int ReshAirNormValue
+        public double? ReshAirNormValue
         {
             get
             {
@@ -330,7 +330,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        public double GetTrueValue
+        public double? GetTrueValue
         {
             get
             {
@@ -342,7 +342,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = true;
-                ReshAirNormValue = (int)value;
+                ReshAirNormValue = value;
             }
         }
         public SolidColorBrush GetTrueColor
@@ -352,7 +352,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (ByNorm)
                     return Brushes.White;
                 else
-                    return Brushes.LightGreen;
+                    return Brushes.Pink;
             }
         }
     }
@@ -401,11 +401,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int airNum;
+        private int? airNum;
         /// <summary>
         /// 换气次数
         /// </summary>
-        public int AirNum
+        public int? AirNum
         {
             get
             {
@@ -420,11 +420,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private double totalValue;
+        private int? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public double TotalValue
+        public int? TotalValue
         {
             get
             {
@@ -439,7 +439,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        public double GetTrueValue
+        public int? GetTrueValue
         {
             get
             {
@@ -451,7 +451,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = true;
-                AirNum = (int)value;
+                AirNum = value;
             }
         }
 
@@ -462,7 +462,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (ByNorm)
                     return Brushes.White;
                 else
-                    return Brushes.LightGreen;
+                    return Brushes.Pink;
             }
         }
     }
@@ -492,11 +492,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int normValue;
+        private int? normValue;
         /// <summary>
         /// 换气次数
         /// </summary>
-        public int NormValue
+        public int? NormValue
         {
             get
             {
@@ -511,11 +511,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int totalValue;
+        private int? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int TotalValue
+        public int? TotalValue
         {
             get
             {
@@ -539,12 +539,15 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 else if (ByNorm == 2)
                     return TotalValue.ToString();
                 else
-                    return "计算值";
+                    return "热平衡";
             }
             set
             {
                 ByNorm = 1;
-                NormValue = int.Parse(value);
+                if (string.IsNullOrEmpty(value))
+                    NormValue = null;
+                else
+                    NormValue = int.Parse(value);
             }
         }
 
@@ -555,9 +558,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (ByNorm == 1)
                     return Brushes.White;
                 else if (ByNorm == 2)
-                    return Brushes.LightGreen;
+                    return Brushes.Pink;
                 else
-                    return Brushes.LightSalmon;
+                    return Brushes.Moccasin;
             }
         }
 
@@ -619,11 +622,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private double normValue;
+        private double? normValue;
         /// <summary>
         /// 平时补风系数
         /// </summary>
-        public double NormValue
+        public double? NormValue
         {
             get
             {
@@ -638,11 +641,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int totalValue;
+        private int? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int TotalValue
+        public int? TotalValue
         {
             get
             {
@@ -671,7 +674,10 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = 1;
-                NormValue = double.Parse(value);
+                if (string.IsNullOrEmpty(value))
+                    NormValue = null;
+                else
+                    NormValue = double.Parse(value);
             }
         }
         public SolidColorBrush GetTrueColor
@@ -681,9 +687,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (ByNorm == 1)
                     return Brushes.White;
                 else if (ByNorm == 2)
-                    return Brushes.LightGreen;
+                    return Brushes.Pink;
                 else
-                    return Brushes.LightSalmon;
+                    return Brushes.Moccasin;
             }
         }
         public int CapacityType { get; set; } = 1;

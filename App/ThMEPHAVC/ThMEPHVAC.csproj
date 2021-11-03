@@ -75,6 +75,7 @@
     <Compile Include="LoadCalculation\Model\ConfigDataModel.cs" />
     <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromConfig.cs" />
     <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromUI.cs" />
+    <Compile Include="LoadCalculation\Model\MainUIData.cs" />
     <Compile Include="LoadCalculation\Model\OutdoorParameterData.cs" />
     <Compile Include="LoadCalculation\Service\GetPrimitivesService.cs" />
     <Compile Include="LoadCalculation\Service\InsertBlockService.cs" />

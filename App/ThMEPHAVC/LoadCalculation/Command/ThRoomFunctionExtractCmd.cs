@@ -29,7 +29,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
         string defaultFile = "房间功能映射表.xlsx";
         public ThRoomFunctionExtractCmd()
         {
-            this.CommandName = "THFJGN";
+            this.CommandName = "THFJGNTQ";
             this.ActionName = "提取房间功能";
         }
         public void Dispose()
@@ -43,7 +43,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
             {
                 //初始化
                 int StartingNo;
-                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.StartingNum, out StartingNo))
+                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.TQStartingNum, out StartingNo))
                 {
                     return;
                 }
@@ -102,7 +102,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 
 
                 LogicService logicService = new LogicService();
-                var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo);
+                var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix, ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent, StartingNo);
 
                 foreach (var item in roomfunctions)
                 {

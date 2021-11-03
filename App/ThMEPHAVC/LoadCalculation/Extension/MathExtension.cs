@@ -23,7 +23,10 @@ namespace ThMEPHVAC.LoadCalculation.Extension
         public static int CeilingInteger(this int number, int decimals)
         {
             int remainder = number % decimals;
-            return number + remainder;
+            if (remainder != 0)
+                return number + decimals - remainder;
+            else
+                return number;
         }
     }
 }

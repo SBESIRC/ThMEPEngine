@@ -24,13 +24,11 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
     /// <summary>
     /// ColdNormConfig.xaml 的交互逻辑
     /// </summary>
-    public partial class RoomNumber : ThCustomWindow
+    public partial class ExtractRoomFunction : ThCustomWindow
     {
-        public RoomNumber()
+        public ExtractRoomFunction()
         {
             InitializeComponent();
-            this.PrefixContentTxt.Text = ThLoadCalculationUIService.Instance.Parameter.PerfixContent;
-            this.StartingNumlblTxt.Text = ThLoadCalculationUIService.Instance.Parameter.StartingNum;
             this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
             this.StartingNumlblTxt.Focus();
             this.StartingNumlblTxt.SelectionStart = this.StartingNumlblTxt.Text.Length;
@@ -54,18 +52,14 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
                 this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
         }
 
-        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
+        private void ExtractButton_Click(object sender, RoutedEventArgs e)
         {
-            ThLoadCalculationUIService.Instance.Parameter.HasPrefix = HasPrefix.IsChecked.Value;
-            ThLoadCalculationUIService.Instance.Parameter.PerfixContent = this.PrefixContentTxt.Text;
-            ThLoadCalculationUIService.Instance.Parameter.StartingNum = this.StartingNumlblTxt.Text;
+            ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix = HasPrefix.IsChecked.Value;
+            ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent = this.PrefixContentTxt.Text;
+            ThLoadCalculationUIService.Instance.Parameter.TQStartingNum = this.StartingNumlblTxt.Text;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJGNTQ");
             FocusToCAD();
-            using (var cmd = new ThRoomFunctionNumIncreaseCmd())
-            {
-                cmd.Execute();
-            }
-
-            this.StartingNumlblTxt.Text = ThLoadCalculationUIService.Instance.Parameter.StartingNum;
+            this.Close();
         }
         void FocusToCAD()
         {

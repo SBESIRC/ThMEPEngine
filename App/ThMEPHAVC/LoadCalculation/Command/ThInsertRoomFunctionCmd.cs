@@ -24,14 +24,17 @@ namespace ThMEPHVAC.LoadCalculation.Command
         {
             using (var database = AcadDatabase.Active())
             {
-                //选择插入点
-                var ppr = Active.Editor.GetPoint("\n请选择暖通房间图块插入点位");
-                if (ppr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
                 string roomFunctionName = ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName;
-                InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value);
+                while (true)
+                {
+                    //选择插入点
+                    var ppr = Active.Editor.GetPoint("\n请选择暖通房间图块插入点位");
+                    if (ppr.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+                    InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value);
+                }
             }
         }
     }

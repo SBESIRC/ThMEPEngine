@@ -26,5 +26,8 @@ namespace ThMEPHVAC.LoadCalculation.Model
         public bool HasPrefix { get; set; } = true; //前缀
         public string PerfixContent { get; set; } = "N-1F-"; //前缀内容
         public string StartingNum { get; set; } = "01"; //起始序号
+        public bool TQHasPrefix { get; set; } = true; //前缀
+        public string TQPerfixContent { get; set; } = "N-1F-"; //前缀内容
+        public string TQStartingNum { get; set; } = "01"; //起始序号
     }
 }
