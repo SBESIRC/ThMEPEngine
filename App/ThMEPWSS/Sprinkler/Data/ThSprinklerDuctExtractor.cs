@@ -41,7 +41,7 @@ namespace ThMEPWSS.Sprinkler.Data
         private void DuctRecognizeFromCurrentDB(Point3dCollection polygon, Database database, Matrix3d matrix)
         {
             var dictionary = new Dictionary<Polyline, DuctModifyParam>();
-            ThSprinklerDuctService.Get_ducts_dic(out dictionary, database, matrix);
+            ThSprinklerDuctService.GetDuctsParam(out dictionary, database, matrix);
 
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dictionary.Keys.ToCollection());
             var filter = spatialIndex.SelectCrossingPolygon(polygon);
@@ -121,7 +121,7 @@ namespace ThMEPWSS.Sprinkler.Data
         private void FittingRecognizeFromCurrentDB(Point3dCollection polygon, Database database, Matrix3d matrix)
         {
             var dictionary = new Dictionary<Polyline, EntityModifyParam>();
-            ThSprinklerDuctService.Get_shapes_dic(out dictionary, database, matrix);
+            ThSprinklerDuctService.GetFittingsParam(out dictionary, database, matrix);
             dictionary.ForEach(o =>
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { o.Key });

@@ -1,6 +1,7 @@
 ﻿using System;
 using NFox.Cad;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
@@ -124,18 +125,12 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)
         {
-            foreach (var data in dataList)
-            {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { data.Geometry });
-                if (polygon.Count > 0)
-                {
-                    var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
-                    if (sprinklerFilter.Count == 0)
-                    {
-                        continue;
-                    }
-                }
+            var collection = dataList.Select(o => o.Geometry).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(collection);
+            var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
 
+            dataList.Where(o => sprinklerFilter.Contains(o.Geometry)).ForEach(data =>
+            {
                 var parameter = new ThIfcDuctSegmentParameters();
                 parameter.Outline = data.Geometry as Polyline;
                 var dictionary = data.Data as Dictionary<string, object>;
@@ -149,7 +144,7 @@ namespace ThMEPEngineCore.Engine
                 parameter.Length = Math.Sqrt(Math.Pow(start_x - end_x, 2) + Math.Pow(start_y - end_y, 2));
                 parameter.MarkHeight = (start_z - parameter.Height / 2.0) / 1000.0;
                 Elements.Add(new ThIfcDuctSegment(parameter));
-            }
+            });
         }
     }
 }
