@@ -20,8 +20,33 @@ namespace TianHua.AutoCAD.ThCui
         }
         private static void CreateHVACPanel(RibbonTabSource tab)
         {
+            CreateHVACCalculationPanel(tab);
             CreateHVACInstallationPanel(tab);
             CreateHVACPlanPanel(tab);
+        }
+
+        private static void CreateHVACCalculationPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("HVACCALCULATION", "计算");
+            var row = panel.AddNewRibbonRow();
+
+            // 室外参数设置
+            row.AddNewButton("室外参数设置",
+                "天华室外参数设置",
+                "THSWSZ",
+                "天华室外参数设置",
+                "IDI_THCAD_THSWSZ_SMALL",
+                "IDI_THCAD_THSWSZ_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 负荷通风计算
+            row.AddNewButton("负荷通风计算",
+                "天华负荷通风计算",
+                "THFHJS",
+                "天华负荷通风计算",
+                "IDI_THCAD_THFHJS_SMALL",
+                "IDI_THCAD_THFHJS_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateHVACInstallationPanel(RibbonTabSource tab)
@@ -505,50 +530,99 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("PRECONDITION", "前置输入");
             var row = panel.AddNewRibbonRow();
 
-            // 楼层定义
-            row.AddNewButton("楼层定义",
-                "天华楼层定义",
-                "THLCDY",
-                "天华楼层定义",
-                "IDI_THCAD_THLCDY_SMALL",
-                "IDI_THCAD_THLCDY_LARGE",
-                RibbonButtonStyle.LargeWithText);
+            {
+                var subPanel = row.AddNewPanel();
 
-            // 提车道中心线
-            row.AddNewButton("提车道中心线",
-                "天华提车道中心线",
-                "THTCD",
-                "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
-                "IDI_THCAD_THTCD_SMALL",
-                "IDI_THCAD_THTCD_LARGE",
-                RibbonButtonStyle.LargeWithText);
+                // 楼层定义
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("楼层定义",
+                    "天华楼层定义",
+                    "THLCDY",
+                    "天华楼层定义",
+                    "IDI_THCAD_THLCDY_SMALL",
+                    "IDI_THCAD_THLCDY_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
-            // 图块配置
-            row.AddNewButton("图块配置",
-                "天华图块配置",
-                "THWTKSB",
-                "天华图块配置",
-                "IDI_THCAD_THWTKSB_SMALL",
-                "IDI_THCAD_THWTKSB_LARGE",
-                RibbonButtonStyle.LargeWithText);
+            {
+                var subPanel = row.AddNewPanel();
 
-            // 房间框线
-            row.AddNewButton("房间框线",
-                "天华房间框线",
-                "THFJKX",
-                "天华房间框线",
-                "IDI_THCAD_THFJKX_SMALL",
-                "IDI_THCAD_THFJKX_LARGE",
-                RibbonButtonStyle.LargeWithText);
+                // 提车道中心线
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("提车道中心线",
+                    "天华提车道中心线",
+                    "THTCD",
+                    "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
+                    "IDI_THCAD_THTCD_SMALL",
+                    "IDI_THCAD_THTCD_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
 
-            // 房间名称
-            row.AddNewButton("房间名称",
-                "天华房间名称",
-                "THKJMCTQ",
-                "天华房间名称",
-                "IDI_THCAD_THKJMCTQ_SMALL",
-                "IDI_THCAD_THKJMCTQ_LARGE",
-                RibbonButtonStyle.LargeWithText);
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 图块配置
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("图块配置",
+                    "天华图块配置",
+                    "THWTKSB",
+                    "天华图块配置",
+                    "IDI_THCAD_THWTKSB_SMALL",
+                    "IDI_THCAD_THWTKSB_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 房间框线
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("房间框线",
+                    "天华房间框线",
+                    "THFJKX",
+                    "天华房间框线",
+                    "IDI_THCAD_THFJKX_SMALL",
+                    "IDI_THCAD_THFJKX_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 房间名称
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("房间名称",
+                    "天华房间名称",
+                    "THKJMCTQ",
+                    "天华房间名称",
+                    "IDI_THCAD_THKJMCTQ_SMALL",
+                    "IDI_THCAD_THKJMCTQ_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 房间功能提取
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("房间功能提取",
+                    "天华房间功能提取",
+                    "THFJGN",
+                    "天华房间功能提取",
+                    "IDI_THCAD_THFJGN_SMALL",
+                    "IDI_THCAD_THFJGN_SMALL",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 房间编号
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("房间编号",
+                    "天华房间编号",
+                    "THFJBH",
+                    "天华房间编号",
+                    "IDI_THCAD_THGBMQ_SMALL",
+                    "IDI_THCAD_THGBMQ_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
         }
 
         private static void CreateHelpPanel(RibbonTabSource tab)
