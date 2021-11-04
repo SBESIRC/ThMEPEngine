@@ -99,14 +99,12 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
 
-                
-
+                rooms.ForEach(o => originTransformer.Transform(o.Boundary));
                 LogicService logicService = new LogicService();
                 var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix, ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent, StartingNo);
-
                 foreach (var item in roomfunctions)
                 {
-                    InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, item.Item1);
+                    InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, originTransformer.Reset(item.Item1));
                 }
             }
         }

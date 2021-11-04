@@ -1,6 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -31,8 +33,10 @@ namespace ThMEPHVAC.LoadCalculation.Service
             {
                 foreach (var table in tables)
                 {
+                    table.Position = table.Position.TransformBy(Active.Editor.WCS2UCS());
                     table.TableStyle = acad.TableStyles.ElementOrDefault(LoadCalculationParameterFromConfig.LoadCalculationTableName).ObjectId;
                     table.Layer = LoadCalculationParameterFromConfig.LoadCalculationTableLayer;
+                    table.TransformBy(Active.Editor.UCS2WCS());
                     acad.ModelSpace.Add(table);
                 }
             }
@@ -58,7 +62,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 var objId = acadDatabase.Database.InsertBlock(
                     LoadCalculationParameterFromConfig.RoomFunctionLayer,
                     LoadCalculationParameterFromConfig.RoomFunctionBlockName,
-                    point,
+                    point.TransformBy(Active.Editor.WCS2UCS()),
                     new Scale3d(),
                     0,
                     true,
@@ -67,6 +71,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                         { "房间编号",roomNumber },{ "房间功能",roomFunctionName },{ "房间净高","3.00" }
                     });
                 var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                blkref.TransformBy(Active.Editor.UCS2WCS());
             }
         }
 

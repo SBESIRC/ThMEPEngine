@@ -27,6 +27,12 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 .OfType<BlockReference>()
                 .Where(o => o.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName)
                 .ToList();
+                roomFunctionBlks.ForEach(o =>
+                {
+                    o.UpgradeOpen();
+                    originTransformer.Transform(o);
+                    o.DowngradeOpen();
+                });
                 return roomFunctionBlks;
             }
         }
@@ -37,8 +43,14 @@ namespace ThMEPHVAC.LoadCalculation.Service
             {
                 var tables = acdb.ModelSpace
                 .OfType<Table>()
-                .Where(o => o.Layer== LoadCalculationParameterFromConfig.LoadCalculationTableLayer && o.TableStyleName== LoadCalculationParameterFromConfig.LoadCalculationTableName)
+                .Where(o => o.Layer == LoadCalculationParameterFromConfig.LoadCalculationTableLayer && o.TableStyleName == LoadCalculationParameterFromConfig.LoadCalculationTableName)
                 .ToList();
+                tables.ForEach(o =>
+                {
+                    o.UpgradeOpen();
+                    originTransformer.Transform(o);
+                    o.DowngradeOpen();
+                });
                 return tables;
             }
         }
@@ -50,8 +62,12 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 var curves = acdb.ModelSpace
                 .OfType<Curve>()
                 .Where(o => o.Layer == LoadCalculationParameterFromConfig.LoadCalculationTableLayer)
-                .Select(o=>o.Clone() as Curve)
+                .Select(o => o.Clone() as Curve)
                 .ToList();
+                curves.ForEach(o =>
+                {
+                    originTransformer.Transform(o);
+                });
                 return curves;
             }
         }

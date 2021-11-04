@@ -5,6 +5,7 @@ using ThMEPEngineCore.Command;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPHVAC.LoadCalculation.Service;
 using ThMEPHVAC.LoadCalculation.Model;
+using GeometryExtensions;
 
 namespace ThMEPHVAC.LoadCalculation.Command
 {
@@ -22,19 +23,19 @@ namespace ThMEPHVAC.LoadCalculation.Command
 
         public override void SubExecute()
         {
-            using (var database = AcadDatabase.Active())
+            string roomFunctionName = ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName;
+            while (true)
             {
-                string roomFunctionName = ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName;
-                while (true)
+                //选择插入点
+                var ppr = Active.Editor.GetPoint("\n请选择暖通房间图块插入点位");
+                if (ppr.Status != PromptStatus.OK)
                 {
-                    //选择插入点
-                    var ppr = Active.Editor.GetPoint("\n请选择暖通房间图块插入点位");
-                    if (ppr.Status != PromptStatus.OK)
-                    {
-                        return;
-                    }
-                    InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value);
+                    return;
                 }
+                using (var database = AcadDatabase.Active())
+                {
+                    InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value.TransformBy(Active.Editor.UCS2WCS()));
+                }                
             }
         }
     }
