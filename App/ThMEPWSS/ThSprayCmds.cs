@@ -1,31 +1,29 @@
 ﻿using System;
+using DotNetARX;
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
 using ThMEPWSS.Command;
 using ThMEPWSS.Bussiness.LayoutBussiness;
-using ThMEPWSS.Sprinkler.Analysis;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Engine;
-using ThMEPWSS.Sprinkler.Data;
-using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPWSS
 {
     public class ThSprayCmds
     {
-
         [CommandMethod("TIANHUACAD", "THPLCD", CommandFlags.Modal)]
         public void ThCreateLayoutPtByLine()
         {
@@ -185,7 +183,7 @@ namespace ThMEPWSS
 
                 //天正配件
                 var fittingEngine = new ThTCHFittingRecognitionEngine();
-                //engine.Recognize(acadDatabase.Database, frame.Vertices());
+                fittingEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 fittingEngine.RecognizeMS(acadDatabase.Database, frame.Vertices());
                 var temp1 = fittingEngine.Elbows;
                 var temp2 = fittingEngine.Tees;
@@ -197,17 +195,20 @@ namespace ThMEPWSS
                 temp4.ForEach(o => results.Add(o.Parameters.Outline));
 
                 //AI风管及其配件
-                var list = new List<string> { "Duct", "Elbow", "Tee", "Cross", "Reducing" };
+                var thDuctEngine = new ThMEPDuctExtractor();
+                thDuctEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                thDuctEngine.Elements.OfType<ThIfcDuctSegment>().ForEach(o =>
+                {
+                    results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
+                });
+
+                var list = new List<string> { "Elbow", "Tee", "Cross", "Reducing" };
                 list.ForEach(o =>
                 {
-                    var thEngine = new ThSprinklerDuctExtractor();
-                    thEngine.Category = o;
-                    thEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                    var result = thEngine.Elements;
-                    result.OfType<ThIfcDuctSegment>().ForEach(o =>
-                    {
-                        results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());
-                    });
+                    var thFittingEngine = new ThMEPFittingExtractor();
+                    thFittingEngine.Category = o;
+                    thFittingEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                    var result = thFittingEngine.Elements;
                     result.OfType<ThIfcDuctElbow>().ForEach(o =>
                     {
                         results.Add(o.Parameters.Outline.ToNTSPolygon().ToDbEntity());

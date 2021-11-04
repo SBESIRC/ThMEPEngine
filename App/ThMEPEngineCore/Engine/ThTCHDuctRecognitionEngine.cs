@@ -163,7 +163,6 @@ namespace ThMEPEngineCore.Engine
             dataList.Where(o => sprinklerFilter.Contains(o.Geometry)).ForEach(data =>
             {
                 var parameter = new ThIfcDuctSegmentParameters();
-                parameter.Outline = data.Geometry as Polyline;
                 var dictionary = data.Data as Dictionary<string, object>;
                 parameter.Width = Convert.ToDouble(dictionary["宽度"]);
                 parameter.Height = Convert.ToDouble(dictionary["厚度"]);
@@ -174,7 +173,11 @@ namespace ThMEPEngineCore.Engine
                 var end_y = Convert.ToDouble(dictionary["末端 Y 坐标"]);
                 parameter.Length = Math.Sqrt(Math.Pow(start_x - end_x, 2) + Math.Pow(start_y - end_y, 2));
                 parameter.MarkHeight = (start_z - parameter.Height / 2.0) / 1000.0;
-                Elements.Add(new ThIfcDuctSegment(parameter));
+                parameter.Outline = (data.Geometry as Line).Buffer(parameter.Width / 2);
+                Elements.Add(new ThIfcDuctSegment(parameter)
+                {
+                    Outline = data.Geometry,
+                });
             });
         }
     }

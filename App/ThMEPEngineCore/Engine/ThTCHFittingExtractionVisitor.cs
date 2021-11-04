@@ -35,6 +35,7 @@ namespace ThMEPEngineCore.Engine
                         .FirstOrDefault();
                     if (outline != null)
                     {
+                        outline.TransformBy(matrix);
                         elements.Add(new ThRawIfcDistributionElementData()
                         {
                             Geometry = outline,

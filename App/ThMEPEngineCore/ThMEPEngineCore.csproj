@@ -157,6 +157,8 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
+    <Compile Include="Service\ThMEPDuctExtractor.cs" />
+    <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
@@ -276,6 +278,7 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThMEPDuctService.cs" />
     <Compile Include="Service\ThEntityContainerBuilder.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThLineUnionService.cs" />

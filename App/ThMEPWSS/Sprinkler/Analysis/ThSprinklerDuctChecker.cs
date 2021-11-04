@@ -4,13 +4,14 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPWSS.Sprinkler.Data;
-using System.Collections.Generic;
-using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model.Hvac;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Sprinkler.Data;
+using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -105,6 +106,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             engine.Recognize(database, pline.Vertices());
             engine.RecognizeMS(database, pline.Vertices());
             Ducts.AddRange(engine.Elements.OfType<ThIfcDuctSegment>());
+
             var fittingEngine = new ThTCHFittingRecognitionEngine();
             fittingEngine.Recognize(database, pline.Vertices());
             fittingEngine.RecognizeMS(database, pline.Vertices());
@@ -114,17 +116,22 @@ namespace ThMEPWSS.Sprinkler.Analysis
             Reducings.AddRange(fittingEngine.Reducings);
 
             // AI风管、配件
-            var list = new List<string> { "Duct", "Elbow", "Tee", "Cross", "Reducing" };
+            var AIDuctEngine = new ThMEPDuctExtractor();
+            AIDuctEngine.Recognize(database, pline.Vertices());
+            Ducts.AddRange(AIDuctEngine.Elements.OfType<ThIfcDuctSegment>());
+
+            var list = new List<string> {"Elbow", "Tee", "Cross", "Reducing" };
             list.ForEach(o =>
             {
-                var thEngine = new ThSprinklerDuctExtractor();
-                thEngine.Category = o;
-                thEngine.Recognize(database, pline.Vertices());
-                Ducts.AddRange(thEngine.Elements.OfType<ThIfcDuctSegment>());
-                Elbows.AddRange(thEngine.Elements.OfType<ThIfcDuctElbow>());
-                Tees.AddRange(thEngine.Elements.OfType<ThIfcDuctTee>());
-                Crosses.AddRange(thEngine.Elements.OfType<ThIfcDuctCross>());
-                Reducings.AddRange(thEngine.Elements.OfType<ThIfcDuctReducing>());
+                var thFittingEngine = new ThMEPFittingExtractor
+                {
+                    Category = o
+                };
+                thFittingEngine.Recognize(database, pline.Vertices());
+                Elbows.AddRange(thFittingEngine.Elements.OfType<ThIfcDuctElbow>());
+                Tees.AddRange(thFittingEngine.Elements.OfType<ThIfcDuctTee>());
+                Crosses.AddRange(thFittingEngine.Elements.OfType<ThIfcDuctCross>());
+                Reducings.AddRange(thFittingEngine.Elements.OfType<ThIfcDuctReducing>());
             });
         }
 

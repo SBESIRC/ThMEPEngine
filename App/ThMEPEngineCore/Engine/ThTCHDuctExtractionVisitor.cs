@@ -19,23 +19,18 @@ namespace ThMEPEngineCore.Engine
             {
                 var objs = new DBObjectCollection();
                 dbObj.Explode(objs);
-                var results = objs
-                    .OfType<Curve>()
-                    .Where(o => !o.Layer.Contains("DUCT-加压送风中心线"))
-                    .ToCollection();
-                // 这里需要获取一个外轮廓, 通常情况下用NTS Polygonizer来获取Outline
-                // 由于天正图元有精度的问题，NTS Polygonizer不能获取Outline
-                // 这里借用NTS Buffer的功能，它能把图元“合并”
-                var outline = results
-                    .Buffer(0.01)
-                    .OfType<Curve>()
-                    .OrderByDescending(o => o.Area)
+                var geometry = objs
+                    .OfType<Line>()
+                    .Where(o => o.Layer.Contains("DUCT-加压送风中心线"))
+                    .OrderByDescending(o => o.Length)
                     .FirstOrDefault();
-                if (outline != null)
+                if (geometry != null)
                 {
+                    var clone = geometry.Clone() as Line;
+                    clone.TransformBy(matrix);
                     elements.Add(new ThRawIfcDistributionElementData()
                     {
-                        Geometry = outline,
+                        Geometry = clone,
                         Data = ThOPMTools.GetOPMProperties(dbObj.Id),
                     });
                 }

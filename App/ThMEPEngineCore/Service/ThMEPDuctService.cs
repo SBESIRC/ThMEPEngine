@@ -1,18 +1,17 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPWSS.Sprinkler.Service
+namespace ThMEPEngineCore.Service
 {
-    public class ThSprinklerDuctService
+    public class ThMEPDuctService
     {
         public static Database QueryXRefDatabase(Database database, ObjectId blkRecordId)
         {
@@ -45,37 +44,33 @@ namespace ThMEPWSS.Sprinkler.Service
             return null;
         }
 
-        public static void GetDuctsParam(out Dictionary<Polyline, DuctModifyParam> dic, Database database, Matrix3d matrix)
+        public static void GetDuctsParam(out Dictionary<Line, DuctModifyParam> dic, Database database, Matrix3d matrix)
         {
-            dic = new Dictionary<Polyline, DuctModifyParam>();
+            dic = new Dictionary<Line, DuctModifyParam>();
             var tor = new Tolerance(1.5, 1.5);
             foreach (var id in ThHvacGetComponent.ReadDuctIds(database))
             {
                 var param = ThHvacAnalysisComponent.GetDuctParamById(id);
                 if (param.handle == ObjectId.Null.Handle || param.sp.IsEqualTo(param.ep, tor))
                     continue;
-                var poly = GetGeometry(id);
-                if (poly != null) 
+                var geometry = GetGeometry(id);
+                if (geometry != null)
                 {
-                    poly.TransformBy(matrix);
-                    dic.Add(poly, param);
+                    geometry.TransformBy(matrix);
+                    dic.Add(geometry, param);
                 }
             }
         }
 
-        private static Polyline GetGeometry(ObjectId groupId)
+        private static Line GetGeometry(ObjectId groupId)
         {
             var ids = Dreambuild.AutoCAD.DbHelper.GetEntityIdsInGroup(groupId);
-            var results = ids.Select(o => o.GetObject(OpenMode.ForRead))
-                    .OfType<Curve>()
-                    .Where(o => !o.Layer.Contains("H-DUCT-DUAL-MID"))
-                    .ToCollection();
-            var outline = results
-                    .Buffer(0.01)
-                    .OfType<Polyline>()
-                    .OrderByDescending(o => o.Area)
+            var geometry = ids.Select(o => o.GetObject(OpenMode.ForRead))
+                    .OfType<Line>()
+                    .Where(o => o.Layer.Contains("H-DUCT-DUAL-MID"))
+                    .OrderByDescending(o => o.Length)
                     .FirstOrDefault();
-            return outline;
+            return geometry.Clone() as Line;
         }
 
         public static void GetFittingsParam(out Dictionary<Polyline, EntityModifyParam> dic, Database database, Matrix3d matrix)
@@ -119,7 +114,7 @@ namespace ThMEPWSS.Sprinkler.Service
                                         .OfType<Polyline>()
                                         .OrderByDescending(o => o.Area)
                                         .FirstOrDefault();
-                                if (outline != null) 
+                                if (outline != null)
                                 {
                                     outline.TransformBy(matrix);
                                     dic.Add(id, outline);
