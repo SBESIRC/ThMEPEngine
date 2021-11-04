@@ -39,11 +39,11 @@ namespace ThMEPHVAC.FanConnect.Service
                 BianLiTree(n);
             }
         }
-        public void WaterPipeExtend(ThFanPipeModel pipe)
+        public void WaterPipeExtend(ThFanPipeModel pipeModel)
         {
-            var line = pipe.LineSegment;
+            var pipeLine = pipeModel.LineSegment;
 
-            
+            var pipeWidth = pipeModel.PipeWidth;
         }
     }
 }
