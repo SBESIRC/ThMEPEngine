@@ -428,7 +428,7 @@ namespace ThMEPEngineCore.Test
                 Active.Editor.WriteMessage("\n建筑墙数量：" + db3ArchWallEngine.Results.Count + "个");
                 Active.Editor.WriteMessage("\n剪力墙数量：" + shearWallCount + "个");
                 Active.Editor.WriteMessage("\n柱子数量：" + columnCount + "个");
-                Active.Editor.WriteMessage("\n耗时："+ ThStopWatchService.TimeSpan()+"秒");
+                Active.Editor.WriteMessage("\n耗时：" + ThStopWatchService.TimeSpan() + "秒");
                 //results.Cast<Entity>().ForEach(o =>
                 //{
                 //    acadDatabase.ModelSpace.Add(o);
@@ -483,8 +483,8 @@ namespace ThMEPEngineCore.Test
                 extractor.Extract(acdb.Database);
 
                 ThStopWatchService.Stop();
-                Active.Editor.WriteMessage("\n建筑墙数量：" + 
-                    (archWallVisitor.Results.Count+ pcArchWallVisitor.Results.Count) + "个");
+                Active.Editor.WriteMessage("\n建筑墙数量：" +
+                    (archWallVisitor.Results.Count + pcArchWallVisitor.Results.Count) + "个");
                 Active.Editor.WriteMessage("\n剪力墙数量：" +
                     (shearWallVisitor.Results.Count + db3ShearWallVisitor.Results.Count) + "个");
                 Active.Editor.WriteMessage("\n柱子数量：" +
@@ -658,6 +658,91 @@ namespace ThMEPEngineCore.Test
                 var engine = new ThTCHDuctRecognitionEngine();
                 engine.RecognizeMS(acadDatabase.Database, frame.Vertices());
                 var temp = engine.Elements;
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THGA", CommandFlags.Modal)]
+        public void THGATest()
+        {
+
+            var lowLeft = new Point3d(0, 0, 0);
+            var highRight = new Point3d(100, 100, 0);
+            Draw.Rectang(lowLeft, highRight);
+
+            //Active.Editor.ZoomWindow(new Extents3d(lowLeft, highRight));
+
+            var pts = new List<Point3d>();
+
+            //var startPropmpt = new PromptPointOptions("\nSpecify start Point:");
+            var startRst = Active.Editor.GetPoint("\nSpecify start Point:");
+            if (startRst.Status != PromptStatus.OK)
+                return;
+            var start = new Point3d((int)startRst.Value.X, (int)startRst.Value.Y, 0);
+            Draw.Circle(start, 1);
+            pts.Add(start);
+
+            while (true)
+            {
+                //var endPropmpt = new PromptPointOptions("\nSpecify next end Point:");
+                var endRst = Active.Editor.GetPoint("\nSpecify next end Point:");
+                if (endRst.Status != PromptStatus.OK)
+                    break;
+                var end = new Point3d((int)endRst.Value.X, (int)endRst.Value.Y, 0);
+                Draw.Circle(end, 1);
+                pts.Add(end);
+            }
+            if (pts.Count < 2) return;
+
+            var obstacles = new List<Extents3d>();
+            while (true)
+            {
+                //var endPropmpt = new PromptPointOptions("\nSpecify next end Point:");
+                startRst = Active.Editor.GetPoint("\nSpecify next obstacle first Pt:");
+                if (startRst.Status != PromptStatus.OK)
+                    break;
+
+                var endRst = Active.Editor.GetPoint("\nSpecify next obstacle next Pt:");
+                if (endRst.Status != PromptStatus.OK)
+                    break;
+
+                var rect = NoDraw.Rectang(startRst.Value, endRst.Value);
+                rect.AddToCurrentSpace();
+                obstacles.Add(rect.GeometricExtents.Expand(1.2));
+            }
+
+            //var start = new Point3d(50, 100, 0);
+            var end1 = new Point3d(10, 10, 0);
+            var end2 = new Point3d(80, 40, 0);
+            var end3 = new Point3d(20, 20, 0);
+
+            var ga = new ThCADCore.Test.GA(pts, lowLeft, highRight, obstacles, 20);
+            var rst = ga.Run();
+            var solution = rst.First();
+
+            foreach (var s in rst)
+            {
+                var ids = new List<ObjectId>();
+
+                foreach (var c in s.chromos)
+                {
+                    Active.Editor.WriteLine($"First Direction:{c.FirstDir}");
+                    foreach (var p in c.pts)
+                    {
+                        var id = NoDraw.Circle(new Point3d(p.X, p.Y, 0), 0.1).AddToCurrentSpace();
+                        ids.Add(id);
+                    }
+                }
+                var pr = Active.Editor.GetKeywords("Continue?", new List<string>() { "Y", "N" }.ToArray());
+                if (pr.Status != PromptStatus.OK || !pr.StringResult.ToUpper().Equals("Y"))
+                    break;
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    foreach (var id in ids)
+                    {
+                        var entity = acadDatabase.Element<Entity>(id, true);
+                        entity.Erase();
+                    }
+                }
             }
         }
     }
