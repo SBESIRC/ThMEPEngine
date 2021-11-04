@@ -66,16 +66,40 @@ namespace ThMEPWSS.UndergroundSpraySystem.Command
             {
                 return;
             }
+            try
+            {
+                loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
 
-            loopFlag = SpraySys.Processing(curDb, sprayIn, spraySystem);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
 
             if(loopFlag)
             {
-                SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
+                try
+                {
+                    SpraySys.GetOutput(sprayIn, spraySystem, sprayOut);
+
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
             else
             {
-                SpraySys.GetOutput2(sprayIn, spraySystem, sprayOut);
+                try
+                {
+                    SpraySys.GetOutput2(sprayIn, spraySystem, sprayOut);
+
+                }
+                catch (Exception ex)
+                {
+
+                }
             }
             sprayOut.Draw(curDb);
         }

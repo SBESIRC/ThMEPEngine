@@ -129,7 +129,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             var spatialIndex = new ThCADCoreNTSSpatialIndex(DBObjs);
             foreach (var pt in alarmPts)
             {
-                if(pt._pt.DistanceTo(new Point3d(18364992.5894, 21122847.2703, 0)) < 10)
+                if(pt._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815, 0)) < 100)
                 {
                     ;
                 }

@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -101,6 +102,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                         .Where(e => e is Circle)
                         .Where(e => (e as Circle).Radius < 120 && (e as Circle).Radius > 30)
                         .ForEach(e => DBObjs.Add(e));
+                    objs.Cast<Entity>()
+                            .ForEach(e => ExplodeCircle(e, DBObjs));
                     return;
                 }
             }
@@ -112,22 +115,25 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool NotExplodeBlock(BlockReference bkr)
         {
+            var name = "";
             try
             {
-                var name = bkr.GetEffectiveName();
-                if(name.Contains("潜水泵") || 
-                   name.Contains("报警阀") ||
-                   name.Contains("xhs") ||
-                   name.Contains("灭火器"))
-                {
-                    return true;
-                }
-                return false;
+                name = bkr.GetEffectiveName();
             }
-            catch
+            catch (Exception ex)
             {
-                return false;
+                name = bkr.Name;
             }
+            if(name.Contains("潜水泵") || 
+                name.Contains("报警阀") ||
+                name.Contains("xhs") ||
+                name.Contains("灭火器") ||
+                name.Contains("气压罐") ||
+                name.Contains("*"))
+            {
+                return true;
+            }
+            return false;
         }
         public static bool IsTCHPipeFitting(Entity entity)
         {

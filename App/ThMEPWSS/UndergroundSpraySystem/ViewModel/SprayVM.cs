@@ -102,29 +102,31 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
         {
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
-            using (var acadDatabase = AcadDatabase.Active())
             {
-                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+                using (var acadDatabase = AcadDatabase.Active())
                 {
-                    acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("喷淋总管标记"), true);
+                    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+                    {
+                        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("喷淋总管标记"), true);
+                    }
+                }
+
+                while (true)
+                {
+                    var opt = new PromptPointOptions("请指定喷淋总管标记插入点: \n");
+                    var pt = Active.Editor.GetPoint(opt);
+                    if (pt.Status != PromptStatus.OK)
+                    {
+                        break;
+                    }
+                    using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+                    {
+                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
+                                    pt.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0);
+                    }
                 }
             }
             
-            //Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
-            while (true)
-            {
-                var opt = new PromptPointOptions("请指定喷淋总管标记插入点: \n");
-                var pt = Active.Editor.GetPoint(opt);
-                if (pt.Status != PromptStatus.OK)
-                {
-                    break;
-                }
-                using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
-                {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "喷淋总管标记",
-                                pt.Value.Point3dZ0().TransformBy(Active.Editor.UCS2WCS()), new Scale3d(1, 1, 1), 0);
-                }
-            }
             
         }
     }

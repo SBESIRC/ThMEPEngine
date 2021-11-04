@@ -89,6 +89,11 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
                 {
                     continue;
                 }
+                var tpt = new Point3d(1688488.94475489,803281.067637163, 0);
+                if (pt1._pt.DistanceTo(tpt) < 1 || pt2._pt.DistanceTo(tpt) < 1)
+                {
+                    ;
+                }
                 AddPtDicItem(sprayIn, pt1, pt2);
             }
         }

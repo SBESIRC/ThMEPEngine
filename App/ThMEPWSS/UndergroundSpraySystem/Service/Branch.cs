@@ -23,10 +23,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 {
                     double fireNums = 0;
 
-                    if (pt._pt.DistanceTo(new Point3d(925921.5, 418704.7, 0)) < 10)
-                    {
-                        ;
-                    }
                     if (spraySystem.SubLoopFireAreasDic.ContainsKey(pt))
                     {
                         fireNums = spraySystem.SubLoopFireAreasDic[pt][0];
@@ -64,6 +60,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                         sprayOut.SprayBlocks.Add(new SprayBlock("自动排气阀系统1", stPt));
                     }
 
+                    bool signelBranch = true;//第一个 type 4 标志
+                    var cnt = tpts.Count;
                     foreach (var tpt in tpts)// tpt 支路端点
                     {
                         try
@@ -74,13 +72,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
 
                             var termPt = sprayIn.TermPtDic[tpt];
-                            bool signelBranch = true;
-                            string DN = "";
+                            string DN = "DN150";
                             foreach(var vpt in sprayIn.TermDnDic.Keys)
                             {
                                 if(tpt._pt.DistanceTo(vpt._pt) < 100)//端点管径标注包含当前点
                                 {
                                     DN = sprayIn.TermDnDic[vpt];
+                                    break;
                                 }
                             }
 
@@ -168,10 +166,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     var textPt = pt3.OffsetXY(-length, 900 + stepSize * indx);
                                     var text2 = new Text(termPt.PipeNumber, textPt);
                                     var texts = new List<DBText>() { text2.DbText };
-
+                                    var line34 = new Line(pt3, pt3.OffsetY(900 + stepSize * indx));
+                                    var lines = new List<Line>() { line34 };
                                     if (spraySystem.BlockExtents.SelectAll().Count == 0)//外包框数目为0
                                     {
                                         spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
+                                        spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
                                         break;
                                     }
                                     else
@@ -181,6 +181,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                         if (dbObjs.Count == 0)
                                         {
                                             spraySystem.BlockExtents.Update(texts.ToCollection(), new DBObjectCollection());
+                                            spraySystem.BlockExtents.Update(lines.ToCollection(), new DBObjectCollection());
                                             break;
                                         }
                                     }
@@ -193,17 +194,22 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                     sprayOut.PipeLine.Add(new Line(stPt4, pt1));
 
                                 }
-                                if(spraySystem.ValveDic.ContainsKey(tpt))
+                                sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                                if (spraySystem.ValveDic.Contains(tpt))
                                 {
-                                    sprayOut.PipeLine.Add(new Line(pt1, pt1.OffsetX(175)));
-                                    sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetX(-175)));
-                                    sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt1.OffsetX(175)));
+                                    //sprayOut.PipeLine.Add(new Line(pt1, pt1.OffsetX(175)));
+                                    //sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetX(-175)));
+                                    //sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt1.OffsetX(175)));
+                                    sprayOut.PipeLine.Add(new Line(pt2, pt2.OffsetY(50)));
+                                    sprayOut.PipeLine.Add(new Line(pt2.OffsetY(350), pt3));
+                                    sprayOut.SprayBlocks.Add(new SprayBlock("遥控信号阀", pt2.OffsetY(50), Math.PI/2));
                                 }
                                 else
                                 {
-                                    sprayOut.PipeLine.Add(new Line(pt1, pt2));
+                                    sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                                    //sprayOut.PipeLine.Add(new Line(pt1, pt2));
                                 }
-                                sprayOut.PipeLine.Add(new Line(pt2, pt3));
+                                
                                 sprayOut.NoteLine.Add(new Line(pt3, pt4));
                                 sprayOut.NoteLine.Add(new Line(pt4, pt5));
                                 sprayOut.SprayBlocks.Add(new SprayBlock("水管中断", pt3, Math.PI / 2));
@@ -238,7 +244,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             if (!dBText.TextString.Equals(""))
             {
                 maxPt = dBText.GeometricExtents.MaxPoint.OffsetXY(gap, gap);
-                minPt = dBText.GeometricExtents.MinPoint.OffsetXY(-gap, -gap);
+                minPt = dBText.GeometricExtents.MinPoint.OffsetXY(-gap, -gap - 400);
             }
             
 

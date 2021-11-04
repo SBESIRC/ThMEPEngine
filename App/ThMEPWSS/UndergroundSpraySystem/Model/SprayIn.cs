@@ -12,6 +12,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public double FloorLength { get; set; }//楼层线宽
         public double FloorHeight { get; set; }//楼层高
         public double PipeGap { get; set; }//管道通用间距
+        public double ValveSize { get; set; }//阀门间距
         public Point3dEx LoopStartPt { get; set; }//环管起点
         public Point3dEx LoopEndPt { get; set; }//环管终点
         public List<Line> PipeLines { get; set; }//管道
@@ -39,6 +40,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             FloorLength = 80000;
             PipeGap = 1900;
+            ValveSize = 300;
             FloorHeight = _UiConfigs.SetViewModel.FloorLineSpace;
             FloorRectDic = _UiConfigs.FloorRect;
             FloorPtDic = _UiConfigs.FloorPt;

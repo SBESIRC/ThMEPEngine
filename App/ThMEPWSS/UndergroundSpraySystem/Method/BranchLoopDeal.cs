@@ -14,6 +14,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         {
             foreach (var subLoop in spraySystem.SubLoops)
             {
+                
                 var tempPath = new List<Point3dEx>();
                 
                 visited.Clear();

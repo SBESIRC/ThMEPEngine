@@ -39,6 +39,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     dbObjs.Cast<Entity>()
                         .Where(e => e is DBText)
                         .ForEach(e => DBObjs.Add(e));
+                    dbObjs.Cast<Entity>()
+                        .Where(e => e is BlockReference)
+                        .ForEach(e => ExplodeBlockNote(e, DBObjs));
                 }
             }
         }
@@ -63,7 +66,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             try
             {
                 return entity.GetType().Name.Equals("ImpEntity");
-
             }
             catch
             {
@@ -81,34 +83,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     if((db as Entity).IsTCHText())
                     {
-                        var textStr = "";//保存当前标注
-                        var location = new Point3d();//保存标注的位置
-                        var first = true;
-                        foreach(var text in (db as Entity).ExplodeTCHText())
-                        {
-                            var st = (text as DBText).TextString;
-                            if (!st.StartsWith("DN"))
-                            {
-                                textStr += (text as DBText).TextString;
-                            }
-                            if(first)
-                            {
-                                location = (text as DBText).Position.OffsetXY(-50, -50);
-                                first = false;
-                            }
-                        }
-                        var dbText = new Block.Text(textStr.Split('喷')[0], location, "W-NOTE").DbText;
-                        DBObjs.Add(dbText);
+                        AddTchText(db as Entity);
                     }
 
-                    if(db is DBText text2)
+                    if(db is DBText dBText)
                     {
-                        var st = text2.TextString;
-                        if (!st.StartsWith("DN"))
-                        {
-                            var dbText = new Block.Text(st.Split('喷')[0], text2.Position, "W-NOTE").DbText;
-                            DBObjs.Add(dbText);
-                        }
+                        AddDbText(dBText);
                     }
                 }
             }
@@ -116,7 +96,76 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 ;
             }
-            
+        }
+
+        private void ExplodeBlockNote(Entity entity, DBObjectCollection DBObjs)
+        {
+            try
+            {
+                var dbObjs = new DBObjectCollection();
+                entity.Explode(dbObjs);
+                foreach (var db in dbObjs)
+                {
+                    var ent = db as Entity;
+                    if(IsTCHNote(ent))
+                    {
+                        ExplodeTCHNote(ent, DBObjs);
+                    }
+                    if (ent.IsTCHText())
+                    {
+                        AddTchText(ent);
+                    }
+
+                    if (db is DBText text2)
+                    {
+                        AddDbText(text2);
+                    }
+                }
+            }
+            catch
+            {
+                ;
+            }
+        }
+
+        private void AddTchText(Entity ent)
+        {
+            var textStr = "";//保存当前标注
+            var location = new Point3d();//保存标注的位置
+            var first = true;
+            foreach (var text in ent.ExplodeTCHText())
+            {
+                var st = (text as DBText).TextString;
+                if (!st.StartsWith("DN"))
+                {
+                    textStr += (text as DBText).TextString;
+                }
+                if (first)
+                {
+                    location = (text as DBText).Position.OffsetXY(-50, -50);
+                    first = false;
+                }
+            }
+            if (!textStr.Contains("水泵接合器"))
+            {
+                textStr = textStr.Split('喷')[0];
+            }
+            var dbText = new Block.Text(textStr, location, "W-NOTE").DbText;
+            DBObjs.Add(dbText);
+        }
+
+        private void AddDbText(DBText dBText)
+        {
+            var st = dBText.TextString;
+            if (!st.StartsWith("DN"))
+            {
+                if (!st.Contains("水泵接合器"))
+                {
+                    st = st.Split('喷')[0];
+                }
+                var dbText = new Block.Text(st.Split('喷')[0], dBText.Position, "W-NOTE").DbText;
+                DBObjs.Add(dbText);
+            }
         }
     }
 }
