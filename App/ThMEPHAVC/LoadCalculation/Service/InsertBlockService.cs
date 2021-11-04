@@ -23,6 +23,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.RoomFunctionLayer);
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.LoadCalculationTableLayer);
                 acadDatabase.Database.ImportBlock(LoadCalculationParameterFromConfig.RoomFunctionBlockName);
+                acadDatabase.Database.ImportTextStyle(LoadCalculationParameterFromConfig.DefaultTableTextStyle);
                 acadDatabase.Database.ImportTableStyles(LoadCalculationParameterFromConfig.LoadCalculationTableName);
             }
         }
@@ -31,12 +32,19 @@ namespace ThMEPHVAC.LoadCalculation.Service
         {
             using (AcadDatabase acad = AcadDatabase.Active())
             {
+                var textStyle = acad.TextStyles.Element(LoadCalculationParameterFromConfig.DefaultTableTextStyle);
                 foreach (var table in tables)
                 {
                     table.Position = table.Position.TransformBy(Active.Editor.WCS2UCS());
                     table.TableStyle = acad.TableStyles.ElementOrDefault(LoadCalculationParameterFromConfig.LoadCalculationTableName).ObjectId;
                     table.Layer = LoadCalculationParameterFromConfig.LoadCalculationTableLayer;
+                    table.ColorIndex = (int)ColorIndex.BYLAYER;
                     table.TransformBy(Active.Editor.UCS2WCS());
+                    for (int i = 0; i < table.Rows.Count(); i++)
+                    {
+                        table.Cells[i, 0].TextStyleId = textStyle.Id;
+                        table.Cells[i, 1].TextStyleId = textStyle.Id;
+                    }
                     acad.ModelSpace.Add(table);
                 }
             }
@@ -105,7 +113,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
         private static void ImportBlock(this Database database, string block)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LoadCalculationDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(block), false);
             }
@@ -120,7 +128,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
         private static void ImportLayer(this Database database, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LoadCalculationDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
@@ -135,9 +143,24 @@ namespace ThMEPHVAC.LoadCalculation.Service
         private static void ImportTableStyles(this Database database, string tableStyles)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LoadCalculationDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.TableStyles.Import(blockDb.TableStyles.ElementOrDefault(tableStyles), false);
+            }
+        }
+
+        /// <summary>
+        /// 导入文字样式
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="name"></param>
+        /// <param name="layer"></param>
+        private static void ImportTextStyle(this Database database, string textStyle)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(textStyle), false);
             }
         }
         #endregion

@@ -85,12 +85,12 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             else
             {
-                this._data.TotalValue = int.Parse(TotalTxt.Text);
+                this._data.TotalValue = double.Parse(TotalTxt.Text);
             }
             this._data.CapacityType = CapacityType1.IsChecked.Value ? 1 : 2;
-            this._data.BoilerCapacity = int.Parse(BoilerCapacityTxt.Text);
-            this._data.FirewoodCapacity = int.Parse(FirewoodCapacityTxt.Text);
-            this._data.CombustionAirVolume = int.Parse(CombustionAirVolumeTxt.Text);
+            this._data.BoilerCapacity = double.Parse(BoilerCapacityTxt.Text);
+            this._data.FirewoodCapacity = double.Parse(FirewoodCapacityTxt.Text);
+            this._data.CombustionAirVolume = double.Parse(CombustionAirVolumeTxt.Text);
             this.Close();
         }
 

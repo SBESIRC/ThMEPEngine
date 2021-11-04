@@ -27,9 +27,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
         public NormClass ColdNorm { get; set; }
 
         /// <summary>
-        /// 冷水温差-column3-int
+        /// 冷水温差-column3-double
         /// </summary>
-        public int? CWaterTemperature { get; set; }
+        public double? CWaterTemperature { get; set; }
 
         /// <summary>
         /// 热指标-column4-class
@@ -37,9 +37,9 @@ namespace ThMEPHVAC.LoadCalculation.Model
         public NormClass HotNorm { get; set; }
 
         /// <summary>
-        /// 热水温差-column5-int
+        /// 热水温差-column5-double
         /// </summary>
-        public int? HWaterTemperature { get; set; }
+        public double? HWaterTemperature { get; set; }
 
         /// <summary>
         /// 新风量-column6&7-class
@@ -181,11 +181,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int totalValue;
+        private double totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int TotalValue
+        public double TotalValue
         {
             get
             {
@@ -401,11 +401,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int? airNum;
+        private double? airNum;
         /// <summary>
         /// 换气次数
         /// </summary>
-        public int? AirNum
+        public double? AirNum
         {
             get
             {
@@ -420,11 +420,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int? totalValue;
+        private double? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int? TotalValue
+        public double? TotalValue
         {
             get
             {
@@ -439,7 +439,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        public int? GetTrueValue
+        public double? GetTrueValue
         {
             get
             {
@@ -473,11 +473,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
     [Serializable]
     public class UsuallyExhaust : NotifyPropertyChangedBase
     {
-        private int byNorm;
+        private double byNorm;
         /// <summary>
         /// 是否按指标计算（1-按指标 / 2-按总量 / 3-按热平衡计算）
         /// </summary>
-        public int ByNorm
+        public double ByNorm
         {
             get
             {
@@ -492,11 +492,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int? normValue;
+        private double? normValue;
         /// <summary>
         /// 换气次数
         /// </summary>
-        public int? NormValue
+        public double? NormValue
         {
             get
             {
@@ -511,11 +511,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int? totalValue;
+        private double? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int? TotalValue
+        public double? TotalValue
         {
             get
             {
@@ -547,7 +547,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
                 if (string.IsNullOrEmpty(value))
                     NormValue = null;
                 else
-                    NormValue = int.Parse(value);
+                    NormValue = double.Parse(value);
             }
         }
 
@@ -567,34 +567,34 @@ namespace ThMEPHVAC.LoadCalculation.Model
         /// <summary>
         /// 换气次数要求
         /// </summary>
-        public int BreatheNum { get; set; }
+        public double BreatheNum { get; set; }
 
-        public int CapacityType { get; set; } = 1;
+        public double CapacityType { get; set; } = 1;
 
         /// <summary>
         /// 变压器容量
         /// </summary>
-        public int TransformerCapacity { get; set; }
+        public double TransformerCapacity { get; set; }
 
         /// <summary>
         /// 锅炉容量
         /// </summary>
-        public int BoilerCapacity { get; set; }
+        public double BoilerCapacity { get; set; }
 
         /// <summary>
         /// 柴发容量
         /// </summary>
-        public int FirewoodCapacity { get; set; }
+        public double FirewoodCapacity { get; set; }
 
         /// <summary>
         /// 散热系数
         /// </summary>
-        public int HeatDissipation { get; set; }
+        public double HeatDissipation { get; set; }
 
         /// <summary>
         /// 室内温度
         /// </summary>
-        public int RoomTemperature { get; set; }
+        public double RoomTemperature { get; set; }
     }
 
     /// <summary>
@@ -603,11 +603,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
     [Serializable]
     public class UsuallyAirCompensation : NotifyPropertyChangedBase
     {
-        private int byNorm;
+        private double byNorm;
         /// <summary>
         /// 是否按指标计算（1-按指标 / 2-按总量 / 3-按排风+燃料所需空气量计算）
         /// </summary>
-        public int ByNorm
+        public double ByNorm
         {
             get
             {
@@ -641,11 +641,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private int? totalValue;
+        private double? totalValue;
         /// <summary>
         /// 总量
         /// </summary>
-        public int? TotalValue
+        public double? TotalValue
         {
             get
             {
@@ -692,21 +692,21 @@ namespace ThMEPHVAC.LoadCalculation.Model
                     return Brushes.Moccasin;
             }
         }
-        public int CapacityType { get; set; } = 1;
+        public double CapacityType { get; set; } = 1;
 
         /// <summary>
         /// 锅炉容量
         /// </summary>
-        public int BoilerCapacity { get; set; }
+        public double BoilerCapacity { get; set; }
 
         /// <summary>
         /// 柴发容量
         /// </summary>
-        public int FirewoodCapacity { get; set; }
+        public double FirewoodCapacity { get; set; }
 
         /// <summary>
         /// 燃烧空气量
         /// </summary>
-        public int CombustionAirVolume { get; set; }
+        public double CombustionAirVolume { get; set; }
     }
 }

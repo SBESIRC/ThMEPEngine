@@ -84,7 +84,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             else
             {
-                this._data.NormValue = int.Parse(NormTxt.Text);
+                this._data.NormValue = double.Parse(NormTxt.Text);
             }
             if (string.IsNullOrEmpty(TotalTxt.Text))
             {
@@ -92,15 +92,15 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             else
             {
-                this._data.TotalValue = int.Parse(TotalTxt.Text);
+                this._data.TotalValue = double.Parse(TotalTxt.Text);
             }
-            this._data.BreatheNum = int.Parse(BreatheNumTxt.Text);
+            this._data.BreatheNum = double.Parse(BreatheNumTxt.Text);
             this._data.CapacityType = CapacityType1.IsChecked.Value ? 1 : CapacityType2.IsChecked.Value ? 2 : 3;
-            this._data.TransformerCapacity = int.Parse(TransformerCapacityTxt.Text);
-            this._data.BoilerCapacity = int.Parse(BoilerCapacityTxt.Text);
-            this._data.FirewoodCapacity = int.Parse(FirewoodCapacityTxt.Text);
-            this._data.HeatDissipation = int.Parse(HeatDissipationTxt.Text);
-            this._data.RoomTemperature = int.Parse(RoomTemperatureTxt.Text);
+            this._data.TransformerCapacity = double.Parse(TransformerCapacityTxt.Text);
+            this._data.BoilerCapacity = double.Parse(BoilerCapacityTxt.Text);
+            this._data.FirewoodCapacity = double.Parse(FirewoodCapacityTxt.Text);
+            this._data.HeatDissipation = double.Parse(HeatDissipationTxt.Text);
+            this._data.RoomTemperature = double.Parse(RoomTemperatureTxt.Text);
             this.Close();
         }
 

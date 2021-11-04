@@ -24,7 +24,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="0,0,0,5">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Focusable="False" Margin="0,0,0,5">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -36,7 +36,7 @@
                     <ComboBox Grid.Row="0" Name="configFileList" Height="22" Width="700" IsEnabled="True" Margin="0,0,0,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionChanged="configList_SelectionChanged"
                            DropDownOpened="configFileList_DropDownOpened" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="0,5,0,0">
+                <StackPanel Grid.Row="1" Orientation="Horizontal" MaxHeight="337" Focusable="False" Margin="0,5,0,0">
                     <DataGrid x:Name="IndoorParameterTable"  AutoGenerateColumns="False" ItemsSource="{Binding DynamicModelData}" RowBackground="White" >
                         <DataGrid.Columns>
                             <DataGridTemplateColumn Width="100" Header="房间功能" CanUserSort="False" CanUserResize="False">
@@ -47,7 +47,7 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header=" 冷指标 &#x0a;  w/m2 "  CanUserSort="False" CanUserResize="False">
+                            <DataGridTemplateColumn Header=" 冷指标 &#x0a;  w/m2 " CanUserSort="False" CanUserResize="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid VerticalAlignment="Stretch" Margin="0">
@@ -97,7 +97,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -167,7 +167,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Exhaust,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ExhaustBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -181,7 +181,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AirCompensation,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AirCompensationBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -194,7 +194,7 @@
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Focusable="False" Margin="0,5,0,0">
                     <cus:ImageButton Name="SaveAsFileBtn" IsEnabled="True" Content="另存模板" Width="70" Height="25" Click="SaveAsFileBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
                     <cus:ImageButton Name="SaveBtn" IsEnabled="False" Content="保存" Width="70" Height="25" Click="SaveBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
-                    <cus:ImageButton Name="CopyBtn" IsEnabled="True" Content="复制" Width="70" Height="25" Click="CopyBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
+                    <cus:ImageButton Name="CopyBtn" IsEnabled="True" Content="复制/新增行" Width="80" Height="25" Click="CopyBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
                     <cus:ImageButton Name="DeleteBtn" IsEnabled="True" Content="删除" Width="70" Height="25" Click="DeleteBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
                 </StackPanel>
             </Grid>

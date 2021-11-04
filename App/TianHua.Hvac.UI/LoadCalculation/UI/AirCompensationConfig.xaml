@@ -36,7 +36,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
-                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputInteger" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputDouble" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h" ></Label>
                 </Grid>
             </RadioButton>
@@ -59,7 +59,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="锅炉容量：" Margin="0,0,5,0"></Label>
-                        <TextBox Grid.Column="2" x:Name="BoilerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                        <cus:InputTextBox Grid.Column="2" x:Name="BoilerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                         <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KW" ></Label>
                     </Grid>
                 </RadioButton>
@@ -72,14 +72,14 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="柴发容量：" Margin="0,0,5,0"></Label>
-                        <TextBox Grid.Column="2" x:Name="FirewoodCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                        <cus:InputTextBox Grid.Column="2" x:Name="FirewoodCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                         <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KVA" ></Label>
                     </Grid>
                 </RadioButton>
             </StackPanel>
             <StackPanel x:Name="panel2" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,5">
                 <Label Width="80" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="燃烧空气量：" Margin="0,0,5,0"></Label>
-                <TextBox x:Name="CombustionAirVolumeTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                <cus:InputTextBox x:Name="CombustionAirVolumeTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                 <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/KWH" Margin="0,0,0,0"></Label>
             </StackPanel>
         </StackPanel>

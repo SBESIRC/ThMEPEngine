@@ -60,7 +60,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             else
             {
-                this._data.AirNum = int.Parse(AirNumTxt.Text);
+                this._data.AirNum = double.Parse(AirNumTxt.Text);
             }
             if (string.IsNullOrEmpty(TotalTxt.Text))
             {
@@ -68,7 +68,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             }
             else
             {
-                this._data.TotalValue = int.Parse(TotalTxt.Text);
+                this._data.TotalValue = double.Parse(TotalTxt.Text);
             }
             this.Close();
         }

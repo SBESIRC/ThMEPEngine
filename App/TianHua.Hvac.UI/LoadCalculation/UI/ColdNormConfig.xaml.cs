@@ -60,7 +60,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
                 this._data.NormValue = double.Parse(NormTxt.Text);
             }
             this._data.TotalValue = 0;
-            if(int.TryParse(TotalTxt.Text,out int num))
+            if(double.TryParse(TotalTxt.Text,out double num))
             {
                 this._data.TotalValue = num;
             }

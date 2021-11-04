@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="0,15,0,10">
             <Label Grid.Column="1" Width="90" Padding="0"  Focusable="False" Content="请输入房间功能：" Margin="10,0,10,0"></Label>
-            <TextBox Grid.Column="2" TabIndex="0" x:Name="RoomFunctionTxt" Width="100" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+            <cus:InputTextBox Grid.Column="2" TabIndex="0" x:Name="RoomFunctionTxt" Width="100" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,5">
             <cus:ImageButton Content="确定" Width="50" Height="20"  Margin="0,0,10,0" Click="SaveButton_Click" IsDefault="True"></cus:ImageButton>

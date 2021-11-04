@@ -13,6 +13,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
         public static string LoadCalculationTableLayer = "AI-负荷通风标注";
 
         public static string DefaultRoomNumber = "N-1F-01";
+        public static string DefaultTableTextStyle = "TH-AI-STYLE3";
         public static DataTable RoomFunctionConfigTable { get; set; }
         public static Dictionary<string,string> RoomFunctionConfigDic { get; set; }
 

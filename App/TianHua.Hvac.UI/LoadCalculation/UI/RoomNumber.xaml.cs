@@ -31,7 +31,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             InitializeComponent();
             this.PrefixContentTxt.Text = ThLoadCalculationUIService.Instance.Parameter.PerfixContent;
             this.StartingNumlblTxt.Text = ThLoadCalculationUIService.Instance.Parameter.StartingNum;
-            this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
+            this.NumberIndicationlbl.Content = (HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "") + this.StartingNumlblTxt.Text;
             this.StartingNumlblTxt.Focus();
             this.StartingNumlblTxt.SelectionStart = this.StartingNumlblTxt.Text.Length;
         }

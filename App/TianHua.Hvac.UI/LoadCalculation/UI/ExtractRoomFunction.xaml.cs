@@ -29,7 +29,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         public ExtractRoomFunction()
         {
             InitializeComponent();
-            this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
+            this.NumberIndicationlbl.Content = (HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "") + this.StartingNumlblTxt.Text;
             this.StartingNumlblTxt.Focus();
             this.StartingNumlblTxt.SelectionStart = this.StartingNumlblTxt.Text.Length;
         }

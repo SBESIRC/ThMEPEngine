@@ -122,7 +122,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
             Dictionary<string, string> result = new Dictionary<string, string>();
             foreach (DataRow row in roomFunctionConfigTable.Rows)
             {
-                var roomfunctionName = row["房间功能标签"].ToString();
+                var roomfunctionName = row["暖通房间功能标签"].ToString();
                 if (!string.IsNullOrWhiteSpace(roomfunctionName))
                 {
                     for (int column = 0; column < 4; column++)

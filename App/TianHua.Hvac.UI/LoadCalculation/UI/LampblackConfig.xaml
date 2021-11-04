@@ -33,7 +33,7 @@
                 </StackPanel>
                 <StackPanel Name="panel2" Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
                     <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="换气次数：" Margin="0,0,5,0"></Label>
-                    <cus:InputTextBox Grid.Column="2" x:Name="AirNumTxt" TextBoxInputType="InputInteger" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="AirNumTxt" TextBoxInputType="InputDouble" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="次/h" ></Label>
                 </StackPanel>
 
@@ -49,7 +49,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
-                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputInteger" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputDouble" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h" ></Label>
                 </Grid>
             </RadioButton>

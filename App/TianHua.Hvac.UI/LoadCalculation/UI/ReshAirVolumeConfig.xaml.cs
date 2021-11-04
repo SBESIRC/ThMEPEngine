@@ -69,7 +69,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             {
                 this._data.ReshAirNormValue = double.Parse(FreshAirNormTxt.Text);
             }
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            this._data.TotalValue = double.Parse(TotalTxt.Text);
             this.Close();
         }
 
