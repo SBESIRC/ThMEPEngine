@@ -17,23 +17,18 @@ namespace ThMEPEngineCore.Engine
         {
             if (dbObj.IsTCHDuct())
             {
-                var objs = new DBObjectCollection();
-                dbObj.Explode(objs);
-                var geometry = objs
-                    .OfType<Line>()
-                    .Where(o => o.Layer.Contains("DUCT-加压送风中心线"))
-                    .OrderByDescending(o => o.Length)
-                    .FirstOrDefault();
-                if (geometry != null)
+                var data = ThOPMTools.GetOPMProperties(dbObj.Id);
+                var start_x = Convert.ToDouble(data["始端 X 坐标"]);
+                var start_y = Convert.ToDouble(data["始端 Y 坐标"]);
+                var end_x = Convert.ToDouble(data["末端 X 坐标"]);
+                var end_y = Convert.ToDouble(data["末端 Y 坐标"]);
+                var geometry = new Line(new Point3d(start_x, start_y, 0), new Point3d(end_x, end_y, 0));
+                geometry.TransformBy(matrix);
+                elements.Add(new ThRawIfcDistributionElementData()
                 {
-                    var clone = geometry.Clone() as Line;
-                    clone.TransformBy(matrix);
-                    elements.Add(new ThRawIfcDistributionElementData()
-                    {
-                        Geometry = clone,
-                        Data = ThOPMTools.GetOPMProperties(dbObj.Id),
-                    });
-                }
+                    Geometry = geometry,
+                    Data = data,
+                });
             }
         }
 

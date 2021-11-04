@@ -31,6 +31,7 @@ namespace ThMEPHVAC.FanConnect.Model
   
     public class ThFanPipeModel
     {
+        public double PipeWidth { set; get; }
         public PIPETYPE PipeType { set; get; }
         public PIPELEVEL PipeLevel { set; get; }
         public LineSegment2d LineSegment { set; get; }
