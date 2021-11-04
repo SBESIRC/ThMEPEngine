@@ -105,9 +105,6 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Fan_BOM_Export" Guid="{16401283-570B-406E-81BD-AC18FA2E2546}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Fan_BOM_Export" Source="$(var.AutoloaderContentsPath)\Support\导出材料表.xlsx" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_LoadCalculationConfig" Guid="{D4D60937-D397-4D76-8AC8-B6EDAC7CEB73}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_LoadCalculationConfig" Source="$(var.AutoloaderContentsPath)\Support\按指标计算负荷.dwg" KeyPath="yes" />
-            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -178,7 +175,6 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Parameters" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_BOM_Export" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LoadCalculationConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Config" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Room" />
         </ComponentGroup>
