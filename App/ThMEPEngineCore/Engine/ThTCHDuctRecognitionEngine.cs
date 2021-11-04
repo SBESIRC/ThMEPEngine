@@ -1,15 +1,17 @@
 ﻿using System;
 using NFox.Cad;
+using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model.Hvac;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -51,6 +53,28 @@ namespace ThMEPEngineCore.Engine
                         }
                     });
                 Results.AddRange(elements);
+            }
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var psr = Active.Editor.SelectCrossingPolygon(frame);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    var visitor = new ThTCHDuctExtractionVisitor();
+                    var elements = new List<ThRawIfcDistributionElementData>();
+                    psr.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var e = acadDatabase.Element<Entity>(o);
+                        if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+                        {
+                            visitor.DoExtract(elements, e, Matrix3d.Identity);
+                        }
+                    });
+                    Results.AddRange(elements);
+                }
             }
         }
 
@@ -120,6 +144,13 @@ namespace ThMEPEngineCore.Engine
         {
             var engine = new ThTCHDuctExtractionEngine();
             engine.ExtractFromMS(database);
+            Recognize(engine.Results, polygon);
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            var engine = new ThTCHDuctExtractionEngine();
+            engine.ExtractFromEditor(polygon);
             Recognize(engine.Results, polygon);
         }
 

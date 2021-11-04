@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.Pipe.Model;
+using System;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -26,6 +27,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Accept(visitor);
             extractor.ExtractFromMS(database);// 提取ModelSpace下的块
             Results.AddRange(visitor.Results);
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
         }
     }
     public class ThWGravityWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -54,6 +60,11 @@ namespace ThMEPWSS.Pipe.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
             Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWGravityWaterBucket.Create(o)));
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
 }

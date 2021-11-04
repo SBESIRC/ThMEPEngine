@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -93,6 +94,11 @@ namespace ThMEPEngineCore.Engine
             extractor.ExtractFromMS(database);
             Results.AddRange(Visitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
     }
 
     public class ThDrainageWellBlockRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -121,6 +127,10 @@ namespace ThMEPEngineCore.Engine
             };
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
+        }
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {

@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -22,7 +23,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            throw new System.NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
         }
     }
     public class ThWRoofRainPipeRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -42,7 +48,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new System.NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
 }

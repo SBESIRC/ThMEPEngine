@@ -104,6 +104,11 @@ namespace ThMEPWSS.DrainageSystemDiagram
             extractor.ExtractFromMS(database);
             Results.AddRange(visitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
     }
 
     public class ThDrainageSDRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -120,6 +125,12 @@ namespace ThMEPWSS.DrainageSystemDiagram
         {
             throw new NotImplementedException();
         }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> originDatas, Point3dCollection polygon)
         {
         

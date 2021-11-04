@@ -52,6 +52,11 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
+
         private List<ThRawIfcDistributionElementData> DoExtract(List<ThRawIfcDistributionElementData> elements, BlockReference blkRef, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
@@ -136,6 +141,11 @@ namespace ThMEPEngineCore.Engine
             var engine = new ThTCHFittingExtractionEngine();
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
 
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)

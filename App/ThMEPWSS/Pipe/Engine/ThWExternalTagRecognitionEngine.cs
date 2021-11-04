@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using System;
+using Linq2Acad;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -41,7 +42,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new System.NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
 }
