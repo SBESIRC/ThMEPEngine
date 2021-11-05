@@ -723,7 +723,7 @@ namespace ThMEPEngineCore.Test
             {
                 var ids = new List<ObjectId>();
 
-                foreach (var c in s.chromos)
+                foreach (var c in s.Genome)
                 {
                     Active.Editor.WriteLine($"First Direction:{c.FirstDir}");
                     foreach (var p in c.pts)

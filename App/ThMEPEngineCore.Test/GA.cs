@@ -53,7 +53,7 @@ namespace ThCADCore.Test
         }
     }
 
-    public class Chromokey : IEquatable<Chromokey>
+    public class GeneKey : IEquatable<GeneKey>
     {
         public int Dir = 0;
         public Point3dEx StartPt;
@@ -63,18 +63,16 @@ namespace ThCADCore.Test
         {
             return StartPt.GetHashCode() ^ EndPt.GetHashCode() ^ Dir.GetHashCode() ^ FirstDir.GetHashCode();
         }
-        public bool Equals(Chromokey other)
+        public bool Equals(GeneKey other)
         {
             return this.Dir.Equals(other.Dir)
                 && this.StartPt.Equals(other.StartPt)
                 && this.EndPt.Equals(other.EndPt)
                 && this.FirstDir.Equals(other.FirstDir);
         }
-
-
     }
 
-    public class Chromosome : IEquatable<Chromosome>
+    public class Gene : IEquatable<Gene>
     {
         public int Dir = 0;
         public Point3dEx StartPt;
@@ -82,17 +80,17 @@ namespace ThCADCore.Test
         public int FirstDir = 0;
         public List<Point3dEx> pts = new List<Point3dEx>();
 
-        public Chromokey Key 
+        public GeneKey Key 
         { 
             get
             {
-                return GetChromoKey(this.StartPt, this.EndPt, this.FirstDir, this.Dir);
+                return GetGeneKey(this.StartPt, this.EndPt, this.FirstDir, this.Dir);
             }
         }
 
-        static public Chromokey GetChromoKey(Point3dEx startPt, Point3dEx endPt, int firstDir, int dir)
+        static public GeneKey GetGeneKey(Point3dEx startPt, Point3dEx endPt, int firstDir, int dir)
         {
-            var key = new Chromokey();
+            var key = new GeneKey();
             key.StartPt = startPt;
             key.EndPt = endPt;
             key.FirstDir = firstDir;
@@ -104,7 +102,7 @@ namespace ThCADCore.Test
         {
             return StartPt.GetHashCode() ^ EndPt.GetHashCode() ^ Dir.GetHashCode() ^ FirstDir.GetHashCode();
         }
-        public bool Equals(Chromosome other)
+        public bool Equals(Gene other)
         {
             return this.Dir.Equals(other.Dir)
                 && this.StartPt.Equals(other.StartPt) 
@@ -118,130 +116,109 @@ namespace ThCADCore.Test
         }
     }
 
-    public class Solution
+    public class Chromosome
     {
-        public List<Chromosome> chromos = new List<Chromosome>();
+        //Group of genes
+        public List<Gene> Genome = new List<Gene>(); 
+        
+        //Fitness method
         public double GetTotalLength()
         {
-            return chromos.Sum(c => c.GetLength());
+            return Genome.Sum(c => c.GetLength());
         }
 
         private HashSet<Point3dEx> ptSet = new HashSet<Point3dEx>();
         public int GetDistinctPtLen()
         {
             if (ptSet.Count > 0) return ptSet.Count;
-            foreach(var c in chromos)
+            foreach(var c in Genome)
             {
                 ptSet = new HashSet<Point3dEx>(ptSet.Union(c.pts));
             }
             return ptSet.Count;
         }
 
-        //public Solution CrossOver(Solution other, Random rand)
-        //{
-        //    Solution newSolution = new Solution();
-        //    for(int i = 0; i < chrom)
-        //}
-
-        public void AddChromos(Chromosome c)
+        public void AddChromos(Gene c)
         {
-            chromos.Add(c);
+            Genome.Add(c);
         }
     }
 
     public class GA
     {
-        Random rand = new Random();
-        int MaxTime;
-        int popsize;
-        int selectionSize = 6;
-        int chromoLen = 2;
-        double crossRate = 0.8;
-        double mutateRate = 0.2;
+        Random Rand = new Random();
 
-        Point3dEx startPt;
-        List<Point3dEx> endPts = new List<Point3dEx>();
+        //Genetic Algorithm parameters
+        int MaxTime;
+        int PopulationSize;
+        int SelectionSize = 6;
+        int ChromoLen = 2;
+        double CrossRate = 0.8;
+        double MutationRate = 0.2;
+
+        //Inputs
+        Point3dEx StartPt;
+        List<Point3dEx> EndPts = new List<Point3dEx>();
         List<Extents3d> Obstacles = new List<Extents3d>();
 
-        Point3dEx low, high;
+        //Range
+        Point3dEx Low, High;
         public GA(List<Point3d> pts, Point3d rangeLowPt, Point3d rangeHighPt, List<Extents3d> obstacles, int popSize = 10)
         {
-            //Guid.NewGuid().GetHashCode
-            rand = new Random(System.DateTime.Now.Millisecond);
-            popsize = popSize;
+            Rand = new Random(System.DateTime.Now.Millisecond);
+            PopulationSize = popSize;
             MaxTime = 100;
-            crossRate = 0.8;
-            mutateRate = 0.2;
-            startPt = new Point3dEx( pts.First());
+            CrossRate = 0.8;
+            MutationRate = 0.2;
+            StartPt = new Point3dEx( pts.First());
             pts.RemoveAt(0);
-            pts.ForEach(p => endPts.Add(new Point3dEx(p)));
+            pts.ForEach(p => EndPts.Add(new Point3dEx(p)));
             Obstacles = obstacles;
 
-            low = new Point3dEx(rangeLowPt);
-            high = new Point3dEx(rangeHighPt);
+            Low = new Point3dEx(rangeLowPt);
+            High = new Point3dEx(rangeHighPt);
         }
          
-        public List<Solution> Run()
+        public List<Chromosome> Run()
         {
-             List<Solution> selected = new List<Solution>();
+             List<Chromosome> selected = new List<Chromosome>();
 
-            //var s = new Solution();
-            //var chrom = FindAChromByBfs(startPt, endPts[0]);
-            //var chrom1 = FindAChromByBfs(startPt, endPts[0], 1);
-            //s.AddChromos(chrom);
-            //s.AddChromos(chrom1);
-            //selected.Add(s);
-
-            //var chrom3 = FindAChromByBfs(startPt, endPts[1],2);
-            //var chrom4 = FindAChromByBfs(startPt, endPts[1], 3);
-
-            //var s2 = new Solution();
-            //s2.AddChromos(chrom3);
-            //s2.AddChromos(chrom4);
-            //selected.Add(s2);
-
-            //return selected;
-
-            var pop = CreateFirstPop3();
-
-            //return pop;
+            var pop = CreateFirstPopulation();
 
             Active.Editor.WriteMessage($"init pop cnt {pop.Count}");
             var cnt = 200;
 
             while (cnt-- > 0)
             {
-                //Active.Editor.WriteMessage($"iteration cnt {cnt}");
+                //Active.Editor.WriteMessage($"iteration cnt： {cnt}");
                 selected = Selection(pop);
                 pop = CreateNextGeneration(selected);
                 //Mutation(pop);
             }
 
             return selected;
-
-
         }
 
-        public void Mutation(List<Solution> s)
+        public void Mutation(List<Chromosome> s)
         {
-            var cnt = (int)s.Count * mutateRate;
+            var cnt = (int)s.Count * MutationRate;
             for(int i = 0; i < cnt; ++i )
             {
-                int index = rand.Next(s.Count);
+                int index = Rand.Next(s.Count);
                 var targetSolution = s[index];
-                for(int j = 0; j < chromoLen; ++j)
+                for(int j = 0; j < ChromoLen; ++j)
                 {
-                    var rn = rand.Next(2);
+                    var rn = Rand.Next(2);
                     if(rn == 0)
                     {
-                        var chrom = new Chromosome();
-                        chrom.pts.Add(startPt);
+                        var chrom = new Gene();
+                        chrom.pts.Add(StartPt);
                         while (true)
                         {
-                            int rd = rand.Next(3);
+                            int rd = Rand.Next(3);
                             var lastPt = chrom.pts.Last();
 
-                            if (lastPt.Equals(endPts[j]))
+                            if (lastPt.Equals(EndPts[j]))
                             {
                                 break;
                             }
@@ -266,7 +243,7 @@ namespace ThCADCore.Test
                             }
                         }
 
-                        targetSolution.chromos[j] = chrom;
+                        targetSolution.Genome[j] = chrom;
                     }
                 }
             }
@@ -274,7 +251,7 @@ namespace ThCADCore.Test
 
         private bool IsPtInRange(Point3dEx pt)
         {
-            return pt.X > low.X && pt.X < high.X && pt.Y > low.Y && pt.Y < high.X;
+            return pt.X > Low.X && pt.X < High.X && pt.Y > Low.Y && pt.Y < High.X;
         }
         private List<Point3dEx> GetPtAdjs(Point3dEx pt, int dirPriority)
         {
@@ -351,16 +328,16 @@ namespace ThCADCore.Test
         }
 
 
-        Dictionary<Chromokey,Chromosome> GlobalChromdic = new Dictionary<Chromokey, Chromosome>();
-        public Chromosome FindAChromByBfs(Point3dEx startPt, Point3dEx endPt, int dir = 0)
+        Dictionary<GeneKey,Gene> GlobalChromdic = new Dictionary<GeneKey, Gene>();
+        public Gene FindAChromByBfs(Point3dEx startPt, Point3dEx endPt, int dir = 0)
         {
             var startTime = DateTime.Now;
-            var chrom = new Chromosome();
+            var chrom = new Gene();
             chrom.Dir = dir;
             chrom.StartPt = startPt;
             chrom.EndPt = endPt;
 
-            var chromKey = new Chromokey();
+            var chromKey = new GeneKey();
             chromKey.Dir = chrom.Dir;
             chromKey.StartPt = chrom.StartPt;
             chromKey.EndPt = chrom.EndPt;
@@ -430,9 +407,9 @@ namespace ThCADCore.Test
             return false;
         }
 
-        public List<Chromosome> FindChromsByBFS(Point3dEx startPt, List<Point3dEx> endPts, int firstDir)
+        public List<Gene> FindGenomeByBFS(Point3dEx startPt, List<Point3dEx> endPts, int firstDir)
         {
-            var localChromosDic = new Dictionary<Chromokey,Chromosome>();
+            var localChromosDic = new Dictionary<GeneKey,Gene>();
             var startTime = DateTime.Now;
 
             var tmpEnds = new HashSet<Point3dEx>(endPts);
@@ -442,8 +419,7 @@ namespace ThCADCore.Test
             Dictionary<Point3dEx, bool> visited = new Dictionary<Point3dEx, bool>();
             Dictionary<Point3dEx, Point3dEx> preDic = new Dictionary<Point3dEx, Point3dEx>();
             visited[startPt] = true;
-            //int maxCnt = 1000000;
-            // bool found = false;
+
             int cnt = 0;
             while (tmpEnds.Count > 0)
             {
@@ -452,17 +428,11 @@ namespace ThCADCore.Test
                 {
                     tmpEnds.Remove(pt);
 
-                    var chrome = new Chromosome();
-                    //rst.Dir = dir;
+                    var chrome = new Gene();
                     chrome.StartPt = startPt;
                     chrome.EndPt = pt;
                     chrome.FirstDir = firstDir;
                     var chromKey = chrome.Key;
-                    //var chromKey = new Chromokey();
-                    //chromKey.Dir = chrome.Dir;
-                    //chromKey.ClockWise = chrome.ClockWise;
-                    //chromKey.StartPt = chrome.StartPt;
-                    //chromKey.EndPt = chrome.EndPt;
 
                     if (GlobalChromdic.ContainsKey(chromKey))
                     {
@@ -485,7 +455,6 @@ namespace ThCADCore.Test
                         localChromosDic.Add(chromKey,chrome);
                     }
                     Active.Editor.WriteMessageWithReturn($"found node: {cnt}");
-                    //break;
                 }
                 var adjs = GetPtAdjs2(pt, firstDir);
                 foreach (var adj in adjs)
@@ -506,15 +475,10 @@ namespace ThCADCore.Test
             var span = endTime - startTime;
             Active.Editor.WriteMessageWithReturn($"Chrom Seconds: {span.TotalSeconds}");
 
-            var chromos = new List<Chromosome>();
+            var chromos = new List<Gene>();
             foreach(var e in endPts)
             {
-                //var chromKey = new Chromokey();
-                ////chromKey.Dir = Dir;
-                //chromKey.ClockWise = clockwise;
-                //chromKey.StartPt = startPt;
-                //chromKey.EndPt = e;
-                var chromKey = Chromosome.GetChromoKey(startPt, e, firstDir, 0);
+                var chromKey = Gene.GetGeneKey(startPt, e, firstDir, 0);
 
                 if(localChromosDic.ContainsKey(chromKey))
                 {
@@ -524,138 +488,6 @@ namespace ThCADCore.Test
             return chromos;
         }
 
-        //public List< Chromosome> FindAChromsByBfs(Point3dEx startPt, Point3dEx endPt, int dir1, int dir2)
-        //{
-        //    var startTime = DateTime.Now;
-        //    var rst = new Chromosome();
-
-        //    var QsDic = new Dictionary<int, Queue<Point3dEx>>();
-        //    var q1 = new Queue<Point3dEx>();
-        //    q1.Enqueue(startPt);
-        //    var q2 = new Queue<Point3dEx>();
-        //    q2.Enqueue(startPt);
-
-        //    var visitedDic = new Dictionary<int, Dictionary<Point3dEx, bool>>();
-        //    var ptsPreDic = new Dictionary<int, Dictionary<Point3dEx, Point3dEx>>();
-        //    var visited1 = new Dictionary<Point3dEx, bool>();
-        //    var visited2 = new Dictionary<Point3dEx, bool>();
-        //    visited1[startPt] = true;
-        //    visited2[startPt] = true;
-        //    visitedDic.Add(1, visited1);
-        //    visitedDic.Add(2, visited2);
-
-        //    int maxCnt = 1000000;
-        //    bool found = false;
-        //    int cnt = 0;
-        //    while (maxCnt-- > 0)
-        //    {
-        //        var pt = Q.Dequeue();
-        //        if (pt.Equals(endPt))
-        //        {
-        //            Active.Editor.WriteMessage($"found: {cnt}");
-        //            found = true;
-        //            break;
-        //        }
-        //        var adjs1 = GetPtAdjs(pt, dir1);
-        //        var adjs2 = GetPtAdjs(pt, dir2);
-        //        foreach (var adj in adjs1)
-        //        {
-        //            if (!visited.ContainsKey(adj) /*|| !visited[adj]*/)
-        //            {
-        //                visited.Add(adj, true);
-        //                preDic.Add(adj, pt);
-        //                Q.Enqueue(adj);
-        //                cnt++;
-        //            }
-        //        }
-        //    }
-
-        //    if (found)
-        //    {
-        //        rst.pts.Add(endPt);
-        //        var curPt = preDic[endPt];
-        //        while (preDic.ContainsKey(curPt))
-        //        {
-        //            curPt = preDic[curPt];
-        //            rst.pts.Add(curPt);
-        //        }
-
-        //        rst.pts.Add(startPt);
-        //    }
-        //    var endTime = DateTime.Now;
-        //    var span = endTime - startTime;
-        //    Active.Editor.WriteMessage($"Seconds: { span.TotalSeconds}");
-        //    return rst;
-        //}
-
-
-        //public Dictionary<Point3dEx, Chromosome> FindChromsByBfs(Point3dEx startPt, List<Point3dEx> endPts, int dir = 0)
-        //{
-        //    var startTime = DateTime.Now;
-
-        //    var chromosDic = new Dictionary<Point3dEx, Chromosome>();
-
-        //    Dictionary<Point3dEx, Queue<Point3dEx>> QsDic = new Dictionary<Point3dEx, Queue<Point3dEx>>();
-        //    foreach(var pt in endPts)
-        //    {
-        //        var q = new Queue<Point3dEx>();
-        //        q.Enqueue(startPt);
-        //        QsDic.Add(pt, q);
-        //    }
-
-        //    Dictionary<Point3dEx, bool> visited = new Dictionary<Point3dEx, bool>();
-        //    Dictionary<Point3dEx, Point3dEx> preDic = new Dictionary<Point3dEx, Point3dEx>();
-        //    visited[startPt] = true;
-        //    int maxCnt = 1000000;
-        //    bool found = false;
-        //    int cnt = 0;
-        //    while (maxCnt-- > 0)
-        //    {
-        //        var pt = Q.Dequeue();
-        //        if (endPts.Contains(pt))
-        //        {
-
-        //            Active.Editor.WriteMessage($"found: {cnt}");
-        //            found = true;
-        //            break;
-        //        }
-        //        var adjs = GetPtAdjs(pt, dir);
-        //        foreach (var adj in adjs)
-        //        {
-        //            if (!visited.ContainsKey(adj) /*|| !visited[adj]*/)
-        //            {
-        //                visited.Add(adj, true);
-        //                preDic.Add(adj, pt);
-        //                Q.Enqueue(adj);
-        //                cnt++;
-        //            }
-        //        }
-        //    }
-
-        //    if (found)
-        //    {
-        //        foreach (var endPt in endPts)
-        //        {
-        //            var oneChrom = new Chromosome();
-        //            oneChrom.pts.Add(endPt);
-        //            var curPt = preDic[endPt];
-        //            while (preDic.ContainsKey(curPt))
-        //            {
-        //                curPt = preDic[curPt];
-        //                oneChrom.pts.Add(curPt);
-        //            }
-
-        //            oneChrom.pts.Add(startPt);
-
-        //            chromosDic.Add(endPt, oneChrom);
-        //        }
-        //    }
-        //    var endTime = DateTime.Now;
-        //    var span = endTime - startTime;
-        //    Active.Editor.WriteMessage($"Seconds: { span.TotalSeconds}");
-        //    return chromosDic;
-        //}
-
         private int RandInt(int range)
         {
             var guid = Guid.NewGuid();
@@ -664,122 +496,27 @@ namespace ThCADCore.Test
             return i;
         }
 
-        public List<Solution> CreateFirstPop3()
+        public List<Chromosome> CreateFirstPopulation()
         {
-            List<Solution> solutions = new List<Solution>();
+            List<Chromosome> solutions = new List<Chromosome>();
 
-            for(int i = 0; i < popsize; ++i)
+            for(int i = 0; i < PopulationSize; ++i)
             {
-                var s = new Solution();
+                var solution = new Chromosome();
                 var firstDir = RandInt(4);
-                //bool clockwise = tmp == 0 ? true : false;
-                var chroms = FindChromsByBFS(startPt, endPts, firstDir);
-                s.chromos = chroms;
-                solutions.Add(s);
-            }
-
-            return solutions;
-        }
-
-        public List<Solution> CreateFirstPop2()
-        {
-            List<Solution> solutions = new List<Solution>();
-            for(int i = 0; i < popsize; ++i)
-            {
-                var s = new Solution();
-                int j = 0;
-                foreach(var endPt in endPts)
-                {
-                    var rd = rand.Next(2);
-                    if (j == 0)
-                    {
-                        var chrom = FindAChromByBfs(startPt, endPts[0], rd);
-                        s.AddChromos(chrom);
-                    }
-                    else if (j == 1)
-                    {
-                        var chrom = FindAChromByBfs(startPt, endPts[1], rd + 2);
-                        s.AddChromos(chrom);
-                    }
-                    else
-                    {
-                        //var chrom = FindAChromByBfs(startPt, endPts[1], rd + 2);
-                        //s.AddChromos(chrom);
-                    }
-                    ++j;
-                    //var rd = rand.Next(4);
-                    //var chrom = FindAChromByBfs(startPt, endPt, rd);
-                    //s.AddChromos(chrom);
-                }
-                solutions.Add(s);
-            }
-            return solutions;
-        }
-
-        public List<Solution> CreateFirstPop()
-        {
-            List<Solution> solutions = new List<Solution>();
-            for(int i = 0; i < popsize; ++i)
-            {
-                var solution = new Solution();
-                var visited = new HashSet<Point3dEx>();
-                for (int j = 0; j < chromoLen; ++j)
-                {
-                    var chrom = new Chromosome();
-                    chrom.pts.Add(startPt);
-                    visited.Add(startPt);
-                    while (true)
-                    {
-                        int rd = rand.Next(3);
-                        var lastPt = chrom.pts.Last();
-
-                        if (lastPt.Equals(endPts[j]))
-                        {
-                            break;
-                        }
-
-                        if (rd == 0)
-                        {
-                            var newPt = new Point3dEx(lastPt.X, lastPt.Y - 1, 0);
-                            if (IsPtInRange(newPt) && !visited.Contains(newPt))
-                            {
-                                chrom.pts.Add(newPt);
-                                visited.Add(newPt);
-                            }
-                        }
-                        else if (rd == 1)
-                        {
-                            var newPt = new Point3dEx(lastPt.X + 1, lastPt.Y, 0);
-                            if (IsPtInRange(newPt) && !visited.Contains(newPt))
-                            {
-                                chrom.pts.Add(newPt);
-                                visited.Add(newPt);
-                            }
-                        }
-                        else
-                        {
-                            var newPt = new Point3dEx(lastPt.X - 1, lastPt.Y, 0);
-                            if (IsPtInRange(newPt) && !visited.Contains(newPt))
-                            {
-                                chrom.pts.Add(newPt);
-                                visited.Add(newPt);
-                            }
-                        }
-                    }
-                    solution.AddChromos(chrom);
-                }
+                var genome = FindGenomeByBFS(StartPt, EndPts, firstDir);
+                solution.Genome = genome;
                 solutions.Add(solution);
             }
+
             return solutions;
         }
 
-        public List<Solution> CreateNextGeneration(List<Solution> solutions)
+        public List<Chromosome> CreateNextGeneration(List<Chromosome> solutions)
         {
-            //var popSize = popsize;
+            List<Chromosome> rst = new List<Chromosome>();
 
-            List<Solution> rst = new List<Solution>();
-
-            for(int i = 0; i < popsize; ++i)
+            for(int i = 0; i < PopulationSize; ++i)
             {
                 int rd1 = RandInt (solutions.Count);
                 int rd2 = RandInt (solutions.Count);
@@ -787,45 +524,35 @@ namespace ThCADCore.Test
                 rst.Add(s);
             }
 
-            //for(int i = 0; i < solutions.Count - 1; i ++)
-            //{
-            //    var s = Crossover(solutions[i], solutions[i + 1]);
-            //    rst.Add(s);
-            //}
-            //int index  = rand.Next(0, solutions.Count);
-            //rst.Add(solutions[index]);
-
-            //todo : mutation
             return rst;
         }
 
-        public Solution Crossover(Solution s1, Solution s2)
+        public Chromosome Crossover(Chromosome s1, Chromosome s2)
         {
-            Solution newS = new Solution();
-            var chromoLen = s1.chromos.Count;
+            Chromosome newS = new Chromosome();
+            var chromoLen = s1.Genome.Count;
             int[] covering_code = new int[chromoLen];
             for (int i = 0; i < chromoLen; ++i)
             {
                 var cc = RandInt(2) ;//rand.Next(0, 2);
                 if (cc == 0)
                 {
-                    newS.AddChromos(s1.chromos[i]);
+                    newS.AddChromos(s1.Genome[i]);
                 }
                 else
                 {
-                    newS.AddChromos(s2.chromos[i]);
+                    newS.AddChromos(s2.Genome[i]);
                 }
             }
-            //for (int i )
 
             return newS;
         }
 
-        public List<Solution> Selection(List<Solution> inputSolution)
+        public List<Chromosome> Selection(List<Chromosome> inputSolution)
         {
             var sorted = inputSolution.OrderBy(s => s.GetDistinctPtLen()).ToList();
-            var rst = new List<Solution>();
-            for(int i = 0; i < selectionSize; ++i)
+            var rst = new List<Chromosome>();
+            for(int i = 0; i < SelectionSize; ++i)
             {
                 rst.Add(sorted[i]);
             }
