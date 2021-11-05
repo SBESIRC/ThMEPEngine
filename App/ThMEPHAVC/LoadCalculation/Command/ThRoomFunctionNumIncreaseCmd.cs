@@ -31,44 +31,81 @@ namespace ThMEPHVAC.LoadCalculation.Command
 
         public override void SubExecute()
         {
-            using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var database = AcadDatabase.Active())
+            //初始化
+            int StartingNo;
+            if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.StartingNum, out StartingNo))
             {
-                //初始化
-                int StartingNo;
-                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.StartingNum, out StartingNo))
+                return;
+            }
+            LogicService logicService = new LogicService();
+            //初始化图纸(导入图层/图块/图层三板斧等)
+            InsertBlockService.initialization();
+            while (true)
+            {
+                PromptEntityOptions op = new PromptEntityOptions("\n逐个点选房间功能图块");
+                op.Keywords.Add("批量修改", "A", "批量修改(A)");
+                op.Keywords.Default = "批量修改";
+                var ner = Active.Editor.GetEntity(op);
+                if (ner.Status == PromptStatus.OK)
                 {
-                    return;
+                    using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
+                    using (var database = AcadDatabase.Active())
+                    {
+                        var blks = new List<BlockReference>();
+                        var entity = database.Element<Entity>(ner.ObjectId);
+                        if (entity is BlockReference blk && blk.GetEffectiveName() == LoadCalculationParameterFromConfig.RoomFunctionBlockName)
+                        {
+                            blks.Add(blk);
+                        }
+                        int index = logicService.ChangeRoonFunctionBlk(blks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo++);
+                        ThLoadCalculationUIService.Instance.Parameter.StartingNum = index.ToString("00");
+                    }
                 }
-
-                // 获取房间框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
+                else if(ner.Status==PromptStatus.Keyword)
                 {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择房间功能块",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
+                    if(ner.StringResult== "批量修改")
+                    {
+                        using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
+                        using (var database = AcadDatabase.Active())
+                        {
+                            // 获取房间框线
+                            PromptSelectionOptions options2 = new PromptSelectionOptions()
+                            {
+                                AllowDuplicates = false,
+                                MessageForAdding = "请批量选择房间功能图块",
+                                RejectObjectsOnLockedLayers = true,
+                            };
+                            var dxfNames = new string[]
+                            {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filterlist = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.BlockName) == LoadCalculationParameterFromConfig.RoomFunctionBlockName &
-                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-                var result = Active.Editor.GetSelection(options, filterlist);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
+                            };
+                            var filterlist = OpFilter.Bulid(o =>
+                            o.Dxf((int)DxfCode.BlockName) == LoadCalculationParameterFromConfig.RoomFunctionBlockName &
+                            o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                            var result2 = Active.Editor.GetSelection(options2, filterlist);
+                            if (result2.Status != PromptStatus.OK)
+                            {
+                                return;
+                            }
+                            var blks = new List<BlockReference>();
+                            foreach (ObjectId objid in result2.Value.GetObjectIds())
+                            {
+                                blks.Add(database.Element<BlockReference>(objid));
+                            }
+                            int index = logicService.ChangeRoonFunctionBlk(blks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo);
+                            ThLoadCalculationUIService.Instance.Parameter.StartingNum = index.ToString("00");
+                        }
+                        break;
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
-                var blks = new List<BlockReference>();
-                foreach (ObjectId objid in result.Value.GetObjectIds())
+                else
                 {
-                    blks.Add(database.Element<BlockReference>(objid));
+                    break;
                 }
-
-                LogicService logicService = new LogicService();
-                int index = logicService.ChangeRoonFunctionBlk(blks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo);
-                ThLoadCalculationUIService.Instance.Parameter.StartingNum = index.ToString("00");
             }
         }
     }

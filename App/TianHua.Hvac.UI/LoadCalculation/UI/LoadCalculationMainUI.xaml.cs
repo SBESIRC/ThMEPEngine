@@ -52,8 +52,6 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             //获取图纸缓存数据
             GetNODData();
             CreatBtn.Focus();
-            //初始化图纸(导入图层/图块等)
-            InsertBlockService.initialization();
         }
 
 

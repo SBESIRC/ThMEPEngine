@@ -79,7 +79,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
                     LoadCalculationParameterFromConfig.RoomFunctionConfigTable = LoadRoomFunctionConfig();
                     LoadCalculationParameterFromConfig.RoomFunctionConfigDic = ParseTable(LoadCalculationParameterFromConfig.RoomFunctionConfigTable);
                 }
-                //初始化图纸(导入图层/图块等)
+                //初始化图纸(导入图层/图块/图层三板斧等)
                 InsertBlockService.initialization();
 
                 var Rectangle = dbobjs.GeometricExtents().ToRectangle();
