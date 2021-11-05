@@ -41,17 +41,24 @@ namespace ThMEPHVAC.LoadCalculation.Service
                     BlockReference roomFunction = BlocksDic[dBPoint];
 
                     var loadCalculationtableobjs = tableSpatialIndex.SelectCrossingPolygon(roomBoundary);
-                    if (loadCalculationtableobjs.Count == 1)
+                    if (loadCalculationtableobjs.Count >0)
                     {
-                        //本身含有表格
-                        Polyline tableBoundary = loadCalculationtableobjs[0] as Polyline;
-                        Table existedTable = tableDic[tableBoundary];
-                        //找到表格
-                        var table = FillTableData(roomBoundary, roomFunction, summerVentilationT, winterVentilationT, existedTable.Position);
-                        if (!table.IsNull())
+                        foreach (Entity item in loadCalculationtableobjs)
                         {
-                            Deprecatedtables.Add(existedTable);
-                            result.Add(table);
+                            //本身含有表格
+                            Polyline tableBoundary = item as Polyline;
+                            Table existedTable = tableDic[tableBoundary];
+                            if (IsContains(roomBoundary, existedTable.Position))
+                            {
+                                //找到表格
+                                var table = FillTableData(roomBoundary, roomFunction, summerVentilationT, winterVentilationT, existedTable.Position);
+                                if (!table.IsNull())
+                                {
+                                    Deprecatedtables.Add(existedTable);
+                                    result.Add(table);
+                                }
+                                break;
+                            }
                         }
                     }
                     else
@@ -115,6 +122,20 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 }
             }
             return result;
+        }
+
+        private bool IsContains(Entity roomBoundary, Point3d position)
+        {
+            if (roomBoundary is Polyline polyline)
+            {
+                return polyline.Contains(position);
+            }
+            else if (roomBoundary is MPolygon mPolygon)
+            {
+                return mPolygon.Contains(position);
+            }
+            else
+                return false;
         }
 
         /// <summary>
