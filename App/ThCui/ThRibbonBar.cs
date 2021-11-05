@@ -619,8 +619,8 @@ namespace TianHua.AutoCAD.ThCui
                     "天华房间编号",
                     "THFJBH",
                     "天华房间编号",
-                    "IDI_THCAD_THGBMQ_SMALL",
-                    "IDI_THCAD_THGBMQ_LARGE",
+                    "IDI_THCAD_THFJBH_SMALL",
+                    "IDI_THCAD_THFJBH_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
         }
