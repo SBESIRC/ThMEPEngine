@@ -32,9 +32,18 @@
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
-    <Compile Include="FanConnect\Command\ThFanConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
+    <Compile Include="FanConnect\Model\ThFanPipeModel.cs" />
     <Compile Include="FanConnect\Model\ThFanMainLineModel.cs" />
     <Compile Include="FanConnect\Model\ThFanTreeModel.cs" />
+    <Compile Include="FanConnect\Service\ThAirPipeExtendServiece.cs" />
+    <Compile Include="FanConnect\Service\ThPipeExtendBaseServiece.cs" />
+    <Compile Include="FanConnect\Service\ThPipeExtractServiece.cs" />
+    <Compile Include="FanConnect\Service\ThWaterPipeExtendServiece.cs" />
+    <Compile Include="FanConnect\ViewModel\ThAirPipeConfigInfo.cs" />
+    <Compile Include="FanConnect\ViewModel\ThWaterPipeConfigInfo.cs" />
+    <Compile Include="FanConnect\ViewModel\ThWaterPipeViewModel.cs" />
     <Compile Include="FanLayout\Command\ThFanHoleExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanLayoutExtractCmd.cs" />
     <Compile Include="FanLayout\Command\ThFanMaterialTableExtractCmd.cs" />
@@ -66,6 +75,7 @@
     <Compile Include="LoadCalculation\Model\ConfigDataModel.cs" />
     <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromConfig.cs" />
     <Compile Include="LoadCalculation\Model\LoadCalculationParameterFromUI.cs" />
+    <Compile Include="LoadCalculation\Model\MainUIData.cs" />
     <Compile Include="LoadCalculation\Model\OutdoorParameterData.cs" />
     <Compile Include="LoadCalculation\Service\GetPrimitivesService.cs" />
     <Compile Include="LoadCalculation\Service\InsertBlockService.cs" />
@@ -205,8 +215,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="FanConnect\Engine\" />
-    <Folder Include="FanConnect\Service\" />
-    <Folder Include="FanConnect\ViewModel\" />
     <Folder Include="LoadCalculation\Engine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

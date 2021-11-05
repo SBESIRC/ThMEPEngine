@@ -3,16 +3,28 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+                    xmlns:local="clr-namespace:TianHua.Hvac.UI.LoadCalculation"
                     SizeToContent="WidthAndHeight"
                     mc:Ignorable="d"
-                    Title="负荷和通风计算">
+                    Title="负荷和通风计算"
+                    Closed="ThCustomWindow_Closed">
+    <cus:ThCustomWindow.Resources>
+        <ResourceDictionary>
+            <local:DoubleConvert x:Key="numConverter"/>
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                <Setter Property="FontWeight" Value="Normal"></Setter>
+            </Style>
+        </ResourceDictionary>
+    </cus:ThCustomWindow.Resources>
+
     <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="0,0,0,5">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Focusable="False" Margin="0,0,0,5">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
@@ -20,22 +32,22 @@
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="0,15,0,10">
-                    <Label Grid.Row="0" Focusable="False" Margin="0,0,5,0" Content="模板选择:"></Label>
-                    <ComboBox Grid.Row="0" Name="configFileList" Height="22" Width="605" IsEnabled="False" Margin="0,0,0,0" TabIndex="0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionChanged="configList_SelectionChanged"/>
-                    <Button x:Name="ChoiseConfigFileBtn" Margin="0,0,15,0" Content="  ....  " Click="ChoiseConfigFileBtn_Click"/>
-                    <Button x:Name="SaveAsFileBtn" Margin="0,0,5,0" HorizontalAlignment="Right" Content="另存模板" Click="SaveAsFileBtn_Click"/>
+                    <Label Grid.Row="0" Focusable="False" Margin="15,0,5,0" Content="模板选择:"></Label>
+                    <ComboBox Grid.Row="0" Name="configFileList" Height="22" Width="700" IsEnabled="True" Margin="0,0,0,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" SelectionChanged="configList_SelectionChanged"
+                           DropDownOpened="configFileList_DropDownOpened" />
                 </StackPanel>
-                <StackPanel Grid.Row="1" Orientation="Horizontal"  Focusable="False" Margin="0,5,0,0">
+                <StackPanel Grid.Row="1" Orientation="Horizontal" MaxHeight="337" Focusable="False" Margin="0,5,0,0">
                     <DataGrid x:Name="IndoorParameterTable"  AutoGenerateColumns="False" ItemsSource="{Binding DynamicModelData}" RowBackground="White" >
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="100" Header="&#x0a;房间功能" CanUserSort="False" CanUserResize="False">
+                            <DataGridTemplateColumn Width="100" Header="房间功能" CanUserSort="False" CanUserResize="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Foreground="Blue" FontWeight="Bold" TextDecorations="Underline" TextAlignment="Center" VerticalAlignment="Center"  x:Name="EditName" Text="{Binding RoomFunction}" MouseLeftButtonUp="RoomTag_MouseLeftButtonUp"/>
+                                        <cus:InputTextBox Foreground="Blue" FontWeight="Bold" ForceCursor="True" Cursor="Hand" TextDecorations="Underline" BorderThickness="0" TextAlignment="Center" VerticalAlignment="Center" 
+                             Text="{Binding RoomFunction,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"  PreviewMouseLeftButtonDown="RoomTag_MouseLeftButtonUp"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn Header=" 冷指标 &#x0a;  w/m2 "  CanUserSort="False" CanUserResize="False">
+                            <DataGridTemplateColumn Header=" 冷指标 &#x0a;  w/m2 " CanUserSort="False" CanUserResize="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid VerticalAlignment="Stretch" Margin="0">
@@ -43,8 +55,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding ColdNorm.GetTrueColor}" VerticalAlignment="Stretch" Text="{Binding ColdNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ColdNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ColdNormBtn_Click" Content="..."></Button>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding ColdNorm.GetTrueColor}" VerticalAlignment="Stretch" Text="{Binding ColdNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ColdNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ColdNormBtn_Click" Content="."></Button>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -53,7 +65,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding CWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding CWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -66,8 +78,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding HotNorm.GetTrueColor}" Text="{Binding HotNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding HotNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="HotNormBtn_Click" Content="..."></Button>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding HotNorm.GetTrueColor}" Text="{Binding HotNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding HotNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="HotNormBtn_Click" Content="."></Button>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -76,7 +88,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding HWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding HWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -85,7 +97,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -98,8 +110,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding ReshAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding ReshAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ReshAir,Mode=TwoWay,NotifyOnSourceUpdated=True}" Click="ReshAirBtn_Click" Content="...">
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding ReshAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding ReshAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ReshAir,Mode=TwoWay,NotifyOnSourceUpdated=True}" Click="ReshAirBtn_Click" Content=".">
                                             </Button>
                                         </Grid>
                                     </DataTemplate>
@@ -113,8 +125,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding Lampblack.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding Lampblack.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Lampblack,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackBtn_Click" Content="..."/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding Lampblack.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding Lampblack.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Lampblack,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -127,8 +139,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding LampblackAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding LampblackAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding LampblackAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackAirBtn_Click" Content="..."/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding LampblackAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding LampblackAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding LampblackAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackAirBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -141,8 +153,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding AccidentAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding AccidentAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AccidentAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AccidentAirBtn_Click" Content="..."/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding AccidentAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding AccidentAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AccidentAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AccidentAirBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -155,8 +167,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                                <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Exhaust,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ExhaustBtn_Click" Content="..."/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Exhaust,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ExhaustBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -169,8 +181,8 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="True" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
-                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AirCompensation,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AirCompensationBtn_Click" Content="..."/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AirCompensation,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AirCompensationBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -180,9 +192,10 @@
                     <Border BorderThickness="0,0,0,10" Height="1"   Focusable="False" ></Border>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Focusable="False" Margin="0,5,0,0">
-                    <cus:ImageButton Name="SaveBtn" IsEnabled="False" Content="保存" Width="70" Height="25" Click="SaveBtn_Click"></cus:ImageButton>
-                    <cus:ImageButton Name="CopyBtn" IsEnabled="False" Content="复制" Width="70" Height="25" Click="CopyBtn_Click"></cus:ImageButton>
-                    <cus:ImageButton Name="DeleteBtn" IsEnabled="False" Content="删除" Width="70" Height="25" Click="DeleteBtn_Click"></cus:ImageButton>
+                    <cus:ImageButton Name="SaveAsFileBtn" IsEnabled="True" Content="另存模板" Width="70" Height="25" Click="SaveAsFileBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
+                    <cus:ImageButton Name="SaveBtn" IsEnabled="False" Content="保存" Width="70" Height="25" Click="SaveBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
+                    <cus:ImageButton Name="CopyBtn" IsEnabled="True" Content="复制/新增行" Width="80" Height="25" Click="CopyBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
+                    <cus:ImageButton Name="DeleteBtn" IsEnabled="True" Content="删除" Width="70" Height="25" Click="DeleteBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -200,10 +213,10 @@
                         <CheckBox Name="chk_Area" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5" Padding="0" Content="面积" IsChecked="True"></CheckBox>
                         <CheckBox Name="chk_ColdL" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷负荷" IsChecked="True"></CheckBox>
                         <CheckBox Name="chk_ColdW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷水量" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_ColdWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False">
+                        <CheckBox Name="chk_ColdWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False" Checked="chk_ColdWP_Checked" Unchecked="chk_ColdWP_Unchecked">
                             <StackPanel Orientation="Horizontal" Focusable="False" HorizontalAlignment="Left">
                                 <Label Content="冷水管径，比摩阻≤"  Focusable="False" Margin="0,0,0,0" Padding="0"/>
-                                <ComboBox Name="chk_ColdWP_Com" IsEnabled="True" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <ComboBox Name="chk_ColdWP_Com" IsEnabled="False" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <ComboBoxItem Content="200" Tag="1" IsSelected="True"></ComboBoxItem>
                                     <ComboBoxItem Content="150" Tag="2"></ComboBoxItem>
                                 </ComboBox>
@@ -216,10 +229,10 @@
                         <CheckBox VerticalContentAlignment="Center" Visibility="Hidden" VerticalAlignment="Center" Margin="0,0,0,5" Padding="0" Content="面积" IsChecked="False"></CheckBox>
                         <CheckBox Name="chk_HotL" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热负荷" IsChecked="False"></CheckBox>
                         <CheckBox Name="chk_HotW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热水量" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_HotWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False">
+                        <CheckBox Name="chk_HotWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False" Checked="chk_HotWP_Checked" Unchecked="chk_HotWP_Unchecked">
                             <StackPanel Orientation="Horizontal" Focusable="False" HorizontalAlignment="Left">
                                 <Label Content="热水管径，比摩阻≤"  Focusable="False" Margin="0,0,0,0" Padding="0"/>
-                                <ComboBox Name="chk_HotWP_Com" IsEnabled="True" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <ComboBox Name="chk_HotWP_Com" IsEnabled="False" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <ComboBoxItem Content="200" Tag="1" IsSelected="True"></ComboBoxItem>
                                     <ComboBoxItem Content="150" Tag="2"></ComboBoxItem>
                                 </ComboBox>
@@ -236,9 +249,8 @@
                         <CheckBox Name="chk_NormalFumeSupplementary" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时补风量" IsChecked="False"></CheckBox>
                     </StackPanel>
                 </StackPanel>
-                <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Focusable="False">
-                    <cus:ImageButton Content="生成" Width="130" Height="25" Margin="0,30,10,20" Click="CreatBtn_Click"></cus:ImageButton>
-                    <cus:ImageButton Content="更新" Width="130" Height="25" Margin="0,0,10,15" Click="UpdateBtn_Click"></cus:ImageButton>
+                <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="70,0,0,0" Focusable="False">
+                    <cus:ImageButton Name="CreatBtn" TabIndex="0" Content="生成/更新" Width="70" Height="70" Margin="30,30,10,0" Click="CreatBtn_Click"></cus:ImageButton>
                 </StackPanel>
             </Grid>
         </StackPanel>

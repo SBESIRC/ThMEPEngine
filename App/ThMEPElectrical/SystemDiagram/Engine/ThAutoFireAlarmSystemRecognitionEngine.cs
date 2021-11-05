@@ -34,6 +34,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             extractor.ExtractFromMS(database);// 提取ModelSpace下的块
             Results = visitor.Results;
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
     }
     public class ThAutoFireAlarmSystemRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -74,14 +79,13 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             // 通过获取的OriginData 分类
             Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
         }
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
         public Dictionary<Entity, List<KeyValuePair<string, string>>> QueryAllOriginDatas()
         {
             return BlockAttInfo;
-        }
-
-        public List<KeyValuePair<string, string>> QueryOriginDatas(ThIfcDistributionFlowElement element)
-        {
-            return BlockAttInfo.First(o => o.Key.Equals(element.Outline)).Value;
         }
     }
 }

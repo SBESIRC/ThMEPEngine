@@ -31,7 +31,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
         }
     }
     public class ThWCompositeRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -98,7 +103,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
     public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine, IDisposable

@@ -17,14 +17,14 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
     /// </summary>
     public class SpaceDivider
     {
-        private List<Layout> layouts; 
+        private List<Layout> layouts;
         public Dictionary<Polyline, Vector3d> UCSs = new Dictionary<Polyline, Vector3d>();//UCS轮廓及其方向 
-        
+
         public SpaceDivider()
         {
 
         }
-        
+
         /// <summary>
         /// 计算UCS
         /// </summary>
@@ -33,11 +33,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         public void Compute(Polyline frame, List<MPolygon> polylines)
         {
             layouts = new List<Layout>();
-            for(int i=0;i<polylines.Count;i++)
+            for (int i = 0; i < polylines.Count; i++)
                 layouts.Add(new Layout(polylines[i], i));
             //按照方向初步分组
-            var TmpGroups=new List<LayoutGroup>();
-            foreach(Layout layout in layouts)
+            var TmpGroups = new List<LayoutGroup>();
+            foreach (Layout layout in layouts)
             {
                 var group = TmpGroups.Find(o => Math.Abs(o.angle - layout.angle) < 10);
                 if (group.IsNull())
@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 else
                 {
                     group.insert(layout);
-                    layout.GroupID=TmpGroups.FindIndex(o=>o==group);
+                    layout.GroupID = TmpGroups.FindIndex(o => o == group);
                 }
             }
             //个数少的组合并到大组中
@@ -103,28 +103,28 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             }
             //计算分组后的UCS,record为（角度，可布置区域的组）
             var groups = new Dictionary<double, DBObjectCollection>();
-            foreach(var layout in layouts)
+            foreach (var layout in layouts)
             {
                 if (groups.ContainsKey(TmpGroups[layout.GroupID].angle) == false)
                     groups.Add(TmpGroups[layout.GroupID].angle, layout.ent.Buffer(1000));
-                else 
+                else
                     groups[TmpGroups[layout.GroupID].angle].Add(layout.ent.Buffer(1000).Cast<Polyline>().First());
             }
             //转化为需要的UCS字典
-            foreach(var group in groups)
+            foreach (var group in groups)
             {
                 var UCSs = group.Value.UnionPolygons().Cast<Polyline>().ToList();
-                foreach(var UCS in UCSs)
+                foreach (var UCS in UCSs)
                 {
                     if (frame.ToNTSPolygon().Contains(UCS.ToNTSPolygon()))
                         continue;
                     var regions = UCS.GeometryIntersection(frame).Cast<Polyline>().ToList();
-                    foreach(var region in regions)
+                    foreach (var region in regions)
                     {
 
                         var dbline = new Line(region.GetCentroidPoint(), region.GetCentroidPoint() + new Vector3d(3000, 0, 0));
                         dbline.Rotate(dbline.StartPoint, group.Key / 180 * Math.PI);
-                        this.UCSs.Add(region, dbline.EndPoint-dbline.StartPoint);
+                        this.UCSs.Add(region, dbline.EndPoint - dbline.StartPoint);
                     }
 
                 }
@@ -138,7 +138,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         public int ID;
         public int GroupID;
 
-        public Layout(MPolygon poly,int index)
+        public Layout(MPolygon poly, int index)
         {
             ent = poly.ToNTSPolygon().Shell.ToDbPolyline();
             //var minRect = ent.OBB();
@@ -146,13 +146,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             var angle_list = new List<double>();
             var len_list = new List<double>();
 
-            for (int i=0;i<ent.NumberOfVertices-1;i++)
+            for (int i = 0; i < ent.NumberOfVertices - 1; i++)
             {
                 var dir = ent.GetPoint3dAt(i + 1) - ent.GetPoint3dAt(i);
                 var tmpAngle = GetAngle(dir.X, dir.Y);
                 int maxIndex = -1;
-                for (int j=0;j<angle_list.Count;j++)
-                    if(Math.Abs(angle_list[j]-tmpAngle)<5)
+                for (int j = 0; j < angle_list.Count; j++)
+                    if (Math.Abs(angle_list[j] - tmpAngle) < 5)
                     {
                         maxIndex = j;
                         break;
@@ -168,8 +168,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             }
 
             double maxLength = -1;
-            for (int i=0;i<angle_list.Count;i++)
-                if(len_list[i]>maxLength)
+            for (int i = 0; i < angle_list.Count; i++)
+                if (len_list[i] > maxLength)
                 {
                     maxLength = len_list[i];
                     angle = angle_list[i];

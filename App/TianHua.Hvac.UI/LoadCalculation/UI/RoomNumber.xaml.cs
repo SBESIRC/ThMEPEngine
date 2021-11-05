@@ -31,35 +31,27 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             InitializeComponent();
             this.PrefixContentTxt.Text = ThLoadCalculationUIService.Instance.Parameter.PerfixContent;
             this.StartingNumlblTxt.Text = ThLoadCalculationUIService.Instance.Parameter.StartingNum;
-            this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
+            this.NumberIndicationlbl.Content = (HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "") + this.StartingNumlblTxt.Text;
+            this.StartingNumlblTxt.Focus();
+            this.StartingNumlblTxt.SelectionStart = this.StartingNumlblTxt.Text.Length;
         }
 
         private void PrefixContentTxt_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull())
+            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull() && !NumberIndicationlbl.IsNull())
                 this.NumberIndicationlbl.Content = (HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "") + this.StartingNumlblTxt.Text;
         }
 
         private void StartingNumlblTxt_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull())
+            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull() && !NumberIndicationlbl.IsNull())
                 this.NumberIndicationlbl.Content = (HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "") + this.StartingNumlblTxt.Text;
         }
 
         private void HasPrefix_Checked(object sender, RoutedEventArgs e)
         {
-            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull())
+            if (!HasPrefix.IsNull() && !PrefixContentTxt.IsNull() && !StartingNumlblTxt.IsNull() && !NumberIndicationlbl.IsNull())
                 this.NumberIndicationlbl.Content = HasPrefix.IsChecked.Value ? this.PrefixContentTxt.Text : "" + this.StartingNumlblTxt.Text;
-        }
-
-        private void ExtractButton_Click(object sender, RoutedEventArgs e)
-        {
-            ThLoadCalculationUIService.Instance.Parameter.HasPrefix = HasPrefix.IsChecked.Value;
-            ThLoadCalculationUIService.Instance.Parameter.PerfixContent = this.PrefixContentTxt.Text;
-            ThLoadCalculationUIService.Instance.Parameter.StartingNum = this.StartingNumlblTxt.Text;
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJGN");
-            FocusToCAD();
-            this.Close();
         }
 
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)

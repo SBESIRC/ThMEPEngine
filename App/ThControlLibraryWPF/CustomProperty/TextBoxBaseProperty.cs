@@ -107,6 +107,18 @@ namespace ThControlLibraryWPF.CustomProperty
             get { return (EnumTextInputType)GetValue(TextBoxInputTypeProperty); }
             set { SetValue(TextBoxInputTypeProperty, value); }
         }
+        /// <summary>
+        /// Double数字输入时最大输入小数点后几位（<=0时不做限制）
+        /// </summary>
+        public static readonly DependencyProperty MaxDecimalPlacesProperty = DependencyProperty.Register("MaxDecimalPlaces", typeof(int), typeof(TextBoxBaseProperty), new PropertyMetadata(-1));
+        /// <summary>
+        /// Double数字输入时最大输入小数点后几位（<=0时不做限制）
+        /// </summary>
+        public int MaxDecimalPlaces
+        {
+            get { return (int)GetValue(MaxDecimalPlacesProperty); }
+            set { SetValue(MaxDecimalPlacesProperty, value); }
+        }
     }
     public enum EnumTextInputType
     {

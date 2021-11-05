@@ -70,7 +70,7 @@ namespace ThMEPHVAC.FanLayout.Service
         {
             string strWidth = (width + space).ToString();
             string strHeigth = (heigth + space).ToString();
-            string fanHoleSize = "洞口：" + strWidth + "x" + strHeigth;
+            string fanHoleSize = "留洞：" + strWidth + "x" + strHeigth+"(H)";
             return fanHoleSize;
         }
         public static string GetFanHoleMark(int type, double heigth = 800)
@@ -83,7 +83,7 @@ namespace ThMEPHVAC.FanLayout.Service
             else
             {
                 string strHeigth = heigth.ToString("0.00");
-                fanHoleMark = "高度："+"h+" + strHeigth;
+                fanHoleMark = "洞底标高："+"h+" + strHeigth+"m";
             }
             return fanHoleMark;
         }

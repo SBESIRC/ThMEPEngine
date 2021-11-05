@@ -33,10 +33,8 @@ namespace ThMEPWSS.FlushPoint.Data
             {
                 using (var engine = new ThParkingStallRecognitionEngine())
                 {
-                    var visitor = new ThParkingStallExtractionVisitor();
-                    visitor.CheckQualifiedBlockName = CheckBlockNameQualified;
-                    visitor.CheckQualifiedLayer = (Entity e) => true;
-                    engine.Visitor = visitor;
+                    engine.CheckQualifiedBlockName = CheckBlockNameQualified;
+                    engine.CheckQualifiedLayer = (Entity e) => true;
                     engine.Recognize(database, pts);
                     engine.RecognizeMS(database, pts);
                     ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
@@ -48,10 +46,8 @@ namespace ThMEPWSS.FlushPoint.Data
             {
                 using (var engine = new ThParkingStallRecognitionEngine())
                 {
-                    var visitor = new ThParkingStallExtractionVisitor();
-                    visitor.CheckQualifiedLayer = CheckLayerNameQualified;
-                    visitor.CheckQualifiedBlockName = (Entity e) => true;
-                    engine.Visitor = visitor;
+                    engine.CheckQualifiedLayer = CheckLayerNameQualified;
+                    engine.CheckQualifiedBlockName = (Entity e) => true;
                     engine.Recognize(database, pts);
                     engine.RecognizeMS(database, pts);
                     ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());

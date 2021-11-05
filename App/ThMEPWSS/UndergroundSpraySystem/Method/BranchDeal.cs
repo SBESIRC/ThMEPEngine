@@ -50,7 +50,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 {
                     ;
                 }
-                if(!indexOrder)
+                if (!indexOrder)
                 {
                     branchLoop.Reverse();
                 }
@@ -62,7 +62,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         var pt = branchLoop[i];
 
-                        if (sprayIn.PtTypeDic[branchLoop[i]].Contains("Alarm"))
+                        if (sprayIn.PtTypeDic[branchLoop[i]].Contains("AlarmValve"))
                         {
                             alarmNums += 1;
                             var termPts = new List<Point3dEx>();
@@ -77,10 +77,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 var curPt = q.Dequeue();
                                 if (sprayIn.PtTypeDic.ContainsKey(curPt))
                                 {
-                                    if (sprayIn.PtTypeDic[curPt].Contains("Valve"))
-                                    {
-                                        valvePts.Add(pt);
-                                    }
                                     if(sprayIn.PtTypeDic[curPt].Contains("Flow"))
                                     {
                                         flowPts.Add(pt);
@@ -124,10 +120,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                             fireAreaNums += 1;
                                         }
                                     }
-                                    //if (valvePts.Count != 0)
-                                    //{
-                                    //    spraySystem.ValveDic.Add(tpt, true);
-                                    //}
                                 }
                                 if (spraySystem.BranchDic.ContainsKey(pt))
                                 {
@@ -198,8 +190,39 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                     }
                 }
-                
-                foreach(var subLoop in spraySystem.SubLoops)
+
+                foreach (var spt in branchLoop)//每个支路起点
+                {
+                    try
+                    {
+                        if(sprayIn.PtDic[spt].Count == 3)
+                        {
+                            if(!spraySystem.BranchDic.ContainsKey(spt))
+                            {
+                                continue;
+                            }
+                            foreach (var ept in spraySystem.BranchDic[spt])//每个支路终点
+                            {
+                                var tempPath = new List<Point3dEx>();
+                                var visited2 = new HashSet<Point3dEx>();
+                                bool hasValve = false;
+                                BranchDeal2.DfsBranch(spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve);
+                                if (hasValve)
+                                {
+                                    spraySystem.ValveDic.Add(ept);
+                                }
+                            }
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+
+                    }
+                    
+                }
+
+
+                foreach (var subLoop in spraySystem.SubLoops)
                 {
                     try
                     {
@@ -236,17 +259,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 }
                 foreach(var branchLoopPt in branchLoop)
                 {
-                    try
+                    if (!spraySystem.SubLoopAlarmsDic.ContainsKey(branchLoopPt))
                     {
-                        if (!spraySystem.SubLoopAlarmsDic.ContainsKey(branchLoopPt))
-                        {
-                            spraySystem.SubLoopAlarmsDic.Add(branchLoopPt, new List<int>() { alarmNums });
-                            spraySystem.SubLoopFireAreasDic.Add(branchLoopPt, new List<int>() { fireAreaNums });
-                        }
-                    }
-                    catch
-                    {
-                        
+                        spraySystem.SubLoopAlarmsDic.Add(branchLoopPt, new List<int>() { alarmNums });
+                        spraySystem.SubLoopFireAreasDic.Add(branchLoopPt, new List<int>() { fireAreaNums });
                     }
                 }
             }
@@ -386,7 +402,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 {
                                     foreach (var tpt in termPts)
                                     {
-                                        spraySystem.ValveDic.Add(tpt, true);
+                                        spraySystem.ValveDic.Add(tpt);
                                     }
                                 }
                             }
@@ -466,7 +482,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 {
                                     foreach(var tpt in termPts)
                                     {
-                                        spraySystem.ValveDic.Add(tpt, true);
+                                        spraySystem.ValveDic.Add(tpt);
 
                                     }
                                 }

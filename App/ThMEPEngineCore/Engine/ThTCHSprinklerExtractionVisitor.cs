@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
@@ -14,7 +13,7 @@ namespace ThMEPEngineCore.Engine
     {
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            if (dbObj.IsTCHSprinkler()) 
+            if (dbObj.IsTCHSprinkler())
             {
                 var objs = new DBObjectCollection();
                 dbObj.Explode(objs);
@@ -48,9 +47,14 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public override bool IsDistributionElement(Entity entity)
+        public override bool IsDistributionElement(Entity e)
         {
-            return entity.IsTCHSprinkler();
+            return e.IsTCHSprinkler();
+        }
+
+        public override bool CheckLayerValid(Entity e)
+        {
+            return true;
         }
     }
 }

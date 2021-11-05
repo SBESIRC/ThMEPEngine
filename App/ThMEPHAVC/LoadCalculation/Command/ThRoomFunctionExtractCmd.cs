@@ -29,7 +29,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
         string defaultFile = "房间功能映射表.xlsx";
         public ThRoomFunctionExtractCmd()
         {
-            this.CommandName = "THFJGN";
+            this.CommandName = "THFJGNTQ";
             this.ActionName = "提取房间功能";
         }
         public void Dispose()
@@ -43,7 +43,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
             {
                 //初始化
                 int StartingNo;
-                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.StartingNum, out StartingNo))
+                if (!int.TryParse(ThLoadCalculationUIService.Instance.Parameter.TQStartingNum, out StartingNo))
                 {
                     return;
                 }
@@ -99,14 +99,12 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
 
-                
-
+                rooms.ForEach(o => originTransformer.Transform(o.Boundary));
                 LogicService logicService = new LogicService();
-                var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.HasPrefix, ThLoadCalculationUIService.Instance.Parameter.PerfixContent, StartingNo);
-
+                var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix, ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent, StartingNo);
                 foreach (var item in roomfunctions)
                 {
-                    InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, item.Item1);
+                    InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, originTransformer.Reset(item.Item1));
                 }
             }
         }
@@ -124,7 +122,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
             Dictionary<string, string> result = new Dictionary<string, string>();
             foreach (DataRow row in roomFunctionConfigTable.Rows)
             {
-                var roomfunctionName = row["房间功能标签"].ToString();
+                var roomfunctionName = row["暖通房间功能标签"].ToString();
                 if (!string.IsNullOrWhiteSpace(roomfunctionName))
                 {
                     for (int column = 0; column < 4; column++)

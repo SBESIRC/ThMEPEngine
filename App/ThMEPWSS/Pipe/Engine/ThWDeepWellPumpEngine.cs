@@ -105,6 +105,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThRawIfcDistributionElementData> Datas { get; set; }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
+
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
@@ -124,6 +125,11 @@ namespace ThMEPWSS.Pipe.Engine
             }
             Datas = deepWellPumpVisitor.Results.Where(o => dbObjs.Contains(o.Geometry)).ToList();
             Elements.AddRange(Datas.Select(o => o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
 }

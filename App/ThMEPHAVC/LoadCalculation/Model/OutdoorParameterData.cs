@@ -24,20 +24,20 @@ namespace ThMEPHVAC.LoadCalculation.Model
         }
         public string Title { get; set; }
 
-        private string summerTemperature = "30.8°C";
-        public string SummerTemperature
+        private double summerTemperature = 32;
+        public double SummerTemperature
         {
             get
             {
-                if (selectIndex == 0)
-                    return "32°C";
-                else if (selectIndex == 1)
-                    return "31.2°C";
+                if (selectIndex == 1)
+                    return 32;
+                else if (selectIndex == 2)
+                    return 31.2;
                 return summerTemperature;
             }
             set
             {
-                if (selectIndex == 2)
+                if (selectIndex == 0)
                 {
                     summerTemperature = value;
                 }
@@ -45,20 +45,20 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private string winterTemperature = "3.7°C";
-        public string WinterTemperature
+        private double winterTemperature = 3.7;
+        public double WinterTemperature
         {
             get
             {
-                if (selectIndex == 0)
-                    return "3.7°C";
-                else if (selectIndex == 1)
-                    return "4.2°C";
+                if (selectIndex == 1)
+                    return 3.7;
+                else if (selectIndex == 2)
+                    return 4.2;
                 return winterTemperature;
             }
             set
             {
-                if (selectIndex == 2)
+                if (selectIndex == 0)
                 {
                     winterTemperature = value;
                 }
@@ -70,7 +70,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
         {
             get
             {
-                if (selectIndex != 2)
+                if (selectIndex != 0)
                     return true;
                 else
                     return false;
@@ -84,7 +84,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
         {
             get
             {
-                if (selectIndex != 2)
+                if (selectIndex != 0)
                     return true;
                 else
                     return false;

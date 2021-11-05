@@ -9,13 +9,12 @@ namespace ThMEPEngineCore.Service.Hvac
 {
     public class ThHvacGetComponent
     {
-        public static List<ObjectId> readDuctIds()
+        public static List<ObjectId> ReadDuctIds(Database database)
         {
-            var ids = new List<ObjectId>();
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(database))
             {
-                var groups = db.Groups;
-                foreach (var g in groups)
+                var ids = new List<ObjectId>();
+                foreach (var g in db.Groups)
                 {
                     var id = g.ObjectId;
                     var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
@@ -27,16 +26,15 @@ namespace ThMEPEngineCore.Service.Hvac
                             ids.Add(id);
                     }
                 }
+                return ids;
             }
-            return ids;
         }
-        public static List<ObjectId> readConnectorIds()
+        public static List<ObjectId> ReadConnectorIds(Database database)
         {
-            var connectors = new List<ObjectId>();
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(database))
             {
-                var groups = db.Groups;
-                foreach (var g in groups)
+                var connectors = new List<ObjectId>();
+                foreach (var g in db.Groups)
                 {
                     var id = g.ObjectId;
                     var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
@@ -48,8 +46,8 @@ namespace ThMEPEngineCore.Service.Hvac
                             connectors.Add(id);
                     }
                 }
+                return connectors;
             }
-            return connectors;
         }
     }
 }

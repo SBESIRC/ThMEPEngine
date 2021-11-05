@@ -1,15 +1,14 @@
 ﻿using System;
 using Linq2Acad;
+using DotNetARX;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -39,10 +38,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHSprinklerExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
-                };
+                var visitor = new ThTCHSprinklerExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
                 acadDatabase.ModelSpace
                     .OfType<Entity>()
@@ -57,15 +53,17 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
+
         private List<ThRawIfcDistributionElementData> DoExtract(List<ThRawIfcDistributionElementData> elements, BlockReference blkRef, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHSprinklerExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
-                };
+                var visitor = new ThTCHSprinklerExtractionVisitor();
                 if (visitor.IsBuildElementBlockReference(blkRef))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
@@ -127,6 +125,11 @@ namespace ThMEPEngineCore.Engine
             Recognize(engine.Results, polygon);
         }
 
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)
         {
             Polyline frame = null;
@@ -141,8 +144,8 @@ namespace ThMEPEngineCore.Engine
             foreach (var data in dataList)
             {
                 var block = data.Geometry as BlockReference;
-                if (block == null 
-                    || !block.Bounds.HasValue 
+                if (block == null
+                    || !block.Bounds.HasValue
                     || !(block.Name.Contains("$TwtSys$00000131") || block.Name.Contains("$TwtSys$00000125")))
                 {
                     continue;

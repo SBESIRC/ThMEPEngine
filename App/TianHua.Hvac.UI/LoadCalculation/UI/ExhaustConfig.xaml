@@ -13,7 +13,7 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,15,0,10">
-            <RadioButton Name="RadioBtnType1" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="True">
+            <RadioButton Name="RadioBtnType1" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="True" Checked="RadioBtnType1_Checked">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -24,11 +24,11 @@
             </RadioButton>
             <StackPanel Grid.Row="0" Orientation="Horizontal"  Focusable="False" Margin="40,0,0,10">
                 <Label Grid.Column="1" Width="60" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="换气次数：" Margin="0,0,5,0"></Label>
-                <TextBox Grid.Column="2" x:Name="NormTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                <cus:InputTextBox Grid.Column="2" x:Name="NormTxt" TextBoxInputType="InputDouble" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                 <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="次/h" ></Label>
             </StackPanel>
 
-            <RadioButton Name="RadioBtnType2" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="False">
+            <RadioButton Name="RadioBtnType2" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="3" VerticalContentAlignment="Bottom" Margin="10,0,0,10" IsChecked="False" Checked="RadioBtnType2_Checked">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0*"></ColumnDefinition>
@@ -37,11 +37,11 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="指定总量" Margin="0,0,5,0"></Label>
-                    <TextBox Grid.Column="2" x:Name="TotalTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                    <cus:InputTextBox Grid.Column="2" x:Name="TotalTxt" TextBoxInputType="InputDouble" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0" BorderThickness="1" TextAlignment="Center"></cus:InputTextBox>
                     <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="m3/h" ></Label>
                 </Grid>
             </RadioButton>
-            <RadioButton Name="RadioBtnType3" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,5" IsChecked="True">
+            <RadioButton Name="RadioBtnType3" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,5" IsChecked="True" Checked="RadioBtnType3_Checked">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -50,12 +50,12 @@
                     <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="按热平衡计算" Margin="0,0,5,0"></Label>
                 </Grid>
             </RadioButton>
-            <StackPanel Orientation="Horizontal"  Focusable="False" Margin="20,0,0,0">
+            <StackPanel Name="panel1" Orientation="Horizontal"  Focusable="False" Margin="20,0,0,0">
                 <Label Width="80" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="换气次数要求：" Margin="0,0,5,0"></Label>
-                <TextBox x:Name="BreatheNumTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                <cus:InputTextBox x:Name="BreatheNumTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                 <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="次/h" Margin="0,0,0,0"></Label>
             </StackPanel>
-            <StackPanel Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
+            <StackPanel Name="panel2" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
                 <RadioButton Name="CapacityType1" Width="250" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,0,5" IsChecked="True">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -65,7 +65,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="变压器容量：" Margin="0,0,5,0"></Label>
-                        <TextBox Grid.Column="2" x:Name="TransformerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                        <cus:InputTextBox Grid.Column="2" x:Name="TransformerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                         <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KVA" ></Label>
                     </Grid>
                 </RadioButton>
@@ -78,7 +78,7 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="锅炉容量：" Margin="0,0,5,0"></Label>
-                        <TextBox Grid.Column="2" x:Name="BoilerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                        <cus:InputTextBox Grid.Column="2" x:Name="BoilerCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                         <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KW" ></Label>
                     </Grid>
                 </RadioButton>
@@ -91,25 +91,25 @@
                             <ColumnDefinition/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="1" Width="200" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="柴发容量：" Margin="0,0,5,0"></Label>
-                        <TextBox Grid.Column="2" x:Name="FirewoodCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                        <cus:InputTextBox Grid.Column="2" x:Name="FirewoodCapacityTxt" Width="45" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                         <Label Grid.Column="3" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="KVA" ></Label>
                     </Grid>
                 </RadioButton>
             </StackPanel>
-            <StackPanel Orientation="Horizontal"  Focusable="False" Margin="20,0,0,5">
+            <StackPanel Name="panel3" Orientation="Horizontal"  Focusable="False" Margin="20,0,0,5">
                 <Label Width="80" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="散热系数：" Margin="0,0,5,0"></Label>
-                <TextBox x:Name="HeatDissipationTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                <cus:InputTextBox x:Name="HeatDissipationTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                 <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="%" Margin="0,0,0,0"></Label>
             </StackPanel>
-            <StackPanel Orientation="Horizontal"  Focusable="False" Margin="20,0,0,5">
+            <StackPanel Name="panel4" Orientation="Horizontal"  Focusable="False" Margin="20,0,0,5">
                 <Label Width="80" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="室内控制温度：" Margin="0,0,5,0"></Label>
-                <TextBox x:Name="RoomTemperatureTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></TextBox>
+                <cus:InputTextBox x:Name="RoomTemperatureTxt" Width="50" HorizontalContentAlignment="Center" Margin="0,0,5,0"></cus:InputTextBox>
                 <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="°C" Margin="0,0,0,0"></Label>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,0">
-            <cus:ImageButton Content="保存" Width="50" Height="20"  TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
-            <cus:ImageButton Content="取消" Width="50" Height="20"  TabIndex="1" Click="CancleButton_Click"></cus:ImageButton>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right"  Focusable="False" Margin="0,0,0,5">
+            <cus:ImageButton Content="保存" Width="50" Height="20" IsDefault="True" TabIndex="1" Margin="0,0,10,0" Click="SaveButton_Click"></cus:ImageButton>
+            <cus:ImageButton Content="取消" Width="50" Height="20" IsCancel="True" TabIndex="1" Margin="0,0,10,0" Click="CancleButton_Click"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

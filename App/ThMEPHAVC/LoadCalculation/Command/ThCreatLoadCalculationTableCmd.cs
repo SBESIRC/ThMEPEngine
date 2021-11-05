@@ -71,7 +71,9 @@ namespace ThMEPHVAC.LoadCalculation.Command
 
                 var objs = rooms.Select(o => o.Boundary).ToCollection();
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(objs);
+                rooms.ForEach(x => originTransformer.Transform(x.Boundary));
 
+                //提取近点
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 var roomFunctionBlocks = getPrimitivesService.GetRoomFunctionBlocks();
                 var loadCalculationtables = getPrimitivesService.GetLoadCalculationTables();
@@ -80,6 +82,12 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 LogicService logicService = new LogicService();
                 List<Table> Deprecatedtables;
                 var tables=logicService.InsertLoadCalculationTable(database.Database,rooms.Select(o => o.Boundary).ToList(), roomFunctionBlocks, loadCalculationtables, curves,out Deprecatedtables);
+
+                //移回原点
+                originTransformer.Reset(tables.ToCollection());
+                originTransformer.Reset(roomFunctionBlocks.ToCollection());
+                originTransformer.Reset(loadCalculationtables.ToCollection());
+
                 InsertBlockService.InsertTable(tables);
                 InsertBlockService.DeleteTable(Deprecatedtables);
             }

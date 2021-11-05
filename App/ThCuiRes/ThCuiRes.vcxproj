@@ -314,6 +314,8 @@
     <Image Include="Images\THFJBH_dark_large.ico" />
     <Image Include="Images\THFJGN_dark_small.ico" />    
     <Image Include="Images\THFJGN_dark_large.ico" />
+    <Image Include="Images\THSWSZ_dark_small.ico" />    
+    <Image Include="Images\THSWSZ_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

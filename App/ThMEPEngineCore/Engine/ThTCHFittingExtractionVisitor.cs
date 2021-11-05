@@ -3,7 +3,6 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
@@ -36,6 +35,7 @@ namespace ThMEPEngineCore.Engine
                         .FirstOrDefault();
                     if (outline != null)
                     {
+                        outline.TransformBy(matrix);
                         elements.Add(new ThRawIfcDistributionElementData()
                         {
                             Geometry = outline,
@@ -68,9 +68,14 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public override bool IsDistributionElement(Entity entity)
+        public override bool IsDistributionElement(Entity e)
         {
-            return entity.IsTCHFitting();
+            return e.IsTCHFitting();
+        }
+
+        public override bool CheckLayerValid(Entity e)
+        {
+            return true;
         }
     }
 }

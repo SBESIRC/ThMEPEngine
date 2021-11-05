@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using System;
 
 namespace ThMEPWSS.Hydrant.Engine
 {
@@ -32,6 +33,11 @@ namespace ThMEPWSS.Hydrant.Engine
             service.ExtractFromMS(database);
             Results.AddRange(Visitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
     }
     public class ThFireExtinguisherRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -55,6 +61,12 @@ namespace ThMEPWSS.Hydrant.Engine
             extractEngine.ExtractFromMS(database);
             Recognize(extractEngine.Results, polygon);
         }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {
             var originDatas = datas;

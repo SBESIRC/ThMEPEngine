@@ -68,12 +68,45 @@ namespace ThMEPEngineCore.Algorithm.DijkstraAlgorithm
         }
 
         /// <summary>
+        /// 计算已知和所有终点的最短路径(达不到路径则不返回)
+        /// </summary>
+        /// <param name="spt"></param>
+        /// <param name="ept"></param>
+        /// <returns></returns>
+        public Dictionary<Point3d, List<Point3d>> FindingAllMinPath(Point3d spt)
+        {
+            var allPath = FindingPath(spt);
+
+            Dictionary<Point3d, List<Point3d>> pathInfo = new Dictionary<Point3d, List<Point3d>>();
+            foreach (var node in allPath)
+            {
+                List<Point3d> path = new List<Point3d>();
+                var endNode = node;
+                while (endNode != null)
+                {
+                    path.Add(endNode.NodePt);
+                    endNode = endNode.Parent;
+                }
+                if (!pathInfo.Keys.Contains(node.NodePt) && path.Last().IsEqualTo(spt, new Tolerance(1, 1)))
+                {
+                    pathInfo.Add(node.NodePt, path);
+                }
+            }
+
+            return pathInfo;
+        }
+
+        /// <summary>
         /// 寻找起点到所有点的最短距离
         /// </summary>
         /// <param name="spt"></param>
         private List<Node> FindingPath(Point3d spt)
         {
             var s = nodes.Where(x => x.NodePt.IsEqualTo(spt, new Tolerance(1, 1))).ToList();
+            if (s.Count == 0)
+            {
+                return new List<Node>();
+            }
             s.ForEach(x => x.value = 0);
             var u = nodes.Where(x => !x.NodePt.IsEqualTo(spt, new Tolerance(1, 1))).ToList();
             u.ForEach(x => x.value = double.PositiveInfinity);

@@ -18,6 +18,7 @@ namespace ThMEPEngineCore.Engine
         {
         }
 
+        public abstract void RecognizeEditor(Point3dCollection polygon);
         public abstract void Recognize(Database database, Point3dCollection polygon);
         public abstract void RecognizeMS(Database database, Point3dCollection polygon);
         public virtual void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)

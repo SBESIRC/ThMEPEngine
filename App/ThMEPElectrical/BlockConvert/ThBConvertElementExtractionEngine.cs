@@ -2,6 +2,7 @@
 using ThMEPEngineCore.Engine;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -24,6 +25,11 @@ namespace ThMEPElectrical.BlockConvert
         public override void ExtractFromMS(Database database)
         {
             throw new NotImplementedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
         }
     }
 }

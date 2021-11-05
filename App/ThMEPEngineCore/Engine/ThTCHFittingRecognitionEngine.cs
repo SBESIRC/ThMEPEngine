@@ -1,16 +1,13 @@
 ﻿using System;
-using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -40,10 +37,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHFittingExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
-                };
+                var visitor = new ThTCHFittingExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
                 acadDatabase.ModelSpace
                     .OfType<Entity>()
@@ -58,15 +52,17 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
+
         private List<ThRawIfcDistributionElementData> DoExtract(List<ThRawIfcDistributionElementData> elements, BlockReference blkRef, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHFittingExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
-                };
+                var visitor = new ThTCHFittingExtractionVisitor();
                 if (visitor.IsBuildElementBlockReference(blkRef))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
@@ -147,6 +143,11 @@ namespace ThMEPEngineCore.Engine
             Recognize(engine.Results, polygon);
         }
 
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)
         {
             foreach (var data in dataList)
@@ -163,9 +164,10 @@ namespace ThMEPEngineCore.Engine
 
                 var dictionary = data.Data as Dictionary<string, object>;
                 var category = Convert.ToString(dictionary["类型"]);
-                switch(category)
+                switch (category)
                 {
-                    case "2" : RecoginzeElbow(data);
+                    case "2":
+                        RecoginzeElbow(data);
                         break;
                     case "5":
                         RecoginzeTee(data);
@@ -182,13 +184,13 @@ namespace ThMEPEngineCore.Engine
             var dictionary = data.Data as Dictionary<string, object>;
             var bigEndWidth = Convert.ToDouble(dictionary["始端宽度"]);
             var smallEndWidth = Convert.ToDouble(dictionary["末端宽度"]);
-            if(bigEndWidth < smallEndWidth)
+            if (bigEndWidth < smallEndWidth)
             {
                 var temp = bigEndWidth;
                 bigEndWidth = smallEndWidth;
                 smallEndWidth = temp;
             }
-            if(bigEndWidth - smallEndWidth < 1.0)
+            if (bigEndWidth - smallEndWidth < 1.0)
             {
                 var elbow = new ThIfcDuctElbowParameters
                 {

@@ -48,7 +48,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipe.Extract(database, sprayIn);//提取管道
             var pipeLines = pipe.CreateSprayLines();//生成管道线
             pipeLines.CreatePtDic(sprayIn);//创建初始字典对
-
             var vertical = new Verticalpipe();
             vertical.Extract(database, sprayIn);//提取竖管
 
@@ -57,13 +56,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
 
             pipeLines.CreatePtDic(sprayIn);
-            
             pipeLines = pipeLines.ConnectBreakLine(sprayIn);
             pipeLines.CreatePtDic(sprayIn);
-            
             pipeLines = pipeLines.PipeLineSplit(sprayIn.PtDic.Keys.ToList());
             pipeLines.CreatePtDic(sprayIn);
-            
             DicTools.CreatePtTypeDic(sprayIn.PtDic.Keys.ToList(), "MainLoop", sprayIn);
             foreach (var line in pipeLines.ToList())
             {
@@ -93,7 +89,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines = pipeLines.PipeLineSplit(valve.PressureValves);
             pipeLines = pipeLines.PipeLineSplit(valve.DieValves);
             pipeLines.CreatePtDic(sprayIn);
-
             DicTools.CreatePtTypeDic(valve.SignalValves, "SignalValve", sprayIn);
             DicTools.CreatePtTypeDic(valve.PressureValves, "PressureValves", sprayIn);
             DicTools.CreatePtTypeDic(valve.DieValves, "DieValves", sprayIn);
@@ -174,25 +169,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 }
                             }
                         }
-
-                        
- 
-                        
                     }
-                    ;
                 }
-                ;
             }
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
 
-            
             var leadLine = new LeadLine();
             leadLine.Extract(database, sprayIn);//3,283ms
             sprayIn.LeadLines = leadLine.GetLines();
 
             Dics.CreateLeadLineDic(ref sprayIn);//3,559ms
-
-            
 
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
             DNLineEngine.Extract(database, selectArea);
@@ -216,7 +202,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             sprayIn.CreateTermPtDic(textSpatialIndex, pipeDNSpatialIndex);//针对包含立管的批量标注//9973ms
 
             sprayIn.CreateTermPt(textSpatialIndex);//针对存在缺省立管的标注
-
 
             var alarmValve = new AlarmValve();
             var alarmPts = alarmValve.Extract(database, selectArea);
@@ -261,6 +246,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     spraySystem.MainLoops.Add(path);
                 }
                 BranchDeal2.Get(ref visited, sprayIn, spraySystem);
+
                 BranchDeal.GetThrough(ref visited, sprayIn, spraySystem);
                 return false;
             }

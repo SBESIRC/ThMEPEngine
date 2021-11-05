@@ -13,20 +13,19 @@
         </Grid.RowDefinitions>
         <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,10,0,5">
             <StackPanel Orientation="Horizontal">
-                <CheckBox Name="HasPrefix" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="前缀" IsChecked="True" Checked="HasPrefix_Checked"></CheckBox>
-                <TextBox x:Name="PrefixContentTxt" Width="70" Margin="10,0,10,0" TextChanged="PrefixContentTxt_TextChanged" />
+                <CheckBox Name="HasPrefix" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="前缀" IsChecked="True" Checked="HasPrefix_Checked" Unchecked="HasPrefix_Checked"></CheckBox>
+                <cus:InputTextBox x:Name="PrefixContentTxt" Width="70" Margin="10,0,10,0" TextChanged="PrefixContentTxt_TextChanged" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Name="StartingNumlbl" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="起始序号："></Label>
-                <TextBox x:Name="StartingNumlblTxt" Width="70" Margin="10,0,10,0" TextChanged="StartingNumlblTxt_TextChanged"/>
+                <cus:InputTextBox x:Name="StartingNumlblTxt" Width="70" Margin="10,0,10,0" TextChanged="StartingNumlblTxt_TextChanged"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="编号示意："></Label>
                 <Label Name="NumberIndicationlbl" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="70" Margin="10,0,10,0"></Label>
             </StackPanel>
             <StackPanel Orientation="Vertical" Margin="0,5,0,0">
-                <cus:ImageButton Content="提取房间功能" HorizontalAlignment="Stretch" Width="150" TabIndex="1" Margin="10,0,10,5" Click="ExtractButton_Click"></cus:ImageButton>
-                <cus:ImageButton Content="确定" HorizontalAlignment="Stretch" Width="150" TabIndex="1" Margin="10,0,10,0" Click="ConfirmButton_Click"></cus:ImageButton>
+                <cus:ImageButton Content="确定" HorizontalAlignment="Stretch" IsDefault="True" Width="150" TabIndex="1" Margin="10,0,10,0" Click="ConfirmButton_Click"></cus:ImageButton>
             </StackPanel>
         </StackPanel>
     </Grid>

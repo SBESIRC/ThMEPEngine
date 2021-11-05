@@ -114,11 +114,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 if (eLine.Equals(new Line())) continue;
                 var spt = new Point3dEx();
                 var ept = new Point3dEx();
+
                 if (sprayIn.PtDic[new Point3dEx(sLine.StartPoint)].Count == 1)
                 {
                     spt = new Point3dEx(sLine.StartPoint);
                 }
-                if(sprayIn.PtDic[new Point3dEx(sLine.EndPoint)].Count == 1)
+                //if(sprayIn.PtDic[new Point3dEx(sLine.EndPoint)].Count == 1)
+                else
                 {
                     spt = new Point3dEx(sLine.EndPoint);
                 }

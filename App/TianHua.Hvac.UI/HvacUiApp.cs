@@ -67,7 +67,14 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
+        [CommandMethod("TIANHUACAD", "THSPM", CommandFlags.Modal)]
+        public void THSPM()
+        {
+            using (var cmd = new ThHvacSpmCmd())
+            {
+                cmd.Execute();
+            }
+        }
         [CommandMethod("TIANHUACAD", "THFHJS", CommandFlags.Modal)]
         public void THFHJS()
         {
@@ -77,8 +84,8 @@ namespace TianHua.Hvac.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THSWTF", CommandFlags.Modal)]
-        public void THSWTF()
+        [CommandMethod("TIANHUACAD", "THSWSZ", CommandFlags.Modal)]
+        public void THSWSZ()
         {
             using (var cmd = new ThHvacOutdoorVentilationCmd())
             {
@@ -90,6 +97,16 @@ namespace TianHua.Hvac.UI
         public void THFJBH()
         {
             using (var cmd = new ThHvacRoomFunctionCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFJGN", CommandFlags.Modal)]
+        //天华提取房间功能
+        public void THFJGN()
+        {
+            using (var cmd = new ThHvacExtractRoomFunctionCmd())
             {
                 cmd.Execute();
             }

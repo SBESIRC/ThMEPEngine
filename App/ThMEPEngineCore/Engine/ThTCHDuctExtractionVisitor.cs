@@ -3,7 +3,6 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
@@ -18,28 +17,18 @@ namespace ThMEPEngineCore.Engine
         {
             if (dbObj.IsTCHDuct())
             {
-                var objs = new DBObjectCollection();
-                dbObj.Explode(objs);
-                var results = objs
-                    .OfType<Curve>()
-                    .Where(o => !o.Layer.Contains("DUCT-加压送风中心线"))
-                    .ToCollection();
-                // 这里需要获取一个外轮廓, 通常情况下用NTS Polygonizer来获取Outline
-                // 由于天正图元有精度的问题，NTS Polygonizer不能获取Outline
-                // 这里借用NTS Buffer的功能，它能把图元“合并”
-                var outline = results
-                    .Buffer(0.01)
-                    .OfType<Curve>()
-                    .OrderByDescending(o => o.Area)
-                    .FirstOrDefault();
-                if (outline != null)
+                var data = ThOPMTools.GetOPMProperties(dbObj.Id);
+                var start_x = Convert.ToDouble(data["始端 X 坐标"]);
+                var start_y = Convert.ToDouble(data["始端 Y 坐标"]);
+                var end_x = Convert.ToDouble(data["末端 X 坐标"]);
+                var end_y = Convert.ToDouble(data["末端 Y 坐标"]);
+                var geometry = new Line(new Point3d(start_x, start_y, 0), new Point3d(end_x, end_y, 0));
+                geometry.TransformBy(matrix);
+                elements.Add(new ThRawIfcDistributionElementData()
                 {
-                    elements.Add(new ThRawIfcDistributionElementData()
-                    {
-                        Geometry = outline,
-                        Data = ThOPMTools.GetOPMProperties(dbObj.Id),
-                    });
-                }
+                    Geometry = geometry,
+                    Data = data,
+                });
             }
         }
 
@@ -65,9 +54,14 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public override bool IsDistributionElement(Entity entity)
+        public override bool IsDistributionElement(Entity e)
         {
-            return entity.IsTCHDuct();
+            return e.IsTCHDuct();
+        }
+
+        public override bool CheckLayerValid(Entity e)
+        {
+            return true;
         }
     }
 }

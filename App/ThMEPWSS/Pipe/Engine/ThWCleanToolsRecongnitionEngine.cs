@@ -126,7 +126,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException();
+        }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
         }
     }
 }

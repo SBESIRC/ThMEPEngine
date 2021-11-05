@@ -1,16 +1,17 @@
 ﻿using System;
 using NFox.Cad;
+using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
-using ThMEPEngineCore.Model.Hvac;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -40,10 +41,7 @@ namespace ThMEPEngineCore.Engine
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                var visitor = new ThTCHDuctExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(database))
-                };
+                var visitor = new ThTCHDuctExtractionVisitor();
                 var elements = new List<ThRawIfcDistributionElementData>();
                 acadDatabase.ModelSpace
                     .OfType<Entity>()
@@ -58,15 +56,34 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var psr = Active.Editor.SelectCrossingPolygon(frame);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    var visitor = new ThTCHDuctExtractionVisitor();
+                    var elements = new List<ThRawIfcDistributionElementData>();
+                    psr.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var e = acadDatabase.Element<Entity>(o);
+                        if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+                        {
+                            visitor.DoExtract(elements, e, Matrix3d.Identity);
+                        }
+                    });
+                    Results.AddRange(elements);
+                }
+            }
+        }
+
         private List<ThRawIfcDistributionElementData> DoExtract(List<ThRawIfcDistributionElementData> elements, BlockReference blkRef, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var results = new List<ThRawIfcDistributionElementData>();
-                var visitor = new ThTCHDuctExtractionVisitor()
-                {
-                    LayerFilter = new HashSet<string>(ThDbLayerManager.Layers(blkRef.Database))
-                };
+                var visitor = new ThTCHDuctExtractionVisitor();
                 if (visitor.IsBuildElementBlockReference(blkRef))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blkRef.BlockTableRecord);
@@ -130,22 +147,22 @@ namespace ThMEPEngineCore.Engine
             Recognize(engine.Results, polygon);
         }
 
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            var engine = new ThTCHDuctExtractionEngine();
+            engine.ExtractFromEditor(polygon);
+            Recognize(engine.Results, polygon);
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> dataList, Point3dCollection polygon)
         {
-            foreach (var data in dataList)
-            {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection { data.Geometry });
-                if (polygon.Count > 0)
-                {
-                    var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
-                    if (sprinklerFilter.Count == 0)
-                    {
-                        continue;
-                    }
-                }
+            var collection = dataList.Select(o => o.Geometry).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(collection);
+            var sprinklerFilter = spatialIndex.SelectCrossingPolygon(polygon);
 
+            dataList.Where(o => sprinklerFilter.Contains(o.Geometry)).ForEach(data =>
+            {
                 var parameter = new ThIfcDuctSegmentParameters();
-                parameter.Outline = data.Geometry as Polyline;
                 var dictionary = data.Data as Dictionary<string, object>;
                 parameter.Width = Convert.ToDouble(dictionary["宽度"]);
                 parameter.Height = Convert.ToDouble(dictionary["厚度"]);
@@ -156,8 +173,12 @@ namespace ThMEPEngineCore.Engine
                 var end_y = Convert.ToDouble(dictionary["末端 Y 坐标"]);
                 parameter.Length = Math.Sqrt(Math.Pow(start_x - end_x, 2) + Math.Pow(start_y - end_y, 2));
                 parameter.MarkHeight = (start_z - parameter.Height / 2.0) / 1000.0;
-                Elements.Add(new ThIfcDuctSegment(parameter));
-            }
+                parameter.Outline = (data.Geometry as Line).Buffer(parameter.Width / 2);
+                Elements.Add(new ThIfcDuctSegment(parameter)
+                {
+                    Outline = data.Geometry,
+                });
+            });
         }
     }
 }

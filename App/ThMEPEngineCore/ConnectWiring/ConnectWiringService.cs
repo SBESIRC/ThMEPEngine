@@ -21,6 +21,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.ConnectWiring.Data;
+using ThMEPEngineCore.ConnectWiring.Model;
 using ThMEPEngineCore.ConnectWiring.Service;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
@@ -48,8 +49,8 @@ namespace ThMEPEngineCore.ConnectWiring
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
-
             BranchConnectingService branchConnecting = new BranchConnectingService();
+            MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
             {
@@ -77,7 +78,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
                     {
-                         var lines = new List<Polyline>();
+                        var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
                         using (var stringReader = new StringReader(res))
                         using (var jsonReader = new JsonTextReader(stringReader))
@@ -87,14 +88,27 @@ namespace ThMEPEngineCore.ConnectWiring
                             {
                                 if (f.Geometry is LineString line)
                                 {
-                                    var wiring = branchConnecting.CreateBranch(line.ToDbPolyline(), resBlocks);
-                                    lines.Add(wiring);
+                                    lines.Add(line.ToDbPolyline());
                                 }
                             }
                         }
 
-                        //插入线
-                        LineTypeService.InsertConnectPipe(lines, info.loopInfoModels.First().LineType);
+                        Dictionary<LoopInfoModel, List<Polyline>> loops = new Dictionary<LoopInfoModel, List<Polyline>>() { { info.loopInfoModels.First(), lines } };
+                        if (info.loopInfoModels.Count > 1)
+                        {
+                            loops = multiLoopService.CreateLoop(info, lines, resBlocks);
+                        }
+                        foreach (var loop in loops)
+                        {
+                            List<Polyline> resLines = new List<Polyline>();
+                            foreach (var line in loop.Value)
+                            {
+                                var wiring = branchConnecting.CreateBranch(line, resBlocks);
+                                resLines.Add(wiring);
+                            }
+                            //插入线
+                            LineTypeService.InsertConnectPipe(resLines, loop.Key.LineType);
+                        }
                     }
                 }
             }

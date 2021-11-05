@@ -16,13 +16,13 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var ids = new ObjectId[] { id };
             var duct_list = GetValueList(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return AnayDuctparam(duct_list, id.Handle);
+            return AnayDuctparam(duct_list, id.Handle, id.Database);
         }
         public static EntityModifyParam GetConnectorParamById(ObjectId id)
         {
             var ids = new ObjectId[] { id };
             var entity_list = GetValueList(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return AnayConnectorparam(entity_list, id.Handle);
+            return AnayConnectorparam(entity_list, id.Handle, id.Database);
         }
         public static TypedValueList GetValueList(IEnumerable<ObjectId> g_ids, string reg_app_name)
         {
@@ -36,7 +36,7 @@ namespace ThMEPEngineCore.Service.Hvac
             }
             return list;
         }
-        public static DuctModifyParam AnayDuctparam(TypedValueList list, Handle group_handle)
+        public static DuctModifyParam AnayDuctparam(TypedValueList list, Handle group_handle, Database database)
         {
             var param = new DuctModifyParam();
             var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.Service.Hvac
             param.air_volume = Double.Parse((string)values.ElementAt(inc++).Value);
             param.elevation = Double.Parse((string)values.ElementAt(inc++).Value);
             param.duct_size = (string)values.ElementAt(inc++).Value;
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(database))
             {
                 var id = db.Database.GetObjectId(false, group_handle, 0);
                 var portIndex2PositionDic = ThHvacAnalysisComponent.GetPortsOfGroup(id);
@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.Service.Hvac
             }
             return param;
         }
-        private static EntityModifyParam AnayConnectorparam(TypedValueList list, Handle group_handle)
+        private static EntityModifyParam AnayConnectorparam(TypedValueList list, Handle group_handle, Database database)
         {
             var param = new EntityModifyParam();
             if (list.Count > 0)
@@ -76,7 +76,7 @@ namespace ThMEPEngineCore.Service.Hvac
                 param.type = (string)values.ElementAt(inc++).Value;
                 if (!values.Any() || param.type == "Duct")
                     return param;
-                using (var db = AcadDatabase.Active())
+                using (var db = AcadDatabase.Use(database))
                 {
                     var id = db.Database.GetObjectId(false, group_handle, 0);
                     var portIndex2PositionDic = GetPortsOfGroup(id);
@@ -99,12 +99,12 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var rst = new Dictionary<string, Tuple<Point3d, string>>();
 
-            var id2GroupDic = GetObjectId2GroupDic();
+            var id2GroupDic = GetObjectId2GroupDic(groupId.Database);
             if (!id2GroupDic.ContainsKey(groupId))
                 return rst;
             var groupObj = id2GroupDic[groupId];
             var allObjIdsInGroup = groupObj.GetAllEntityIds();
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(groupId.Database))
             {
                 foreach (var id in allObjIdsInGroup)
                 {
@@ -130,14 +130,14 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var rst = new Dictionary<string, Point3d>();
 
-            var id2GroupDic = GetObjectId2GroupDic();
+            var id2GroupDic = GetObjectId2GroupDic(groupId.Database);
             if (!id2GroupDic.ContainsKey(groupId))
                 return rst;
 
             var groupObj = id2GroupDic[groupId];
 
             var allObjIdsInGroup = groupObj.GetAllEntityIds();
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(groupId.Database))
             {
                 foreach (var id in allObjIdsInGroup)
                 {
@@ -158,10 +158,10 @@ namespace ThMEPEngineCore.Service.Hvac
             }
             return rst;
         }
-        public static Dictionary<ObjectId, Group> GetObjectId2GroupDic()
+        public static Dictionary<ObjectId, Group> GetObjectId2GroupDic(Database database)
         {
             var dic = new Dictionary<ObjectId, Group>();
-            using (var db = AcadDatabase.Active())
+            using (var db = AcadDatabase.Use(database))
             {
                 var groups = db.Groups;
                 foreach (var g in groups)

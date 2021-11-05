@@ -14,17 +14,33 @@ panels:
   - UID: "pnlPRECONDITION"
     name: "PRECONDITION"
     title: "前置输入"
-    items:
-        - text: "楼层定义"
-          attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "提车道中心线"
-          attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "图块配置"
-          attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "房间框线"
-          attributes: { "IsVisible": false, "IsEnabled": false }
-        - text: "房间名称"
-          attributes: { "IsVisible": false, "IsEnabled": false }
+    rowPanels:
+      - text: ""
+        items:
+          - text: "楼层定义"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "提车道中心线"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "图块配置"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "房间框线"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "房间名称"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "房间功能提取"
+            attributes: { "IsVisible": false, "IsEnabled": false }
+          - text: "房间编号"
+            attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWGROUNDPLAN"
     name: "WGROUNDPLAN"
@@ -91,6 +107,15 @@ panels:
     title: "校核"
     items:
         - text: "消火栓\r\n灭火器"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlHVACCALCULATION"
+    name: "HVACCALCULATION"
+    title: "计算"
+    items:
+        - text: "室外参数\r\n设置"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "负荷通风\r\n计算"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACINSTALLATION"

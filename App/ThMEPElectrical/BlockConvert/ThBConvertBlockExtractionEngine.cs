@@ -6,6 +6,7 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Engine;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -14,6 +15,11 @@ namespace ThMEPElectrical.BlockConvert
         public List<string> NameFilter { get; set; }
 
         public override void Extract(Database database)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
         {
             throw new NotSupportedException();
         }

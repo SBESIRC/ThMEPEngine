@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -28,7 +29,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             InitializeComponent();
             this._data = data;
 
-            if(data.ByNorm)
+            if (data.ByNorm)
             {
                 RadioBtnTrue.IsChecked = true;
                 RadioBtnFalse.IsChecked = false;
@@ -41,6 +42,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             ProportionTxt.Text = data.Proportion.ToString();
             AirNumTxt.Text = data.AirNum.ToString();
             TotalTxt.Text = data.TotalValue.ToString();
+            this.AirNumTxt.Focus();
+            this.AirNumTxt.SelectionStart = this.AirNumTxt.Text.Length;
         }
 
         private void CancleButton_Click(object sender, RoutedEventArgs e)
@@ -51,10 +54,30 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            this._data.Proportion = double.Parse(ProportionTxt.Text);
-            this._data.AirNum = int.Parse(AirNumTxt.Text);
-            this._data.TotalValue = int.Parse(TotalTxt.Text);
+            this._data.Proportion = ProportionTxt.Text.ToNullDouble();
+            this._data.AirNum = AirNumTxt.Text.ToNullDouble();
+            this._data.TotalValue = TotalTxt.Text.ToNullDouble();
             this.Close();
+        }
+
+        private void RadioBtnTrue_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!panel1.IsNull() && !panel2.IsNull() && !TotalTxt.IsNull())
+            {
+                panel1.IsEnabled = true;
+                panel2.IsEnabled = true;
+                TotalTxt.IsEnabled = false;
+            }
+        }
+
+        private void RadioBtnFalse_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!panel1.IsNull() && !panel2.IsNull() && !TotalTxt.IsNull())
+            {
+                panel1.IsEnabled = false;
+                panel2.IsEnabled = false;
+                TotalTxt.IsEnabled = true;
+            }
         }
     }
 }

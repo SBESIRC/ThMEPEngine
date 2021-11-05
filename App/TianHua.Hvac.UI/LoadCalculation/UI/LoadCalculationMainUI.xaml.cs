@@ -2,12 +2,13 @@
 using AcHelper.Commands;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using ThCADExtension;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPEngineCore.IO.IOService;
@@ -26,9 +27,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
 
         static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "LoadCalculationConfig");
         static string defaultFile = "Config.config";
-        static string installUrl = urlFolder + "\\" + defaultFile;
-        static string configFolderUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "LoadCalculationConfig";
-        static string configFileUrl = configFolderUrl + "\\" + defaultFile;
+        static string installUrl = Path.Combine(urlFolder, defaultFile);
+        static string configFolderUrl = Path.Combine(new DirectoryInfo((string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX")).Parent.Parent.Parent.FullName, "LoadCalculationConfig");
 
         LoadCalculationViewModel viewModel;
         ConfigDataModel dataModel = null;
@@ -49,8 +49,40 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             //为UI绑定数据
             UpdateUIData();
 
+            //获取图纸缓存数据
+            GetNODData();
+            CreatBtn.Focus();
             //初始化图纸(导入图层/图块等)
             InsertBlockService.initialization();
+        }
+
+
+        private void GetNODData()
+        {
+            using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+            {
+                var dbSourceService = new ModelDataDbSourceService();
+                dbSourceService.LoadFHJS(acad.Database);
+
+                chk_Area.IsChecked = dbSourceService.mainUIData.chk_Area;
+                chk_ColdL.IsChecked = dbSourceService.mainUIData.chk_ColdL;
+                chk_ColdW.IsChecked = dbSourceService.mainUIData.chk_ColdW;
+                chk_ColdWP.IsChecked = dbSourceService.mainUIData.chk_ColdWP;
+                chk_ColdWP_Com.SelectedIndex = dbSourceService.mainUIData.chk_ColdWP_Index;
+                chk_CondensateWP.IsChecked = dbSourceService.mainUIData.chk_CondensateWP;
+                chk_HotL.IsChecked = dbSourceService.mainUIData.chk_HotL;
+                chk_HotW.IsChecked = dbSourceService.mainUIData.chk_HotW;
+                chk_HotWP.IsChecked = dbSourceService.mainUIData.chk_HotWP;
+                chk_HotWP_Com.SelectedIndex = dbSourceService.mainUIData.chk_HotWP_Index;
+                chk_AirVolume.IsChecked = dbSourceService.mainUIData.chk_AirVolume;
+                chk_FumeExhaust.IsChecked = dbSourceService.mainUIData.chk_FumeExhaust;
+                chk_FumeSupplementary.IsChecked = dbSourceService.mainUIData.chk_FumeSupplementary;
+                chk_AccidentExhaust.IsChecked = dbSourceService.mainUIData.chk_AccidentExhaust;
+                chk_NormalAirVolume.IsChecked = dbSourceService.mainUIData.chk_NormalAirVolume;
+                chk_NormalFumeSupplementary.IsChecked = dbSourceService.mainUIData.chk_NormalFumeSupplementary;
+                if (configFileList.Items.Count > dbSourceService.mainUIData.ChoiseFileIndex)
+                    configFileList.SelectedIndex = dbSourceService.mainUIData.ChoiseFileIndex;
+            }
         }
 
         private void ReadConfig(string fileurl)
@@ -300,8 +332,6 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             {
                 ReadConfig(installUrl);
                 SaveBtn.IsEnabled = false;
-                CopyBtn.IsEnabled = false;
-                DeleteBtn.IsEnabled = false;
             }
             else
             {
@@ -309,21 +339,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
                 //读取配置信息
                 ReadConfig(file);
                 SaveBtn.IsEnabled = true;
-                CopyBtn.IsEnabled = true;
-                DeleteBtn.IsEnabled = true;
             }
             UpdateUIData(FileName);
-            configFileList.IsEnabled = false;
-        }
-
-        private void ChoiseConfigFileBtn_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            if (configFileList.SelectedItem.ToString() != "默认" && !CheckDataUpdates() && MessageBoxResult.Yes == MessageBox.Show("检测到用户未保存已更改数据，是否需要保存?", "提示", MessageBoxButton.YesNo, MessageBoxImage.Question))
-            {
-                configFileList.IsEnabled = false;
-                return;
-            }
-            configFileList.IsEnabled = true;
         }
 
         private void SaveAsFileBtn_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -461,12 +478,31 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         /// <param name="e"></param>
         private void RoomTag_MouseLeftButtonUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            TextBlock textBlock = (TextBlock)sender;
-            string roomName = textBlock.Text;
-            ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName = roomName;
-
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBHCR");
-            FocusToCAD();
+            var element = (InputTextBox)sender;
+            if (e.ClickCount == 1)
+            {
+                var timer = new System.Timers.Timer(500);
+                timer.AutoReset = false;
+                timer.Elapsed += new ElapsedEventHandler((o, ex) => element.Dispatcher.Invoke(new Action(() =>
+                {
+                    var timer2 = (System.Timers.Timer)element.Tag;
+                    timer2.Stop();
+                    timer2.Dispose();
+                    UIElement_Click(element, e);
+                })));
+                timer.Start();
+                element.Tag = timer;
+            }
+            if (e.ClickCount > 1)
+            {
+                var timer = element.Tag as System.Timers.Timer;
+                if (timer != null)
+                {
+                    timer.Stop();
+                    timer.Dispose();
+                    UIElement_DoubleClick(sender, e);
+                }
+            }
         }
 
         /// <summary>
@@ -621,28 +657,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
 
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSCFH");
             FocusToCAD();
-            this.Close();
-        }
-
-
-        /// <summary>
-        /// 更新按钮点击事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void UpdateBtn_Click(object sender, RoutedEventArgs e)
-        {
-            SaveUIAnnotateContent();
-            var ModelDataList = new List<DynamicLoadCalculationModelData>();
-            foreach (var config in viewModel.DynamicModelData)
-            {
-                ModelDataList.Add(config);
-            }
-            ThLoadCalculationUIService.Instance.Parameter.ModelDataList = ModelDataList;
-
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THSCFH");
-            FocusToCAD();
-            this.Close();
+            //this.Close();
         }
         #endregion
 
@@ -654,6 +669,104 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private bool ShowconfigFileList = false;
+        private void configFileList_DropDownOpened(object sender, EventArgs e)
+        {
+            if (!ShowconfigFileList &&  !CheckDataUpdates() && MessageBoxResult.No == MessageBox.Show("检测到用户未保存已更改数据，是否需要保存?", "提示", MessageBoxButton.YesNo, MessageBoxImage.Question))
+            {
+                ShowconfigFileList = true;
+                configFileList.IsDropDownOpen = true;
+            }
+            ShowconfigFileList = false;
+        }
+
+        private void chk_ColdWP_Checked(object sender, RoutedEventArgs e)
+        {
+            chk_ColdWP_Com.IsEnabled = true;
+        }
+
+        private void chk_ColdWP_Unchecked(object sender, RoutedEventArgs e)
+        {
+            chk_ColdWP_Com.IsEnabled = false;
+        }
+
+        private void chk_HotWP_Checked(object sender, RoutedEventArgs e)
+        {
+            chk_HotWP_Com.IsEnabled = true;
+        }
+
+        private void chk_HotWP_Unchecked(object sender, RoutedEventArgs e)
+        {
+            chk_HotWP_Com.IsEnabled = false;
+        }
+
+        private void ThCustomWindow_Closed(object sender, EventArgs e)
+        {
+            using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+            using (var doclock = AcadApp.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                var dbSourceService = new ModelDataDbSourceService();
+
+                dbSourceService.mainUIData.chk_Area = chk_Area.IsChecked.Value;
+                dbSourceService.mainUIData.chk_ColdL = chk_ColdL.IsChecked.Value;
+                dbSourceService.mainUIData.chk_ColdW = chk_ColdW.IsChecked.Value;
+                dbSourceService.mainUIData.chk_ColdWP = chk_ColdWP.IsChecked.Value;
+                dbSourceService.mainUIData.chk_ColdWP_Index = chk_ColdWP_Com.SelectedIndex;
+                dbSourceService.mainUIData.chk_CondensateWP = chk_CondensateWP.IsChecked.Value;
+                dbSourceService.mainUIData.chk_HotL = chk_HotL.IsChecked.Value;
+                dbSourceService.mainUIData.chk_HotW = chk_HotW.IsChecked.Value;
+                dbSourceService.mainUIData.chk_HotWP = chk_HotWP.IsChecked.Value;
+                dbSourceService.mainUIData.chk_HotWP_Index = chk_HotWP_Com.SelectedIndex;
+                dbSourceService.mainUIData.chk_AirVolume = chk_AirVolume.IsChecked.Value;
+                dbSourceService.mainUIData.chk_FumeExhaust = chk_FumeExhaust.IsChecked.Value;
+                dbSourceService.mainUIData.chk_FumeSupplementary = chk_FumeSupplementary.IsChecked.Value;
+                dbSourceService.mainUIData.chk_AccidentExhaust = chk_AccidentExhaust.IsChecked.Value;
+                dbSourceService.mainUIData.chk_NormalAirVolume = chk_NormalAirVolume.IsChecked.Value;
+                dbSourceService.mainUIData.chk_NormalFumeSupplementary = chk_NormalFumeSupplementary.IsChecked.Value;
+                dbSourceService.mainUIData.ChoiseFileIndex = configFileList.SelectedIndex;
+                dbSourceService.SaveFHJS(acad.Database);
+            }
+        }
+        private void UIElement_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            InputTextBox textBlock = (InputTextBox)sender;
+            textBlock.Cursor = null;
+            textBlock.PreviewMouseLeftButtonDown -= RoomTag_MouseLeftButtonUp;
+            textBlock.LostFocus += TextBox_LostFocus;
+            textBlock.EnterEvent += InputTextBox_EnterEvent;
+            textBlock.IsReadOnly = false;
+            textBlock.Focus();
+        }
+
+        private void UIElement_Click(InputTextBox textBlock, MouseButtonEventArgs e)
+        {
+            string roomName = textBlock.Text;
+            ThLoadCalculationUIService.Instance.Parameter.RoomFunctionName = roomName;
+
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBHCR");
+            FocusToCAD();
+        }
+
+        private void TextBox_LostFocus(object sender, RoutedEventArgs e)
+        {
+            InputTextBox textBlock = (InputTextBox)sender;
+            textBlock.Cursor = Cursors.Hand;
+            textBlock.PreviewMouseLeftButtonDown += RoomTag_MouseLeftButtonUp;
+            textBlock.LostFocus -= TextBox_LostFocus;
+            textBlock.EnterEvent -= InputTextBox_EnterEvent;
+            textBlock.IsReadOnly = true ;
+        }
+
+        private void InputTextBox_EnterEvent(object sender, RoutedEventArgs e)
+        {
+            InputTextBox textBlock = (InputTextBox)sender;
+            textBlock.Cursor = Cursors.Hand;
+            textBlock.PreviewMouseLeftButtonDown += RoomTag_MouseLeftButtonUp;
+            textBlock.LostFocus -= TextBox_LostFocus;
+            textBlock.EnterEvent -= InputTextBox_EnterEvent;
+            textBlock.IsReadOnly = true;
         }
     }
 }

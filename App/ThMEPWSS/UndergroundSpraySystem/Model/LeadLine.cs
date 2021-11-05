@@ -35,7 +35,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                     var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                     dbObjs.Cast<Entity>()
                         .Where(e => IsTCHNote(e))
-                        .ForEach(e => e.ExplodeTCHNote(DBObjs));
+                        .ForEach(e => ExplodeTCHNote(e));
+                    dbObjs.Cast<Entity>()
+                        .Where(e => e is BlockReference)
+                        .ForEach(e => ExplodeBlockNote(e));
                     dbObjs.Cast<Entity>()
                         .Where(e => e is Line)
                         .ForEach(e => DBObjs.Add(e));
@@ -73,11 +76,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         {
             return entity.GetType().Name.Equals("ImpEntity");
         }
-    }
 
-    public static class TCHNoteTools
-    {
-        public static void ExplodeTCHNote(this Entity entity, DBObjectCollection DBObjs)
+        private void ExplodeTCHNote(Entity entity)
         {
             var dbObjs = new DBObjectCollection();
             entity.Explode(dbObjs);
@@ -87,6 +87,21 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             dbObjs.Cast<Entity>()
                 .Where(e => e is Polyline)
                 .ForEach(e => DBObjs.AddList((e as Polyline).Pline2Lines()));
+        }
+
+        private void ExplodeBlockNote(Entity entity)
+        {
+            var dbObjs = new DBObjectCollection();
+            entity.Explode(dbObjs);
+            dbObjs.Cast<Entity>()
+                .Where(e => e is Line)
+                .ForEach(e => DBObjs.Add(e));
+            dbObjs.Cast<Entity>()
+                .Where(e => e is Polyline)
+                .ForEach(e => DBObjs.AddList((e as Polyline).Pline2Lines()));
+            dbObjs.Cast<Entity>()
+                .Where(e => IsTCHNote(e))
+                .ForEach(e => ExplodeTCHNote(e));
         }
     }
 }

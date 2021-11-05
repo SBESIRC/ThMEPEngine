@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
                 this.detect_area = new List<Polyline>();
             else this.detect_area = detect_area;
 
-            if(UCS==null)
+            if (UCS == null)
                 this.UCS = new Dictionary<Polyline, Vector3d>();
             else
             {
@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Data
                     this.UCS.Add(room, new Vector3d(1, 0, 0));
                 else
                 {
-                    foreach(var record in UCS)
+                    foreach (var record in UCS)
                     {
                         if (record.Value == null)
                         {

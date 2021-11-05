@@ -20,9 +20,9 @@ namespace ThMEPHVAC
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJGN", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFJGNTQ", CommandFlags.Modal)]
         //天华提取房间功能
-        public void THFJGN()
+        public void THFJGNTQ()
         {
             using (var cmd = new ThRoomFunctionExtractCmd())
             {

@@ -120,6 +120,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.ExtractFromMS(database);
             Results.AddRange(waterWellVisitor.Results);
         }
+
+        public override void ExtractFromEditor(Point3dCollection frame)
+        {
+            throw new NotSupportedException();
+        }
     }
     public class ThWWaterWellRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -150,6 +155,12 @@ namespace ThMEPWSS.Pipe.Engine
             extractionEngine.ExtractFromMS(database);
             Recognize(extractionEngine.Results, polygon);
         }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
         public override void Recognize(List<ThRawIfcDistributionElementData> datas,Point3dCollection polygon)
         {
             var dbObjs = datas.Select(o => o.Geometry).ToCollection();

@@ -1,0 +1,32 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.LoadCalculation.UI.ExtractRoomFunction"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="提取房间功能">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,10,0,5">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox Name="HasPrefix" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="前缀" IsChecked="True" Checked="HasPrefix_Checked" Unchecked="HasPrefix_Checked"></CheckBox>
+                <cus:InputTextBox x:Name="PrefixContentTxt" Width="70" Margin="10,0,10,0" Text="N-1F-" TextChanged="PrefixContentTxt_TextChanged" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label Name="StartingNumlbl" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="起始序号："></Label>
+                <cus:InputTextBox x:Name="StartingNumlblTxt" Width="70" Margin="10,0,10,0" Text="01" TextChanged="StartingNumlblTxt_TextChanged"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label VerticalContentAlignment="Center" VerticalAlignment="Center" Width="55" Margin="10,0,10,0" Padding="0" Content="编号示意："></Label>
+                <Label Name="NumberIndicationlbl" VerticalContentAlignment="Center" VerticalAlignment="Center" Width="70" Margin="10,0,10,0"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0">
+                <cus:ImageButton Content="提取房间功能" HorizontalAlignment="Stretch" Width="150" IsDefault="True" TabIndex="1" Margin="10,0,10,5" Click="ExtractButton_Click"></cus:ImageButton>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>
