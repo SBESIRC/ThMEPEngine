@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -58,22 +59,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             {
                 this._data.Proportion = num;
             }
-            if (string.IsNullOrEmpty(AirNumTxt.Text))
-            {
-                this._data.AirNum = null;
-            }
-            else
-            {
-                this._data.AirNum = double.Parse(AirNumTxt.Text);
-            }
-            if (string.IsNullOrEmpty(TotalTxt.Text))
-            {
-                this._data.TotalValue = null;
-            }
-            else
-            {
-                this._data.TotalValue = double.Parse(TotalTxt.Text);
-            }
+            this._data.AirNum = AirNumTxt.Text.ToNullDouble();
+            this._data.TotalValue = TotalTxt.Text.ToNullDouble();
             this.Close();
         }
 

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -52,14 +53,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            if (string.IsNullOrEmpty(ProportionTxt.Text))
-            {
-                this._data.NormValue = null;
-            }
-            else
-            {
-                this._data.NormValue = double.Parse(ProportionTxt.Text);
-            }
+            this._data.NormValue = ProportionTxt.Text.ToNullDouble();
             this._data.TotalValue = 0;
             if (double.TryParse(TotalTxt.Text, out double num))
             {

@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -53,23 +54,13 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnTrue.IsChecked.Value;
-            if (string.IsNullOrEmpty(PersonnelDensityTxt.Text))
+            this._data.PersonnelDensity = PersonnelDensityTxt.Text.ToNullDouble();
+            this._data.ReshAirNormValue = FreshAirNormTxt.Text.ToNullDouble();
+            this._data.TotalValue = 0;
+            if(double.TryParse(TotalTxt.Text,out double num))
             {
-                this._data.PersonnelDensity = null;
+                this._data.TotalValue = num;
             }
-            else
-            {
-                this._data.PersonnelDensity = double.Parse(PersonnelDensityTxt.Text);
-            }
-            if (string.IsNullOrEmpty(FreshAirNormTxt.Text))
-            {
-                this._data.ReshAirNormValue = null;
-            }
-            else
-            {
-                this._data.ReshAirNormValue = double.Parse(FreshAirNormTxt.Text);
-            }
-            this._data.TotalValue = double.Parse(TotalTxt.Text);
             this.Close();
         }
 

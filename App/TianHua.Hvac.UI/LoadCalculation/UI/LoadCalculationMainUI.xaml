@@ -43,7 +43,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <cus:InputTextBox Foreground="Blue" FontWeight="Bold" ForceCursor="True" Cursor="Hand" TextDecorations="Underline" BorderThickness="0" TextAlignment="Center" VerticalAlignment="Center" 
-                             Text="{Binding RoomFunction,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  PreviewMouseLeftButtonDown="RoomTag_MouseLeftButtonUp"/>
+                             Text="{Binding RoomFunction,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"  PreviewMouseLeftButtonDown="RoomTag_MouseLeftButtonUp"/>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -55,7 +55,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding ColdNorm.GetTrueColor}" VerticalAlignment="Stretch" Text="{Binding ColdNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding ColdNorm.GetTrueColor}" VerticalAlignment="Stretch" Text="{Binding ColdNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ColdNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ColdNormBtn_Click" Content="."></Button>
                                         </Grid>
                                     </DataTemplate>
@@ -65,7 +65,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding CWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding CWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -78,7 +78,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding HotNorm.GetTrueColor}" Text="{Binding HotNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Background="{Binding HotNorm.GetTrueColor}" Text="{Binding HotNorm.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding HotNorm,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="HotNormBtn_Click" Content="."></Button>
                                         </Grid>
                                     </DataTemplate>
@@ -88,7 +88,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding HWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" Text="{Binding HWaterTemperature,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -97,7 +97,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Grid>
-                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding ReshAir.GetPersonnelDensity,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="White" BorderThickness="0" TextAlignment="Center"/>
                                         </Grid>
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
@@ -110,7 +110,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding ReshAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding ReshAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding ReshAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding ReshAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding ReshAir,Mode=TwoWay,NotifyOnSourceUpdated=True}" Click="ReshAirBtn_Click" Content=".">
                                             </Button>
                                         </Grid>
@@ -125,7 +125,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding Lampblack.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding Lampblack.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding Lampblack.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding Lampblack.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Lampblack,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -139,7 +139,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding LampblackAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding LampblackAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding LampblackAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding LampblackAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding LampblackAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="LampblackAirBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -153,7 +153,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding AccidentAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding AccidentAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" Text="{Binding AccidentAir.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding AccidentAir.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AccidentAir,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AccidentAirBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -167,7 +167,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding Exhaust.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding Exhaust.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding Exhaust,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="ExhaustBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>
@@ -181,7 +181,7 @@
                                                 <ColumnDefinition Width="80*"/>
                                                 <ColumnDefinition Width="20*"/>
                                             </Grid.ColumnDefinitions>
-                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,Converter={StaticResource numConverter}}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
+                                            <cus:InputTextBox Grid.Column="0" TextBoxInputType="InputString" IsReadOnly="False" Text="{Binding AirCompensation.GetTrueValue,Mode=TwoWay,UpdateSourceTrigger=LostFocus,Converter={StaticResource numConverter}}" Background="{Binding AirCompensation.GetTrueColor}" BorderThickness="0" TextAlignment="Center"/>
                                             <Button Grid.Column="1" Width="12" VerticalAlignment="Stretch" Tag="{Binding AirCompensation,Mode=TwoWay,NotifyOnSourceUpdated=True}"  Click="AirCompensationBtn_Click" Content="."/>
                                         </Grid>
                                     </DataTemplate>

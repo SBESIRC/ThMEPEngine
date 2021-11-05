@@ -2,6 +2,7 @@
 using System.Windows.Media;
 using System.Collections.Generic;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPHVAC.LoadCalculation.Extension;
 
 namespace ThMEPHVAC.LoadCalculation.Model
 {
@@ -326,7 +327,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = true;
-                PersonnelDensity = double.Parse(value);
+                personnelDensity = value.ToNullDouble();
             }
         }
 
@@ -382,11 +383,11 @@ namespace ThMEPHVAC.LoadCalculation.Model
             }
         }
 
-        private double proportion;
+        private double? proportion;
         /// <summary>
         /// 占比
         /// </summary>
-        public double Proportion
+        public double? Proportion
         {
             get
             {
@@ -544,10 +545,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = 1;
-                if (string.IsNullOrEmpty(value))
-                    NormValue = null;
-                else
-                    NormValue = double.Parse(value);
+                NormValue = value.ToNullDouble();
             }
         }
 
@@ -567,34 +565,34 @@ namespace ThMEPHVAC.LoadCalculation.Model
         /// <summary>
         /// 换气次数要求
         /// </summary>
-        public double BreatheNum { get; set; }
+        public double? BreatheNum { get; set; }
 
-        public double CapacityType { get; set; } = 1;
+        public double? CapacityType { get; set; } = 1;
 
         /// <summary>
         /// 变压器容量
         /// </summary>
-        public double TransformerCapacity { get; set; }
+        public double? TransformerCapacity { get; set; }
 
         /// <summary>
         /// 锅炉容量
         /// </summary>
-        public double BoilerCapacity { get; set; }
+        public double? BoilerCapacity { get; set; }
 
         /// <summary>
         /// 柴发容量
         /// </summary>
-        public double FirewoodCapacity { get; set; }
+        public double? FirewoodCapacity { get; set; }
 
         /// <summary>
         /// 散热系数
         /// </summary>
-        public double HeatDissipation { get; set; }
+        public double? HeatDissipation { get; set; }
 
         /// <summary>
         /// 室内温度
         /// </summary>
-        public double RoomTemperature { get; set; }
+        public double? RoomTemperature { get; set; }
     }
 
     /// <summary>
@@ -674,10 +672,7 @@ namespace ThMEPHVAC.LoadCalculation.Model
             set
             {
                 ByNorm = 1;
-                if (string.IsNullOrEmpty(value))
-                    NormValue = null;
-                else
-                    NormValue = double.Parse(value);
+                NormValue = value.ToNullDouble();
             }
         }
         public SolidColorBrush GetTrueColor
@@ -697,16 +692,16 @@ namespace ThMEPHVAC.LoadCalculation.Model
         /// <summary>
         /// 锅炉容量
         /// </summary>
-        public double BoilerCapacity { get; set; }
+        public double? BoilerCapacity { get; set; }
 
         /// <summary>
         /// 柴发容量
         /// </summary>
-        public double FirewoodCapacity { get; set; }
+        public double? FirewoodCapacity { get; set; }
 
         /// <summary>
         /// 燃烧空气量
         /// </summary>
-        public double CombustionAirVolume { get; set; }
+        public double? CombustionAirVolume { get; set; }
     }
 }

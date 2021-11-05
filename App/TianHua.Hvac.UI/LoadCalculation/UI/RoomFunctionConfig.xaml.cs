@@ -26,8 +26,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         {
             InitializeComponent();
             this.RoomFunctionTxt.Text = roomFunction;
-            this.RoomFunctionTxt.Focus();
             this.RoomFunctionTxt.SelectionStart = this.RoomFunctionTxt.Text.Length;
+            this.RoomFunctionTxt.Focus();
         }
         private void CancleButton_Click(object sender, RoutedEventArgs e)
         {

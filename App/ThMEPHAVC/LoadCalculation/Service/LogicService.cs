@@ -329,13 +329,13 @@ namespace ThMEPHVAC.LoadCalculation.Service
             bool showLampblack = false;
             //Column 7
             {
-                if (modeldata.Lampblack.ByNorm && modeldata.Lampblack.AirNum.HasValue && modeldata.Lampblack.AirNum.Value > 0)
+                if (modeldata.Lampblack.ByNorm && modeldata.Lampblack.AirNum.HasValue && modeldata.Lampblack.AirNum.Value > 0 && modeldata.Lampblack.Proportion.HasValue)
                 {
                     showLampblack = true;
-                    Lampblack = ((int)Math.Ceiling(Area * modeldata.Lampblack.Proportion * roomHeigth * modeldata.Lampblack.AirNum.Value)).CeilingInteger(50);
+                    Lampblack = ((int)Math.Ceiling(Area * modeldata.Lampblack.Proportion.Value * roomHeigth * modeldata.Lampblack.AirNum.Value)).CeilingInteger(50);
                     tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_FumeExhaust, @"排油烟(m{\H0.7x;\S3^;\H1.4286x;/h)}", Lampblack.ToString()));
                 }
-                else if (!(modeldata.Lampblack.ByNorm && modeldata.Lampblack.TotalValue.HasValue && modeldata.Lampblack.TotalValue.Value > 0))
+                else if (!modeldata.Lampblack.ByNorm && modeldata.Lampblack.TotalValue.HasValue && modeldata.Lampblack.TotalValue.Value > 0)
                 {
                     showLampblack = true;
                     Lampblack = ((int)modeldata.Lampblack.TotalValue.Value).CeilingInteger(50);
@@ -352,9 +352,9 @@ namespace ThMEPHVAC.LoadCalculation.Service
             }
             //Column 9
             {
-                if (modeldata.AccidentAir.ByNorm && modeldata.AccidentAir.AirNum.HasValue && modeldata.AccidentAir.AirNum.Value > 0)
+                if (modeldata.AccidentAir.ByNorm && modeldata.AccidentAir.AirNum.HasValue && modeldata.AccidentAir.AirNum.Value > 0 && modeldata.AccidentAir.Proportion.HasValue)
                 {
-                    AccidentExhaust = ((int)Math.Ceiling(Area * modeldata.AccidentAir.Proportion * roomHeigth * modeldata.AccidentAir.AirNum.Value)).CeilingInteger(50);
+                    AccidentExhaust = ((int)Math.Ceiling(Area * modeldata.AccidentAir.Proportion.Value * roomHeigth * modeldata.AccidentAir.AirNum.Value)).CeilingInteger(50);
                     tuples.Add(new Tuple<bool, string, string>(ThLoadCalculationUIService.Instance.Parameter.chk_AccidentExhaust, @"事故排风(m{\H0.7x;\S3^;\H1.4286x;/h)}", AccidentExhaust.ToString()));
                 }
                 else if (!modeldata.AccidentAir.ByNorm && modeldata.AccidentAir.TotalValue.HasValue && modeldata.AccidentAir.TotalValue.Value > 0)
@@ -375,19 +375,19 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 }
                 else if(modeldata.Exhaust.ByNorm == 3)
                 {
-                    int NormalAirNewVolume = (int)Math.Ceiling(Area * roomHeigth * modeldata.Exhaust.BreatheNum);
+                    int NormalAirNewVolume = modeldata.Exhaust.BreatheNum.HasValue ? (int)Math.Ceiling(Area * roomHeigth * modeldata.Exhaust.BreatheNum.Value) : 0;
                     int HeatBalanceValue = 0;
-                    if (modeldata.Exhaust.CapacityType == 1)
+                    if (modeldata.Exhaust.CapacityType == 1 && modeldata.Exhaust.TransformerCapacity.HasValue && modeldata.Exhaust.HeatDissipation.HasValue && modeldata.Exhaust.RoomTemperature.HasValue)
                     {
-                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.TransformerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.TransformerCapacity.Value * modeldata.Exhaust.HeatDissipation.Value * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature.Value)));
                     }
-                    else if (modeldata.Exhaust.CapacityType == 2)
+                    else if (modeldata.Exhaust.CapacityType == 2 && modeldata.Exhaust.BoilerCapacity.HasValue && modeldata.Exhaust.HeatDissipation.HasValue && modeldata.Exhaust.RoomTemperature.HasValue)
                     {
-                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.BoilerCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.BoilerCapacity.Value * modeldata.Exhaust.HeatDissipation.Value * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature.Value)));
                     }
-                    else
+                    else if(modeldata.Exhaust.CapacityType == 3 && modeldata.Exhaust.FirewoodCapacity.HasValue && modeldata.Exhaust.HeatDissipation.HasValue && modeldata.Exhaust.RoomTemperature.HasValue)
                     {
-                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.FirewoodCapacity * modeldata.Exhaust.HeatDissipation * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature)));
+                        HeatBalanceValue = Math.Abs((int)Math.Ceiling(3600 * modeldata.Exhaust.FirewoodCapacity.Value * modeldata.Exhaust.HeatDissipation.Value * 0.01 / 1.2 / (summerVentilationT - modeldata.Exhaust.RoomTemperature.Value)));
                     }
                     NormalAirVolume = Math.Max(NormalAirNewVolume, HeatBalanceValue).CeilingInteger(50);
                 }
@@ -408,13 +408,13 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 }
                 else if(modeldata.AirCompensation.ByNorm == 3)
                 {
-                    if (modeldata.AirCompensation.CapacityType == 1)
+                    if (modeldata.AirCompensation.CapacityType == 1 && modeldata.AirCompensation.BoilerCapacity.HasValue)
                     {
-                        NormalFumeSupplementary = NormalAirVolume + ((int)Math.Ceiling(modeldata.AirCompensation.BoilerCapacity / 8000 / 4.18 * 3600 / 0.9 * 9.6 * 1.2)).CeilingInteger(50);
+                        NormalFumeSupplementary = NormalAirVolume + ((int)Math.Ceiling(modeldata.AirCompensation.BoilerCapacity.Value / 8000 / 4.18 * 3600 / 0.9 * 9.6 * 1.2)).CeilingInteger(50);
                     }
-                    else
+                    else if(modeldata.AirCompensation.CapacityType == 2 && modeldata.AirCompensation.FirewoodCapacity.HasValue && modeldata.AirCompensation.CombustionAirVolume.HasValue)
                     {
-                        NormalFumeSupplementary = ((int)(NormalAirVolume + modeldata.AirCompensation.FirewoodCapacity * modeldata.AirCompensation.CombustionAirVolume)).CeilingInteger(50);
+                        NormalFumeSupplementary = ((int)(NormalAirVolume + modeldata.AirCompensation.FirewoodCapacity.Value * modeldata.AirCompensation.CombustionAirVolume.Value)).CeilingInteger(50);
                     }
                 }
                 if (NormalFumeSupplementary > 0)

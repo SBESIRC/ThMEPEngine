@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -78,29 +79,15 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnType1.IsChecked.Value ? 1 : RadioBtnType2.IsChecked.Value ? 2 : 3;
-            if (string.IsNullOrEmpty(NormTxt.Text))
-            {
-                this._data.NormValue = null;
-            }
-            else
-            {
-                this._data.NormValue = double.Parse(NormTxt.Text);
-            }
-            if (string.IsNullOrEmpty(TotalTxt.Text))
-            {
-                this._data.TotalValue = null;
-            }
-            else
-            {
-                this._data.TotalValue = double.Parse(TotalTxt.Text);
-            }
-            this._data.BreatheNum = double.Parse(BreatheNumTxt.Text);
+            this._data.NormValue = NormTxt.Text.ToNullDouble();
+            this._data.TotalValue = TotalTxt.Text.ToNullDouble();
+            this._data.BreatheNum = BreatheNumTxt.Text.ToNullDouble();
             this._data.CapacityType = CapacityType1.IsChecked.Value ? 1 : CapacityType2.IsChecked.Value ? 2 : 3;
-            this._data.TransformerCapacity = double.Parse(TransformerCapacityTxt.Text);
-            this._data.BoilerCapacity = double.Parse(BoilerCapacityTxt.Text);
-            this._data.FirewoodCapacity = double.Parse(FirewoodCapacityTxt.Text);
-            this._data.HeatDissipation = double.Parse(HeatDissipationTxt.Text);
-            this._data.RoomTemperature = double.Parse(RoomTemperatureTxt.Text);
+            this._data.TransformerCapacity = TransformerCapacityTxt.Text.ToNullDouble();
+            this._data.BoilerCapacity = BoilerCapacityTxt.Text.ToNullDouble();
+            this._data.FirewoodCapacity = FirewoodCapacityTxt.Text.ToNullDouble();
+            this._data.HeatDissipation = HeatDissipationTxt.Text.ToNullDouble();
+            this._data.RoomTemperature = RoomTemperatureTxt.Text.ToNullDouble();
             this.Close();
         }
 

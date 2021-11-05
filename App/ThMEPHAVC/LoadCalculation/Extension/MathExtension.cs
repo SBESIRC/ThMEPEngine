@@ -28,5 +28,17 @@ namespace ThMEPHVAC.LoadCalculation.Extension
             else
                 return number;
         }
+
+        public static double? ToNullDouble(this string Value)
+        {
+            if (double.TryParse(Value, out double num))
+            {
+                return num;
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

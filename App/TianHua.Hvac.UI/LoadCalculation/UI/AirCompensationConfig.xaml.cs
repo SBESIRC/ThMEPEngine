@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPHVAC.LoadCalculation.Extension;
 using ThMEPHVAC.LoadCalculation.Model;
 
 namespace TianHua.Hvac.UI.LoadCalculation.UI
@@ -71,26 +72,12 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             this._data.ByNorm = RadioBtnType1.IsChecked.Value ? 1 : RadioBtnType2.IsChecked.Value ? 2 : 3;
-            if (string.IsNullOrEmpty(NormTxt.Text))
-            {
-                this._data.NormValue = null;
-            }
-            else
-            {
-                this._data.NormValue = double.Parse(NormTxt.Text);
-            }
-            if (string.IsNullOrEmpty(TotalTxt.Text))
-            {
-                this._data.TotalValue = null;
-            }
-            else
-            {
-                this._data.TotalValue = double.Parse(TotalTxt.Text);
-            }
+            this._data.NormValue = NormTxt.Text.ToNullDouble();
+            this._data.TotalValue = TotalTxt.Text.ToNullDouble();
             this._data.CapacityType = CapacityType1.IsChecked.Value ? 1 : 2;
-            this._data.BoilerCapacity = double.Parse(BoilerCapacityTxt.Text);
-            this._data.FirewoodCapacity = double.Parse(FirewoodCapacityTxt.Text);
-            this._data.CombustionAirVolume = double.Parse(CombustionAirVolumeTxt.Text);
+            this._data.BoilerCapacity = BoilerCapacityTxt.Text.ToNullDouble();
+            this._data.FirewoodCapacity = FirewoodCapacityTxt.Text.ToNullDouble();
+            this._data.CombustionAirVolume = CombustionAirVolumeTxt.Text.ToNullDouble();
             this.Close();
         }
 
