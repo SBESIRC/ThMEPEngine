@@ -8,6 +8,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.FireAlarm.Data;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
@@ -46,7 +47,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                 }
             });
 
-            ThFireAlarmUtils.MoveToXYPlane(Geos);
+            Geos.MoveToXYPlane();
         }
 
         protected override ThMEPDataSet BuildDataSet()

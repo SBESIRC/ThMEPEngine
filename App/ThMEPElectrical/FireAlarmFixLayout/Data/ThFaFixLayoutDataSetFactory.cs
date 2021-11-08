@@ -20,6 +20,7 @@ using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Interface;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
@@ -178,7 +179,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                 }
             });
 
-            ThFireAlarmUtils.MoveToXYPlane(Geos);
+            Geos.MoveToXYPlane();
         }
 
         private ThBuildingElementVisitorManager Extract(Database database)

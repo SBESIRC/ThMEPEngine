@@ -12,6 +12,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
@@ -90,7 +91,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                 }
             });
 
-            ThFireAlarmUtils.MoveToXYPlane(Geos);
+            Geos.MoveToXYPlane();
         }
 
         private ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, bool referBeam)
