@@ -10,9 +10,9 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaEStoreyExtractor : ThEStoreyExtractor, IPrint, IGroup, ITransformer
+    public class ThAFASEStoreyExtractor : ThEStoreyExtractor, IPrint, IGroup, ITransformer
     {
-        public ThFaEStoreyExtractor()
+        public ThAFASEStoreyExtractor()
         {
         }
         public override List<ThGeometry> BuildGeometries()

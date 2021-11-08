@@ -39,7 +39,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
             vm.MoveToOrigin(Transformer); // 移动到原点
 
             //先提取楼层框线
-            var storeyExtractor = new ThFaEStoreyExtractor()
+            var storeyExtractor = new ThAFASEStoreyExtractor()
             {
                 ElementLayer = "AI-楼层框定E",
                 Transformer = Transformer,
