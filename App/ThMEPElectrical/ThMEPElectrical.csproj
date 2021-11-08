@@ -133,6 +133,7 @@
     <Compile Include="FireAlarmCombustibleGas\Service\ThFaAreaLayoutRoomTypeService.cs" />
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasCmd.cs" />
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasEngine.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
