@@ -1,33 +1,29 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
 using NFox.Cad;
-using Linq2Acad;
 using DotNetARX;
-
+using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaDoorOpeningExtractor : ThExtractorBase,IPrint,IGroup, ISetStorey, ITransformer
+    public class ThAFASDoorOpeningExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         private List<ThIfcRoom> Rooms { get; set; }
         private List<Polyline> Holes { get; set; }
@@ -39,7 +35,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public ThBuildingElementVisitorManager VisitorManager { get; set; }
 
-        public ThFaDoorOpeningExtractor()
+        public ThAFASDoorOpeningExtractor()
         {
             Doors = new List<ThIfcDoor>();
             StoreyInfos = new List<ThStoreyInfo>();
@@ -58,12 +54,12 @@ namespace ThMEPElectrical.FireAlarm.Data
 
             //处理重叠
             var conflictService = new ThHandleConflictService();
-            Doors = conflictService.Union(db3Doors,localDoors);
+            Doors = conflictService.Union(db3Doors, localDoors);
 
             var objs = Doors.Select(o => o.Outline).ToCollection().FilterSmallArea(SmallAreaTolerance);
             Doors = Doors.Where(o => objs.Contains(o.Outline)).ToList();
             var bufferService = new ThNTSBufferService();
-            for(int i = 0; i < Doors.Count; i++)
+            for (int i = 0; i < Doors.Count; i++)
             {
                 Doors[i].Outline = bufferService.Buffer(Doors[i].Outline, 15);
             }
@@ -92,7 +88,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             var wallEngine = new ThDB3ArchWallRecognitionEngine();
             wallEngine.Recognize(VisitorManager.DB3ArchWallVisitor.Results, newPts);
             return wallEngine.Elements.Select(o => o.Outline).ToCollection();
-        }       
+        }
         private DBObjectCollection ExtractDb3Curtainwall(Point3dCollection pts)
         {
             //提取了DB3中的墙，并移动到原点
@@ -136,7 +132,7 @@ namespace ThMEPElectrical.FireAlarm.Data
         private Dictionary<BuiltInCategory, DBObjectCollection> DoorDependElements(Point3dCollection pts)
         {
             //都在原点
-            var dict = new Dictionary<BuiltInCategory, DBObjectCollection>();       
+            var dict = new Dictionary<BuiltInCategory, DBObjectCollection>();
             var columns = ExtractColumn(pts);
             var shearWalls = ExtractShearwall(pts);
             var db3Windows = ExtractDb3Window(pts);
@@ -164,7 +160,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             //    BuiltInCategory.Window
             //});            
             //ThSpatialIndexCacheService.Instance.Build(database, pts);
-            var dict = DoorDependElements(pts);            
+            var dict = DoorDependElements(pts);
             ThSpatialIndexCacheService.Instance.Transformer = new ThMEPOriginTransformer()
             {
                 Displacement = Matrix3d.Identity,
@@ -176,7 +172,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             doorDatas.AddRange(VisitorManager.DB3DoorStoneVisitor.Results);
 
             var doorEngine = new ThDB3DoorRecognitionEngine();
-            var newPts = Transformer.Transform(pts);            
+            var newPts = Transformer.Transform(pts);
             doorEngine.Recognize(doorDatas, newPts);
             return doorEngine.Elements.Cast<ThIfcDoor>().ToList();
         }
@@ -193,14 +189,14 @@ namespace ThMEPElectrical.FireAlarm.Data
             instance.Polys.ForEach(o => Transformer.Transform(o));
             return instance.Polys
                 .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => new ThIfcDoor { Outline=o})
+                .Select(o => new ThIfcDoor { Outline = o })
                 .Cast<ThIfcDoor>()
                 .ToList();
         }
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            var exteriorDoorService = new ThIsExteriorDoorService(this.Rooms.Select(o=>o.Boundary).ToList(), this.Holes);
+            var exteriorDoorService = new ThIsExteriorDoorService(this.Rooms.Select(o => o.Boundary).ToList(), this.Holes);
 
             Doors.ForEach(o =>
             {
@@ -233,18 +229,18 @@ namespace ThMEPElectrical.FireAlarm.Data
         }
         public void SetTags(Dictionary<Entity, string> fireApartIds)
         {
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(fireApartIds.Select(o=>o.Key).ToCollection());
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(fireApartIds.Select(o => o.Key).ToCollection());
             var bufferService = new ThNTSBufferService();
             var fireDoors = Doors.Where(o => IsFireDoor(o)).ToList();
             fireDoors.ForEach(o =>
             {
                 var enlarge = bufferService.Buffer(o.Outline, 5.0);
                 var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count==2)
+                if (neibours.Count == 2)
                 {
-                    FireDoorNeibourIds.Add(o.Outline,neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
+                    FireDoorNeibourIds.Add(o.Outline, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
                 }
-                else if(neibours.Count>2)
+                else if (neibours.Count > 2)
                 {
                     throw new NotSupportedException();
                 }
@@ -292,7 +288,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public override List<Entity> GetEntities()
         {
-            return Doors.Select(o =>o.Outline).ToList();
+            return Doors.Select(o => o.Outline).ToList();
         }
         public override void SetRooms(List<ThIfcRoom> rooms)
         {

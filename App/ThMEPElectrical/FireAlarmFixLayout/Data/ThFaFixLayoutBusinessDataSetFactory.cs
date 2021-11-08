@@ -1,23 +1,12 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-using Linq2Acad;
-
-using ThCADExtension;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-
 using ThMEPElectrical.FireAlarm.Data;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPElectrical.FireAlarm.Service;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data
@@ -26,7 +15,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
     {
         public List<string> BlkNameList { get; set; }
         private List<ThGeometry> Geos { get; set; }
-         
+
         public ThFaFixLayoutBusinessDataSetFactory()
         {
             Geos = new List<ThGeometry>();

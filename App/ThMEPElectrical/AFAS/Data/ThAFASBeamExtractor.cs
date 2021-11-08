@@ -1,31 +1,27 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
-
+using System.Linq;
+using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThCADCore.NTS;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    class ThFaBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey,ITransformer
+    class ThAFASBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
@@ -35,7 +31,7 @@ namespace ThMEPElectrical.FireAlarm.Data
         public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
-        public ThFaBeamExtractor()
+        public ThAFASBeamExtractor()
         {
             Beams = new List<ThIfcBeam>();
             Category = BuiltInCategory.Beam.ToString();
@@ -104,7 +100,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             if (newPts.Count > 0)
             {
                 var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    beams.Select(o=>o.Outline).ToCollection());
+                    beams.Select(o => o.Outline).ToCollection());
                 var pline = new Polyline()
                 {
                     Closed = true,
@@ -166,7 +162,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public override List<Entity> GetEntities()
         {
-            return Beams.Select(o=>o.Outline).ToList();
+            return Beams.Select(o => o.Outline).ToList();
         }
         private double GetDistancd(double distance)
         {

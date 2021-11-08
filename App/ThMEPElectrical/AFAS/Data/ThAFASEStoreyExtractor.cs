@@ -1,20 +1,16 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
 using System.Collections.Generic;
-
 using Autodesk.AutoCAD.DatabaseServices;
-
-using NFox.Cad;
-
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaEStoreyExtractor : ThEStoreyExtractor,IPrint,IGroup,ITransformer
+    public class ThFaEStoreyExtractor : ThEStoreyExtractor, IPrint, IGroup, ITransformer
     {
         public ThFaEStoreyExtractor()
         {
@@ -59,6 +55,6 @@ namespace ThMEPElectrical.FireAlarm.Data
             }
         }
 
-        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer=value; }
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
     }
 }

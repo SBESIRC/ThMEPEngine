@@ -1,38 +1,32 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Service;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaRoomExtractor : ThRoomExtractor, IGroup, ISetStorey,ITransformer
+    public class ThAFASRoomExtractor : ThRoomExtractor, IGroup, ISetStorey, ITransformer
     {
         public bool IsWithHole { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
-        public ThFaRoomExtractor()
+        public ThAFASRoomExtractor()
         {
             IsWithHole = true;
             StoreyInfos = new List<ThStoreyInfo>();
@@ -59,7 +53,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
 
             //对于起、终点间距小于一定距离的，做缝合
-            for(int i = 0; i < rooms.Count; i++)
+            for (int i = 0; i < rooms.Count; i++)
             {
                 rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Polyline);
             }
@@ -108,15 +102,15 @@ namespace ThMEPElectrical.FireAlarm.Data
                     var labels = service.GetLabels(o);
                     if (labels.Count > 0)
                     {
-                        if(service.IsPublic(labels))
-                        privacyContent="公有";
-                        else if(service.IsPrivate(labels))
+                        if (service.IsPublic(labels))
+                            privacyContent = "公有";
+                        else if (service.IsPrivate(labels))
                             privacyContent = "私有";
                     }
                 }
                 if (service.MustLayoutArea(o))
                     LayoutContent = "必布区域";
-                else if(service.CannotLayoutArea(o))
+                else if (service.CannotLayoutArea(o))
                     LayoutContent = "不可布区域";
                 geometry.Properties.Add(ThExtractorPropertyNameManager.PrivacyPropertyName, privacyContent);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.PlacementPropertyName, LayoutContent);
@@ -148,7 +142,7 @@ namespace ThMEPElectrical.FireAlarm.Data
                 if (ids.Count == 0)
                 {
                     var objs = spatialIndex.SelectCrossingPolygon(room.Boundary);
-                    if(objs.Count>0)
+                    if (objs.Count > 0)
                     {
                         var fireApart = GetMaximumIntersectFireApart(room.Boundary, objs);
                         GroupOwner.Add(room.Boundary, new List<string> { groupId[fireApart] });
@@ -160,13 +154,13 @@ namespace ThMEPElectrical.FireAlarm.Data
                 }
             }
         }
-        private Entity GetMaximumIntersectFireApart(Entity room,DBObjectCollection fireAparts)
+        private Entity GetMaximumIntersectFireApart(Entity room, DBObjectCollection fireAparts)
         {
             //获取与房间相交面积最大的防火分区
             var roomPolygon = room.ToNTSPolygon();
             var areaDic = new Dictionary<Entity, double>();
-            foreach(Entity fireApart in fireAparts)
-            {                
+            foreach (Entity fireApart in fireAparts)
+            {
                 var bufferService = new ThNTSBufferService();
                 var objs = fireApart.ToNTSPolygon().Buffer(0).ToDbCollection(true);
                 double intersectArea = 0.0;

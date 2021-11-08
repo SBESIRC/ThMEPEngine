@@ -9,8 +9,9 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.Data;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
@@ -33,38 +34,38 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 
             var extractors = new List<ThExtractorBase>()
                 {
-                    new ThFaArchitectureWallExtractor()
+                    new ThAFASArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3ArchWallVisitor.Results,
                     },
-                    new ThFaShearWallExtractor()
+                    new ThAFASShearWallExtractor()
                     {
                         ElementLayer = "AI-剪力墙",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3ShearWallVisitor.Results,
                         NonDb3ExtractResults = vm.ShearWallVisitor.Results,
                     },
-                    new ThFaColumnExtractor()
+                    new ThAFASColumnExtractor()
                     {
                         ElementLayer = "AI-柱",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3ColumnVisitor.Results,
                         NonDb3ExtractResults = vm.ColumnVisitor.Results,
                     },
-                    new ThFaRoomExtractor()
+                    new ThAFASRoomExtractor()
                     {
                         //IsWithHole=false,
                         UseDb3Engine=true,
                         Transformer = Transformer,
                     },
-                    new ThHoleExtractor()
+                    new ThAFASHoleExtractor()
                     {
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
-                    new ThFaBeamExtractor()
+                    new ThAFASBeamExtractor()
                     {
                         ElementLayer = "AI-梁",
                         Transformer = Transformer,
@@ -92,15 +93,15 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             ThFireAlarmUtils.MoveToXYPlane(Geos);
         }
 
-        private ThFaPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, bool referBeam)
+        private ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, bool referBeam)
         {
-            var roomExtract = extractors.Where(x => x is ThFaRoomExtractor).FirstOrDefault() as ThFaRoomExtractor;
-            var wallExtract = extractors.Where(x => x is ThFaShearWallExtractor).FirstOrDefault() as ThFaShearWallExtractor;
-            var columnExtract = extractors.Where(x => x is ThFaColumnExtractor).FirstOrDefault() as ThFaColumnExtractor;
-            var beamExtract = extractors.Where(x => x is ThFaBeamExtractor).FirstOrDefault() as ThFaBeamExtractor;
-            var holeExtract = extractors.Where(x => x is ThHoleExtractor).FirstOrDefault() as ThHoleExtractor;
+            var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
+            var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
+            var columnExtract = extractors.Where(x => x is ThAFASColumnExtractor).FirstOrDefault() as ThAFASColumnExtractor;
+            var beamExtract = extractors.Where(x => x is ThAFASBeamExtractor).FirstOrDefault() as ThAFASBeamExtractor;
+            var holeExtract = extractors.Where(x => x is ThAFASHoleExtractor).FirstOrDefault() as ThAFASHoleExtractor;
 
-            var placeConverageExtract = new ThFaPlaceCoverageExtractor()
+            var placeConverageExtract = new ThAFASPlaceCoverageExtractor()
             {
                 Rooms = roomExtract.Rooms,
                 Walls = wallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList(),

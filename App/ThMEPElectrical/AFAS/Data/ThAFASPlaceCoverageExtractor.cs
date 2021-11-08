@@ -1,27 +1,22 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
+﻿using NFox.Cad;
 using DotNetARX;
-
-using ThMEPEngineCore.Algorithm;
+using System.Linq;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.AFASRegion;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.AFASRegion;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer, IGroup, ISetStorey
+    public class ThAFASPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer, IGroup, ISetStorey
     {
         #region input
         public List<ThIfcRoom> Rooms { get; set; } = new List<ThIfcRoom>();
@@ -46,7 +41,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             }
         }
 
-        public ThFaPlaceCoverageExtractor()
+        public ThAFASPlaceCoverageExtractor()
         {
             CanLayoutAreas = new List<Entity>();
             Category = "PlaceCoverage";

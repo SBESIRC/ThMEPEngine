@@ -1,36 +1,31 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaFireproofshutterExtractor : ThFireproofShutterExtractor, ISetStorey, ITransformer
+    public class ThAFASFireProofShutterExtractor : ThFireproofShutterExtractor, ISetStorey, ITransformer
     {
         private Dictionary<Entity, List<string>> FireDoorNeibourIds { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
-        public ThFaFireproofshutterExtractor()
+        public ThAFASFireProofShutterExtractor()
         {
             StoreyInfos = new List<ThStoreyInfo>();
             FireDoorNeibourIds = new Dictionary<Entity, List<string>>();
@@ -46,7 +41,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             instance.Polys.ForEach(o => Transformer.Transform(o));
             localFireproofShutters = instance.Polys.ToCollection();
 
-            for (int i =0;i< localFireproofShutters.Count;i++)
+            for (int i = 0; i < localFireproofShutters.Count; i++)
             {
                 if (!IsClosed(localFireproofShutters[i] as Polyline))
                 {
@@ -119,7 +114,7 @@ namespace ThMEPElectrical.FireAlarm.Data
         }
         private bool IsClosed(Polyline polyline)
         {
-            if(polyline.StartPoint.DistanceTo(polyline.EndPoint)<=1.0)
+            if (polyline.StartPoint.DistanceTo(polyline.EndPoint) <= 1.0)
             {
                 return true;
             }

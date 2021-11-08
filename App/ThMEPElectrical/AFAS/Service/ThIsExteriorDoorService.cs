@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.FireAlarm.Service
+namespace ThMEPElectrical.AFAS.Service
 {
     public class ThIsExteriorDoorService
     {

@@ -1,31 +1,24 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
+﻿using NFox.Cad;
 using DotNetARX;
-
+using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    class ThFireApartExtractor : ThExtractorBase, IPrint, IGroup,ITransformer
+    class ThAFASFireCompartmentExtractor : ThExtractorBase, IPrint, IGroup, ITransformer
     {
         public List<Polyline> FireAparts { get; protected set; }
 
@@ -33,7 +26,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public Dictionary<Entity, string> FireApartIds { get; private set; }
 
-        public ThFireApartExtractor()
+        public ThAFASFireCompartmentExtractor()
         {
             FireAparts = new List<Polyline>();
             Category = BuiltInCategory.FireApart.ToString();
@@ -46,7 +39,7 @@ namespace ThMEPElectrical.FireAlarm.Data
             FireAparts.ForEach(o =>
             {
                 var geometry = new ThGeometry();
-                if(FireApartIds.ContainsKey(o))
+                if (FireApartIds.ContainsKey(o))
                 {
                     geometry.Properties.Add(ThExtractorPropertyNameManager.IdPropertyName, FireApartIds[o]);
                 }

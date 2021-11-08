@@ -1,12 +1,12 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 
-namespace ThMEPElectrical.FireAlarm.Service
+namespace ThMEPElectrical.AFAS.Service
 {
     public class ThHandleConflictService
     {

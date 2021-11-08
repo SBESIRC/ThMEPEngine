@@ -1,13 +1,13 @@
 ﻿using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 
-namespace ThMEPElectrical.FireAlarm.Service
+namespace ThMEPElectrical.AFAS.Service
 {
     public class ThHandleRoomBufferService
     {

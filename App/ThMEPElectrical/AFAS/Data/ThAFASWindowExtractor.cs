@@ -1,9 +1,9 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
-using NFox.Cad;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
@@ -13,63 +13,53 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThFaArchitectureWallExtractor : ThArchitectureExtractor, IGroup, ISetStorey, ITransformer
+    public class ThAFASWindowExtractor : ThWindowExtractor, ISetStorey, ITransformer
     {
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-        /// <summary>
-        /// 从图纸中获取的原始建筑墙元素
-        /// 已经移动到原点处
-        /// </summary>
-        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; } 
-
-        public ThFaArchitectureWallExtractor()
+        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
+        public List<ThRawIfcBuildingElementData> Db3ExtractResults { get; set; }
+        public ThAFASWindowExtractor()
         {
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
         {
-            //提取,并移动到原点
-            var db3Walls = ExtractDb3Wall(pts);
+            var db3Windows = ExtractDb3Window(pts);
+            var localWindows = ExtractMsWindow(database, pts);
 
-            var localWalls = ExtractMsWall(database, pts);
-
-            //清洗
             ThCleanEntityService clean = new ThCleanEntityService();
-            localWalls = localWalls.FilterSmallArea(SmallAreaTolerance)
+            localWindows = localWindows.FilterSmallArea(SmallAreaTolerance)
                 .Cast<Polyline>()
                 .Select(o => clean.Clean(o))
                 .Cast<Entity>()
                 .ToCollection();
             //对Clean的结果进一步过虑
-            localWalls = localWalls.FilterSmallArea(SmallAreaTolerance);
+            localWindows = localWindows.FilterSmallArea(SmallAreaTolerance);
 
             //处理重叠
             var conflictService = new ThHandleConflictService(
-                localWalls.Cast<Entity>().ToList(),
-                db3Walls.Cast<Entity>().ToList());
+                localWindows.Cast<Entity>().ToList(),
+                db3Windows.Cast<Entity>().ToList());
             conflictService.Handle();
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
-            Walls = handleObjs.Cast<Entity>().ToList();
+            Windows = handleObjs.Cast<Polyline>().ToList();
         }
-
-        private DBObjectCollection ExtractDb3Wall(Point3dCollection pts)
+        private DBObjectCollection ExtractDb3Window(Point3dCollection pts)
         {
-            //提取了DB3中的墙，并移动到原点
-            var newPts = Transformer.Transform(pts);            
-            var wallEngine = new ThDB3ArchWallRecognitionEngine();
-            wallEngine.Recognize(Db3ExtractResults, newPts);
-            return wallEngine.Elements.Select(o => o.Outline).ToCollection();
+            var db3Windows = new DBObjectCollection();
+            var windowEngine = new ThDB3WindowRecognitionEngine();
+            var newPts = Transformer.Transform(pts);
+            windowEngine.Recognize(Db3ExtractResults, newPts);
+            db3Windows = windowEngine.Elements.Select(o => o.Outline as Polyline).ToCollection();
+            return db3Windows;
         }
-
-        private DBObjectCollection ExtractMsWall(Database database, Point3dCollection pts)
+        private DBObjectCollection ExtractMsWindow(Database database, Point3dCollection pts)
         {
-            //提取了本地图纸中的墙，并移动到原点
             var instance = new ThExtractPolylineService()
             {
                 ElementLayer = this.ElementLayer,
@@ -78,11 +68,10 @@ namespace ThMEPElectrical.FireAlarm.Data
             instance.Polys.ForEach(o => Transformer.Transform(o));
             return instance.Polys.ToCollection();
         }
-
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            Walls.ForEach(o =>
+            Windows.ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
@@ -101,7 +90,6 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         public ThStoreyInfo Query(Entity entity)
         {
-            //ToDo
             var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
@@ -110,20 +98,15 @@ namespace ThMEPElectrical.FireAlarm.Data
         {
             StoreyInfos = storeyInfos;
         }
-        public void Group(Dictionary<Entity, string> groupId)
-        {
-            Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));            
-        }
 
         public void Transform()
         {
-            transformer.Transform(Walls.ToCollection());
+            Transformer.Transform(Windows.ToCollection());
         }
 
         public void Reset()
         {
-            Transformer.Reset(Walls.ToCollection());
+            Transformer.Reset(Windows.ToCollection());
         }
-        public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
     }
 }

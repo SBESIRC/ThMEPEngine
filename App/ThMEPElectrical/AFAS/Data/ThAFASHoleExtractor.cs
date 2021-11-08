@@ -1,36 +1,30 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-using DotNetARX;
 using Dreambuild.AutoCAD;
-
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
+using ThMEPElectrical.AFAS.Service;
+using ThMEPElectrical.AFAS.Interface;
 
-using ThMEPElectrical.FireAlarm.Interface;
-using ThMEPElectrical.FireAlarm.Service;
-
-namespace ThMEPElectrical.FireAlarm.Data
+namespace ThMEPElectrical.AFAS.Data
 {
-    class ThHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    class ThAFASHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         public Dictionary<Polyline, List<string>> HoleDic { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
-        public ThHoleExtractor()
+        public ThAFASHoleExtractor()
         {
             Category = BuiltInCategory.Hole.ToString();
             StoreyInfos = new List<ThStoreyInfo>();
@@ -49,7 +43,7 @@ namespace ThMEPElectrical.FireAlarm.Data
                     var storeyInfo = Query(o.Key);
                     parentId = storeyInfo.Id;
                 }
-                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName,string.Join(",", o.Value.ToArray()));
+                geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, string.Join(",", o.Value.ToArray()));
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
                 geometry.Boundary = o.Key;
                 geos.Add(geometry);
@@ -79,7 +73,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
             var textService = new ThExtractTextService()
             {
-               ElementLayer ="AI-房间名称", 
+                ElementLayer = "AI-房间名称",
             };
             textService.Extract(database, pts);
             textService.Texts.ForEach(o => Transformer.Transform(o));
@@ -94,7 +88,7 @@ namespace ThMEPElectrical.FireAlarm.Data
         }
         public void Print(Database database)
         {
-            HoleDic.Select(o=>o.Key).Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+            HoleDic.Select(o => o.Key).Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
 
         public void Set(List<ThStoreyInfo> storeyInfos)
