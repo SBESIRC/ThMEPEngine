@@ -56,6 +56,14 @@
     <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
     <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
     <Compile Include="OutsideFrameRecognition\ThRecogniseOutsideFrame.cs" />
+    <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectCmd.cs" />
+    <Compile Include="SprinklerConnect\Data\ThSprinklerConnectDataFactory.cs" />
+    <Compile Include="SprinklerConnect\Data\ThSprinklerDataQueryService.cs" />
+    <Compile Include="SprinklerConnect\Engine\ThSprinklerConnectEngine.cs" />
+    <Compile Include="SprinklerConnect\Engine\ThSprinklerPtNetworkEngine.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerParameter.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtil.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerNetworkService.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />

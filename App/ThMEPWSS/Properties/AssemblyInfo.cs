@@ -41,3 +41,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.ThMEPWSSApp))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThSystemDiagramCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThWaterwellPumpCmds))]
+[assembly: CommandClass(typeof(ThMEPWSS.SprinklerConnect.Cmd.ThSprinklerConnectNoUICmd))]
