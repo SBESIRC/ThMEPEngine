@@ -112,6 +112,23 @@ namespace ThMEPEngineCore.Config
         }
 
         /// <summary>
+        /// 查找包含对应标签的房间名
+        /// </summary>
+        /// <param name="roomTree"></param>
+        /// <param name="tagName"></param>
+        /// <returns></returns>
+        public static List<string> CalRoomLstByTag(this List<RoomTableTree> roomTree, string tagName)
+        {
+            List<string> roomInfo = new List<string>();
+            foreach (var treeNode in roomTree)
+            {
+                roomInfo.AddRange(GetTagNodeInfo(treeNode, tagName));
+            }
+
+            return roomInfo;
+        }
+
+        /// <summary>
         /// 判断是否是公共区域
         /// </summary>
         /// <param name="roomTree"></param>
@@ -142,7 +159,13 @@ namespace ThMEPEngineCore.Config
             return false;
         }
 
-        private static List<string> getSingleRoomTag(this List<RoomTableTree> roomTree, string roomName)
+        /// <summary>
+        /// 递归遍历节点获得指定房间的标签
+        /// </summary>
+        /// <param name="roomTree"></param>
+        /// <param name="roomName"></param>
+        /// <returns></returns>
+        private static List<string> GetSingleRoomTag(this List<RoomTableTree> roomTree, string roomName)
         {
             List<string> roomTages = new List<string>();
             foreach (var treeNode in roomTree)
@@ -155,7 +178,7 @@ namespace ThMEPEngineCore.Config
 
                else if (thisNode.child.Count > 0)
                 {
-                    roomTages = getSingleRoomTag(thisNode.child, roomName);
+                    roomTages = GetSingleRoomTag(thisNode.child, roomName);
                     if (roomTages.Count > 0)
                     {
                         return roomTages;
@@ -166,7 +189,12 @@ namespace ThMEPEngineCore.Config
             return roomTages;
         }
 
-
+        /// <summary>
+        /// 获取配置表房间标签
+        /// </summary>
+        /// <param name="roomTree"></param>
+        /// <param name="roomName"></param>
+        /// <returns></returns>
         public static List<string> getRoomTag(this List<RoomTableTree> roomTree, string roomName)
         {
             List<string> roomTages = new List<string>();
@@ -174,7 +202,7 @@ namespace ThMEPEngineCore.Config
 
             foreach (var name in roomNameList)
             {
-                roomTages.AddRange(getSingleRoomTag(roomTree, name));
+                roomTages.AddRange(GetSingleRoomTag(roomTree, name));
             }
 
             return roomTages;
@@ -286,6 +314,29 @@ namespace ThMEPEngineCore.Config
             foreach (var tn in treeNode.child)
             {
                 nodeInfos.AddRange(GetNodeInfo(tn, name, hasNode));
+            }
+
+            return nodeInfos;
+        }
+
+        /// <summary>
+        /// 判断是否包含这个节点
+        /// </summary>
+        /// <param name="treeNode"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private static List<string> GetTagNodeInfo(RoomTableTree treeNode, string tagName)
+        {
+            List<string> nodeInfos = new List<string>();
+            if (treeNode.tags.Contains(tagName))
+            {
+                nodeInfos.Add(treeNode.nodeName);
+                nodeInfos.AddRange(treeNode.synonym);
+            }
+
+            foreach (var tn in treeNode.child)
+            {
+                nodeInfos.AddRange(GetTagNodeInfo(tn, tagName));
             }
 
             return nodeInfos;

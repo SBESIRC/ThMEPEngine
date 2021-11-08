@@ -25,60 +25,6 @@ namespace ThMEPLighting.DSFEL.Service
         }
 
         /// <summary>
-        /// 获取需要布置疏散指示灯的房间
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public List<KeyValuePair<Polyline, string>>GetUsefulRooms(Polyline polyline)
-        {
-            var objs = new DBObjectCollection();
-            var textObjs = new List<DBText>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var centerLines = acdb.ModelSpace
-                .OfType<Polyline>()
-                .Where(o => o.Layer == ThMEPLightingCommon.ROOM_LAYER);
-                centerLines.ForEach(x =>
-                {
-                    var transCurve = x.Clone() as Polyline;
-                    originTransformer.Transform(transCurve);
-                    objs.Add(transCurve);
-                });
-
-                var roomTexts = acdb.ModelSpace
-                .OfType<DBText>()
-                .Where(o => o.Layer == ThMEPLightingCommon.ROOM_TEXT_NAME_LAYER);
-                roomTexts.ForEach(x =>
-                {
-                    var isUsefel = DSFELConfigCommon.LayoutRoomText.Where(y => y.Contains(x.TextString)).Count() > 0;
-                    if (isUsefel)
-                    {
-                        var transText = x.Clone() as DBText;
-                        originTransformer.Transform(transText);
-                        textObjs.Add(transText);
-                    }
-                });
-            }
-
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var roomPolys = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
-
-            List<KeyValuePair<Polyline, string>> resRooms = new List<KeyValuePair<Polyline, string>>();
-            foreach (var poly in roomPolys)
-            {
-                foreach (var text in textObjs)
-                {
-                    if (poly.Contains(text.Position))
-                    {
-                        resRooms.Add(new KeyValuePair<Polyline, string>(poly, text.TextString));
-                    }
-                }
-            }
-
-            return resRooms;
-        }
-
-        /// <summary>
         /// 获取房间
         /// </summary>
         /// <param name="polyline"></param>
@@ -89,11 +35,11 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var roomEngine = new ThRoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
-                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var markEngine = new ThRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
-                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var boundaryEngine = new ThRoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
@@ -130,7 +76,7 @@ namespace ThMEPLighting.DSFEL.Service
                 doors.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    originTransformer.Transform(transCurve);
+                    //originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -145,7 +91,6 @@ namespace ThMEPLighting.DSFEL.Service
         /// <returns></returns>
         public List<Line> GetCentterLines(Polyline frame, List<Polyline> polylines)
         {
-#if (ACAD2016 || ACAD2018)
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -155,14 +100,15 @@ namespace ThMEPLighting.DSFEL.Service
                 centerLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    originTransformer.Transform(transCurve);
+                    //originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
 
             if (objs.Count <= 0)
             {
-                objs = ThMEPPolygonService.CenterLine(frame).ToCollection();
+                return new List<Line>();
+                //objs = ThMEPPolygonService.CenterLine(frame).ToCollection();
             }
 
             List<Curve> resLines = new List<Curve>();
@@ -184,9 +130,6 @@ namespace ThMEPLighting.DSFEL.Service
             parkingLines.AddRange(otherPLines);
 
             return parkingLines.SelectMany(x => x).ToList();
-#else
-            return new List<Line>();
-#endif
         }
 
         /// <summary>
@@ -201,20 +144,20 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
-                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
 
                 // 启动墙识别引擎
                 var ShearWallExtractEngine = new ThShearWallExtractionEngine();
                 ShearWallExtractEngine.Extract(acdb.Database);
-                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
@@ -261,7 +204,7 @@ namespace ThMEPLighting.DSFEL.Service
                 exitLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    originTransformer.Transform(transCurve);
+                    //originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }

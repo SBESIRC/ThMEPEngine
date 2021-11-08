@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPLighting.DSFEL.Model
 {
-    public class ExitModel
+    public class ExitModel : FELModel
     {
         /// <summary>
         /// 疏散口类型
@@ -18,12 +18,7 @@ namespace ThMEPLighting.DSFEL.Model
         /// <summary>
         /// 属于哪个房间
         /// </summary>
-        public Polyline room { get; set; }
-
-        /// <summary>
-        /// 插入基点
-        /// </summary>
-        public Point3d positin { get; set; }
+        public Polyline room { get; set; }       
     }
 
     public enum ExitType
