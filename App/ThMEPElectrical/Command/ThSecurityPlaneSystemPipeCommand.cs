@@ -43,7 +43,7 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+                var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
@@ -70,15 +70,21 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
-                List<BlockReference> frameLst = new List<BlockReference>();
+                //List<BlockReference> frameLst = new List<BlockReference>();
+                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
+                    ObjectIdCollection dBObject = new ObjectIdCollection();
+                    dBObject.Add(obj);
+                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
+                    
                 }
                 string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
-                foreach (var frameBlock in frameLst)
+                foreach (var frameBlockDic in frameLst)
                 {
+                    var frameBlock = frameBlockDic.Key;
+                    var frameBlockId = frameBlockDic.Value;
                     var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
                     if (frame == null)
                     {
@@ -87,10 +93,17 @@ namespace ThMEPElectrical.Command
 
                     var pt = frame.StartPoint;
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                    //originTransformer.Transform(frame);
+                    originTransformer.Transform(frame);
                     var outFrame = ThMEPFrameService.Normalize(frame);
 
                     GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+
+                    var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
+                    if(floor.IsNull())
+                    {
+                        continue;
+                    }
+
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
@@ -99,17 +112,25 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
-                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
+                    
 
                     //获取连线图块
-                    var blocks = GetBlocks(frame);
+                    var blocks = GetBlocks(frame, originTransformer);
 
                     //获取线槽
                     var trunkings = getPrimitivesService.GetTrunkings(frame, trunkingLayer);
-
                     //连线
                     ConnectPipeService connectPipeService = new ConnectPipeService();
-                    connectPipeService.ConnectPipe(frame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
+                    var Lines=connectPipeService.ConnectPipe(frame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
+
+                    using (AcadDatabase db = AcadDatabase.Active())
+                    {
+                        foreach (var polys in Lines)
+                        {
+                            originTransformer.Reset(polys);
+                            db.ModelSpace.Add(polys);
+                        }
+                    }
                 }
             }
         }
@@ -118,7 +139,7 @@ namespace ThMEPElectrical.Command
         /// 查找框线内所有布置图块
         /// </summary>
         /// <param name="polyline"></param>
-        public List<BlockReference> GetBlocks(Polyline polyline)
+        public List<BlockReference> GetBlocks(Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -150,10 +171,16 @@ namespace ThMEPElectrical.Command
                 blocks.Where(o => {
                     var pts = o.GeometricExtents;
                     var position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                    position = originTransformer.Transform(position);
                     return polyline.Contains(position);
                 })
                 .Cast<BlockReference>()
-                .ForEachDbObject(o => resBlocks.Add(o));
+                .ForEachDbObject(o =>
+                {
+                    var blk = o.Clone() as BlockReference;
+                    originTransformer.Transform(blk);
+                    resBlocks.Add(blk);
+                });
 
                 return resBlocks;
             }

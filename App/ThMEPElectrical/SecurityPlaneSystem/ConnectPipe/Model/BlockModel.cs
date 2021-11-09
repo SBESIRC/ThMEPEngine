@@ -15,7 +15,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model
         {
             blockModel = block;
             position = new Point3d(block.Position.X, block.Position.Y, 0);
-            Boundary = block.ToOBB(block.BlockTransform);
+            Boundary = block.ToOBB(block.BlockTransform,AcHelper.Active.Database);
         }
 
         /// <summary>

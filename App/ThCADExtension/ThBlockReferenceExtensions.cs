@@ -153,6 +153,18 @@ namespace ThCADExtension
             }
         }
 
+        public static Polyline ToOBB(this BlockReference br, Matrix3d ecs2Wcs,Database database)
+        {
+            // 因为原有的ToOBB,如果Database是不存在的话，会报错
+            // 需要调用者传入一个Database进来
+            using (var acadDatabase = AcadDatabase.Use(database))
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
+                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
+                return rectangle.GetTransformedRectangle(ecs2Wcs).FlattenRectangle();
+            }
+        }
+
         // mimic the Burst command
         //  https://adndevblog.typepad.com/autocad/2015/06/programmatically-mimic-the-burst-command.html
         public static void Burst(this BlockReference blockReference, DBObjectCollection blockEntities)

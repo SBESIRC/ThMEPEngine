@@ -45,22 +45,26 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+                var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                List<BlockReference> frameLst = new List<BlockReference>();
+                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
+                    ObjectIdCollection dBObject = new ObjectIdCollection();
+                    dBObject.Add(obj);
+                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
                 }
 
-                foreach (var frameBlock in frameLst)
+                foreach (var frameBlockDic in frameLst)
                 {
+                    var frameBlock = frameBlockDic.Key;
+                    var frameBlockId = frameBlockDic.Value;
                     var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
                     if (frame == null)
                     {
@@ -69,10 +73,17 @@ namespace ThMEPElectrical.Command
 
                     var pt = frame.StartPoint;
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                    //originTransformer.Transform(frame);
+                    originTransformer.Transform(frame);
                     var outFrame = ThMEPFrameService.Normalize(frame);
 
                     GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+                    var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
+                    if (floor.IsNull())
+                    {
+                        continue;
+                    }
+
+
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
@@ -81,7 +92,6 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
-                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
                     //布置
                     LayoutFactoryService layoutService = new LayoutFactoryService();
@@ -117,7 +127,7 @@ namespace ThMEPElectrical.Command
             foreach (var model in layoutModels)
             {
                 var pt = model.LayoutPoint;
-                //originTransformer.Reset(ref pt);
+                originTransformer.Reset(ref pt);
 
                 double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.LayoutDir, Vector3d.ZAxis);
                 if (model is ControllerModel)
