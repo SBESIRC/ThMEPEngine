@@ -128,8 +128,8 @@ namespace ThMEPElectrical.StructureHandleService
                 foreach (var door in doorRecognitionEngine.Elements)
                 {
                     Polyline doorPolyline = door.Outline as Polyline;
-                    var Indentationdoor = doorPolyline.Buffer(-10)[0] as Polyline;
-                    if (spatialIndex.SelectCrossingPolygon(Indentationdoor).Count < 1)
+                    var Indentationdoor = doorPolyline.Buffer(10)[0] as Polyline;
+                    if (spatialIndex.SelectWindowPolygon(Indentationdoor).Count < 1)
                     {
                         doors.Add(doorPolyline);
                     }
