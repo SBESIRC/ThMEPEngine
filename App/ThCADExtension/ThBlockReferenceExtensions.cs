@@ -143,11 +143,9 @@ namespace ThCADExtension
             }
         }
 
-        public static Polyline ToOBB(this BlockReference br, Matrix3d ecs2Wcs,Database database)
+        public static Polyline ToOBB(this BlockReference br, Matrix3d ecs2Wcs)
         {
-            // 因为原有的ToOBB,如果Database是不存在的话，会报错
-            // 需要调用者传入一个Database进来
-            using (var acadDatabase = AcadDatabase.Use(database))
+            using (var acadDatabase = AcadDatabase.Use(br.Database))
             {
                 var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
                 var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
