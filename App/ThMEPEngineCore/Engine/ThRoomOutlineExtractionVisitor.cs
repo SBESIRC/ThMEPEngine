@@ -48,5 +48,9 @@ namespace ThMEPEngineCore.Engine
                 Data = description
             };
         }
+        public override bool IsSpatialElement(Entity entity)
+        {
+            return entity.ObjectId.IsValid;
+        }
     }
 }

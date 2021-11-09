@@ -105,7 +105,7 @@ namespace ThMEPEngineCore.Engine
             if (newPts.Count > 0)
             {
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                objs = spatialIndex.SelectCrossingPolygon(newPts);                
+                objs = spatialIndex.SelectCrossingPolygon(newPts);
             }
             transformer.Reset(objs);
             objs.Cast<Entity>().ForEach(o =>

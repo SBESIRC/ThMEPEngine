@@ -10,7 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPHVAC.LoadCalculation.Model;
+using AcApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPHVAC.LoadCalculation.Service
 {
@@ -18,6 +20,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
     {
         public static void initialization()
         {
+            using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(LoadCalculationParameterFromConfig.RoomFunctionLayer);
@@ -25,6 +28,13 @@ namespace ThMEPHVAC.LoadCalculation.Service
                 acadDatabase.Database.ImportBlock(LoadCalculationParameterFromConfig.RoomFunctionBlockName);
                 acadDatabase.Database.ImportTextStyle(LoadCalculationParameterFromConfig.DefaultTableTextStyle);
                 acadDatabase.Database.ImportTableStyles(LoadCalculationParameterFromConfig.LoadCalculationTableName);
+                try
+                {
+                    acadDatabase.Database.CreateAILayer("0", 255);
+                    acadDatabase.Database.CreateAILayer(LoadCalculationParameterFromConfig.RoomFunctionLayer, (short)ColorIndex.BYLAYER);
+                    acadDatabase.Database.CreateAILayer(LoadCalculationParameterFromConfig.LoadCalculationTableLayer, (short)ColorIndex.BYLAYER);
+                }
+                catch { }
             }
         }
         

@@ -44,40 +44,41 @@ namespace ThMEPElectrical.Command
                 {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+                var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                List<BlockReference> frameLst = new List<BlockReference>();
+                Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
+                    var blk = frame.Clone() as BlockReference;
+                    var boundary = CommonService.GetBlockInfo(blk).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    ObjectIdCollection dBObject = new ObjectIdCollection();
+                    dBObject.Add(obj);
+                    frameLst.Add(boundary, dBObject);
                 }
 
-                List<Polyline> frames = new List<Polyline>();
-                foreach (var frameBlock in frameLst)
-                {
-                    var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame != null)
-                    {
-                        frames.Add(frame);
-                    }
-                }
-
-                var pt = frames.First().StartPoint;
+                var pt = frameLst.First().Key.StartPoint;
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                frames = frames.Select(x =>
-                {
-                    //originTransformer.Transform(x);
-                    return ThMEPFrameService.Normalize(x);
-                }).ToList();
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
-                foreach (var outFrame in frames)
+                foreach (var frameBlockDic in frameLst)
                 {
+                    var outFrame = frameBlockDic.Key;
+                    var frameBlockId = frameBlockDic.Value;
+                    originTransformer.Transform(outFrame);
+                    outFrame = ThMEPFrameService.Normalize(outFrame);
+
+                    //获取楼层信息
+                    var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
+                    if (floor.IsNull())
+                    {
+                        continue;
+                    }
+
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
@@ -90,9 +91,6 @@ namespace ThMEPElectrical.Command
                     //获取车道线
                     var lanes = getPrimitivesService.GetLanes(outFrame, out List<List<Line>> otherLanes);
                     lanes.AddRange(otherLanes);
-
-                    //获取楼层信息
-                    var floor = getPrimitivesService.GetFloorInfo(outFrame);
 
                     //布置
                     LayoutGuardTourService layoutService = new LayoutGuardTourService();
@@ -124,7 +122,7 @@ namespace ThMEPElectrical.Command
             foreach (var model in layoutModels)
             {
                 var pt = model.Item1;
-                //originTransformer.Reset(ref pt);
+                originTransformer.Reset(ref pt);
 
                 var dir = model.Item2;
                 if (dir.Y < 0)

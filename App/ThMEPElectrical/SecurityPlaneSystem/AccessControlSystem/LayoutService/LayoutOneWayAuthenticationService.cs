@@ -46,6 +46,21 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 }
             }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
+            if (structs.Count <= 0)
+            {
+                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                Polyline roomBoundary = roomA;
+                var bufferRoomPL = roomBoundary.BufferPL(200)[0] as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(roomBoundary);
+                objs.Add(bufferDoor);
+                var rooms = ThCADCoreNTSEntityExtension.Difference(bufferRoomPL, objs).Cast<Polyline>().ToList();
+                structs.AddRange(rooms);
+                if (structs.Count <= 0)
+                {
+                    return accessControlModels;
+                }
+            }
             var button = CalLayoutButton(structs, roomDoorInfo.Item1, roomA, door);
             var cardReader = CalLayoutCardReader(structs, roomDoorInfo.Item2, roomA, roomB, door);
             if (button != null) accessControlModels.Add(button);

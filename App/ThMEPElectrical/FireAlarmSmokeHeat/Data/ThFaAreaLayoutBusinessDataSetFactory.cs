@@ -1,24 +1,15 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-using Linq2Acad;
-
-using ThCADExtension;
 using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 using ThMEPElectrical.FireAlarm.Data;
-using ThMEPElectrical.FireAlarm.Interface;
 using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
@@ -56,7 +47,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                 }
             });
 
-            ThFireAlarmUtils.MoveToXYPlane(Geos);
+            Geos.MoveToXYPlane();
         }
 
         protected override ThMEPDataSet BuildDataSet()

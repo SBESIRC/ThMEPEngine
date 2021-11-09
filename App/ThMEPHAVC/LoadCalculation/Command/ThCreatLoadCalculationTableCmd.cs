@@ -69,6 +69,9 @@ namespace ThMEPHVAC.LoadCalculation.Command
                     return;
                 }
 
+                //初始化图纸(导入图层/图块/图层三板斧等)
+                InsertBlockService.initialization();
+
                 var objs = rooms.Select(o => o.Boundary).ToCollection();
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(objs);
                 rooms.ForEach(x => originTransformer.Transform(x.Boundary));

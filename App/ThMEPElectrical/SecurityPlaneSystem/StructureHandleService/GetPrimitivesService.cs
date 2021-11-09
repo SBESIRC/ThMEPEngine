@@ -47,7 +47,7 @@ namespace ThMEPElectrical.StructureHandleService
                 laneLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    //originTransformer.Transform(transCurve);
+                    originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -80,11 +80,11 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 var roomEngine = new ThRoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
-                //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var markEngine = new ThRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
-                //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var boundaryEngine = new ThRoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
@@ -111,6 +111,7 @@ namespace ThMEPElectrical.StructureHandleService
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => x.Clone() as Polyline).ToList();
+
                 //doors.ForEach(x => originTransformer.Transform(x));
                 //var doorExtractEngine = new ThDoorExtractionEngine();
                 //doorExtractEngine.Extract(acdb.Database);
@@ -118,6 +119,22 @@ namespace ThMEPElectrical.StructureHandleService
                 //var doorEngine = new ThDoorRecognitionEngine();
                 //doorEngine.Recognize(doorExtractEngine.Results, polyline.Vertices());
                 //doors = doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
+                var boundary = polyline.Clone() as Polyline;
+                originTransformer.Reset(boundary);
+                var doorRecognitionEngine = new ThDB3DoorRecognitionEngine();
+                doorRecognitionEngine.Recognize(acdb.Database, boundary.Vertices());
+                foreach (var door in doorRecognitionEngine.Elements)
+                {
+                    Polyline doorPolyline = door.Outline as Polyline;
+                    var Indentationdoor = doorPolyline.Buffer(10)[0] as Polyline;
+                    if (spatialIndex.SelectWindowPolygon(Indentationdoor).Count < 1)
+                    {
+                        doors.Add(doorPolyline);
+                    }
+                }
+                doors.ForEach(x => originTransformer.Transform(x));
             }
 
             return doors;
@@ -133,22 +150,28 @@ namespace ThMEPElectrical.StructureHandleService
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                var WindowExtractEngine = new ThDB3WindowExtractionEngine();
+                WindowExtractEngine.Extract(acdb.Database);
+                WindowExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                var WindowEngine = new ThDB3WindowRecognitionEngine();
+                WindowEngine.Recognize(WindowExtractEngine.Results, polyline.Vertices());
+
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
-                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
 
                 // 启动墙识别引擎
                 var ShearWallExtractEngine = new ThShearWallExtractionEngine();
                 ShearWallExtractEngine.Extract(acdb.Database);
-                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
@@ -159,6 +182,14 @@ namespace ThMEPElectrical.StructureHandleService
                 columns.ForEach(x => objs.Add(x));
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+                ////获取窗
+                var windows = new List<Polyline>();
+                windows = WindowEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                objs = new DBObjectCollection();
+                windows.ForEach(x => objs.Add(x));
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                windows = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
                 //获取剪力墙
                 walls = new List<Polyline>();
@@ -176,6 +207,7 @@ namespace ThMEPElectrical.StructureHandleService
                         walls.Add(wall);
                     }
                 }
+                walls.AddRange(windows);
             }
         }
 
@@ -191,6 +223,26 @@ namespace ThMEPElectrical.StructureHandleService
             using (AcadDatabase db = AcadDatabase.Active())
             {   
                 storeysRecognitionEngine.Recognize(db.Database, bufferPoly.Vertices());
+            }
+            if (storeysRecognitionEngine.Elements.Count > 0)
+            {
+                return storeysRecognitionEngine.Elements[0] as ThEStoreys;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 获取楼层信息
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public ThEStoreys GetFloorInfo(ObjectIdCollection objectId)
+        {
+            var storeysRecognitionEngine = new ThEStoreysRecognitionEngine();
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                storeysRecognitionEngine.RecognizeMS(db.Database, objectId);
             }
             if (storeysRecognitionEngine.Elements.Count > 0)
             {
@@ -235,11 +287,11 @@ namespace ThMEPElectrical.StructureHandleService
                 trunkingLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    //originTransformer.Transform(transCurve);
+                    originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
-
+            //originTransformer.Transform(objs);
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var selectLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
             if (selectLines.Count <= 0)

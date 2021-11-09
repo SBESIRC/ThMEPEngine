@@ -24,10 +24,13 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
         {
-            var results = Check(sprinklers, pline);
-            if (results.Count > 0) 
+            if (ParkingStalls.Count > 0)
             {
-                Present(results);
+                var results = Check(sprinklers, pline);
+                if (results.Count > 0)
+                {
+                    Present(results);
+                }
             }
         }
 
@@ -79,12 +82,16 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var parkingStallBlkNames = new List<string>();
             parkingStallBlkNames.AddRange(QueryBlkNames("机械车位"));
             parkingStallBlkNames.AddRange(QueryBlkNames("非机械车位"));
-            var parkingStallExtractor = new ThParkingStallExtractor()
+            if (parkingStallBlkNames.Count > 0)
             {
-                BlockNames = parkingStallBlkNames,
-            };
-            parkingStallExtractor.Extract(database, pline.Vertices());
-            ParkingStalls = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToCollection();
+                var parkingStallExtractor = new ThParkingStallExtractor()
+                {
+                    BlockNames = parkingStallBlkNames,
+                    LayerNames = new List<string>(),
+                };
+                parkingStallExtractor.Extract(database, pline.Vertices());
+                ParkingStalls = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToCollection();
+            }
         }
 
         private List<string> QueryBlkNames(string category)

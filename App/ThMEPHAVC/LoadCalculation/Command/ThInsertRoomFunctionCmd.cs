@@ -34,6 +34,9 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 }
                 using (var database = AcadDatabase.Active())
                 {
+                    //初始化图纸(导入图层/图块/图层三板斧等)
+                    InsertBlockService.initialization();
+
                     InsertBlockService.InsertRoomFunctionBlock(LoadCalculationParameterFromConfig.DefaultRoomNumber, roomFunctionName, ppr.Value.TransformBy(Active.Editor.UCS2WCS()));
                 }                
             }

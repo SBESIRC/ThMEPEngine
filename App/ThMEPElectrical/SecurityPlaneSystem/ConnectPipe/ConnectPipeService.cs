@@ -14,9 +14,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
     public class ConnectPipeService
     {
-        public void ConnectPipe(Polyline polyline, List<BlockReference> connectBlock, List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns,
+        public List<Entity> ConnectPipe(Polyline polyline, List<BlockReference> connectBlock, List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns,
               List<Line> trunking, List<Polyline> holes, ThEStoreys floor)
         {
+            List<Entity> res = new List<Entity>();
             IntrucsionAlarmConnectService connectService = new IntrucsionAlarmConnectService();
             var iaPipes = connectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
             var ConnectLines = InsertConnectPipeService.InsertConnectPipe(iaPipes, ThMEPCommon.IA_PIPE_LAYER_NAME, ThMEPCommon.IA_PIPE_LINETYPE);
@@ -36,13 +37,16 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             var resPolys = systemConnectPipeService.AdjustEndRoute(columns, blockModels.Select(o => o.Boundary).ToList(), resPolyDic);
             //断开有交叉的连线
             var resLines = systemConnectPipeService.DisconnectRoute(resPolys, blockModels.Select(o => o.Boundary).ToList());
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var polys in resLines)
-                {
-                    db.ModelSpace.Add(polys);
-                }
-            }
+            res.AddRange(ConnectLines);
+            res.AddRange(resLines);
+            //using (AcadDatabase db = AcadDatabase.Active())
+            //{
+            //    foreach (var polys in resLines)
+            //    {
+            //        db.ModelSpace.Add(polys);
+            //    }
+            //}
+            return res;
         }
 
         /// <summary>

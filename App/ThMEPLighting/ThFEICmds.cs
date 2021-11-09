@@ -136,7 +136,7 @@ namespace ThMEPLighting
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frameLst = frameLst.Select(x =>
                 {
-                    originTransformer.Transform(x);
+                    //originTransformer.Transform(x);
                     return ThMEPFrameService.Normalize(x as Polyline) as Curve;
                 }).ToList();
 
@@ -166,7 +166,11 @@ namespace ThMEPLighting
                     //布置
                     var thRooms = rooms.Select(x => x.Key).ToList();
                     LayoutService layoutService = new LayoutService();
-                    layoutService.LayoutFELService(thRooms, doors, centerLines, holes);
+                    var paths = layoutService.LayoutFELService(thRooms, doors, centerLines, holes, originTransformer);
+
+                    ////打印路径
+                    //PrintPathService printService = new PrintPathService();
+                    //printService.PrintPath(paths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
                 }
             }
         }
@@ -174,7 +178,6 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THSSZSDBZ", CommandFlags.Modal)]
         public void ThMEGLBZ()
         {
-            
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 // 获取框线

@@ -69,7 +69,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
             var retGroups = new List<List<Point3d>>();
             if (null == _lightBlockReferences || _lightBlockReferences.Count < 1)
                 return retGroups;
-            var pointDBSacn = new PointDBSacn(_lightBlockReferences.Select(c => c.LightPosition2d).ToList(), _notCrossLines);
+            var pointDBSacn = new PointDBScan(_lightBlockReferences.Select(c => c.LightPosition2d).ToList(), _notCrossLines);
             var clusters = pointDBSacn.ClusterResult(eps, minPts, maxCount);
             if (clusters == null || clusters.Count < 1)
                 return retGroups;

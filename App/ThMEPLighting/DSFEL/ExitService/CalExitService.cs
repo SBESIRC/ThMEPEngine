@@ -2,11 +2,14 @@
 using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Config;
+using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.Model;
 using ThMEPLighting.DSFEL.Model;
 
@@ -15,7 +18,9 @@ namespace ThMEPLighting.DSFEL.ExitService
     public class CalExitService
     {
         readonly double tol = 5;
-
+        readonly string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+        readonly string roomConfidName = "房间名称处理";
+        readonly double moveBlockTol = 250;
         /// <summary>
         /// 计算出口
         /// </summary>
@@ -23,6 +28,10 @@ namespace ThMEPLighting.DSFEL.ExitService
         /// <param name="doors"></param>
         public List<ExitModel> CalExit(List<ThIfcRoom> roomInfo, List<Polyline> doors)
         {
+            var configData = GetExcelContent(roomConfigUrl);
+            var roomTree = RoomConfigTreeService.CreateRoomTree(configData.Tables[roomConfidName]);
+            DSFELConfigCommon dSFELConfig = new DSFELConfigCommon(roomTree);
+
             List<ExitModel> exitModels = new List<ExitModel>();
             List<Polyline> bufferDoors = doors.Select(x => x.Buffer(tol)[0] as Polyline).ToList();
             foreach (var door in bufferDoors)
@@ -30,13 +39,14 @@ namespace ThMEPLighting.DSFEL.ExitService
                 var intersectRooms = roomInfo.Where(x => (x.Boundary as Polyline).Intersects(door)).ToList();
                 ExitModel exit = new ExitModel();
                 if (intersectRooms.Count == 1)
-                {
+                {  
                     Polyline roomBound = intersectRooms[0].Boundary as Polyline;
                     if (CalDoorOpenDir(door, roomBound))
                     {
                         exit.exitType = ExitType.SafetyExit;
                         exit.room = roomBound;
                         exit.positin = GetLayoutPosition(roomBound, door);
+                        exit.direction = GetLayoutDir(roomBound, door);
                         exitModels.Add(exit);
                     }
                 }
@@ -45,11 +55,12 @@ namespace ThMEPLighting.DSFEL.ExitService
                     foreach (var room in intersectRooms)
                     {
                         Polyline roomBound = room.Boundary as Polyline;
-                        if (CalDoorOpenDir(door, roomBound) && CheckIsExit(intersectRooms.Where(x=>x.Boundary != room.Boundary).ToList()))
+                        if (dSFELConfig.CheckExitRoom(room, intersectRooms.Where(x=>x.Boundary != room.Boundary).ToList()))
                         {
                             exit.exitType = ExitType.EvacuationExit;
                             exit.room = roomBound;
                             exit.positin = GetLayoutPosition(roomBound, door);
+                            exit.direction = GetLayoutDir(roomBound, door);
                             exitModels.Add(exit);
                             break;
                         }
@@ -58,16 +69,6 @@ namespace ThMEPLighting.DSFEL.ExitService
             }
 
             return exitModels;
-        }
-
-        /// <summary>
-        /// 检查是否是疏散出口
-        /// </summary>
-        /// <param name="roomInfo"></param>
-        /// <returns></returns>
-        private bool CheckIsExit(List<ThIfcRoom> roomInfo)
-        {
-            return roomInfo.Any(z => DSFELConfigCommon.EvacuationExitArea.Any(y => z.Tags.Any(x => y.Contains(x))));
         }
 
         /// <summary>
@@ -96,7 +97,42 @@ namespace ThMEPLighting.DSFEL.ExitService
         {
             List<Point3d> pts = door.Vertices().Cast<Point3d>().ToList();
             pts = pts.OrderBy(x => room.Distance(x)).ToList();
-            return new Point3d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2, 0);
+            var pt1 = pts[0];
+            var pt2 = pts[1];
+            pts.Remove(pt1);
+            pts = pts.OrderBy(x => pt1.DistanceTo(x)).ToList();
+            var moveDir = (pt1 - pts[0]).GetNormal();
+            var layoutPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+            layoutPt = layoutPt + moveDir * (moveBlockTol / 2);
+            return layoutPt;
+        }
+
+        /// <summary>
+        /// 计算疏散指示灯布置方向
+        /// </summary>
+        /// <param name="door"></param>
+        /// <param name="room"></param>
+        /// <returns></returns>
+        private Vector3d GetLayoutDir(Polyline room, Polyline door)
+        {
+            List<Point3d> pts = door.Vertices().Cast<Point3d>().ToList();
+            pts = pts.OrderBy(x => room.Distance(x)).ToList();
+            var dir = (pts[0] - pts[1]).GetNormal();
+            if (dir.DotProduct(Vector3d.XAxis) < 0)
+            {
+                dir = -dir;
+            }
+            return dir;
+        }
+
+        /// <summary>
+        /// 读取excel内容
+        /// </summary>
+        /// <returns></returns>
+        private DataSet GetExcelContent(string path)
+        {
+            ReadExcelService excelSrevice = new ReadExcelService();
+            return excelSrevice.ReadExcelToDataSet(path, true);
         }
     }
 }

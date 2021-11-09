@@ -22,7 +22,10 @@ namespace ThMEPEngineCore.Engine
         }
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj)
         {
-            throw new NotImplementedException();
+            if (dbObj is BlockReference br)
+            {
+                HandleBlockReference(elements, br, Matrix3d.Identity);
+            }
         }
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix)
         {

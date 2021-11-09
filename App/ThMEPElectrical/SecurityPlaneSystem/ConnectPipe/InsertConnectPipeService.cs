@@ -29,7 +29,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                         pipe.Linetype = lineType;
                         pipe.Layer = layerName;
                         pipe.ColorIndex = 256;
-                        acadDatabase.ModelSpace.Add(pipe);
+                        //acadDatabase.ModelSpace.Add(pipe);
                     }
                 }
             }

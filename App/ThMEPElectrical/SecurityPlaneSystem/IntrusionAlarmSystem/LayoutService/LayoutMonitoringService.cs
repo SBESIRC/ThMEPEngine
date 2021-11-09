@@ -1,5 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Model;
@@ -24,7 +27,26 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var structs = getLayoutStructureService.CalLayoutStruc(door, columns, walls);
             if (structs.Count <= 0)
             {
-                return layoutModels;
+                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                Polyline roomBoundary = new Polyline();
+                if(thRoom.Boundary is Polyline polyline)
+                {
+                    roomBoundary = polyline;
+                }
+                else if(thRoom.Boundary is MPolygon mPolygon)
+                {
+                    roomBoundary = mPolygon.Shell();
+                }
+                var bufferRoom = roomBoundary.BufferPL(200)[0] as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(roomBoundary);
+                objs.Add(bufferDoor);
+                var rooms = ThCADCoreNTSEntityExtension.Difference(bufferRoom, objs).Cast<Polyline>().ToList();
+                structs.AddRange(rooms);
+                if (structs.Count <= 0)
+                {
+                    return layoutModels;
+                }
             }
             using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
@@ -78,6 +100,26 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
             var structs = getLayoutStructureService.CalLayoutStruc(door, columns, walls);
             if (structs.Count <= 0)
             {
+                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                Polyline roomBoundary = new Polyline();
+                if (thRoom.Boundary is Polyline polyline)
+                {
+                    roomBoundary = polyline;
+                }
+                else if (thRoom.Boundary is MPolygon mPolygon)
+                {
+                    roomBoundary = mPolygon.Shell();
+                }
+                var bufferRoom = roomBoundary.BufferPL(200)[0] as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(roomBoundary);
+                objs.Add(bufferDoor);
+                var rooms = ThCADCoreNTSEntityExtension.Difference(bufferRoom, objs).Cast<Polyline>().ToList();
+                structs.AddRange(rooms);
+                if (structs.Count <= 0)
+                {
+                    return layoutModels;
+                }
                 return layoutModels;
             }
 

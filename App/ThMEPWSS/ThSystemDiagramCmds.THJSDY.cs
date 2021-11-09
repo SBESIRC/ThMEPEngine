@@ -310,7 +310,7 @@ namespace ThMEPWSS
         }
 
 
-        [CommandMethod("TIANHUACAD", "THCleanDrainageDebugDraw", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "CleanDebugDraw", CommandFlags.Modal)]
         public void ThCleanDrainageDebugDraw()
         {
 
@@ -335,7 +335,7 @@ namespace ThMEPWSS
 
         }
 
-        [CommandMethod("TIANHUACAD", "ThCleanDYFinalDraw", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "CleanDYFinalDraw", CommandFlags.Modal)]
         public void ThCleanDYFinalDraw()
         {
 
