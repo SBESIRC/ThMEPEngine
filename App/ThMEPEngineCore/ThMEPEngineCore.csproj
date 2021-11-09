@@ -80,7 +80,7 @@
     <Compile Include="Algorithm\BFSAlgorithm\BFSNode.cs" />
     <Compile Include="Algorithm\BFSAlgorithm\BFSPathPlaner.cs" />
     <Compile Include="Algorithm\ClusteringAlgorithm\DBScanClustering.cs" />
-    <Compile Include="Algorithm\ClusteringAlgorithm\PointDBSacn.cs" />
+    <Compile Include="Algorithm\ClusteringAlgorithm\PointDBScan.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\FastAStarAlgorithm\AdjustAStarPath.cs" />
     <Compile Include="Algorithm\FastAStarAlgorithm\AStarModel\AStarEntity.cs" />

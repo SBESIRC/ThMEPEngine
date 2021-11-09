@@ -10,7 +10,7 @@ namespace ThMEPEngineCore.Algorithm.ClusteringAlgorithm
     /// <summary>
     /// 点根据密度聚类，如果两个点穿线不进行聚类，可以设置不可以穿过的线
     /// </summary>
-    public class PointDBSacn
+    public class PointDBScan
     {
         List<Point3d> _clusterPoints;
         List<Line> _notCorssLines;
@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.Algorithm.ClusteringAlgorithm
         /// 根据点进行聚类（只考虑点之间的距离）
         /// </summary>
         /// <param name="clusterPoints">密度聚类的点</param>
-        public PointDBSacn(List<Point3d> clusterPoints) 
+        public PointDBScan(List<Point3d> clusterPoints) 
             :this(clusterPoints,null)
         { }
         /// <summary>
@@ -28,7 +28,7 @@ namespace ThMEPEngineCore.Algorithm.ClusteringAlgorithm
         /// </summary>
         /// <param name="clusterPoints">密度聚类的点</param>
         /// <param name="notCrossLines">不能穿的线</param>
-        public PointDBSacn(List<Point3d> clusterPoints, List<Line> notCrossLines) 
+        public PointDBScan(List<Point3d> clusterPoints, List<Line> notCrossLines) 
         {
             _clusterPoints = new List<Point3d>();
             _notCorssLines = new List<Line>();
