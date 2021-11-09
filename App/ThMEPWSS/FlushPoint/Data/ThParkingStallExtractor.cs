@@ -81,7 +81,7 @@ namespace ThMEPWSS.FlushPoint.Data
         {
             if (entity is BlockReference br)
             {
-                if(br.BlockTableRecord != null)
+                if(!br.BlockTableRecord.IsNull)
                 {
                     string name = br.GetEffectiveName().ToUpper();
                     return BlockNames.Where(o => name.Contains(o.ToUpper())).Any();
