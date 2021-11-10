@@ -10,13 +10,14 @@ using ThCADCore.NTS;
 using Linq2Acad;
 using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
+using NetTopologySuite.Geometries;
 
-namespace ThMEPStructure.GirderConnect.Utils
+namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
     class CenterLine
     {
         /// <summary>
-        /// 简化中心线，删除中心线上的叶子分支
+        /// Simplify Centerline, remove leaves of centerline tree
         /// </summary>
         /// <param name="mPolygon"></param>
         /// <param name="interpolationDistance"></param>
@@ -30,8 +31,8 @@ namespace ThMEPStructure.GirderConnect.Utils
             //points on centerline 1:has this point 2:watched and ready to delete 3:can not backtrace from now on
             Dictionary<Point3d, int> edgPts = new Dictionary<Point3d, int>();
             List<Point3d> leaves = new List<Point3d>();
-            Point3d tmpStPt = new Point3d();
-            Point3d tmpEdPt = new Point3d();
+            Point3d tmpStPt;
+            Point3d tmpEdPt;
             foreach (var cl in centerlines)
             {
                 if (cl is Polyline line)
@@ -122,10 +123,10 @@ namespace ThMEPStructure.GirderConnect.Utils
         }
 
         /// <summary>
-        /// 分叉回溯（循环删掉树枝）
+        /// Branches Backtracking (delete branches by loop)
         /// </summary>
         /// <param name="mPolygon"></param>
-        /// <param name="looptime">循环删除的次数，分叉回溯次数</param>
+        /// <param name="looptime">loop times，分叉回溯次数</param>
         /// <param name="interpolationDistance">分割细粒度</param>
         public static void CutBrancheLoop(MPolygon mPolygon, int looptime = 5, double interpolationDistance = 30)
         {
@@ -142,7 +143,7 @@ namespace ThMEPStructure.GirderConnect.Utils
             List<Point3d> points = new List<Point3d>();
             int color = 1;
             double radius = 100;
-            for (int i = 0; i < looptime; ++i, color += 50, radius += 50, radius ++)
+            for (int i = 0; i < looptime; ++i, color += 50, radius += 50, ++radius)
             {
                 points = CutBranche(lines);
                 foreach (var point in points)
@@ -157,7 +158,7 @@ namespace ThMEPStructure.GirderConnect.Utils
         }
 
         /// <summary>
-        /// 删除双边结构树上的最外分支，返回剩下的双边线段和重要点
+        /// Delete the outest branches in tree with double line structure, return leaves lines and inportant points
         /// </summary>
         /// <param name="lines"></param>
         /// <returns></returns>
@@ -254,7 +255,7 @@ namespace ThMEPStructure.GirderConnect.Utils
         }
 
         /// <summary>
-        /// 有优先的获取墙中的点
+        /// Get Points in Polyline by Priority(based on centerline)
         /// </summary>
         /// <param name="mPolygon"></param>
         /// <param name="interpolationDistance"></param>
@@ -300,6 +301,41 @@ namespace ThMEPStructure.GirderConnect.Utils
             }
             return new List<Point3d>();
         }
+        public static void WallEdgePoint(Polygon polygon, double interpolationDistance, ref List<Point3d> fstPts, ref List<Point3d> SndPts)
+        {
+            fstPts.Clear();
+            SndPts.Clear();
+            var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(polygon, interpolationDistance);
+            var lines = new List<Tuple<Point3d, Point3d>>();
+            foreach (var cl in centerlines)
+            {
+                if (cl is Polyline line)
+                {
+                    lines.Add(new Tuple<Point3d, Point3d>(line.StartPoint, line.EndPoint));
+                }
+            }
+            fstPts = CutBranche(lines);
 
+            Dictionary<Point3d, int> degree = new Dictionary<Point3d, int>();
+            foreach (var line in lines)
+            {
+                degree[line.Item1] = 0;
+                degree[line.Item2] = 0;
+            }
+            foreach (var line in lines)
+            {
+                ++degree[line.Item1];
+                ++degree[line.Item2];
+            }
+
+            foreach (var point in degree)
+            {
+                if (point.Value == 2)
+                {
+                    fstPts.Remove(point.Key);
+                    SndPts.Add(point.Key);
+                }
+            }
+        }
     }
 }

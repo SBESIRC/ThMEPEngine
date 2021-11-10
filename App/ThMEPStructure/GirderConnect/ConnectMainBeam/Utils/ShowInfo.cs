@@ -11,7 +11,7 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 
-namespace ThMEPStructure.GirderConnect.Utils
+namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
     class ShowInfo
     {
@@ -72,10 +72,32 @@ namespace ThMEPStructure.GirderConnect.Utils
         }
 
         /// <summary>
+        /// 用方块显示一个点
+        /// </summary>
+        /// <param name="pt">点的位置</param>
+        public static void ShowPointAsU(Point3d pt, int colorIndex = 7, double radius = 200)
+        {
+            Point3d p1 = new Point3d(pt.X - radius, pt.Y - radius, 0);
+            Point3d p2 = new Point3d(pt.X - radius, pt.Y + radius, 0);
+            Point3d p3 = new Point3d(pt.X + radius, pt.Y + radius, 0);
+            Point3d p4 = new Point3d(pt.X + radius, pt.Y - radius, 0);
+
+            Line line1 = new Line(p1, p2);
+            line1.ColorIndex = colorIndex; 
+            Line line2 = new Line(p2, p3);
+            line2.ColorIndex = colorIndex;
+            Line line3 = new Line(p3, p4);
+            line3.ColorIndex = colorIndex;
+            Line line4 = new Line(p4, p1);
+            line4.ColorIndex = colorIndex;
+            HostApplicationServices.WorkingDatabase.AddToModelSpace(line1, line2, line3, line4);
+        }
+
+        /// <summary>
         /// 用带有方向的箭头表示一个布置设备的方向
         /// </summary>
         /// <param name="pt">设备布置位置</param>
-        /// <param name="vector">方向</param>
+        /// <param name="vec">方向</param>
         /// <param name="colorIndex">颜色</param>
         public static void ShowPointWithDirection(Point3d pt, Vector3d vec, int colorIndex = 210)
         {
@@ -106,11 +128,18 @@ namespace ThMEPStructure.GirderConnect.Utils
                     ShowPointAsX(pt, colorIndex, radius);
                 }
             }
-            else
+            else if(type == 'O')
             {
                 foreach (Point3d pt in pts)
                 {
                     ShowPointAsO(pt, colorIndex, radius);
+                }
+            }
+            else
+            {
+                foreach (Point3d pt in pts)
+                {
+                    ShowPointAsU(pt, colorIndex, radius);
                 }
             }
         }
