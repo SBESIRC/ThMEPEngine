@@ -62,12 +62,15 @@ namespace ThMEPWSS.HydrantConnectPipe.Engine
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            var outline = blkref.ToOBB(blkref.BlockTransform.PreMultiplyBy(matrix));
-            elements.Add(new ThRawIfcDistributionElementData()
+            if(blkref.Bounds.HasValue)
             {
-                Data = outline,
-                Geometry = blkref.GetTransformedCopy(matrix),
-            });
+                var outline = blkref.ToOBB(blkref.BlockTransform.PreMultiplyBy(matrix));
+                elements.Add(new ThRawIfcDistributionElementData()
+                {
+                    Data = outline,
+                    Geometry = blkref.GetTransformedCopy(matrix),
+                });
+            }            
         }
 
         private void HandleCircle(List<ThRawIfcDistributionElementData> elements, Circle circle, Matrix3d matrix)
