@@ -48,7 +48,7 @@
     <Compile Include="DSFEL\ThEmgPilotLamp\EmgWallLight.cs" />
     <Compile Include="DSFEL\ThEmgPilotLamp\GraphUtils.cs" />
     <Compile Include="DSFEL\ThEmgPilotLamp\LayoutToStructure.cs" />
-    <Compile Include="DSFEL\ThEmgPilotLamp\ThEmgPilotLampCommand.cs" />
+    <Compile Include="DSFEL\ThEmgPilotLamp\ThDSEmgPilotLampCommand.cs" />
     <Compile Include="DSFEL\ThEmgPilotLamp\ThFEILineExtension.cs" />
     <Compile Include="EmgLightConnect\ConnectEmgLightEngine.cs" />
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />

@@ -41,7 +41,7 @@ namespace ThMEPLighting.DSFEL.ExitService
                 if (intersectRooms.Count == 1)
                 {  
                     Polyline roomBound = intersectRooms[0].Boundary as Polyline;
-                    if (CalDoorOpenDir(door, roomBound))
+                    if (true/*CalDoorOpenDir(door, roomBound)*/)
                     {
                         exit.exitType = ExitType.SafetyExit;
                         exit.room = roomBound;
@@ -99,7 +99,7 @@ namespace ThMEPLighting.DSFEL.ExitService
             pts = pts.OrderBy(x => room.Distance(x)).ToList();
             var pt1 = pts[0];
             var pt2 = pts[1];
-            pts.Remove(pt1);
+            pts = pts.Where(x => !x.IsEqualTo(pt1, new Tolerance(0.01, 0.01))).ToList();
             pts = pts.OrderBy(x => pt1.DistanceTo(x)).ToList();
             var moveDir = (pt1 - pts[0]).GetNormal();
             var layoutPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);

@@ -58,7 +58,7 @@ namespace ThMEPLighting.DSFEL
 
             if (LayoutRoomTextConfig.Any(x => room.Tags.Any(y => RoomConfigTreeService.CompareRoom(x, y))))
             {
-                if (EvacuationExitArea.Any(x => otherRooms.SelectMany(z => z.Tags).Any(y => RoomConfigTreeService.CompareRoom(x, y))))
+                if (EvacuationExitAreaConfig.Any(x => otherRooms.SelectMany(z => z.Tags).Any(y => RoomConfigTreeService.CompareRoom(x, y))))
                 {
                     return true;
                 }

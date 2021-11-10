@@ -24,7 +24,7 @@ namespace ThMEPLighting.DSFEL
             //创建疏散路径
             CreateEvacuationPathService evacuationPath = new CreateEvacuationPathService();
             var evaPaths = evacuationPath.CreatePath(exitInfo, centerLines, holes);
-
+           
             //打印出入口图块
             PrintBlock(exitInfo);
 
@@ -46,11 +46,11 @@ namespace ThMEPLighting.DSFEL
                 double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.direction, Vector3d.ZAxis);
                 if (model.exitType == ExitType.EvacuationExit)
                 {
-                    InsertBlockService.InsertBlock(ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.ExitEBlockName, model.positin, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.ExitEBlockName, model.positin, rotateAngle, 100, new Dictionary<string, string>() { { "T", "E" } });
                 }
                 else if (model.exitType == ExitType.SafetyExit)
                 {
-                    InsertBlockService.InsertBlock(ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.ExitSBlockName, model.positin, rotateAngle, 100);
+                    InsertBlockService.InsertBlock(ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.ExitSBlockName, model.positin, rotateAngle, 100, new Dictionary<string, string>() { { "T", "S" } });
                 }
             }
         }

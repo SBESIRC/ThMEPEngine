@@ -11,6 +11,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPLighting.DSFEI.ThEmgPilotLamp;
 using ThMEPLighting.DSFEL;
 using ThMEPLighting.DSFEL.Service;
 using ThMEPLighting.FEI;
@@ -216,6 +217,98 @@ namespace ThMEPLighting
                 var holeInfo = CalHoles(plines);
 
                 var lampLight = new ThEmgPilotLampCommand();
+                lampLight.InitData(originTransformer, holeInfo);
+                lampLight.Execute();
+
+
+                var cloudLineIds = lampLight.AddPolyLineIds;
+                if (null == cloudLineIds || cloudLineIds.Count < 1)
+                    return;
+                //revcloud can only print to the current layer.
+                //so it changes the active layer to the required layer, then changes back.
+                //画云线。 云线只能画在当前图层。所以先转图层画完在转回来。
+                var oriLayer = Active.Database.Clayer;
+                foreach (var id in cloudLineIds)
+                {
+                    var pline = acdb.ModelSpace.Element(id);
+                    if (null == pline)
+                        continue;
+                    ObjectId revcloud = ObjectId.Null;
+                    void handler(object s, ObjectEventArgs e)
+                    {
+                        if (e.DBObject is Polyline polyline)
+                        {
+                            revcloud = e.DBObject.ObjectId;
+                        }
+                    }
+                    acdb.Database.ObjectAppended += handler;
+
+#if ACAD_ABOVE_2014
+                    Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", id, "_No");
+#else
+                    ResultBuffer args = new ResultBuffer(
+                       new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
+                       new TypedValue((int)LispDataType.Text, "_ARC"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "_Object"),
+                       new TypedValue((int)LispDataType.ObjectId, id),
+                       new TypedValue((int)LispDataType.Text, "_No"));
+                    Active.Editor.AcedCmd(args);
+#endif
+                    acdb.Database.ObjectAppended -= handler;
+
+                    // 设置运行属性
+                    var revcloudObj = acdb.Element<Entity>(revcloud, true);
+                    revcloudObj.ColorIndex = ThMEPLightingCommon.EMGPILOTREVCLOUD_CORLOR_INDEX;
+                    revcloudObj.Layer = ThMEPLightingCommon.REVCLOUD_LAYER;
+                }
+                Active.Database.Clayer = oriLayer;
+
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THDSSSZSDBZ", CommandFlags.Modal)]
+        public void ThDSMEGLBZ()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                //获取外包框
+                List<Curve> frameLst = new List<Curve>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+                var pt = frameLst.First().StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                frameLst = frameLst.Where(c => c.Area > 10).Select(x =>
+                {
+                    //originTransformer.Transform(x);
+                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
+                }).ToList();
+
+                var plines = HandleFrame(frameLst);
+                var holeInfo = CalHoles(plines);
+
+                var lampLight = new ThDSEmgPilotLampCommand();
                 lampLight.InitData(originTransformer, holeInfo);
                 lampLight.Execute();
 

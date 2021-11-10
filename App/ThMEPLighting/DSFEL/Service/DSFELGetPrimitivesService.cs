@@ -240,7 +240,7 @@ namespace ThMEPLighting.DSFEL.Service
                 exitBlock.ForEach(x =>
                 {
                     var transBlock = x.Clone() as BlockReference;
-                    originTransformer.Transform(transBlock);
+                    //originTransformer.Transform(transBlock);
                     objs.Add(transBlock);
                 });
             }
@@ -277,7 +277,7 @@ namespace ThMEPLighting.DSFEL.Service
                 {
                     for (int i = 1; i < mPolygonLoops.Count(); i++)
                     {
-                        holes.Add(mPolygonLoops[0]);
+                        holes.Add(mPolygonLoops[i]);
                     }
                 }
             }

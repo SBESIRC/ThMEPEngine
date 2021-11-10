@@ -15,18 +15,12 @@ namespace ThMEPLighting.DSFEL.Service
     {
         public void PrintPath(List<Line> extendLines, List<Line> lanes, ThMEPOriginTransformer originTransformer)
         {
-            var paths = new List<Line>(extendLines);
-            paths.AddRange(lanes);
-
-            paths = ConnectLine(paths);
-            foreach (var path in paths)
-            {
-                //originTransformer.Reset(path);
-                InsertConnectPipe(path);
-            }
+            //paths = ConnectLine(paths);
+            InsertPath(extendLines, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
+            InsertPath(lanes, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
         }
 
-        public void InsertConnectPipe(Line path)
+        public void InsertPath(List<Line> paths, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -35,9 +29,13 @@ namespace ThMEPLighting.DSFEL.Service
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
 
-                path.ColorIndex = 256;
-                path.Layer = ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME;
-                acadDatabase.ModelSpace.Add(path);
+                foreach (var path in paths)
+                {
+                    var pathLine = path.Clone() as Line;
+                    pathLine.ColorIndex = 256;
+                    pathLine.Layer = layer;
+                    acadDatabase.ModelSpace.Add(pathLine);
+                }
             }
         }
 

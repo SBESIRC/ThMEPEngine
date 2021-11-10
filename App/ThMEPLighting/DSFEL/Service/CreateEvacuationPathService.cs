@@ -27,6 +27,7 @@ namespace ThMEPLighting.DSFEL.Service
                 RoomInfoModel roomInfoModel = new RoomInfoModel();
                 roomInfoModel.room = room;
                 roomInfoModel.exitModels = exitInfo.Select(x => x).ToList();
+                roomInfoModel.evacuationPaths = new List<Line>();
                 foreach (var exit in exitInfo)
                 {
                     var closetLine = roomCenterLines.OrderBy(x => x.GetClosestPointTo(exit.positin, false).DistanceTo(exit.positin)).First();
@@ -38,10 +39,10 @@ namespace ThMEPLighting.DSFEL.Service
 
                     if (path != null)
                     {
-                        roomCenterLines.AddRange(TransPolylineToLine(path));
+                        path.AddVertexAt(0, exit.positin.ToPoint2D(), 0, 0, 0);
+                        roomInfoModel.evacuationPaths.AddRange(TransPolylineToLine(path));
                     }
                 }
-                roomInfoModel.evacuationPaths = roomCenterLines;
                 roomModels.Add(roomInfoModel);
             }
 
@@ -56,7 +57,7 @@ namespace ThMEPLighting.DSFEL.Service
         private List<Line> TransPolylineToLine(Polyline polyline)
         {
             List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
             {
                 var line = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices));
                 if (line.Length > 0)

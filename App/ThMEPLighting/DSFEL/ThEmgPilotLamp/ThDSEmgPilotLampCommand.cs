@@ -14,10 +14,10 @@ using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.DSFEI.ThEmgPilotLamp
 {
-    class ThEmgPilotLampCommand : IAcadCommand, IDisposable
+    class ThDSEmgPilotLampCommand : IAcadCommand, IDisposable
     {
         private bool _isHostFirst = false;
-        public ThEmgPilotLampCommand() 
+        public ThDSEmgPilotLampCommand() 
         {
             //这里根据用户选项
             this._isHostFirst= ThEmgLightService.Instance.IsHostingLight;
@@ -127,7 +127,7 @@ namespace ThMEPLighting.DSFEI.ThEmgPilotLamp
                         Point3d sp = item.pointInOutSide;
                         Point3d ep = sp + item.direction.MultiplyBy(10);
                         var createPt = item.pointInOutSide;
-                        _originTransformer.Reset(ref createPt);
+                        //_originTransformer.Reset(ref createPt);
                         Vector3d createDir = item.directionSide.CrossProduct(Vector3d.ZAxis);
                         if (createDir.DotProduct(item.direction) < 0)
                             createDir = createDir.Negate();
