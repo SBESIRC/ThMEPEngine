@@ -27,6 +27,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 1);//打断部分 自动连接
+            var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 3);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
                 try
@@ -53,6 +54,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     ;
                 }
                 
+            }
+            foreach (var gl in GLineConnectList2)
+            {
+                try
+                {
+                    var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
+                    var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
+                    if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                    {
+                        continue;
+                    }
+                    if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
+                    {
+                        if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                        {
+                            continue;
+                        }
+                    }
+
+                    var line = new Line(pt1._pt, pt2._pt);
+                    lineList.Add(line);
+                }
+                catch
+                {
+                    ;
+                }
+
             }
             lineList = CleanLaneLines3(lineList);
         }
