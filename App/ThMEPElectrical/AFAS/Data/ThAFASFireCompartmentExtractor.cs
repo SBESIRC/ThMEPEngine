@@ -2,25 +2,25 @@
 using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPElectrical.AFAS.Service;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.AFAS.Data
 {
     class ThAFASFireCompartmentExtractor : ThExtractorBase, IPrint, IGroup, ITransformer
     {
-        public List<Polyline> FireAparts { get; protected set; }
+        private DBObjectCollection FireCompartments { get; set; }
 
         public List<ThStoreyInfo> StoreyInfos { get; set; }
 
@@ -28,7 +28,7 @@ namespace ThMEPElectrical.AFAS.Data
 
         public ThAFASFireCompartmentExtractor()
         {
-            FireAparts = new List<Polyline>();
+            FireCompartments = new DBObjectCollection();
             Category = BuiltInCategory.FireApart.ToString();
             StoreyInfos = new List<ThStoreyInfo>();
             FireApartIds = new Dictionary<Entity, string>();
@@ -36,7 +36,7 @@ namespace ThMEPElectrical.AFAS.Data
         public override List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            FireAparts.ForEach(o =>
+            FireCompartments.OfType<Entity>().ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 if (FireApartIds.ContainsKey(o))
@@ -49,7 +49,6 @@ namespace ThMEPElectrical.AFAS.Data
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, BuildString(GroupOwner, o));
-                //geometry.Boundary = o;
                 geos.Add(geometry);
             });
 
@@ -58,38 +57,33 @@ namespace ThMEPElectrical.AFAS.Data
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var extractService = new ThExtractPolylineService()
+            var builder = new ThFireCompartmentBuilder()
             {
-                ElementLayer = this.ElementLayer,
+                LayerFilter = ElementLayer.Split(',').ToList(),
             };
-            extractService.Extract(database, pts);
+            var compartments = builder.BuildFromMS(database, pts);
+            FireCompartments = compartments.Select(o => o.Boundary).ToCollection();
 
-            extractService.Polys.ForEach(o => Transformer.Transform(o));
-            FireAparts = extractService.Polys.ToList();
+            // 移动到原点附近
+            Transformer.Transform(FireCompartments);
 
-            // 如果楼层框线没有防火分区，就认为楼层框线是一个防火分区
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(FireAparts.ToCollection());
+            // 业务需求：
+            //  如果楼层框线没有防火分区，就认为楼层框线是一个防火分区
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(FireCompartments);
             StoreyInfos.ForEach(o =>
             {
                 if (spatialIndex.SelectWindowPolygon(o.Boundary).Count == 0)
                 {
                     var bufferService = new ThNTSBufferService();
                     var fireApartOutline = bufferService.Buffer(o.Boundary, -1.0) as Polyline;
-                    FireAparts.Add(fireApartOutline);
+                    FireCompartments.Add(fireApartOutline);
                 }
             });
-            FireAparts = FireAparts
-                .Where(o => o.Area >= SmallAreaTolerance)
-                .Select(o => ThCleanEntityService.Tesslate(o))
-                .Cast<Polyline>()
-                .ToList();
-            //对Clean的结果进一步过虑
-            FireAparts = FireAparts.ToCollection().FilterSmallArea(SmallAreaTolerance).Cast<Polyline>().ToList();
         }
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            FireAparts.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            FireCompartments.OfType<Entity>().ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
 
         public void BuildFireAPartIds()
@@ -122,17 +116,17 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Print(Database database)
         {
-            FireAparts.Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
+            FireCompartments.OfType<Entity>().ToList().CreateGroup(database, ColorIndex);
         }
 
         public void Transform()
         {
-            Transformer.Transform(FireAparts.ToCollection());
+            Transformer.Transform(FireCompartments);
         }
 
         public void Reset()
         {
-            Transformer.Reset(FireAparts.ToCollection());
+            Transformer.Reset(FireCompartments);
         }
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
     }
