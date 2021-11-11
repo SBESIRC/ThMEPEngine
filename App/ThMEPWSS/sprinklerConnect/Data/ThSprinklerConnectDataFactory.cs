@@ -19,6 +19,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.LaneLine;
 using NetTopologySuite.Geometries;
@@ -147,7 +148,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
             };
         }
 
-        public static List<Point3d> getSprinklerConnectData(Polyline frame)
+        public static List<Point3d> GetSprinklerConnectData(Polyline frame)
         {
             var sprinklerPt = new List<Point3d>();
 
@@ -158,7 +159,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
 
 
 
-                var sprinklersData = recognizeAllEngine.Elements 
+                var sprinklersData = recognizeAllEngine.Elements
                                       .OfType<ThSprinkler>()
                                       .Where(o => frame.Contains(o.Position))
                                       .Select(o => o.Position)
@@ -170,50 +171,25 @@ namespace ThMEPWSS.SprinklerConnect.Data
 
         }
 
-        private static DBObjectCollection getSprayItems(Polyline frame)
+        public static List<Polyline> GetPipeData(Polyline frame, string layer)
         {
+            var polyList = new List<Polyline>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
-                acadDatabase.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
-                acadDatabase.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
-
-                //获取喷淋
-                var dxfNames = new string[]
+                var extractService = new ThExtractPolylineService()
                 {
-                    ThCADCommon.DxfName_TCH_EQUIPMENT_16,
-                    ThCADCommon.DxfName_TCH_EQUIPMENT_12,
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                    ElementLayer = layer,
+
                 };
-
-                var filterlist = OpFilter.Bulid(o =>
-                                o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
-                                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-                var sprays = new List<Entity>();
-                var allSprays = Active.Editor.SelectAll(filterlist);
-                if (allSprays.Status == PromptStatus.OK)
-                {
-                    using (AcadDatabase acdb = AcadDatabase.Active())
-                    {
-                        foreach (ObjectId obj in allSprays.Value.GetObjectIds())
-                        {
-                            sprays.Add(acdb.Element<Entity>(obj));
-                        }
-                    }
-                }
-
-                var objs = new DBObjectCollection();
-                sprays.Where(o =>
-                {
-                    var pts = o.GeometricExtents;
-                    var position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
-                    return frame.Contains(position);
-                })
-                .ForEachDbObject(o => objs.Add(o));
-
-                return objs;
+                extractService.Extract(acadDatabase.Database , frame.Vertices());
+                polyList.AddRange(extractService.Polys);
             }
+
+            return polyList;
+
         }
+
+
     }
 }
 

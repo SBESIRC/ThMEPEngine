@@ -30,7 +30,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
         public static void SprinklerConnectEngine(ThSprinklerParameter sprinklerParameter)
         {
 
-            ThSprinklerPtNetworkEngine.getSprinklerPtNetwork(sprinklerParameter);
+            ThSprinklerPtNetworkEngine.GetSprinklerPtNetwork(sprinklerParameter);
 
 
 

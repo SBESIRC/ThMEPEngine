@@ -22,9 +22,9 @@ using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    class ThSprinklerConnectUtil
+    class ThSprinklerDataService
     {
-        public static Polyline getFrame()
+        public static Polyline GetFrame()
         {
             var frame = new Polyline();
             //画框，提数据，转数据

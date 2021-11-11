@@ -61,9 +61,15 @@
     <Compile Include="SprinklerConnect\Data\ThSprinklerDataQueryService.cs" />
     <Compile Include="SprinklerConnect\Engine\ThSprinklerConnectEngine.cs" />
     <Compile Include="SprinklerConnect\Engine\ThSprinklerPtNetworkEngine.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerEdgeNode.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerParameter.cs" />
-    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtil.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerDataService.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerNetGraphService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerNetworkService.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerLineService.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerPipeService.cs" />
+    <Compile Include="SprinklerConnect\ThSprinklerConnectCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
