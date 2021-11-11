@@ -462,6 +462,7 @@
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.THDSPSXT.cs" />
     <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Extract\ThVerticalpipe.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\MainLoop.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\PtDist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\SubLoop.cs" />

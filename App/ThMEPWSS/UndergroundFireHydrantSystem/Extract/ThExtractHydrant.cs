@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Pipe.Service;
@@ -20,10 +21,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public IEnumerable<Circle> Results1 { get; private set; }
         public DBObjectCollection DBObjs { get; private set; }
         public DBObjectCollection DBobjsResults { get; private set; }
+        public DBObjectCollection Lines { get; private set; }
+        public DBObjectCollection Texts { get; private set; }
         public DBObjectCollection DBObjs1 { get; private set; }
         public List<Point3dEx> HydrantPosition { get; private set; }
         public DBObjectCollection Extract(AcadDatabase acadDatabase, Point3dCollection polygon)
         {
+            Lines = new DBObjectCollection();
+            Texts = new DBObjectCollection();
 
             Results = acadDatabase.ModelSpace
                .OfType<Entity>()
@@ -33,6 +38,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                            o.Layer.ToUpper() == "W-WSUP-COOL-PIPE" ||
                            o.Layer.ToUpper() == "W-FRPT-EXTG" ||
                            o.Layer.ToUpper() == "W-FRPT-HYDT" ||
+                           o.Layer.ToUpper() == "W-FRPT-HYDT-DIMS" ||
                            o.Layer.ToUpper() == "W-RAIN-EQPM" ||
                            o.Layer.ToUpper() == "W-WSUP-DIMS" ||
                            o.Layer.ToUpper() == "0");
@@ -65,7 +71,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                             DBobjsResults.Add(circle);
                             continue;
                         }
+                        if(br.Name.Contains("SDRFSETEW"))
+                        {
+                            var objs = new DBObjectCollection();
+                            br.Explode(objs);
+                            foreach(var obj in objs)
+                            {
+                                if(obj is BlockReference)
+                                {
+                                    var objs1 = new DBObjectCollection();
+                                    (obj as Entity).Explode(objs1);
+                                    objs1.Cast<Entity>()
+                                        .Where(e => e is Circle)
+                                        .Where(e => (e as Circle).Radius > 30 && (e as Circle).Radius < 130)
+                                        .ForEach(e => DBobjsResults.Add(e));
+                                }
+                                if (obj.GetType().Name.Contains("ImpEntity"))
+                                {
+                                    var objs1 = new DBObjectCollection();
+                                    (obj as Entity).Explode(objs1);
+                                    objs1.Cast<Entity>()
+                                        .Where(e => e is Line)
+                                        .ForEach(e => Lines.Add(e));
+                                    objs1.Cast<Entity>()
+                                        .Where(e => e.IsTCHText())
+                                        .ForEach(e => Texts.Add(e.ExplodeTCHText()[0]));
+                                    objs1.Cast<Entity>()
+                                        .Where(e => e is DBText)
+                                        .ForEach(e => Texts.Add(e));
+                                }
+                            }
+                            continue;
+                        }
                     }
+           
                     AddBlockReference(acadDatabase, DBobjsResults, entity);
                 }
             }
@@ -96,6 +135,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         public static void AddBlockReference(AcadDatabase acadDatabase, DBObjectCollection DBobjs, Entity entity)
         {
+            
             if (IsTCHPipeFitting(entity))
             {
                 return;
@@ -225,7 +265,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         public static bool IsTCHPipe(Entity entity)
         {
             string dxfName = entity.GetRXClass().DxfName.ToUpper();
-            return dxfName.Equals("TCH_PIPE");
+            return dxfName.Equals("TCH_PIPE") || dxfName.Contains("TCH_MULTILEADER");
         }
 
         public static bool IsTCHPipeFitting(Entity entity)

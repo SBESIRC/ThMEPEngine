@@ -9,6 +9,7 @@ using AcHelper;
 using ThMEPEngineCore.Command;
 using GeometryExtensions;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Command
 {
@@ -48,9 +49,17 @@ namespace ThMEPWSS.Command
 
         public void CreateFireHydrantSystem(AcadDatabase curDb)
         {
+
+            //var entOpt = new PromptEntityOptions("\nPick entity in block:");
+            //var entityResult = Active.Editor.GetEntity(entOpt);
+
+            //var entId = entityResult.ObjectId;
+            //var dbObj = curDb.Element<Entity>(entId);
+            //var name = dbObj.GetRXClass().DxfName;
+
             var opt = new PromptPointOptions("请指定环管标记起点: \n");
             var propPtRes = Active.Editor.GetPoint(opt);
-            if(propPtRes.Status != PromptStatus.OK)
+            if (propPtRes.Status != PromptStatus.OK)
             {
                 return;
             }

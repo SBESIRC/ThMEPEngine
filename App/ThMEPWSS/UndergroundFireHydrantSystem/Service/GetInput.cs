@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Windows.Forms;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -22,6 +24,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
             var hydrantDB = hydrantEngine.Extract(acadDatabase, selectArea);
             fireHydrantSysIn.HydrantPosition = hydrantEngine.CreatePointList();
+
+            var labelLines = hydrantEngine.Lines;
+            var labelTexts = hydrantEngine.Texts;
+
+            //var hydrantEngine = new ThVerticalpipe();
+            //fireHydrantSysIn.HydrantPosition = hydrantEngine.Extract(acadDatabase.Database, selectArea);
 
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
@@ -72,8 +80,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
-            var labelLine = labelEngine.CreateLabelLineList();//----12s----
-                
+            var labelLine = labelEngine.CreateLabelLineList(labelLines);//----12s----
+            
+            foreach(var l in labelLine)
+            {
+                l.LayerId = DbHelper.GetLayerId("0");
+                acadDatabase.CurrentSpace.Add(l);
+            }
+
             double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
@@ -109,6 +123,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
             
+ 
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             
             fireHydrantSysIn.TextWidth = textWidth + 100;

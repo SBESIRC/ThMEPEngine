@@ -192,6 +192,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             int indxx = 0;
             foreach (var pt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
             {
+                if(pt._pt.DistanceTo(new Point3d(1754741, 821940.9, 0))<19)
+                {
+
+                }
                 try
                 {
                     CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
@@ -204,6 +208,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             foreach (var pt in pointList)
             {
+                if (pt._pt.DistanceTo(new Point3d(1754741,821940.9, 0)) < 19)
+                {
+
+                }
                 try
                 {
                     CreateTermPtDic3(pt, ref fireHydrantSysIn, labelLine, textSpatialIndex, fhSpatialIndex);
