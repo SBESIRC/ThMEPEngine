@@ -83,7 +83,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Dictionary<Point3d, int> PointClass = new Dictionary<Point3d, int>();
             PointClassify(polyline, PointClass);
             var points = Algorithms.GetConvexHull(PointClass.Keys.ToList());
-            foreach(var point in points) //actually O(1) time
+            foreach (var point in points) //actually O(1) time
             {
                 if (PointClass.ContainsKey(point))
                 {
@@ -92,15 +92,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             List<Point3d> outPoints = new List<Point3d>();
-            if(ptType == 0)
+            if (ptType == 0)
             {
                 return null;
             }
             else
             {
-                foreach(var point in PointClass)
+                foreach (var point in PointClass)
                 {
-                    if(point.Value == ptType)
+                    if (point.Value == ptType)
                     {
                         //ShowInfo.ShowPointAsO(point.Key, 130);
                         outPoints.Add(point.Key);
@@ -160,9 +160,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         if (poly2points != null)
                         {
-                            foreach(var pl2pts in poly2points)
+                            foreach (var pl2pts in poly2points)
                             {
-                                if(!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
+                                if (!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
                                 {
                                     pl2pts.Value.Add(pt);
                                     //ShowInfo.ShowPointAsO(pt, 230, 300);
@@ -170,6 +170,43 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             }
                         }
                         break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get Near Points By ConformingDelaunayTriangulation
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="poly2points"></param>
+        public static void ConformingDelaunayTriangulationNearPoints(Point3dCollection points, Tuple<Polyline, Point3dCollection> poly2points)
+        {
+            var builder = new ConformingDelaunayTriangulationBuilder();
+            builder.SetSites(points.ToNTSGeometry());
+            builder.Constraints = poly2points.Item1.ToNTSLineString();
+
+            foreach (var geometry in builder.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory).Geometries)
+            {
+                if (geometry is Polygon polygon)
+                {
+                    if (polygon.IsEmpty)
+                    {
+                        continue;
+                    }
+                    var polyline = polygon.Shell.ToDbPolyline();
+                    if (poly2points.Item1.Intersects(polyline))
+                    {
+                        foreach (var obj in polyline.Vertices())
+                        {
+                            if (obj is Point3d pt)
+                            {
+                                if (pt.DistanceTo(poly2points.Item1.GetClosePoint(pt)) > 2)
+                                {
+                                    poly2points.Item2.Add(pt);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -224,9 +261,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             foreach (Point3d basePoint in basePoints)
             {
-                foreach(Point3d removePoint in removePoints)
+                foreach (Point3d removePoint in removePoints)
                 {
-                    if(basePoint.DistanceTo(removePoint) < deviation)
+                    if (basePoint.DistanceTo(removePoint) < deviation)
                     {
                         if (basePoints.Contains(removePoint))
                         {
@@ -270,13 +307,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             List<Point3d> tmpPoints = new List<Point3d>();
             tmpPoints.AddRange(points);
-            foreach(var pt in tmpPoints)
+            foreach (var pt in tmpPoints)
             {
                 double curDis = pt.DistanceTo(outline.GetClosePoint(pt));
                 if (curDis > maxDis)
                 {
                     points.Remove(pt);
-                } 
+                }
             }
         }
     }

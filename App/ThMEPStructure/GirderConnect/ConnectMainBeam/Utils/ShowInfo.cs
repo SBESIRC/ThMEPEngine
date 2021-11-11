@@ -83,7 +83,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Point3d p4 = new Point3d(pt.X + radius, pt.Y - radius, 0);
 
             Line line1 = new Line(p1, p2);
-            line1.ColorIndex = colorIndex; 
+            line1.ColorIndex = colorIndex;
             Line line2 = new Line(p2, p3);
             line2.ColorIndex = colorIndex;
             Line line3 = new Line(p3, p4);
@@ -128,7 +128,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     ShowPointAsX(pt, colorIndex, radius);
                 }
             }
-            else if(type == 'O')
+            else if (type == 'O')
             {
                 foreach (Point3d pt in pts)
                 {

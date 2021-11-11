@@ -398,16 +398,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
                 outlineWalls.Add(outline, walls);
 
                 //计算
-                Connect.Calculate(newClumnPts, outlineWalls, outlineClumns);
+                Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
             }
             //{
             //    //DBObjectCollection objs = new DBObjectCollection();
             //    List<Line> lines = new List<Line>();
             //    lines.Select(o => o.ExtendLine(1));
             //    var spaces = lines.ToCollection().PolygonsEx();
-
             //}
-
             //{
             //    List<Polyline> polylines = new List<Polyline>();
             //    ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(polylines.ToCollection());
@@ -415,7 +413,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
             //    var entitys= spatialIndex.SelectCrossingPolygon(polyline);
             //    //var entitys= spatialIndex.SelectWindowPolygon(polyline);
             //    //var entitys= spatialIndex.SelectFence(polyline);
-                
             //}
         }
     }

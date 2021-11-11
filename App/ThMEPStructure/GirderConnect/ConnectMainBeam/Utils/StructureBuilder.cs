@@ -42,7 +42,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     if (polyline.Contains(pt) && !pt2lines.ContainsKey(pt))
                     {
-                        if(poly2points != null)
+                        if (poly2points != null)
                         {
                             foreach (var houseBorder in poly2points.Keys)
                             {
@@ -223,7 +223,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlineWalls">某轮廓和它的剪力墙</param>
         /// <param name="outlineClumns">某轮廓和它包含的柱点</param>
         /// <param name="outline2BorderNearPts">Input and Output</param>
-        public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, List<Polyline>> outlineWalls, 
+        public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, List<Polyline>> outlineWalls,
             Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             List<Point3d> fstPts = new List<Point3d>();
@@ -344,57 +344,101 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
-        /// 通过线找到包含这条线的内部为空多边形
+        /// Build a structure
+        /// can find a polyline by any line in this polyline
         /// </summary>
-        public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLine)
+        /// <param name="dicTuples"></param>
+        /// <param name="findPolylineFromLines"></param>
+        /// <param name="acdb"></param>
+        public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, AcadDatabase acdb = null)
         {
-            List<Point3d> points = dicTuples.Keys.ToList();
-            Dictionary<Point3d, int> ptVisited = new Dictionary<Point3d, int>();
-            foreach(var startPt in points)
+            Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
+            foreach (var dicTuple in dicTuples)
             {
-                foreach(var endPt in dicTuples[startPt])
+                foreach (var edPt in dicTuple.Value)
                 {
-
+                    if (!lineVisit.ContainsKey(new Tuple<Point3d, Point3d>(dicTuple.Key, edPt)))
+                    {
+                        lineVisit.Add(new Tuple<Point3d, Point3d>(dicTuple.Key, edPt), 0);
+                    }
                 }
             }
-            //List<Tuple<Point3d, Point3d>> lines = new List<Tuple<Point3d, Point3d>>();
-            //lines.Add(curLine);
-            //Tuple<Point3d, Point3d> tmpLine = new Tuple<Point3d, Point3d>();
-            ////当能获得到下一根线的时候，就一直获取下一根线，如果获取不到了， 就返回null
-            ////如果一开始就没有，
-            //while ()
-            //{
-            //    lines.Add(GetNextLine(linesm));
-            //}
+            List<Tuple<Point3d, Point3d>> tuppleList = lineVisit.Keys.ToList();
+            foreach (var tuple in tuppleList)
+            {
+                if (lineVisit[tuple] == 0)
+                {
+                    var tmpLines = new List<Tuple<Point3d, Point3d>>();
+                    lineVisit[tuple] = 1;
+                    tmpLines.Add(tuple);
+                    var curTuple = new Tuple<Point3d, Point3d>(tuple.Item1, tuple.Item2);
+                    int flag = 0;
+                    while (true)
+                    {
+                        Point3d nextPt = GetNextConnectPoint(curTuple.Item1, curTuple.Item2, dicTuples);
+                        if (nextPt == curTuple.Item1) //find a leaf
+                        {
+                            flag = 1;
+                            break;
+                        }
+                        curTuple = new Tuple<Point3d, Point3d>(curTuple.Item2, nextPt);
+                        if (lineVisit[curTuple] == 1)
+                        {
+                            if (curTuple.Item2 != nextPt)
+                            {
+                                flag = 1;
+                            }
+                            break;
+                        }
+                        lineVisit[curTuple] = 1;
+                        tmpLines.Add(curTuple);
+                        if (nextPt == tuple.Item1) // had find a circle
+                        {
+                            break;
+                        }
+                    }
+
+                    if (tmpLines.Count > 1 && flag != 1) //如果算法好，这个是可以不要的
+                    {
+                        foreach (var tmpLine in tmpLines)
+                        {
+                            //ShowInfo.DrawLine(tmpLine.Item1, tmpLine.Item2);
+                            if (!findPolylineFromLines.ContainsKey(tmpLine))
+                            {
+                                findPolylineFromLines.Add(tmpLine, tmpLines);
+                            }
+                        }
+                        Polyline polyline = LineDealer.Tuples2Polyline(tmpLines);
+                        ShowInfo.ShowGeometry(polyline.ToNTSGeometry(), acdb, 90);
+                    }
+                }
+            }
         }
 
         /// <summary>
-        /// 获取当前线所在多边形的下一条线段
+        /// Get the next point in the polyline based on this corrent line
         /// </summary>
-        /// <param name="curLine"></param>
-        /// <param name=""></param>
-        /// <returns></returns>
-        //public static Tuple<Point3d, Point3d> GetNextLine(Tuple<Point3d, Point3d> curLine, Dictionary<Tuple<Point3d, Point3d>, int> LineVisit)
-        public static void GetNextLine(Tuple<Point3d, Point3d> curLine, Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        /// <returns>if the return value equals to baseStPt，means there is no next point，also means this is a leaf point</returns>
+        public static Point3d GetNextConnectPoint(Point3d baseStPt, Point3d baseEdPt, Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
-            ////如果下一个线不为空而且没有被访问过 ,则访问这个线
-            ////////////////////////////////////////////////////////////////////////////////////////////此代码可能有问题，参考上面的注释和参数列表
-            //double maxCmp = double.MinValue;
-            //Point3d nextPt = new Point3d();
-            //foreach (var point in lines[curLine.Item2])
-            //{
-            //    if (point == curLine.Item1)
-            //    {
-            //        continue;
-            //    }
-            //    var tmp = PointsDealer.DirectionCompair(curLine.Item1, curLine.Item2, point);
-            //    if (tmp > maxCmp)
-            //    {
-            //        maxCmp = tmp;
-            //        nextPt = point;
-            //    }
-            //}
-            //return new Tuple<Point3d, Point3d>(curLine.Item1, nextPt);
+            double minDegree = double.MaxValue;
+            Vector3d baseVec = baseStPt - baseEdPt;
+            Point3d aimEdPt = baseStPt;
+            double curDegree;
+            foreach (var curEdPt in dicTuples[baseEdPt])
+            {
+                if (curEdPt == baseStPt)
+                {
+                    continue;
+                }
+                curDegree = (curEdPt - baseEdPt).GetAngleTo(baseVec, Vector3d.ZAxis);
+                if (curDegree < minDegree)
+                {
+                    minDegree = curDegree;
+                    aimEdPt = curEdPt;
+                }
+            }
+            return aimEdPt;
         }
     }
 }

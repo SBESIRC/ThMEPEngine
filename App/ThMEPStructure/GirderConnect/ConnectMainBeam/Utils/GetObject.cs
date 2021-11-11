@@ -166,9 +166,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 double curRotate = baseVec.GetAngleTo(curPt - fromPt);
                 double curDis = fromPt.DistanceTo(curPt);
                 double curCross = curRotate * curDis;
-                if(curRotate < tolerance && curDis < constrain && curDis > 200)
+                if (curRotate < tolerance && curDis < constrain && curDis > 200)
                 {
-                    if(curDis < constrain / 2)
+                    if (curDis < constrain / 2)
                     {
                         if (curCross < minFstCross)
                         {
@@ -176,9 +176,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             ansFstPt = curPt;
                         }
                     }
-                    else if(curRotate < tolerance / 2)
+                    else if (curRotate < tolerance / 2)
                     {
-                        if(curCross < minSndCross)
+                        if (curCross < minSndCross)
                         {
                             minSndCross = curCross;
                             ansSndPt = curPt;
@@ -186,7 +186,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                     else
                     {
-                        if(curCross < minThdCross)
+                        if (curCross < minThdCross)
                         {
                             minThdCross = curCross;
                             ansThdPt = curPt;
@@ -195,15 +195,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
 
-            if(ansFstPt != fromPt)
+            if (ansFstPt != fromPt)
             {
                 return ansFstPt;
             }
-            else if(ansSndPt != fromPt)
+            else if (ansSndPt != fromPt)
             {
                 return ansSndPt;
             }
-            else if(ansThdPt != fromPt)
+            else if (ansThdPt != fromPt)
             {
                 return ansThdPt;
             }
@@ -256,7 +256,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             foreach (var pointInOutline in pointInOutlines)
             {
-                foreach(Point3d pt in points)
+                foreach (Point3d pt in points)
                 {
                     if (pointInOutline.Key.ContainsOrOnBoundary(pt) && !pointInOutline.Value.Contains(pt))
                     {
@@ -276,7 +276,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static Line GetClosetLineOfPolyline(Polyline polyline, Point3d basePt, Vector3d baseVec)
         {
             int n = polyline.NumberOfVertices;
-            if(n < 2)
+            if (n < 2)
             {
                 return null;
             }
@@ -312,7 +312,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             for (int i = 0; i < n; ++i)
             {
                 Line curLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
-                if(point.DistanceTo(curLine.GetClosestPointTo(point, false)) < 1)
+                if (point.DistanceTo(curLine.GetClosestPointTo(point, false)) < 1)
                 {
                     return curLine;
                 }

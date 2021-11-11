@@ -130,12 +130,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="interpolationDistance">分割细粒度</param>
         public static void CutBrancheLoop(MPolygon mPolygon, int looptime = 5, double interpolationDistance = 30)
         {
-            
+
             var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), interpolationDistance);
             var lines = new List<Tuple<Point3d, Point3d>>();
-            foreach(var cl in centerlines)
+            foreach (var cl in centerlines)
             {
-                if(cl is Polyline line)
+                if (cl is Polyline line)
                 {
                     lines.Add(new Tuple<Point3d, Point3d>(line.StartPoint, line.EndPoint));
                 }
@@ -170,7 +170,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             //points on centerline 1:has this point 2:watched and ready to delete 3:can not backtrace from now on
             Dictionary<Point3d, int> edgPts = new Dictionary<Point3d, int>();
             List<Point3d> leaves = new List<Point3d>();
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
                 degree[line.Item1] = 0;
                 degree[line.Item2] = 0;
@@ -295,7 +295,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     ShowInfo.ShowPointAsO(point.Key, 80, 150);
                 }
             }
-            foreach(var point in fstPoints)
+            foreach (var point in fstPoints)
             {
                 ShowInfo.ShowPointAsO(point, 130, 250);
             }

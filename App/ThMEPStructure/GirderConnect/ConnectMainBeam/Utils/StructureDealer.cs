@@ -203,10 +203,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static void DeleteLineConnectToSingle(Dictionary<Polyline, Point3dCollection> outlineNearPts, Point3dCollection clumnPts, Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             Dictionary<Point3d, HashSet<Point3d>> tmpDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
-            foreach(var dic in dicTuples)
+            foreach (var dic in dicTuples)
             {
                 tmpDicTuples.Add(dic.Key, new HashSet<Point3d>());
-                foreach(var pt in dic.Value)
+                foreach (var pt in dic.Value)
                 {
                     tmpDicTuples[dic.Key].Add(pt);
                 }
@@ -254,7 +254,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 }
                             }
                         }
-                        if(stayPt != nearPt)
+                        if (stayPt != nearPt)
                         {
                             if (!dicTuples.ContainsKey(stayPt))
                             {
@@ -303,7 +303,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             //1、Find the nearest Cross Point
             foreach (var fstPt in fstPts)
             {
-                if(fstPt.DistanceTo(basePt) > baseRadius || fstPt.DistanceTo(closetLine.GetClosestPointTo(fstPt, false)) > 400)
+                if (fstPt.DistanceTo(basePt) > baseRadius || fstPt.DistanceTo(closetLine.GetClosestPointTo(fstPt, false)) > 400)
                 {
                     continue;
                 }
@@ -314,7 +314,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     tmpPt = fstPt;
                 }
             }
-            if(tmpPt != verticalPt)
+            if (tmpPt != verticalPt)
             {
                 //ShowInfo.ShowPointAsO(tmpPt);
                 return tmpPt;
@@ -364,7 +364,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outline2BorderNearPts"></param>
         public static void DeleteConnectUpToFour(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
-            foreach(var dic in dicTuples)
+            foreach (var dic in dicTuples)
             {
                 int n = dic.Value.Count;
                 while (n > 4)
@@ -375,17 +375,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     Tuple<Point3d, Point3d> minDegreePairPt = new Tuple<Point3d, Point3d>(cntPts[0], cntPts[1]);
                     double minDegree = double.MaxValue;
                     double curDegree;
-                    for(int i = 1; i <= n; ++i)
+                    for (int i = 1; i <= n; ++i)
                     {
                         curDegree = (cntPts[i % n] - dic.Key).GetAngleTo(cntPts[i - 1] - dic.Key);
-                        if(curDegree < minDegree)
+                        if (curDegree < minDegree)
                         {
                             minDegree = curDegree;
                             minDegreePairPt = new Tuple<Point3d, Point3d>(cntPts[i % n], cntPts[i - 1]);
                         }
                     }
                     Point3d rmPt = new Point3d();
-                    if(minDegreePairPt.Item1.DistanceTo(dic.Key) <= minDegreePairPt.Item2.DistanceTo(dic.Key))
+                    if (minDegreePairPt.Item1.DistanceTo(dic.Key) <= minDegreePairPt.Item2.DistanceTo(dic.Key))
                     {
                         rmPt = minDegreePairPt.Item1;
                         --n;
@@ -440,14 +440,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="dicTuples"></param>
         public static void AddConnectUpToFour(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
-            foreach(var dic in dicTuples)
+            foreach (var dic in dicTuples)
             {
                 int cnt = dic.Value.Count;
-                if(cnt == 2 || cnt == 3)
+                if (cnt == 2 || cnt == 3)
                 {
                     //找到其中角度最接近90度或者180度的
                     //向另一个方向找点
-                    
+
                 }
             }
         }
@@ -464,14 +464,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 Polyline polyline = dic.Key;
                 List<Point3d> points = new List<Point3d>();
                 int n = polyline.NumberOfVertices;
-                for(int i = 0; i < n; ++i)
+                for (int i = 0; i < n; ++i)
                 {
                     Line tmpLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
                     List<Point3d> tmpPts = new List<Point3d>();
-                    foreach(var borderPt in dic.Value.Keys)
+                    foreach (var borderPt in dic.Value.Keys)
                     {
                         //ShowInfo.ShowPointAsU(borderPt, 1);
-                        if(borderPt.DistanceTo(tmpLine.GetClosestPointTo(borderPt, false)) < 500 && !points.Contains(borderPt))
+                        if (borderPt.DistanceTo(tmpLine.GetClosestPointTo(borderPt, false)) < 500 && !points.Contains(borderPt))
                         {
                             tmpPts.Add(borderPt);
                             //ShowInfo.DrawLine(tmpLine.StartPoint, tmpLine.EndPoint, 30);
@@ -480,7 +480,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     tmpPts = tmpPts.OrderBy(p => p.DistanceTo(tmpLine.StartPoint)).ToList();
                     points.AddRange(tmpPts);
                 }
-                for(int i = 1; i <= points.Count; i++)
+                for (int i = 1; i <= points.Count; i++)
                 {
                     if (points[i % points.Count].DistanceTo(points[i - 1]) < 9000 * 2)
                     {

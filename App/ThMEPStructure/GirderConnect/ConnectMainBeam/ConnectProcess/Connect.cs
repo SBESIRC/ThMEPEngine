@@ -33,7 +33,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static HashSet<Tuple<Point3d, Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, List<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        public static HashSet<Tuple<Point3d, Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, List<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns, AcadDatabase acdb = null)
         {
             //Steps:
             //1.1:Get near points of outlines
@@ -149,41 +149,43 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //2.2 close border
             Dictionary<Point3d, Point3d> closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
             //2.3 show off
-            foreach (var closeBorderLine in closeBorderLines)
+
+            foreach (var outline2BorderNearPt in outline2BorderNearPts)
             {
-                ShowInfo.DrawLine(closeBorderLine.Key, closeBorderLine.Value, 90);
-                ShowInfo.DrawLine(closeBorderLine.Value, closeBorderLine.Key, 90);
-                //if (!dicTuples.ContainsKey(closeBorderLine.Key))
-                //{
-                //    dicTuples.Add(closeBorderLine.Key, new HashSet<Point3d>());
-                //}
-                //if (!dicTuples[closeBorderLine.Key].Contains(closeBorderLine.Value))
-                //{
-                //    dicTuples[closeBorderLine.Key].Add(closeBorderLine.Value);
-                //}
+                foreach (var border2NearPts in outline2BorderNearPt.Value)
+                {
+                    foreach (var nearPt in border2NearPts.Value)
+                    {
+                        //ShowInfo.DrawLine(border2NearPts.Key, nearPt, 210);
+                        //ShowInfo.DrawLine(nearPt, border2NearPts.Key, 210);
+                    }
+                }
             }
             foreach (var dicTuple in dicTuples)
             {
                 foreach (Point3d pt in dicTuple.Value)
                 {
-                    ShowInfo.DrawLine(dicTuple.Key, pt, 130);
+                    //ShowInfo.DrawLine(dicTuple.Key, pt, 130);
                 }
             }
-            foreach(var outline2BorderNearPt in outline2BorderNearPts)
+            foreach (var closeBorderLine in closeBorderLines)
             {
-                foreach(var border2NearPts in outline2BorderNearPt.Value)
+                //ShowInfo.DrawLine(closeBorderLine.Key, closeBorderLine.Value, 90);
+                //ShowInfo.DrawLine(closeBorderLine.Value, closeBorderLine.Key, 90);
+                if (!dicTuples.ContainsKey(closeBorderLine.Key))
                 {
-                    foreach(var nearPt in border2NearPts.Value)
-                    {
-                        ShowInfo.DrawLine(border2NearPts.Key, nearPt, 210);
-                        ShowInfo.DrawLine(nearPt, border2NearPts.Key, 210);
-                    }
+                    dicTuples.Add(closeBorderLine.Key, new HashSet<Point3d>());
+                }
+                if (!dicTuples[closeBorderLine.Key].Contains(closeBorderLine.Value))
+                {
+                    dicTuples[closeBorderLine.Key].Add(closeBorderLine.Value);
                 }
             }
 
             //3.0
+            LineDealer.DicTuplesStandardize(dicTuples, allPts);
             Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLine = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLine);
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLine, acdb);
 
             //3.1、add connect up tp four / splic polyline
             //StructureDealer.AddConnectUpToFour(dicTuples);

@@ -38,9 +38,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var tmpPt = tuples[0].Item1;
             for (int i = 0; i < tuples.Count; ++i)
             {
-                foreach(var tup in tuples)
+                foreach (var tup in tuples)
                 {
-                    if((tup.Item1 == tmpPt || tmpPt.DistanceTo(tup.Item1) <= tolerance) && !ansTuples.Contains(new Tuple<Point3d, Point3d>(tup.Item1, tup.Item2)))
+                    if ((tup.Item1 == tmpPt || tmpPt.DistanceTo(tup.Item1) <= tolerance) && !ansTuples.Contains(new Tuple<Point3d, Point3d>(tup.Item1, tup.Item2)))
                     {
                         ansTuples.Add(new Tuple<Point3d, Point3d>(tup.Item1, tup.Item2));
                         tmpPt = tup.Item2;
@@ -82,11 +82,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             Polyline polyline = new Polyline();
             int n = tuples.Count;
-            if(n == 0)
+            if (n == 0)
             {
                 return polyline;
             }
-            else if(n == 1)
+            else if (n == 1)
             {
                 polyline.AddVertexAt(0, new Point2d(tuples[0].Item1.X, tuples[0].Item1.Y), 0, 0, 0);
                 polyline.AddVertexAt(1, new Point2d(tuples[0].Item2.X, tuples[0].Item2.Y), 0, 0, 0);
@@ -97,9 +97,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 var edges = OrderTuples(tuples);
                 polyline.AddVertexAt(0, new Point2d(tuples[0].Item1.X, tuples[0].Item1.Y), 0, 0, 0);
                 int cnt = 1;
-                foreach(var edge in edges)
+                foreach (var edge in edges)
                 {
-                    if(edge.Item1.DistanceTo(edge.Item2) <= tolerance)
+                    if (edge.Item1.DistanceTo(edge.Item2) <= tolerance)
                     {
                         continue;
                     }
@@ -185,18 +185,18 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var tuple in tmpTuples)
             {
                 cnt = 0;
-                foreach(var pt in points)
+                foreach (var pt in points)
                 {
-                    if(pt.DistanceTo(tuple.Item1) < deviation)
+                    if (pt.DistanceTo(tuple.Item1) < deviation)
                     {
                         ++cnt;
                     }
-                    else if(pt.DistanceTo(tuple.Item2) < deviation)
+                    else if (pt.DistanceTo(tuple.Item2) < deviation)
                     {
                         ++cnt;
                     }
                 }
-                if(cnt >= 2)
+                if (cnt >= 2)
                 {
                     tuples.Remove(tuple);
                 }
@@ -205,9 +205,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static void DeleteSameClassLine(HashSet<Point3d> points, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
         {
             List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
-            foreach(var dic in dicTuples)
+            foreach (var dic in dicTuples)
             {
-                foreach(Point3d pt in dic.Value)
+                foreach (Point3d pt in dic.Value)
                 {
                     tmpTuples.Add(new Tuple<Point3d, Point3d>(dic.Key, pt));
                 }
@@ -231,7 +231,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (cnt >= 2)
                 {
                     dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    if(dicTuples[tuple.Item1].Count == 0)
+                    if (dicTuples[tuple.Item1].Count == 0)
                     {
                         dicTuples.Remove(tuple.Item1);
                     }
@@ -426,6 +426,21 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
+        /// Points of Entity intersect with Entity
+        /// </summary>
+        /// <param name="firstEntity"></param>
+        /// <param name="secondEntity"></param>
+        /// <returns></returns>
+        public static Point3dCollection IntersectWith(Entity firstEntity, Entity secondEntity) // copy
+        {
+            Point3dCollection pts = new Point3dCollection();
+            Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
+            plane.Dispose();
+            return pts;
+        }
+
+        /// <summary>
         /// Merge points whose very close to each other in double line structure
         /// </summary>
         /// <param name="tuples"> 原始数据（可能有误差）</param>
@@ -439,16 +454,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var tuple in tuples)
             {
                 int flag = 0;
-                foreach(Point3d ptA in basePts)
+                foreach (Point3d ptA in basePts)
                 {
-                    if(ptA.DistanceTo(tuple.Item1) < deviation)
+                    if (ptA.DistanceTo(tuple.Item1) < deviation)
                     {
                         flag = 1;
                         tmpPtA = ptA;
                         break;
                     }
                 }
-                if(flag == 0)//profs there is no nearest point
+                if (flag == 0)//profs there is no nearest point
                 {
                     tmpPtA = tuple.Item1;
                 }
@@ -492,18 +507,67 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
-        /// Points of Entity intersect with Entity
+        /// Merge points whose very close to each other in double line structure
+        /// If there is a single line, add a compair one
         /// </summary>
-        /// <param name="firstEntity"></param>
-        /// <param name="secondEntity"></param>
-        /// <returns></returns>
-        public static Point3dCollection IntersectWith(Entity firstEntity, Entity secondEntity) // copy
+        /// <param name="dicTuples"> 原始数据（可能有误差）</param>
+        /// <param name="basePts"> 基于这些点 </param>
+        /// <param name="deviation"> 误差</param>
+        public static void DicTuplesStandardize(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, double deviation = 0.001)
         {
-            Point3dCollection pts = new Point3dCollection();
-            Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
-            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-            plane.Dispose();
-            return pts;
+            Point3d tmpPtA = new Point3d();
+            Point3d tmpPtB = new Point3d();
+            foreach (var dicTuple in dicTuples)
+            {
+                foreach (var edPt in dicTuple.Value)
+                {
+                    int flag = 0;
+                    foreach (Point3d ptA in basePts)
+                    {
+                        if (ptA.DistanceTo(dicTuple.Key) < deviation)
+                        {
+                            flag = 1;
+                            tmpPtA = ptA;
+                            break;
+                        }
+                    }
+                    if (flag == 0)//profs there is no nearest point
+                    {
+                        tmpPtA = dicTuple.Key;
+                    }
+                    if (!dicTuples.ContainsKey(tmpPtA))
+                    {
+                        dicTuples.Add(tmpPtA, new HashSet<Point3d>());
+                    }
+
+                    flag = 0;
+                    foreach (Point3d ptB in basePts)
+                    {
+                        if (ptB.DistanceTo(edPt) < deviation)
+                        {
+                            flag = 1;
+                            tmpPtB = ptB;
+                            break;
+                        }
+                    }
+                    if (flag == 0)//no nearest point
+                    {
+                        tmpPtB = edPt;
+                    }
+                    if (!dicTuples[tmpPtA].Contains(tmpPtB))
+                    {
+                        dicTuples[tmpPtA].Add(tmpPtB);
+                    }
+                    if (!dicTuples.ContainsKey(tmpPtB))
+                    {
+                        dicTuples.Add(tmpPtB, new HashSet<Point3d>());
+                    }
+                    if (!dicTuples[tmpPtB].Contains(tmpPtA))
+                    {
+                        dicTuples[tmpPtB].Add(tmpPtA);
+                    }
+                }
+            }
         }
     }
 }
