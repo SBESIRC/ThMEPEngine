@@ -28,17 +28,19 @@ namespace ThMEPHVAC.FanConnect.Model
         CSCR,
         HSHR,
     }
-  
+
     public class ThFanPipeModel
     {
         public double PipeWidth { set; get; }
-        public PIPETYPE PipeType { set; get; }
         public PIPELEVEL PipeLevel { set; get; }
-        public LineSegment2d LineSegment { set; get; }
-        public ThFanPipeModel(LineSegment2d line, PIPELEVEL level = PIPELEVEL.LEVEL1)
+        public Line PLine { set; get; }
+        public List<Line> ExPline { set; get; }
+        public List<Point3d> ExPoint { set; get; }
+        public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1)
         {
             PipeLevel = level;
-            LineSegment = line;
+            PLine = line;
+            ExPoint = new List<Point3d>();
         }
         
     }

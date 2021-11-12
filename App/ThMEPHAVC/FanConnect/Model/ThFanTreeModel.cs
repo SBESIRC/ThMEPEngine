@@ -29,6 +29,7 @@ namespace ThMEPHVAC.FanConnect.Model
         }
         public void InsertChild(ThFanTreeNode<T> child)
         {
+            child.Parent = this;
             Children.Add(child);
         }
         public ThFanTreeNode<T> GetChild(int index)

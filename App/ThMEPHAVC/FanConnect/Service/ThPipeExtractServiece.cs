@@ -1,9 +1,13 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
 using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Service
@@ -13,10 +17,73 @@ namespace ThMEPHVAC.FanConnect.Service
     /// </summary>
     public class ThPipeExtractServiece
     {
-        public static ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel(Point3dCollection area)
+        /// <summary>
+        /// 生成管路路由
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public ThFanTreeModel<ThFanPipeModel> CreatePipePath(int type)
         {
-            ThFanTreeModel<ThFanPipeModel> resTree = new ThFanTreeModel<ThFanPipeModel>();
-            return resTree;
+            ThFanTreeModel<ThFanPipeModel> retTree = null;
+            switch (type)
+            {
+                case 0:
+                    retTree = GetPipeTreeModel0();
+                    break;
+                case 1:
+                    retTree = GetPipeTreeModel1();
+                    break;
+                default:
+                    break;
+            }
+
+            return retTree;
+        }
+        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel0()
+        {
+            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
+
+            //root结点
+            var rootLine = new Line();
+            rootLine.StartPoint = new Point3d(0.0, 1000.0,0.0);
+            rootLine.EndPoint = new Point3d(3000.0, 1000.0,0.0);
+            ThFanPipeModel rooModel = new ThFanPipeModel(rootLine, PIPELEVEL.LEVEL1);
+            rooModel.PipeWidth = 100;
+            ThFanTreeNode<ThFanPipeModel> rootNode = new ThFanTreeNode<ThFanPipeModel>(rooModel);
+            //Child1
+            var childLine1 = new Line();
+            childLine1.StartPoint = new Point3d(2000.0, 1000.0, 0.0);
+            childLine1.EndPoint = new Point3d(2000.0, 4000.0,0.0);
+            ThFanPipeModel childModel1 = new ThFanPipeModel(childLine1, PIPELEVEL.LEVEL2);
+            childModel1.PipeWidth = 50;
+            ThFanTreeNode<ThFanPipeModel> childNode1 = new ThFanTreeNode<ThFanPipeModel>(childModel1);
+
+            //Child2
+            var childLine2 = new Line();
+            childLine2.StartPoint = new Point3d(3000.0, 1000.0, 0.0);
+            childLine2.EndPoint = new Point3d(3000.0, 0.0,0.0);
+            ThFanPipeModel childModel2 = new ThFanPipeModel(childLine2, PIPELEVEL.LEVEL2);
+            childModel2.PipeWidth = 50;
+            ThFanTreeNode<ThFanPipeModel> childNode2 = new ThFanTreeNode<ThFanPipeModel>(childModel2);
+            //Child Child1
+            var childChildLine1 = new Line();
+            childChildLine1.StartPoint = new Point3d(2000.0, 3000.0, 0.0);
+            childChildLine1.EndPoint = new Point3d(1000.0, 3000.0,0.0);
+            
+            ThFanPipeModel childChildModel1 = new ThFanPipeModel(childChildLine1, PIPELEVEL.LEVEL3);
+            childChildModel1.PipeWidth = 20;
+            ThFanTreeNode<ThFanPipeModel> childChildNode1 = new ThFanTreeNode<ThFanPipeModel>(childChildModel1);
+            childNode1.InsertChild(childChildNode1);
+            rootNode.InsertChild(childNode1);
+            rootNode.InsertChild(childNode2);
+            retTree.RootNode = rootNode;
+            return retTree;
+        }
+        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel1()
+        {
+            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
+            //可以引用自己写类和方法
+            return retTree;
         }
     }
 }
