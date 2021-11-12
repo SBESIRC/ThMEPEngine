@@ -71,7 +71,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
                 CadCache.HideAllWindows();
                 FocusMainWindow();
-                RainDiagram.DrawRainDiagram(vm, false);
+                ThMEPCommandService.Execute(() => RainDiagram.DrawRainDiagram(vm, false), "THYSXTT");
             }
             catch (System.Exception ex)
             {

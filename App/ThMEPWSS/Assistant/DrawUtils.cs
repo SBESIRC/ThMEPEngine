@@ -2474,8 +2474,13 @@ namespace ThMEPWSS.Assistant
         {
             var x = (first.X + second.X) / 2;
             var y = (first.Y + second.Y) / 2;
-
             return new Point3d(x, y, 0);
+        }
+        public static Point2d GetMidPoint(Point2d first, Point2d second)
+        {
+            var x = (first.X + second.X) / 2;
+            var y = (first.Y + second.Y) / 2;
+            return new Point2d(x, y);
         }
         public static Circle DrawCircleLazy(GRect rect)
         {

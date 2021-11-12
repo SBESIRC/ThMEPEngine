@@ -596,7 +596,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
         public static double LONG_TRANSLATOR_HEIGHT1 = QUOTATION1BRICKETY;
         public static double CHECKPOINT_OFFSET_Y = THESAURUSINEVITABLE;
-        public static void DrawDrainageSystemDiagram(List<DrainageDrawingData> drDatas, List<StoreyItem> storeysItems, Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, DrainageSystemDiagramViewModel viewModel)
+        public static void DrawDrainageSystemDiagram(List<DrainageDrawingData> drDatas, List<StoreyItem> storeysItems, Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<int> allNumStoreys, List<string> allRfStoreys, DrainageSystemDiagramViewModel viewModel, ExtraInfo exInfo)
         {
             var allNumStoreyLabels = allNumStoreys.Select(i => i + QUOTATIONHOUSEMAID).ToList();
             var allStoreys = allNumStoreyLabels.Concat(allRfStoreys).ToList();
@@ -614,7 +614,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             var COUNT = pipeGroupItems.Count;
             var dy = HEIGHT - THESAURUSINFERENCE;
             var __dy = THESAURUSINTENTIONAL;
-            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
+            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel, exInfo);
         }
         public class Opt
         {
@@ -648,6 +648,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             public double dy;
             public int __dy;
             public DrainageSystemDiagramViewModel viewModel;
+            public ExtraInfo exInfo;
             public static bool SHOWLINE;
             public void Draw()
             {
@@ -2256,8 +2257,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         var gap = UNDERACHIEVEMENT;
                         var factor = LYMPHANGIOMATOUS;
                         double height = THESAURUSDETEST;
-                        var width = height * factor * factor * Math.Max(text1?.Length ?? NARCOTRAFICANTE, text2?.Length ?? NARCOTRAFICANTE) + THESAURUSINDUSTRY;
-                        if (width < THESAURUSWAYWARD) width = THESAURUSWAYWARD;
+                        var (w1, _) = GetDBTextSize(text1, THESAURUSDETEST, LYMPHANGIOMATOUS, THESAURUSTRAFFIC);
+                        var (w2, _) = GetDBTextSize(text2, THESAURUSDETEST, LYMPHANGIOMATOUS, THESAURUSTRAFFIC);
+                        var width = Math.Max(w1, w2);
                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSALCOVE, THESAURUSALCOVE), new Vector2d(width, NARCOTRAFICANTE) };
                         if (isLeftOrRight == THESAURUSSEMBLANCE)
                         {
@@ -2837,8 +2839,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 }
             }
         }
-        public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel)
+        public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel, ExtraInfo exInfo)
         {
+            exInfo.vm = viewModel;
+            FlatDiagramNs.FlatDiagramService.DrawFlatDiagram(exInfo);
             var o = new Opt()
             {
                 basePoint = basePoint,
@@ -2854,6 +2858,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 dy = dy,
                 __dy = __dy,
                 viewModel = viewModel,
+                exInfo = exInfo,
             };
             o.Draw();
         }
@@ -2866,14 +2871,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             DrawBlockReference(blkName: THESAURUSIGNORANCE, basePt: pt.ToPoint3d(), layer: layer, cb: br =>
             {
                 br.ObjectId.SetDynBlockValue(PHOTOCONDUCTING, name);
-            });
-        }
-        public static void DrawAiringSymbol(Point2d pt, double offsetY)
-        {
-            DrawBlockReference(blkName: STAPHYLORRHAPHY, basePt: pt.OffsetY(offsetY).ToPoint3d(), layer: THESAURUSOVERWHELM, cb: br =>
-            {
-                br.ObjectId.SetDynBlockValue(THERMOREGULATORY, offsetY);
-                br.ObjectId.SetDynBlockValue(PHOTOCONDUCTING, THESAURUSSURFACE);
             });
         }
         public static CommandContext commandContext;
@@ -3086,43 +3083,50 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             service.Read(storeys);
             commandContext.ViewModel.FloorListDatas = service.StoreyNames.Select(o => o.Item2).ToList();
         }
-        public static bool CreateDrainageDrawingData(out List<DrainageDrawingData> drDatas, bool noWL, DrainageGeoData geoData)
+        public static (List<DrainageDrawingData>, ExtraInfo, bool) CreateDrainageDrawingData(out List<DrainageDrawingData> drDatas, bool noWL, DrainageGeoData geoData)
         {
             ThDrainageService.PreFixGeoData(geoData);
             if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
             {
                 MessageBox.Show(INCOMMENSURABILIS);
                 drDatas = null;
-                return UNTRACEABLENESS;
+                return (null, null, UNTRACEABLENESS);
             }
-            drDatas = _CreateDrainageDrawingData(geoData, THESAURUSSEMBLANCE);
-            return THESAURUSSEMBLANCE;
+            var (_drDatas, exInfo) = _CreateDrainageDrawingData(geoData, THESAURUSSEMBLANCE);
+            drDatas = _drDatas;
+            return (drDatas, exInfo, THESAURUSSEMBLANCE);
         }
-        public static List<DrainageDrawingData> CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
+        public static (List<DrainageDrawingData>, ExtraInfo) CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
         {
             ThDrainageService.PreFixGeoData(geoData);
             return _CreateDrainageDrawingData(geoData, noDraw);
         }
-        private static List<DrainageDrawingData> _CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
+        private static (List<DrainageDrawingData>, ExtraInfo) _CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
         {
             List<DrainageDrawingData> drDatas;
             ThDrainageService.ConnectLabelToLabelLine(geoData);
             geoData.FixData();
             var cadDataMain = DrainageCadData.Create(geoData);
             var cadDatas = cadDataMain.SplitByStorey();
-            DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out drDatas);
+            var exInfo = DrainageService.CreateDrawingDatas(geoData, cadDataMain, cadDatas, out string logString, out drDatas);
             if (noDraw) Dispose();
-            return drDatas;
+            return (drDatas, exInfo);
         }
-        public static bool CollectDrainageData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, bool noWL = UNTRACEABLENESS)
+        public static ExtraInfo CollectDrainageData(Point3dCollection range, AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, bool noWL = UNTRACEABLENESS)
         {
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData);
-            return CreateDrainageDrawingData(out drDatas, noWL, geoData);
+            var m = CreateDrainageDrawingData(out drDatas, noWL, geoData);
+            m.Item2.DrDatas = m.Item1;
+            m.Item2.OK = m.Item3;
+            return m.Item2;
         }
-        public static bool CollectDrainageData(AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = UNTRACEABLENESS)
+        public static ExtraInfo CollectDrainageData(AcadDatabase adb, out List<StoreyItem> storeysItems, out List<DrainageDrawingData> drDatas, CommandContext ctx, bool noWL = UNTRACEABLENESS)
         {
             CollectDrainageGeoData(adb, out storeysItems, out DrainageGeoData geoData, ctx);
-            return CreateDrainageDrawingData(out drDatas, noWL, geoData);
+            var m = CreateDrainageDrawingData(out drDatas, noWL, geoData);
+            m.Item2.DrDatas = m.Item1;
+            m.Item2.OK = m.Item3;
+            return m.Item2;
         }
         public static List<StoreyItem> GetStoreysItem(List<StoreyInfo> storeys)
         {
@@ -3215,13 +3219,16 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 List<StoreyItem> storeysItems;
                 List<DrainageDrawingData> drDatas;
                 var range = commandContext.range;
+                ExtraInfo exInfo;
                 if (range != null)
                 {
-                    if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSSEMBLANCE)) return;
+                    exInfo = CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSSEMBLANCE);
+                    if (!exInfo.OK) return;
                 }
                 else
                 {
-                    if (!CollectDrainageData(adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSSEMBLANCE)) return;
+                    exInfo = CollectDrainageData(adb, out storeysItems, out drDatas, commandContext, noWL: THESAURUSSEMBLANCE);
+                    if (!exInfo.OK) return;
                 }
                 var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, DrainageSystemDiagram.commandContext?.ViewModel, out List<int> allNumStoreys, out List<string> allRfStoreys);
                 var allNumStoreyLabels = allNumStoreys.Select(i => i + QUOTATIONHOUSEMAID).ToList();
@@ -3235,7 +3242,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 var dy = HEIGHT - THESAURUSINFERENCE;
                 var __dy = THESAURUSINTENTIONAL;
                 Dispose();
-                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel);
+                DrawDrainageSystemDiagram(basePt.ToPoint2d(), pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, viewModel, exInfo);
                 FlushDQ(adb);
             }
         }
@@ -3253,11 +3260,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             {
                 List<StoreyItem> storeysItems;
                 List<DrainageDrawingData> drDatas;
-                if (!CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSSEMBLANCE)) return;
+                var exInfo = CollectDrainageData(range, adb, out storeysItems, out drDatas, noWL: THESAURUSSEMBLANCE);
+                if (!exInfo.OK) return;
                 var vm = DrainageSystemDiagram.commandContext?.ViewModel;
                 var pipeGroupItems = GetDrainageGroupedPipeItems(drDatas, storeysItems, vm, out List<int> allNumStoreys, out List<string> allRfStoreys);
                 Dispose();
-                DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, vm);
+                DrawDrainageSystemDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, vm, exInfo);
                 FlushDQ(adb);
             }
         }
@@ -4993,6 +5001,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             var bd = c.Bounds.ToGRect().TransformBy(matrix);
                             reg(fs, bd, pipes);
                         }
+                        else if (THESAURUSFACTOR < c.Radius && c.Radius <= distinguishDiameter && GetEffectiveLayer(c.Layer) is THESAURUSUNDERSTATE or THESAURUSAGGRIEVED)
+                        {
+                            var bd = c.Bounds.ToGRect().TransformBy(matrix);
+                            reg(fs, bd, downwaterPorts);
+                        }
                     }
                 }
             }
@@ -5556,8 +5569,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             }
             return list;
         }
-        public static void CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out string logString, out List<DrainageDrawingData> drDatas)
+        public static ExtraInfo CreateDrawingDatas(DrainageGeoData geoData, DrainageCadData cadDataMain, List<DrainageCadData> cadDatas, out string logString, out List<DrainageDrawingData> drDatas)
         {
+            var extraInfo = new ExtraInfo() { Items = new List<ExtraInfo.Item>(), CadDatas = cadDatas, geoData = geoData, };
             var roomData = geoData.RoomData;
             Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
             Func<IEnumerable<Geometry>, Geometry> G = GeoFac.CreateGeometry;
@@ -5582,6 +5596,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 var drData = new DrainageDrawingData();
                 drData.Init();
                 var item = cadDatas[storeyI];
+                var exItem = new ExtraInfo.Item();
+                extraInfo.Items.Add(exItem);
                 var storeyGeo = geoData.Storeys[storeyI].ToPolygon();
                 var kitchens = _kitchensf(storeyGeo);
                 var toilets = _toiletsf(storeyGeo);
@@ -5615,7 +5631,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 var dlinesGeos = GeoFac.GroupLinesByConnPoints(item.DLines, THESAURUSNETHER).ToList();
                 var dlinesGeosf = F(dlinesGeos);
                 var washingMachinesf = F(cadDataMain.WashingMachines);
-                var vlinesGroups = GG(item.VLines);
                 var wrappingPipesf = F(item.WrappingPipes);
                 {
                     var labelsf = F(item.Labels);
@@ -5744,6 +5759,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
                     DrawRectLazy(GRect.Create(m, THESAURUSSENILE));
                 }
+                foreach (var o in item.DownWaterPorts)
+                {
+                    DrawRectLazy(geoData.DownWaterPorts[cadDataMain.DownWaterPorts.IndexOf(o)]);
+                }
                 {
                     var cl = Color.FromRgb(THESAURUSINDICT, UNCONSTITUTIONALISM, DIHYDROXYSTILBENE);
                     foreach (var o in item.WrappingPipes)
@@ -5758,17 +5777,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         var e = DrawLineSegmentLazy(geoData.DLines[cadDataMain.DLines.IndexOf(o)]).Color = cl;
                     }
-                }
-                {
-                    var cl = Color.FromRgb(THESAURUSBELOVED, INSTITUTIONALIZATION, OBOEDIENTIARIUS);
-                    foreach (var o in item.VLines)
-                    {
-                        DrawLineSegmentLazy(geoData.VLines[cadDataMain.VLines.IndexOf(o)]).Color = cl;
-                    }
-                }
-                foreach (var o in item.WLines)
-                {
-                    DrawLineSegmentLazy(geoData.WLines[cadDataMain.WLines.IndexOf(o)]).ColorIndex = QUOTATIONLENTIFORM;
                 }
                 {
                     {
@@ -6146,8 +6154,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     }
                 }
                 {
-                    var wlinesGeos = GeoFac.GroupLinesByConnPoints(item.WLines, THESAURUSNETHER).ToList();
-                    var wlinesGeosf = F(wlinesGeos);
                     var fdsf = F(item.FloorDrains);
                     var vps = new List<Geometry>();
                     foreach (var kv in lbDict)
@@ -6155,25 +6161,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         if (IsFL0(kv.Value))
                         {
                             vps.Add(kv.Key);
-                        }
-                    }
-                    {
-                        foreach (var fl0 in vps)
-                        {
-                            foreach (var wl in wlinesGeos)
-                            {
-                                if (fdsf(wl).Any())
-                                {
-                                    drData.IsConnectedToFloorDrainForFL0.Add(lbDict[fl0]);
-                                }
-                            }
-                            foreach (var dl in wlinesGeos)
-                            {
-                                if (fdsf(dl).Any())
-                                {
-                                    drData.IsConnectedToFloorDrainForFL0.Add(lbDict[fl0]);
-                                }
-                            }
                         }
                     }
                     var ok_vpipes = new HashSet<Geometry>();
@@ -6184,126 +6171,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     var waterWellsLabelDict = new Dictionary<Geometry, string>();
                     var outletWrappingPipe = new Dictionary<int, string>();
                     var hasRainPortSymbols = new HashSet<string>();
-                    {
-                        var rainPortsf = F(item.RainPortSymbols);
-                        var pipesf = F(vps.Except(ok_vpipes).ToList());
-                        var wpfsf = F(item.WrappingPipes);
-                        foreach (var wlinesGeo in wlinesGeos)
-                        {
-                            var rainPorts = rainPortsf(wlinesGeo);
-                            foreach (var rainPort in rainPorts)
-                            {
-                                var pipes = pipesf(wlinesGeo);
-                                foreach (var pipe in pipesf(wlinesGeo))
-                                {
-                                    var label = getLabel(pipe);
-                                    if (label != null)
-                                    {
-                                        hasRainPortSymbols.Add(label);
-                                        ok_vpipes.Add(pipe);
-                                        rainPortIdDict[label] = cadDataMain.RainPortSymbols.IndexOf(rainPort);
-                                        foreach (var wp in wpfsf(wlinesGeo))
-                                        {
-                                            outletWrappingPipe[cadDataMain.WrappingPipes.IndexOf(wp)] = label;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        drData.HasRainPortSymbolsForFL0 = hasRainPortSymbols;
-                    }
-                    {
-                        void collect(Func<Geometry, List<Geometry>> waterWellsf, Func<Geometry, string> getWaterWellLabel, Func<Geometry, int> getWaterWellId)
-                        {
-                            var f2 = F(vps.Except(ok_vpipes).ToList());
-                            foreach (var wlinesGeo in wlinesGeos)
-                            {
-                                var waterWells = waterWellsf(wlinesGeo);
-                                if (waterWells.Count == ADRENOCORTICOTROPHIC)
-                                {
-                                    var waterWell = waterWells[NARCOTRAFICANTE];
-                                    var waterWellLabel = getWaterWellLabel(waterWell);
-                                    waterWellsLabelDict[wlinesGeo] = waterWellLabel;
-                                    waterWellsIdDict[wlinesGeo] = getWaterWellId(waterWell);
-                                    var pipes = f2(wlinesGeo);
-                                    ok_vpipes.AddRange(pipes);
-                                    foreach (var pipe in pipes)
-                                    {
-                                        if (lbDict.TryGetValue(pipe, out string label))
-                                        {
-                                            outletd[label] = waterWellLabel;
-                                            waterWellIdDict[label] = getWaterWellId(waterWell);
-                                            var wrappingpipes = wrappingPipesf(wlinesGeo);
-                                            foreach (var wp in wrappingpipes)
-                                            {
-                                                outletWrappingPipe[cadDataMain.WrappingPipes.IndexOf(wp)] = label;
-                                            }
-                                            foreach (var wp in wrappingpipes)
-                                            {
-                                                waterWellsLabelDict[wp] = waterWellLabel;
-                                                waterWellsIdDict[wp] = getWaterWellId(waterWell);
-                                                DrawTextLazy(waterWellLabel, wp.GetCenter());
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        collect(F(item.WaterPorts), waterWell => geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterWell)], well => cadDataMain.WaterPorts.IndexOf(well));
-                        {
-                            var spacialIndex = item.WaterPorts.Select(cadDataMain.WaterPorts).ToList();
-                            var waterWells = spacialIndex.ToList(geoData.WaterPorts).Select(x => x.Expand(THESAURUSALCOVE).ToPolygon()).Cast<Geometry>().ToList();
-                            collect(F(waterWells), waterWell => geoData.WaterPortLabels[spacialIndex[waterWells.IndexOf(waterWell)]], waterWell => spacialIndex[waterWells.IndexOf(waterWell)]);
-                        }
-                    }
-                    {
-                        var f2 = F(vps.Except(ok_vpipes).ToList());
-                        var radius = THESAURUSCONSUL;
-                        var f5 = GeoFac.NearestNeighbourPoint3dF(item.WaterPorts);
-                        foreach (var dlinesGeo in wlinesGeos)
-                        {
-                            var segs = ExplodeGLineSegments(dlinesGeo);
-                            var pts = GeoFac.GetAlivePoints(segs.Distinct().ToList(), radius: radius);
-                            {
-                                var _pts = pts.Select(x => new GCircle(x, radius).ToCirclePolygon(QUOTATIONLENTIFORM, UNTRACEABLENESS)).ToGeometryList();
-                                var killer = GeoFac.CreateGeometryEx(vps.Concat(item.WaterPorts).Concat(item.CleaningPorts).Concat(item.FloorDrains).Distinct().ToList());
-                                pts = pts.Except(F(_pts)(killer).Select(_pts).ToList(pts)).ToList();
-                            }
-                            foreach (var pt in pts)
-                            {
-                                var waterWell = f5(pt.ToPoint3d());
-                                if (waterWell != null)
-                                {
-                                    if (waterWell.GetCenter().GetDistanceTo(pt) <= ELECTROMYOGRAPH)
-                                    {
-                                        var waterWellLabel = geoData.WaterPortLabels[cadDataMain.WaterPorts.IndexOf(waterWell)];
-                                        waterWellsLabelDict[dlinesGeo] = waterWellLabel;
-                                        waterWellsIdDict[dlinesGeo] = cadDataMain.WaterPorts.IndexOf(waterWell);
-                                        foreach (var pipe in f2(dlinesGeo))
-                                        {
-                                            if (lbDict.TryGetValue(pipe, out string label))
-                                            {
-                                                outletd[label] = waterWellLabel;
-                                                waterWellIdDict[label] = cadDataMain.WaterPorts.IndexOf(waterWell);
-                                                ok_vpipes.Add(pipe);
-                                                var wrappingpipes = wrappingPipesf(dlinesGeo);
-                                                foreach (var wp in wrappingpipes)
-                                                {
-                                                    outletWrappingPipe[cadDataMain.WrappingPipes.IndexOf(wp)] = label;
-                                                }
-                                                foreach (var wp in wrappingpipes)
-                                                {
-                                                    waterWellsLabelDict[wp] = waterWellLabel;
-                                                    waterWellsIdDict[wp] = cadDataMain.WaterPorts.IndexOf(waterWell);
-                                                    DrawTextLazy(waterWellLabel, wp.GetCenter());
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
                 }
                 foreach (var pp in item.VerticalPipes)
                 {
@@ -6314,6 +6181,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         drData.VerticalPipeLabels.Add(label);
                     }
                 }
+                exItem.LabelDict = lbDict.Select(x => new Tuple<Geometry, string>(x.Key, x.Value)).ToList();
                 var FLs = new List<Geometry>();
                 var FL0s = new List<Geometry>();
                 var pls = new List<Geometry>();
@@ -6602,40 +6470,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         }
                     }
                 }
-                {
-                    var wlinesGeos = GeoFac.GroupLinesByConnPoints(item.WLines, THESAURUSNETHER).ToList();
-                    var wlinesGeosf = F(wlinesGeos);
-                    var merges = new HashSet<string>();
-                    var wells = item.WaterWells.Select(x => x.Buffer(HYDROSTATICALLY)).ToList();
-                    if (wells.Count > NARCOTRAFICANTE)
-                    {
-                        var gs = GeoFac.GroupGeometries(FL0s.Concat(item.FloorDrains).Select(xl => CreateXGeoRect(xl.ToGRect())).Concat(wlinesGeos).ToList())
-                        .Select(x => x.Count == ADRENOCORTICOTROPHIC ? x[NARCOTRAFICANTE] : GeoFac.CreateGeometry(x)).ToList();
-                        var circlesf = F(item.FloorDrains.Concat(FL0s).ToList());
-                        var gsf = F(gs);
-                        foreach (var well in wells)
-                        {
-                            var g = G(gsf(well));
-                            var circles = circlesf(g);
-                            var fl0s = circles.Where(x => FL0s.Contains(x)).ToList();
-                            if (fl0s.Count == NARCOTRAFICANTE) continue;
-                            var fds = circles.Where(x => item.FloorDrains.Contains(x)).ToList();
-                            if (fl0s.Count == ADRENOCORTICOTROPHIC && fds.Count == ADRENOCORTICOTROPHIC)
-                            {
-                                var fl = fl0s[NARCOTRAFICANTE];
-                                var fd = fds[NARCOTRAFICANTE];
-                                if (wlinesGeosf(fl).Intersect(wlinesGeosf(fd)).Any())
-                                {
-                                    merges.Add(lbDict[fl]);
-                                }
-                            }
-                        }
-                    }
-                    drData.Merges.AddRange(merges);
-                }
                 drDatas.Add(drData);
             }
             logString = sb.ToString();
+            extraInfo.DrDatas = drDatas;
+            return extraInfo;
         }
         public static Geometry CreateXGeoRect(GRect r)
         {
@@ -7013,8 +6852,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<Geometry> Labels;
         public List<Geometry> LabelLines;
         public List<Geometry> DLines;
-        public List<Geometry> VLines;
-        public List<Geometry> WLines;
         public List<Geometry> VerticalPipes;
         public List<Geometry> WrappingPipes;
         public List<Geometry> FloorDrains;
@@ -7034,8 +6871,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             Labels ??= new List<Geometry>();
             LabelLines ??= new List<Geometry>();
             DLines ??= new List<Geometry>();
-            VLines ??= new List<Geometry>();
-            WLines ??= new List<Geometry>();
             VerticalPipes ??= new List<Geometry>();
             WrappingPipes ??= new List<Geometry>();
             FloorDrains ??= new List<Geometry>();
@@ -7060,8 +6895,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (UNTRACEABLENESS) o.LabelLines.AddRange(data.LabelLines.Select(NewMethod(bfSize)));
             else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
             o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
-            o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
-            o.WLines.AddRange(data.WLines.Select(ConvertVLinesF()));
             o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
             if (UNTRACEABLENESS) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
             else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
@@ -7137,8 +6970,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             ret.AddRange(Labels);
             ret.AddRange(LabelLines);
             ret.AddRange(DLines);
-            ret.AddRange(VLines);
-            ret.AddRange(WLines);
             ret.AddRange(VerticalPipes);
             ret.AddRange(WrappingPipes);
             ret.AddRange(FloorDrains);
@@ -7167,8 +6998,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 o.Labels.AddRange(objs.Where(x => this.Labels.Contains(x)));
                 o.LabelLines.AddRange(objs.Where(x => this.LabelLines.Contains(x)));
                 o.DLines.AddRange(objs.Where(x => this.DLines.Contains(x)));
-                o.VLines.AddRange(objs.Where(x => this.VLines.Contains(x)));
-                o.WLines.AddRange(objs.Where(x => this.WLines.Contains(x)));
                 o.VerticalPipes.AddRange(objs.Where(x => this.VerticalPipes.Contains(x)));
                 o.WrappingPipes.AddRange(objs.Where(x => this.WrappingPipes.Contains(x)));
                 o.FloorDrains.AddRange(objs.Where(x => this.FloorDrains.Contains(x)));
@@ -7440,9 +7269,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string ADVERTISEMENTAL = "伸顶通气2000";
         public const string ORTHONORMALIZING = "伸顶通气500";
         public const string PHOTOCONDUCTING = "可见性1";
-        public const string STAPHYLORRHAPHY = "通气帽系统";
-        public const string THERMOREGULATORY = "距离1";
-        public const string THESAURUSSURFACE = "伸顶通气管";
         public const string QUOTATIONOPHTHALMIA = "1000";
         public const int THESAURUSINEVITABLE = 580;
         public const string UNEXCEPTIONABLE = "标高";
@@ -7482,7 +7308,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int THESAURUSDETEST = 350;
         public const int THESAURUSLEVITATE = 150;
         public const int THESAURUSPOISED = 318;
-        public const int THESAURUSWAYWARD = 1400;
         public const int QUOTATIONCAPABLE = 1200;
         public const int THESAURUSDIRECTIVE = 2000;
         public const int VENTRILOQUISTIC = 600;
@@ -7529,8 +7354,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int UNCONSTITUTIONALISM = 0xc7;
         public const int DIHYDROXYSTILBENE = 0xae;
         public const int THESAURUSBELOVED = 211;
-        public const int INSTITUTIONALIZATION = 213;
-        public const int OBOEDIENTIARIUS = 111;
         public const string THESAURUSPERSPIRATION = "AI-空间框线";
         public const string THESAURUSSQUASHY = "AI-空间名称";
         public const string THESAURUSDUDGEON = "73-";
@@ -7753,7 +7576,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string IMPLEMENTIFEROUS = "SingleOutletFloorDrains：";
         public const string THESAURUSMELODIOUS = "Shunts：";
         public const string THESAURUSCONVOLUTION = "circlesCount ";
-        public const string THESAURUSRENOUNCE = "Merges ";
         public const string HYDROXYLAPATITE = "drainage_drDatas";
         public const string THESAURUSPERMISSIVE = "单排";
         public const string THESAURUSDONATION = "设置乙字弯";
@@ -7887,5 +7709,20 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 });
             }
         }
+    }
+    public class ExtraInfo
+    {
+        public bool OK;
+        public class Item
+        {
+            public int Index;
+            public List<Tuple<Geometry, string>> LabelDict;
+        }
+        public List<DrainageCadData> CadDatas;
+        public List<Item> Items;
+        public List<DrainageDrawingData> DrDatas;
+        public List<DrainageSystemNs.StoreyItem> storeysItems;
+        public DrainageSystemNs.DrainageGeoData geoData;
+        public DrainageSystemDiagramViewModel vm;
     }
 }
