@@ -152,6 +152,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public List<Point3d> GateValves { get; set; }
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public List<Point3dEx> StartEndPts { get; set; }
+        public HashSet<Point3dEx> VerticalHasHydrant { get; set; }
         public FireHydrantSystemIn(double floorHeight = 5000)
         {
             FloorHeight = floorHeight;
@@ -169,6 +170,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             GateValves = new List<Point3d>(); //闸阀中点位置
             TermDnDic = new Dictionary<Point3dEx, string>();//端点的标注
             StartEndPts = new List<Point3dEx>();//环管的起始终结点
+            VerticalHasHydrant = new HashSet<Point3dEx>();//立管有消火栓设备
         }
     }
 }

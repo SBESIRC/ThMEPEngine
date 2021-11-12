@@ -192,7 +192,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             int indxx = 0;
             foreach (var pt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
             {
-                if(pt._pt.DistanceTo(new Point3d(1754741, 821940.9, 0))<19)
+                if(pt._pt.DistanceTo(new Point3d(1680211.1,792951, 0))<50)
                 {
 
                 }
@@ -232,10 +232,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 return;
             }
-
+            var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
             var termPoint = new TermPoint(pt);
             termPoint.SetLines(fireHydrantSysIn, labelLine);
-            termPoint.SetType(fhSpatialIndex);
+            termPoint.SetType(verticalHasHydrant);
             fireHydrantSysIn.TermPointDic.Add(tpt, termPoint);
             if (termPoint.StartLine is null)
             {
@@ -271,7 +271,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     return;
                 }
-                termPoint1.SetType(fhSpatialIndex);
+                termPoint1.SetType(verticalHasHydrant);
                 if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
                 {
                     return;
@@ -309,7 +309,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 return;
             }
 
-            termPoint.SetType(fhSpatialIndex);
+            termPoint.SetType(verticalHasHydrant);
             if (fireHydrantSysIn.TermPointDic.ContainsKey(tpt))
             {
                 fireHydrantSysIn.TermPointDic.Remove(tpt);
@@ -324,7 +324,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private static void CreateTermPtDic3(Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine,
             ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
-            
+            var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
             if (!fireHydrantSysIn.PtDic.ContainsKey(pt))
             {
                 return;//点集里面没有的点，很危险！！！
@@ -353,7 +353,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             return;
                         }
-                        termPoint1.SetType(fhSpatialIndex);
+                        termPoint1.SetType(verticalHasHydrant);
                         if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
                         {
                             return;
@@ -373,7 +373,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         return;
                     }
-                    termPoint.SetType(fhSpatialIndex);
+                    termPoint.SetType(verticalHasHydrant);
                     if (fireHydrantSysIn.TermPointDic.ContainsKey(pt))
                     {
                         return;

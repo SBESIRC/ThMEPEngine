@@ -23,10 +23,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer));
+                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var DBObjs = spatialIndex.SelectWindowPolygon(polygon.Envelope().ToRectangle());
+                var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
                 DbTextCollection = new DBObjectCollection();
 
@@ -63,14 +63,15 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         private bool IsHYDTPipeLayer(string layer)
         {
             return layer.ToUpper() == "W-RAIN-DIMS" ||
-                   layer.ToUpper() == "W-RAIN-NOTE" ||
-                   layer.ToUpper() == "W-DRAI-DIMS" ||
-                   layer.ToUpper() == "W-WSUP-DIMS" ||
-                   layer.ToUpper() == "W-FRPT-NOTE" ||
+                   layer.ToUpper() == "W-FRPT-HYDT-DIMS" ||
                    layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "W-FRPT-HYDT-EQPM" ||
+                   layer.ToUpper() == "W-WSUP-DIMS" ||
+                   layer.ToUpper() == "W-DRAI-DIMS" ||
+                   layer.ToUpper() == "W-FRPT-NOTE" ||
+                   layer.ToUpper() == "W-FRPT-HYDT-NOTE" ||
                    layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "W-FRPT-HYDT-DIMS"||
+                   layer.ToUpper() == "W-RAIN-NOTE" ||
                    layer.ToUpper() == "TWT_TEXT";
         }
 
@@ -132,6 +133,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                                 objs1.Cast<Entity>()
                                     .Where(e => e is Line)
                                     .ForEach(e => dBObjects.Add(e));
+                            }
+                            if (obj is Line)
+                            {
+                                dBObjects.Add((DBObject)obj);
                             }
                         }
                         return;

@@ -84,12 +84,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                                 var objs1 = new DBObjectCollection();
                                 (obj as Entity).Explode(objs1);
                                 objs1.Cast<Entity>()
-                                    .Where(e => (e as Entity).IsTCHText())
-                                    .ForEach(e => dBObjects.Add((e as Entity).ExplodeTCHText()[0]));
+                                    .Where(e => e.IsTCHText())
+                                    .ForEach(e => dBObjects.Add(e.ExplodeTCHText()[0]));
                                 objs1.Cast<Entity>()
                                     .Where(e => e is DBText)
-                                    .ForEach(e => dBObjects.Add(e as Entity));
+                                    .ForEach(e => dBObjects.Add(e));
                             }
+                            
                         }
                         return;
                     }

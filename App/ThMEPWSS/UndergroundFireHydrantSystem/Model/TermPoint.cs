@@ -142,7 +142,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             }
             return pipeNumber;
         }
-        public void SetType(ThCADCoreNTSSpatialIndex spatialIndex)
+        public void SetType(bool verticalHasHydrant)
         {
             var xRange = 250;
             var yRange = 250;
@@ -150,13 +150,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             var pt2 = new Point3d(PtEx._pt.X + xRange, PtEx._pt.Y - yRange, 0);
             var tuplePoint = new Tuple<Point3d, Point3d>(pt1, pt2);//消火栓范围
             var selectArea = ThFireHydrantSelectArea.CreateArea(tuplePoint);//生成候选区域
-            var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+            //var DBObjs = spatialIndex.SelectCrossingPolygon(selectArea);
             if(PipeNumber?.Contains("水泵接合器") == true)
             {
                 Type = 4;
                 return;
             }
-            if(DBObjs.Count == 0)
+            if(!verticalHasHydrant)
             {
                 Type = 2;//只供给其他区域
             }

@@ -70,11 +70,15 @@ namespace ThMEPWSS.Command
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
 
             GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
-            
+
             var mainPathList = MainLoop.Get(ref fireHydrantSysIn);//主环提取
-            if(mainPathList.Count == 0)
+            if (mainPathList.Count == 0)
             {
                 return;
+            }
+            for (int i = 0; i < mainPathList[0].Count - 1; i++)
+            {
+                curDb.CurrentSpace.Add(new Line(mainPathList[0][i]._pt, mainPathList[0][i + 1]._pt));
             }
             var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
 

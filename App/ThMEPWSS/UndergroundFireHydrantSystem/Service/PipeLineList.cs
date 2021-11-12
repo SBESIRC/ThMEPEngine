@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 var GLineSeg = new GLineSegment(l.StartPoint.X, l.StartPoint.Y, l.EndPoint.X, l.EndPoint.Y);
                 GLineSegList.Add(GLineSeg);
             }
-            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 1000, 1);//打断部分 自动连接
+            var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1);//打断部分 自动连接
             var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 3);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
@@ -40,7 +40,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                     if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
                     {
-                        if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                        if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
                         {
                             continue;
                         }
@@ -61,13 +61,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     var pt1 = new Point3dEx(gl.StartPoint.X, gl.StartPoint.Y, 0);
                     var pt2 = new Point3dEx(gl.EndPoint.X, gl.EndPoint.Y, 0);
-                    if (pt1.DistanceToEx(pt2) > 1000 || pt1.DistanceToEx(pt2) < 1)
+                    
+                    if (pt1.DistanceToEx(pt2) > 20 || pt1.DistanceToEx(pt2) < 1)
                     {
                         continue;
                     }
                     if (fireHydrantSysIn.PtDic.ContainsKey(pt1) && fireHydrantSysIn.PtDic.ContainsKey(pt2))
                     {
-                        if (fireHydrantSysIn.PtDic[pt1].Count >= 3 || fireHydrantSysIn.PtDic[pt2].Count >= 3)
+                        if (fireHydrantSysIn.PtDic[pt1].Count >= 2 || fireHydrantSysIn.PtDic[pt2].Count >= 2)
                         {
                             continue;
                         }
