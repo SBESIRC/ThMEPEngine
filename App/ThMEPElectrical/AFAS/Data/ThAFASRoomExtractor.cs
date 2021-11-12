@@ -24,14 +24,12 @@ namespace ThMEPElectrical.AFAS.Data
 {
     public class ThAFASRoomExtractor : ThRoomExtractor, IGroup, ISetStorey, ITransformer
     {
-        public bool IsWithHole { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThAFASRoomExtractor()
         {
-            IsWithHole = true;
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
@@ -65,7 +63,7 @@ namespace ThMEPElectrical.AFAS.Data
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
-            roomBuilder.Build(rooms, marks, IsWithHole);
+            roomBuilder.Build(rooms, marks, true);
             Rooms = rooms;
             //把弧线转成直线
             Clean();

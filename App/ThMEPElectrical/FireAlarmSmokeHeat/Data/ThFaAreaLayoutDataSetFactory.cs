@@ -57,7 +57,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                     },
                     new ThAFASRoomExtractor()
                     {
-                        //IsWithHole=false,
                         UseDb3Engine=true,
                         Transformer = Transformer,
                     },
