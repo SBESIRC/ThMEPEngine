@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -20,14 +19,17 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
     {
         private List<ThGeometry> Geos { get; set; }
 
-        ThAFASDistanceDataSetFactory()
+        public ThAFASDistanceDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }
 
         protected override ThMEPDataSet BuildDataSet()
         {
-            throw new NotImplementedException();
+            return new ThMEPDataSet()
+            {
+                Container = Geos,
+            };
         }
 
         protected override void GetElements(Database database, Point3dCollection collection)
@@ -58,7 +60,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
 
             var extractors = new List<ThExtractorBase>()
-                {
+            {
                     new ThAFASArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
