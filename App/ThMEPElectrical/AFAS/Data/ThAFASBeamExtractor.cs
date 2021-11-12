@@ -21,7 +21,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    class ThAFASBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    public class ThAFASBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";

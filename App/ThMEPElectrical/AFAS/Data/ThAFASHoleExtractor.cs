@@ -17,7 +17,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    class ThAFASHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    public class ThAFASHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
     {
         public Dictionary<Polyline, List<string>> HoleDic { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }

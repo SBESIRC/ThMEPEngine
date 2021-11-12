@@ -18,12 +18,12 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPLighting.IlluminationLighting.Data
 {
-    class ThBlkExtractor : ThExtractorBase, ITransformer
+    class ThIlluminationBlkExtractor : ThExtractorBase, ITransformer
     {
         public Dictionary<BlockReference, Polyline> Equipment { get; private set; } //key:origin blkreference, value: blk postition dbpoint
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
         public List<string> BlkNameList { get; set; }
-        public ThBlkExtractor()
+        public ThIlluminationBlkExtractor()
         {
             Category = BuiltInCategory.Distribution.ToString();
             Equipment = new Dictionary<BlockReference, Polyline>();

@@ -35,7 +35,7 @@ namespace ThMEPLighting.IlluminationLighting.Data
 
             var extractors = new List<ThExtractorBase>()
             {
-                new ThBlkExtractor()
+                new ThIlluminationBlkExtractor()
                 {
                     Transformer = Transformer ,
                     BlkNameList = this.BlkNameList, //add needed all blk name string 
