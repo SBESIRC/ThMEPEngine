@@ -616,7 +616,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     br4.Rotation = Math.PI / 2 * 3;
                     tmpBlocksLayerBUSH.Add(br4);
                 }
-                else if (drainageMode == 3)//穿外墙排水方式
+                else if (drainageMode == 4)//穿侧墙排水方式
                 {
                     double disFromptloc = 1100;//固定值
                     Point3d pt1 = new Point3d(ptloc.X, ptloc.Y + disFromptloc, 0);
@@ -648,7 +648,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     var brId2 = adb.CurrentSpace.ObjectId.InsertBlockReference("W-BUSH", "套管系统", ptlocbr2, new Scale3d(0), 0);
                     tmpBlocksLayerBUSH.Add(adb.Element<BlockReference>(brId2));
                 }
-                else//穿侧墙排水方式:4
+                else//穿外墙排水方式:3
                 {
                     double disFromptloc = 3000;//固定值
                     Point3d pt1 = new Point3d(ptloc.X + disFromptloc, ptloc.Y, 0);

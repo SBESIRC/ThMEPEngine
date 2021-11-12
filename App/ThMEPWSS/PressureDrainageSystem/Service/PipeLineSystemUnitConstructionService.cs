@@ -205,41 +205,77 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             }
                             break;
                         }
-                        else
+                    }
+                    if (unit.DrainMode != 1 && unit.DrainMode != 2)
+                    {
+                        var connectedLines = unit.HorizontalPipes;
+                        var walls = Modeldatas.WallLines;
+                        var boundaries = Modeldatas.Boundaries;
+                        foreach (var line in connectedLines)
                         {
-                            var connectedLines = unit.HorizontalPipes;
-                            var walls = Modeldatas.WallLines;
-                            var boundaries = Modeldatas.Boundaries;
-                            foreach (var line in connectedLines)
+                            foreach (var bound in boundaries)
                             {
-                                foreach (var bound in boundaries)
+                                if (line.IntersectWithEx(bound).Count > 0)
                                 {
-                                    if (line.IntersectWithEx(bound).Count > 0)
+                                    unit.DrainMode = 3;//穿外墙
+                                    break;
+                                }
+                            }
+                            if (unit.DrainMode == 3) break;
+                        }
+                        if (unit.DrainMode != 3 && connectedLines.Count > 0)
+                        {
+                            if (unit.VerticalPipes.Count > 0)
+                            {
+                                double tol_extend = 200000;
+                                Line far_line = connectedLines[0];
+                                double max_dis = connectedLines[0].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+                                if (connectedLines.Count > 1)
+                                {
+                                    for (int i = 1; i < connectedLines.Count; i++)
                                     {
-                                        unit.DrainMode = 3;//穿外墙
+                                        double dis = connectedLines[i].GetMidpoint().DistanceTo(unit.VerticalPipes[0].Circle.Center);
+                                        if (dis > max_dis)
+                                        {
+                                            max_dis = dis;
+                                            far_line = connectedLines[i];
+                                        }
+                                    }
+                                }
+                                if (far_line.StartPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center) > far_line.EndPoint.DistanceTo(unit.VerticalPipes[0].Circle.Center))
+                                {
+                                    far_line = new Line(far_line.EndPoint, far_line.StartPoint);
+                                }
+                                Point3d far_ptstart = far_line.EndPoint;
+                                far_line.Extend(false, tol_extend);
+                                far_line = new Line(far_ptstart, far_line.EndPoint);
+                                bool crossed_inner_wall = false;
+                                foreach (var bound in walls)
+                                {
+                                    if (far_line.IntersectWithEx(bound).Count > 0)
+                                    {
+                                        crossed_inner_wall = true;
                                         break;
                                     }
                                 }
-                                if (unit.DrainMode == 3) break;
-                            }
-                            if (unit.DrainMode != 3 && connectedLines.Count > 0)
-                            {
-                                foreach (var line in connectedLines)
-                                {
-                                    foreach (var bound in walls)
-                                    {
-                                        if (line.IntersectWithEx(bound).Count > 0)
-                                        {
-                                            unit.DrainMode = 4;//穿侧墙
-                                            break;
-                                        }
-                                    }
-                                    if (unit.DrainMode == 4) break;
-                                }
-                            }
+                                if (crossed_inner_wall) unit.DrainMode = 4;
+                                else unit.DrainMode = 3;
+                            }                         
+                            //foreach (var line in connectedLines)
+                            //{
+                            //    foreach (var bound in walls)
+                            //    {
+                            //        if (line.IntersectWithEx(bound).Count > 0)
+                            //        {
+                            //            unit.DrainMode = 4;//穿侧墙
+                            //            break;
+                            //        }
+                            //    }
+                            //    if (unit.DrainMode == 4) break;
+                            //}
                         }
                     }
-                    unit.DrainMode = unit.DrainMode == 0 ? 3 : unit.DrainMode;//暂时默认其它方式均为穿外墙
+                    unit.DrainMode = unit.DrainMode == 0 ? 4 : unit.DrainMode;//暂时默认其它方式均为穿外墙
                 }
             }
         }
