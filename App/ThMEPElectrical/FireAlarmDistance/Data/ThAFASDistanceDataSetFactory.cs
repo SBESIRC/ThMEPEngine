@@ -139,6 +139,11 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             //    as ThAFASArchitectureWallExtractor;
             //architectureWallExtractor.Walls.AddRange(selfBuildWalls);
 
+            // 用防火分区对房间进行分割，保留在防火分区内的房间
+            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
+            var splitRooms = roomExtractor.SplitByFrames(fireApartExtractor.FireCompartments);
+            roomExtractor.UpdateRooms(splitRooms);
+
             //用防火分区对墙、柱...分组
             extractors.ForEach(o =>
             {
@@ -153,8 +158,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
             var fireProofShutter = extractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
             fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
-            // 把房间传给门提取器
-            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
+
+            // 把房间传给门提取器            
             faDoorExtractor.SetRooms(roomExtractor.Rooms);
 
             //把洞传给门提取器

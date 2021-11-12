@@ -20,7 +20,7 @@ namespace ThMEPElectrical.AFAS.Data
 {
     class ThAFASFireCompartmentExtractor : ThExtractorBase, IPrint, IGroup, ITransformer
     {
-        private DBObjectCollection FireCompartments { get; set; }
+        public DBObjectCollection FireCompartments { get; private set; }
 
         public List<ThStoreyInfo> StoreyInfos { get; set; }
 

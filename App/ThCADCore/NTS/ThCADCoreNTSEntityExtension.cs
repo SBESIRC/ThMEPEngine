@@ -88,6 +88,14 @@ namespace ThCADCore.NTS
                 SpatialFunction.Intersection).ToDbCollection(keepHoles);
         }
 
+        public static DBObjectCollection Intersection(Entity entity, DBObjectCollection objs, bool keepHoles = false)
+        {
+            return OverlayNGRobust.Overlay(
+                entity.ToNTSPolygon(),
+                objs.UnionGeometries(),
+                SpatialFunction.Intersection).ToDbCollection(keepHoles);
+        }
+
         public static DBObjectCollection Difference(Entity entity, DBObjectCollection objs,bool keepHoles=false)
         {
             return OverlayNGRobust.Overlay(
