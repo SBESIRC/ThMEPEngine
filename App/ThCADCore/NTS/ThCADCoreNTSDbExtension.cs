@@ -131,7 +131,7 @@ namespace ThCADCore.NTS
             }
             else if (geometry is Polygon polygon)
             {
-                if (keepHoles)
+                if (keepHoles && polygon.NumInteriorRings > 0)
                 {
                     objs.Add(polygon.ToDbMPolygon());
                 }
@@ -181,10 +181,17 @@ namespace ThCADCore.NTS
 
             // 支持真实闭合或视觉闭合
             // 对于处于“闭合”状态的多段线，要保证其首尾点一致
-            if (!points[0].Equals(points[points.Count - 1]) && 
-                IsClosed(polyLine, ThCADCoreNTSService.Instance.AcadGlobalTolerance))
+            if (points[0].Equals2D(points[points.Count - 1], ThCADCoreNTSService.Instance.AcadGlobalTolerance))
             {
+                points.RemoveAt(points.Count - 1);
                 points.Add(points[0]);
+            }
+            else
+            {
+                if (polyLine.Closed)
+                {
+                    points.Add(points[0]);
+                }
             }
 
             if (points[0].Equals(points[points.Count - 1]))
