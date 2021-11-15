@@ -27,7 +27,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 GLineSegList.Add(GLineSeg);
             }
             var GLineConnectList = GeoFac.AutoConn(GLineSegList, 880, 1);//打断部分 自动连接
-            var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 3);//打断部分 自动连接
+            var GLineConnectList2 = GeoFac.AutoConn(GLineSegList, 20, 30);//打断部分 自动连接
             foreach (var gl in GLineConnectList)
             {
                 try
@@ -125,6 +125,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
+        public static void ConnectClosedPt(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn)
+        {
+            var pts = new List<Point3dEx>();
+            foreach(var pt in fireHydrantSysIn.PtDic.Keys)
+            {
+                if(fireHydrantSysIn.PtDic[pt].Count == 1)
+                {
+                    pts.Add(pt);
+                }
+            }
+            for(int i = 0; i < pts.Count - 1; i++)
+            {
+                for(int j = i + 1; j < pts.Count; j++)
+                {
+                    if(pts[i].DistanceToEx(pts[j]) < 20)
+                    {
+                        lineList.Add(new Line(pts[i]._pt, pts[j]._pt));
+                    }
+                }
+            }
+        }
         public static void ConnectBreakLine(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, 
             ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
         {

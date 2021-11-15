@@ -174,7 +174,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         var stPt = fireHydrantSysOut.BranchDrawDic[pt];
                         var x = branchDic[pt];
-                        
+                        if (x[0]._pt.DistanceTo(new Point3d(2818810.9, 502304.5, 0)) < 10)
+                        {
+
+                        }
                         if (fireHydrantSysIn.TermPointDic.ContainsKey(branchDic[pt][0]))
                         {
                             if (fireHydrantSysIn.TermPointDic[branchDic[pt].First()].Type.Equals(1))//终点是类型1，消火栓
@@ -236,7 +239,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                             else
                             {
-                                GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+                                var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(branchDic[pt][0]);
+                                if (verticalHasHydrant)
+                                {
+                                    GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+
+                                }
+                                else
+                                {
+                                    GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+
+                                }
                             }
                             
                         }

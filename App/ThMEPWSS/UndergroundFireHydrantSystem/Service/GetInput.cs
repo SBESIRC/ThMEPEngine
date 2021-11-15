@@ -36,8 +36,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
 
+            PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
             PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
+            
             PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.HydrantPosition);//删除两个点都是端点的线段
+
             //PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
             PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                             //PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList);
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  

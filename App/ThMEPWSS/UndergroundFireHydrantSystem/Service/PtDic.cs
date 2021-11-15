@@ -208,7 +208,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             foreach (var pt in pointList)
             {
-                if (pt._pt.DistanceTo(new Point3d(1754741,821940.9, 0)) < 19)
+                if (pt._pt.DistanceTo(new Point3d(2818810.9, 502304.5, 0)) < 10)
                 {
 
                 }
@@ -335,6 +335,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     var termPoint = new TermPoint(pt);
                     termPoint.SetLines(fireHydrantSysIn, labelLine);
+                    termPoint.SetType(verticalHasHydrant);
                     if (termPoint.StartLine is null)
                     {
                         var pt1 = fireHydrantSysIn.PtDic[pt].First();//找这条线的邻接点
