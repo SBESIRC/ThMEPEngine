@@ -69,7 +69,7 @@ namespace ThMEPWSS.Command
                         new ThSprinklerBeamChecker(),
                         new ThSprinklerPipeChecker(),
                         new ThSprinklerDuctChecker(),
-                        new ThSprinklerSoDenseChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
+                        new ThSprinklerDensityChecker{AreaDensity = SprinklerCheckerVM.Parameter.AreaDensity },
                     };
                 checkers.ForEach(o =>
                 {

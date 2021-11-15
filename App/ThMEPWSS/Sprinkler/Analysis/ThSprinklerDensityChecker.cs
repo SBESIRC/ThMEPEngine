@@ -15,7 +15,7 @@ using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
-    public class ThSprinklerSoDenseChecker : ThSprinklerChecker
+    public class ThSprinklerDensityChecker : ThSprinklerChecker
     {
         // 喷头区域密度阈值
         public int AreaDensity { get; set; }
