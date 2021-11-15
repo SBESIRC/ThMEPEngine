@@ -1,10 +1,13 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPHVAC.FanConnect.Model;
@@ -70,6 +73,52 @@ namespace ThMEPHVAC.FanConnect.Service
                     buildRooms.Add(ThFanRoomModel.Create(room.Boundary));
                 }
                 return buildRooms;
+            }
+        }
+        public static List<Polyline> GetAIHole(Point3dCollection selectArea)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                var retHoles = new List<Polyline>();
+                var tmpHoles = database.ModelSpace.OfType<Entity>().Where(o=>o.Layer.Contains("AI-洞口")).ToList();
+
+                if(tmpHoles.Count != 0)
+                {
+
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(tmpHoles.ToCollection());
+
+                    var filterObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+
+                    foreach (var hole in filterObjs)
+                    {
+                        if (hole is Polyline)
+                        {
+                            retHoles.Add(hole as Polyline);
+                        }
+                    }
+                }
+                return retHoles;
+            }
+        }
+
+        public static Point3d GetPipeStartPt(Point3dCollection selectArea)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                var retPt = new Point3d();
+                var blks = database.ModelSpace.OfType<BlockReference>().Where(o => o.GetEffectiveName() == "AI-水管起点").ToList();
+                if(blks.Count != 0)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(blks.ToCollection());
+                    var filterObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+
+                    if(filterObjs.Count != 0)
+                    {
+                        var blk = filterObjs[0] as BlockReference;
+                        retPt = blk.Position;
+                    }
+                }
+                return retPt;
             }
         }
     }

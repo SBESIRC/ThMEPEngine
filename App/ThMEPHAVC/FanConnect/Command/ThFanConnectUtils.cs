@@ -35,5 +35,15 @@ namespace ThMEPHVAC.FanConnect.Command
                 return frame.Vertices();
             }
         }
+
+        public static Point3d SelectPoint()
+        {
+            var point1 = Active.Editor.GetPoint("\n请选择水管起点位置");
+            if (point1.Status != PromptStatus.OK)
+            {
+                return new Point3d();
+            }
+            return point1.Value.TransformBy(Active.Editor.UCS2WCS());
+        }
     }
 }

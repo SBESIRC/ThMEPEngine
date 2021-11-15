@@ -1,5 +1,8 @@
-﻿using Linq2Acad;
+﻿using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -18,14 +21,21 @@ namespace ThMEPHVAC.FanConnect.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var database = AcadDatabase.Active())
             {
+                //选择一个点
+                var pt = ThFanConnectUtils.SelectPoint();
+                var startPt = ThBuildElementExtractServiece.GetPipeStartPt(pt.CreateSquare(50).Vertices());
                 //获取范围
                 var area = ThFanConnectUtils.SelectArea();
+                //获取风机设备
+                var fucs = ThEquipElementExtractServiece.GetFCUModels(area);
                 //获取剪力墙
                 var shearWalls = ThBuildElementExtractServiece.GetShearWalls(area);
                 //获取结构柱
                 var columns = ThBuildElementExtractServiece.GetColumns(area);
                 //获取房间框线
                 var rooms = ThBuildElementExtractServiece.GetBuildRooms(area);
+                //AI洞口
+                var holes = ThBuildElementExtractServiece.GetAIHole(area);
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 foreach (var shearWall in shearWalls)
