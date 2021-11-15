@@ -125,5 +125,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 CadCache.ShowAllWindows();
             }
         }
+
+        private void ImageButton_Click_2(object sender, RoutedEventArgs e)
+        {
+            ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawRainFlatDiagram();
+        }
     }
 }

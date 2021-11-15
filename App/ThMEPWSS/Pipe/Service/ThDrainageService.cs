@@ -793,6 +793,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         return viewModel?.Params?.WashingMachineFloorDrainDN ?? THESAURUSATAVISM;
                     }
+                    string getBasinDN()
+                    {
+                        return viewModel?.Params?.BasinDN ?? THESAURUSATAVISM;
+                    }
                     string getOtherFloorDrainDN()
                     {
                         return viewModel?.Params?.OtherFloorDrainDN ?? THESAURUSATAVISM;
@@ -1555,8 +1559,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                     var p3 = segs1.Last().EndPoint;
                                                     var p4 = p3.OffsetY(THESAURUSDILIGENCE);
                                                     DrawDimLabel(p3, p4, new Vector2d(QUOTATIONTRILINEAR, NARCOTRAFICANTE), BASIDIOMYCOTINA, THESAURUSAGGRIEVED);
-                                                    Get2FloorDrainDN(out string v1, out string v2);
-                                                    Dr.DrawDN_2(segs1.Last().StartPoint + new Vector2d(PROBATIONERSHIP + COMMUNICABLENESS - THESAURUSINDUSTRY - MICROPUBLISHING, -THESAURUSENTREAT), THESAURUSPROCEEDING, v1);
+                                                    var dn = getBasinDN();
+                                                    Dr.DrawDN_2(segs1.Last().StartPoint + new Vector2d(PROBATIONERSHIP + COMMUNICABLENESS - THESAURUSINDUSTRY - MICROPUBLISHING, -THESAURUSENTREAT), THESAURUSPROCEEDING, dn);
                                                 }
                                                 else
                                                 {
@@ -1567,8 +1571,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                         var segs1 = new List<Vector2d> { new Vector2d(ALSOBENEVENTINE, NARCOTRAFICANTE), new Vector2d(CONSTITUTIONALLY, -CONSTITUTIONALLY) }.ToGLineSegments(p1.OffsetY(THESAURUSINDUSTRY));
                                                         f = () => { drawDomePipes(segs1, THESAURUSREDOUND); };
                                                     }
-                                                    Get2FloorDrainDN(out string v1, out string v2);
-                                                    DrawNoteText(v1, p1.OffsetY(fixY));
+                                                    var dn = getBasinDN();
+                                                    DrawNoteText(dn, p1.OffsetY(fixY));
                                                 }
                                             }
                                         }
@@ -2670,8 +2674,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 else if (gpItem.HasBasinInKitchenAt1F)
                                 {
                                     output.HasWrappingPipe2 = output.HasWrappingPipe1;
+                                    output.DN1 = getBasinDN();
                                     output.DN2 = SPLANCHNOPLEURE;
-                                    output.DN1 = getOtherFloorDrainDN();
                                     void DrawOutlets4(string shadow, Point2d basePoint, double HEIGHT)
                                     {
                                         var v = THESAURUSRECEPTACLE;
@@ -2842,7 +2846,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public static void DrawDrainageSystemDiagram(Point2d basePoint, List<DrainageGroupedPipeItem> pipeGroupItems, List<string> allNumStoreyLabels, List<string> allStoreys, int start, int end, double OFFSET_X, double SPAN_X, double HEIGHT, int COUNT, double dy, int __dy, DrainageSystemDiagramViewModel viewModel, ExtraInfo exInfo)
         {
             exInfo.vm = viewModel;
-            FlatDiagramNs.FlatDiagramService.DrawFlatDiagram(exInfo);
             var o = new Opt()
             {
                 basePoint = basePoint,
@@ -3116,7 +3119,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         {
             CollectDrainageGeoData(range, adb, out storeysItems, out DrainageGeoData geoData);
             var m = CreateDrainageDrawingData(out drDatas, noWL, geoData);
-            m.Item2.DrDatas = m.Item1;
+            m.Item2.drDatas = m.Item1;
             m.Item2.OK = m.Item3;
             return m.Item2;
         }
@@ -3124,7 +3127,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         {
             CollectDrainageGeoData(adb, out storeysItems, out DrainageGeoData geoData, ctx);
             var m = CreateDrainageDrawingData(out drDatas, noWL, geoData);
-            m.Item2.DrDatas = m.Item1;
+            m.Item2.drDatas = m.Item1;
             m.Item2.OK = m.Item3;
             return m.Item2;
         }
@@ -6473,7 +6476,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 drDatas.Add(drData);
             }
             logString = sb.ToString();
-            extraInfo.DrDatas = drDatas;
+            extraInfo.drDatas = drDatas;
             return extraInfo;
         }
         public static Geometry CreateXGeoRect(GRect r)
@@ -7720,7 +7723,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
         public List<DrainageCadData> CadDatas;
         public List<Item> Items;
-        public List<DrainageDrawingData> DrDatas;
+        public List<DrainageDrawingData> drDatas;
         public List<DrainageSystemNs.StoreyItem> storeysItems;
         public DrainageSystemNs.DrainageGeoData geoData;
         public DrainageSystemDiagramViewModel vm;

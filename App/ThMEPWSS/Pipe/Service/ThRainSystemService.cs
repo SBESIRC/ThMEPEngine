@@ -3662,7 +3662,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             public void Run()
             {
                 exInfo.vm = viewModel;
-                FlatDiagramNs.FlatDiagramService.DrawFlatDiagram(exInfo);
                 var db = adb.Database;
                 static void DrawSegs(List<GLineSegment> segs) { for (int k = NARCOTRAFICANTE; k < segs.Count; k++) DrawTextLazy(k.ToString(), segs[k].StartPoint); }
                 var storeyLines = new List<KeyValuePair<string, GLineSegment>>();

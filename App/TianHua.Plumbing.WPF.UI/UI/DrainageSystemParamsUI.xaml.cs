@@ -34,11 +34,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = ObjFac.CloneObjByJson(vm);
             this.vm = vm;
             this.DataContext = _vm;
-            this.FloorDrain.ItemsSource = new string[] { "DN50", "DN75", };
+            cbxBasinDn.ItemsSource = FloorDrain.ItemsSource = new string[] { "DN50", "DN75", };
             this.Basin.ItemsSource = new string[] { "双池S弯", "双池P弯" };
         }
 
-      
+
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
@@ -46,7 +46,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             Ok = true;
             this.Close();
         }
-      
+
         private void CancelBtn_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

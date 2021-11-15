@@ -54,6 +54,88 @@ namespace ThMEPWSS.FlatDiagramNs
     }
     public static class FlatDiagramService
     {
+        public static void DrawRainFlatDiagram()
+        {
+            var range = CadCache.TryGetRange();
+            if (range == null)
+            {
+                Active.Editor.WriteMessage(THESAURUSIMPRESSION);
+                return;
+            }
+            FocusMainWindow();
+            using (DocLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new _DrawingTransaction(adb, THESAURUSSEMBLANCE))
+            {
+                LayerTools.AddLayer(adb.Database, MLeaderLayer);
+                if (adb.ModelSpace.OfType<MLeader>().Where(x => x.Layer == MLeaderLayer).Any())
+                {
+                    var r = MessageBox.Show(THESAURUSWHITEN, COLLABORATIVELY, MessageBoxButtons.YesNo);
+                    if (r == DialogResult.No) return;
+                }
+                var mlPts = new List<Point>(PHOTOSENSITIZING);
+                foreach (var e in adb.ModelSpace.OfType<MLeader>().Where(x => x.Layer == MLeaderLayer))
+                {
+                    var pt=e.GetFirstVertex(NARCOTRAFICANTE).ToNTSPoint();
+                    pt.UserData = e;
+                    mlPts.Add(pt);
+                }
+                ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CollectRainGeoData(range, adb, out List<StoreyInfo> storeysItems, out ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData);
+                var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.CreateRainDrawingData(adb, geoData, UNTRACEABLENESS);
+                exInfo.drDatas = drDatas;
+                exInfo.geoData = geoData;
+                Dispose();
+                var f = GeoFac.CreateIntersectsSelector(geoData.WLines.Select(x => x.Buffer(THESAURUSFACTOR)).ToList());
+                var pts = mlPts.Where(pt => f(pt).Any()).ToList();
+                foreach (var pt in pts)
+                {
+                    adb.Element<Entity>(((Entity)pt.UserData).ObjectId, THESAURUSSEMBLANCE).Erase();
+                }
+                DrawFlatDiagram(exInfo);
+                FlushDQ();
+            }
+        }
+        public static void DrawDrainageFlatDiagram()
+        {
+            var range = CadCache.TryGetRange();
+            if (range == null)
+            {
+                Active.Editor.WriteMessage(THESAURUSIMPRESSION);
+                return;
+            }
+            FocusMainWindow();
+            using (DocLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new _DrawingTransaction(adb, THESAURUSSEMBLANCE))
+            {
+                LayerTools.AddLayer(adb.Database, MLeaderLayer);
+                if (adb.ModelSpace.OfType<MLeader>().Where(x => x.Layer == MLeaderLayer).Any())
+                {
+                    var r = MessageBox.Show(THESAURUSWHITEN, COLLABORATIVELY, MessageBoxButtons.YesNo);
+                    if (r == DialogResult.No) return;
+                }
+                var mlPts = new List<Point>(PHOTOSENSITIZING);
+                foreach (var e in adb.ModelSpace.OfType<MLeader>().Where(x => x.Layer == MLeaderLayer))
+                {
+                    var pt = e.GetFirstVertex(NARCOTRAFICANTE).ToNTSPoint();
+                    pt.UserData = e;
+                    mlPts.Add(pt);
+                }
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CollectDrainageGeoData(range, adb, out List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> storeysItems, out ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData);
+                var (drDatas, exInfo) = ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.CreateDrainageDrawingData(geoData, UNTRACEABLENESS);
+                exInfo.drDatas = drDatas;
+                exInfo.geoData = geoData;
+                Dispose();
+                var f = GeoFac.CreateIntersectsSelector(geoData.DLines.Select(x => x.Buffer(THESAURUSFACTOR)).ToList());
+                var pts = mlPts.Where(pt => f(pt).Any()).ToList();
+                foreach (var pt in pts)
+                {
+                    adb.Element<Entity>(((Entity)pt.UserData).ObjectId, THESAURUSSEMBLANCE).Erase();
+                }
+                DrawFlatDiagram(exInfo);
+                FlushDQ();
+            }
+        }
         public static void DrawFlatDiagram(ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo)
         {
             if (exInfo is null) return;
@@ -87,7 +169,6 @@ namespace ThMEPWSS.FlatDiagramNs
         }
         public static void DrawBackToFlatDiagram(List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDiagram.StoreysItem> storeysItems, ThMEPWSS.ReleaseNs.RainSystemNs.RainGeoData geoData, List<ThMEPWSS.ReleaseNs.RainSystemNs.RainDrawingData> drDatas, ThMEPWSS.ReleaseNs.RainSystemNs.ExtraInfo exInfo, RainSystemDiagramViewModel vm)
         {
-            ClearMLeader();
             var mlInfos = new List<MLeaderInfo>(PHOTOSENSITIZING);
             var cadDatas = exInfo.CadDatas;
             Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
@@ -1959,8 +2040,11 @@ namespace ThMEPWSS.FlatDiagramNs
         public const int THESAURUSINDICATION = 754789;
         public const string ALSOBROBDINGNAG = "26#，27#";
         public const string THESAURUSFRINGE = "DN15";
+        public const string THESAURUSIMPRESSION = "\n处理中断。未找到有效楼层。";
+        public const string THESAURUSWHITEN = "已有的管径标注将被覆盖，是否继续？";
+        public const string COLLABORATIVELY = "Quetion";
         const string MLeaderLayer = VERIFICATIONISM;
-        public static void DrawMLeader(string content, Point2d p1, Point2d p2)
+        public static MLeader DrawMLeader(string content, Point2d p1, Point2d p2)
         {
             var e = new MLeader();
             e.ColorIndex = THESAURUSSENILE;
@@ -1982,8 +2066,9 @@ namespace ThMEPWSS.FlatDiagramNs
             e.TextLocation = p3;
             e.Layer = MLeaderLayer;
             DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(e); });
+            return e;
         }
-        public static void DrawMLeader(string content, Point3d p1, Point3d p2)
+        public static MLeader DrawMLeader(string content, Point3d p1, Point3d p2)
         {
             var e = new MLeader();
             e.ColorIndex = THESAURUSSENILE;
@@ -2005,6 +2090,7 @@ namespace ThMEPWSS.FlatDiagramNs
             e.TextLocation = p3;
             e.Layer = MLeaderLayer;
             DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(e); });
+            return e;
         }
         private static void ClearMLeader()
         {
@@ -2017,7 +2103,6 @@ namespace ThMEPWSS.FlatDiagramNs
         }
         public static void DrawBackToFlatDiagram(List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> storeysItems, ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData, List<ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageDrawingData> drDatas, ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo, DrainageSystemDiagramViewModel vm)
         {
-            ClearMLeader();
             var mlInfos = new List<MLeaderInfo>(PHOTOSENSITIZING);
             var cadDatas = exInfo.CadDatas;
             Func<List<Geometry>, Func<Geometry, List<Geometry>>> F = GeoFac.CreateIntersectsSelector;
@@ -2784,7 +2869,7 @@ namespace ThMEPWSS.FlatDiagramNs
         public static void DrawBackToFlatDiagram(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo)
         {
             if (exInfo is null) return;
-            DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.DrDatas, exInfo, exInfo.vm);
+            DrawBackToFlatDiagram(exInfo.storeysItems, exInfo.geoData, exInfo.drDatas, exInfo, exInfo.vm);
         }
         private static void NewMethod1(ThMEPWSS.ReleaseNs.DrainageSystemNs.ExtraInfo exInfo, DrainageSystemDiagramViewModel vm)
         {
