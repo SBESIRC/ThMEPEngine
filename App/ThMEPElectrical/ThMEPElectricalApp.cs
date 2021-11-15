@@ -1,15 +1,12 @@
 ﻿using AcHelper;
-using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
 using GeometryExtensions;
 using ThMEPElectrical.CAD;
 using ThMEPElectrical.Core;
 using ThMEPElectrical.Model;
-using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 

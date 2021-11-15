@@ -58,7 +58,11 @@ namespace ThMEPElectrical.AFAS.Data
             var handleObjs = conflictService.Results.ToCollection().FilterSmallArea(SmallAreaTolerance);
             ThHandleContainsService handlecontain = new ThHandleContainsService();
             handleObjs = handlecontain.Handle(handleObjs.Cast<Entity>().ToList()).ToCollection();
-            Columns = handleObjs.Cast<Polyline>().ToList();
+            var columns = handleObjs.OfType<Polyline>().Select(o=>ThIfcColumn.Create(o)).ToList();
+            var columnBuilder = new ThColumnBuilderEngine();
+            Columns = columnBuilder
+                .Union(columns.OfType<ThIfcBuildingElement>().ToList())
+                .Select(o=>o.Outline as Polyline).ToList();
         }
         private DBObjectCollection ExtractDb3Column(Point3dCollection pts)
         {

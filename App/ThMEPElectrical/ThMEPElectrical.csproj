@@ -343,6 +343,7 @@
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
     <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
+    <Compile Include="ThAFASCmds.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
     <Compile Include="ThGroundGridCmds.cs" />

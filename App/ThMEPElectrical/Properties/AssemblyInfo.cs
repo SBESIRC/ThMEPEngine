@@ -35,6 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.6.5.0")]
 [assembly: AssemblyFileVersion("1.6.5.0")]
 
+[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
