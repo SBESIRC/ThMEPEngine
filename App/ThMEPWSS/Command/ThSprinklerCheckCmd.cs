@@ -1,16 +1,18 @@
 ﻿using System;
-using AcHelper;
-using Linq2Acad;
-using ThCADExtension;
-using AcHelper.Commands;
-using ThMEPWSS.ViewModel;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Command;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPWSS.Sprinkler.Service;
-using ThMEPWSS.Sprinkler.Analysis;
+using System.Linq;
+
+using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
+
+using ThCADExtension;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.Sprinkler.Analysis;
+using ThMEPWSS.Sprinkler.Service;
+using ThMEPWSS.ViewModel;
 
 namespace ThMEPWSS.Command
 {
@@ -47,8 +49,9 @@ namespace ThMEPWSS.Command
                     SprinklerCheckerVM.Parameter.CheckItem12,
                 };
 
-                var polylines = ThSprinklerLayoutAreaUtils.GetFrames();
-                if (polylines.Count <= 0)
+                var remainder = new DBObjectCollection();
+                var polylines = ThSprinklerLayoutAreaUtils.GetFrames(out remainder);
+                if (polylines.Count == 0 && remainder.Count == 0)
                 {
                     return;
                 }
@@ -82,8 +85,10 @@ namespace ThMEPWSS.Command
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
                 recognizeAllEngine.RecognizeMS(currentDb.Database, new Point3dCollection());
 
+                var index = new List<int> { 3, 4, 5, 8, 9, 10, 11 };
                 var frame = new Extents3d();
                 polylines.ForEach(p => frame.AddExtents(p.GeometricExtents));
+                frame.AddExtents(remainder.GeometricExtents());
                 for (int i = 0; i < checkers.Count; i++)
                 {
                     if (checkBoxs[i])
@@ -94,6 +99,14 @@ namespace ThMEPWSS.Command
                         {
                             checkers[i].Check(recognizeAllEngine.Elements, geometries, p);
                         });
+
+                        if (index.Contains(i))
+                        {
+                            remainder.OfType<Entity>().ToList().ForEach(p =>
+                            {
+                                checkers[i].Check(recognizeAllEngine.Elements, geometries, p);
+                            });
+                        }
                     }
                 }
             }

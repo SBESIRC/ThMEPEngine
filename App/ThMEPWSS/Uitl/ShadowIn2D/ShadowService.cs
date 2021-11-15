@@ -23,21 +23,11 @@ namespace ThMEPWSS.Uitl.ShadowIn2D
             var vertices = AllVertices(verticePolys);
             var usefulLines = GetLine(basePt, vertices, verticePolys);
             
-            var allTriangle = CalLightTriangle(usefulLines, verticePolys);
-            DBObjectCollection dbs = new DBObjectCollection();
-            foreach (var triangle in allTriangle)
-            {
-                using (AcadDatabase db = AcadDatabase.Active())
-                {
-                    //db.ModelSpace.Add(triangle);
-                }
-                dbs.Add(triangle);
-            }
-
-            return dbs.UnionPolygons().Cast<Polyline>().ToList();
+            var allTriangle = CalLightTriangle(usefulLines, verticePolys).ToCollection();
+            return allTriangle.UnionPolygons().OfType<Polyline>().ToList();
         }
 
-        private List<Polyline> CalLightTriangle(List<Line> usefulLines, List<Polyline> polylines)
+        public List<Polyline> CalLightTriangle(List<Line> usefulLines, List<Polyline> polylines)
         {
             List<Polyline> triangle = new List<Polyline>();
             var firLine = usefulLines.First();
@@ -149,18 +139,19 @@ namespace ThMEPWSS.Uitl.ShadowIn2D
             return false;
         }
 
-        private List<Line> GetLine(Point3d basePt, List<Point3d> vertices, List<Polyline> obstacle)
+        public  List<Line> GetLine(Point3d basePt, List<Point3d> vertices, List<Polyline> obstacle)
         {
             List<Line> rayLine = new List<Line>();
             foreach (var pt in vertices)
             {
                 Line line = new Line(basePt, pt);
-                var interPts = obstacle.SelectMany(x => line.Intersect(x, Intersect.OnBothOperands)).ToList();
-                if (interPts.Count > 1 || (interPts.Count > 0 && !interPts.First().IsEqualTo(pt)))
+                var interPts = obstacle.SelectMany(x => line.Intersect(x, Intersect.OnBothOperands)).OrderBy(pt => pt.X).ToList();
+                if ((interPts.Count > 1 && interPts[0].DistanceTo(interPts[interPts.Count - 1]) > 1.0)
+                    || (interPts.Count > 0 && !interPts.First().IsEqualTo(pt))) 
                 {
                     continue;
                 }
-
+                
                 if (rayLine.Where(x => x.Overlaps(line)).Count() <= 0)
                 {
                     rayLine.Add(line);

@@ -181,12 +181,9 @@ namespace DotNetARX
             LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
             if (ltr != null)
             {
-                if (!ltr.IsUsed)
+                if (ltr.IsFrozen)
                 {
-                    if (ltr.IsFrozen)
-                    {
-                        ltr.IsFrozen = false;
-                    }
+                    ltr.IsFrozen = false;
                 }
             }
         }

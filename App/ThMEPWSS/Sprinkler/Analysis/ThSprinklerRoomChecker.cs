@@ -1,15 +1,14 @@
-﻿using NFox.Cad;
-using Linq2Acad;
-using System.Linq;
-using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.Hydrant.Service;
+﻿using System.Linq;
 using System.Collections.Generic;
-using ThMEPWSS.Sprinkler.Service;
+
 using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
+using Linq2Acad;
+using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -20,12 +19,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
             CleanHatch(ThWSSCommon.Room_Checker_LayerName, pline);
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var objs = Check(geometries, sprinklers, pline);
-            if (objs.Count > 0) 
+            if (entity is Polyline pline)
             {
-                Present(objs);
+                var objs = Check(geometries, sprinklers, pline);
+                if (objs.Count > 0)
+                {
+                    Present(objs);
+                }
             }
         }
 

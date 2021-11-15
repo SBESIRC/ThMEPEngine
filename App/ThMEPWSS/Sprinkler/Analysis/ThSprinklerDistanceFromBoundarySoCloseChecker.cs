@@ -1,16 +1,17 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -21,12 +22,15 @@ namespace ThMEPWSS.Sprinkler.Analysis
             CleanDimension(ThWSSCommon.From_Boundary_So_Close_LayerName, pline);
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var results = DistanceCheck(sprinklers, geometries, pline);
-            if (results.Count > 0)
+            if (entity is Polyline pline)
             {
-                Present(results);
+                var results = DistanceCheck(sprinklers, geometries, pline);
+                if (results.Count > 0)
+                {
+                    Present(results);
+                }
             }
         }
 
@@ -36,11 +40,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var geometriesFilter = geometries.Where(g =>
             {
                 var category = g.Properties["Category"] as string;
-                if(category.Contains("Beam"))
+                if (category.Contains("Beam"))
                 {
                     return false;
                 }
-                if(!polygon.Intersects(g.Boundary.ToNTSGeometry()))
+                if (!polygon.Intersects(g.Boundary.ToNTSGeometry()))
                 {
                     return false;
                 }

@@ -1,12 +1,17 @@
 ﻿using System;
-using Linq2Acad;
 using System.Linq;
+using System.Collections.Generic;
+
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using NetTopologySuite.Operation.Buffer;
+
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Sprinkler.Service;
-using System.Collections.Generic;
-using NetTopologySuite.Operation.Buffer;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -20,21 +25,22 @@ namespace ThMEPWSS.Sprinkler.Analysis
             CleanPline(ThWSSCommon.Sprinkler_So_Dense_LayerName, pline);
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var distanceCheck = DistanceCheck(sprinklers, pline).ToList();
-            var results = MergeCloseLine(distanceCheck);
-            if (results.Count > 0) 
+            var distanceCheck = DistanceCheck(sprinklers, entity);
+            var buildingCheck = BuildingCheck(geometries, distanceCheck, entity);
+            var results = MergeCloseLine(buildingCheck);
+            if (results.Count > 0)
             {
                 Present(results);
             }
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, Entity entity)
         {
             var sprinklersClone = sprinklers.OfType<ThSprinkler>()
                                             .Where(o => o.Category == Category)
-                                            .Where(o => pline.Contains(o.Position))
+                                            .Where(o => entity.IsContains(o.Position))
                                             .ToList();
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0)
@@ -46,6 +52,28 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var closePointList = ThSprinklerKdTreeService.QueryOther(kdTree, position, AreaDensity);
                 closePointList.ForEach(o => result.Add(new Line(position, o)));
             }
+            return result;
+        }
+
+        private List<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Entity entity)
+        {
+            var polygon = entity.ToNTSPolygon();
+            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
+                                                      || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
+                                             .Select(g => g.Boundary)
+                                             .Where(g => polygon.Intersects(g.ToNTSGeometry()))
+                                             .ToCollection();
+            var result = new List<Line>();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(geometriesFilter);
+            lines.ForEach(o =>
+            {
+                var line = new Line(o.StartPoint, o.EndPoint);
+                var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));
+                if (filter.Count == 0)
+                {
+                    result.Add(o);
+                }
+            });
             return result;
         }
 

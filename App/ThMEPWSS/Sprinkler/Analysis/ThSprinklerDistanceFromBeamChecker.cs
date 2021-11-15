@@ -1,17 +1,18 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
-using DotNetARX;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPWSS.Service;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+using ThMEPWSS.Service;
 using ThMEPWSS.Sprinkler.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -25,14 +26,17 @@ namespace ThMEPWSS.Sprinkler.Analysis
             CleanDimension(ThWSSCommon.Distance_Form_Beam_LayerName, pline);
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var areas = LayoutAreas(geometries);
-            Present(areas);
-            var results = BeamCheck(sprinklers, areas, geometries, pline);
-            if (results.Count > 0) 
+            if (entity is Polyline pline)
             {
-                Present(results);
+                var areas = LayoutAreas(geometries);
+                Present(areas);
+                var results = BeamCheck(sprinklers, areas, geometries, pline);
+                if (results.Count > 0)
+                {
+                    Present(results);
+                }
             }
         }
 
@@ -95,7 +99,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var layerId = acadDatabase.Database.CreateAISprinklerLayoutAreaLayer();
                 layoutAreas.ForEach(o =>
                 {
-                    o.ForEach(area => 
+                    o.ForEach(area =>
                     {
                         area.ColorIndex = 3;
                         area.LayerId = layerId;

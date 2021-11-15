@@ -1,29 +1,30 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
-using DotNetARX;
 using System.Linq;
-using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
 using System.Collections.Generic;
-using ThMEPWSS.Sprinkler.Service;
+
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
     public class ThSprinklerBeamChecker : ThSprinklerChecker
     {
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var objs = Check(geometries, pline);
+            var objs = Check(geometries, entity);
             if (objs.Count > 0) 
             {
                 Present(objs);
             }
         }
 
-        private DBObjectCollection Check(List<ThGeometry> geometries, Polyline pline)
+        private DBObjectCollection Check(List<ThGeometry> geometries, Entity entity)
         {
             var objs = new DBObjectCollection();
             geometries.ForEach(g =>
@@ -37,7 +38,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 }
             });
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return spatialIndex.SelectCrossingPolygon(pline);
+            return spatialIndex.SelectCrossingPolygon(entity);
         }
 
         public override void Clean(Polyline polyline)

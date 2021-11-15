@@ -1,15 +1,19 @@
-﻿using ThMEPWSS.ViewModel;
-using System.Windows.Input;
+﻿using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
+
+using ThMEPWSS;
+using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
     public partial class SprinklerCheckersUI : ThCustomWindow
     {
-        public SprinklerCheckersUI(ThSprinklerCheckerVM VM)
+        private ThSprinklerCheckerVM VM;
+        public SprinklerCheckersUI(ThSprinklerCheckerVM vm)
         {
             InitializeComponent();
-            this.DataContext = VM;
+            this.DataContext = vm;
+            this.VM = vm;
         }
 
         private void rbUpSprinkler_Checked(object sender, System.Windows.RoutedEventArgs e)
@@ -134,6 +138,54 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void tbBottom_MouseDown(object sender, MouseButtonEventArgs e)
         {
             chkItem12.IsChecked = !chkItem12.IsChecked;
+        }
+
+        private void btnSet_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
+            var layerNum = btn.Tag.ToString();
+
+            var layerName = "";
+            switch (layerNum)
+            {
+                case "1":
+                    layerName = ThWSSCommon.Blind_Zone_LayerName;
+                    break;
+                case "2":
+                    layerName = ThWSSCommon.From_Boundary_So_Far_LayerName;
+                    break;
+                case "3":
+                    layerName = ThWSSCommon.Room_Checker_LayerName;
+                    break;
+                case "4":
+                    layerName = ThWSSCommon.Parking_Stall_Checker_LayerName;
+                    break;
+                case "5":
+                    layerName = ThWSSCommon.Mechanical_Parking_Stall_Checker_LayerName;
+                    break;
+                case "6":
+                    layerName = ThWSSCommon.Sprinkler_Distance_LayerName;
+                    break;
+                case "7":
+                    layerName = ThWSSCommon.From_Boundary_So_Close_LayerName;
+                    break;
+                case "8":
+                    layerName = ThWSSCommon.Distance_Form_Beam_LayerName;
+                    break;
+                case "9":
+                    layerName = ThWSSCommon.Beam_Checker_LayerName;
+                    break;
+                case "10":
+                    layerName = ThWSSCommon.Pipe_Checker_LayerName;
+                    break;
+                case "11":
+                    layerName = ThWSSCommon.Duct_Checker_LayerName;
+                    break;
+                case "12":
+                    layerName = ThWSSCommon.Sprinkler_So_Dense_LayerName;
+                    break;
+            }
+            VM.SelectAll(layerName, layerNum);
         }
     }
 }

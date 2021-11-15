@@ -1,14 +1,16 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
-using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPWSS.Sprinkler.Service;
 using System.Collections.Generic;
+
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -19,27 +21,27 @@ namespace ThMEPWSS.Sprinkler.Analysis
             CleanDimension(ThWSSCommon.Sprinkler_Distance_LayerName, pline);
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var distanceCheck = DistanceCheck(sprinklers, 1800.0, pline);
+            var distanceCheck = DistanceCheck(sprinklers, 1799.0, entity);
             if (distanceCheck.Count > 0)
             {
-                var buildingCheck = BuildingCheck(geometries, distanceCheck, pline);
-                if (buildingCheck.Count > 0) 
+                var buildingCheck = BuildingCheck(geometries, distanceCheck, entity);
+                if (buildingCheck.Count > 0)
                 {
                     Present(buildingCheck);
                 }
             }
         }
 
-        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Polyline pline)
+        private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Entity entity)
         {
             var sprinklersClone = sprinklers.OfType<ThSprinkler>()
                                             .Where(o => o.Category == Category)
-                                            .Where(o => pline.Contains(o.Position))
+                                            .Where(o => entity.IsContains(o.Position))
                                             .ToList();
             var result = new HashSet<Line>();
-            while (sprinklersClone.Count > 0) 
+            while (sprinklersClone.Count > 0)
             {
                 var position = sprinklersClone[0].Position;
                 sprinklersClone.RemoveAt(0);
@@ -51,9 +53,9 @@ namespace ThMEPWSS.Sprinkler.Analysis
             return result;
         }
 
-        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
+        private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Entity entity)
         {
-            var polygon = pline.ToNTSPolygon();
+            var polygon = entity.ToNTSPolygon();
             var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
                                                       || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
                                              .Select(g => g.Boundary)
@@ -65,7 +67,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 var line = new Line(o.StartPoint, o.EndPoint);
                 var filter = spatialIndex.SelectCrossingPolygon(line.Buffer(1.0));
-                if(filter.Count == 0)
+                if (filter.Count == 0)
                 {
                     result.Add(o);
                 }
