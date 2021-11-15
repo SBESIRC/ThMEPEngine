@@ -110,7 +110,7 @@ namespace ThMEPEngineCore.AFASRegion
                         var cmd = new AFASRegion();
                         AFASBeamContour.WallThickness = 100;
                         //获取探测范围
-                        var Detectionspace = cmd.DivideRoomWithDetectionRegion(pline, AFASDetector.SmokeDetectorLow);
+                        var Detectionspace = cmd.DivideRoomWithDetectionRegion(pline);
                         foreach (var polygon in Detectionspace)
                         {
                             polygon.ColorIndex = 3;

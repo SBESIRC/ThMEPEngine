@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
         /// <summary>
         /// 墙板厚度
         /// </summary>
-        private double WallThickness { get; set; } = 100;
+        public double WallThickness { get; set; } = 100;
 
         /// <summary>
         /// 最小内缩距离

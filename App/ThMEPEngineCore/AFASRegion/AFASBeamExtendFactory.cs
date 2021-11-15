@@ -25,27 +25,27 @@ namespace ThMEPEngineCore.AFASRegion.Service
         public AFASDetector detectorType { get; set; }
         private ThCADCoreNTSSpatialIndex thobstacleSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex thbeamsSpatialIndex { get; set; }
-        public AFASBeamExtendFactory(ThBeamConnectRecogitionEngine beamConnectEngine, ThDB3ArchWallRecognitionEngine archWallEngine)
+
+        public void Initialize(List<ThIfcBuildingElement> columns, List<ThIfcBuildingElement> beams, List<ThIfcBuildingElement> walls, List<Polyline> holes)
         {
             //获取柱
-            var columns = beamConnectEngine.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToCollection();
+            var thcolumns = columns.Select(o => o.Outline).Cast<Polyline>();
 
             //获取梁
-            var thBeams = beamConnectEngine.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
-            //获取剪力墙
-            var shearWalls = beamConnectEngine.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToCollection();
+            var thBeams = beams.Cast<ThIfcLineBeam>().ToList();
 
-            //获取建筑墙
-            var arcWalls = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToCollection();
+            //获取墙
+            var thwalls = walls.Select(o => o.Outline).Cast<Polyline>();
+
 
             List<Polyline> obstacle = new List<Polyline>();
-            obstacle.AddRange(columns.Cast<Polyline>());
-            obstacle.AddRange(shearWalls.Cast<Polyline>());
-            obstacle.AddRange(arcWalls.Cast<Polyline>());
+            obstacle.AddRange(thcolumns);
+            obstacle.AddRange(thwalls);
+            obstacle.AddRange(holes);
             this.ObstacleBoundarys = obstacle;
             Beams = new List<AFASBeamContour>();
             Beams.AddRange(thBeams.Select(o => BeamConversion(o)));
-            
+
             thobstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacle.ToCollection());
         }
 
@@ -269,7 +269,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             DBObjectCollection DetectionAreaLines = new DBObjectCollection();
             frame.ToNTSPolygon().ToDbPolylines().ForEach(o => DetectionAreaLines.Add(o));//添加房间框线
             obstacles.ForEach(o => DetectionAreaLines.Add(o));//添加障碍物
-            extendBeam.ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
+            extendBeam.Where(o=>o.BeamType==BeamType.HighBeam).ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
             var polygons = DetectionAreaLines.PolygonsEx();
 
             var obstacleBufferArea = obstacles.Cast<Polyline>().Select(o => o.Buffer(10)[0] as Polyline);//障碍物空间（柱，剪力墙,结构墙)
