@@ -87,7 +87,7 @@
     <Compile Include="Sprinkler\Analysis\ThSprinklerParkingStallChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerPipeChecker.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerRoomChecker.cs" />
-    <Compile Include="Sprinkler\Analysis\ThSprinklerSoDenseChecker.cs" />
+    <Compile Include="Sprinkler\Analysis\ThSprinklerDensityChecker.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerArchitectureWallExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerBeamExtractor.cs" />
     <Compile Include="Sprinkler\Data\ThSprinklerColumnExtractor.cs" />
