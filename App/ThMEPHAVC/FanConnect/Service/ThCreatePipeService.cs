@@ -17,7 +17,8 @@ namespace ThMEPHVAC.FanConnect.Service
         public List<Line> TrunkLines { get; }//干路线
         public List<Line> BranchLines { get; }//支干路
         public List<Line> TagLines { get; }//支路
-        public List<Polyline> ObstacleRooms { get; }//可穿越区域，但是代价大(房间框线)
+        public List<Polyline> EquipmentObbs { get; }//可穿越区域，但是必须垂直连接且代价大(设备框)
+        public List<Polyline> ObstacleRooms { get; }//可穿越区域，但是必须垂直穿越且代价大(房间框线)
         public List<Polyline> ObstacleHoles { get; }//不可穿越区域
         public ThCreatePipeService()
         {
@@ -25,6 +26,7 @@ namespace ThMEPHVAC.FanConnect.Service
             TrunkLines = new List<Line>();
             BranchLines = new List<Line>();
             TagLines = new List<Line>();
+            EquipmentObbs = new List<Polyline>();
             ObstacleRooms = new List<Polyline>();
             ObstacleHoles = new List<Polyline>();
 
@@ -32,6 +34,16 @@ namespace ThMEPHVAC.FanConnect.Service
         public void AddEquipPoint(Point3d pt)
         {
             EquipPoint.Add(pt);
+        }
+        public void AddEquipmentObbs(Entity room)
+        {
+            if (room != null)
+            {
+                if (room is Polyline)
+                {
+                    ObstacleRooms.Add(room as Polyline);
+                }
+            }
         }
         public void AddObstacleRoom(Entity room)
         {
