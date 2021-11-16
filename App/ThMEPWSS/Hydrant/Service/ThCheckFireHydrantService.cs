@@ -205,7 +205,7 @@ namespace ThMEPWSS.Hydrant.Service
             extractors.AddRange(extractorsContainer);
             var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
             var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
-            hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
+            //hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
         }
 
         private string OutPutGeojson(List<ThExtractorBase> extractors)

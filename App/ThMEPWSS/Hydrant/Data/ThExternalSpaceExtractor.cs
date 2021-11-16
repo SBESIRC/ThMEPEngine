@@ -33,8 +33,11 @@ namespace ThMEPWSS.Hydrant.Data
             // 根据生成的房间外框线来构件ExternalSpace
             OffsetDis = 100000;
             ExternalSpaces = new List<Entity>();
-            var mPolygon = ThRecogniseOutsideFrame.CreatMpolygonFromBoundaryToInfinity(outsideFrames, OffsetDis);
-            ExternalSpaces.Add(mPolygon);
+            if(outsideFrames.Count>0)
+            {
+                var mPolygon = ThRecogniseOutsideFrame.CreatMpolygonFromBoundaryToInfinity(outsideFrames, OffsetDis);
+                ExternalSpaces.Add(mPolygon);
+            }
         }
 
         public override void Extract(Database database, Point3dCollection pts)
