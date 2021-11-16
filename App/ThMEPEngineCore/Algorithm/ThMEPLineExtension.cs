@@ -12,6 +12,39 @@ namespace ThMEPEngineCore.Algorithm
 {
     public static class ThMEPLineExtension
     {
+        public static List<Line> TransCurveToLine(DBObjectCollection dBObjectCollection, double ArcChord)
+        {
+            var curves = ExplodeCurves(dBObjectCollection);
+            var lines = new List<Line>();
+            var arcs = new List<Arc>();
+            curves.ForEach(o =>
+            {
+                if (o is Line l)
+                {
+                    lines.Add(l);
+                }
+                else
+                {
+                    arcs.Add(o as Arc);
+                }
+            });
+
+            var results = new List<Line>();
+            // arc打成多段线
+            arcs.ForEach(o =>
+            {
+
+                var polyline = o.TessellateArcWithChord(ArcChord);
+                var entitySet = new DBObjectCollection();
+                polyline.Explode(entitySet);
+                foreach (var obj in entitySet)
+                {
+                    results.Add(obj as Line);
+                }
+            });
+
+            return results;
+        }
         public static List<Line> LineSimplifier(DBObjectCollection dBObjectCollection, double ArcChord, double DistGap2Extend, double DistGap2Merge, double AngleTolerance)
         {
             // 将多段线炸开，保留所有Line(长度大于10.0mm)
