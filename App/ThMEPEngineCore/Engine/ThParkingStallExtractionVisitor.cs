@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -55,8 +58,9 @@ namespace ThMEPEngineCore.Engine
         {
             if (IsSpatialElement(br))
             {
-                var objs = CAD.ThDrawTool.Explode(br);
-                objs = ExplodeToBasic(objs);
+                var objs = new DBObjectCollection();
+                br.ExplodeWithVisible(objs);
+                objs = ExplodeToBasic(objs.OfType<Curve>().ToCollection());
                 var obb = ToObb(objs);
                 if (obb.Area > 1.0)
                 {
