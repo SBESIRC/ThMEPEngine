@@ -134,7 +134,6 @@ namespace ThMEPWSS.Hydrant.Service
                 });
             }
             extractorsContainer.ForEach(e => e.Extract(db, frame));
-
             for (int i = 0; i < extractorsContainer.Count; ++i)
             {
                 if (i == 0 && extractorsContainer[i] is ThHydrantArchitectureWallExtractor temp0)
@@ -200,11 +199,11 @@ namespace ThMEPWSS.Hydrant.Service
                     }
                 }
             }
+            extractors.AddRange(extractorsContainer);
 
             //调整不在房间内的消火栓的点位
-            extractors.AddRange(extractorsContainer);
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
-            var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
+            //var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            //var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
             //hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
         }
 
