@@ -82,12 +82,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
             var labelLine = labelEngine.CreateLabelLineList(labelDB);//----12s----
-            
-            foreach(var l in labelLine)
-            {
-                l.LayerId = DbHelper.GetLayerId("0");
-                acadDatabase.CurrentSpace.Add(l);
-            }
 
             double textWidth = 1300;
             string textModel = "";
@@ -113,8 +107,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             fireHydrantSysIn.SlashDic = DNPipeEngine.GetSlashDic(leadLineDic, segLineDic);//斜点标注对
             PtDic.CreateDNDic(ref fireHydrantSysIn, PipeDN, lineList);//创建DN字典对
-                
-            
 
             var labelPtDic = PtDic.CreateLabelPtDic(fireHydrantSysIn.HydrantPosition, labelLine);//把在同一条标记线上的点聚集
             var labelLineDic = PtDic.CreateLabelLineDic(labelPtDic, labelLine);//找到标注线

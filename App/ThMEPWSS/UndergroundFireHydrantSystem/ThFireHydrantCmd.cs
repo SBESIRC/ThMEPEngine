@@ -49,14 +49,6 @@ namespace ThMEPWSS.Command
 
         public void CreateFireHydrantSystem(AcadDatabase curDb)
         {
-
-            //var entOpt = new PromptEntityOptions("\nPick entity in block:");
-            //var entityResult = Active.Editor.GetEntity(entOpt);
-
-            //var entId = entityResult.ObjectId;
-            //var dbObj = curDb.Element<Entity>(entId);
-            //var name = dbObj.GetRXClass().DxfName;
-
             var opt = new PromptPointOptions("请指定环管标记起点: \n");
             var propPtRes = Active.Editor.GetPoint(opt);
             if (propPtRes.Status != PromptStatus.OK)
@@ -76,10 +68,10 @@ namespace ThMEPWSS.Command
             {
                 return;
             }
-            for (int i = 0; i < mainPathList[0].Count - 1; i++)
-            {
-                curDb.CurrentSpace.Add(new Line(mainPathList[0][i]._pt, mainPathList[0][i + 1]._pt));
-            }
+            //for (int i = 0; i < mainPathList[0].Count - 1; i++)
+            //{
+            //    curDb.CurrentSpace.Add(new Line(mainPathList[0][i]._pt, mainPathList[0][i + 1]._pt));
+            //}
             var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
 
             var visited = new HashSet<Point3dEx>();//访问标志
