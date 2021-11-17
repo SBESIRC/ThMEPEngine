@@ -163,6 +163,12 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                                 }
                             }
                         }
+                        foreach(var l in toDeleteLine)
+                        {
+                            l.ColorIndex = 3;
+                            Draw.AddToCurrentSpace(l);
+                        }
+
                         //挑选出需要删除的数据
                         //
                         ThHydrantDataManager.RemoveBranchLines(toDeleteLine, loopLines, hydrantValve, pipeMark, range);

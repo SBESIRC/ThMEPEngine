@@ -169,8 +169,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
                 foreach (var L in lineList)
                 {
-                    var pt1 = new Point3dEx(L.StartPoint,4);
-                    var pt2 = new Point3dEx(L.EndPoint,4);
+                    var pt1 = new Point3dEx(L.StartPoint,12);
+                    var pt2 = new Point3dEx(L.EndPoint,12);
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2);
                 }
 

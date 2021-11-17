@@ -18,7 +18,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
     {
         public static double GetDistFireHydrantToPipe(ThHydrant fireHydrant, ThHydrantPipe pipe)
         {
-            return ThCADCoreNTSDistance.Distance(fireHydrant.FireHydrantObb,pipe.PipePosition);
+            var centroidPt = fireHydrant.FireHydrantObb.GetCentroidPoint();
+            return centroidPt.DistanceTo(pipe.PipePosition);
         }
         public static bool PipeIsContainBranchLine(ThHydrantPipe pipe, List<Line> branchLines)
         {
@@ -39,7 +40,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             {
                 if (fireHydrant.IsContainsPipe(pipe, 500.0))
                 {
-                    double tmpDist = ThHydrantConnectPipeUtils.GetDistFireHydrantToPipe(fireHydrant, pipe);
+                    double tmpDist = GetDistFireHydrantToPipe(fireHydrant, pipe);
                     if(minDist > tmpDist)
                     {
                         fireHydrant.FireHydrantPipe = pipe;
@@ -56,7 +57,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             {
                 if (fireHydrant.IsContainsPipe(pipe, 500.0))
                 {
-                    double tmpDist = ThHydrantConnectPipeUtils.GetDistFireHydrantToPipe(fireHydrant, pipe);
+                    double tmpDist = GetDistFireHydrantToPipe(fireHydrant, pipe);
                     if (minDist > tmpDist)
                     {
                         fireHydrant.FireHydrantPipe = pipe;
