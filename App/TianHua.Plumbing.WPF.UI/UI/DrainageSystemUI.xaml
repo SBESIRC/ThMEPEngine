@@ -46,7 +46,6 @@
             </ItemsControl>
         </StackPanel>
         <DockPanel Grid.Row="3" LastChildFill="False">
-            <cus:ImageButton DockPanel.Dock="Left" Content="标注管径" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click_2"></cus:ImageButton>
             <cus:ImageButton DockPanel.Dock="Right" Content="生成" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
         </DockPanel>
     </Grid>
