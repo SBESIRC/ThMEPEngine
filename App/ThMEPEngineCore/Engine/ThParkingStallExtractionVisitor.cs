@@ -11,6 +11,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Service;
+using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -58,10 +59,9 @@ namespace ThMEPEngineCore.Engine
         {
             if (IsSpatialElement(br))
             {
-                var objs = new DBObjectCollection();
-                br.ExplodeWithVisible(objs);
-                objs = ExplodeToBasic(objs.OfType<Curve>().ToCollection());
-                var obb = ToObb(objs);
+                var objs = ExplodeWithVisible(br);
+                objs = ExplodeToBasic(objs);
+                var obb = ToObb(objs.PolygonsEx());
                 if (obb.Area > 1.0)
                 {
                     var solid = obb.ToSolid();
@@ -77,8 +77,12 @@ namespace ThMEPEngineCore.Engine
         private Polyline ToObb(DBObjectCollection basicCurves)
         {
             var curves = new DBObjectCollection();
-            basicCurves.Cast<Curve>().ForEach(e =>
+            basicCurves.OfType<Entity>().ForEach(e =>
             {
+                if(e is MPolygon mPolygon)
+                {
+                    e = mPolygon.Shell();
+                }
                 var newEnt = ThTesslateService.Tesslate(e, 100.0);
                 if (newEnt != null)
                 {
@@ -134,6 +138,32 @@ namespace ThMEPEngineCore.Engine
         private bool CheckBlockNameIsValid(Entity e)
         {
             return e is BlockReference;
+        }
+
+        private DBObjectCollection ExplodeWithVisible(BlockReference blockReference)
+        {
+            var objs = new DBObjectCollection();
+            var newObjs = new DBObjectCollection();
+            blockReference.Explode(objs);
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Curve curve)
+                {
+                    newObjs.Add(curve);
+                }
+                else if (o is BlockReference br)
+                { 
+                    ExplodeWithVisible(br).OfType<Entity>().ForEach(e => newObjs.Add(e));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            });
+            return newObjs.OfType<Entity>()
+                .Where(e => e.Visible)
+                .Where(e => e.Bounds.HasValue)
+                .ToCollection();
         }
     }
 }
