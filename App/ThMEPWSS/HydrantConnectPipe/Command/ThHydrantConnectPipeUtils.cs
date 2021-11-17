@@ -49,6 +49,27 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             }
             return pipes.Remove(fireHydrant.FireHydrantPipe);
         }
+        public static bool HydrantIsContainPipe1(ThHydrant fireHydrant, List<ThHydrantPipe> pipes)
+        {
+            double minDist = 9999.0;
+            foreach (var pipe in pipes)
+            {
+                if (fireHydrant.IsContainsPipe(pipe, 500.0))
+                {
+                    double tmpDist = ThHydrantConnectPipeUtils.GetDistFireHydrantToPipe(fireHydrant, pipe);
+                    if (minDist > tmpDist)
+                    {
+                        fireHydrant.FireHydrantPipe = pipe;
+                        minDist = tmpDist;
+                    }
+                }
+            }
+            if(fireHydrant.FireHydrantPipe == null)
+            {
+                return false;
+            }
+            return true;
+        }
         public static List<Curve> GetSegment(Polyline polyline, Point3d pt, double tolerance = 1.0)
         {
             var segments = new List<Curve>();

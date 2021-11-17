@@ -145,7 +145,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     fireHydrantSysIn.PtDic[pt1].Add(pt2);
                 }
-            
             }
             else
             {
