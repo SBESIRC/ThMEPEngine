@@ -121,15 +121,24 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     return;
                 }
 
-                //简略的写提取管子和点位（需要改）
-                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
-                var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
-                var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
 
-                if (SprinklerPts.Count == 0 || mainPipe.Count == 0 || subMainPipe.Count == 0)
-                {
-                    return;
-                }
+                //点位
+                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
+
+                //提取车位
+                var singleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_SingleCar);
+                var doubleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
+                //DrawUtils.ShowGeometry(singleCarParking, "l0singleCar", 22, 30);
+                //DrawUtils.ShowGeometry(doubleCarParking, "l0doubleCar", 22, 30);
+
+                //提取管子
+                //var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
+                //var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
+
+                //if (SprinklerPts.Count == 0 || mainPipe.Count == 0 || subMainPipe.Count == 0)
+                //{
+                //    return;
+                //}
 
                 //var dataset = new ThSprinklerConnectDataFactory();
                 //   var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
@@ -141,17 +150,17 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
 
                 //打散管线
-                ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
-                DrawUtils.ShowGeometry(mainLine, "l0mainline", 22, 30);
-                DrawUtils.ShowGeometry(subMainLine, "l0submainline", 142, 30);
-                DrawUtils.ShowGeometry(allLines, "l0all", 2, 30);
+                //ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
+                //DrawUtils.ShowGeometry(mainLine, "l0mainline", 22, 30);
+                //DrawUtils.ShowGeometry(subMainLine, "l0submainline", 142, 30);
+                //DrawUtils.ShowGeometry(allLines, "l0all", 2, 30);
 
 
                 var sprinklerParameter = new ThSprinklerParameter();
                 sprinklerParameter.SprinklerPt = SprinklerPts;
-                sprinklerParameter.MainPipe = mainLine;
-                sprinklerParameter.SubMainPipe = subMainLine;
-                sprinklerParameter.AllPipe = allLines;
+                //sprinklerParameter.MainPipe = mainLine;
+                //sprinklerParameter.SubMainPipe = subMainLine;
+                //sprinklerParameter.AllPipe = allLines;
 
                 ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
 

@@ -189,7 +189,23 @@ namespace ThMEPWSS.SprinklerConnect.Data
 
         }
 
+        public static List<Polyline> GetCarData(Polyline frame, string layer)
+        {
+            var polyList = new List<Polyline>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var extractService = new ThExtractPolylineService()
+                {
+                    ElementLayer = layer,
 
+                };
+                extractService.Extract(acadDatabase.Database, frame.Vertices());
+                polyList.AddRange(extractService.Polys);
+            }
+            polyList.ForEach(x => x.Closed = true);
+            return polyList;
+
+        }
     }
 }
 
