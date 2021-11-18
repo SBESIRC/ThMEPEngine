@@ -105,7 +105,7 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             using (var database = AcadDatabase.Active())
             {
-                var retPt = new Point3d();
+                Point3d retPt = new Point3d();
                 var blks = database.ModelSpace.OfType<BlockReference>().Where(o => o.GetEffectiveName() == "AI-水管起点").ToList();
                 if(blks.Count != 0)
                 {

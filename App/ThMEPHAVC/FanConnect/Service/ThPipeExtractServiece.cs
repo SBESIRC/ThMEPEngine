@@ -17,6 +17,13 @@ namespace ThMEPHVAC.FanConnect.Service
     /// </summary>
     public class ThPipeExtractServiece
     {
+        public Point3d PipeStartPt { set; get; }//水管起始点
+        public List<Point3d> EquipPoint { set; get; }//设备连接点
+        public List<Line> TrunkLines { set; get; }//干路线
+        public List<Line> BranchLines { set; get; }//支干路
+        public List<Polyline> EquipmentObbs { set; get; }//可穿越区域，但是必须垂直连接且代价大(设备框)
+        public List<Polyline> ObstacleRooms { set; get; }//可穿越区域，但是必须垂直穿越且代价大(房间框线)
+        public List<Polyline> ObstacleHoles { set; get; }//不可穿越区域
         /// <summary>
         /// 生成管路路由
         /// </summary>
@@ -39,7 +46,42 @@ namespace ThMEPHVAC.FanConnect.Service
 
             return retTree;
         }
+        private List<Polyline> GetPipePath0()
+        {
+            var retList = new List<Polyline>();
+            var pathServiece = new ThCreatePathServiece();
+            pathServiece.TrunkLines = TrunkLines;
+            pathServiece.BranchLines = BranchLines;
+            pathServiece.EquipmentObbs = EquipmentObbs;
+            pathServiece.ObstacleRooms = ObstacleRooms;
+            pathServiece.ObstacleHoles = ObstacleHoles;
+            pathServiece.InitData();
+            foreach (var pt in EquipPoint)
+            {
+                var tmpPath = pathServiece.CreatePath(pt);
+                if(tmpPath != null)
+                {
+                    retList.Add(pathServiece.CreatePath(pt));
+                }
+            }
+            return retList;
+        }
+        private List<Line> GetPipePath1()
+        {
+            var retList = new List<Line>();
+
+            return retList;
+        }
         private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel0()
+        {
+            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
+            //将设备进行连接，得到管路路由
+            var termLine = GetPipePath0();//支路
+            //通过起点，干路线，支干路，支路得到TreeModel
+
+            return retTree;
+        }
+        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel2()
         {
             ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
 
@@ -83,6 +125,14 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
             //可以引用自己写类和方法
+            //生成管线路由放入到List<Line>
+            var lines = GetPipePath1();
+            return GetTreeModel(PipeStartPt, lines);
+        }
+
+        private ThFanTreeModel<ThFanPipeModel> GetTreeModel(Point3d startPt,List<Line> lines)
+        {
+            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
             return retTree;
         }
     }

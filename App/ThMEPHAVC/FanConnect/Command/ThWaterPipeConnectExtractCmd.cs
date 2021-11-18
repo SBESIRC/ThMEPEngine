@@ -38,6 +38,8 @@ namespace ThMEPHVAC.FanConnect.Command
                 var holes = ThBuildElementExtractServiece.GetAIHole(area);
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
+                pipeService.PipeStartPt = startPt;
+
                 foreach (var shearWall in shearWalls)
                 {
                     pipeService.AddObstacleHole(shearWall.Outline);
@@ -49,6 +51,15 @@ namespace ThMEPHVAC.FanConnect.Command
                 foreach (var room in rooms)
                 {
                     pipeService.AddObstacleRoom(room.Outline);
+                }
+                foreach(var hole in holes)
+                {
+                    pipeService.AddObstacleHole(hole);
+                }
+                foreach(var fuc in fucs)
+                {
+                    pipeService.AddEquipPoint(fuc.FanPoint);
+                    pipeService.AddEquipmentObbs(fuc.FanObb);
                 }
                 var pipeTree = pipeService.CreatePipeLine(0);
                 //扩展管路

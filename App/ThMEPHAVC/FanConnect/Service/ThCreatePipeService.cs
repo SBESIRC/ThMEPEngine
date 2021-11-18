@@ -16,7 +16,6 @@ namespace ThMEPHVAC.FanConnect.Service
         public List<Point3d> EquipPoint { get; }//设备连接点
         public List<Line> TrunkLines { get; }//干路线
         public List<Line> BranchLines { get; }//支干路
-        public List<Line> TagLines { get; }//支路
         public List<Polyline> EquipmentObbs { get; }//可穿越区域，但是必须垂直连接且代价大(设备框)
         public List<Polyline> ObstacleRooms { get; }//可穿越区域，但是必须垂直穿越且代价大(房间框线)
         public List<Polyline> ObstacleHoles { get; }//不可穿越区域
@@ -25,11 +24,9 @@ namespace ThMEPHVAC.FanConnect.Service
             EquipPoint = new List<Point3d>();
             TrunkLines = new List<Line>();
             BranchLines = new List<Line>();
-            TagLines = new List<Line>();
             EquipmentObbs = new List<Polyline>();
             ObstacleRooms = new List<Polyline>();
             ObstacleHoles = new List<Polyline>();
-
         }
         public void AddEquipPoint(Point3d pt)
         {
@@ -74,7 +71,14 @@ namespace ThMEPHVAC.FanConnect.Service
         public ThFanTreeModel<ThFanPipeModel> CreatePipeLine(int type)
         {
             var pipePathServiece = new ThPipeExtractServiece();
+            pipePathServiece.PipeStartPt = PipeStartPt;
 
+            pipePathServiece.EquipPoint = EquipPoint;
+            pipePathServiece.TrunkLines = TrunkLines;
+            pipePathServiece.BranchLines = BranchLines;
+            pipePathServiece.EquipmentObbs = EquipmentObbs;
+            pipePathServiece.ObstacleRooms = ObstacleRooms;
+            pipePathServiece.ObstacleHoles = ObstacleHoles;
             var treeModel = pipePathServiece.CreatePipePath(type);
 
             return treeModel;
