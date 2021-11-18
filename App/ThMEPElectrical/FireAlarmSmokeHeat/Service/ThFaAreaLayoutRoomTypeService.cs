@@ -22,7 +22,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         /// </summary>
         /// <param name="frameList"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> getAreaSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
+        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> GetAreaSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
@@ -38,7 +38,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
                 var typeInt = ThFaSmokeCommon.layoutType.noName;
                 var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
 
-                if (isRoom(roomTableTree, roomName, stairName))
+                if (IsRoom(roomTableTree, roomName, stairName))
                 {
                     typeInt = ThFaSmokeCommon.layoutType.stair;
                 }
@@ -91,7 +91,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
 
         }
 
-        private static bool isRoom(List<RoomTableTree> roomTableTree, string name, string standardName)
+        private static bool IsRoom(List<RoomTableTree> roomTableTree, string name, string standardName)
         {
             var bReturn = false;
             var nameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);

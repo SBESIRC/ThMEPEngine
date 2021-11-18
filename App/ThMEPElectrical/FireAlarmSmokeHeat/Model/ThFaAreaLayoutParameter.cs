@@ -24,7 +24,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Model
         public string BlkNameHeatPrf = "";
         public string BlkNameSmokePrf = "";
         public double priorityExtend = 0;
-        public List<Point3d> stairPartResult { get; set; } = new List<Point3d>();
+        public List<Point3d> StairPartResult { get; set; } = new List<Point3d>();
         public Dictionary<Polyline, ThFaSmokeCommon.layoutType> RoomType { get; set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
     }
 }

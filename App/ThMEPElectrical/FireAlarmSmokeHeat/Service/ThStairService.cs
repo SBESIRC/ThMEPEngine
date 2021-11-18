@@ -22,7 +22,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         /// <param name="dataQuery"></param>
         /// <param name="layoutParameter"></param>
         /// <returns></returns>
-        public static List<ThLayoutPt> layoutStair(ThFaAreaLayoutParameter layoutParameter)
+        public static List<ThLayoutPt> LayoutStair(ThFaAreaLayoutParameter layoutParameter)
         {
             var transformer = layoutParameter.transformer;
             var pts = layoutParameter.framePts;
@@ -48,7 +48,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
                 stairBoundary.ForEach(x => transformer.Transform(x));
                 stairFirePts = stairFirePts.Select(x => transformer.Transform(x)).ToList();
 
-                layoutParameter.stairPartResult.AddRange(stairFirePts);
+                layoutParameter.StairPartResult.AddRange(stairFirePts);
                 ////
 
                 return resultPts;

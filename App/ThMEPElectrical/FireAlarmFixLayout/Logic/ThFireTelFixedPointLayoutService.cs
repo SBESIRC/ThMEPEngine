@@ -77,8 +77,11 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 }
                 if (rightIndex == -1)
                 {
-                    rightIndex = 0;
-                    leftIndex = doorPaired.Count - 1;
+                    //rightIndex = 0;
+                    //leftIndex = doorPaired.Count - 1;
+                    //2021-11-18帮同学上git
+                    rightIndex = doorPaired.Count - 1;
+                    leftIndex = 0;
                 }
 
                 var rightHandWall = new Polyline();  //门两侧墙

@@ -94,7 +94,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
             blines.AddRange(layoutCmd.blinds);
         }
 
-        public static bool isAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
+        public static bool IsAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
         {
             return ThMEPPolygonShapeRecognitionService.IsAisle(
                 frame,
@@ -103,7 +103,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
                 threshold);
         }
 
-        public static void addResult(List<ThLayoutPt> layoutResult, List<Polyline> blindsResult, Dictionary<Point3d, Vector3d> localPts, List<Polyline> localBlinds, string blkName)
+        public static void AddResult(List<ThLayoutPt> layoutResult, List<Polyline> blindsResult, Dictionary<Point3d, Vector3d> localPts, List<Polyline> localBlinds, string blkName)
         {
             foreach (var r in localPts)
             {
@@ -113,13 +113,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
             blindsResult.AddRange(localBlinds);
         }
 
-        public static List<Polyline> toPriority(Dictionary<Point3d, Vector3d> localPts, (double, double) size, double Scale, double priorityExtend)
+        public static List<Polyline> ToPriority(Dictionary<Point3d, Vector3d> localPts, (double, double) size, double Scale, double priorityExtend)
         {
             var priority = new List<Polyline>();
 
             if (localPts != null && localPts.Count > 0)
             {
-                priority = ThFaAreaLayoutParamterCalculationService.getPriorityBoundary(localPts, Scale, size);
+                priority = ThFaAreaLayoutParamterCalculationService.GetPriorityBoundary(localPts, Scale, size);
                 priority = priority.Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
             }
             return priority;

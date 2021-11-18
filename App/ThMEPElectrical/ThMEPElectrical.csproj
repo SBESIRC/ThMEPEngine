@@ -29,6 +29,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="AlarmLayout\Test\TestCmd.cs" />
     <Compile Include="AlarmSensorLayout\Test\TestCmd.cs" />

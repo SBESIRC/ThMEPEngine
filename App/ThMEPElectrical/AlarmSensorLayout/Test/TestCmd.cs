@@ -388,7 +388,7 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                 var avoidBlkName = FireAlarm.ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
                 //画框，提数据，转数据
-                var pts = FireAlarm.Service.ThFireAlarmUtils.getFrame();
+                var pts = FireAlarm.Service.ThFireAlarmUtils.GetFrame();
                 if (pts.Count == 0)
                 {
                     return;
@@ -405,14 +405,14 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
                 //图块比例默认100
                 var _scale = 100;
                 //提取数据
-                var geos = FireAlarm.Service.ThFireAlarmUtils.getSmokeData(pts, extractBlkList, _referBeam);
+                var geos = FireAlarm.Service.ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam,100);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //转回原点
-                var transformer = FireAlarm.Service.ThFireAlarmUtils.transformToOrig(pts, geos);
+                var transformer = FireAlarm.Service.ThFireAlarmUtils.TransformToOrig(pts, geos);
                 ////不转回原点
                 //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
                 //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
@@ -420,14 +420,14 @@ namespace ThMEPElectrical.AlarmSensorLayout.Test
 
                 var dataQuery = new FireAlarmSmokeHeat.Data.ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线
-                dataQuery.analysisHoles();
+                dataQuery.AnalysisHoles();
 
                 //墙，柱，可布区域，避让分配到房间框线
                 dataQuery.ClassifyData();
 
                 //扩大避让区域防止最终块重叠
-                var priorityExtend = FireAlarmSmokeHeat.Service.ThFaAreaLayoutParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
-                dataQuery.extendPriority(priorityExtend);
+                var priorityExtend = FireAlarmSmokeHeat.Service.ThFaAreaLayoutParamterCalculationService.GetPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.ExtendPriority(priorityExtend);
 
                 //debug 打图纸用
                 foreach (var frame in dataQuery.FrameList)

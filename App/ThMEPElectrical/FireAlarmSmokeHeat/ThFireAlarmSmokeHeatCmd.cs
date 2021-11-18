@@ -53,23 +53,22 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var pts = ThFireAlarmUtils.getFrameBlk ();
+            var pts = ThFireAlarmUtils.GetFrameBlk();
             if (pts.Count == 0)
             {
                 return;
             }
             var bBean = true;
-            var geos = ThFireAlarmUtils.writeSmokeData(pts, extractBlkList, bBean);
+            var wallThick = 50;
+            var theta = 0;
+            var floorHight = 2;
+            var layoutType = ThFaSmokeCommon.layoutType.smoke;
+
+            var geos = ThFireAlarmUtils.WriteSmokeData(pts, extractBlkList, bBean, wallThick);
             if (geos.Count == 0)
             {
                 return;
             }
-
-            ////转回原点
-            //var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
-            ////var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
-            ////newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
-            ////var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
 
             var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
 
@@ -77,17 +76,20 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
             DrawUtils.ShowGeometry(dataQuery.Columns.Select(x => x.Boundary).ToList(), "l0Column", 3);
             DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
-            DrawUtils.ShowGeometry(dataQuery.Holes .Select(x => x.Boundary).ToList(), "l0hole", 140);
-
+            DrawUtils.ShowGeometry(dataQuery.Holes.Select(x => x.Boundary).ToList(), "l0hole", 140);
+            DrawUtils.ShowGeometry(dataQuery.DetectArea.Select(x => x.Boundary).ToList(), "l0DetectArea", 96);
             //洞,必须先做找到框线
-            dataQuery.analysisHoles();
-            var roomType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
+            dataQuery.AnalysisHoles();
+            var roomType = ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
             foreach (var frame in dataQuery.FrameList)
             {
                 DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
                 DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
                 DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
+
+                //var radius = ThFaAreaLayoutParamterCalculationService.calculateRadius(frame.Area,floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
+                //DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
             }
 
         }
@@ -117,18 +119,18 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
         private int _floorHight = 0;
         private double _scale = 100;
         private bool _referBeam = true;
-
+        private double _wallThick = 100;
         public ThFireAlarmSmokeHeatCmd(FireAlarmViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
             CommandName = "THFireAlarmSmokeLayout";
             ActionName = "布置";
-            setInfo();
+            SetInfo();
         }
 
         public ThFireAlarmSmokeHeatCmd()
         {
-
+            SetInfo();
         }
 
         public override void SubExecute()
@@ -136,7 +138,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             FireAlarmSmokeHeatLayoutExecute();
         }
 
-        private void setInfo()
+        private void SetInfo()
         {
             if (_UiConfigs != null)
             {
@@ -144,6 +146,15 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 _floorHight = _UiConfigs.SelectedIndexForH;
                 _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
                 _referBeam = _UiConfigs.ShouldConsiderBeam;
+                _wallThick = 50;
+            }
+            else
+            {
+                _theta = 0;
+                _floorHight = 2;
+                _scale = 100;
+                _referBeam = true;
+                _wallThick = 50;
             }
         }
 
@@ -168,40 +179,39 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.getFrameBlk();
+                var pts = ThFireAlarmUtils.GetFrameBlk();
                 if (pts.Count == 0)
                 {
                     return;
                 }
 
-                var geos = ThFireAlarmUtils.getSmokeData(pts, extractBlkList, _referBeam);
+                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //转回原点
-                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                var transformer = ThFireAlarmUtils.TransformToOrig(pts, geos);
                 //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
                 //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
                 //var transformer = ThFireAlarmUtils.transformToOrig(newPts, geos);
 
                 var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线
-                dataQuery.analysisHoles();
+                dataQuery.AnalysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                var priorityExtend = ThFaAreaLayoutParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
-                dataQuery.extendPriority(priorityExtend);
-                var roomType = ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
+                var priorityExtend = ThFaAreaLayoutParamterCalculationService.GetPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.ExtendPriority(priorityExtend);
+                var roomType = ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
                 foreach (var frame in dataQuery.FrameList)
                 {
                     DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
                     DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
-                    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
+                    //DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
                     DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
-
                 }
 
 
@@ -220,13 +230,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 layoutParameter.priorityExtend = priorityExtend;
 
                 //接入楼梯
-                var stairBlkResult = ThStairService.layoutStair(layoutParameter);
+                var stairBlkResult = ThStairService.LayoutStair(layoutParameter);
                 ////
 
-                ThFireAlarmSmokeHeatEngine.thFaSmokeHeatLayoutEngine(dataQuery, layoutParameter, out var layoutResult, out var blindsResult);
+                ThFireAlarmSmokeHeatEngine.ThFaSmokeHeatLayoutEngine(dataQuery, layoutParameter, out var layoutResult, out var blindsResult);
 
                 //转回到原始位置
-                layoutResult.ForEach(x => x.transformBack(transformer));
+                layoutResult.ForEach(x => x.TransformBack(transformer));
 
                 //打印
                 ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);

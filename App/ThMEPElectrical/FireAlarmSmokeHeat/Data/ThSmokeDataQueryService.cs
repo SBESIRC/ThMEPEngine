@@ -29,6 +29,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
         public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> LayoutArea { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> DetectArea { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> AvoidEquipments { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> CleanEquipments { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> Equipments { get; set; } = new List<ThGeometry>();
@@ -47,8 +48,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
         public Dictionary<Polyline, List<MPolygon>> FrameLayoutList { get; private set; } = new Dictionary<Polyline, List<MPolygon>>();
         public Dictionary<Polyline, List<Polyline>> FramePriorityList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<Polyline, List<Polyline>> FrameDetectAreaList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
-        //   public Dictionary<Polyline, ThFaSmokeCommon.layoutType> FrameSensorType { get; private set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
-        public Dictionary<ThGeometry, Polyline> roomFrameDict { get; set; } = new Dictionary<ThGeometry, Polyline>();
+        public Dictionary<ThGeometry, Polyline> RoomFrameDict { get; set; } = new Dictionary<ThGeometry, Polyline>();
         public ThSmokeDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
         {
             Data = data;
@@ -56,7 +56,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             AvoidBlkNameList = avoidBlkNameList;
 
             PrepareData();
-            setAvoidEquipment();
+            SetAvoidEquipment();
             CleanData();
         }
 
@@ -69,10 +69,10 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             Rooms = QueryC(BuiltInCategory.Room.ToString());
             LayoutArea = QueryC("PlaceCoverage");
             Equipments = QueryC(BuiltInCategory.Distribution.ToString());
-
+            DetectArea = QueryC("DetectionRegion");
         }
 
-        public void setAvoidEquipment()
+        public void SetAvoidEquipment()
         {
             if (AvoidBlkNameList != null)
             {
@@ -117,7 +117,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             return result;
         }
 
-        public void analysisHoles()
+        public void AnalysisHoles()
         {
             var holesTemp = Holes.Select(x => x.Boundary as Polyline).ToList();
             var allHolesList = new List<Polyline>();
@@ -170,7 +170,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                 }
                 FrameHoleList.Add(frame, holes);
                 FrameList.Add(frame);
-                roomFrameDict.Add(Rooms[i], frame);
+                RoomFrameDict.Add(Rooms[i], frame);
             }
         }
 
@@ -180,13 +180,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             wallList.AddRange(ArchitectureWalls);
             wallList.AddRange(Shearwalls);
 
-            FrameWallList = classifyData(wallList);
-            FrameColumnList = classifyData(Columns);
-            FrameLayoutList = classifyLayoutArea(LayoutArea);
-            FramePriorityList = classifyData(AvoidEquipments);
-            FrameDetectAreaList = classifyData(new List<ThGeometry>());
+            FrameWallList = ClassifyData(wallList);
+            FrameColumnList = ClassifyData(Columns);
+            FrameLayoutList = ClassifyLayoutArea(LayoutArea);
+            FramePriorityList = ClassifyData(AvoidEquipments);
+            FrameDetectAreaList = ClassifyData(DetectArea);
         }
-        private Dictionary<Polyline, List<Polyline>> classifyData(List<ThGeometry> polyList)
+        private Dictionary<Polyline, List<Polyline>> ClassifyData(List<ThGeometry> polyList)
         {
             var polyDict = new Dictionary<Polyline, List<Polyline>>();
 
@@ -218,7 +218,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             return polyDict;
         }
 
-        private Dictionary<Polyline, List<MPolygon>> classifyLayoutArea(List<ThGeometry> polyList)
+        private Dictionary<Polyline, List<MPolygon>> ClassifyLayoutArea(List<ThGeometry> polyList)
         {
             var polyDict = new Dictionary<Polyline, List<MPolygon>>();
 
@@ -256,11 +256,11 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             return polyDict;
         }
 
-        public void extendPriority(double priorityExtend)
+        public void ExtendPriority(double priorityExtend)
         {
             foreach (var frame in FrameList)
             {
-                FramePriorityList [frame] = FramePriorityList[frame].Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+                FramePriorityList[frame] = FramePriorityList[frame].Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
             }
         }
     }

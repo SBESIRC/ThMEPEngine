@@ -55,7 +55,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             _UiConfigs = uiConfigs;
             CommandName = "THFireAlarmProofMonitorLayout";
             ActionName = "生成";
-            setInfo();
+            SetInfo();
         }
         public ThFireAlarmFireProofMonitorLayoutCmd()
         {
@@ -65,7 +65,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         {
             FireAlarmFireProofMonitorLayoutExecute();
         }
-        private void setInfo()
+        private void SetInfo()
         {
             if (_UiConfigs != null)
             {
@@ -89,17 +89,18 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.getFrame();
+                //var pts = ThFireAlarmUtils.GetFrame();
+                var pts = ThFireAlarmUtils.GetFrameBlk();
                 if (pts.Count == 0)
                 {
                     return;
                 }
-                var geos = ThFireAlarmUtils.getFixLayoutData(pts, extractBlkList);
+                var geos = ThFireAlarmUtils.GetFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
-                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                var transformer = ThFireAlarmUtils.TransformToOrig(pts, geos);
 
                 ThFixedPointLayoutService layoutService = null;
                 layoutService = new ThFireProofMonitorFixedPointLayoutService(geos, cleanBlkName, avoidBlkName);
