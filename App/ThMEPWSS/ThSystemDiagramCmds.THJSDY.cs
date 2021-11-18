@@ -314,8 +314,8 @@ namespace ThMEPWSS
         public void ThCleanDrainageDebugDraw()
         {
 
-            Polyline frame = new Polyline();
-            Polyline transFrame = new Polyline();
+            var frame = new Polyline();
+            var transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
 
             //frame = selectFrame();
@@ -340,7 +340,7 @@ namespace ThMEPWSS
         {
 
             //Polyline frame = selectFrame();
-            Polyline transFrame = new Polyline();
+            var transFrame = new Polyline();
             ThMEPOriginTransformer transformer = null;
             //if (frame != null && frame.NumberOfVertices > 0)
             //{

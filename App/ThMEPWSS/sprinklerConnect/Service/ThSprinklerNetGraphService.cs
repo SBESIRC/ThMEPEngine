@@ -164,7 +164,26 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
 
         }
-        
+
+        public static void CreatePartGroup_test(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
+        {
+
+            var lineList = new List<Line>();
+            lineList.AddRange(netGroup.lines);
+
+            BreakLineIntersectWithSub(lineList, subMainPipe, out var breakLine, out var breakPoint);
+
+            var newNetGroup = CreateNetwork(netGroup.angle, lineList);
+
+
+            AddBreakLineToGraph(newNetGroup, breakLine, breakPoint);
+            for (int j = 0; j < newNetGroup.ptsGraph.Count; j++)
+            {
+                var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
+                DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
+            }
+        }
+
         /// <summary>
         /// 删掉干管相交线
         /// </summary>

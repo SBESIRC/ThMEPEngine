@@ -27,7 +27,7 @@ using ThMEPWSS.SprinklerConnect.Engine;
 
 namespace ThMEPWSS.SprinklerConnect.Engine
 {
-    class ThSprinklerPtNetworkEngine
+    public class ThSprinklerPtNetworkEngine
     {
         /// <summary>
         /// 获取点位分片图

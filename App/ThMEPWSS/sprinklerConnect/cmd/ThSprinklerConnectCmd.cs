@@ -99,6 +99,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
     public class ThSprinklerConnectCmd : ThMEPBaseCommand
     {
+        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+
         public ThSprinklerConnectCmd()
         {
 

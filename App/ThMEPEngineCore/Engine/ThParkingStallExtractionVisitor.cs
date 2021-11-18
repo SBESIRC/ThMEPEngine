@@ -155,10 +155,6 @@ namespace ThMEPEngineCore.Engine
                 { 
                     ExplodeWithVisible(br).OfType<Entity>().ForEach(e => newObjs.Add(e));
                 }
-                else
-                {
-                    throw new NotSupportedException();
-                }
             });
             return newObjs.OfType<Entity>()
                 .Where(e => e.Visible)

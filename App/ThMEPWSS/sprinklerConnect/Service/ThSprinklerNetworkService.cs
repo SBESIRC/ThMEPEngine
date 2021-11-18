@@ -29,7 +29,7 @@ using ThMEPWSS.SprinklerConnect.Engine;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    class ThSprinklerNetworkService
+    public class ThSprinklerNetworkService
     {
 
         /// <summary>
