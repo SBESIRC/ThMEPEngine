@@ -8,6 +8,7 @@ using ThMEPHVAC.FanConnect.Model;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using NFox.Cad;
+using ThCADExtension;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -27,9 +28,8 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public Polyline CreatePath(ThFanCUModel model)
         {
-            var retLine = new Polyline();
             //选择两条距离设备最近的线
-            var nearLines = ThFanConnectUtils.GetNearbyLine(model.FanPoint, TrunkLines, 2);
+            var nearLines = ThFanConnectUtils.GetNearbyLine(model.FanPoint, TrunkLines, 1);
 
             var pathList = new List<Polyline>();
             foreach (var l in nearLines)
@@ -42,7 +42,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
 
             //从pathList里面，挑选一条
-            return retLine;
+            return pathList[0];
         }
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
@@ -71,15 +71,24 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
             }
             //----简单的一条延伸线且不穿洞
-            var retLine = CreateSymbolLine(frame, line, stepPt, holes, rooms);
-            if (retLine != null)
+            var tmpLine = CreateSymbolLine(frame, line, stepPt, holes, rooms);
+            if (tmpLine != null)
             {
-                return retLine;
+                return tmpLine;
             }
             else
             {
                 //使用A*算法，跑出路径
-                retLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
+                tmpLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
+            }
+            var pts = tmpLine.Vertices();
+
+            var retLine = new Polyline();
+            retLine.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
+
+            for(int i = 0; i < pts.Count;i++)
+            {
+                retLine.AddVertexAt(i+1, pts[i].ToPoint2D(), 0.0, 0.0, 0.0);
             }
             return retLine;
         }
