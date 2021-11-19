@@ -296,8 +296,8 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THYJZM_LARGE",
             RibbonButtonStyle.LargeWithText);
 
-            // 地库疏散指示
-            row.AddNewButton("地库疏散指示",
+            // 疏散指示
+            row.AddNewButton("疏散指示",
             "天华疏散指示灯",
             "THSSZSD",
             "天华疏散指示灯",
