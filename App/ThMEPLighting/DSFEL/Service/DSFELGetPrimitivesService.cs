@@ -35,11 +35,11 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var roomEngine = new ThRoomOutlineExtractionEngine();
                 roomEngine.ExtractFromMS(acdb.Database);
-                //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var markEngine = new ThRoomMarkExtractionEngine();
                 markEngine.ExtractFromMS(acdb.Database);
-                //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var boundaryEngine = new ThRoomOutlineRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
@@ -76,7 +76,7 @@ namespace ThMEPLighting.DSFEL.Service
                 doors.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    //originTransformer.Transform(transCurve);
+                    originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -100,7 +100,7 @@ namespace ThMEPLighting.DSFEL.Service
                 centerLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    //originTransformer.Transform(transCurve);
+                    originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -144,20 +144,20 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
-                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
 
                 // 启动墙识别引擎
                 var ShearWallExtractEngine = new ThShearWallExtractionEngine();
                 ShearWallExtractEngine.Extract(acdb.Database);
-                //ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
                 var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
-                //archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
@@ -204,7 +204,7 @@ namespace ThMEPLighting.DSFEL.Service
                 exitLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    //originTransformer.Transform(transCurve);
+                    originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -240,7 +240,7 @@ namespace ThMEPLighting.DSFEL.Service
                 exitBlock.ForEach(x =>
                 {
                     var transBlock = x.Clone() as BlockReference;
-                    //originTransformer.Transform(transBlock);
+                    originTransformer.Transform(transBlock);
                     objs.Add(transBlock);
                 });
             }

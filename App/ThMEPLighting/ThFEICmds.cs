@@ -301,7 +301,7 @@ namespace ThMEPLighting
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frameLst = frameLst.Where(c => c.Area > 10).Select(x =>
                 {
-                    //originTransformer.Transform(x);
+                    originTransformer.Transform(x);
                     return ThMEPFrameService.Normalize(x as Polyline) as Curve;
                 }).ToList();
 

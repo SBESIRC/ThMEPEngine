@@ -7,6 +7,7 @@ using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Electrical.UI.WiringConnecting;
 
 namespace TianHua.Electrical.UI
 {
@@ -109,7 +110,9 @@ namespace TianHua.Electrical.UI
         public void THAFPM()
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
-            AcadApp.ShowModalWindow(securityPlaneSystemUI);
+            AcadApp.ShowModalWindow(securityPlaneSystemUI); 
+            //ThWiringConnectingUI securityPlaneSystemUI = new ThWiringConnectingUI();
+            //AcadApp.ShowModalWindow(securityPlaneSystemUI);
         }
 
         [CommandMethod("TIANHUACAD", "THLTSBBZ", CommandFlags.Modal)]

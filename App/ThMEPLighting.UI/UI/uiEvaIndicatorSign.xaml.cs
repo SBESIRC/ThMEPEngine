@@ -42,7 +42,6 @@ namespace ThMEPLighting.UI.UI
 
             checkFEIHide.IsChecked = true;
         }
-
         private void btnStartLayout_Click(object sender, RoutedEventArgs e)
         {
             if (Active.Document == null)
@@ -55,6 +54,20 @@ namespace ThMEPLighting.UI.UI
             SetValueToService();
             commondType = signViewModel.LightLayoutType == LayoutTypeEnum.WallLayout?1:2;
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSSZSDBZ");
+            FocusToCAD();
+        }
+        private void btnLayoutUnderGround_Click(object sender, RoutedEventArgs e)
+        {
+            if (Active.Document == null)
+                return;
+            if (!CheckInputData())
+            {
+                MessageBox.Show("输入的数据有错误，请检查输入后在进行后续操作", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            SetValueToService();
+            commondType = signViewModel.LightLayoutType == LayoutTypeEnum.WallLayout ? 1 : 2;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THDSSSZSDBZ");
             FocusToCAD();
         }
         private bool CheckInputData() 
@@ -76,6 +89,13 @@ namespace ThMEPLighting.UI.UI
                 }
             }
             return errorMsgs.Count<1;
+        }
+        private void btnLayoutExit_Click(object sender, RoutedEventArgs e)
+        {
+            if (Active.Document == null)
+                return;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THDSFEL");
+            FocusToCAD();
         }
         private void btnLayoutLaneLine_Click(object sender, RoutedEventArgs e)
         {

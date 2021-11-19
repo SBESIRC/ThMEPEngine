@@ -12,6 +12,8 @@ namespace ThMEPLighting.DSFEL.Service
     {
         public void PrintPath(List<Line> extendLines, List<Line> lanes, ThMEPOriginTransformer originTransformer)
         {
+            extendLines.ForEach(x => originTransformer.Reset(x));
+            lanes.ForEach(x => originTransformer.Reset(x));
             //paths = ConnectLine(paths);
             InsertPath(extendLines, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
             InsertPath(lanes, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);

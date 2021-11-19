@@ -53,7 +53,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem
             GTRooms.Clear();
             foreach (DataRow row in table.Rows)
             {
-                if (true==(row[0] as bool?).Value)
+                if (true == (row[0] as bool?).Value)
                 {
                     var roomANames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomA].ToString());
                     var roomBNames = RoomConfigTreeService.CalRoomLst(ThElectricalUIService.Instance.Parameter.RoomInfoMappingTree, row[roomB].ToString());
