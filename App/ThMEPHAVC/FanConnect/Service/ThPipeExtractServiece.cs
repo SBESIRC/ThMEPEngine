@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -18,10 +19,9 @@ namespace ThMEPHVAC.FanConnect.Service
     public class ThPipeExtractServiece
     {
         public Point3d PipeStartPt { set; get; }//水管起始点
-        public List<Point3d> EquipPoint { set; get; }//设备连接点
+        public List<ThFanCUModel> EquipModel { set; get; }//风机设备
         public List<Line> TrunkLines { set; get; }//干路线
         public List<Line> BranchLines { set; get; }//支干路
-        public List<Polyline> EquipmentObbs { set; get; }//可穿越区域，但是必须垂直连接且代价大(设备框)
         public List<Polyline> ObstacleRooms { set; get; }//可穿越区域，但是必须垂直穿越且代价大(房间框线)
         public List<Polyline> ObstacleHoles { set; get; }//不可穿越区域
         /// <summary>
@@ -52,16 +52,15 @@ namespace ThMEPHVAC.FanConnect.Service
             var pathServiece = new ThCreatePathServiece();
             pathServiece.TrunkLines = TrunkLines;
             pathServiece.BranchLines = BranchLines;
-            pathServiece.EquipmentObbs = EquipmentObbs;
             pathServiece.ObstacleRooms = ObstacleRooms;
             pathServiece.ObstacleHoles = ObstacleHoles;
             pathServiece.InitData();
-            foreach (var pt in EquipPoint)
+            foreach (var equip in EquipModel)
             {
-                var tmpPath = pathServiece.CreatePath(pt);
+                var tmpPath = pathServiece.CreatePath(equip.FanPoint);
                 if(tmpPath != null)
                 {
-                    retList.Add(pathServiece.CreatePath(pt));
+                    retList.Add(pathServiece.CreatePath(equip.FanPoint));
                 }
             }
             return retList;
@@ -78,7 +77,11 @@ namespace ThMEPHVAC.FanConnect.Service
             //将设备进行连接，得到管路路由
             var termLine = GetPipePath0();//支路
             //通过起点，干路线，支干路，支路得到TreeModel
-
+            foreach(var l in termLine)
+            {
+                l.ColorIndex = 5;
+                Draw.AddToCurrentSpace(l);
+            }
             return retTree;
         }
         private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel2()
