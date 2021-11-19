@@ -53,7 +53,7 @@ namespace ThMEPLighting.UI.UI
             }
             SetValueToService();
             commondType = signViewModel.LightLayoutType == LayoutTypeEnum.WallLayout?1:2;
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THSSZSDBZ");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THDSSSZSDBZ");
             FocusToCAD();
         }
         private void btnLayoutUnderGround_Click(object sender, RoutedEventArgs e)
@@ -67,7 +67,7 @@ namespace ThMEPLighting.UI.UI
             }
             SetValueToService();
             commondType = signViewModel.LightLayoutType == LayoutTypeEnum.WallLayout ? 1 : 2;
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THDSSSZSDBZ");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THSSZSDBZ");
             FocusToCAD();
         }
         private bool CheckInputData() 
