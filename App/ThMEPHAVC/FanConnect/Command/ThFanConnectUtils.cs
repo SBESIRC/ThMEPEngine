@@ -82,6 +82,21 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return retModeles;
         }
+        public static List<Line> GetNearbyLine(Point3d pt, List<Line> lines, int N = 3)
+        {
+            List<Line> returnLines = new List<Line>();
+            if (lines.Count <= N)
+            {
+                return lines;
+            }
+
+            lines = lines.OrderBy(o => DistanceToPoint(o,pt)).ToList();
+            for (int i = 0; i < N; i++)
+            {
+                returnLines.Add(lines[i]);
+            }
+            return returnLines;
+        }
 
         public static void AnalysisPipe(Point3d startPt, List<Line> lines, List<Line> trunkLines, List<Line> branchLines)
         {
@@ -110,5 +125,24 @@ namespace ThMEPHVAC.FanConnect.Command
                 return;
             }
         }
+
+        public static double DistanceToPoint(Line l ,Point3d pt,bool isExtend = false)
+        {
+            Point3d closestPoint = l.GetClosestPointTo(pt, isExtend);
+            return pt.DistanceTo(closestPoint);
+        }
+        public static Polyline CreateMapFrame(Line line,Point3d pt, double expandLength)
+        {
+            List<Point3d> pts = new List<Point3d>();
+            pts.Add(pt);
+            pts.Add(line.GetClosestPointTo(pt, false));
+
+            Polyline polyLine = new Polyline();
+            polyLine.AddVertexAt(0, pts[0].ToPoint2D(), 0, 0, 0);
+            polyLine.AddVertexAt(0, pts[1].ToPoint2D(), 0, 0, 0);
+            var objcet = polyLine.BufferPL(expandLength)[0];
+            return objcet as Polyline;
+        }
+
     }
 }

@@ -51,16 +51,15 @@ namespace ThMEPHVAC.FanConnect.Service
             var retList = new List<Polyline>();
             var pathServiece = new ThCreatePathServiece();
             pathServiece.TrunkLines = TrunkLines;
-            pathServiece.BranchLines = BranchLines;
             pathServiece.ObstacleRooms = ObstacleRooms;
             pathServiece.ObstacleHoles = ObstacleHoles;
             pathServiece.InitData();
             foreach (var equip in EquipModel)
             {
-                var tmpPath = pathServiece.CreatePath(equip.FanPoint);
+                var tmpPath = pathServiece.CreatePath(equip);
                 if(tmpPath != null)
                 {
-                    retList.Add(pathServiece.CreatePath(equip.FanPoint));
+                    retList.Add(tmpPath);
                 }
             }
             return retList;
