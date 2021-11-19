@@ -132,7 +132,7 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
-        private string _CondensePipeHorizontalDN = "DN50";
+        private string _CondensePipeHorizontalDN = "DN25";
         public string CondensePipeHorizontalDN
         {
             get

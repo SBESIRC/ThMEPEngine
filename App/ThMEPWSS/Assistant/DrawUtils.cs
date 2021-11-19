@@ -29,6 +29,8 @@ using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Algorithm;
 using ThCADCoreNTSService = ThCADCore.NTS.ThCADCoreNTSService;
+using NetTopologySuite.Geometries.Prepared;
+using NetTopologySuite;
 
 namespace ThMEPWSS.Assistant
 {
@@ -46,6 +48,32 @@ namespace ThMEPWSS.Assistant
                 y.SetValue(dst, x.GetValue(src));
                 return 666;
             }).Count();
+        }
+    }
+    public static class GeoEntensions
+    {
+        public static Coordinate Offset(this Coordinate c, Vector2d v) => c.Offset(v.X, v.Y);
+        public static Point Offset(this Point pt, Vector2d v) => pt.Offset(v.X, v.Y);
+        public static LineString Offset(this LineString ls, Vector2d v) => ls.Offset(v.X, v.Y);
+        public static LinearRing Offset(this LinearRing lr, Vector2d v) => lr.Offset(v.X, v.Y);
+        public static Polygon Offset(this Polygon pl, Vector2d v) => pl.Offset(v.X, v.Y);
+        public static GeometryCollection Offset(this GeometryCollection colle, Vector2d v) => colle.Offset(v.X, v.Y);
+        public static Geometry Offset(Geometry geo, Vector2d v) => geo.Offset(v.X, v.Y);
+        public static Coordinate Offset(this Coordinate c, double dx, double dy) => new(c.X + dx, c.Y + dy);
+        public static Point Offset(this Point pt, double dx, double dy) => new(pt.X + dx, pt.Y + dy);
+        public static LineString Offset(this LineString ls, double dx, double dy) => new(ls.Coordinates.Select(x => x.Offset(dx, dy)).ToArray());
+        public static LinearRing Offset(this LinearRing lr, double dx, double dy) => new(lr.Coordinates.Select(x => x.Offset(dx, dy)).ToArray());
+        public static Polygon Offset(this Polygon pl, double dx, double dy) => new(pl.Shell.Offset(dx, dy));
+        public static GeometryCollection Offset(this GeometryCollection colle, double dx, double dy) => new(colle.Geometries.Select(geo => geo.Offset(dx, dy)).ToArray());
+        public static Geometry Offset(this Geometry geo, double dx, double dy)
+        {
+            if (geo is null) throw new ArgumentNullException();
+            if (geo is Point point) return point.Offset(dx, dy);
+            if (geo is LinearRing lr) return lr.Offset(dx, dy);
+            if (geo is LineString ls) return ls.Offset(dx, dy);
+            if (geo is Polygon pl) return pl.Offset(dx, dy);
+            if (geo is GeometryCollection colle) return colle.Offset(dx, dy);
+            throw new NotSupportedException();
         }
     }
     public static class GeoNTSConvertion
@@ -388,8 +416,9 @@ namespace ThMEPWSS.Assistant
             }
             return results;
         }
+        public static readonly GeometryFactory DefaultGeometryFactory = NtsGeometryServices.Instance.CreateGeometryFactory();
 
-        static readonly NetTopologySuite.Index.Strtree.GeometryItemDistance itemDist = new NetTopologySuite.Index.Strtree.GeometryItemDistance();
+        public static readonly NetTopologySuite.Index.Strtree.GeometryItemDistance DefaultGeometryItemDistance = new NetTopologySuite.Index.Strtree.GeometryItemDistance();
         public static List<Point2d> GetAlivePoints(List<GLineSegment> segs, double radius)
         {
             var points = GetSegsPoints(segs);
@@ -447,7 +476,7 @@ namespace ThMEPWSS.Assistant
             else if (geos.Count == 1) return geometry => geos[0];
             var engine = new NetTopologySuite.Index.Strtree.STRtree<Geometry>();
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
-            return geometry => (T)engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, itemDist);
+            return geometry => (T)engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, DefaultGeometryItemDistance);
         }
         public static Func<Point3d, int, List<Geometry>> NearestNeighboursPoint3dF(List<Geometry> geos)
         {
@@ -463,7 +492,7 @@ namespace ThMEPWSS.Assistant
             return (geometry, num) =>
             {
                 if (num <= geos.Count) return geos.ToList();
-                var neighbours = engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, itemDist, num)
+                var neighbours = engine.NearestNeighbour(geometry.EnvelopeInternal, geometry, DefaultGeometryItemDistance, num)
         .Where(o => !o.EqualsExact(geometry)).ToList();
                 return neighbours;
             };
@@ -476,7 +505,7 @@ namespace ThMEPWSS.Assistant
             for (int i = 0; i < geos.Count; i++)
             {
                 var geo = geos[i];
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                var gf = PreparedGeometryFactory.Create(geo);
                 foreach (var j in engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).Select(g => geos.BinarySearch(g)).Where(j => i < j))
                 {
                     yield return new KeyValuePair<int, int>(i, j);
@@ -654,8 +683,8 @@ namespace ThMEPWSS.Assistant
                     }
                 }
                 {
-                    var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geos);
-                    var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                    var geo = DefaultGeometryFactory.BuildGeometry(geos);
+                    var gf = PreparedGeometryFactory.Create(geo);
                     foreach (var r in engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)))
                     {
                         for (int i = 0; i < IsAlone1.Length; i++)
@@ -689,7 +718,7 @@ namespace ThMEPWSS.Assistant
                     GeometricShapeFactory.Centre = seg.EndPoint.ToNTSCoordinate();
                     //var point2 = GeometricShapeFactory.CreateCircle().Shell;
                     var point2 = GeometricShapeFactory.CreateCircle();
-                    var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(new Geometry[] { point1, point2 });
+                    var geo = DefaultGeometryFactory.BuildGeometry(new Geometry[] { point1, point2 });
                     DoublePoints.Add(geo);
                     Points1.Add(point1);
                     Points2.Add(point2);
@@ -714,7 +743,7 @@ namespace ThMEPWSS.Assistant
                 return lst;
             }
         }
-        public static readonly NetTopologySuite.Utilities.GeometricShapeFactory GeometricShapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory);
+        public static readonly NetTopologySuite.Utilities.GeometricShapeFactory GeometricShapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(DefaultGeometryFactory);
         public static List<GLineSegment> ToNodedLineSegments(IList<GLineSegment> lineSegments)
         {
             var arr = lineSegments.Where(x => x.IsValid).Distinct().Select(x => x.ToLineString()).ToArray();
@@ -756,7 +785,7 @@ namespace ThMEPWSS.Assistant
                 var ring1 = GeometricShapeFactory.CreateCircle().Shell;
                 GeometricShapeFactory.Centre = seg.EndPoint.ToNTSCoordinate();
                 var ring2 = GeometricShapeFactory.CreateCircle().Shell;
-                var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
+                var geo = DefaultGeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
                 ret.Add(geo);
             }
             return ret;
@@ -881,14 +910,14 @@ namespace ThMEPWSS.Assistant
         }
         public static Geometry CreateGeometry(IEnumerable<Geometry> geomList)
         {
-            return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geomList);
+            return DefaultGeometryFactory.BuildGeometry(geomList);
         }
         public static Geometry CreateGeometryEx<T>(List<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx<T>(T[] geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
         public static Geometry CreateGeometry(params Geometry[] geos)
         {
-            return ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(geos);
+            return DefaultGeometryFactory.BuildGeometry(geos);
         }
         public static List<List<Geometry>> GroupGeometriesEx(List<Geometry> linesGeos, List<Geometry> items)
         {
@@ -901,7 +930,7 @@ namespace ThMEPWSS.Assistant
                 foreach (var geo in items) engine.Insert(geo.EnvelopeInternal, geo);
                 foreach (var linesGeo in linesGeos)
                 {
-                    var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(linesGeo);
+                    var gf = PreparedGeometryFactory.Create(linesGeo);
                     foreach (var polygon in engine.Query(linesGeo.EnvelopeInternal).Where(item => gf.Intersects(item)))
                     {
                         yield return new KeyValuePair<Geometry, Geometry>(linesGeo, polygon);
@@ -956,13 +985,13 @@ namespace ThMEPWSS.Assistant
             var points2 = GeoNTSConvertion.ConvertToCoordinateArray(GRect.Create(seg.EndPoint, radius));
             var ring1 = new LinearRing(points1);
             var ring2 = new LinearRing(points2);
-            var geo = ThCADCoreNTSService.Instance.GeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
+            var geo = DefaultGeometryFactory.BuildGeometry(new Geometry[] { ring1, ring2 });
             return geo;
         }
         public static Polygon CreateCirclePolygon(Point3d center, double radius, int numPoints, bool larger = true)
         {
             radius = larger ? radius / Math.Cos(Math.PI / numPoints) : radius;
-            var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
+            var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(DefaultGeometryFactory)
             {
                 NumPoints = numPoints,
                 Size = 2 * radius,
@@ -973,7 +1002,7 @@ namespace ThMEPWSS.Assistant
         public static Polygon CreateCirclePolygon(Point2d center, double radius, int numPoints, bool larger = true)
         {
             radius = larger ? radius / Math.Cos(Math.PI / numPoints) : radius;
-            var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
+            var shapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(DefaultGeometryFactory)
             {
                 NumPoints = numPoints,
                 Size = 2 * radius,
@@ -981,33 +1010,94 @@ namespace ThMEPWSS.Assistant
             };
             return shapeFactory.CreateCircle();
         }
-        public static Func<Geometry, List<T>> CreateContainsSelector<T>(List<T> geos) where T : Geometry
+        public static readonly PreparedGeometryFactory PreparedGeometryFactory = new PreparedGeometryFactory();
+        public static Func<Geometry, bool> CreateIntersectsTester<T>(List<T> geos) where T : Geometry
         {
-            if (geos.Count == 0) return r => new List<T>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            if (geos.Count == 0) return r => false;
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                if (geo == null) throw new ArgumentNullException();
+                var gf = PreparedGeometryFactory.Create(geo);
+                return engine.Query(geo.EnvelopeInternal).Any(g => gf.Intersects(g));
+            };
+        }
+        public static (Func<Geometry, List<T>>, Action<T>) CreateIntersectsSelectorEngine<T>(IEnumerable<T> geos = null) where T : Geometry
+        {
+            var hasBuild = false;
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            var hs = new HashSet<T>(16);
+            if (geos != null)
+            {
+                foreach (var geo in geos)
+                {
+                    engine.Insert(geo.EnvelopeInternal, geo);
+                    hs.Add(geo);
+                }
+            }
+            return (geo =>
+            {
+                if (geo == null) throw new ArgumentNullException();
+                var gf = PreparedGeometryFactory.Create(geo);
+                hasBuild = true;
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
+            }, geo =>
+            {
+                if (geo == null) throw new ArgumentNullException();
+                if (hs.Contains(geo)) return;
+                if (hasBuild)
+                {
+                    engine = new NetTopologySuite.Index.Strtree.STRtree<T>(hs.Count + 1 > 10 ? hs.Count + 1 : 10);
+                    foreach (var _geo in hs)
+                    {
+                        engine.Insert(_geo.EnvelopeInternal, _geo);
+                    }
+                    hasBuild = false;
+                }
+                engine.Insert(geo.EnvelopeInternal, geo);
+                hs.Add(geo);
+            }
+            );
+        }
+        public static Func<Geometry, List<T>> CreateContainsSelector<T>(List<T> geos) where T : Geometry
+        {
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
+            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
+            return geo =>
+            {
+                var gf = PreparedGeometryFactory.Create(geo);
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
             };
         }
         public static Func<Geometry, List<T>> CreateIntersectsSelector<T>(List<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
                 if (geo == null) throw new ArgumentNullException();
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                var gf = PreparedGeometryFactory.Create(geo);
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
+            };
+        }
+        public static Func<Geometry, List<T>> CreateEnvelopeSelector<T>(List<T> geos) where T : Geometry
+        {
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
+            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
+            return geo =>
+            {
+                if (geo == null) throw new ArgumentNullException();
+                return engine.Query(geo.EnvelopeInternal).ToList();
             };
         }
         public static Func<T, List<T>> CreateSTRTreeSelector<T>(List<T> list, Func<T, Envelope> getEnvelope, Func<T, bool> test)
         {
             if (list.Count == 0) return r => new List<T>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(list.Count > 10 ? list.Count : 10);
             foreach (var item in list) engine.Insert(getEnvelope(item), item);
             return item =>
             {
@@ -1018,12 +1108,12 @@ namespace ThMEPWSS.Assistant
         public static IEnumerable<KeyValuePair<int, int>> _GroupGeometriesToKVIndex<T>(List<T> geos) where T : Geometry
         {
             if (geos.Count == 0) yield break;
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
             foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             for (int i = 0; i < geos.Count; i++)
             {
                 var geo = geos[i];
-                var gf = ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
+                var gf = PreparedGeometryFactory.Create(geo);
                 foreach (var j in engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).Select(g => geos.IndexOf(g)).Where(j => i < j))
                 {
                     yield return new KeyValuePair<int, int>(i, j);

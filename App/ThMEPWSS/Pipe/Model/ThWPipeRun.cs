@@ -275,7 +275,7 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawBlockReference(
                 blkName: "$TwtSys$00000132",
                 basePt: basePt.OffsetXY(-450, 0),
-                cb: br => DU.SetLayerAndByLayer("W-DRAI-NOTE", br));
+                cb: br => DU.SetLayerAndByLayer("W-RAIN-EQPM", br));
         }
 
         public static void DrawWaterWell(Point3d basePt, string DN)

@@ -126,7 +126,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ImageButton_Click_2(object sender, RoutedEventArgs e)
         {
-            ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram();
+            try
+            {
+                CadCache.HideAllWindows();
+                FocusMainWindow();
+                ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram(vm);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                CadCache.ShowAllWindows();
+            }
         }
     }
 }

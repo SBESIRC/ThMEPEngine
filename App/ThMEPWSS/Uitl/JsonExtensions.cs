@@ -13,6 +13,7 @@ using ThMEPWSS.ReleaseNs;
 using ThCADCore.NTS;
 using DotNetARX;
 using ThMEPWSS.Assistant;
+using NetTopologySuite.Operation.Buffer;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
@@ -176,6 +177,14 @@ namespace ThMEPWSS.JsonExtensionsNs
             if (extents3D.HasValue) return new GRect(extents3D.Value.MinPoint, extents3D.Value.MaxPoint);
             return default;
         }
+        public static IEnumerable<Point2d> YieldPoints(this IEnumerable<GLineSegment> segs)
+        {
+            foreach (var seg in segs)
+            {
+                yield return seg.StartPoint;
+                yield return seg.EndPoint;
+            }
+        }
     }
     public static class JsonExtensions
     {
@@ -219,7 +228,9 @@ namespace ThMEPWSS.CADExtensionsNs
         public static Point2d ToPoint2d(this Coordinate c) => new(c.X, c.Y);
         public static Point2d ToPoint2d(this Point p) => new(p.X, p.Y);
         public static Point ToNTSPoint(this Point3d p) => new(p.X, p.Y);
+        public static Point ToNTSPoint(this Point3d p, object tag) => new(p.X, p.Y) { UserData = tag };
         public static Point ToNTSPoint(this Point2d p) => new(p.X, p.Y);
+        public static Point ToNTSPoint(this Point2d p, object tag) => new(p.X, p.Y) { UserData = tag };
         public static Coordinate ToNTSCoordinate(this Point3d p) => new(p.X, p.Y);
         public static Coordinate ToNTSCoordinate(this Point2d p) => new(p.X, p.Y);
     }
@@ -299,9 +310,9 @@ namespace ThMEPWSS.CADExtensionsNs
         {
             return ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
         }
-        public static Geometry Buffer(this GLineSegment seg, double distance)
+        public static Geometry Buffer(this GLineSegment seg, double distance, EndCapStyle endCapStyle = EndCapStyle.Flat)
         {
-            return seg.ToLineString().Buffer(distance, NetTopologySuite.Operation.Buffer.EndCapStyle.Flat);
+            return seg.ToLineString().Buffer(distance, endCapStyle);
         }
         public static GRect ToGRect(this Envelope env)
         {
