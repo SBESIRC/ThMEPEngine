@@ -36,5 +36,10 @@ namespace TianHua.Electrical.UI.WiringConnecting
         {
             this.Close();
         }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

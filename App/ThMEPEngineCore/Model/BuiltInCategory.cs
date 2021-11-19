@@ -179,5 +179,9 @@
         /// 电源点位
         /// </summary>
         PowerPosition,
+        /// <summary>
+        /// 电源点位
+        /// </summary>
+        UCSPolyline,
     }
 }

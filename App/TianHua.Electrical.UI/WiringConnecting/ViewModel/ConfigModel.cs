@@ -51,5 +51,13 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
         {
             get; set;
         }
+
+        /// <summary>
+        /// 是否选中
+        /// </summary>
+        public bool isCheck 
+        {
+            get; set; 
+        }
     }
 }

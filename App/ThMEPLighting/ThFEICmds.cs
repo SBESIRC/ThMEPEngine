@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
@@ -116,7 +117,7 @@ namespace ThMEPLighting
                 };
                 var dxfNames = new string[]
                 {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
                 var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
@@ -125,41 +126,45 @@ namespace ThMEPLighting
                     return;
                 }
 
-                //获取外包框
-                List<Curve> frameLst = new List<Curve>();
+                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    var frame = acdb.Element<Polyline>(obj);
-                    frameLst.Add(frame.Clone() as Polyline);
+                    var frame = acdb.Element<BlockReference>(obj);
+                    ObjectIdCollection dBObject = new ObjectIdCollection();
+                    dBObject.Add(obj);
+                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
                 }
 
-                var pt = frameLst.First().StartPoint;
-                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                frameLst = frameLst.Select(x =>
+                foreach (var frameBlockDic in frameLst)
                 {
-                    //originTransformer.Transform(x);
-                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
-                }).ToList();
+                    var frameBlock = frameBlockDic.Key;
+                    var frameBlockId = frameBlockDic.Value;
+                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    if (frame == null)
+                    {
+                        continue;
+                    }
 
-                var plines = HandleFrame(frameLst);
-                var holeInfo = CalHoles(plines);
-                foreach (var pline in holeInfo)
-                {
+                    var pt = frame.StartPoint;
+                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                    originTransformer.Transform(frame);
+                    var outFrame = ThMEPFrameService.Normalize(frame);
+
                     DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                     //获取房间
-                    var rooms = dsFELGetPrimitivesService.GetRoomInfo(pline.Key);
+                    var rooms = dsFELGetPrimitivesService.GetRoomInfo(outFrame);
 
                     //获取门 
-                    var doors = dsFELGetPrimitivesService.GetDoor(pline.Key);
+                    var doors = dsFELGetPrimitivesService.GetDoor(outFrame);
 
                     //获取中心线
-                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(pline.Key, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());
+                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(outFrame, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());
 
                     //获取结构信息
-                    dsFELGetPrimitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
+                    dsFELGetPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //计算洞口
-                    List<Polyline> holes = new List<Polyline>(pline.Value);
+                    List<Polyline> holes = new List<Polyline>();
                     holes.AddRange(columns);
                     holes.AddRange(walls);
                     holes.AddRange(rooms.SelectMany(x => x.Value).ToList());
@@ -172,7 +177,7 @@ namespace ThMEPLighting
                     ////打印路径
                     //PrintPathService printService = new PrintPathService();
                     //printService.PrintPath(paths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
-                }
+                }  
             }
         }
 
@@ -219,7 +224,6 @@ namespace ThMEPLighting
                 var lampLight = new ThEmgPilotLampCommand();
                 lampLight.InitData(originTransformer, holeInfo);
                 lampLight.Execute();
-
 
                 var cloudLineIds = lampLight.AddPolyLineIds;
                 if (null == cloudLineIds || cloudLineIds.Count < 1)
@@ -408,6 +412,28 @@ namespace ThMEPLighting
             }
 
             return resPolys;
+        }
+
+        /// <summary>
+        /// 获取块内信息
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <returns></returns>
+        private List<Entity> GetBlockInfo(BlockReference blockReference)
+        {
+            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var results = new List<Entity>();
+                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                foreach (var objId in blockTableRecord)
+                {
+                    var dbObj = acadDatabase.Element<Entity>(objId).Clone() as Entity;
+                    dbObj.TransformBy(matrix);
+                    results.Add(dbObj);
+                }
+                return results;
+            }
         }
     }
 }  

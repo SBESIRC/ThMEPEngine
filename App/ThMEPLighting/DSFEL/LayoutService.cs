@@ -20,12 +20,13 @@ namespace ThMEPLighting.DSFEL
             //计算块出口
             CalExitService calExitService = new CalExitService();
             var exitInfo = calExitService.CalExit(roomInfo, door);
-            exitInfo.ForEach(x => x.positin = originTransformer.Reset(x.positin));
+            
             //创建疏散路径
             CreateEvacuationPathService evacuationPath = new CreateEvacuationPathService();
             var evaPaths = evacuationPath.CreatePath(exitInfo, centerLines, holes);
-           
+
             //打印出入口图块
+            exitInfo.ForEach(x => x.positin = originTransformer.Reset(x.positin));
             PrintBlock(exitInfo);
 
             //打印路径
