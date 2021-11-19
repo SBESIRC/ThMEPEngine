@@ -202,5 +202,18 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
+        private string _BasinDN = "DN50";
+        public string BasinDN
+        {
+            get
+            {
+                return _BasinDN;
+            }
+            set
+            {
+                _BasinDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
     }
 }

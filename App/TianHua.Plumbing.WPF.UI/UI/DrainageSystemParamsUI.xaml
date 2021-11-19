@@ -38,14 +38,14 @@
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
             <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
-            <Grid Margin="0,5,0,5">
+            <!--<Grid Margin="0,5,0,5">
                 <Label Content="尺寸规格："></Label>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"/>
-            </Grid>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+            </Grid>-->
+            <!--<StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="洗衣地漏："></Label>
                 <ComboBox x:Name="FloorDrain" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
-            </StackPanel>
+            </StackPanel>-->
             <!--<StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="其他地漏："></Label>
                 <ComboBox x:Name="其他地漏" Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding OtherFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
@@ -57,33 +57,35 @@
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2" >
 
-            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" Margin="-5,0,-5,0"  SnapsToDevicePixels="True"/>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30"></RowDefinition>
-                    <RowDefinition Height="30"></RowDefinition>
-                    <RowDefinition Height="30"></RowDefinition>
-                    <RowDefinition Height="30"></RowDefinition>
-                </Grid.RowDefinitions>
-                <!--<CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>-->
-                <CheckBox Grid.Row="0" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
-                <CheckBox Grid.Row="1" Checked="CheckBox_Checked" IsChecked="{Binding CanHaveDownboard,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">卫生间降板</CheckBox>
-                <CheckBox Grid.Row="2" Checked="CheckBox_Checked" IsChecked="{Binding H,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
-                <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,5,0,0">
-                    <Label Content="厨房洗涤盆："></Label>
-                    <ComboBox x:Name="Basin" Width="100" Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
-                </StackPanel>
-            </Grid>
+            <!--<Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" Margin="-5,0,-5,0"  SnapsToDevicePixels="True"/>-->
+            <!--<CheckBox Grid.Row="0" Checked="CheckBox_Checked_2" IsChecked="{Binding ShouldRaiseWashingMachine,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">洗衣机抬高</CheckBox>-->
+            <StackPanel Orientation="Vertical">
+                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding CouldHavePeopleOnRoof,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">屋面上人</CheckBox>
+                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding CanHaveDownboard,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">卫生间降板</CheckBox>
+                <CheckBox Margin="5" Checked="CheckBox_Checked" IsChecked="{Binding H,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}">通气H件隔层布置</CheckBox>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="35"/>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="30"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="0"  Margin="0,5,0,5" Grid.Column="0" Content="洗衣地漏："></Label>
+                    <ComboBox Grid.Row="0"  Margin="0,5,0,5" Grid.Column="1" x:Name="FloorDrain" Width="80" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <Label Grid.Row="1"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆："></Label>
+                    <ComboBox Grid.Row="1" Margin="0,0,0,5" Grid.Column="1" x:Name="Basin" Width="80" Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <Label Grid.Row="2"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆管径："></Label>
+                    <ComboBox Grid.Row="2"  Margin="0,0,0,5" Grid.Column="1" x:Name="cbxBasinDn" Width="80" Text="{Binding BasinDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                </Grid>
+            </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center" Margin="0,10,0,5">
             <cus:ImageButton ImageTextLocation="TextOnly" Content="确认" Width="50" Height="24" Name="oKBtn" Click="OK_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly" Content="取消" Width="50" Height="24" Margin="30,0,0,0" Name="cancelBtn" Click="CancelBtn_Click" ></cus:ImageButton>
         </StackPanel>
-    
+
     </Grid>
 </cus:ThCustomWindow>

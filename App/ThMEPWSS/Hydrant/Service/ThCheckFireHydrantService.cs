@@ -1,21 +1,21 @@
 ﻿#if (ACAD2016 || ACAD2018)
-using CLI;
-using System;
-using System.Linq;
-using ThMEPEngineCore.IO;
-using ThMEPWSS.ViewModel;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.Hydrant.Data;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using CLI;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.GeojsonExtractor;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThCADExtension;
-using ThCADCore.NTS;
-using NFox.Cad;
+using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Hydrant.Data;
+using ThMEPWSS.ViewModel;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -25,6 +25,7 @@ namespace ThMEPWSS.Hydrant.Service
         public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         private ThFireHydrantVM FireHydrantVM { get; set; }
         private ThAILayerManager AiLayerManager { get; set; }
+        private const double RoomOutsideOffsetLength = 50.0;
 
         public ThCheckFireHydrantService(ThFireHydrantVM fireHydrantVM)
         {
@@ -38,9 +39,10 @@ namespace ThMEPWSS.Hydrant.Service
         {
             ThStopWatchService.Start();
             var extractors = FirstExtract(db, pts); //获取数据
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            var roomExtractor = extractors.Where(o => o is ThHydrantRoomExtractor).First() as ThHydrantRoomExtractor;
             Rooms = roomExtractor.Rooms; //获取房间
-
+            var outsideFrames = roomExtractor.BuildOutsideFrames(); //构件房间轮廓线
+            outsideFrames = roomExtractor.Offset(outsideFrames, RoomOutsideOffsetLength);
             var ptsList = new List<Point3dCollection> { };
             if (mode == "P")
             {
@@ -50,19 +52,17 @@ namespace ThMEPWSS.Hydrant.Service
             {
                 ptsList.Add(pts);
             }
-
             var frame = new Point3dCollection();            
             SecondExtract(db, extractors, ptsList, pts, frame, mode);
-
+            extractors.Add(new ThExternalSpaceExtractor(outsideFrames));
             ThStopWatchService.Stop();
             ThStopWatchService.Print("提取数据耗时：");
-
             ThStopWatchService.ReStart();
             //过滤只连接一个房间框线的门
             var doorOpeningExtractor = extractors
                 .Where(o => o is ThHydrantDoorOpeningExtractor)
                 .First() as ThHydrantDoorOpeningExtractor;
-            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList());
+            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList(), outsideFrames);
 
             var fireHydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
             if (fireHydrantExtractor.FireHydrants.Count == 0)
@@ -83,13 +83,7 @@ namespace ThMEPWSS.Hydrant.Service
             //提取房间和外部空间
             var extractors = new List<ThExtractorBase>()
                 {
-                    new ThExternalSpaceExtractor()
-                    {
-                        UseDb3Engine=false,
-                        FilterMode = FilterMode.Cross,
-                        ElementLayer=AiLayerManager.OuterBoundaryLayer,
-                    },
-                    new ThRoomExtractor()
+                    new ThHydrantRoomExtractor()
                     {
                         UseDb3Engine=true,
                         FilterMode = FilterMode.Cross,
@@ -140,7 +134,6 @@ namespace ThMEPWSS.Hydrant.Service
                 });
             }
             extractorsContainer.ForEach(e => e.Extract(db, frame));
-
             for (int i = 0; i < extractorsContainer.Count; ++i)
             {
                 if (i == 0 && extractorsContainer[i] is ThHydrantArchitectureWallExtractor temp0)
@@ -206,12 +199,12 @@ namespace ThMEPWSS.Hydrant.Service
                     }
                 }
             }
+            extractors.AddRange(extractorsContainer);
 
             //调整不在房间内的消火栓的点位
-            extractors.AddRange(extractorsContainer);
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
-            var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
-            hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
+            //var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            //var hydrantExtractor = extractors.Where(o => o is ThFireHydrantExtractor).First() as ThFireHydrantExtractor;
+            //hydrantExtractor.AdjustFireHydrantPosition(roomExtractor.Rooms);
         }
 
         private string OutPutGeojson(List<ThExtractorBase> extractors)

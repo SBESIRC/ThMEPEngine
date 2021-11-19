@@ -37,7 +37,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                 double.IsPositiveInfinity(pt.Z);
         }
 
-        public static Point3dCollection getFrame()
+        public static Point3dCollection GetFrame()
         {
             Point3dCollection pts = new Point3dCollection();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -55,7 +55,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static Point3dCollection getFrameBlk()
+        public static Point3dCollection GetFrameBlk()
         {
             Point3dCollection pts = new Point3dCollection();
 
@@ -100,11 +100,11 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 if (frameL != null && frameL.Area > 10)
                 {
-                    frameL = processFrame(frameL);
+                    frameL = ProcessFrame(frameL);
                 }
                 if (frameL != null && frameL.Area > 10)
                 {
-                  pts = frameL.Vertices();
+                    pts = frameL.Vertices();
                 }
             }
 
@@ -129,7 +129,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> getSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
+        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick)
         {
             var bReadJson = false;
 
@@ -140,7 +140,8 @@ namespace ThMEPElectrical.FireAlarm.Service
                 {
                     var datasetFactory = new ThFaAreaLayoutDataSetFactory()
                     {
-                        ReferBeam = referBeam
+                        ReferBeam = referBeam,
+                        WallThick = wallThick,
                     };
                     var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                     geos.AddRange(dataset.Container);
@@ -175,7 +176,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             return geos;
         }
 
-        public static List<ThGeometry> getFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
+        public static List<ThGeometry> GetFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
         {
             var geos = new List<ThGeometry>();
 
@@ -200,7 +201,7 @@ namespace ThMEPElectrical.FireAlarm.Service
         /// </summary>
         /// <param name="geos"></param>
         /// <returns></returns>
-        public static ThMEPOriginTransformer transformToOrig(Point3dCollection pts, List<ThGeometry> geos)
+        public static ThMEPOriginTransformer TransformToOrig(Point3dCollection pts, List<ThGeometry> geos)
         {
             ThMEPOriginTransformer transformer = null;
 
@@ -249,7 +250,7 @@ namespace ThMEPElectrical.FireAlarm.Service
         /// <param name="pts"></param>
         /// <param name="extractBlkList"></param>
         /// <returns></returns>
-        public static List<ThGeometry> writeSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam)
+        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam,double wallThick)
         {
             var fileInfo = new FileInfo(Active.Document.Name);
             var path = fileInfo.Directory.FullName;
@@ -260,7 +261,8 @@ namespace ThMEPElectrical.FireAlarm.Service
 
                 var datasetFactory = new ThFaAreaLayoutDataSetFactory()
                 {
-                    ReferBeam = referBeam
+                    ReferBeam = referBeam,
+                    WallThick = wallThick,
                 }; ;
                 var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                 geos.AddRange(dataset.Container);
@@ -304,7 +306,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                 {
                     //获取外包框
                     var frameTemp = acdb.Element<Polyline>(obj);
-                    var nFrame = processFrame(frameTemp);
+                    var nFrame = ProcessFrame(frameTemp);
                     if (nFrame.Area < 1)
                     {
                         continue;
@@ -318,7 +320,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        private static Polyline processFrame(Polyline frame)
+        private static Polyline ProcessFrame(Polyline frame)
         {
             Polyline nFrame = null;
             var tol = 1000;

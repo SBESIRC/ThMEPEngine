@@ -27,15 +27,15 @@ namespace ThMEPWSS.SprinklerConnect.Data
         public List<ThGeometry> Columns { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry> mainPipe { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry> subMainPipe { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> MainPipe { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> SubMainPipe { get; private set; } = new List<ThGeometry>();
         //output
-        public List<Polyline> architectureWallList { get; private set; } = new List<Polyline>();
-        public List<Polyline> shearWallList { get; private set; } = new List<Polyline>();
-        public List<Polyline> columnList { get; private set; } = new List<Polyline>();
-        public List<Polyline> roomList { get; private set; } = new List<Polyline>();
-        public List<Polyline> mainPipeList { get; private set; } = new List<Polyline>();
-        public List<Polyline> subMainPipeList { get; private set; } = new List<Polyline>();
+        public List<Polyline> ArchitectureWallList { get; private set; } = new List<Polyline>();
+        public List<Polyline> ShearWallList { get; private set; } = new List<Polyline>();
+        public List<Polyline> ColumnList { get; private set; } = new List<Polyline>();
+        public List<Polyline> RoomList { get; private set; } = new List<Polyline>();
+        public List<Polyline> MainPipeList { get; private set; } = new List<Polyline>();
+        public List<Polyline> SubMainPipeList { get; private set; } = new List<Polyline>();
         public ThSprinklerDataQueryService(List<ThGeometry> data)
         {
             Data = data;
@@ -149,10 +149,10 @@ namespace ThMEPWSS.SprinklerConnect.Data
 
         public void ClassifyData()
         {
-            architectureWallList = ArchitectureWalls.Select(x => x.Boundary).Cast<Polyline>().ToList();
-            shearWallList = Shearwalls.Select(x => x.Boundary).Cast<Polyline>().ToList();
-            roomList = Rooms.Select(x => x.Boundary).Cast<Polyline>().ToList();
-            columnList = Columns.Select(x => x.Boundary).Cast<Polyline>().ToList();
+            ArchitectureWallList = ArchitectureWalls.Select(x => x.Boundary).OfType<Polyline>().ToList();
+            ShearWallList = Shearwalls.Select(x => x.Boundary).OfType<Polyline>().ToList();
+            RoomList = Rooms.Select(x => x.Boundary).OfType<Polyline>().ToList();
+            ColumnList = Columns.Select(x => x.Boundary).OfType<Polyline>().ToList();
 
         }
 

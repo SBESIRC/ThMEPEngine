@@ -17,6 +17,11 @@
             <sys:String>DN50</sys:String>
             <sys:String>DN100</sys:String>
         </x:Array>
+        <x:Array x:Key="DNLists2" Type ="sys:String">
+            <sys:String>DN25</sys:String>
+            <sys:String>DN32</sys:String>
+            <sys:String>DN50</sys:String>
+        </x:Array>
     </cus:ThCustomWindow.Resources>
     <Grid Margin="5">
         <Grid.RowDefinitions>
@@ -51,15 +56,15 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="冷凝横管："></Label>
-                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding CondensePipeHorizontalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists2}}" Text="{Binding CondensePipeHorizontalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="冷凝立管："></Label>
-                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding CondensePipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" Text="{Binding CondensePipeVerticalDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="阳台雨水："></Label>
-                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding BalconyRainPipeDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" Text="{Binding BalconyRainPipeDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="2" >

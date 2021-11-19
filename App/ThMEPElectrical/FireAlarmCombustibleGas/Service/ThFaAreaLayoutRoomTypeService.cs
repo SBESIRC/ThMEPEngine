@@ -25,7 +25,7 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas.Service
         /// <param name="Room"></param>
         /// <param name="roomFrameDict"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> getAreaSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
+        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> GetAreaSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";

@@ -1,6 +1,7 @@
 ﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPWSS.OutsideFrameRecognition;
 
 namespace ThMEPWSS.Hydrant.Data
 {
@@ -41,13 +43,32 @@ namespace ThMEPWSS.Hydrant.Data
             Doors.AddRange(doors.Cast<Polyline>().Select(o => o.GetMinimumRectangle()).ToList());
         }
 
-        public void FilterOuterDoors(List<Entity> rooms)
+        public void FilterOuterDoors(List<Entity> rooms,List<Polyline> outsideFrames)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+            var outsideFrameSpatialIndex = new ThCADCoreNTSSpatialIndex(outsideFrames.ToCollection());
             Doors = Doors.Where(o =>
             {
                 var neighbors = spatialIndex.SelectCrossingPolygon(Buffer(o));
-                return neighbors.Count > 1;                
+                if (neighbors.Count > 1)
+                {
+                    return true;
+                }
+                else
+                {
+                    if (outsideFrameSpatialIndex.SelectCrossingPolygon(o).Count>0)
+                    {
+                        return true;
+                    }
+                    foreach (var frame in outsideFrames)
+                    {
+                        if (frame.Contains(o.GetCenter()))
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
             }).ToList();
         }
 

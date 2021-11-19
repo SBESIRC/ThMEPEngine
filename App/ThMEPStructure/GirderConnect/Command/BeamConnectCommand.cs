@@ -11,8 +11,8 @@ using ThCADCore.NTS;
 using ThCADExtension;
 
 using ThMEPStructure.Command;
-using ThMEPStructure.GirderConnect.ConnectProcess;
-using ThMEPStructure.GirderConnect.Utils;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -21,7 +21,7 @@ namespace ThMEPStructure.GirderConnect.Command
         //input
         public Polyline frame { get; set; }//车库边界轮廓
         public List<Polyline> obstacles { get; set; }//内部障碍物轮廓
-        public List<Tuple<Polyline, List<Polyline>>> houses { get; set; }//楼层和楼层上的剪力墙
+        public Dictionary<Polyline, List<Polyline>> houses { get; set; }//楼层和楼层上的剪力墙
         public List<Polyline> walls { get; set; } //墙体
         public List<Polyline> columns { get; set; }//柱子
 
@@ -33,7 +33,7 @@ namespace ThMEPStructure.GirderConnect.Command
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var points = GetObject.GetCenters(acdb);
-                ConnectMainBeam.Calculate(points);
+                //ConnectMainBeam.Calculate(points);
             }
         }
     }

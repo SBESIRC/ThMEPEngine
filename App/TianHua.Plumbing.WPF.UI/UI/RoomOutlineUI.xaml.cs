@@ -15,5 +15,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.DataContext = RoomOutlineVM;
             this.Topmost = true;
         }
+
+        private void ThCustomWindow_Closed(object sender, System.EventArgs e)
+        {
+            RoomOutlineVM.ResetCurrentLayer();
+        }
     }
 }

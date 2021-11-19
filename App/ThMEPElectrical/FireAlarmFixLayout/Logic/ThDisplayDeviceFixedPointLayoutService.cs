@@ -92,8 +92,11 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                     {
                         if (doorPaired[i].Key - doorPaired[i - 1].Key > 1)
                         {
-                            rightIndex = i - 1;
-                            leftIndex = i;
+                            //rightIndex = i - 1;
+                            //leftIndex = i;
+                            //2021-11-18帮同学上git
+                            rightIndex = i;
+                            leftIndex = i - 1;
                             break;
                         }
                     }

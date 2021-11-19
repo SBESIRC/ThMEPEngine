@@ -144,7 +144,6 @@
     </Style>
     <Style TargetType="DataGridCell">
         <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
-        <Setter Property="Focusable" Value="False"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">

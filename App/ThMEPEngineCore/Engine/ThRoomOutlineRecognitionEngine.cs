@@ -67,11 +67,15 @@ namespace ThMEPEngineCore.Engine
             {
                 var transformer = new ThMEPOriginTransformer(curves);
                 transformer.Transform(curves);
-                curves = ThRoomOutlineSimplifier.Simplify(curves);
-                curves = ThRoomOutlineSimplifier.MakeValid(curves);
-                curves = ThRoomOutlineSimplifier.Simplify(curves);
-                transformer.Reset(curves);
-                Elements.AddRange(curves.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
+                var roomSimplifer = new ThRoomOutlineSimplifier();
+                var roomObjs = roomSimplifer.Close(
+                    curves.Cast<Polyline>().ToList()).ToCollection(); // 封闭
+                roomObjs = roomSimplifer.Normalize(roomObjs); // 处理狭长线
+                roomObjs = roomSimplifer.MakeValid(roomObjs); // 处理自交
+                roomObjs = roomSimplifer.Simplify(roomObjs);  // 处理简化线
+                roomObjs = roomSimplifer.Filter(roomObjs);
+                transformer.Reset(roomObjs);
+                Elements.AddRange(roomObjs.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
             }
         }
 

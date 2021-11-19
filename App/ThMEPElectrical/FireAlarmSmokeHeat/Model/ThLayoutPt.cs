@@ -16,7 +16,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Model
         public string BlkName = "";
         public double Angle = 0;
 
-        public void transformBack(ThMEPOriginTransformer transformer)
+        public void TransformBack(ThMEPOriginTransformer transformer)
         {
             Pt = transformer.Reset(Pt);
         }

@@ -22,7 +22,7 @@ namespace ThMEPLighting.DSFEI.ThEmgPilotLamp
         private Vector3d _normal = Vector3d.ZAxis;
         private Polyline _maxPolyline;
         private double _lightSpace = 10000;//灯具最大间距
-        private double _lightOffset = 800;//单方向灯具偏移距离
+        private double _lightOffset = 0;//单方向灯具偏移距离
         private double _lightDeleteMaxSpace = 10000;
         private double _lightDeleteMaxAngle = 30;
         private double _wallLightMergeAngle = 45;
@@ -39,7 +39,7 @@ namespace ThMEPLighting.DSFEI.ThEmgPilotLamp
         public EmgLampIndicatorLight(Polyline outPolyline,List<Polyline> columns, List<Polyline> walls, IndicatorLight indicator)
         {
             this._lightSpace = ThEmgLightService.Instance.MaxLightSpace;
-            this._lightOffset = ThEmgLightService.Instance.HostLightMoveOffSet;
+            this._lightOffset = 0;//ThEmgLightService.Instance.HostLightMoveOffSet;
             this._lightDeleteMaxSpace = ThEmgLightService.Instance.MaxDeleteDistance;
             this._lightDeleteMaxAngle = ThEmgLightService.Instance.MaxDeleteAngle;
 

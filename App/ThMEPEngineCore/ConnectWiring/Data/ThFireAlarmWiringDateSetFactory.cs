@@ -173,16 +173,12 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     transformer.Reset(objs);
 
                     //处理车道线
-                    var handleLines = ThMEPLineExtension.LineSimplifier(objs, 500, 100.0, 2.0, Math.PI / 180.0);
-                    var parkingLinesService = new ParkingLinesService();
-                    var parkingLines = parkingLinesService.CreateNodedParkingLines(frame, handleLines, out List<List<Line>> otherPLines);
-                    parkingLines.AddRange(otherPLines);
-                    resLines = parkingLines.SelectMany(x => x).ToList();
+                    resLines = ThMEPLineExtension.TransCurveToLine(objs, 500);
                 }
             }
             if (resLines.Count <= 0)
             {
-                resLines = ThMEPPolygonService.CenterLine(frame);
+                //resLines = ThMEPPolygonService.CenterLine(frame);
             }
 
             var geos = new List<ThGeometry>();

@@ -12,6 +12,7 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Sprinkler.Analysis;
+using ThMEPWSS.SprinklerConnect.Cmd;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -242,6 +243,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiRoomOutline);
         }
 
+        [CommandMethod("TIANHUACAD", "THSprinkConn1", CommandFlags.Modal)]
+        public void THSprinkConnCmd()
+        {
+            var cmd = new ThSprinklerConnectCmd_test
+            {
+                BlockNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList()
+            };
+            cmd.SprinklerConnectExecute();
+        }
 
         [CommandMethod("TIANHUACAD", "THExtractWSSDrainageWell", CommandFlags.Modal)]
         public void THExtractWSSDrainageWell()

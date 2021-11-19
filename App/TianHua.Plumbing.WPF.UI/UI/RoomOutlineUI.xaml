@@ -10,7 +10,7 @@
                     Height="130"
                     ResizeMode="NoResize"
                     MaxHeight="135"
-             mc:Ignorable="d">
+             mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Grid  Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>

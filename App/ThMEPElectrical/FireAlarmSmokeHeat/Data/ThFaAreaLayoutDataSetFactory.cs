@@ -19,7 +19,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
     public class ThFaAreaLayoutDataSetFactory : ThMEPDataSetFactory
     {
         public bool ReferBeam { get; set; } = true;
-
+        public double WallThick { get; set; } = 100;
         private List<ThGeometry> Geos { get; set; }
 
         public ThFaAreaLayoutDataSetFactory()
@@ -57,7 +57,6 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
                     },
                     new ThAFASRoomExtractor()
                     {
-                        //IsWithHole=false,
                         UseDb3Engine=true,
                         Transformer = Transformer,
                     },
@@ -80,8 +79,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             var palceConverage = BuildPlaceCoverage(extractors, ReferBeam);
             extractors.Add(palceConverage);
 
+            //提取可布区域
+            var detectiveConverage = BuildDetectionRegion(extractors,WallThick);
+            extractors.Add(detectiveConverage);
+
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
+
             // 移回原位
             extractors.ForEach(o =>
             {
@@ -117,7 +121,29 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 
             return placeConverageExtract;
         }
+        private ThAFASDetectionRegionExtractor BuildDetectionRegion(List<ThExtractorBase> extractors, double wallThick)
+        {
+            var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
+            var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
+            var columnExtract = extractors.Where(x => x is ThAFASColumnExtractor).FirstOrDefault() as ThAFASColumnExtractor;
+            var beamExtract = extractors.Where(x => x is ThAFASBeamExtractor).FirstOrDefault() as ThAFASBeamExtractor;
+            var holeExtract = extractors.Where(x => x is ThAFASHoleExtractor).FirstOrDefault() as ThAFASHoleExtractor;
 
+            var detectionRegionExtract = new ThAFASDetectionRegionExtractor()
+            {
+                Rooms = roomExtract.Rooms,
+                Walls = wallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList(),
+                Columns = columnExtract.Columns.Select(x => ThIfcColumn.Create(x)).ToList(),
+                Beams = beamExtract.Beams,
+                Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
+                WallThickness = wallThick,
+                Transformer = Transformer,
+            };
+
+            detectionRegionExtract.Extract(null, new Point3dCollection());
+
+            return detectionRegionExtract;
+        }
 
 
         private ThBuildingElementVisitorManager Extract(Database database)

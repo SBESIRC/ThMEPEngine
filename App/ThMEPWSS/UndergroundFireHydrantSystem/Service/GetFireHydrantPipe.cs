@@ -93,7 +93,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     ;
                 }
-                
             }
             GetPipePart.GetMainLoopDetial(ref fireHydrantSysOut, stPt, ptStart);
             fireHydrantSysOut.InsertPoint = ptStart.OffsetY(-fireHydrantSysIn.FloorHeight);
@@ -106,7 +105,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             foreach (var rstPath in subPathList)
             {
                 var stPt1 = fireHydrantSysOut.InsertPoint;
-                var stPt = new Point3d(stPt1.X, stPt1.Y - fireHydrantSysIn.FloorHeight * index, 0);
+                var stPt = new Point3d(stPt1.X, stPt1.Y - (fireHydrantSysIn.FloorHeight + 3000) * index - 3000, 0);
                 index += 1;
                 var ptStart = new Point3d(stPt.X, stPt.Y, 0);
                 var pipeGap = 400;
@@ -175,7 +174,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         var stPt = fireHydrantSysOut.BranchDrawDic[pt];
                         var x = branchDic[pt];
-                        
+
                         if (fireHydrantSysIn.TermPointDic.ContainsKey(branchDic[pt][0]))
                         {
                             if (fireHydrantSysIn.TermPointDic[branchDic[pt].First()].Type.Equals(1))//终点是类型1，消火栓
@@ -237,7 +236,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                             else
                             {
-                                GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+                                var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(branchDic[pt][0]);
+                                if (verticalHasHydrant)
+                                {
+                                    GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+
+                                }
+                                else
+                                {
+                                    GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
+
+                                }
                             }
                             
                         }

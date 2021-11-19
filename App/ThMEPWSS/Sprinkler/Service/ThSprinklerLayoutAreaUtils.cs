@@ -1,19 +1,20 @@
-﻿using AcHelper;
-using NFox.Cad;
+﻿using System.Linq;
+using System.Collections.Generic;
+
+using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
-using Linq2Acad;
-using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPWSS.Service;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
+using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Service;
 
 namespace ThMEPWSS.Sprinkler.Service
 {
@@ -23,8 +24,9 @@ namespace ThMEPWSS.Sprinkler.Service
         /// 获取框线
         /// </summary>
         /// <returns></returns>
-        public static List<Polyline> GetFrames()
+        public static List<Polyline> GetFrames(out DBObjectCollection remainder)
         {
+            remainder = new DBObjectCollection();
             var resPolys = new List<Polyline>();
             var options = new PromptKeywordOptions("\n选择处理方式");
             options.Keywords.Add("框选范围", "K", "框选范围(K)");
@@ -38,7 +40,7 @@ namespace ThMEPWSS.Sprinkler.Service
 
             if (result.StringResult == "框选范围")
             {
-                resPolys = GetFrameByCrosing();
+                resPolys = GetFrameByCrossing(out remainder);
             }
             else if (result.StringResult == "选择多段线")
             {
@@ -53,10 +55,11 @@ namespace ThMEPWSS.Sprinkler.Service
         /// 通过框选获取框线
         /// </summary>
         /// <returns></returns>
-        private static List<Polyline> GetFrameByCrosing()
+        private static List<Polyline> GetFrameByCrossing(out DBObjectCollection remainder)
         {
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
+                remainder = new DBObjectCollection();
                 var resPolys = new List<Polyline>();
                 try
                 {
@@ -66,7 +69,7 @@ namespace ThMEPWSS.Sprinkler.Service
                 {
                     return resPolys;
                 }
-                Point3dCollection winCorners = pc.CollectedPoints;
+                var winCorners = pc.CollectedPoints;
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
@@ -74,6 +77,8 @@ namespace ThMEPWSS.Sprinkler.Service
 
                 resPolys.AddRange(GetAllFramePolys(frames));
                 resPolys.Remove(frame);
+
+                remainder = frame.DifferenceMP(resPolys.ToCollection());
                 return resPolys;
             }
         }
@@ -163,7 +168,7 @@ namespace ThMEPWSS.Sprinkler.Service
                     {
                         return o.Area > 0 && checkFrame.Contains(o) && (frame.Area - o.Area) > 50;
                     })
-                   .Cast<Polyline>()
+                   .OfType<Polyline>()
                    .ForEachDbObject(o => resPolys.Add(o));
                     resPolys.Add(frame);
                 }

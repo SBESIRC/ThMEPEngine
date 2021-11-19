@@ -58,14 +58,14 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
         private double _scale = 100;
         private bool _referBeam = true;
         private double _radius = 8000;
-
+        private double _wallThick = 100;
         public ThFireAlarmGasCmd(FireAlarmViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
             CommandName = "THFireGasLayout";
             ActionName = "布置";
 
-            setInfo();
+            SetInfo();
         }
 
         public ThFireAlarmGasCmd()
@@ -78,13 +78,15 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             FireAlarmGasLayoutExecute();
         }
 
-        private void setInfo()
+        private void SetInfo()
         {
             if (_UiConfigs != null)
             {
                 _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
                 _referBeam = _UiConfigs.ShouldConsiderBeam;
                 _radius = _UiConfigs.ProtectRadius;
+                //bug
+                _wallThick = 50;
             }
         }
 
@@ -109,29 +111,29 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.getFrame();
+                var pts = ThFireAlarmUtils.GetFrame();
                 if (pts.Count == 0)
                 {
                     return;
                 }
 
-                var geos = ThFireAlarmUtils.getSmokeData(pts, extractBlkList, _referBeam); //38s
+                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam,_wallThick); //38s
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //转回原点
-                var transformer = ThFireAlarmUtils.transformToOrig(pts, geos);
+                var transformer = ThFireAlarmUtils.TransformToOrig(pts, geos);
 
                 var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);//19s
                 //洞,必须先做找到框线
-                dataQuery.analysisHoles();
+                dataQuery.AnalysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                var priorityExtend = ThFaAreaLayoutParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
-                dataQuery.extendPriority(priorityExtend);
-                var roomType = ThMEPElectrical.FireAlarmCombustibleGas.Service.ThFaAreaLayoutRoomTypeService.getAreaSensorType(dataQuery.Rooms, dataQuery.roomFrameDict);
+                var priorityExtend = ThFaAreaLayoutParamterCalculationService.GetPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.ExtendPriority(priorityExtend);
+                var roomType = ThMEPElectrical.FireAlarmCombustibleGas.Service.ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
                 foreach (var frame in dataQuery.FrameHoleList)
                 {
@@ -147,10 +149,10 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 layoutParameter.BlkNameGas = layoutBlkNameGas;
                 layoutParameter.BlkNameGasPrf = layoutBlkNameProfGas;
 
-                ThFireAlarmGasEngine.thFaGasLayoutEngine(dataQuery,layoutParameter, out var layoutResult, out var blindsResult);
+                ThFireAlarmGasEngine.ThFaGasLayoutEngine(dataQuery,layoutParameter, out var layoutResult, out var blindsResult);
 
                 //转回到原始位置
-                layoutResult.ForEach(x => x.transformBack(transformer));
+                layoutResult.ForEach(x => x.TransformBack(transformer));
 
                 //打印
                 ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);

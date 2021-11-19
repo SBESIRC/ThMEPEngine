@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,27 +40,27 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             {
                 if (blockDb.Blocks.Contains("蝶阀"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("蝶阀"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("蝶阀"), true);
                 }
                 if (blockDb.Blocks.Contains("消火栓管线管径"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管线管径"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管线管径"), true);
                 }
                 if (blockDb.Blocks.Contains("消火栓管径150"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管径150"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓管径150"), true);
                 }
                 if (blockDb.Layers.Contains("W-FRPT-HYDT-PIPE-AI"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-PIPE-AI"));
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-PIPE-AI"),true);
                 }
                 if (blockDb.Layers.Contains("W-FRPT-HYDT-EQPM"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-EQPM"));
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-EQPM"), true);
                 }
                 if (blockDb.Layers.Contains("W-FRPT-HYDT-DIMS"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-DIMS"));
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-HYDT-DIMS"), true);
                 }
 
             }
@@ -146,7 +147,25 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     
                     if (ConfigInfo.isCoveredGraph)
                     {
-                        ThHydrantDataManager.RemoveBranchLines(branchLines, loopLines, hydrantValve, pipeMark, range);
+                        //branchLines 包含所有的支路（需要删除和不需要删除的数据）
+                        var toDeleteLine = new List<Line>();
+                        foreach (var hydrant in hydrants)
+                        {
+                            if(ThHydrantConnectPipeUtils.HydrantIsContainPipe1(hydrant, hydrantPipes))
+                            {
+                                foreach(var l in branchLines)
+                                {
+                                    double dist = l.DistanceToPoint(hydrant.FireHydrantPipe.PipePosition);
+                                    if (dist < 100.0)
+                                    {
+                                        toDeleteLine.AddRange(FindListLine(l, branchLines));
+                                    }
+                                }
+                            }
+                        }
+                        //挑选出需要删除的数据
+                        //
+                        ThHydrantDataManager.RemoveBranchLines(toDeleteLine, loopLines, hydrantValve, pipeMark, range);
                     }
                     else
                     {
@@ -228,5 +247,30 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+        public List<Line> FindListLine(Line l, List<Line> allLine)
+        {
+            var tmpLines = allLine.Clone().ToList();
+            l = l.ExtendLine(10);
+            var tmpBox = l.Buffer(10);
+            var retLines = new List<Line>();
+            foreach (var temp in tmpLines)
+            { 
+                //判断tmpline和l是否连接
+                if (tmpBox.Contains(temp.StartPoint) || tmpBox.Contains(temp.EndPoint))
+                {
+                    retLines.Add(temp);
+                }
+            }
+            tmpLines = tmpLines.Except(retLines).ToList();
+            var retLines1 = new List<Line>();
+            foreach (var ret in retLines)
+            {
+                retLines1.AddRange(FindListLine(ret, tmpLines));
+            }
+            retLines.AddRange(retLines1);
+            return retLines;
+        }
     }
+
+
 }

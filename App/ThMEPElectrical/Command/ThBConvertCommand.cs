@@ -190,7 +190,7 @@ namespace ThMEPElectrical.Command
                                 {
                                     case ConvertMode.STRONGCURRENT:
                                         {
-                                            if (string.IsNullOrEmpty(visibility) && string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
+                                            if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
                                             {
                                                 // 当配置表中可见性为空时，则按图块名转换
                                                 transformedBlock = manager.TransformRule(srcName);
@@ -206,7 +206,11 @@ namespace ThMEPElectrical.Command
                                         break;
                                     case ConvertMode.WEAKCURRENT:
                                         {
-                                            if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                            if (string.IsNullOrEmpty(ThStringTools.ToChinesePunctuation(visibility)))
+                                            {
+                                                transformedBlock = manager.TransformRule(srcName);
+                                            }
+                                            else if(ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
                                             {
                                                 transformedBlock = manager.TransformRule(
                                                     srcName,

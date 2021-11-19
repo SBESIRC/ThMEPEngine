@@ -87,7 +87,6 @@ namespace ThMEPWSS.Hydrant.Data
         {
             var roomInnerPts = PointInRoom(rooms); //获取在房间内的点           
             var isoldatedHydrants = FireHydrants.Where(o => !roomInnerPts.Contains(o)).ToList(); // 获取不在房间内的点
-            //DEBUG
             var temp = new List<DBPoint>();
             isoldatedHydrants.ForEach(o =>
             {
@@ -99,6 +98,10 @@ namespace ThMEPWSS.Hydrant.Data
                     var closestRoom = disDic.OrderBy(m => m.Value).First().Key;
                     var newPt = MovePtToRoom(o.Position, closestRoom);
                     temp.Add(new DBPoint(newPt));
+                }
+                else
+                {
+                    temp.Add(o); //保留不在房间内的消火栓
                 }
             });
             roomInnerPts.AddRange(temp);

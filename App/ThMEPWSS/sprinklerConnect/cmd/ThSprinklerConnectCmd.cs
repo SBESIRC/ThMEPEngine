@@ -42,7 +42,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
 
         [CommandMethod("TIANHUACAD", "testLineOverlap", CommandFlags.Modal)]
-        public void testLineOverlap()
+        public void TestLineOverlap()
         {
 
             var aa = new Line(new Point3d(100, 0, 0), new Point3d(200, 0, 0));
@@ -74,21 +74,21 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             DrawUtils.ShowGeometry(eb, "l0test", 2);
             DrawUtils.ShowGeometry(intersectCheck, "l0test", 1);
 
-            var a = new List<(Line, Line)> { (aa, ab), (ab, aa), (ba, bb), (ca, cb), (da, db), (ea, eb), (aa, intersectCheck) };
-
+            var a = new List<(Line, Line)> { (aa, ab), (ab, aa), (ba, bb), (ca, cb), (da, db), (ea, eb), (ca, intersectCheck) };
+            //var a = new List<(Line, Line)> { (aa, ab), (ab, aa), (ca, intersectCheck) };
             for (int i = 0; i < a.Count; i++)
             {
                 var am = RelateOp.Relate(a[i].Item1.ToNTSLineString(), a[i].Item2.ToNTSLineString());
 
-                var an1 = am.IsCrosses(NetTopologySuite.Geometries.Dimension.Surface, NetTopologySuite.Geometries.Dimension.Surface);
-                var an2 = am.IsOverlaps(NetTopologySuite.Geometries.Dimension.Surface, NetTopologySuite.Geometries.Dimension.Surface);
+                var an1 = am.IsCrosses(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
+                var an2 = am.IsOverlaps(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
                 var an3 = am.IsContains();
                 var an4 = am.IsDisjoint();
                 var an5 = am.IsIntersects();
-                var an6 = am.IsEquals(NetTopologySuite.Geometries.Dimension.Surface, NetTopologySuite.Geometries.Dimension.Surface);
+                var an6 = am.IsEquals(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
                 var an7 = am.IsCoveredBy();
                 var an8 = am.IsCovers();
-                var an9 = am.IsTouches(NetTopologySuite.Geometries.Dimension.Surface, NetTopologySuite.Geometries.Dimension.Surface);
+                var an9 = am.IsTouches(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
                 var an10 = am.IsWithin();
             }
 
@@ -99,6 +99,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
     public class ThSprinklerConnectCmd : ThMEPBaseCommand
     {
+        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+
         public ThSprinklerConnectCmd()
         {
 
@@ -115,19 +117,32 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
 
-                var frame = ThSprinklerConnectUtil.getFrame();
+                var frame = ThSprinklerDataService.GetFrame();
                 if (frame == null || frame.Area < 10)
                 {
                     return;
                 }
 
-                var SprinklerPts = ThSprinklerConnectDataFactory.getSprinklerConnectData(frame);
-                if (SprinklerPts.Count == 0)
-                {
-                    return;
-                }
 
-                var dataset = new ThSprinklerConnectDataFactory();
+                //点位
+                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
+
+                //提取车位
+                var singleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_SingleCar);
+                var doubleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
+                //DrawUtils.ShowGeometry(singleCarParking, "l0singleCar", 22, 30);
+                //DrawUtils.ShowGeometry(doubleCarParking, "l0doubleCar", 22, 30);
+
+                //提取管子
+                //var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
+                //var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
+
+                //if (SprinklerPts.Count == 0 || mainPipe.Count == 0 || subMainPipe.Count == 0)
+                //{
+                //    return;
+                //}
+
+                //var dataset = new ThSprinklerConnectDataFactory();
                 //   var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
                 //   var dataQuery = new ThSprinklerDataQueryService(geos);
                 //   dataQuery.ClassifyData();
@@ -135,10 +150,19 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 //转回原点
                 //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
 
-                //
+
+                //打散管线
+                //ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
+                //DrawUtils.ShowGeometry(mainLine, "l0mainline", 22, 30);
+                //DrawUtils.ShowGeometry(subMainLine, "l0submainline", 142, 30);
+                //DrawUtils.ShowGeometry(allLines, "l0all", 2, 30);
+
 
                 var sprinklerParameter = new ThSprinklerParameter();
                 sprinklerParameter.SprinklerPt = SprinklerPts;
+                //sprinklerParameter.MainPipe = mainLine;
+                //sprinklerParameter.SubMainPipe = subMainLine;
+                //sprinklerParameter.AllPipe = allLines;
 
                 ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
 

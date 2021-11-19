@@ -17,14 +17,15 @@ namespace ThMEPEngineCore.Engine
             {
                 var objs = new DBObjectCollection();
                 dbObj.Explode(objs);
-                if(objs.OfType<BlockReference>().Count() == 0)
+                var entities = objs.OfType<BlockReference>();
+                if (entities.Count() == 0)
                 {
                     return;
                 }
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = ThOPMTools.GetOPMProperties(dbObj.Id),
-                    Geometry = objs.OfType<BlockReference>().First(),
+                    Geometry = entities.First(),
                 });
             }
         }

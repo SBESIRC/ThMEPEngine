@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Service
     {
         public double OFFSET_DISTANCE { get; set; }
         public double DISTANCE_TOLERANCE { get; set; }
-        public double TESSELLATE_ARC_LENGTH { get; set; }
+        public double TESSELLATE_ARC_LENGTH { get; set; }        
 
         public ThElementSimplifier()
         {

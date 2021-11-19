@@ -885,6 +885,40 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractConcaveHullBoundaries", CommandFlags.Modal)]
+        public void THExtractConcaveHullBoundaries()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                PromptDoubleOptions op = new PromptDoubleOptions("请输入容差值");
+                var tol = Active.Editor.GetDouble(op);
+                if (tol.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs =  result.Value
+                    .GetObjectIds()
+                    .Select(o => acadDatabase.Element<Entity>(o))
+                    .Where(o => o is Line || o is Polyline || o is Circle || o is Arc)
+                    .Select(o=>o.Clone() as Entity)
+                    .ToCollection();
+                var concaveBuilder = new ThMEPConcaveBuilder(objs, tol.Value);
+                var objConcaveHull = concaveBuilder.Build();
+                var boundaries = new List<Polyline>();
+                boundaries.AddRange(objConcaveHull.Cast<Polyline>().ToList());
+                boundaries.ForEach(e =>
+                {
+                    e.AddToCurrentSpace();
+                    e.SetDatabaseDefaults();
+                });
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THExtractContourLineByConcave", CommandFlags.Modal)]
         public void THExtractContourLineByConcave()
         {

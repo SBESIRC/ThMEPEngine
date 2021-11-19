@@ -1,11 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
@@ -16,8 +18,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var hydrantPipe = acadDb.ModelSpace.OfType<BlockReference>().Where(o => IsHydranLayer(o.Layer) && IsBlockReference(o.GetEffectiveName())).ToList();
-                return hydrantPipe;
+                var blks = acadDb.ModelSpace.OfType<BlockReference>().Where(o => IsHydranLayer(o.Layer) && IsBlockReference(o.GetEffectiveName())).ToList();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(blks.ToCollection());
+                var filterObjs = spatialIndex.SelectCrossingPolygon(selectArea);
+                var valves = new List<BlockReference>();
+                if (filterObjs.Count != 0)
+                {
+                    var blk = filterObjs[0] as BlockReference;
+                    valves.Add(blk);
+                }
+                return valves;
             }
         }
 

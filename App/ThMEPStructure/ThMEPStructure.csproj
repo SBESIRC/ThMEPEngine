@@ -27,16 +27,18 @@
   <ItemGroup>
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="GirderConnect\Command\BeamConnectCommand.cs" />
-    <Compile Include="GirderConnect\ConnectProcess\ConnectMainBeam.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Test\TestCmds.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\PointsDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ShowInfo.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureBuilder.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureDealer.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ConnectSndBeam.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ExtractInfo.cs" />
     <Compile Include="GirderConnect\ConnectProcess\GenerateLine.cs" />
-    <Compile Include="GirderConnect\Test\TestCmds.cs" />
-    <Compile Include="GirderConnect\Utils\CenterLine.cs" />
-    <Compile Include="GirderConnect\Utils\GetObject.cs" />
-    <Compile Include="GirderConnect\Utils\LineDealer.cs" />
-    <Compile Include="GirderConnect\Utils\PointsDealer.cs" />
-    <Compile Include="GirderConnect\Utils\ShowInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPStructureApp.cs" />
   </ItemGroup>

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -20,14 +19,17 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
     {
         private List<ThGeometry> Geos { get; set; }
 
-        ThAFASDistanceDataSetFactory()
+        public ThAFASDistanceDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }
 
         protected override ThMEPDataSet BuildDataSet()
         {
-            throw new NotImplementedException();
+            return new ThMEPDataSet()
+            {
+                Container = Geos,
+            };
         }
 
         protected override void GetElements(Database database, Point3dCollection collection)
@@ -58,7 +60,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
 
             var extractors = new List<ThExtractorBase>()
-                {
+            {
                     new ThAFASArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
@@ -137,6 +139,11 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             //    as ThAFASArchitectureWallExtractor;
             //architectureWallExtractor.Walls.AddRange(selfBuildWalls);
 
+            // 用防火分区对房间进行分割，保留在防火分区内的房间
+            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
+            var splitRooms = roomExtractor.SplitByFrames(fireApartExtractor.FireCompartments);
+            roomExtractor.UpdateRooms(splitRooms);
+
             //用防火分区对墙、柱...分组
             extractors.ForEach(o =>
             {
@@ -151,8 +158,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
             var fireProofShutter = extractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
             fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
-            // 把房间传给门提取器
-            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
+
+            // 把房间传给门提取器            
             faDoorExtractor.SetRooms(roomExtractor.Rooms);
 
             //把洞传给门提取器

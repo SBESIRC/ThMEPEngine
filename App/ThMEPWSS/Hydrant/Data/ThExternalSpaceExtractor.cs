@@ -14,61 +14,34 @@ using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.IO;
+using ThMEPWSS.OutsideFrameRecognition;
 
 namespace ThMEPWSS.Hydrant.Data
 {
-    public class ThExternalSpaceExtractor : ThExtractorBase, IPrint, IClean
+    public class ThExternalSpaceExtractor : ThExtractorBase, IPrint
     {
         /// <summary>
         /// 由建筑轮廓往外括形成的的空间
         /// </summary>
         public List<Entity> ExternalSpaces { get; set; }
         public double OffsetDis { get; set; }
-        public double TESSELLATE_ARC_LENGTH { get; set; }
-        public ThExternalSpaceExtractor()
+        private List<Polyline> outsideFrames { get; set; }
+
+        public ThExternalSpaceExtractor(List<Polyline> outsideFrames)
         {
-            OffsetDis = 100000;
-            TESSELLATE_ARC_LENGTH = 500.0;
-            ExternalSpaces = new List<Entity>();
             Category = BuiltInCategory.ExternalSpace.ToString();
+            // 根据生成的房间外框线来构件ExternalSpace
+            OffsetDis = 100000;
+            ExternalSpaces = new List<Entity>();
+            if(outsideFrames.Count>0)
+            {
+                var mPolygon = ThRecogniseOutsideFrame.CreatMpolygonFromBoundaryToInfinity(outsideFrames, OffsetDis);
+                ExternalSpaces.Add(mPolygon);
+            }
         }
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            var results = new DBObjectCollection();
-            if (UseDb3Engine)
-            {
-                // 通过计算或指定的规则获取
-                // TODO
-            }
-            else
-            {
-                IArchitectureOutlineData datas = new ThQueryArchitectureOutlineService()
-                {
-                    ElementLayer = ElementLayer,
-                };
-                var outlines = datas.Query(database, pts);
-                results = Clean(outlines.ToCollection());
-            }
-
-            IBuffer iBuffer = new ThNTSBufferService();
-            results.Cast<Entity>().ForEach(o =>
-            {
-                var bufferEnt = iBuffer.Buffer(o, OffsetDis);
-                if (bufferEnt is Polyline shell)
-                {
-                    var mPolygon = ThMPolygonTool.CreateMPolygon(shell, new List<Curve> { o.Clone() as Polyline });
-                    ExternalSpaces.Add(mPolygon);
-                }
-                else if (bufferEnt is MPolygon mPolygon)
-                {
-                    throw new NotSupportedException();
-                }
-            });
-            if (FilterMode == FilterMode.Window)
-            {
-                ExternalSpaces = FilterWindowPolygon(pts, ExternalSpaces);
-            }
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -86,18 +59,6 @@ namespace ThMEPWSS.Hydrant.Data
         public void Print(Database database)
         {
             ExternalSpaces.CreateGroup(database, ColorIndex);
-        }
-
-        public DBObjectCollection Clean(DBObjectCollection objs)
-        {
-            var simplifier = new ThElementSimplifier()
-            {
-                TESSELLATE_ARC_LENGTH = TESSELLATE_ARC_LENGTH,
-            };
-            var results = simplifier.Tessellate(objs);
-            results = simplifier.Simplify(objs);
-            results = simplifier.Normalize(objs);
-            return results;
         }
     }
 }

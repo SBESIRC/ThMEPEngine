@@ -1,14 +1,15 @@
-﻿using Linq2Acad;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Model;
+﻿using System.Linq;
 using System.Collections.Generic;
-using ThMEPWSS.Sprinkler.Service;
+
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 using DotNetARX;
-using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
+
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -29,7 +30,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             //
         }
 
-        public abstract void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline);
+        public abstract void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity);
 
         public abstract void Clean(Polyline pline);
 
@@ -84,7 +85,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             }
         }
 
-        public void CleanPline(string layerName, Polyline polyline)
+        public void CleanPline(string layerName, Polyline polyline, bool includePolygon = false)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -105,6 +106,23 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                 o.UpgradeOpen();
                                 o.Erase();
                             });
+
+                if (includePolygon) 
+                {
+                    var objsTidal = acadDatabase.ModelSpace
+                        .OfType<MPolygon>()
+                        .Where(o => o.Layer == layerName).ToCollection();
+                    var bufferPolygon = polyline.Buffer(1)[0] as Polyline;
+                    var polygonSpatialIndex = new ThCADCoreNTSSpatialIndex(objsTidal);
+                    polygonSpatialIndex.SelectCrossingPolygon(bufferPolygon)
+                                .OfType<MPolygon>()
+                                .ToList()
+                                .ForEach(o =>
+                                {
+                                    o.UpgradeOpen();
+                                    o.Erase();
+                                });
+                }
             }
         }
     }

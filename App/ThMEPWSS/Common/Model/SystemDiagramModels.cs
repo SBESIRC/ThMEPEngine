@@ -272,46 +272,18 @@ namespace ThMEPWSS.Uitl
                 var phi = GeoAlgorithm.AngleFromDegree(degree);
                 return point.OffsetXY(radius * Math.Cos(phi), radius * Math.Sin(phi));
             }
-            public static Point3d OffsetX(this Point3d point, double delta)
-            {
-                return new Point3d(point.X + delta, point.Y, point.Z);
-            }
-            public static Point3d OffsetY(this Point3d point, double delta)
-            {
-                return new Point3d(point.X, point.Y + delta, point.Z);
-            }
-            public static Point3d OffsetXY(this Point3d point, double deltaX, double deltaY)
-            {
-                return new Point3d(point.X + deltaX, point.Y + deltaY, point.Z);
-            }
-            public static Point3d ReplaceX(this Point3d point, double x)
-            {
-                return new Point3d(x, point.Y, point.Z);
-            }
-            public static Point3d ReplaceY(this Point3d point, double y)
-            {
-                return new Point3d(point.X, y, point.Z);
-            }
-            public static Point2d OffsetX(this Point2d point, double delta)
-            {
-                return new Point2d(point.X + delta, point.Y);
-            }
-            public static Point2d OffsetY(this Point2d point, double delta)
-            {
-                return new Point2d(point.X, point.Y + delta);
-            }
-            public static Point2d OffsetXY(this Point2d point, double deltaX, double deltaY)
-            {
-                return new Point2d(point.X + deltaX, point.Y + deltaY);
-            }
-            public static Point2d ReplaceX(this Point2d point, double x)
-            {
-                return new Point2d(x, point.Y);
-            }
-            public static Point2d ReplaceY(this Point2d point, double y)
-            {
-                return new Point2d(point.X, y);
-            }
+            public static Point3d OffsetX(this Point3d point, double delta) => new(point.X + delta, point.Y, point.Z);
+            public static Point3d OffsetY(this Point3d point, double delta) => new(point.X, point.Y + delta, point.Z);
+            public static Point3d OffsetXY(this Point3d point, double deltaX, double deltaY) => new(point.X + deltaX, point.Y + deltaY, point.Z);
+            public static Point3d ReplaceX(this Point3d point, double x) => new(x, point.Y, point.Z);
+            public static Point3d ReplaceY(this Point3d point, double y) => new(point.X, y, point.Z);
+            public static Point2d OffsetX(this Point2d point, double delta) => new(point.X + delta, point.Y);
+            public static Point2d OffsetY(this Point2d point, double delta) => new(point.X, point.Y + delta);
+            public static Point2d OffsetXY(this Point2d point, double deltaX, double deltaY) => new(point.X + deltaX, point.Y + deltaY);
+            public static Point2d ReplaceX(this Point2d point, double x) => new(x, point.Y);
+            public static Point2d ReplaceY(this Point2d point, double y) => new(point.X, y);
+            public static Point2d Offset(this Point2d point, Vector2d v) => new Point2d(point.X + v.X, point.Y + v.Y);
+            public static Point3d Offset(this Point3d point, Vector3d v) => new Point3d(point.X + v.X, point.Y + v.Y, point.Z + v.Z);
         }
     }
     public class ComparableCollection<T> : List<T>, IEquatable<ComparableCollection<T>>
@@ -482,6 +454,7 @@ namespace ThMEPWSS.Uitl
         public double OuterRadius => (new Point2d(MinX, MinY)).GetDistanceTo(new Point2d(CenterX, CenterY));
         public double MiddleRadius => Math.Max(Width, Height) / 2;
         public double InnerRadius => Math.Min(Width, Height) / 2;
+        public double Area => Width * Height;
         public Extents2d ToExtents2d() => new Extents2d(MinX, MinY, MaxX, MaxY);
         public GRect Expand(double thickness)
         {
@@ -631,6 +604,16 @@ namespace ThMEPWSS.Uitl
                 return dg;
             }
         }
+        public double Angle
+        {
+            get
+            {
+                var angle = (EndPoint - StartPoint).Angle;
+                if (angle < 0) angle += Math.PI * 2;
+                if (angle >= Math.PI * 2) angle -= Math.PI * 2;
+                return angle;
+            }
+        }
         public double SingleAngleDegree
         {
             get
@@ -638,6 +621,15 @@ namespace ThMEPWSS.Uitl
                 var dg = AngleDegree;
                 if (dg >= 180) dg -= 180;
                 return dg;
+            }
+        }
+        public double SingleAngle
+        {
+            get
+            {
+                var angle = Angle;
+                if (angle >= Math.PI) angle -= Math.PI;
+                return angle;
             }
         }
         public bool IsVertical(double tollerance)

@@ -83,7 +83,6 @@ namespace ThMEPElectrical.Command
                         continue;
                     }
 
-
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))

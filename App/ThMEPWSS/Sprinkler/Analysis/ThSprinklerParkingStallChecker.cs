@@ -1,14 +1,17 @@
-﻿using NFox.Cad;
+﻿using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
-using System.Linq;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FlushPoint.Data;
-using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -22,11 +25,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
             ParkingStalls = new DBObjectCollection();
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
             if (ParkingStalls.Count > 0)
             {
-                var results = Check(sprinklers, pline);
+                var results = Check(sprinklers, entity);
                 if (results.Count > 0)
                 {
                     Present(results);
@@ -34,21 +37,31 @@ namespace ThMEPWSS.Sprinkler.Analysis
             }
         }
 
-        private DBObjectCollection Check(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
+        private DBObjectCollection Check(List<ThIfcDistributionFlowElement> sprinklers, Entity frame)
         {
+            var frameEx = frame.Clone() as Entity;
+            if(frame is Polyline polyline)
+            {
+                frameEx = polyline.Buffer(3000.0).OfType<Polyline>().OrderByDescending(o => o.Area).First();
+            }
+            else if(frame is MPolygon polygon)
+            {
+                frameEx = polygon.Buffer(3000.0).OfType<MPolygon>().OrderByDescending(o => o.Area).First();
+            }
             var results = new DBObjectCollection();
             var objs = sprinklers
                     .OfType<ThSprinkler>()
                     .Where(o => o.Category == Category)
-                    .Where(o => pline.Contains(o.Position))
+                    .Where(o => frameEx.IsContains(o.Position))
                     .Select(o => new DBPoint(o.Position))
                     .ToCollection();
             var sprinklerIndex = new ThCADCoreNTSSpatialIndex(objs);
             var spatialIndex = new ThCADCoreNTSSpatialIndex(ParkingStalls);
-            var parkingStalls = spatialIndex.SelectCrossingPolygon(pline);
+            var parkingStalls = spatialIndex.SelectCrossingPolygon(frame);
             parkingStalls.OfType<Polyline>().ForEach(o =>
             {
-                var sprinklersInStall = sprinklerIndex.SelectCrossingPolygon(o);
+                var parkingStallEx = o.Buffer(100.0).OfType<Polyline>().First();
+                var sprinklersInStall = sprinklerIndex.SelectCrossingPolygon(parkingStallEx);
                 if (sprinklersInStall.Count < 2)
                 {
                     results.Add(o);

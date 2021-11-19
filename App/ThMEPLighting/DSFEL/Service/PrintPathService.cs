@@ -1,12 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.CAD;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.DSFEL.Service
@@ -15,29 +12,34 @@ namespace ThMEPLighting.DSFEL.Service
     {
         public void PrintPath(List<Line> extendLines, List<Line> lanes, ThMEPOriginTransformer originTransformer)
         {
-            var paths = new List<Line>(extendLines);
-            paths.AddRange(lanes);
-
-            paths = ConnectLine(paths);
-            foreach (var path in paths)
-            {
-                //originTransformer.Reset(path);
-                InsertConnectPipe(path);
-            }
+            extendLines.ForEach(x => originTransformer.Reset(x));
+            lanes.ForEach(x => originTransformer.Reset(x));
+            //paths = ConnectLine(paths);
+            InsertPath(extendLines, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
+            InsertPath(lanes, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
         }
 
-        public void InsertConnectPipe(Line path)
+        public void InsertPath(List<Line> paths, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingFEIDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME), false);
 
-                path.ColorIndex = 256;
-                path.Layer = ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME;
-                acadDatabase.ModelSpace.Add(path);
+                foreach (var path in paths)
+                {
+                    var pathLine = path.Clone() as Line;
+                    pathLine.ColorIndex = 256;
+                    pathLine.Layer = layer;
+                    acadDatabase.ModelSpace.Add(pathLine);
+                }
             }
         }
 

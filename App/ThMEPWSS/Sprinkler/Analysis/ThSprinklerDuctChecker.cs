@@ -1,16 +1,17 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
-using System.Linq;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
-using ThMEPWSS.Sprinkler.Data;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.Sprinkler.Analysis
@@ -37,24 +38,24 @@ namespace ThMEPWSS.Sprinkler.Analysis
             Reducings = new List<ThIfcDuctReducing>();
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
             var width = 1200.0;
-            var objs = Check(pline, width);
+            var objs = Check(entity, width);
             if(objs.Count > 0)
             {
                 Present(objs);
             }
         }
 
-        private DBObjectCollection Check(Polyline pline, double width)
+        private DBObjectCollection Check(Entity entity, double width)
         {
             var results = new DBObjectCollection();
             //风管
             var ducts = Ducts.Where(o => o.Parameters.Width > width)
                              .Select(o => o.Parameters.Outline).ToCollection();
             var ductIndex = new ThCADCoreNTSSpatialIndex(ducts);
-            ductIndex.SelectCrossingPolygon(pline)
+            ductIndex.SelectCrossingPolygon(entity)
                      .OfType<Polyline>()
                      .ForEach(o => results.Add(o));
 
@@ -62,7 +63,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var elbows = Elbows.Where(o => o.Parameters.PipeOpenWidth > width)
                                .Select(o => o.Parameters.Outline).ToCollection();
             var elbowIndex = new ThCADCoreNTSSpatialIndex(elbows);
-            elbowIndex.SelectCrossingPolygon(pline)
+            elbowIndex.SelectCrossingPolygon(entity)
                       .OfType<Polyline>()
                       .ForEach(o => results.Add(o));
 
@@ -72,7 +73,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                     || o.Parameters.MainSmallDiameter > width)
                            .Select(o => o.Parameters.Outline).ToCollection();
             var teeIndex = new ThCADCoreNTSSpatialIndex(tees);
-            teeIndex.SelectCrossingPolygon(pline)
+            teeIndex.SelectCrossingPolygon(entity)
                     .OfType<Polyline>()
                     .ForEach(o => results.Add(o));
 
@@ -83,7 +84,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                           || o.Parameters.SideSmallEndWidth > width)
                                  .Select(o => o.Parameters.Outline).ToCollection();
             var crossIndex = new ThCADCoreNTSSpatialIndex(crosses);
-            crossIndex.SelectCrossingPolygon(pline)
+            crossIndex.SelectCrossingPolygon(entity)
                       .OfType<Polyline>()
                       .ForEach(o => results.Add(o));
 
@@ -92,7 +93,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                               || o.Parameters.SmallEndWidth > width)
                                      .Select(o => o.Parameters.Outline).ToCollection();
             var reducingIndex = new ThCADCoreNTSSpatialIndex(reducings);
-            reducingIndex.SelectCrossingPolygon(pline)
+            reducingIndex.SelectCrossingPolygon(entity)
                          .OfType<Polyline>()
                          .ForEach(o => results.Add(o));
 

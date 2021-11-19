@@ -69,11 +69,43 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         private void ExplodeText(Entity ent, DBObjectCollection dBObjects, ref double textWidth, ref string textModel)
         {
+            if (ent is BlockReference br)
+            {
+                try
+                {
+                    if (br.Name.Contains("SDRFSETEW"))
+                    {
+                        var objs = new DBObjectCollection();
+                        br.Explode(objs);
+                        foreach (var obj in objs)
+                        {
+                            if (obj.GetType().Name.Contains("ImpEntity"))
+                            {
+                                var objs1 = new DBObjectCollection();
+                                (obj as Entity).Explode(objs1);
+                                objs1.Cast<Entity>()
+                                    .Where(e => e.IsTCHText())
+                                    .ForEach(e => dBObjects.Add(e.ExplodeTCHText()[0]));
+                                objs1.Cast<Entity>()
+                                    .Where(e => e is DBText)
+                                    .ForEach(e => dBObjects.Add(e));
+                            }
+                            
+                        }
+                        return;
+                    }
+                }
+                catch(Exception ex)
+                {
+
+                }
+                
+            }
             if (ent is DBText dbText)//DBText直接添加
             {
                 if (dbText.TextString.Contains("De"))
                 {
-                    return; ;
+                    return;
                 }
                 if (!dbText.TextString.Contains("DN"))
                 {
@@ -87,27 +119,55 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
                 return;
             }
-            if (ent is AlignedDimension || ent is Arc || ent is Line || ent is Circle || ent is Polyline)//炸成线就退出
+            if (ent is AlignedDimension || 
+                ent is Arc || 
+                ent is Line || 
+                ent is Circle || 
+                ent is Polyline || 
+                ent is DBPoint ||
+                ent is Hatch)//炸成线就退出
             {
                 return;
             }
             if (ent.IsTCHText())//天正单行文字,先炸后添加
             {
                 var texts = ent.ExplodeTCHText();
-                foreach (var text in texts)
+                var noteText = "";
+                var insertPt = new Point3d();//文字插入点
+                foreach(var text in texts)
                 {
-                    var tWidth = Math.Abs((text as Entity).GeometricExtents.MaxPoint.X - (text as Entity).GeometricExtents.MinPoint.X);
-                    if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X") && (!(text as DBText).TextString.Trim().Contains("/")))
+                    if(text is DBText db)
                     {
-                        textWidth = tWidth;
-
-                        textModel = (text as DBText).TextString;
+                        noteText += db.TextString;
+                        if(insertPt.Equals(new Point3d()))
+                        {
+                            insertPt = new Point3d(db.Position.X, db.Position.Y, 0);
+                        }
                     }
-                    dBObjects.Add((DBObject)text);
                 }
+                var dBText = CreateText(insertPt, noteText);//创建成标准文字
+                var tWidth = Math.Abs(dBText.GeometricExtents.MaxPoint.X - dBText.GeometricExtents.MinPoint.X);
+                if (tWidth > textWidth && noteText.Trim().Contains("X") && (!noteText.Trim().Contains("/")))
+                {
+                    textWidth = tWidth;
+                    textModel = dBText.TextString;
+                }
+                dBObjects.Add((DBObject)dBText);
+                //foreach (var text in texts)
+                //{
+                //    var tWidth = Math.Abs((text as Entity).GeometricExtents.MaxPoint.X - (text as Entity).GeometricExtents.MinPoint.X);
+                //    if (tWidth > textWidth && (text as DBText).TextString.Trim().Contains("X") && (!(text as DBText).TextString.Trim().Contains("/")))
+                //    {
+                //        textWidth = tWidth;
+
+                //        textModel = (text as DBText).TextString;
+                //    }
+                //    dBObjects.Add((DBObject)text);
+                //}
                 return;
             }
             if(ent.GetRXClass().DxfName.StartsWith("TCH") && ent.GetRXClass().DxfName.Contains("PIPE"))
+            //if (ent.GetRXClass().DxfName.StartsWith("TCH"))
             {
                 var dbObjs = new DBObjectCollection();
                 ent.Explode(dbObjs);
@@ -136,6 +196,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
 
             }
+        }
+
+
+        private DBText CreateText(Point3d insertPt, string text)
+        {
+            string layer = "W-FRPT-SPRL-DIMS";
+            double rotation = 0;
+            return new DBText
+            {
+                TextString = text,
+                Position = insertPt,
+                LayerId = DbHelper.GetLayerId(layer),
+                Rotation = rotation,
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                Height = 350,
+                WidthFactor = 0.7,
+                ColorIndex = (int)ColorIndex.BYLAYER
+            };
         }
     }
 }

@@ -71,7 +71,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
                 CadCache.HideAllWindows();
                 FocusMainWindow();
-                RainDiagram.DrawRainDiagram(vm, false);
+                ThMEPCommandService.Execute(() => RainDiagram.DrawRainDiagram(vm, false), "THYSXTT");
             }
             catch (System.Exception ex)
             {
@@ -115,6 +115,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 CadCache.HideAllWindows();
                 FocusMainWindow();
                 ThMEPWSS.Common.Utils.CreateFloorFraming(false);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                CadCache.ShowAllWindows();
+            }
+        }
+
+        private void ImageButton_Click_2(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CadCache.HideAllWindows();
+                FocusMainWindow();
+                ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawRainFlatDiagram(vm);
             }
             catch (System.Exception ex)
             {

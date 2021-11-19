@@ -42,7 +42,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = new ThMEPWSS.ReleaseNs.DrainageSystemNs.CommandContext()
                 { ViewModel = vm, window = this };
-                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.TryUpdateByRange(CadCache.TryGetRange(),true);
+                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.TryUpdateByRange(CadCache.TryGetRange(), true);
             };
             Closed += (s, e) => { ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext = null; };
 
@@ -70,7 +70,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
                 CadCache.HideAllWindows(); ;
                 FocusMainWindow();
-                ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(vm, false);
+                ThMEPCommandService.Execute(() => ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(vm, false), "THPSXTT");
             }
             catch (Exception ex)
             {
@@ -113,6 +113,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 CadCache.HideAllWindows(); ;
                 FocusMainWindow();
                 ThMEPWSS.Common.Utils.CreateFloorFraming(false);
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                CadCache.ShowAllWindows();
+            }
+        }
+
+        private void ImageButton_Click_2(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                CadCache.HideAllWindows();
+                FocusMainWindow();
+                ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram(vm);
             }
             catch (System.Exception ex)
             {

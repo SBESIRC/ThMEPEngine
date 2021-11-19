@@ -1,14 +1,17 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.Sprinkler.Service;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.Sprinkler.Analysis
@@ -22,22 +25,22 @@ namespace ThMEPWSS.Sprinkler.Analysis
             PipeLine = new DBObjectCollection();
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            var results = Check(sprinklers, pline);
+            var results = Check(sprinklers, entity);
             if (results.Count > 0)
             {
                 Present(results);
             }
         }
 
-        private List<Point3d> Check(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
+        private List<Point3d> Check(List<ThIfcDistributionFlowElement> sprinklers, Entity entity)
         {
             var results = new List<Point3d>();
             var points = sprinklers
                     .OfType<ThSprinkler>()
                     .Where(o => o.Category == Category)
-                    .Where(o => pline.Contains(o.Position))
+                    .Where(o => entity.IsContains(o.Position))
                     .Select(o => o.Position)
                     .ToList();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(PipeLine);

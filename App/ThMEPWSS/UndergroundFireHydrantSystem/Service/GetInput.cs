@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Windows.Forms;
 using ThCADCore.NTS;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -19,9 +21,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pointList = new List<Point3dEx>();//点集
             var ptVisit = new Dictionary<Point3dEx, bool>();//访问标志
 
-            var hydrantEngine = new ThExtractHydrant();//提取消火栓管段末端
+            var hydrantEngine = new ThExtractHydrant();//提取立管
             var hydrantDB = hydrantEngine.Extract(acadDatabase, selectArea);
             fireHydrantSysIn.HydrantPosition = hydrantEngine.CreatePointList();
+
+            var fireHydrantEngine = new ThExtractFireHydrant();//提取室内消火栓平面
+            fireHydrantEngine.Extract(acadDatabase.Database, selectArea);
+            var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.DBobjs);
+            fireHydrantEngine.CreateVerticalHydrantDic(fireHydrantSysIn.HydrantPosition, fireHydrantSysIn);
 
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
@@ -29,11 +36,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
 
+            PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
             PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
-            PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.HydrantPosition);//删除两个点都是端点的线段
-            PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
-            PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                             //PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList);
             
+            PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.HydrantPosition);//删除两个点都是端点的线段
+
+            //PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
+            PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                             //PipeLineList.ConnectBreakLine(ref lineList, fireHydrantSysIn, ref pointList);
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
             var valveEngine = new ThExtractValveService();//提取阀
             var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
@@ -72,8 +81,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
-            var labelLine = labelEngine.CreateLabelLineList();//----12s----
-                
+            var labelLine = labelEngine.CreateLabelLineList(labelDB);//----12s----
+
             double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
@@ -98,10 +107,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             fireHydrantSysIn.SlashDic = DNPipeEngine.GetSlashDic(leadLineDic, segLineDic);//斜点标注对
             PtDic.CreateDNDic(ref fireHydrantSysIn, PipeDN, lineList);//创建DN字典对
-                
-            var fireHydrantEngine = new ThExtractFireHydrant();//提取室内消火栓平面
-            fireHydrantEngine.Extract(acadDatabase.Database, selectArea);
-            var fhSpatialIndex = new ThCADCoreNTSSpatialIndex(fireHydrantEngine.DBobjs);
 
             var labelPtDic = PtDic.CreateLabelPtDic(fireHydrantSysIn.HydrantPosition, labelLine);//把在同一条标记线上的点聚集
             var labelLineDic = PtDic.CreateLabelLineDic(labelPtDic, labelLine);//找到标注线
@@ -109,6 +114,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             var ptTextDic = PtDic.CreatePtTextDic(labelPtDic, labelLineDic, textSpatialIndex);//直接生成点和text对应
             
+ 
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             
             fireHydrantSysIn.TextWidth = textWidth + 100;

@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
+using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -55,9 +59,9 @@ namespace ThMEPEngineCore.Engine
         {
             if (IsSpatialElement(br))
             {
-                var objs = CAD.ThDrawTool.Explode(br);
+                var objs = ExplodeWithVisible(br);
                 objs = ExplodeToBasic(objs);
-                var obb = ToObb(objs);
+                var obb = ToObb(objs.PolygonsEx());
                 if (obb.Area > 1.0)
                 {
                     var solid = obb.ToSolid();
@@ -73,8 +77,12 @@ namespace ThMEPEngineCore.Engine
         private Polyline ToObb(DBObjectCollection basicCurves)
         {
             var curves = new DBObjectCollection();
-            basicCurves.Cast<Curve>().ForEach(e =>
+            basicCurves.OfType<Entity>().ForEach(e =>
             {
+                if(e is MPolygon mPolygon)
+                {
+                    e = mPolygon.Shell();
+                }
                 var newEnt = ThTesslateService.Tesslate(e, 100.0);
                 if (newEnt != null)
                 {
@@ -130,6 +138,28 @@ namespace ThMEPEngineCore.Engine
         private bool CheckBlockNameIsValid(Entity e)
         {
             return e is BlockReference;
+        }
+
+        private DBObjectCollection ExplodeWithVisible(BlockReference blockReference)
+        {
+            var objs = new DBObjectCollection();
+            var newObjs = new DBObjectCollection();
+            blockReference.Explode(objs);
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Curve curve)
+                {
+                    newObjs.Add(curve);
+                }
+                else if (o is BlockReference br)
+                { 
+                    ExplodeWithVisible(br).OfType<Entity>().ForEach(e => newObjs.Add(e));
+                }
+            });
+            return newObjs.OfType<Entity>()
+                .Where(e => e.Visible)
+                .Where(e => e.Bounds.HasValue)
+                .ToCollection();
         }
     }
 }

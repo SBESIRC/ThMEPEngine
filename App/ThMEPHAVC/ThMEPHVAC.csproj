@@ -34,10 +34,19 @@
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
+    <Compile Include="FanConnect\Engine\ThFanCURecognitionEngine.cs" />
+    <Compile Include="FanConnect\Model\ThFanColumnModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanCUModel.cs" />
     <Compile Include="FanConnect\Model\ThFanPipeModel.cs" />
     <Compile Include="FanConnect\Model\ThFanMainLineModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanRoomModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanShearWallModel.cs" />
     <Compile Include="FanConnect\Model\ThFanTreeModel.cs" />
     <Compile Include="FanConnect\Service\ThAirPipeExtendServiece.cs" />
+    <Compile Include="FanConnect\Service\ThBuildElementExtractServiece.cs" />
+    <Compile Include="FanConnect\Service\ThCreatePathServiece.cs" />
+    <Compile Include="FanConnect\Service\ThCreatePipeService.cs" />
+    <Compile Include="FanConnect\Service\ThEquipElementExtractServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtendBaseServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtractServiece.cs" />
     <Compile Include="FanConnect\Service\ThWaterPipeExtendServiece.cs" />
@@ -214,7 +223,6 @@
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="FanConnect\Engine\" />
     <Folder Include="LoadCalculation\Engine\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

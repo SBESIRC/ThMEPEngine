@@ -1,22 +1,51 @@
-﻿using NFox.Cad;
-using System.Linq;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThRoomOutlineSimplifier
+    public class ThRoomOutlineSimplifier:ThElementSimplifier
     {
-        private const double MINIMUM_ROOM_AREA = 100.0;
-        private const double MINIMUM_ROOM_CLOSED_TOLERANCE = 1000.0;
-        public static DBObjectCollection MakeValid(DBObjectCollection curves)
+        public double ClOSED_DISTANC_TOLERANCE
         {
-            return curves.Cast<Polyline>().Select(o => ThMEPFrameService.NormalizeEx(o, MINIMUM_ROOM_CLOSED_TOLERANCE)).ToCollection();
+            get;
+            set;
         }
 
-        public static DBObjectCollection Simplify(DBObjectCollection curves)
+        public ThRoomOutlineSimplifier()
         {
-            return curves.Cast<Polyline>().Where(o => o.Area > MINIMUM_ROOM_AREA).ToCollection();
+            OFFSET_DISTANCE = 20.0;
+            DISTANCE_TOLERANCE = 1.0;
+            TESSELLATE_ARC_LENGTH = 100.0;
+            ClOSED_DISTANC_TOLERANCE = 1000.0; // 待定
+            AREATOLERANCE = 100.0; //过滤房间面积
+        }
+
+        public List<Polyline> Close(List<Polyline> polys)
+        {
+            var results = new List<Polyline>();
+            polys.ForEach(p =>
+            {
+                if(IsExactClosed(p))
+                {
+                    results.Add(p);                    
+                }
+                else if(IsApproximateClosed(p))
+                {
+                    var clone = p.Clone() as Polyline;
+                    clone.Closed = true;
+                    results.Add(clone);
+                }
+            });
+            return results;
+        }
+
+        private bool IsExactClosed(Polyline polyline)
+        {
+            return polyline.Closed;
+        }
+        private bool IsApproximateClosed(Polyline polyline)
+        {
+            return polyline.StartPoint.DistanceTo(polyline.EndPoint) <= ClOSED_DISTANC_TOLERANCE;
         }
     }
 }

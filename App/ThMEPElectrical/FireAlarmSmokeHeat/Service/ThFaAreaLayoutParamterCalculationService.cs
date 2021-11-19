@@ -21,7 +21,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         /// <param name="thetaInt"></param>
         /// <param name="isSmokeSensor">true:smoke senser, false:heat senser</param>
         /// <returns></returns>
-        public static double calculateRadius(double roomArea, int hightInt, int thetaInt, ThFaSmokeCommon.layoutType layoutType)
+        public static double CalculateRadius(double roomArea, int hightInt, int thetaInt, ThFaSmokeCommon.layoutType layoutType)
         {
             double radius = 5800;
             var i = 0;
@@ -68,13 +68,13 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         }
 
 
-        public static List<Polyline> getPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale, (double, double) size)
+        public static List<Polyline> GetPriorityBoundary(Dictionary<Point3d, Vector3d> layoutPts, double scale, (double, double) size)
         {
             var blkBoundary = new List<Polyline>();
 
             foreach (var blk in layoutPts)
             {
-                var boundary = getBoundary(blk.Key, blk.Value, scale, size);
+                var boundary = GetBoundary(blk.Key, blk.Value, scale, size);
                 blkBoundary.Add(boundary);
             }
 
@@ -82,7 +82,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         }
 
 
-        private static Polyline getBoundary(Point3d pt, Vector3d dir, double scale, (double, double) size)
+        private static Polyline GetBoundary(Point3d pt, Vector3d dir, double scale, (double, double) size)
         {
             var xDir = dir.RotateBy(90 * Math.PI / 180, -Vector3d.ZAxis).GetNormal();
             var pt0 = pt + dir * (size.Item2 * scale / 2) - xDir * (size.Item1 * scale / 2);
@@ -101,7 +101,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Service
         }
 
 
-        public static double getPriorityExtendValue(List<string> blkNameList, double scale)
+        public static double GetPriorityExtendValue(List<string> blkNameList, double scale)
         {
             double extend = -1;
             var size = new List<double>();

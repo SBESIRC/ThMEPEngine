@@ -102,42 +102,40 @@ namespace ThMEPEngineCore.AFASRegion
         }
 
         /// <summary>
+        /// 墙板厚度
+        /// </summary>
+        public double WallThickness { get; set; } = 100;
+
+        /// <summary>
         /// 分割房间探测范围
         /// </summary>
         /// <param name="Roomdata">房间框线</param>
         /// <param name="detectorType">探测器类型</param>
         /// <returns></returns>
-        public List<Entity> DivideRoomWithDetectionRegion(Polyline storyPL, AFASDetector detectorType = AFASDetector.SmokeDetectorLow)
+        public List<Entity> DivideRoomWithDetectionRegion(Polyline storyPL)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var ArrangeableSpace = new List<Entity>();
-                var pts = storyPL.Vertices();
-                //提取房间框线
-                var roomBuidler = new ThRoomBuilderEngine();
-                var Rooms = roomBuidler.BuildFromMS(acadDatabase.Database, pts);
-                if (Rooms.Count == 0)
-                {
-                    return ArrangeableSpace;
-                }
-
-                var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acadDatabase.Database, pts);
-       
-                //建筑墙
-                var archWallEngine = new ThDB3ArchWallRecognitionEngine();
-                archWallEngine.Recognize(acadDatabase.Database, pts);
-
-                AFASBeamExtendFactory beamExtendFactory = new AFASBeamExtendFactory(allStructure, archWallEngine);
-                beamExtendFactory.detectorType = detectorType;
-                beamExtendFactory.ExtendBeamCenterLine();
-
-                //计算每个房间可布置区域
-                Rooms.ForEach(room =>
-                {
-                    ArrangeableSpace.AddRange(beamExtendFactory.DetectionRegions(room.Boundary).Cast<Entity>());
-                });
+            var ArrangeableSpace = new List<Entity>();
+            if (Columns.IsNull())
+                Columns = new List<ThIfcBuildingElement>();
+            if (Walls.IsNull())
+                Walls = new List<ThIfcBuildingElement>();
+            if (Holes.IsNull())
+                Holes = new List<Polyline>();
+            if (!ReferBeams || Beams.IsNull())
+                Beams = new List<ThIfcBuildingElement>();
+            if (Rooms.IsNull() || Rooms.Count == 0)
                 return ArrangeableSpace;
-            }
+            AFASBeamContour.WallThickness = WallThickness;
+            AFASBeamExtendFactory beamExtendFactory = new AFASBeamExtendFactory();
+            beamExtendFactory.Initialize(Columns, Beams, Walls, Holes);
+            //beamExtendFactory.detectorType = detectorType;
+            beamExtendFactory.ExtendBeamCenterLine();
+            //计算每个房间可布置区域
+            Rooms.ForEach(room =>
+            {
+                ArrangeableSpace.AddRange(beamExtendFactory.DetectionRegions(room.Boundary).Cast<Entity>());
+            });
+            return ArrangeableSpace;
         }
 
 
@@ -163,6 +161,7 @@ namespace ThMEPEngineCore.AFASRegion
                 if (Rooms.IsNull() || Rooms.Count == 0)
                     return ArrangeableSpace;
                 AFASRegionService regionService = new AFASRegionService();
+                regionService.WallThickness=WallThickness;
                 regionService.BufferDistance = BufferDistance;
                 regionService.Initialize(Columns, Beams, Walls,Holes);
                 //计算每个房间可布置区域

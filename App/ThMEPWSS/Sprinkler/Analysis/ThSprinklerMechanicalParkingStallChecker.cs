@@ -1,15 +1,18 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.FlushPoint.Data;
-using System.Collections.Generic;
 using ThMEPWSS.Sprinkler.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -23,11 +26,11 @@ namespace ThMEPWSS.Sprinkler.Analysis
             ParkingStalls = new DBObjectCollection();
         }
 
-        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Polyline pline)
+        public override void Check(List<ThIfcDistributionFlowElement> sprinklers, List<ThGeometry> geometries, Entity entity)
         {
-            if (ParkingStalls.Count > 0) 
+            if (ParkingStalls.Count > 0)
             {
-                var results = Check(sprinklers, pline);
+                var results = Check(sprinklers, entity);
                 if (results.Count > 0)
                 {
                     Present(results);
@@ -35,18 +38,20 @@ namespace ThMEPWSS.Sprinkler.Analysis
             }
         }
 
-        private DBObjectCollection Check(List<ThIfcDistributionFlowElement> sprinklers, Polyline pline)
+        private DBObjectCollection Check(List<ThIfcDistributionFlowElement> sprinklers, Entity entity)
         {
             var results = new DBObjectCollection();
             var sideSprinkler = sprinklers
                     .OfType<ThSprinkler>()
                     .Where(o => o.Category == Category);
             var sprinklersPosition = sideSprinkler
-                    .Where(o => pline.Contains(o.Position))
+                    .Where(o => entity.IsContains(o.Position))
                     .Select(o => new DBPoint(o.Position))
                     .ToCollection();
             var sprinklersIndex = new ThCADCoreNTSSpatialIndex(sprinklersPosition);
-            ParkingStalls.OfType<Polyline>().ForEach(o =>
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(ParkingStalls);
+            var parkingStalls = spatialIndex.SelectCrossingPolygon(entity);
+            parkingStalls.OfType<Polyline>().ForEach(o =>
             {
                 var lines = new DBObjectCollection();
                 o.Explode(lines);
@@ -65,7 +70,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                                        {
                                            if (sprinkler.Position.DistanceTo(point) < 1.0)
                                            {
-                                               if(sprinkler.Direction.GetAngleTo(dirction) < Math.PI / 36)
+                                               if (sprinkler.Direction.GetAngleTo(dirction) < Math.PI / 36)
                                                {
                                                    count++;
                                                }

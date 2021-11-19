@@ -22,6 +22,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <returns></returns>
         public static NetTopologySuite.Geometries.Geometry UnVisibleArea(MPolygon mPolygon, List<Point3d> points, double radius)
         {
+            if (points.Count == 0)
+            {
+                return mPolygon.ToNTSPolygon();
+            }
             //计算过点集覆盖的真实面积
             List<Polygon> Detect = new List<Polygon>();
             foreach (Point3d pt in points)
@@ -42,6 +46,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <returns></returns>
         public static NetTopologySuite.Geometries.Geometry UnCoverArea(MPolygon mPolygon, List<Point3d> points, double radius)
         {
+            if(points.Count == 0)
+            {
+                return mPolygon.ToNTSPolygon();
+            }
             List<Polygon> Detect = new List<Polygon>();
             foreach (Point3d pt in points)
             {

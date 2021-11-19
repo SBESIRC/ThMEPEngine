@@ -29,8 +29,8 @@ namespace ThMEPWSS.Hydrant.Service
         public List<ThIfcRoom> Rooms { get; set; }
         public List<Tuple<Entity, Point3d, List<Entity>>> Covers { get; set; }
         public List<string> FireExtinguisherBlkNames { get; set; }
-
         private ThAILayerManager AiLayerManager { get; set; }
+        private const double RoomOutsideOffsetLength = 50.0;
 
         public ThCheckFireExtinguisherService(ThFireHydrantVM fireHydrantVM)
         {
@@ -45,8 +45,10 @@ namespace ThMEPWSS.Hydrant.Service
         {
             ThStopWatchService.Start();
             var extractors = FirstExtract(db, pts); //获取数据
-            var roomExtractor = extractors.Where(o => o is ThRoomExtractor).First() as ThRoomExtractor;
+            var roomExtractor = extractors.Where(o => o is ThHydrantRoomExtractor).First() as ThHydrantRoomExtractor;
             Rooms = roomExtractor.Rooms; //获取房间
+            var outsideFrames = roomExtractor.BuildOutsideFrames();
+            outsideFrames = roomExtractor.Offset(outsideFrames, RoomOutsideOffsetLength);
 
             var ptsList = new List<Point3dCollection> { };
             if (mode == "P")
@@ -60,6 +62,8 @@ namespace ThMEPWSS.Hydrant.Service
 
             var frame = new Point3dCollection();
             SecondExtract(db, extractors, ptsList, frame);
+            extractors.Add(new ThExternalSpaceExtractor(outsideFrames));
+
             ThStopWatchService.Stop();
             ThStopWatchService.Print("提取数据耗时：");
 
@@ -68,7 +72,7 @@ namespace ThMEPWSS.Hydrant.Service
             var doorOpeningExtractor = extractors
                 .Where(o => o is ThHydrantDoorOpeningExtractor)
                 .First() as ThHydrantDoorOpeningExtractor;
-            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList());
+            doorOpeningExtractor.FilterOuterDoors(Rooms.Select(o => o.Boundary).ToList(), outsideFrames);
 
             //用于判断私立空间或公立空间
             IRoomPrivacy privacyCheck = new ThJudgeRoomPrivacyService();
@@ -169,13 +173,7 @@ namespace ThMEPWSS.Hydrant.Service
             //提取房间和外部空间
             var extractors = new List<ThExtractorBase>()
                 {
-                    new ThExternalSpaceExtractor()
-                    {
-                        UseDb3Engine=false,
-                        FilterMode = FilterMode.Cross,
-                        ElementLayer=AiLayerManager.OuterBoundaryLayer,
-                    },
-                    new ThRoomExtractor()
+                    new ThHydrantRoomExtractor()
                     {
                         UseDb3Engine=true,
                         FilterMode = FilterMode.Cross,

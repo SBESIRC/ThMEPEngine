@@ -1,6 +1,9 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -21,14 +24,12 @@ namespace ThMEPElectrical.AFAS.Data
 {
     public class ThAFASRoomExtractor : ThRoomExtractor, IGroup, ISetStorey, ITransformer
     {
-        public bool IsWithHole { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
 
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
 
         public ThAFASRoomExtractor()
         {
-            IsWithHole = true;
             StoreyInfos = new List<ThStoreyInfo>();
         }
         public override void Extract(Database database, Point3dCollection pts)
@@ -62,7 +63,7 @@ namespace ThMEPElectrical.AFAS.Data
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
-            roomBuilder.Build(rooms, marks, IsWithHole);
+            roomBuilder.Build(rooms, marks, true);
             Rooms = rooms;
             //把弧线转成直线
             Clean();
@@ -76,6 +77,114 @@ namespace ThMEPElectrical.AFAS.Data
                 }
                 o.Name = string.Join(";", o.Tags.ToArray());
             });
+        }
+
+        public List<ThIfcRoom> SplitByFrames(DBObjectCollection frames)
+        {
+            var roomCollector = new List<ThIfcRoom>();
+            var inFrames = FilterInFrames(Rooms, frames); // 收集完全在Frames里面的房间
+            roomCollector.AddRange(inFrames);
+
+            var inFrameBoundaries = inFrames.Select(r => r.Boundary).ToCollection();
+            var notInFrames = Rooms.Where(o => !inFrameBoundaries.Contains(o.Boundary)); // 得到不在防火分区里的房间
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(frames);
+            var bufferService = new ThNTSBufferService();
+            notInFrames.ForEach(r =>
+            {
+                var newBoundary = bufferService.Buffer(r.Boundary, -1.0);
+                var objs = spatialIndex.SelectCrossingPolygon(newBoundary);
+                if (objs.Count > 0)
+                {
+                    var inters = Intersection(r.Boundary, objs);
+                    inters.OfType<Entity>().ForEach(e =>
+                    {
+                        var room = new ThIfcRoom()
+                        {
+                            Boundary = e,
+                            Tags = r.Tags,
+                            Name =r.Name,
+                            Uuid = Guid.NewGuid().ToString(),
+                        };
+                        roomCollector.Add(room);
+                    });
+                }
+            });
+            return roomCollector;
+        }
+
+        public void UpdateRooms(List<ThIfcRoom> newRooms)
+        {
+            this.Rooms = newRooms;
+        }
+
+        private List<ThIfcRoom> FilterInFrames(List<ThIfcRoom> rooms ,
+            DBObjectCollection frames,double edgeTolerance=1.0)
+        {
+            var objs = rooms.Select(o=>o.Boundary).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var collector = new DBObjectCollection(); // 收集在frames里面的房间
+            var bufferService = new ThNTSBufferService();
+            frames.OfType<Entity>().ForEach(e =>
+            {
+                var newFrame = bufferService.Buffer(e, edgeTolerance); // 用于解决边界重叠
+                var inners = spatialIndex.SelectWindowPolygon(newFrame);
+                collector = collector.Union(inners);
+            });
+            return rooms.Where(r=> collector.Contains(r.Boundary)).ToList();
+        }
+
+        private DBObjectCollection Intersection(Entity entity, DBObjectCollection objs)
+        {
+            //减去不在Entity里面的东西
+            var results = ThCADCoreNTSEntityExtension.Intersection(entity, objs, true);
+            results = ClearZeroPolygon(results); //清除面积为零
+            results = MakeValid(results); //解决自交的Case
+            results = ClearZeroPolygon(results); //清除面积为零
+            results = DuplicatedRemove(results); //去重
+            return results;
+        }
+
+        private DBObjectCollection ClearZeroPolygon(DBObjectCollection objs, double areaTolerance=1.0)
+        {
+            return objs.Cast<Entity>().Where(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    return polyline.Area > areaTolerance;
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    return mPolygon.Area > areaTolerance;
+                }
+                else
+                {
+                    return false;
+                }
+            }).ToCollection();
+        }
+
+        private DBObjectCollection MakeValid(DBObjectCollection polygons)
+        {
+            var results = new DBObjectCollection();
+            polygons.Cast<Entity>().ForEach(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    var res = polyline.MakeValid();
+                    res.Cast<Entity>().ForEach(e => results.Add(e));
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    var res = mPolygon.MakeValid(true);
+                    res.Cast<Entity>().ForEach(e => results.Add(e));
+                }
+            });
+            return results;
+        }
+
+        private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
+        {
+            return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }
 
         public override List<ThGeometry> BuildGeometries()
