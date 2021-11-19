@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Command
@@ -143,6 +144,51 @@ namespace ThMEPHVAC.FanConnect.Command
             var objcet = polyLine.BufferPL(expandLength)[0];
             return objcet as Polyline;
         }
+        /// <summary>
+        /// 判断是否和外框线相交
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        public static bool CheckIntersectWithFrame(Curve line, Polyline frame)
+        {
+            return frame.IsIntersects(line);
+        }
+        /// <summary>
+        /// 用nts的selectCrossing计算是否相交
+        /// </summary>
+        /// <returns></returns>
+        public static bool LineIntersctBySelect(List<Polyline> polylines, Polyline line, double bufferWidth)
+        {
+            DBObjectCollection dBObject = new DBObjectCollection() { line };
+            foreach (Polyline polyline in dBObject.Buffer(bufferWidth))
+            {
+                if (SelelctCrossing(polylines, polyline).Count > 0)
+                {
+                    return true;
+                }
+            }
 
+            return false;
+        }
+        public static bool LineIntersctBySelect(List<Line> lines, Polyline pl)
+        {
+            foreach (var l in lines)
+            {
+                if (l.IsIntersects(pl))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static List<Polyline> SelelctCrossing(List<Polyline> polylines, Polyline polyline)
+        {
+            var objs = polylines.ToCollection();
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var resHoles = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+            return resHoles;
+        }
     }
 }
