@@ -1,9 +1,18 @@
-﻿using Dreambuild.AutoCAD;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
 
@@ -21,47 +30,32 @@ namespace ThMEPHVAC.FanConnect.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var database = AcadDatabase.Active())
             {
-                //选择一个点
-                var pt = ThFanConnectUtils.SelectPoint();
-                var startPt = ThBuildElementExtractServiece.GetPipeStartPt(pt.CreateSquare(50).Vertices());
-                //获取范围
-                var area = ThFanConnectUtils.SelectArea();
+                //选择水管起点
+                var startPt = ThFanConnectUtils.SelectPoint();
                 //获取风机设备
-                var fucs = ThEquipElementExtractServiece.GetFCUModels(area);
-                //获取剪力墙
-                var shearWalls = ThBuildElementExtractServiece.GetShearWalls(area);
-                //获取结构柱
-                var columns = ThBuildElementExtractServiece.GetColumns(area);
+                var fucs = ThFanConnectUtils.SelectFanCUModel();
+                //水管干路和支干路
+                var pipes = ThEquipElementExtractServiece.GetFanPipes();
                 //获取房间框线
-                var rooms = ThBuildElementExtractServiece.GetBuildRooms(area);
-                //AI洞口
-                var holes = ThBuildElementExtractServiece.GetAIHole(area);
+                var rooms = ThBuildElementExtractServiece.GetBuildRooms();
+                ////AI洞口
+                var holes = ThBuildElementExtractServiece.GetAIHole();
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
+                pipeService.PipeWidth = 400.0;
                 pipeService.PipeStartPt = startPt;
-
-                foreach (var shearWall in shearWalls)
-                {
-                    pipeService.AddObstacleHole(shearWall.Outline);
-                }
-                foreach (var column in columns)
-                {
-                    pipeService.AddObstacleHole(column.Outline);
-                }
+                pipeService.EquipModel = fucs;
+                pipeService.TrunkLines = pipes;
                 foreach (var room in rooms)
                 {
-                    pipeService.AddObstacleRoom(room.Outline);
+                    pipeService.AddObstacleRoom(room);
                 }
                 foreach(var hole in holes)
                 {
                     pipeService.AddObstacleHole(hole);
                 }
-                foreach(var fuc in fucs)
-                {
-                    pipeService.AddEquipPoint(fuc.FanPoint);
-                    pipeService.AddEquipmentObbs(fuc.FanObb);
-                }
                 var pipeTree = pipeService.CreatePipeLine(0);
+                return;
                 //扩展管路
                 ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;

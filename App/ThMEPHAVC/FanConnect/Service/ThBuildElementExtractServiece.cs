@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPHVAC.FanConnect.Model;
@@ -61,43 +62,20 @@ namespace ThMEPHVAC.FanConnect.Service
         /// </summary>
         /// <param name="selectArea"></param>
         /// <returns></returns>
-        public static List<ThFanRoomModel> GetBuildRooms(Point3dCollection selectArea)
+        public static List<Entity> GetBuildRooms()
         {
             using (var database = AcadDatabase.Active())
-            using (var roomEngine = new ThRoomBuilderEngine())
             {
-                var rooms = roomEngine.BuildFromMS(database.Database, selectArea);
-                List<ThFanRoomModel> buildRooms = new List<ThFanRoomModel>();
-                foreach (var room in rooms)
-                {
-                    buildRooms.Add(ThFanRoomModel.Create(room.Boundary));
-                }
-                return buildRooms;
+                var tmpRooms = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains("AI-房间框线")).ToList();
+                return tmpRooms;
             }
         }
-        public static List<Polyline> GetAIHole(Point3dCollection selectArea)
+        public static List<Entity> GetAIHole()
         {
             using (var database = AcadDatabase.Active())
             {
-                var retHoles = new List<Polyline>();
-                var tmpHoles = database.ModelSpace.OfType<Entity>().Where(o=>o.Layer.Contains("AI-洞口")).ToList();
-
-                if(tmpHoles.Count != 0)
-                {
-
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(tmpHoles.ToCollection());
-
-                    var filterObjs = spatialIndex.SelectCrossingPolygon(selectArea);
-
-                    foreach (var hole in filterObjs)
-                    {
-                        if (hole is Polyline)
-                        {
-                            retHoles.Add(hole as Polyline);
-                        }
-                    }
-                }
-                return retHoles;
+                var entity = database.ModelSpace.OfType<Entity>().Where(o=>o.Layer.Contains("AI-洞口")).ToList();
+                return entity;
             }
         }
 
