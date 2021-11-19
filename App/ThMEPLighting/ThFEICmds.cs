@@ -25,7 +25,7 @@ namespace ThMEPLighting
     public class ThFEICmds
     {
         [CommandMethod("TIANHUACAD", "THSSLJ", CommandFlags.Modal)]
-        public void ThFEI()
+        public void THSSLJ()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -177,7 +177,7 @@ namespace ThMEPLighting
         }
 
         [CommandMethod("TIANHUACAD", "THSSZSDBZ", CommandFlags.Modal)]
-        public void ThMEGLBZ()
+        public void THSSZSDBZ()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -269,7 +269,7 @@ namespace ThMEPLighting
         }
 
         [CommandMethod("TIANHUACAD", "THDSSSZSDBZ", CommandFlags.Modal)]
-        public void ThDSMEGLBZ()
+        public void THDSSSZSDBZ()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
