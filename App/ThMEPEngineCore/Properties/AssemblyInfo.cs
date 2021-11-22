@@ -40,6 +40,7 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreCGALCmds))]
 #endif
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreApp))]
+[assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreGeCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreRoomCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreExtractCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreInternalCmds))]

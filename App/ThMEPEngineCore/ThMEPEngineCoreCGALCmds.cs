@@ -16,7 +16,6 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.IO;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Model;
@@ -400,97 +399,6 @@ namespace ThMEPEngineCore
                                 Draw.Line(linePts.ToArray());
                             }
                         }
-                    }
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THPCENTERLINE", CommandFlags.Modal)]
-        public void THPCENTERLINE()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-
-                objs = objs.BuildArea();
-                foreach (Entity obj in objs)
-                {
-                    ThMEPPolygonService.CenterLine(obj).ForEach(o =>
-                    {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.ColorIndex = 1;
-                    });
-                }
-
-
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THPPARTITION", CommandFlags.Modal)]
-        public void THPPARTITION()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var psr = Active.Editor.GetSelection();
-                if (psr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pko = new PromptKeywordOptions("\n请指定分割方式")
-                {
-                    AllowNone = true
-                };
-                pko.Keywords.Add("UCS", "UCS", "UCS(U)");
-                pko.Keywords.Add("RADIUS", "RADIUS", "RADIUS(R)");
-                pko.Keywords.Default = "RADIUS";
-                var pe = Active.Editor.GetKeywords(pko);
-                if (pe.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pdr = Active.Editor.GetDistance("\n请输入参数");
-                if (pdr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in psr.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-
-                objs = objs.BuildArea();
-                foreach (Entity obj in objs)
-                {
-                    if (pe.StringResult == "RADIUS")
-                    {
-                        ThMEPPolygonService.Partition(obj, pdr.Value).Keys.OfType<Polyline>().ForEach(o =>
-                        {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.ColorIndex = 1;
-                        });
-
-                    }
-                    else if (pe.StringResult == "UCS")
-                    {
-                        ThMEPPolygonService.PartitionUCS(obj, pdr.Value).Keys.OfType<Polyline>().ForEach(o =>
-                        {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.ColorIndex = 1;
-                        });
                     }
                 }
             }
