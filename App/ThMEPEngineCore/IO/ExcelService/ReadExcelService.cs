@@ -96,7 +96,7 @@ namespace ThMEPEngineCore.IO.ExcelService
             return dataSet;
         }
 
-        public void ConvertExcelToDataSet(DataSet dataSet, string path)
+        public void ConvertDataSetToExcel(DataSet dataSet, string path)
         {
             using (MemoryStream ms = DataSetToExcel(dataSet))
             {

@@ -14,6 +14,7 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
     public partial class WiringConnectingViewModel : NotifyPropertyChangedBase
     {
         static string roomConfigUrl = ThCADCommon.SupportPath() + "\\连线回路配置表.xlsx";
+        ReadExcelService excelSrevice = new ReadExcelService();
         private ObservableCollection<LoopCinfg> _configLst = new ObservableCollection<LoopCinfg>();
         public WiringConnectingViewModel()
         {
@@ -23,6 +24,12 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
             {
                 _configLst.Add(ConvertToModel(table));
             }
+        }
+
+        public void UpdateDataSource()
+        {
+            var dataset = ConvertToDataset();
+            excelSrevice.ConvertDataSetToExcel(dataset, roomConfigUrl);
         }
 
         public ObservableCollection<LoopCinfg> configLst
@@ -41,7 +48,6 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
         /// <returns></returns>
         private DataSet GetExcelContent(string path)
         {
-            ReadExcelService excelSrevice = new ReadExcelService();
             return excelSrevice.ReadExcelToDataSet(path, true);
         }
 
@@ -64,6 +70,34 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
                 loopConfig.configModels.Add(model);
             }
             return loopConfig;
+        }
+
+        /// <summary>
+        /// 将数据转换成dataset
+        /// </summary>
+        /// <returns></returns>
+        private DataSet ConvertToDataset()
+        {
+            DataSet dataSet = new DataSet();
+            foreach (var config in configLst)
+            {
+                DataTable dt = new DataTable();
+                dt.TableName = config.systemType;
+                dt.Columns.Add(ConfigModel.loopTypeColumn);
+                dt.Columns.Add(ConfigModel.layerTypeColumn);
+                dt.Columns.Add(ConfigModel.pointNumColumn);
+                foreach (var model in config.configModels)
+                {
+                    DataRow dr = dt.NewRow();
+                    dr[ConfigModel.loopTypeColumn] = model.loopType;
+                    dr[ConfigModel.layerTypeColumn] = model.layerType;
+                    dr[ConfigModel.pointNumColumn] = model.pointNum;
+                    dt.Rows.Add(dr);
+                }
+                dataSet.Tables.Add(dt);
+            }
+
+            return dataSet;
         }
     }
 }

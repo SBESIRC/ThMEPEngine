@@ -35,6 +35,18 @@ namespace TianHua.Electrical.UI.WiringConnecting
             ThWiringSettingUI thWiringSettingUI = new ThWiringSettingUI();
             thWiringSettingUI.ShowDialog();
         }
+
+        private void btnConnectWiring_Click(object sender, RoutedEventArgs e)
+        {
+            if (this.fireAlarmSys.IsChecked == true)
+            {
+
+            }
+            else if (this.lightingSys.IsChecked == true)
+            {
+
+            }
+        }
     }
     public class BlkTypeConverter : IValueConverter
     {

@@ -52,7 +52,13 @@
         </Grid>
         <DataGrid x:Name="dg" Grid.Row="1" Height="250" VerticalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding configLst}">
             <DataGrid.Columns>
-                <DataGridTextColumn Width="30" Binding="{Binding systemType}"></DataGridTextColumn>
+                <DataGridTextColumn Width="30" Binding="{Binding systemType}" IsReadOnly="True">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
                 <DataGridTemplateColumn Header="连线内容" Width="3*">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
@@ -65,7 +71,7 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTemplateColumn Width="*">
+                                    <DataGridTemplateColumn Width="*" IsReadOnly="True">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBlock Text="{Binding loopType}"/>
