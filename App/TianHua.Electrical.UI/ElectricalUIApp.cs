@@ -109,9 +109,7 @@ namespace TianHua.Electrical.UI
         [CommandMethod("TIANHUACAD", "THAFPM", CommandFlags.Modal)]
         public void THAFPM()
         {
-            //SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
-            //AcadApp.ShowModalWindow(securityPlaneSystemUI); 
-            ThWiringConnectingUI securityPlaneSystemUI = new ThWiringConnectingUI();
+            SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
         }
 

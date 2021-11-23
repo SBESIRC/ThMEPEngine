@@ -8,8 +8,8 @@
              ResizeMode="NoResize"
              mc:Ignorable="d"
              WindowStyle="None"
-             Width="490"
-             Height="320">
+             Width="550"
+             Height="370">
     <Window.Resources>
         <CollectionViewSource x:Key="LstKey" Source="{Binding configLst}">
             <CollectionViewSource.GroupDescriptions>
@@ -50,7 +50,7 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <DataGrid x:Name="dg" Grid.Row="1" Height="250" VerticalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding configLst}">
+        <DataGrid x:Name="dg" Grid.Row="1" Height="300" VerticalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding configLst}">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="30" Binding="{Binding systemType}" IsReadOnly="True">
                     <DataGridTextColumn.ElementStyle>
