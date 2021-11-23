@@ -1,4 +1,5 @@
 ﻿using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
@@ -29,19 +30,22 @@ namespace ThMEPEngineCore
                 {
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
-
-                objs = objs.BuildArea();
-                foreach (Entity obj in objs)
-                {
-                    ThMEPPolygonService.CenterLine(obj).ForEach(o =>
+                objs.BuildArea()
+                    .OfType<Entity>()
+                    .ForEach(e =>
                     {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.ColorIndex = 1;
+                        ThMEPPolygonService.CenterLine(e)
+                        .ToCollection()
+                        .LineMerge()
+                        .OfType<Entity>()
+                        .ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                        });
                     });
-                }
             }
 #else
-            Active.Editor.WriteLine("此命名只支持CAD2016暨以上版本");
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
 
@@ -105,7 +109,7 @@ namespace ThMEPEngineCore
                 }
             }
 #else
-            Active.Editor.WriteLine("此命名只支持CAD2016暨以上版本");
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
     }
