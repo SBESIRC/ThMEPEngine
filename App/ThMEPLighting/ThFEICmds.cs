@@ -158,7 +158,7 @@ namespace ThMEPLighting
                     var doors = dsFELGetPrimitivesService.GetDoor(outFrame);
 
                     //获取中心线
-                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(outFrame, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());
+                    var centerLines = dsFELGetPrimitivesService.GetCenterLines(outFrame, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());
 
                     //获取结构信息
                     dsFELGetPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);

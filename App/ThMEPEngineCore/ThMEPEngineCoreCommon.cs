@@ -15,7 +15,6 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_PROPERTY_HATCH_PATTERN = "填充图案";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";                  //车道线
-        public const string CENTER_LINE_LAYER = "中心线";                           //中心线图层
         public static List<string> BUILDELEMENT_PROPERTIES = new List<string>
         {
             BUILDELEMENT_PROPERTY_CATEGORY,

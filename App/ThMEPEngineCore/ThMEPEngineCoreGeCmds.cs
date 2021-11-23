@@ -30,6 +30,8 @@ namespace ThMEPEngineCore
                 {
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
+
+                ThMEPEngineCoreLayerUtils.CreateAICenterLineLayer(acadDatabase.Database);
                 objs.BuildArea()
                     .OfType<Entity>()
                     .ForEach(e =>
@@ -41,6 +43,7 @@ namespace ThMEPEngineCore
                         .ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
+                            o.Layer = ThMEPEngineCoreLayerUtils.CENTERLINE;
                         });
                     });
             }
