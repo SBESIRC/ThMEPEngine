@@ -131,5 +131,15 @@ namespace ThMEPWSS.SprinklerConnect.Service
             return bReturn;
         }
 
+        public static List<Line> GetLineFromList(List<Line> lines, Point3d SP, Point3d EP)
+        {
+            var tol = new Tolerance();
+          
+           var lineSelect = lines.Where(x => (x.StartPoint.IsEqualTo(SP, tol) && x.EndPoint.IsEqualTo(EP, tol)) ||
+                                       (x.EndPoint.IsEqualTo(SP, tol) && x.StartPoint.IsEqualTo(EP, tol))).ToList();
+
+
+            return lineSelect;
+        }
     }
 }

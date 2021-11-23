@@ -94,6 +94,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
         }
 
+
     }
 
 
@@ -126,7 +127,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
                 //点位
                 var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
-
+        
                 //提取车位
                 var singleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_SingleCar);
                 var doubleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
@@ -137,19 +138,19 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 //var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
                 //var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
 
-                //if (SprinklerPts.Count == 0 || mainPipe.Count == 0 || subMainPipe.Count == 0)
-                //{
-                //    return;
-                //}
+               
+                if (SprinklerPts.Count == 0)
+                {
+                    return;
+                }
 
                 //var dataset = new ThSprinklerConnectDataFactory();
                 //   var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
                 //   var dataQuery = new ThSprinklerDataQueryService(geos);
                 //   dataQuery.ClassifyData();
-
+                
                 //转回原点
                 //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
-
 
                 //打散管线
                 //ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
