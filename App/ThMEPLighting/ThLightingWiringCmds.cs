@@ -1,9 +1,4 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPLighting.Command;
 
 namespace ThMEPLighting
@@ -11,7 +6,7 @@ namespace ThMEPLighting
     public class ThLightingWiringCmds
     {
         [CommandMethod("TIANHUACAD", "THZMLX", CommandFlags.Modal)]
-        public void THLX()
+        public void THZMLX()
         {
             using (var cmd = new ThLigtingRouteComand())
             {
