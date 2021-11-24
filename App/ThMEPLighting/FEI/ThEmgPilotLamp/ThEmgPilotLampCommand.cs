@@ -1,22 +1,18 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Colors;
+﻿using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
-    class ThEmgPilotLampCommand : IAcadCommand, IDisposable
+    class ThEmgPilotLampCommand : ThMEPBaseCommand, IDisposable
     {
         private bool _isHostFirst = false;
         public ThEmgPilotLampCommand() 
@@ -24,6 +20,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             //这里根据用户选项
             this._isHostFirst= ThEmgLightService.Instance.IsHostingLight;
             this.AddPolyLineIds = new List<ObjectId>();
+            CommandName = "THSSZSDBZ";
+            ActionName = "疏散指示灯布置";
         }
         public void Dispose(){}
 
@@ -37,7 +35,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             _originTransformer = originTransformer;
             _holeInfo = outPolylines;
         }
-        public void Execute()
+        public override void SubExecute()
         {
             this.AddPolyLineIds.Clear();
             using (AcadDatabase acdb = AcadDatabase.Active())

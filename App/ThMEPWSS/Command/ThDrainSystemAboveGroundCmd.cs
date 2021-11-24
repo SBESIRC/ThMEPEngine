@@ -1,5 +1,4 @@
 ﻿using AcHelper;
-using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
@@ -10,6 +9,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Common;
@@ -27,7 +27,7 @@ namespace ThMEPWSS.Command
     /// <summary>
     /// 地上排水系统
     /// </summary>
-    public class ThDrainSystemAboveGroundCmd : IAcadCommand, IDisposable
+    public class ThDrainSystemAboveGroundCmd : ThMEPBaseCommand, IDisposable
     {
         public string errorMsg = "";
         Engine.ThWallColumnsEngine _wallColumnsEngine = null;
@@ -69,6 +69,8 @@ namespace ThMEPWSS.Command
         };
         public ThDrainSystemAboveGroundCmd(List<FloorFramed> selectFloors, DrainageSystemAGViewmodel viewmodel,Dictionary<string,List<string>> layerNames) 
         {
+            CommandName = "THPYSPM";
+            ActionName = "布置立管";
             _configLayerNames.Clear();
             if (null != selectFloors && selectFloors.Count > 0)
                 selectFloors.ForEach(c => { if (c != null) floorFrameds.Add(c); });
@@ -119,7 +121,7 @@ namespace ThMEPWSS.Command
             }
         }
         public void Dispose(){}
-        public void Execute()
+        public override void SubExecute()
         {
             errorMsg = "";
             if (null == floorFrameds || floorFrameds.Count < 1 || Active.Document == null)
