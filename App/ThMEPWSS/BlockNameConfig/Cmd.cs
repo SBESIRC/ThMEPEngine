@@ -8,20 +8,23 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.BlockNameConfig
 {
-    public class Cmd : IAcadCommand, IDisposable
+    public class Cmd : ThMEPBaseCommand, IDisposable
     {
         readonly BlockConfigSetViewModel _UiConfigs;
         public Cmd(BlockConfigSetViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
+            CommandName = "THWTKSB";
+            ActionName = "生成";
         }
         public void Dispose()
         {
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {
@@ -32,6 +35,11 @@ namespace ThMEPWSS.BlockNameConfig
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+        public override void AfterExecute()
+        {
+            Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+        }
+
         public void Execute2()
         {
             try
