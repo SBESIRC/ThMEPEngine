@@ -23,8 +23,8 @@ namespace ThMEPElectrical.FireAlarm.Commands
         {
 #if (ACAD2016 || ACAD2018)
             //todo: route cables using _UiConfigs
-            ConnectWiringService connectWiringService = new ConnectWiringService();
-            connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
+            //ConnectWiringService connectWiringService = new ConnectWiringService();
+            //connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
 #else
             //
 #endif

@@ -128,6 +128,13 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
+        [CommandMethod("TIANHUACAD", "THLX", CommandFlags.Modal)]
+        public void THLX()
+        {
+            ThWiringConnectingUI wiringConnectingUI = new ThWiringConnectingUI();
+            AcadApp.ShowModalWindow(wiringConnectingUI);
+        }
+
         private string LayoutType
         {
             get

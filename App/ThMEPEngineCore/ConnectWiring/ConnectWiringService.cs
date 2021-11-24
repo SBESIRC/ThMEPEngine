@@ -30,16 +30,13 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(int count, string systemName, bool wall = false, bool column = false)
+        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false)
         {
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
             {
                 return;
             }
-
-            BlockConfigSrervice configSrervice = new BlockConfigSrervice();
-            var configInfo = configSrervice.GetLoopInfo(systemName);
 
             //获取所有的块
             var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blockNames).ToList();
@@ -63,7 +60,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 }).ToList();
                 if (data.Count > 0 && resBlocks.Count > 0)
                 {
-                    var maxNum = count;
+                    var maxNum = info.loopInfoModels.First().PointNum;
                     if (info.loopInfoModels.First().LineType == "E-FAS-WIRE4")
                     {
                         maxNum = 1;
@@ -74,7 +71,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
-                    allDatas.AddRange(GetUCSPolylines());
+                    //allDatas.AddRange(GetUCSPolylines());
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))

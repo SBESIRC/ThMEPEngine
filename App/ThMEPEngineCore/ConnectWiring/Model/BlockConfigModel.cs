@@ -17,9 +17,19 @@ namespace ThMEPEngineCore.ConnectWiring.Model
     public class LoopInfoModel
     {
         /// <summary>
+        /// 连线内容
+        /// </summary>
+        public string LineContent { get; set; }
+
+        /// <summary>
         /// 线型
         /// </summary>
         public string LineType { get; set; }
+
+        /// <summary>
+        /// 回路连接上限
+        /// </summary>
+        public int PointNum { get; set; }
 
         /// <summary>
         /// 回路包含的块名

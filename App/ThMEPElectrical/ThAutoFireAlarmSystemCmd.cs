@@ -45,5 +45,17 @@ namespace ThMEPElectrical
                 cmd.Execute();
             }
         }
+
+        /// <summary>
+        /// 火灾报警连线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THHZLX", CommandFlags.Modal)]
+        public void THLX()
+        {
+            using (var cmd = new ThFireAlarmRouteCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

@@ -4,13 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPElectrical.Service;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
 
-namespace ThMEPElectrical.Command
+namespace ThMEPLighting.Command
 {
-    public class ThFireAlarmRouteCommand : IAcadCommand, IDisposable
+    public class ThLigtingRouteComand : IAcadCommand, IDisposable
     {
         public void Dispose()
         {
@@ -20,13 +19,13 @@ namespace ThMEPElectrical.Command
         public void Execute()
         {
             BlockConfigSrervice configSrervice = new BlockConfigSrervice();
-            var configInfo = configSrervice.GetLoopInfo("火灾报警");
+            var configInfo = configSrervice.GetLoopInfo("照明");
 
             foreach (var config in configInfo)
             {
                 foreach (var info in config.loopInfoModels)
                 {
-                    var parameter = ThElectricalUIService.Instance.fireAlarmParameter.Where(x => x.loopType == info.LineContent).FirstOrDefault();
+                    var parameter = ThMEPLightingService.Instance.Parameter.Where(x => x.loopType == info.LineContent).FirstOrDefault();
                     info.LineType = parameter.layerType;
                     info.PointNum = int.TryParse(parameter.pointNum, out int num) ? num : int.MaxValue;
                 }

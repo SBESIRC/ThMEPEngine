@@ -21,8 +21,8 @@ namespace ThMEPLighting.Lighting.Commands
         {
 #if (ACAD2016 || ACAD2018)
             //todo: route cables using _UiConfigs
-            ConnectWiringService connectWiringService = new ConnectWiringService();
-            connectWiringService.Routing(25, "照明");
+            //ConnectWiringService connectWiringService = new ConnectWiringService();
+            //connectWiringService.Routing(25, "照明");
 #else
             
 #endif

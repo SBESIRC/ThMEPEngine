@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPElectrical.Model
+namespace ThMEPLighting.ServiceModels
 {
-    public class ThFireAlarmModel
+    public class ThLigitingWiringModel
     {
         /// <summary>
         /// 连线内容

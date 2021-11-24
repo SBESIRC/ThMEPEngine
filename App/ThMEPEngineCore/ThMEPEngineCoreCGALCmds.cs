@@ -404,13 +404,6 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THWiringGeo", CommandFlags.Modal)]
-        public void THWiringGeo()
-        {
-            ConnectWiringService connectWiring = new ConnectWiringService();
-            connectWiring.Routing(25, "照明");
-        }
-
         [CommandMethod("TIANHUACAD", "THTest2DVisiblity", CommandFlags.Modal)]
         public void TH2DVisiblityTest()
         {

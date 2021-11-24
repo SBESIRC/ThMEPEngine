@@ -1,4 +1,6 @@
-﻿using ThMEPLighting.Garage.Model;
+﻿using System.Collections.Generic;
+using ThMEPLighting.Garage.Model;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting
 {
@@ -19,5 +21,10 @@ namespace ThMEPLighting
         //-------------SINGLETON-----------------
 
         public ThLightArrangeUiParameter LightArrangeUiParameter { get; set; }
+
+        /// <summary>
+        /// 照目
+        /// </summary>
+        public List<ThLigitingWiringModel> Parameter = new List<ThLigitingWiringModel>();
     }
 }

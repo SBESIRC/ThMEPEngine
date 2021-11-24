@@ -13,7 +13,7 @@ namespace TianHua.Electrical.UI.WiringConnecting
     /// </summary>
     public partial class ThWiringSettingUI : Window
     {
-        private static WiringConnectingViewModel settingVM = null;
+        public static WiringConnectingViewModel settingVM = null;
         public ThWiringSettingUI()
         {
             InitializeComponent();

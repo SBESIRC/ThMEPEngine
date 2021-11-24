@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                 {
                     var iGroup = group.Where(x => x.loops.Count > i).ToList();
                     LoopInfoModel loopInfo = new LoopInfoModel();
-                    loopInfo.LineType = iGroup.First().loops[i];
+                    loopInfo.LineContent = iGroup.First().loops[i];
                     foreach (var info in iGroup)
                     {
                         loopInfo.blockNames.Add(info.blockName);
