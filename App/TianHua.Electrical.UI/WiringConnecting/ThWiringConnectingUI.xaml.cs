@@ -10,9 +10,9 @@ using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Service;
+using ThMEPElectrical.ViewModel;
 using ThMEPLighting;
 using ThMEPLighting.ServiceModels;
-using TianHua.Electrical.UI.WiringConnecting.ViewModel;
 
 namespace TianHua.Electrical.UI.WiringConnecting
 {
@@ -51,19 +51,7 @@ namespace TianHua.Electrical.UI.WiringConnecting
             if (this.fireAlarmSys.IsChecked == true)
             {
                 ThElectricalUIService.Instance.fireAlarmParameter = new List<ThFireAlarmModel>();
-                var fireAlarmModel = ThWiringSettingUI.settingVM.configLst.Where(x => x.systemType == "火灾自动报警").FirstOrDefault();
-                if (fireAlarmModel == null)
-                {
-                    return;
-                }
-                foreach (var model in fireAlarmModel.configModels)
-                {
-                    ThFireAlarmModel config = new ThFireAlarmModel();
-                    config.loopType = model.loopType;
-                    config.layerType = model.layerType;
-                    config.pointNum = model.pointNum;
-                    ThElectricalUIService.Instance.fireAlarmParameter.Add(config);
-                }
+                ThElectricalUIService.Instance.fireAlarmParameter = ThElectricalUIService.ConvertToModel(ThWiringSettingUI.settingVM.configLst);
 
                 //聚焦到CAD
                 SetFocusToDwgView();
@@ -73,19 +61,7 @@ namespace TianHua.Electrical.UI.WiringConnecting
             else if (this.lightingSys.IsChecked == true)
             {
                 ThMEPLightingService.Instance.Parameter = new List<ThLigitingWiringModel>();
-                var lightingModel = ThWiringSettingUI.settingVM.configLst.Where(x => x.systemType == "照明").FirstOrDefault();
-                if (lightingModel == null)
-                {
-                    return;
-                }
-                foreach (var model in lightingModel.configModels)
-                {
-                    ThLigitingWiringModel config = new ThLigitingWiringModel();
-                    config.loopType = model.loopType;
-                    config.layerType = model.layerType;
-                    config.pointNum = model.pointNum;
-                    ThMEPLightingService.Instance.Parameter.Add(config);
-                }
+                ThMEPLightingService.Instance.Parameter = ThMEPLightingService.ConvertToModel(ThWiringSettingUI.settingVM.configLst);
 
                 //聚焦到CAD
                 SetFocusToDwgView();

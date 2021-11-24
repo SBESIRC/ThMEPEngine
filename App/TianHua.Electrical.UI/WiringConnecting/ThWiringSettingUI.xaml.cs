@@ -4,7 +4,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using ThControlLibraryWPF.CustomControl;
-using TianHua.Electrical.UI.WiringConnecting.ViewModel;
+using ThMEPElectrical.ViewModel;
 
 namespace TianHua.Electrical.UI.WiringConnecting
 {

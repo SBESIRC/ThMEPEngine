@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
+namespace ThMEPElectrical.Model
 {
-    public class LoopCinfg
+    public class LoopConfig
     {
         /// <summary>
         /// 系统类型
@@ -55,9 +55,9 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
         /// <summary>
         /// 是否选中
         /// </summary>
-        public bool isCheck 
+        public bool isCheck
         {
-            get; set; 
+            get; set;
         }
     }
 }

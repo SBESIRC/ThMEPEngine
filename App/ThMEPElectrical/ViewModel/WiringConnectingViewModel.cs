@@ -7,15 +7,16 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPElectrical.Model;
 using ThMEPEngineCore.IO.ExcelService;
 
-namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
+namespace ThMEPElectrical.ViewModel
 {
     public partial class WiringConnectingViewModel : NotifyPropertyChangedBase
     {
         static string roomConfigUrl = ThCADCommon.SupportPath() + "\\连线回路配置表.xlsx";
         ReadExcelService excelSrevice = new ReadExcelService();
-        private ObservableCollection<LoopCinfg> _configLst = new ObservableCollection<LoopCinfg>();
+        private ObservableCollection<LoopConfig> _configLst = new ObservableCollection<LoopConfig>();
         public WiringConnectingViewModel()
         {
             _configLst.Clear();
@@ -32,7 +33,7 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
             excelSrevice.ConvertDataSetToExcel(dataset, roomConfigUrl);
         }
 
-        public ObservableCollection<LoopCinfg> configLst
+        public ObservableCollection<LoopConfig> configLst
         {
             get { return _configLst; }
             set
@@ -56,9 +57,9 @@ namespace TianHua.Electrical.UI.WiringConnecting.ViewModel
         /// </summary>
         /// <param name="dt"></param>
         /// <returns></returns>
-        private LoopCinfg ConvertToModel(DataTable dt)
+        private LoopConfig ConvertToModel(DataTable dt)
         {
-            LoopCinfg loopConfig = new LoopCinfg();
+            LoopConfig loopConfig = new LoopConfig();
             loopConfig.configModels = new ObservableCollection<ConfigModel>();
             loopConfig.systemType = dt.TableName;
             foreach (DataRow dr in dt.Rows)

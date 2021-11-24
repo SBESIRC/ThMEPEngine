@@ -108,8 +108,6 @@
     <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
       <DependentUpon>ThWiringConnectingUI.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WiringConnecting\ViewModel\ConfigModel.cs" />
-    <Compile Include="WiringConnecting\ViewModel\WiringConnectingViewModel.cs" />
     <EmbeddedResource Include="fmBasementLighting.resx">
       <DependentUpon>fmBasementLighting.cs</DependentUpon>
     </EmbeddedResource>

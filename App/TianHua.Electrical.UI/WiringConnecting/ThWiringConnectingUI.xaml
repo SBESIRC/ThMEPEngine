@@ -41,9 +41,11 @@
                              x:Name="Setting" Width="20" Height="20"
                              Margin="0,0,5,0" 
                              ImageTextLocation="ImageOnly"
-                             NormalImage="pack://application:,,,/ThControlLibraryWPF;Component/Images/SetIcon.png"
+                             Background="Transparent"
+                             NormalImage="pack://application:,,,/ThControlLibraryWPF;Component/Images/SettingIcon.png"
                              ImageHeight="20" ImageWidth="20"
                              BorderThickness="0"
+                             MouseOverBackground="Red"
                              Click="Setting_Click">
                 </cus:ImageButton>
                 <Button x:Name="btnClose" Width="20" Height="20" Focusable="False" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="关闭窗体" Click="btnClose_Click">

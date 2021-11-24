@@ -223,6 +223,7 @@
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
+    <Compile Include="Model\LoopConfig.cs" />
     <Compile Include="Model\ThCapitalConverterModel.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />
@@ -365,6 +366,7 @@
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\GetLayoutStructureService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
+    <Compile Include="ViewModel\WiringConnectingViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
