@@ -15,15 +15,21 @@ using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
 using NFox.Cad;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    class ThFrameFireSystemDiagramCommand : IAcadCommand, IDisposable
+    class ThFrameFireSystemDiagramCommand : ThMEPBaseCommand, IDisposable
     {
         public void Dispose()
         {
         }
-        public void Execute()
+        public ThFrameFireSystemDiagramCommand()
+        {
+            this.ActionName="火灾报警系统图-手动选择楼层";
+            this.CommandName="THHZXTF";
+        }
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

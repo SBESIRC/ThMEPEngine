@@ -17,18 +17,25 @@ using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThAccessControlSystemCommand : IAcadCommand, IDisposable
+    public class ThAccessControlSystemCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThAccessControlSystemCommand()
+        {
+            this.ActionName="安防平面-出入口控制系统布置";
+            this.CommandName="THACSYSTEM";
+        }
+
         public void Dispose()
         {
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
