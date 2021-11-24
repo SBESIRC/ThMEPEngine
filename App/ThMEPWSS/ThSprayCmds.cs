@@ -230,14 +230,5 @@ namespace ThMEPWSS
                 results.OfType<Entity>().ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
-
-        [CommandMethod("TIANHUACAD", "THPL18", CommandFlags.Modal)]
-        public void THPL18()
-        {
-            using (var cmd = new ThSprinklerDistanceCheckCmd())
-            {
-                cmd.Execute();
-            }
-        }
     }
 }

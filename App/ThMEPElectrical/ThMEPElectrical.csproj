@@ -97,7 +97,6 @@
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThFireAlarmRouteCommand.cs" />
-    <Compile Include="Command\ThRoomServiceCommand.cs" />
     <Compile Include="Command\TxtStrucInfoCommand.cs" />
     <Compile Include="Command\ThAccessControlSystemCommand.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
