@@ -1,17 +1,7 @@
-﻿using System;
+﻿using Linq2Acad;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
-
-using ThMEPStructure.Command;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
+using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Command

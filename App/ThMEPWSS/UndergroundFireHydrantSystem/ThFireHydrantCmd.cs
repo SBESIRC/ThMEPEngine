@@ -44,6 +44,7 @@ namespace ThMEPWSS.Command
 
         public override void AfterExecute()
         {
+            base.AfterExecute();
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 

@@ -25,7 +25,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="GirderConnect\Command\BeamConnectCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Test\TestCmds.cs" />
