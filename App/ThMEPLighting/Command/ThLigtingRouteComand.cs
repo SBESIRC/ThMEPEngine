@@ -1,9 +1,9 @@
-﻿using AcHelper.Commands;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using AcHelper;
+using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using AcHelper.Commands;
+using ThMEPElectrical.Service;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
 
@@ -13,11 +13,11 @@ namespace ThMEPLighting.Command
     {
         public void Dispose()
         {
-            //throw new NotImplementedException();
         }
 
         public void Execute()
         {
+#if (ACAD2016 || ACAD2018)
             BlockConfigSrervice configSrervice = new BlockConfigSrervice();
             var configInfo = configSrervice.GetLoopInfo("照明");
 
@@ -33,6 +33,9 @@ namespace ThMEPLighting.Command
 
             ConnectWiringService connectWiringService = new ConnectWiringService();
             connectWiringService.Routing(configInfo);
+#else
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
+#endif
         }
     }
 }
