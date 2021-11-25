@@ -46,6 +46,10 @@ namespace ThCADCore.NTS
             {
                 return mPolygon.ToNTSPolygon();
             }
+            else if (entity is Ellipse ellipse)
+            {
+                return ellipse.ToNTSPolygon();
+            }
             else
             {
                 throw new NotSupportedException();
@@ -73,6 +77,10 @@ namespace ThCADCore.NTS
             else if (curve is Arc arc)
             {
                 return arc.ToNTSLineString();
+            }
+            else if (curve is Ellipse ellipse)
+            {
+                return ellipse.ToNTSLineString();
             }
             else
             {

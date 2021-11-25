@@ -287,6 +287,17 @@ namespace ThCADCore.NTS
             return shapeFactory.CreateCircle();
         }
 
+        public static Polygon ToNTSPolygon(this Ellipse ellipse)
+        {
+            var chordHeight = ThCADCoreNTSService.Instance.ChordHeightTolerance;
+            return ellipse.Tessellate(chordHeight).ToNTSPolygon();
+        }
+
+        public static LineString ToNTSLineString(this Ellipse ellipse)
+        {
+            return ellipse.ToNTSPolygon().Shell;
+        }
+
         public static LineString ToNTSLineString(this Arc arc)
         {
             var arcLength = ThCADCoreNTSService.Instance.ArcTessellationLength;

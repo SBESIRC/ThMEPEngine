@@ -77,6 +77,9 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)
         {
+            // 处理弧线（椭圆）
+            objs = objs.Tessellate();
+
             // 对每个Polygon进行修复
             var filters = new DBObjectCollection();
             objs.OfType<Polyline>().ForEach(o =>

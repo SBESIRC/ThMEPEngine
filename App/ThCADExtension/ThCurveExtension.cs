@@ -1,5 +1,8 @@
 ﻿using System;
 using NFox.Cad;
+using DotNetARX;
+using System.Linq;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -96,6 +99,27 @@ namespace ThCADExtension
         public static double DistanceTo(this Curve curve, Point3d pt, bool extend)
         {
             return curve.GetClosestPointTo(pt, extend).DistanceTo(pt);
+        }
+
+        public static Polyline Tessellate(this Curve curve, double chordHeight)
+        {
+            var pline = new Polyline();
+            var geCurve = curve.GetGeCurve();
+            if (geCurve == null)
+            {
+                return pline;
+            }
+
+            var vertices = geCurve
+                .GetNewSamplePoints(curve.StartParam, curve.EndParam, chordHeight)
+                .Select(o => o.Point.ToPoint2d());
+            if (!vertices.Any())
+            {
+                return pline;
+            }
+
+            pline.CreatePolyline(vertices.ToArray());
+            return pline;
         }
     }
 }
