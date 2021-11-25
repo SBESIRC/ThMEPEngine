@@ -53,7 +53,7 @@ namespace ThCADCore.NTS
 
         public bool Intersects(Entity entity, bool precisely = false)
         {
-            var geometry = ToNTSPolygon(entity);
+            var geometry = ToNTSPolygonalGeometry(entity);
             var queriedObjs = Query(geometry.EnvelopeInternal);
 
             if (precisely == false)
@@ -106,6 +106,10 @@ namespace ThCADCore.NTS
                 {
                     return hatch.GeometricExtents.ToNTSPolygon();
                 }
+                else if (obj is Ellipse ellipse)
+                {
+                    return ellipse.ToNTSPolygon();
+                }
                 else if (obj is Entity entity)
                 {
                     try
@@ -125,7 +129,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        private Polygon ToNTSPolygon(DBObject obj)
+        private Polygon ToNTSPolygonalGeometry(DBObject obj)
         {
             using (var ov = new ThCADCoreNTSFixedPrecision())
             {
@@ -191,7 +195,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectCrossingPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(entity);
+            var geometry = ToNTSPolygonalGeometry(entity);
             return CrossingFilter(
                 Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
@@ -226,7 +230,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectWindowPolygon(Entity entity)
         {
-            var geometry = ToNTSPolygon(entity);
+            var geometry = ToNTSPolygonalGeometry(entity);
             return WindowFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
