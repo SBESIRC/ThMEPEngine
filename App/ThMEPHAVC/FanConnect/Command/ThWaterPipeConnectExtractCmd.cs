@@ -15,6 +15,7 @@ using ThMEPEngineCore.Command;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
+using ThMEPHVAC.FanLayout.Service;
 
 namespace ThMEPHVAC.FanConnect.Command
 {
@@ -30,8 +31,37 @@ namespace ThMEPHVAC.FanConnect.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var database = AcadDatabase.Active())
             {
-                //选择水管起点
-                var startPt = ThFanConnectUtils.SelectPoint();
+                double pipeWidth = 200.0;
+                switch (ConfigInfo.WaterSystemConfigInfo.SystemType)//系统
+                {
+                    case 0://水系统
+                        {
+                            switch (ConfigInfo.WaterSystemConfigInfo.PipeSystemType)//管制
+                            {
+                                case 0://两管制
+                                    {
+                                        pipeWidth = 200.0;
+                                    }
+                                    break;
+                                case 1://四管制
+                                    {
+                                        pipeWidth = 400.0;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
+                    case 1://冷媒系统
+                        {
+                            pipeWidth = 200.0;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
                 //获取风机设备
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 //水管干路和支干路
@@ -42,8 +72,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 var holes = ThBuildElementExtractServiece.GetAIHole();
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
-                pipeService.PipeWidth = 400.0;
-                pipeService.PipeStartPt = startPt;
+                pipeService.PipeWidth = pipeWidth;
                 pipeService.EquipModel = fucs;
                 pipeService.TrunkLines = pipes;
                 foreach (var room in rooms)
@@ -54,12 +83,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     pipeService.AddObstacleHole(hole);
                 }
-                var pipeTree = pipeService.CreatePipeLine(0);
+                var plines = pipeService.CreatePipeLine(0);
+                var toDbServiece = new ThFanToDBServiece();
+                foreach (var pl in plines)
+                {
+                    toDbServiece.InsertEntity(pl , "AI-水管路由示意");
+                }
                 return;
-                //扩展管路
-                ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
-                pipeExtendServiece.ConfigInfo = ConfigInfo;
-                pipeExtendServiece.PipeExtend(pipeTree);
             }
         }
     }

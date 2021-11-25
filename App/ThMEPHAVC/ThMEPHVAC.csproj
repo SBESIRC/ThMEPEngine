@@ -32,6 +32,8 @@
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThFanPipeAdjustPath.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
     <Compile Include="FanConnect\Engine\ThFanCURecognitionEngine.cs" />

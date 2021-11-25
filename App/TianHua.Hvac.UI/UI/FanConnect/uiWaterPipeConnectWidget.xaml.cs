@@ -24,14 +24,21 @@ namespace TianHua.Hvac.UI.UI.FanConnect
 
         private void btnGeneraSPM_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            var waterPipeConnectExtractCmd = new ThWaterPipeConnectExtractCmd();
-            waterPipeConnectExtractCmd.ConfigInfo = ViewModel.WaterPipeConfigInfo;
-            waterPipeConnectExtractCmd.Execute();
+            var createSpm = new ThCreateSPMExtractCmd();
+            createSpm.ConfigInfo = ViewModel.WaterPipeConfigInfo;
+            createSpm.Execute();
         }
 
         private void btnUpdateSPM_Click(object sender, System.Windows.RoutedEventArgs e)
         {
 
+        }
+
+        private void btnConnectPipe_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            var waterPipeConnectExtractCmd = new ThWaterPipeConnectExtractCmd();
+            waterPipeConnectExtractCmd.ConfigInfo = ViewModel.WaterPipeConfigInfo;
+            waterPipeConnectExtractCmd.Execute();
         }
     }
 }

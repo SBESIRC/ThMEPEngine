@@ -14,12 +14,12 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     public class ThEquipElementExtractServiece
     {
-        public static List<ThFanCUModel> GetFCUModels(Point3dCollection selectArea)
+        public static List<ThFanCUModel> GetFCUModels()
         {
             using (var database = AcadDatabase.Active())
             {
                 var fcuEngine = new ThFanCURecognitionEngine();
-                var retFcu = fcuEngine.Extract(database.Database, selectArea);
+                var retFcu = fcuEngine.Extract(database.Database);
                 return retFcu;
             }
         }

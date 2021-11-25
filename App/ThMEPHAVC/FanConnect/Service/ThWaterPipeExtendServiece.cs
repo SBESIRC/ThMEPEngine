@@ -16,7 +16,7 @@ namespace ThMEPHVAC.FanConnect.Service
     class ThWaterPipeExtendServiece : ThPipeExtendBaseServiece
     {
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
-        public override void PipeExtend(ThFanTreeModel<ThFanPipeModel> tree)
+        public override void PipeExtend(ThFanTreeModel tree)
         {
             //遍历树
            BianLiTree(tree.RootNode);
@@ -60,7 +60,7 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             case 0://两管制
                                 {
-                                    plines = OffsetLines(pipeLine, pipeWidth, 2);
+                                    plines = OffsetLines(pipeLine, pipeWidth, 2, pipeModel.IsFlag);
                                 }
                                 break;
                             case 1://四管制
@@ -71,13 +71,13 @@ namespace ThMEPHVAC.FanConnect.Service
                                         case PIPELEVEL.LEVEL1:
                                         case PIPELEVEL.LEVEL2:
                                             {
-                                                plines = OffsetLines(pipeLine, pipeWidth, 4);
+                                                plines = OffsetLines(pipeLine, pipeWidth, 4, pipeModel.IsFlag);
                                             }
                                             break;
                                         case PIPELEVEL.LEVEL3:
                                             {
                                                 //根据路由生成CHS(路由线)+CHR+C
-                                                plines = OffsetLines(pipeLine, pipeWidth, 2);
+                                                plines = OffsetLines(pipeLine, pipeWidth, 2, pipeModel.IsFlag);
                                             }
                                             break;
                                         default:
@@ -92,17 +92,16 @@ namespace ThMEPHVAC.FanConnect.Service
                     break;
                 case 1://冷媒系统
                     {
-                        plines = OffsetLines(pipeLine, pipeWidth, 2);
+                        plines = OffsetLines(pipeLine, pipeWidth, 2, pipeModel.IsFlag);
                     }
                     break;
                 default:
                     break;
             }
             pipeModel.ExPline = plines;
-            return ;
             //根据PipeType确定颜色和图层，线型
         }
-        public List<Line> OffsetLines(Line line,double offset,int count)
+        public List<Line> OffsetLines(Line line,double offset,int count,bool isFlag)
         {
             var retLine = new List<Line>();
             double tmpOffset;
@@ -120,6 +119,10 @@ namespace ThMEPHVAC.FanConnect.Service
                 tmpOffset = -offset * i;
                 var tmpLine = OffsetLine(line, tmpOffset);
                 retLine.Add(tmpLine);
+            }
+            if(isFlag)
+            {
+                retLine.Reverse();
             }
             return retLine;
         }
@@ -145,16 +148,8 @@ namespace ThMEPHVAC.FanConnect.Service
                 return;
             }
             
-            var currentLine = node.Item.PLine;
             var currentExLines = node.Item.ExPline;
-            var parentLine = node.Parent.Item.PLine;
             var parentExLines = node.Parent.Item.ExPline;
-
-            bool isConnet = false;
-            if(parentLine.EndPoint.IsEqualTo(currentLine.StartPoint))
-            {
-                isConnet = true;
-            }
 
             switch (ConfigInfo.WaterSystemConfigInfo.SystemType)//系统
             {
@@ -171,7 +166,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
                                         cline.StartPoint = closPt;
                                         node.Item.ExPoint.Add(closPt);
-                                        if (isConnet)
+                                        if (node.Item.IsConnect)
                                         {
                                             pline.EndPoint = closPt;
                                         }
@@ -193,7 +188,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                     var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
                                                     cline.StartPoint = closPt;
                                                     node.Item.ExPoint.Add(closPt);
-                                                    if (isConnet)
+                                                    if (node.Item.IsConnect)
                                                     {
                                                         pline.EndPoint = closPt;
                                                     }
@@ -211,21 +206,32 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var pline4 = parentExLines[3];
                                                 var pline5 = parentExLines[4];
 
-                                                var closPt1 = pline1.GetClosestPointTo(cline1.StartPoint, true);
-                                                var closPt2 = pline2.GetClosestPointTo(cline1.StartPoint, true);
-                                                var closPt3 = pline3.GetClosestPointTo(cline2.StartPoint, true);
-                                                var closPt4 = pline4.GetClosestPointTo(cline2.StartPoint, true);
-                                                var closPt5 = pline5.GetClosestPointTo(cline3.StartPoint, true);
+                                                Point3d closPt1 = pline1.GetClosestPointTo(cline1.StartPoint, true);
+                                                Point3d closPt2 = pline2.GetClosestPointTo(cline1.StartPoint, true);
+                                                Point3d closPt3 = pline3.GetClosestPointTo(cline2.StartPoint, true);
+                                                Point3d closPt4 = pline4.GetClosestPointTo(cline2.StartPoint, true);
+                                                Point3d closPt5 = pline5.GetClosestPointTo(cline3.StartPoint, true);
 
-                                                cline1.StartPoint = closPt2;
-                                                cline2.StartPoint = closPt4;
-                                                cline3.StartPoint = closPt5;
+                                                if(node.Item.IsConnect && node.Item.CroVector.Equals(new Vector3d(0.0,0.0,-1.0)))
+                                                {
+                                                    cline1.StartPoint = closPt1;
+                                                    cline2.StartPoint = closPt4;
+                                                    cline3.StartPoint = closPt5;
+                                                }
+                                                else
+                                                {
+                                                    cline1.StartPoint = closPt2;
+                                                    cline2.StartPoint = closPt4;
+                                                    cline3.StartPoint = closPt5;
+                                                }
+
+
                                                 node.Item.ExPoint.Add(closPt1);
                                                 node.Item.ExPoint.Add(closPt2);
                                                 node.Item.ExPoint.Add(closPt3);
                                                 node.Item.ExPoint.Add(closPt4);
                                                 node.Item.ExPoint.Add(closPt5);
-                                                if (isConnet)
+                                                if (node.Item.IsConnect)
                                                 {
                                                     pline1.EndPoint = closPt1;
                                                     pline2.EndPoint = closPt2;
@@ -254,7 +260,7 @@ namespace ThMEPHVAC.FanConnect.Service
                             var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
                             cline.StartPoint = closPt;
                             node.Item.ExPoint.Add(closPt);
-                            if (isConnet)
+                            if (node.Item.IsConnect)
                             {
                                 pline.EndPoint = closPt;
                             }

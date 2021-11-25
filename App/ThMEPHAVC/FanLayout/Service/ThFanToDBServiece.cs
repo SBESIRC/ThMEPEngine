@@ -242,5 +242,17 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
             blkId.AddXData("FanProperty", tvs);
         }
+
+        public void InsertEntity(Entity entity,string layer)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                database.ModelSpace.Add(entity);
+                entity.Layer = layer;
+                entity.Linetype = "ByLayer";
+                entity.LineWeight = LineWeight.ByLayer;
+                entity.ColorIndex = (int)ColorIndex.BYLAYER;
+            }
+        }
     }
 }

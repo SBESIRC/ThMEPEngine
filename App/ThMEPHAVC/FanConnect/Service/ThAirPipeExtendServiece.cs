@@ -9,7 +9,7 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     class ThAirPipeExtendServiece : ThPipeExtendBaseServiece
     {
-        public override void PipeExtend(ThFanTreeModel<ThFanPipeModel> tree)
+        public override void PipeExtend(ThFanTreeModel tree)
         {
             throw new NotImplementedException();
         }

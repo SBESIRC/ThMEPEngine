@@ -9,6 +9,6 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     public abstract class ThPipeExtendBaseServiece
     {
-        public abstract void PipeExtend(ThFanTreeModel<ThFanPipeModel> tree);
+        public abstract void PipeExtend(ThFanTreeModel tree);
     }
 }

@@ -16,7 +16,7 @@ namespace ThMEPHVAC.FanConnect.Engine
 {
     public class ThFanCURecognitionEngine
     {
-        public List<ThFanCUModel> Extract(Database database, Point3dCollection polygon)
+        public List<ThFanCUModel> Extract(Database database)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
@@ -25,12 +25,9 @@ namespace ThMEPHVAC.FanConnect.Engine
                    .ModelSpace
                    .OfType<BlockReference>()
                    .Where(o => IsHYDTPipeLayer(o.Layer) && IsValveBlock(o));
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                foreach(var obj in dbObjs)
+                foreach(var blk in Results)
                 {
                     var tmpFan = new ThFanCUModel();
-                    var blk = obj as BlockReference;
                     var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
                     var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
 
@@ -50,13 +47,22 @@ namespace ThMEPHVAC.FanConnect.Engine
 
         private bool IsHYDTPipeLayer(string layer)
         {
-            return layer.ToUpper() == "H-EQUP-FC";
+            if(layer.ToUpper() == "H-EQUP-FC" || layer.ToUpper() == "H-EQUP-AHU")
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private bool IsValveBlock(BlockReference blockReference)
         {
             var blkName = blockReference.GetEffectiveName().ToUpper();
-            return blkName.Contains("AI-FCU");
+            if(blkName.Contains("AI-FCU"))
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

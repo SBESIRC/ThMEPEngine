@@ -52,7 +52,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
             }
         }
-        public ThFanTreeModel<ThFanPipeModel> CreatePipeLine(int type)
+        public List<Polyline> CreatePipeLine(int type)
         {
             var pipePathServiece = new ThPipeExtractServiece
             {
@@ -63,9 +63,9 @@ namespace ThMEPHVAC.FanConnect.Service
                 ObstacleRooms = ObstacleRooms,
                 ObstacleHoles = ObstacleHoles
             };
-            var treeModel = pipePathServiece.CreatePipePath(type);
+            var retPLine = pipePathServiece.CreatePipePath(type);
 
-            return treeModel;
+            return retPLine;
         }
     }
 }

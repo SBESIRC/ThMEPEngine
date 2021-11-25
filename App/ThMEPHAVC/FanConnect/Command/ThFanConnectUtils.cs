@@ -18,6 +18,37 @@ using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Command
 {
+    public class Point3dEx : IEquatable<Point3dEx>
+    {
+        public double Tolerance = 1; //mm
+        public Point3d _pt;
+
+        public Point3dEx(double tol = 1)
+        {
+            _pt = new Point3d();
+            Tolerance = tol;
+        }
+        public Point3dEx(Point3d pt, double tol = 1)
+        {
+            _pt = pt;
+            Tolerance = tol;
+        }
+
+        public Point3dEx(double x, double y, double z, double tol = 1)
+        {
+            _pt = new Point3d(x, y, z);
+            Tolerance = tol;
+        }
+
+        public override int GetHashCode()
+        {
+            return ((int)_pt.X / 1000).GetHashCode() ^ ((int)_pt.Y / 1000).GetHashCode();
+        }
+        public bool Equals(Point3dEx other)
+        {
+            return Math.Abs(other._pt.X - this._pt.X) < Tolerance && Math.Abs(other._pt.Y - this._pt.Y) < Tolerance;
+        }
+    }
     public class ThFanConnectUtils
     {
         public static Point3dCollection SelectArea()
@@ -64,19 +95,23 @@ namespace ThMEPHVAC.FanConnect.Command
                         var entity = acadDb.Element<Entity>(insertPtRst.ObjectId);
                         if (entity is BlockReference)
                         {
-                            var tmpFan = new ThFanCUModel();
                             var blk = entity as BlockReference;
-                            var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
-                            var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
+                            var name = blk.GetEffectiveName();
+                            if (name.Contains("FCU") || name.Contains("1"))
+                            {
+                                var tmpFan = new ThFanCUModel();
+                                var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
+                                var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
 
-                            var offset1 = new Point3d(offset1x, offset1y, 0);
-                            var dbcollection = new DBObjectCollection();
-                            blk.Explode(dbcollection);
-                            dbcollection = dbcollection.OfType<Entity>().Where(O => O is Curve).ToCollection();
+                                var offset1 = new Point3d(offset1x, offset1y, 0);
+                                var dbcollection = new DBObjectCollection();
+                                blk.Explode(dbcollection);
+                                dbcollection = dbcollection.OfType<Entity>().Where(O => O is Curve).ToCollection();
 
-                            tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
-                            tmpFan.FanObb = dbcollection.GetMinimumRectangle();
-                            retModeles.Add(tmpFan);
+                                tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
+                                tmpFan.FanObb = dbcollection.GetMinimumRectangle();
+                                retModeles.Add(tmpFan);
+                            }
                         }
                     }
                 }
@@ -189,6 +224,134 @@ namespace ThMEPHVAC.FanConnect.Command
             var resHoles = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
             return resHoles;
+        }
+
+
+        public static List<Line> CleanLaneLines(List<Line> lines)
+        {
+            var rstLines = new List<Line>();
+
+            //Grouping
+            var lineSegs = lines.Select(l => new LineSegment2d(l.StartPoint.ToPoint2D(), l.EndPoint.ToPoint2D())).ToList();
+            List<HashSet<LineSegment2d>> lineSegGroups = new List<HashSet<LineSegment2d>>();
+
+            while (lineSegs.Count() != 0)
+            {
+                var tmpLineSeg = lineSegs.First();
+                bool alreadyContains = false;
+                foreach (var g in lineSegGroups)
+                {
+                    if (g.Contains(tmpLineSeg))
+                    {
+                        alreadyContains = true;
+                        break;
+                    }
+                }
+
+                if (alreadyContains) continue;
+
+                var colinerSegs = lineSegs.Where(l => l.IsParallelTo(tmpLineSeg, new Tolerance(0.001, 0.001))).ToHashSet();
+                lineSegGroups.Add(colinerSegs);
+                lineSegs = lineSegs.Except(colinerSegs).ToList();
+            }
+
+            foreach (var lg in lineSegGroups)
+            {
+                rstLines.AddRange(MergeGroupLines(lg));
+            }
+
+            return rstLines;
+        }
+        private static List<Line> MergeGroupLines(HashSet<LineSegment2d> lineGroup)
+        {
+            var rstLines = new List<Line>();
+            while (lineGroup.Count != 0)
+            {
+                var l = lineGroup.First();
+                lineGroup.Remove(l);
+                rstLines.Add(MergeLine(ref l, ref lineGroup));
+            }
+            return rstLines;
+
+        }
+        private static Line MergeLine(ref LineSegment2d l, ref HashSet<LineSegment2d> lineGroup)
+        {
+            Line rstLine = new Line();
+
+            MergeLineEx(ref l, ref lineGroup);
+            rstLine.StartPoint = l.StartPoint.ToPoint3d();
+            rstLine.EndPoint = l.EndPoint.ToPoint3d();
+            return rstLine;
+        }
+        private static void MergeLineEx(ref LineSegment2d l, ref HashSet<LineSegment2d> lineGroup)
+        {
+            //如果 l 与 group里面任何一条线都没有交点，那么就把该l返回
+            var overlapLine = IsOverlapLine(l, lineGroup);
+            if (overlapLine.Count == 0)//如果没有相交
+            {
+                return;
+            }
+            else
+            {
+                //找到与l相交的线，然后，进行merge,并且把相交的线，从group里面删除
+                l = MergeLineEX2(l, overlapLine);
+                foreach (var line in overlapLine)
+                {
+                    lineGroup.Remove(line);
+                }
+                //merge 以后，继续执行MergeLine;
+                MergeLineEx(ref l, ref lineGroup);
+            }
+        }
+
+        private static HashSet<LineSegment2d> IsOverlapLine(LineSegment2d line, HashSet<LineSegment2d> lineGroup)
+        {
+            HashSet<LineSegment2d> overlapLine = new HashSet<LineSegment2d>();
+            foreach (var l in lineGroup)
+            {
+                if (IsOverlapLine(line, l))
+                {
+                    overlapLine.Add(l);
+                }
+            }
+
+            return overlapLine;
+        }
+        private static bool IsOverlapLine(LineSegment2d firLine, LineSegment2d secLine)
+        {
+            var overlapedSeg = firLine.Overlap(secLine, new Tolerance(0.01, 0.01));
+            if (overlapedSeg != null)
+            {
+                return true;
+            }
+            else
+            {
+                var ptSet = new HashSet<Point3dEx>();
+                var tol = 1E-2;
+                ptSet.Add(new Point3dEx(firLine.StartPoint.X, firLine.StartPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(firLine.EndPoint.X, firLine.EndPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(secLine.StartPoint.X, secLine.StartPoint.Y, 0.0, tol));
+                ptSet.Add(new Point3dEx(secLine.EndPoint.X, secLine.EndPoint.Y, 0.0, tol));
+                if (ptSet.Count() == 3)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static LineSegment2d MergeLineEX2(LineSegment2d line, HashSet<LineSegment2d> overlapLines)
+        {
+            List<Point3d> pts = new List<Point3d>();
+            pts.Add(line.StartPoint.ToPoint3d());
+            pts.Add(line.EndPoint.ToPoint3d());
+            foreach (var l in overlapLines)
+            {
+                pts.Add(l.StartPoint.ToPoint3d());
+                pts.Add(l.EndPoint.ToPoint3d());
+            }
+            var pairPt = pts.GetCollinearMaxPts();
+            return new LineSegment2d(pairPt.Item1.ToPoint2d(), pairPt.Item2.ToPoint2d());
         }
     }
 }
