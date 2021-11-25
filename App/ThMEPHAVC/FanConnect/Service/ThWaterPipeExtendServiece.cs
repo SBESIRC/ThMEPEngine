@@ -31,7 +31,8 @@ namespace ThMEPHVAC.FanConnect.Service
             WaterPipeExtend(t1);
             //将连接处的线进行补齐并绘制小圆点
             ExtendEnds(node);
-
+            //绘制接点
+            DrawContact(node);
             for (int i = 0; i < node.Item.ExPline.Count;i++)
             {
                 var l = node.Item.ExPline[i];
@@ -140,7 +141,6 @@ namespace ThMEPHVAC.FanConnect.Service
             return retLine;
 
         }
-
         public void ExtendEnds(ThFanTreeNode<ThFanPipeModel> node)
         {
             if (node.Parent == null)
@@ -212,19 +212,9 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 Point3d closPt4 = pline4.GetClosestPointTo(cline2.StartPoint, true);
                                                 Point3d closPt5 = pline5.GetClosestPointTo(cline3.StartPoint, true);
 
-                                                if(node.Item.IsConnect && node.Item.CroVector.Equals(new Vector3d(0.0,0.0,-1.0)))
-                                                {
-                                                    cline1.StartPoint = closPt1;
-                                                    cline2.StartPoint = closPt4;
-                                                    cline3.StartPoint = closPt5;
-                                                }
-                                                else
-                                                {
-                                                    cline1.StartPoint = closPt2;
-                                                    cline2.StartPoint = closPt4;
-                                                    cline3.StartPoint = closPt5;
-                                                }
-
+                                                cline1.StartPoint = closPt2;
+                                                cline2.StartPoint = closPt4;
+                                                cline3.StartPoint = closPt5;
 
                                                 node.Item.ExPoint.Add(closPt1);
                                                 node.Item.ExPoint.Add(closPt2);
@@ -269,6 +259,18 @@ namespace ThMEPHVAC.FanConnect.Service
                     break;
                 default:
                     break;
+            }
+        }
+        public void DrawContact(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            if(!node.Item.IsConnect || node.Item.PipeLevel == PIPELEVEL.LEVEL3)
+            {
+                foreach(var pt in node.Item.ExPoint)
+                {
+                    var c = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 10);
+                    c.ColorIndex = 1;
+                    Draw.AddToCurrentSpace(c);
+                }
             }
         }
     }
