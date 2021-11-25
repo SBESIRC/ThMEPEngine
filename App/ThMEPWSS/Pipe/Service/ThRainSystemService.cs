@@ -1145,7 +1145,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         reg(fs, bd, pipes);
                         return;
                     }
-                    if (_name.EndsWith(THESAURUSMANIKIN))
+                    if (_name.EndsWith(THESAURUSMANIKIN) || _name.EndsWith(THESAURUSPITILESS))
                     {
                         var bd = br.Bounds.ToGRect().TransformBy(matrix);
                         reg(fs, bd, pipes);
@@ -8343,6 +8343,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string THESAURUSOPTIONAL = @"^T\d?L";
         public const string DIASTEREOISOMER = @"^D\d?L";
         public const string THESAURUSEMPHASIS = "$TwtSys$00000132";
+        public const string THESAURUSPITILESS = "A$C01E86F30";
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;

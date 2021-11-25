@@ -58,7 +58,7 @@ namespace ThMEPWSS.Assistant
         public static LinearRing Offset(this LinearRing lr, Vector2d v) => lr.Offset(v.X, v.Y);
         public static Polygon Offset(this Polygon pl, Vector2d v) => pl.Offset(v.X, v.Y);
         public static GeometryCollection Offset(this GeometryCollection colle, Vector2d v) => colle.Offset(v.X, v.Y);
-        public static Geometry Offset(Geometry geo, Vector2d v) => geo.Offset(v.X, v.Y);
+        public static Geometry Offset(this Geometry geo, Vector2d v) => geo.Offset(v.X, v.Y);
         public static Coordinate Offset(this Coordinate c, double dx, double dy) => new(c.X + dx, c.Y + dy);
         public static Point Offset(this Point pt, double dx, double dy) => new(pt.X + dx, pt.Y + dy);
         public static LineString Offset(this LineString ls, double dx, double dy) => new(ls.Coordinates.Select(x => x.Offset(dx, dy)).ToArray());
@@ -1846,7 +1846,7 @@ namespace ThMEPWSS.Assistant
         {
             return _DrawingTransaction.Current.IsLayerVisible(layer);
         }
-        public static void LayerThreeAxes(List<string> layers)
+        public static void LayerThreeAxes(IEnumerable<string> layers)
         {
             static void EnsureLayerOn(string layerName)
             {

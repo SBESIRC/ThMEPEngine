@@ -34,7 +34,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = ObjFac.CloneObjByJson(vm);
             this.vm = vm;
             this.DataContext = _vm;
-            cbxBasinDn.ItemsSource = FloorDrain.ItemsSource = new string[] { "DN50", "DN75", };
+            cbxBasinDn.ItemsSource = cbxFloorDrain.ItemsSource = new string[] { "DN50", "DN75", };
             this.Basin.ItemsSource = new string[] { "双池S弯", "双池P弯" };
         }
 

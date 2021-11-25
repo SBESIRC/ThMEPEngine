@@ -70,7 +70,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
                 CadCache.HideAllWindows(); ;
                 FocusMainWindow();
-                ThMEPCommandService.Execute(() => ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(vm, false), "THPSXTT");
+                ThMEPCommandService.Execute(() => ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageSystemDiagram.DrawDrainageSystemDiagram(vm, false), "THPSXTT", "生成");
             }
             catch (Exception ex)
             {
@@ -126,20 +126,23 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ImageButton_Click_2(object sender, RoutedEventArgs e)
         {
-            try
+            ThMEPCommandService.Execute(() =>
             {
-                CadCache.HideAllWindows();
-                FocusMainWindow();
-                ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram(vm);
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                CadCache.ShowAllWindows();
-            }
+                try
+                {
+                    CadCache.HideAllWindows();
+                    FocusMainWindow();
+                    ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawDrainageFlatDiagram(vm);
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    CadCache.ShowAllWindows();
+                }
+            }, "THPSXTT", "标注管径");
         }
     }
 }

@@ -46,7 +46,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 ThRainService.TryUpdateByRange(CadCache.TryGetRange(), true);
             };
             Closed += (s, e) => { ThRainService.commandContext = null; };
-           
+
             Loaded += (s, e) => { CadCache.Register(this); };
             {
                 DocumentCollectionEventHandler f = (s, e) => { CadCache.CloseAllWindows(); };
@@ -71,7 +71,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (ThMEPWSS.ReleaseNs.RainSystemNs.ThRainService.commandContext.StoreyContext == null) throw new Exception("请重新框选楼层");
                 CadCache.HideAllWindows();
                 FocusMainWindow();
-                ThMEPCommandService.Execute(() => RainDiagram.DrawRainDiagram(vm, false), "THYSXTT");
+                ThMEPCommandService.Execute(() => RainDiagram.DrawRainDiagram(vm, false), "THYSXTT", "生成");
             }
             catch (System.Exception ex)
             {
@@ -128,20 +128,23 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ImageButton_Click_2(object sender, RoutedEventArgs e)
         {
-            try
+            ThMEPCommandService.Execute(() =>
             {
-                CadCache.HideAllWindows();
-                FocusMainWindow();
-                ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawRainFlatDiagram(vm);
-            }
-            catch (System.Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                CadCache.ShowAllWindows();
-            }
+                try
+                {
+                    CadCache.HideAllWindows();
+                    FocusMainWindow();
+                    ThMEPWSS.FlatDiagramNs.FlatDiagramService.DrawRainFlatDiagram(vm);
+                }
+                catch (System.Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    CadCache.ShowAllWindows();
+                }
+            }, "THYSXTT", "标注管径");
         }
     }
 }

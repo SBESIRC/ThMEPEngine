@@ -28,9 +28,9 @@ namespace ThMEPWSS.Pipe.Model
         {
             cb();
         }
-        public static void Execute(Action cb, string cmdName)
+        public static void Execute(Action cb, string cmdName, string actionName)
         {
-            new ThMEPCommandService(cb) { CommandName = cmdName }.Execute();
+            new ThMEPCommandService(cb) { CommandName = cmdName, ActionName = actionName }.Execute();
         }
     }
     public class ThWRainPipeSystem : IThWDraw, IEquatable<ThWRainPipeSystem>, IComparable<ThWRainPipeSystem>
