@@ -57,7 +57,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
         private List<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Entity entity)
         {
-            var polygon = entity.ToNTSPolygon();
+            var polygon = entity.ToNTSPolygonalGeometry();
             var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
                                                       || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
                                              .Select(g => g.Boundary)

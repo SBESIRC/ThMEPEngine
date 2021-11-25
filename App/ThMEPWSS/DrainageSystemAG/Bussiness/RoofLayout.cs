@@ -278,7 +278,7 @@ namespace ThMEPWSS.DrainageSystemAG.Bussiness
                     {
                         if (inRoom)
                             break;
-                        inRoom = room.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault().Contains(cBlock.createPoint);
+                        inRoom = room.Boundary.ToNTSPolygonalGeometry().ToDbPolylines().FirstOrDefault().Contains(cBlock.createPoint);
                     }
                     if (inRoom) 
                     {

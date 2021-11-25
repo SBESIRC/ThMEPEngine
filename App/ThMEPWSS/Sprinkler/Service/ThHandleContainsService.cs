@@ -32,7 +32,7 @@ namespace ThMEPWSS.Sprinkler.Service
 
         private double GetArea(Entity polygon)
         {
-            return polygon.ToNTSPolygon().Area;
+            return polygon.ToNTSPolygonalGeometry().Area;
         }
     }
 }

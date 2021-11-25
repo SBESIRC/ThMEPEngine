@@ -16,13 +16,13 @@ namespace ThCADCore.NTS
     {
         public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygon());
+            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygonalGeometry());
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection objs)
         {
-            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLineString());
+            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLinealGeometry());
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 

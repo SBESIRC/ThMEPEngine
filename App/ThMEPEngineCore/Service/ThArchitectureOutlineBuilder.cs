@@ -45,14 +45,14 @@ namespace ThMEPEngineCore.Service
             var temp1 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
-                temp1.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
+                temp1.Add(o.ToNTSPolygonalGeometry().Shell.ToDbPolyline());
             });
             cleanData = temp1;          
             cleanData = Union(cleanData);
             var temp2 = new DBObjectCollection();
             cleanData.Cast<Entity>().ForEach(o =>
             {
-                temp2.Add(o.ToNTSPolygon().Shell.ToDbPolyline());
+                temp2.Add(o.ToNTSPolygonalGeometry().Shell.ToDbPolyline());
             });          
             cleanData = temp2;
             cleanData = Buffer(cleanData, -ProOffsetDistance);

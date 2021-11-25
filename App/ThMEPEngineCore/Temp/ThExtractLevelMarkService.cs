@@ -61,7 +61,7 @@ namespace ThMEPEngineCore.Temp
         public List<double> Query(Entity ent)
         {
             var results = new List<double>();
-            var polygon = ent.ToNTSPolygon();
+            var polygon = ent.ToNTSPolygonalGeometry();
             var fitlter = LevelMarks
                  .Cast<BlockReference>()
                  .Where(o => polygon.Contains(new DBPoint(o.Position)

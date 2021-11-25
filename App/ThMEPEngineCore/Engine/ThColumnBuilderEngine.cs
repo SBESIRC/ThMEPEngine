@@ -144,7 +144,7 @@ namespace ThMEPEngineCore.Engine
         }
         private double GetArea(Entity polygon)
         {
-            return polygon.ToNTSPolygon().Area;
+            return polygon.ToNTSPolygonalGeometry().Area;
         }
     }
 }

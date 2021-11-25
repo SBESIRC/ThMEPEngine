@@ -53,10 +53,10 @@ namespace ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel
         
         public static bool CanMergeRegion(List<DetectionRegionVertexModel> vertexModels)
         {
-            NetTopologySuite.Geometries.Geometry polygon = vertexModels[0].Data.ToNTSPolygon();
+            NetTopologySuite.Geometries.Geometry polygon = vertexModels[0].Data.ToNTSPolygonalGeometry();
             for (int i = 1; i < vertexModels.Count; i++)
             {
-                polygon = polygon.Union(vertexModels[i].Data.ToNTSPolygon());
+                polygon = polygon.Union(vertexModels[i].Data.ToNTSPolygonalGeometry());
             }
             Entity mergeRegion = polygon.ToDbCollection()[0] as Entity;
             Polyline boundary = new Polyline();
@@ -150,7 +150,7 @@ namespace ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel
 
         private static void UnionRegionScore(DetectionRegionVertexModel source, DetectionRegionVertexModel target, int ce, ref ScoringModel model)
         {
-            Entity mergeRegion = source.Data.ToNTSPolygon().Union(target.Data.ToNTSPolygon()).ToDbCollection()[0] as Entity;
+            Entity mergeRegion = source.Data.ToNTSPolygonalGeometry().Union(target.Data.ToNTSPolygonalGeometry()).ToDbCollection()[0] as Entity;
             Polyline boundary = new Polyline();
             if (mergeRegion is Polyline polyline)
             {

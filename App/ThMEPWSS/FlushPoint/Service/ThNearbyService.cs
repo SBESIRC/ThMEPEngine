@@ -33,7 +33,7 @@ namespace ThMEPWSS.FlushPoint.Service
             {
                 containers = objs.Cast<Entity>().ToList();
             }
-            return containers.OrderBy(o => o.ToNTSPolygon().Distance(pt.ToNTSPoint())).ToList();
+            return containers.OrderBy(o => o.ToNTSPolygonalGeometry().Distance(pt.ToNTSPoint())).ToList();
         }
     }
 }

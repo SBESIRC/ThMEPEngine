@@ -35,10 +35,10 @@ namespace ThMEPWSS.Hydrant.Service
                     }
                     else
                     {
-                        var first = o.ToNTSPolygon();
+                        var first = o.ToNTSPolygonalGeometry();
                         var similars = objs
                         .Cast<Entity>()
-                        .Where(e => IsSimilar(first, e.ToNTSPolygon()))
+                        .Where(e => IsSimilar(first, e.ToNTSPolygonalGeometry()))
                         .ToList();
                         Results.Add(o);
                         containers.AddRange(similars);

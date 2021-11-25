@@ -267,7 +267,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             var extendBeam = ExtendBeamCenterLineFromRoom(frame, obstacles, selectedBeam);
             //探测区域Lines
             DBObjectCollection DetectionAreaLines = new DBObjectCollection();
-            frame.ToNTSPolygon().ToDbPolylines().ForEach(o => DetectionAreaLines.Add(o));//添加房间框线
+            frame.ToNTSPolygonalGeometry().ToDbPolylines().ForEach(o => DetectionAreaLines.Add(o));//添加房间框线
             obstacles.ForEach(o => DetectionAreaLines.Add(o));//添加障碍物
             extendBeam.Where(o=>o.BeamType==BeamType.HighBeam).ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
             var polygons = DetectionAreaLines.PolygonsEx();
