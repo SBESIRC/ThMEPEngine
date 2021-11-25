@@ -1,7 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
+using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThControlLibraryWPF.ControlUtils;
+using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -28,10 +34,12 @@ namespace ThMEPWSS.ViewModel
     {
         public Dictionary<string, List<List<string>>> BlockNameConfigList { get; set; }
         public Dictionary<string, ObservableCollection<BlockNameConfigViewModel>> BlockNameList { get; set; }
+        public Dictionary<string, Dictionary<string,DBObjectCollection>> BlockNestedEntityFrames { get; set; }
         private List<string> Blocks { get; set; }
 
         public BlockConfigViewModel()
         {
+            BlockNestedEntityFrames = new Dictionary<string, Dictionary<string, DBObjectCollection>>();
             BlockNameConfigList = new Dictionary<string, List<List<string>>>();
             CreateBlockList();
 
@@ -139,6 +147,43 @@ namespace ThMEPWSS.ViewModel
             BlockNameConfigList.Add("空调内机--柜机", new List<List<string>>() { new List<string>(), new List<string>() });
 
 
+        }
+        public void AddToTransient(string blkConfigName)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                IntegerCollection intCol = new IntegerCollection();
+                if (BlockNestedEntityFrames.ContainsKey(blkConfigName))
+                {
+                    BlockNestedEntityFrames[blkConfigName].ForEach(o =>
+                    {
+                        o.Value.OfType<Curve>().ForEach(o =>
+                        {
+                            tm.AddTransient(o, cadGraph.TransientDrawingMode.Highlight, 128, intCol);
+                        });
+                    });
+                }
+            }
+        }
+        public void ClearTransientGraphics()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var tm = cadGraph.TransientManager.CurrentTransientManager;
+                IntegerCollection intCol = new IntegerCollection();
+                BlockNestedEntityFrames.Values.ForEach(o =>
+                {
+                    o.ForEach(o =>
+                    {
+                        o.Value.OfType<Curve>().ForEach(o =>
+                        {
+                            tm.EraseTransient(o, intCol);
+                            //o.Dispose();
+                        });
+                    });
+                });
+            }
         }
     }
 }

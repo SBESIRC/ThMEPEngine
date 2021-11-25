@@ -6,6 +6,9 @@ using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.ViewModel;
 using System.Collections.Generic;
 using ThControlLibraryWPF.CustomControl;
+using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using AcHelper;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -27,20 +30,43 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
-            var blockName = btn.Tag.ToString();
-
-            viewModel.SetViewModel.BlockName = blockName;
-            viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
-            var oldViewModel = viewModel.SetViewModel?.Clone();
-            uiBlockNameConfigSet systemSet = new uiBlockNameConfigSet(viewModel.SetViewModel);
-            systemSet.Owner = this;
-            var ret = systemSet.ShowDialog();
-            if (ret == false)//用户取消了操作
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                viewModel.SetViewModel = oldViewModel;
-                viewModel.BlockNameList[blockName] = viewModel.SetViewModel.ConfigList;
-                return;
+                SetFocusToDwgView();
+                System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
+                var blockName = btn.Tag.ToString();
+
+                viewModel.SetViewModel.BlockName = blockName;
+                viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
+
+                if (viewModel.BlockNestedEntityFrames.ContainsKey(blockName))
+                {
+                    viewModel.SetViewModel.Frames = viewModel.BlockNestedEntityFrames[blockName];
+                }
+                else
+                {
+                    viewModel.SetViewModel.Frames = new Dictionary<string, DBObjectCollection>();
+                }
+
+                var oldViewModel = viewModel.SetViewModel?.Clone();
+
+                uiBlockNameConfigSet systemSet = new uiBlockNameConfigSet(viewModel.SetViewModel);
+                systemSet.Owner = this;
+                var ret = systemSet.ShowDialog();
+                if (ret == false)//用户取消了操作
+                {
+                    viewModel.SetViewModel = oldViewModel;
+                    viewModel.BlockNameList[blockName] = viewModel.SetViewModel.ConfigList;
+                }
+
+                if (!viewModel.BlockNestedEntityFrames.ContainsKey(blockName))
+                {
+                    viewModel.BlockNestedEntityFrames.Add(blockName, viewModel.SetViewModel.Frames);
+                }
+                else
+                {
+                    viewModel.BlockNestedEntityFrames[blockName] = viewModel.SetViewModel.Frames;
+                }
             }
         }
 
@@ -113,8 +139,47 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                viewModel.ClearTransientGraphics();
+                SetFocusToDwgView();
+            }
             e.Cancel = true;
             Hide();
+        }
+
+        private void show__Click(object sender, RoutedEventArgs e)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
+                var blockName = btn.Tag.ToString();
+
+                viewModel.SetViewModel.BlockName = blockName;
+                viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
+
+                viewModel.ClearTransientGraphics();
+                viewModel.AddToTransient(blockName);
+                
+                SetFocusToDwgView();
+            }
+        }
+        private void SetFocusToDwgView()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+        #if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+        #else
+            Active.Document.Window.Focus();
+        #endif
+        }
+
+        private void btnSet_MouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                viewModel.ClearTransientGraphics();
+            }
         }
     }
 }

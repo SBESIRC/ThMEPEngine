@@ -9,6 +9,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         public BlockConfigSetViewModel setViewModel;
         public BlockConfigSetViewModel setViewModelCloned;
+        
         public uiBlockNameConfigSet(BlockConfigSetViewModel viewModel)
         {
             InitializeComponent();
@@ -59,7 +60,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             Button btn = (Button)sender;
             var layerName = btn.Tag.ToString().Trim();
-            foreach(var config in setViewModel.ConfigList)
+            setViewModel.Frames.Remove(layerName);
+            foreach (var config in setViewModel.ConfigList)
             {
                 if(config.layerName.Equals(layerName))
                 {

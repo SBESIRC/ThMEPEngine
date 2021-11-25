@@ -13,6 +13,7 @@ using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Sprinkler.Analysis;
 using ThMEPWSS.SprinklerConnect.Cmd;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -43,10 +44,17 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 ThSprinklerCheckCmd.SprinklerCheckerVM = new ThSprinklerCheckerVM();
             }
+
+            AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose += DocumentBeginClose;
         }
 
         public void Terminate()
         {
+        }
+
+        private void DocumentBeginClose(object sender, DocumentBeginCloseEventArgs e)
+        {
+            AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose -= DocumentBeginClose;
         }
 
         /// <summary>
