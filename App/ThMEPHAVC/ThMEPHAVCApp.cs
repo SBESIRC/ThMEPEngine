@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPHVAC.Command;
+using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanLayout.Command;
 
 namespace ThMEPHVAC
@@ -35,7 +36,7 @@ namespace ThMEPHVAC
         [CommandMethod("TIANHUACAD", "THLGTEMP", CommandFlags.Modal)]
         public void THLGTEMP()
         {
-            using (var cmd = new ThFanHoleExtractCmd())
+            using (var cmd = new ThWaterPipeConnectExtractCmd_Temp())
             {
                 cmd.Execute();
             }
