@@ -35,7 +35,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.6.6.0")]
 [assembly: AssemblyFileVersion("1.6.6.0")]
 
-[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
+
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
@@ -51,4 +51,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmSmokeHeat.ThFireAlarmSmokeHeatCmdsNoUI))]
 [assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmDistance.ThAFASCmds))]
 

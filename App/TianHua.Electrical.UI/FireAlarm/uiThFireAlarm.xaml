@@ -79,7 +79,7 @@
                           ></RadioButton>
                 </StackPanel>
 
-                <StackPanel IsEnabled="False" Grid.Row="1" Orientation="Horizontal" >
+                <StackPanel Grid.Row="1" Orientation="Horizontal" >
                     <!--<CheckBox Content="消防广播" IsThreeState="False"
                           IsChecked="{Binding IsBroadcastChecked,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
@@ -88,8 +88,8 @@
                           IsChecked="{Binding IsBroadcastChecked,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                           ></RadioButton>
-                    <RadioButton GroupName="FireAlarmRBGroup" Margin="68,0,0,0" IsChecked ="True">优先吸顶</RadioButton>
-                    <RadioButton GroupName="FireAlarmRBGroup"  Margin="22,0,0,0">优先壁装</RadioButton>
+                    <RadioButton GroupName="FireAlarmRBGroup" Margin="68,0,0,0" >优先吸顶</RadioButton>
+                    <RadioButton GroupName="FireAlarmRBGroup"  Margin="22,0,0,0" IsChecked ="{Binding IsWallChecked}">优先壁装</RadioButton>
                 </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal">
                     <!--<CheckBox  Content="楼层 / 回路显示盘" IsThreeState="False"
@@ -141,7 +141,7 @@
                           IsChecked="{Binding Parameter.IsThinkIsolatedColumn,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </CheckBox>-->
-                    <RadioButton GroupName="rbFunction" IsEnabled="False" Content="手动报警按钮+声光报警器" IsThreeState="False"
+                    <RadioButton GroupName="rbFunction" Content="手动报警按钮+声光报警器" IsThreeState="False"
                           IsChecked="{Binding Parameter.IsThinkIsolatedColumn,
                         Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                     </RadioButton>

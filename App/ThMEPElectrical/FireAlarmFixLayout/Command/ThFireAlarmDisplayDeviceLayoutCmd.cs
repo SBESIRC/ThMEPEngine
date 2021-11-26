@@ -39,7 +39,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         public void THFireAlarmData()
         {
             //把Cad图纸数据写出到Geojson File中
-            using (var cmd = new ThFireAlarmCommand())
+            using (var cmd = new ThFireAlarmExtractData())
             {
                 cmd.Execute();
             }

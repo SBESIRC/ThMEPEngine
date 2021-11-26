@@ -36,6 +36,17 @@ namespace ThMEPElectrical.FireAlarm
         public static string BlkName_EmergencyLight = "E-BFEL800";
         #endregion
 
+        #region 手报
+        public static string BlkName_ManualAlarm = "E-BFAS212";
+        public static string BlkName_SoundLightAlarm = "E-BFAS330";
+        #endregion
+
+        #region 广播
+        public static string BlkName_Broadcast_Ceiling = "E-BFAS410-2";
+        public static string BlkName_Broadcast_Wall = "E-BFAS410-4";
+        #endregion
+
+
         public static List<string> BlkNameList = new List<string>() {
                                                                       BlkName_Display_Fire,
                                                                       BlkName_Display_Floor,
@@ -52,6 +63,10 @@ namespace ThMEPElectrical.FireAlarm
                                                                       BlkName_InductionCeiling,
                                                                       BlkName_Downlight,
                                                                       BlkName_EmergencyLight,
+                                                                      BlkName_ManualAlarm,
+                                                                      BlkName_SoundLightAlarm,
+                                                                      BlkName_Broadcast_Ceiling,
+                                                                      BlkName_Broadcast_Wall,
                                                                     };
 
         public static Dictionary<string, (double, double)> blk_size = new Dictionary<string, (double, double)>()
@@ -71,7 +86,10 @@ namespace ThMEPElectrical.FireAlarm
                                                                     {BlkName_InductionCeiling, (3,3)},
                                                                     {BlkName_Downlight, (3,3)},
                                                                     {BlkName_EmergencyLight,(2.5,2.5)},
-
+                                                                    { BlkName_ManualAlarm,(3,3) },
+                                                                    { BlkName_SoundLightAlarm,(5,3) },
+                                                                    { BlkName_Broadcast_Ceiling,(5,3) },
+                                                                    { BlkName_Broadcast_Wall,(5,3) },
                                                                 };
 
         public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
@@ -91,7 +109,10 @@ namespace ThMEPElectrical.FireAlarm
                                                                     {BlkName_InductionCeiling, "E-LITE-LITE"},
                                                                     {BlkName_Downlight, "E-LITE-LITE"},
                                                                     {BlkName_EmergencyLight,"E-LITE-LITE"},
-
+                                                                    { BlkName_ManualAlarm,"E-FAS-DEVC" },
+                                                                    { BlkName_SoundLightAlarm,"E-FAS-DEVC" },
+                                                                    { BlkName_Broadcast_Ceiling,"E-FAS-DEVC" },
+                                                                    { BlkName_Broadcast_Wall,"E-FAS-DEVC" },
                                                                  };
 
 

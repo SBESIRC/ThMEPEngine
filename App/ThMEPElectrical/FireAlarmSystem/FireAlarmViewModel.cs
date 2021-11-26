@@ -117,6 +117,19 @@ namespace ThMEPElectrical.FireAlarm.ViewModels
             }
         }
 
+        private bool _IsWall = true;
+        public bool IsWallChecked
+        {
+            get
+            {
+                return _IsWall;
+            }
+            set
+            {
+                _IsWall = value;
+            }
+        }
+
         //楼层回路显示盘
         private bool _IsFloorLoopChecked = false;
         public bool IsFloorLoopChecked

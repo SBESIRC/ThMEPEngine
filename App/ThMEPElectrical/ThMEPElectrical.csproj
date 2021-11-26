@@ -102,7 +102,7 @@
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGroundGridCommand.cs" />
     <Compile Include="Command\ThDclCommand.cs" />
-    <Compile Include="Command\ThFireAlarmCommand.cs" />
+    <Compile Include="Command\ThFireAlarmExtractData.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
     <Compile Include="Command\ThInsertStoreyCommand.cs" />
@@ -135,6 +135,8 @@
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasCmd.cs" />
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasEngine.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSet.cs" />
+    <Compile Include="FireAlarmDistance\Service\ThFADistnaceLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />

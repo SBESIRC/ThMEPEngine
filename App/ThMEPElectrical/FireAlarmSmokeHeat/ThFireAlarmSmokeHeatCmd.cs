@@ -84,7 +84,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 return;
             }
             var bBean = true;
-            var wallThick = 50;
+            var wallThick = 100;
             var theta = 0;
             var floorHight = 2;
             var layoutType = ThFaSmokeCommon.layoutType.smoke;
@@ -109,12 +109,16 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
 
             foreach (var frame in dataQuery.FrameList)
             {
+                var centPt = frame.GetCentroidPoint();
                 DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
                 DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
-                DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
+                DrawUtils.ShowGeometry(centPt, string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
 
-                //var radius = ThFaAreaLayoutParamterCalculationService.calculateRadius(frame.Area,floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
-                //DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
+                var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
+                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], radius * 0.8, 0.025);
+
+                DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 1, 0), string.Format("r:{0}", radius), "l0radius", 25, 25, 200);
+                DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 2, 0), string.Format("bIsAisleArea:{0}", bIsAisleArea), "l0Area", 25, 25, 200);
             }
 
         }
