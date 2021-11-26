@@ -77,12 +77,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         
         private int GetParkingNums(LayoutParameter layoutPara)
         {
-            
+
             //这个函数是用于统计车位数，由余工完成
             //var guid = Guid.NewGuid();
             //var rand = new Random(guid.GetHashCode());
             //int num = rand.Next(10);
             //return num;
+
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
@@ -192,7 +193,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var pop = CreateFirstPopulation();//创建第一代
 
             Active.Editor.WriteMessage($"init pop cnt {pop.Count}");
-            var cnt = 2;
+            var cnt = 1;
 
             while (cnt-- > 0)
             {

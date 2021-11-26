@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
@@ -38,22 +39,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             ObstacleDic = new Dictionary<int, List<Polyline>>();
             SegLineDic = new Dictionary<int, List<Line>>();
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles.ToCollection());
-            SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
         }
 
         public void Set(List<Gene> genome)
         {
             var areas = new List<Polyline>();
             areas.Add(OuterBoundary);
+            SegLines.Clear();
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
                 Split(gene, ref areas);
+                SegLines.Add(GetSegLine(gene));
             }
+            SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
             Areas.Clear();
             AreaDic.Clear();
             ObstacleDic.Clear();
             SegLineDic.Clear();
+            
             Areas.AddRange(areas);
             for (int i = 0; i < areas.Count; i++)
             {
@@ -64,6 +68,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
         }
 
+        private Line GetSegLine(Gene gene)
+        {
+            Point3d spt, ept;
+            if(gene.Direction)
+            {
+                spt = new Point3d(gene.Value, gene.StartValue, 0);
+                ept = new Point3d(gene.Value, gene.EndValue, 0);
+            }
+            else
+            {
+                spt = new Point3d(gene.StartValue, gene.Value, 0);
+                ept = new Point3d(gene.EndValue, gene.Value, 0);
+            }
+            return new Line(spt, ept);
+        }
         private void Split(Gene gene, ref List<Polyline> areas)
         {
             var line = gene.ToLine();//对于每一条线
@@ -89,7 +108,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         private List<Line> GetSegLines(Polyline area)
         {
             var segLines = new List<Line>();
-            var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
+            var newArea = area.Buffer(1.0).OfType<Polyline>().OrderByDescending(p => p.Area).First();
+            var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
             dbObjs.Cast<Entity>()
                 .ForEach(e => segLines.Add(e as Line));
             if(segLines.Count == 0)
