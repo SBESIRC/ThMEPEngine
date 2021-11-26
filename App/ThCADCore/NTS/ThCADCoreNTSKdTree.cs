@@ -53,7 +53,7 @@ namespace ThCADCore.NTS
         {
             var minPt = pl.GeometricExtents.MinPoint.ToPoint2D();
             var maxPt = pl.GeometricExtents.MaxPoint.ToPoint2D();
-            var nodes = this.Tree.Query(new Envelope(minPt.X, minPt.Y, maxPt.X, maxPt.Y));
+            var nodes = this.Tree.Query(new Envelope(minPt.X, maxPt.X, minPt.Y, maxPt.Y));
 
             return nodes.Select(n =>n.Coordinate.ToAcGePoint3d()).ToList();
         }
