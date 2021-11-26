@@ -33,7 +33,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 var pipes = ThEquipElementExtractServiece.GetFanPipes();
                 //提取水管连接点
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
-
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 var lines = ThFanConnectUtils.CleanLaneLines(pipes);
                 //构建Tree

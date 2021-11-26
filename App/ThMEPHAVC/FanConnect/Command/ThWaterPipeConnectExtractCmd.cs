@@ -87,7 +87,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 var toDbServiece = new ThFanToDBServiece();
                 foreach (var pl in plines)
                 {
-                    toDbServiece.InsertEntity(pl , "AI-水管路由示意");
+                    toDbServiece.InsertEntity(pl , "AI-水管路由");
                 }
                 return;
             }

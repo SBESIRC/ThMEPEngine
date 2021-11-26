@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -225,8 +226,6 @@ namespace ThMEPHVAC.FanConnect.Command
 
             return resHoles;
         }
-
-
         public static List<Line> CleanLaneLines(List<Line> lines)
         {
             var rstLines = new List<Line>();
@@ -303,7 +302,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 MergeLineEx(ref l, ref lineGroup);
             }
         }
-
         private static HashSet<LineSegment2d> IsOverlapLine(LineSegment2d line, HashSet<LineSegment2d> lineGroup)
         {
             HashSet<LineSegment2d> overlapLine = new HashSet<LineSegment2d>();
@@ -339,7 +337,6 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return false;
         }
-
         private static LineSegment2d MergeLineEX2(LineSegment2d line, HashSet<LineSegment2d> overlapLines)
         {
             List<Point3d> pts = new List<Point3d>();
@@ -352,6 +349,24 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             var pairPt = pts.GetCollinearMaxPts();
             return new LineSegment2d(pairPt.Item1.ToPoint2d(), pairPt.Item2.ToPoint2d());
+        }
+        public static double GetDoubleFromString(string power)
+        {
+            var str = Regex.Replace(power, @"[^\d.\d]", "");
+            double resDouble = double.Parse(str);
+            return resDouble;
+        }
+        public static void GetCoolAndHotCapacity(string capacity, out double cool, out double hot)
+        {
+            var str = capacity.Split('/');
+            cool = GetDoubleFromString(str[0]);
+            hot = GetDoubleFromString(str[1]);
+        }
+        public static void GetCoolAndHotTempDiff(string tempDiff, out double cool, out double hot)
+        {
+            var str = tempDiff.Split('/');
+            cool = GetDoubleFromString(str[0]);
+            hot = GetDoubleFromString(str[1]);
         }
     }
 }
