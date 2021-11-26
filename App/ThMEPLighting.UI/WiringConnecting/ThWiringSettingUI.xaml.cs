@@ -1,12 +1,8 @@
-﻿using System;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Data;
+﻿using System.Windows;
 using System.Windows.Input;
-using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.ViewModel;
 
-namespace TianHua.Electrical.UI.WiringConnecting
+namespace ThMEPLighting.UI.WiringConnecting
 {
     /// <summary>
     /// UIEmgLightLayout.xaml 的交互逻辑

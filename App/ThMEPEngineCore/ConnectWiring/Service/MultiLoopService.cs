@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                 {
                     var resWirings = new List<Polyline>();
                     LoopInfoModel loopInfo = wiringLoop.loopInfoModels[i];
-                    var loopBlocks = resBlocks.Where(x => loopInfo.blockNames.Any(y => x.Name == y)).ToList();
+                    var loopBlocks = resBlocks.Where(x => loopInfo.blocks.Select(y => y.blockName).Any(y => x.Name == y)).ToList();
                     var otherBlocks = resBlocks.Except(loopBlocks).ToList();
                     loopBlocks.AddRange(otherBlocks.Where(x => loopBlocks.Any(y => y.Position.DistanceTo(x.Position) < dis)));
                     if (loopBlocks.Count > 1)

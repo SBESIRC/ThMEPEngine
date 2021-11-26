@@ -32,9 +32,42 @@ namespace ThMEPEngineCore.ConnectWiring.Model
         public int PointNum { get; set; }
 
         /// <summary>
-        /// 回路包含的块名
+        /// 回路包含的块
         /// </summary>
-        public List<string> blockNames = new List<string>();
+        public List<LoopBlockInfos> blocks = new List<LoopBlockInfos>();
+    }
+
+    public class LoopBlockInfos
+    {
+        /// <summary>
+        /// 块名
+        /// </summary>
+        public string blockName { get; set; }
+
+        /// <summary>
+        /// 块形状
+        /// </summary>
+        public BlockShape blcokShape { get; set; }
+
+        /// <summary>
+        /// X正方向移动
+        /// </summary>
+        public double XRight { get; set; }
+
+        /// <summary>
+        /// X负方向移动
+        /// </summary>
+        public double XLeft { get; set; }
+
+        /// <summary>
+        /// Y正方向移动
+        /// </summary>
+        public double YRight { get; set; }
+
+        /// <summary>
+        /// Y负方向移动
+        /// </summary>
+        public double YLeft { get; set; }
     }
 
     public class BlockConfigModel
@@ -53,5 +86,43 @@ namespace ThMEPEngineCore.ConnectWiring.Model
         /// 回路
         /// </summary>
         public List<string> loops = new List<string>();
+
+        /// <summary>
+        /// 块形状
+        /// </summary>
+        public BlockShape blcokShape { get; set; }
+
+        /// <summary>
+        /// X正方向移动
+        /// </summary>
+        public double XRight { get; set; }
+
+        /// <summary>
+        /// X负方向移动
+        /// </summary>
+        public double XLeft { get; set; }
+
+        /// <summary>
+        /// Y正方向移动
+        /// </summary>
+        public double YRight { get; set; }
+
+        /// <summary>
+        /// Y负方向移动
+        /// </summary>
+        public double YLeft { get; set; }
+    }
+
+    public enum BlockShape
+    {
+        Rectangle,
+
+        Capsule,
+
+        Square,
+
+        Trapezoid,
+
+        Circle,
     }
 }

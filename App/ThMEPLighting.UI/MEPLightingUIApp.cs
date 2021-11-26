@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.UI.UI;
+using ThMEPLighting.UI.WiringConnecting;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPLighting.UI
@@ -50,6 +51,17 @@ namespace ThMEPLighting.UI
         {
             var ui = new TianHua.Lighting.UI.uiThLighting();
             AcadApp.ShowModelessWindow(ui);
+        }
+
+
+        /// <summary>
+        /// 天华连线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THLX", CommandFlags.Modal)]
+        public void THLX()
+        {
+            ThWiringConnectingUI wiringConnectingUI = new ThWiringConnectingUI();
+            AcadApp.ShowModalWindow(wiringConnectingUI);
         }
     }
 }

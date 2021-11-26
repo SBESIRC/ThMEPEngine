@@ -3,18 +3,15 @@ using AcHelper.Commands;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
-using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.ViewModel;
-using ThMEPLighting;
 using ThMEPLighting.ServiceModels;
 
-namespace TianHua.Electrical.UI.WiringConnecting
+namespace ThMEPLighting.UI.WiringConnecting
 {
     /// <summary>
     /// UIEmgLightLayout.xaml 的交互逻辑
@@ -82,18 +79,6 @@ namespace TianHua.Electrical.UI.WiringConnecting
 #else
             Active.Document.Window.Focus();
 #endif
-        }
-    }
-    public class BlkTypeConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

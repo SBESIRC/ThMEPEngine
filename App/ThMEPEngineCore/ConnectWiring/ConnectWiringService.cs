@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.ConnectWiring
             }
 
             //获取所有的块
-            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blockNames).ToList();
+            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
             ThBlockPointsExtractor thBlockPointsExtractor = new ThBlockPointsExtractor(allConfigBlocks);
             using (AcadDatabase db = AcadDatabase.Active())
             {
@@ -51,7 +51,8 @@ namespace ThMEPEngineCore.ConnectWiring
             var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
             {
-                var configBlocks = info.loopInfoModels.First().blockNames;
+                var blockInfos = info.loopInfoModels.First().blocks;
+                var configBlocks = blockInfos.Select(x => x.blockName);
                 var resBlocks = allBlocks
                 .Where(x =>
                 {

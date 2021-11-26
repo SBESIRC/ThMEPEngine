@@ -9,12 +9,13 @@ using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPElectrical.Model;
 using ThMEPEngineCore.IO.ExcelService;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPElectrical.ViewModel
 {
     public partial class WiringConnectingViewModel : NotifyPropertyChangedBase
     {
-        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\连线回路配置表.xlsx";
+        static string roomConfigUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\连线回路配置表.xlsx";
         ReadExcelService excelSrevice = new ReadExcelService();
         private ObservableCollection<LoopConfig> _configLst = new ObservableCollection<LoopConfig>();
         public WiringConnectingViewModel()

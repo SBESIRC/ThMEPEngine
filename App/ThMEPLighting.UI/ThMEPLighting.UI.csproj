@@ -74,6 +74,12 @@
     <Compile Include="ViewModels\ExampleViewModel.cs" />
     <Compile Include="ViewModels\MultiCheckItem.cs" />
     <Compile Include="ViewModels\ParkingLightViewModel.cs" />
+    <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
+      <DependentUpon>ThWiringConnectingUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WiringConnecting\ThWiringSettingUI.xaml.cs">
+      <DependentUpon>ThWiringSettingUI.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -139,6 +145,14 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="WiringConnecting\ThWiringConnectingUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WiringConnecting\ThWiringSettingUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -148,6 +162,10 @@
     <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
       <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
       <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
+      <Project>{9F81D0C6-08FE-451E-9379-5882F9270E55}</Project>
+      <Name>ThMEPElectrical</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>

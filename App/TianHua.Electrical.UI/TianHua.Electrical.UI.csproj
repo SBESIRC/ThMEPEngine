@@ -102,12 +102,6 @@
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WiringConnecting\ThWiringSettingUI.xaml.cs">
-      <DependentUpon>ThWiringSettingUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
-      <DependentUpon>ThWiringConnectingUI.xaml</DependentUpon>
-    </Compile>
     <EmbeddedResource Include="fmBasementLighting.resx">
       <DependentUpon>fmBasementLighting.cs</DependentUpon>
     </EmbeddedResource>
@@ -269,14 +263,6 @@
     <Page Include="SystemDiagram\UI\SelectLayers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WiringConnecting\ThWiringSettingUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WiringConnecting\ThWiringConnectingUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

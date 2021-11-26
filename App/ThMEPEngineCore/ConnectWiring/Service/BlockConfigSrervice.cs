@@ -5,12 +5,19 @@ using ThCADExtension;
 using System.Collections.Generic;
 using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.ConnectWiring.Model;
+using System;
 
 namespace ThMEPEngineCore.ConnectWiring.Service
 {
     public class BlockConfigSrervice
     {
         static string blockConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "连线功能白名单.xlsx");
+        string loopName = "回路";
+        string shape = "形状分类";
+        string xRight = "X+";
+        string xLeft = "X-";
+        string yRight = "Y+";
+        string yLeft = "Y-";
 
         /// <summary>
         /// 计算回路信息
@@ -34,7 +41,14 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                     loopInfo.LineContent = iGroup.First().loops[i];
                     foreach (var info in iGroup)
                     {
-                        loopInfo.blockNames.Add(info.blockName);
+                        LoopBlockInfos block = new LoopBlockInfos();
+                        block.blockName = info.blockName;
+                        block.blcokShape = info.blcokShape;
+                        block.XRight = info.XRight;
+                        block.XLeft = info.XLeft;
+                        block.YRight = info.YRight;
+                        block.YLeft = info.YLeft;
+                        loopInfo.blocks.Add(block);
                     }
                     loopModel.loopInfoModels.Add(loopInfo);
                 }
@@ -66,7 +80,30 @@ namespace ThMEPEngineCore.ConnectWiring.Service
                 {
                     if (!string.IsNullOrEmpty(dataRow[j].ToString()))
                     {
-                        model.loops.Add(dataRow[j].ToString());
+                        if (table.Columns[j].ColumnName.Contains(loopName))
+                        {
+                            model.loops.Add(dataRow[j].ToString());
+                        }
+                        else if (table.Columns[j].ColumnName == shape)
+                        {
+                            model.blcokShape = (BlockShape)Enum.Parse(typeof(BlockShape), dataRow[j].ToString());
+                        }
+                        else if (table.Columns[j].ColumnName == xRight)
+                        {
+                            model.XRight = Int32.Parse(dataRow[j].ToString());
+                        }
+                        else if (table.Columns[j].ColumnName == xLeft)
+                        {
+                            model.XLeft = Int32.Parse(dataRow[j].ToString()); 
+                        }
+                        else if (table.Columns[j].ColumnName == yRight)
+                        {
+                            model.YRight = Int32.Parse(dataRow[j].ToString());
+                        }
+                        else if (table.Columns[j].ColumnName == yLeft)
+                        {
+                            model.YLeft = Int32.Parse(dataRow[j].ToString());
+                        }
                     }
                 }
                 blockModels.Add(model);

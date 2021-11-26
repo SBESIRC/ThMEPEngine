@@ -6,7 +6,7 @@ namespace ThMEPLighting
     public class ThLightingWiringCmds
     {
         [CommandMethod("TIANHUACAD", "THZMLX", CommandFlags.Modal)]
-        public void THZMLX()
+        public void THLigtingWiring()
         {
             using (var cmd = new ThLigtingRouteComand())
             {

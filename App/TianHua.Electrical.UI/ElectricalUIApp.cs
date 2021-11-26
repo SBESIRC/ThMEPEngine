@@ -7,7 +7,6 @@ using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using TianHua.Electrical.UI.WiringConnecting;
 
 namespace TianHua.Electrical.UI
 {
@@ -126,13 +125,6 @@ namespace TianHua.Electrical.UI
         {
             var ui = new uiThFireAlarm();
             AcadApp.ShowModelessWindow(ui);
-        }
-
-        [CommandMethod("TIANHUACAD", "THLX", CommandFlags.Modal)]
-        public void THLX()
-        {
-            ThWiringConnectingUI wiringConnectingUI = new ThWiringConnectingUI();
-            AcadApp.ShowModalWindow(wiringConnectingUI);
         }
 
         private string LayoutType
