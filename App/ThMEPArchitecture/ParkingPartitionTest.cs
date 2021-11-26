@@ -3,20 +3,19 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPArchitecture
 {
-    public class ParkingPartitionTest
+    public partial class ParkingPartitionTest
     {
-        public ParkingPartitionTest()
+        [CommandMethod("TIANHUACAD", "ThParkPartitionTest", CommandFlags.Modal)]
+        public void ThParkPartitionTest()
         {
-
+            Execute();
         }
+
         public void Execute()
         {
             var walls = new List<Polyline>();
@@ -47,7 +46,8 @@ namespace ThMEPArchitecture
                 }
             }
             ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles);
-            partition.GenerateParkingSpaces();
+            //partition.GenerateParkingSpaces();
+            partition.test();
         }
     }
 }

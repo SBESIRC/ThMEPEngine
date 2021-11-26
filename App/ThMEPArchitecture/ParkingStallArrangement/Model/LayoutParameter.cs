@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             ObstacleDic = new Dictionary<int, List<Polyline>>();
             SegLineDic = new Dictionary<int, List<Line>>();
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles.ToCollection());
+            SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
         }
 
         public void Set(List<Gene> genome)
@@ -50,6 +52,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             Areas.Clear();
             AreaDic.Clear();
+            ObstacleDic.Clear();
+            SegLineDic.Clear();
             Areas.AddRange(areas);
             for (int i = 0; i < areas.Count; i++)
             {
@@ -69,7 +73,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             else
             {
-                ;
                 AreaSplit.IsCorrectSegLines2(line, ref areas);
             }
         }
@@ -89,6 +92,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
             dbObjs.Cast<Entity>()
                 .ForEach(e => segLines.Add(e as Line));
+            if(segLines.Count == 0)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    acadDatabase.CurrentSpace.Add(area);
+                }
+            }
             return segLines;
         }
     }

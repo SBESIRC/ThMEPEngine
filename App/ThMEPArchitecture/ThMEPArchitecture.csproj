@@ -25,6 +25,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ParkingPartition.cs" />
+    <Compile Include="ParkingPartitionTest.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\RandInt2.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />

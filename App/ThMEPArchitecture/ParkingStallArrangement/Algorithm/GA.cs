@@ -71,17 +71,67 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
             layoutPara.Set(Genome);
-            return GetParkingNums(layoutPara);
+            int result = GetParkingNums(layoutPara);
+            return result;
         }
         
         private int GetParkingNums(LayoutParameter layoutPara)
         {
             
             //这个函数是用于统计车位数，由余工完成
-            var guid = Guid.NewGuid();
-            var rand = new Random(guid.GetHashCode());
-            int num = rand.Next(10);
-            return num;
+            //var guid = Guid.NewGuid();
+            //var rand = new Random(guid.GetHashCode());
+            //int num = rand.Next(10);
+            //return num;
+            int count = 0;
+            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            {
+                int index = layoutPara.AreaNumber[j];
+                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+                layoutPara.AreaDic.TryGetValue(index, out Polyline ply);
+                layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                var splited = new DBObjectCollection();
+                ply.Explode(splited);
+                var ls = splited.Cast<Line>().ToList();
+                foreach (var lane in lanes)
+                {
+                    for (int i = 0; i < ls.Count; i++)
+                    {
+                        if (Math.Abs(ls[i].Length - lane.Length) < 1
+                            && ls[i].GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 1
+                            && ls[i].GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 1)
+                        {
+                            ls.RemoveAt(i);
+                            break;
+                        }
+                    }
+                }               
+                var walls = GeoUtilities.JoinCurves(new List<Polyline>(), ls);
+                //test
+                string s = "";
+                var ps = walls[0].Clone() as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                ps.Explode(objs);
+                var k = objs.Cast<Line>().ToList();
+                for (int p = 0; p < k.Count; p++)
+                {
+                    if (p == 0) s += k[p].StartPoint.X.ToString() + "," + k[p].StartPoint.Y.ToString() + ",";
+                    s += k[p].EndPoint.X.ToString() + "," + k[p].EndPoint.Y.ToString() + ",";
+                }
+                string w = "";
+                foreach (var r in lanes)
+                {
+                    w += r.StartPoint.X.ToString() + "," + r.StartPoint.Y.ToString()
+                        + "," + r.EndPoint.X.ToString() + "," + r.EndPoint.Y.ToString() + ",";
+                }
+                if(lanes.Count>0)
+                {
+                    ParkingPartition p = new ParkingPartition(walls, lanes, obstacles);
+                    count += p.CalNumOfParkingSpaces();
+                }
+                else { }
+            }
+            return count;
         }
 
         public void AddChromos(Gene c)
@@ -142,7 +192,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var pop = CreateFirstPopulation();//创建第一代
 
             Active.Editor.WriteMessage($"init pop cnt {pop.Count}");
-            var cnt = 200;
+            var cnt = 2;
 
             while (cnt-- > 0)
             {
@@ -177,7 +227,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var solution = new Chromosome();
                 var genome = ConvertLineToGene(i);//创建初始基因序列
                 solution.Genome = genome;
-                Draw.DrawSeg(solution);
+                //Draw.DrawSeg(solution);
                 solutions.Add(solution);
             }
 

@@ -49,18 +49,43 @@ namespace ThMEPArchitecture
         const double LengthGenetateModuleLane = 10600;
 
 
-        public double CalNumOfParkingSpaces()
+        public int CalNumOfParkingSpaces()
         {
-            double sum = 0;
+            int sum = 0;
+            GenerateParkingSpaces();
+            sum = CarSpots.Count;
             return sum;
         }
 
         public void GenerateParkingSpaces()
         {
             GenerateLanes();
-            IniLanes.AddToCurrentSpace();
+            //IniLanes.AddToCurrentSpace();
             GenerateParkingSpots();
-            CarSpots.AddToCurrentSpace();
+            //CarSpots.AddToCurrentSpace();
+        }
+
+        public void test()
+        {
+            var splited = new DBObjectCollection();
+            Boundary.Explode(splited);
+            var ls = splited.Cast<Line>().ToList();
+            //IniLanes.ForEach(e => ls.Remove(e));
+            foreach (var lane in IniLanes)
+            {
+                for (int i = 0; i < ls.Count; i++)
+                {
+                    if (Math.Abs(ls[i].Length - lane.Length) < 1
+                        && ls[i].GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 1
+                        && ls[i].GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 1)
+                    {
+                        ls.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+            var pls = JoinCurves(new List<Polyline>(), ls);
+            pls.AddToCurrentSpace();
         }
 
         /// <summary>

@@ -68,7 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var geneAlgorithm = new GA(gaPara, layoutPara);
             var rst = geneAlgorithm.Run();
             var solution = rst.First();
-            Draw.DrawSeg(solution, "1");
+            Draw.DrawSeg(solution);
             ;
         }
 
