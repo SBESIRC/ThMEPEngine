@@ -160,7 +160,7 @@ namespace ThMEPWSS.ViewModel
                     {
                         o.Value.OfType<Curve>().ForEach(o =>
                         {
-                            tm.AddTransient(o, cadGraph.TransientDrawingMode.Highlight, 128, intCol);
+                            tm.AddTransient(o, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
                         });
                     });
                 }

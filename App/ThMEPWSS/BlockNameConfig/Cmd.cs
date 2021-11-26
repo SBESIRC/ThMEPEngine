@@ -15,6 +15,8 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
 using ThMEPWSS.ViewModel;
+using ThMEPEngineCore.Engine;
+using ThCADExtension;
 
 namespace ThMEPWSS.BlockNameConfig
 {
@@ -79,13 +81,13 @@ namespace ThMEPWSS.BlockNameConfig
                 }
                 else
                 {
-                    foreach (ObjectId id in nestedEntRes.GetContainers())
+                    if(nestedEntRes.GetContainers().Length>0)
                     {
-                        var dbObj2 = acadDatabase.Element<Entity>(id);
+                        var containerId = nestedEntRes.GetContainers().First();
+                        var dbObj2 = acadDatabase.Element<Entity>(containerId);
                         if (dbObj2 is BlockReference br2)
                         {
                             blockName = ThMEPXRefService.OriginalFromXref(br2.GetEffectiveName());
-                            break;
                         }
                     }
                 }
@@ -105,15 +107,14 @@ namespace ThMEPWSS.BlockNameConfig
                 }
                 uiConfigs.ConfigList.Add(new ViewModel.BlockNameConfigViewModel(blockName));
                 //添加块的框线
-                var blocks = ExtractBlocks(acadDatabase.Database, blockName);
-                var ents = new DBObjectCollection();
+                var blks = ExtractBlocks(acadDatabase.Database, blockName);
                 var bufferService = new ThNTSBufferService();
-                foreach (BlockReference block in blocks)
+                var ents = new DBObjectCollection();
+                foreach (BlockReference blk in blks)
                 {
-                    var frame = CreateFrame(block);
-                    var newFrame = bufferService.Buffer(frame, 100.0) as Polyline;
+                    var obb = CreateFrame(blk);
+                    var newFrame = bufferService.Buffer(obb, 100.0) as Polyline;
                     newFrame.Color = Color.FromRgb(255,0,0);
-                    //newFrame.ColorIndex = 1;
                     newFrame.LineWeight = LineWeight.LineWeight050;
                     ents.Add(newFrame);
                 }
@@ -121,9 +122,52 @@ namespace ThMEPWSS.BlockNameConfig
             }
         }
 
-        private Polyline CreateFrame(Point3d center,double length ,double width)
+        public Polyline CreateFrame(BlockReference br)
         {
-            return ThDrawTool.CreateRectangle(center, length, width);
+            var objs = ThDrawTool.Explode(br);
+            var curves = objs.OfType<Entity>()
+                .Where(e => e is Curve).ToCollection();
+            curves = Tesslate(curves);
+            curves = curves.OfType<Curve>().Where(o => o != null && o.GetLength() > 1e-6).ToCollection();
+            var transformer = new ThMEPOriginTransformer(curves);
+            transformer.Transform(curves);
+            var obb = curves.GetMinimumRectangle();
+            transformer.Reset(obb);
+            return obb;
+        }
+
+        private DBObjectCollection Tesslate(DBObjectCollection curves, 
+            double arcLength = 50.0, double chordHeight = 50.0)
+        {
+            var results = new DBObjectCollection();
+            curves.OfType<Curve>().ToList().ForEach(o =>
+            {
+                if (o is Line)
+                {
+                    results.Add(o);
+                }
+                else if (o is Arc arc)
+                {
+                    results.Add(arc.TessellateArcWithArc(arcLength));
+                }
+                else if (o is Circle circle)
+                {
+                    results.Add(circle.TessellateCircleWithArc(arcLength));
+                }
+                else if (o is Polyline polyline)
+                {
+                    results.Add(polyline.TessellatePolylineWithArc(arcLength));
+                }
+                else if (o is Ellipse ellipse)
+                {
+                    results.Add(ellipse.Tessellate(chordHeight));
+                }
+                else if (o is Spline spline)
+                {
+                    results.Add(spline.Tessellate(chordHeight));
+                }
+            });
+            return results;
         }
 
         public void Execute2(BlockConfigSetViewModel uiConfigs)
@@ -160,91 +204,104 @@ namespace ThMEPWSS.BlockNameConfig
 
         private DBObjectCollection ExtractBlocks(Database db,string blockName)
         {
-            var ExtractBlock = new ThExtractBlock();
-            ExtractBlock.Extract(db, blockName);
-            return ExtractBlock.DBobjs;
-        }
-        private Polyline CreateFrame(BlockReference  br)
-        {
-            var objs = ThDrawTool.Explode(br);
-            var transformer = new ThMEPOriginTransformer(objs);
-            transformer.Transform(objs);
-            var curves = objs.OfType<Entity>().Where(e => e is Curve).ToCollection();
-            var obb = curves.GetMinimumRectangle();
-            transformer.Reset(obb);
-            objs.Dispose();
-            return obb;
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+              {
+                  if (e is BlockReference br)
+                  {
+                      return br.GetEffectiveName().ToUpper().EndsWith(blockName.ToUpper());
+                  }
+                  return false;
+              };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.ExtractFromMS(db);
+            extractor.Extract(db);
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
     }
-    public class ThExtractBlock
+    public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
     {
-        public List<Entity> Results { get; private set; }
-        public DBObjectCollection DBobjs { get; private set; }
-        public void Extract(Database database, string blockName)
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        public ThBlockReferenceExtractionVisitor()
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
+            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedBlockName = (Entity entity) => true;
+        }
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        {
+            if (dbObj is BlockReference br)
             {
-                Results = acadDatabase
-                   .ModelSpace
-                   .OfType<Entity>()
-                   .ToList();
-
-                var dbObjs = Results.ToCollection();
-
-                DBobjs = new DBObjectCollection();
-                foreach (var db in dbObjs)
-                {
-                    if (db is DBPoint)
-                    {
-                        continue;
-                    }
-                    if (db is BlockReference)
-                    {
-                        if (IsBlock((db as BlockReference).GetEffectiveName(), blockName))
-                        {
-                            DBobjs.Add((DBObject)db);
-                        }
-                        else
-                        {
-                            var objs = new DBObjectCollection();
-
-                            var blockRecordId = (db as BlockReference).BlockTableRecord;
-                            var btr = acadDatabase.Blocks.Element(blockRecordId);
-
-                            int indx = 0;
-                            var indxFlag = false;
-                            foreach (var entId in btr)
-                            {
-                                var dbObj = acadDatabase.Element<Entity>(entId);
-                                if (dbObj is BlockReference)
-                                {
-                                    if (IsBlock((dbObj as BlockReference).GetEffectiveName(), blockName))
-                                    {
-                                        indxFlag = true;
-                                        break;
-                                    }
-                                }
-                                indx += 1;
-                            }
-
-                            (db as BlockReference).Explode(objs);
-                            if (indxFlag)
-                            {
-                                if (indx > objs.Count - 1)
-                                {
-                                    continue;
-                                }
-                                DBobjs.Add((DBObject)objs[indx]);
-                            }
-
-                        }
-                    }
-                }
+                elements.AddRange(Handle(br, matrix));
             }
         }
-        private bool IsBlock(string valve, string blockName)
+
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements,
+            BlockReference blockReference, Matrix3d matrix)
         {
-            return valve.ToUpper().Contains(blockName);
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
+        }
+
+        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcDistributionElementData>();
+            if (IsDistributionElement(br) && CheckLayerValid(br))
+            {
+               var clone = br.Clone() as BlockReference;
+                if (clone!=null)
+                {
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = clone,
+                    });
+                }
+            }
+            return results;
+        }
+        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is BlockReference br)
+            {
+                return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public override bool IsDistributionElement(Entity entity)
+        {
+            return CheckQualifiedBlockName(entity);
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return CheckQualifiedLayer(curve);
+        }
+        
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
