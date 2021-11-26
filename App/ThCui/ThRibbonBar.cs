@@ -158,10 +158,34 @@ namespace TianHua.AutoCAD.ThCui
 
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
+            CreateEGeneralPanel(tab);
             CreateEAFASPanel(tab);
             CreateELightingPanel(tab);
             CreateElectronicPanel(tab);
-            CreateEExchangePanel(tab);
+        }
+
+        private static void CreateEGeneralPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("EGENERAL", "电气通用");
+            var row = panel.AddNewRibbonRow();
+
+            // 连线
+            row.AddNewButton("连线",
+                "天华电气连线",
+                "THLX",
+                "天华电气连线",
+                "IDI_THCAD_THLX_SMALL",
+                "IDI_THCAD_THLX_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            // 提资转换
+            row.AddNewButton("提资转换",
+                "天华提资转换",
+                "THTZZH",
+                "天华提资转换",
+                "IDI_THCAD_THTZZH_SMALL",
+                "IDI_THCAD_THTZZH_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateEAFASPanel(RibbonTabSource tab)
@@ -312,21 +336,6 @@ namespace TianHua.AutoCAD.ThCui
             "天华车道应急照明连线",
             "IDI_THCAD_THYJZMLX_SMALL",
             "IDI_THCAD_THYJZMLX_LARGE",
-            RibbonButtonStyle.LargeWithText);
-        }
-
-        private static void CreateEExchangePanel(RibbonTabSource tab)
-        {
-            var panel = tab.AddNewPanel("EEXCHANGE", "提资接收");
-            var row = panel.AddNewRibbonRow();
-
-            // 提资转换
-            row.AddNewButton("提资转换",
-            "天华提资转换",
-            "THTZZH",
-            "天华提资转换",
-            "IDI_THCAD_THTZZH_SMALL",
-            "IDI_THCAD_THTZZH_LARGE",
             RibbonButtonStyle.LargeWithText);
         }
 
@@ -555,6 +564,20 @@ namespace TianHua.AutoCAD.ThCui
                     "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
                     "IDI_THCAD_THTCD_SMALL",
                     "IDI_THCAD_THTCD_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 中心线
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("提空间中心线",
+                    "天华空间中心线",
+                    "THKJZX",
+                    "天华空间中心线",
+                    "IDI_THCAD_THKJZX_SMALL",
+                    "IDI_THCAD_THKJZX_LARGE",
                     RibbonButtonStyle.LargeWithText);
             }
 
