@@ -14,6 +14,10 @@ namespace ThMEPEngineCore.Engine
             {
                 elements.AddRange(Handle(polyline));
             }
+            else if (dbObj is Ellipse ellipse)
+            {
+                elements.AddRange(Handle(ellipse));
+            }
         }
 
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix)
@@ -26,19 +30,29 @@ namespace ThMEPEngineCore.Engine
             throw new NotSupportedException();
         }
 
-        private List<ThRawIfcSpatialElementData> Handle(Polyline polyline)
+        private List<ThRawIfcSpatialElementData> Handle(Curve polyline)
         {
             var results = new List<ThRawIfcSpatialElementData>();
             if (IsSpatialElement(polyline) && CheckLayerValid(polyline))
             {
-                var clone = polyline.WashClone() as Polyline;
-                if(clone!=null)
+                Curve clone = null;
+                if (polyline is Polyline)
+                {
+                    clone = polyline.WashClone() as Polyline;
+                }
+                else if (polyline is Ellipse)
+                {
+                    clone = polyline.WashClone() as Ellipse;
+                }
+
+                if (clone != null)
                 {
                     results.Add(CreateSpatialElementData(clone, ""));
-                }                
+                }
             }
             return results;
         }
+
 
         private ThRawIfcSpatialElementData CreateSpatialElementData(Curve curve, string description)
         {

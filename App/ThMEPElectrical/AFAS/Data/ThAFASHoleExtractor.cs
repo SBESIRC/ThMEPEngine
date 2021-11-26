@@ -61,7 +61,7 @@ namespace ThMEPElectrical.AFAS.Data
 
             extractService.Polys.ForEach(o => Transformer.Transform(o));
             var holes = extractService.Polys.ToList();
-            holes = holes.Select(o => ThHandleNonClosedPolylineService.Handle(o)).ToList();
+            holes = holes.Select(o => ThHandleNonClosedPolylineService.Handle(o)).OfType<Polyline>().ToList();
             ThCleanEntityService clean = new ThCleanEntityService();
             holes = holes
                 .Where(o => o.Area >= SmallAreaTolerance)

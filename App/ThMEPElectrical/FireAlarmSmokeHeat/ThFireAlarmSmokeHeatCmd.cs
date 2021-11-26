@@ -6,6 +6,8 @@ using System.Text;
 
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using AcHelper;
 
 using Linq2Acad;
 using ThCADCore.NTS;
@@ -45,6 +47,29 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "ThFaBuffer", CommandFlags.Modal)]
+        public void ThBuffer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
+                var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
+                var a = bufferService.Buffer(obj, 1000);
+           
+                DrawUtils.ShowGeometry(a, "l0buffer");
+
+            }
+
+
+
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThFaDataGJson", CommandFlags.Modal)]
         public void ThFaDataGJson()
         {
@@ -53,7 +78,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var pts = ThFireAlarmUtils.GetFrameBlk();
+            var pts = ThFireAlarmUtils.GetFrame();
             if (pts.Count == 0)
             {
                 return;

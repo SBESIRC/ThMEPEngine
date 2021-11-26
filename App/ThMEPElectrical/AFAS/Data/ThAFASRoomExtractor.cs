@@ -56,10 +56,10 @@ namespace ThMEPElectrical.AFAS.Data
             //对于起、终点间距小于一定距离的，做缝合
             for (int i = 0; i < rooms.Count; i++)
             {
-                rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Polyline);
+                rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Curve);
             }
             //过滤无效的房间框线
-            rooms = rooms.Where(o => (o.Boundary as Polyline).Area >= 1.0).ToList();
+            rooms = rooms.Where(o => (o.Boundary as Curve).Area >= 1.0).ToList();
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
