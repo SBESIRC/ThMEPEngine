@@ -46,6 +46,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var areas = new List<Polyline>();
             areas.Add(OuterBoundary);
             SegLines.Clear();
+            if(genome.Count > 3)
+            {
+                ;
+            }
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
@@ -53,6 +57,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLines.Add(GetSegLine(gene));
             }
             SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
+            AreaNumber.Clear();
             Areas.Clear();
             AreaDic.Clear();
             ObstacleDic.Clear();

@@ -6,6 +6,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using Autodesk.AutoCAD.Geometry;
+using System.IO;
+using ThCADExtension;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -83,54 +85,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //var rand = new Random(guid.GetHashCode());
             //int num = rand.Next(10);
             //return num;
-
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 int index = layoutPara.AreaNumber[j];
                 layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                layoutPara.AreaDic.TryGetValue(index, out Polyline ply);
+                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
                 layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
-                var splited = new DBObjectCollection();
-                ply.Explode(splited);
-                var ls = splited.Cast<Line>().ToList();
-                foreach (var lane in lanes)
-                {
-                    for (int i = 0; i < ls.Count; i++)
-                    {
-                        if (Math.Abs(ls[i].Length - lane.Length) < 1
-                            && ls[i].GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 1
-                            && ls[i].GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 1)
-                        {
-                            ls.RemoveAt(i);
-                            break;
-                        }
-                    }
-                }               
-                var walls = GeoUtilities.JoinCurves(new List<Polyline>(), ls);
-                //test
-                string s = "";
-                var ps = walls[0].Clone() as Polyline;
-                DBObjectCollection objs = new DBObjectCollection();
-                ps.Explode(objs);
-                var k = objs.Cast<Line>().ToList();
-                for (int p = 0; p < k.Count; p++)
-                {
-                    if (p == 0) s += k[p].StartPoint.X.ToString() + "," + k[p].StartPoint.Y.ToString() + ",";
-                    s += k[p].EndPoint.X.ToString() + "," + k[p].EndPoint.Y.ToString() + ",";
-                }
+
+                //log
+                List<Polyline> pls = new List<Polyline>() { boundary };
                 string w = "";
-                foreach (var r in lanes)
+                string l = "";
+                foreach (var e in pls)
                 {
-                    w += r.StartPoint.X.ToString() + "," + r.StartPoint.Y.ToString()
-                        + "," + r.EndPoint.X.ToString() + "," + r.EndPoint.Y.ToString() + ",";
+                    foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                        w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
                 }
-                if(lanes.Count>0)
+                foreach (var e in lanes)
                 {
-                    ParkingPartition p = new ParkingPartition(walls, lanes, obstacles);
+                    l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                        + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+                }
+
+                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(fs1);
+                sw.WriteLine(w);
+                sw.WriteLine(l);
+                sw.Close();
+                fs1.Close();
+
+
+                ParkingPartition p = new ParkingPartition(new List<Polyline>(), lanes, obstacles, boundary);
+                bool valid = p.Validate();
+                if (valid)
+                {
+                    //p.Log();
+                    p.Initialize();
                     count += p.CalNumOfParkingSpaces();
                 }
-                else { }
             }
             return count;
         }

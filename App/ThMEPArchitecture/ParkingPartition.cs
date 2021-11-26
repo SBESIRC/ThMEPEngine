@@ -10,23 +10,20 @@ using Autodesk.AutoCAD.Geometry;
 using ThCADCore.NTS;
 using static ThMEPArchitecture.GeoUtilities;
 using Linq2Acad;
+using ThCADExtension;
+using System.IO;
 
 namespace ThMEPArchitecture
 {
     public class ParkingPartition
     {
         public ParkingPartition(List<Polyline> walls, List<Line> iniLanes,
-            List<Polyline> obstacles)
+            List<Polyline> obstacles, Polyline boundary)
         {
             Walls = walls;
             IniLanes = iniLanes;
             Obstacles = obstacles;
-            Boundary = JoinCurves(Walls, IniLanes)[0];
-            BoundingBox = Boundary.CalObb();
-            Walls.ForEach(e => Cutters.Add(e));
-            IniLanes.ForEach(e => Cutters.Add(e));
-            Obstacles.ForEach(e => Cutters.Add(e));
-            ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            Boundary = boundary;
         }
         private List<Polyline> Walls;
         private List<Line> IniLanes;
@@ -48,6 +45,46 @@ namespace ThMEPArchitecture
         const double LengthGenetateHalfLane = 10600;
         const double LengthGenetateModuleLane = 10600;
 
+        public bool Validate()
+        {
+            if (IniLanes.Count == 0) return false;
+            //RemoveInvalidLanes();
+            //if (IniLanes.Count == 0) return false;
+            GenerateWallsForInput();
+            return true;
+        }
+
+        public void Log()
+        {
+            string w = "";
+            string l = "";
+            foreach (var e in Walls)
+            {
+                foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                    w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            foreach (var e in IniLanes)
+            {
+                l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                    + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+            }
+
+            FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs1);
+            sw.WriteLine(w);
+            sw.WriteLine(l);
+            sw.Close();
+            fs1.Close();
+        }
+
+        public void Initialize()
+        {
+            BoundingBox = Boundary.CalObb();
+            Walls.ForEach(e => Cutters.Add(e));
+            IniLanes.ForEach(e => Cutters.Add(e));
+            Obstacles.ForEach(e => Cutters.Add(e));
+            ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+        }
 
         public int CalNumOfParkingSpaces()
         {
@@ -55,6 +92,12 @@ namespace ThMEPArchitecture
             GenerateParkingSpaces();
             sum = CarSpots.Count;
             return sum;
+        }
+
+        public void Draw()
+        {
+            GenerateParkingSpaces();
+            CarSpots.AddToCurrentSpace();
         }
 
         public void GenerateParkingSpaces()
@@ -86,6 +129,59 @@ namespace ThMEPArchitecture
             }
             var pls = JoinCurves(new List<Polyline>(), ls);
             pls.AddToCurrentSpace();
+        }
+
+        private void GenerateWallsForInput()
+        {
+            var splited = new DBObjectCollection();
+            var p = Boundary.Clone() as Polyline;
+            p.Explode(splited);
+            var ls = splited.Cast<Line>().ToList();
+            foreach (var lane in IniLanes)
+            {
+                for (int i = 0; i < ls.Count; i++)
+                {
+                    if (Math.Abs(ls[i].Length - lane.Length) < 1
+                        && ls[i].GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 1
+                        && ls[i].GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 1)
+                    {
+                        ls.RemoveAt(i);
+                        break;
+                    }
+                }
+            }
+            Walls = GeoUtilities.JoinCurves(new List<Polyline>(), ls);
+        }
+
+        private void RemoveInvalidLanes()
+        {
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var l = IniLanes[i];
+                var p_on_b = Boundary.GetClosePoint(l.StartPoint);
+                var p_on_l = l.GetClosestPointTo(p_on_b, false);
+                if (p_on_b.DistanceTo(p_on_l) > 1)
+                {
+                    IniLanes.RemoveAt(i);
+                    i--;
+                }
+            }
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var l = IniLanes[i];
+                DBObjectCollection obj = new DBObjectCollection();
+                obj.Add(Boundary);
+                var ls = SplitCurve(l, obj).Cast<Line>().ToList();
+                foreach (var e in ls)
+                {
+                    var p = Boundary.GetClosestPointTo(e.GetCenter(), false);
+                    if (p.DistanceTo(e.GetCenter()) < 1)
+                    {
+                        IniLanes[i] = e;
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -812,5 +908,41 @@ namespace ThMEPArchitecture
             spatialIndex.Update(add, new DBObjectCollection());
             return;
         }
+
+        public static string AnalysisLine(Line a)
+        {
+            string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
+                a.EndPoint.Y.ToString() + "," + a.EndPoint.Y.ToString() + ",";
+            return s;
+        }
+        public static string AnalysisLineList(List<Line> a)
+        {
+            string s = "";
+            foreach (var e in a)
+            {
+                s += AnalysisLine(e);
+            }
+            return s;
+        }
+        public static string AnalysisPoly(Polyline a)
+        {
+            string s = "";
+            var e = a.Vertices().Cast<Point3d>().ToList();
+            for (int i = 0; i < e.Count; i++)
+            {
+                s += e[i].X.ToString() + e[i].Y.ToString() + ",";
+            }
+            return s;
+        }
+        public static string AnalysisPolyList(List<Polyline> pls)
+        {
+            string s = "";
+            foreach (var e in pls)
+            {
+                s += AnalysisPoly(e) + ";";
+            }
+            return s;
+        }
+
     }
 }

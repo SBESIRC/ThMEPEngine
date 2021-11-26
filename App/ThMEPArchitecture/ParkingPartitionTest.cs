@@ -45,9 +45,9 @@ namespace ThMEPArchitecture
                     else if (o.Layer == "obstacles") obstacles.Add((Polyline)o);
                 }
             }
-            ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles);
-            //partition.GenerateParkingSpaces();
-            partition.test();
+            //ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles);
+            ////partition.GenerateParkingSpaces();
+            //partition.test();
         }
     }
 }
