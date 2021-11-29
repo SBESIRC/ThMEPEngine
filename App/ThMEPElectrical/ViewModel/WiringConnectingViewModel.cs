@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using ThCADExtension;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPElectrical.Model;
 using ThMEPEngineCore.IO.ExcelService;
+using ThMEPEngineCore.IO.IOService;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPElectrical.ViewModel
@@ -16,12 +18,18 @@ namespace ThMEPElectrical.ViewModel
     public partial class WiringConnectingViewModel : NotifyPropertyChangedBase
     {
         static string roomConfigUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\连线回路配置表.xlsx";
+        static string supportUrl = Path.Combine(ThCADCommon.SupportPath(), "连线回路配置表.xlsx");
         ReadExcelService excelSrevice = new ReadExcelService();
         private ObservableCollection<LoopConfig> _configLst = new ObservableCollection<LoopConfig>();
         public WiringConnectingViewModel()
         {
             _configLst.Clear();
-            var ds = GetExcelContent(roomConfigUrl);
+            if (!IOOperateService.FileExist(roomConfigUrl))
+            {
+                IOOperateService.CreateNewFile(supportUrl, roomConfigUrl);
+            }
+
+            DataSet ds = GetExcelContent(roomConfigUrl);
             foreach (DataTable table in ds.Tables)
             {
                 _configLst.Add(ConvertToModel(table));

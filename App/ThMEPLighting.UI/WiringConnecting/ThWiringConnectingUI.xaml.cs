@@ -65,7 +65,6 @@ namespace ThMEPLighting.UI.WiringConnecting
 
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THZMLX");
             }
-            this.Hide();
         }
 
         /// <summary>

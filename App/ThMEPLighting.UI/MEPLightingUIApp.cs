@@ -61,7 +61,7 @@ namespace ThMEPLighting.UI
         public void THLX()
         {
             ThWiringConnectingUI wiringConnectingUI = new ThWiringConnectingUI();
-            AcadApp.ShowModalWindow(wiringConnectingUI);
+            AcadApp.ShowModelessWindow(wiringConnectingUI);
         }
     }
 }
