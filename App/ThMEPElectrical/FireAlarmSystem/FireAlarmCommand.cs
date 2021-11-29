@@ -15,7 +15,7 @@ namespace ThMEPElectrical.FireAlarm.Commands
         public FireAlarmRouteCableCommand(FireAlarmViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
-            CommandName = "THFireAlarmRouteCable";
+            CommandName = "THHZBJ";
             ActionName = "连线";
         }
 
@@ -41,7 +41,7 @@ namespace ThMEPElectrical.FireAlarm.Commands
         public FireAlarmLayoutCommand(FireAlarmViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
-            CommandName = "THFireAlarmLayout";
+            CommandName = "THHZBJ";
             ActionName = "布置";
         }
 

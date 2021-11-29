@@ -1,19 +1,26 @@
 ﻿using System;
-using AcHelper.Commands;
+using ThMEPEngineCore.Command;
 using TianHua.Hvac.UI.LoadCalculation.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
-    public class ThHvacLoadCalculationCmd : IAcadCommand, IDisposable
+    public class ThHvacLoadCalculationCmd : ThMEPBaseCommand, IDisposable
     {
         LoadCalculationMainUI loadCalculation;
+
+        public ThHvacLoadCalculationCmd()
+        {
+            CommandName = "THFHJS";
+            ActionName = "负荷通风计算";
+        }
+
         public void Dispose()
         {
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             if (null != loadCalculation && loadCalculation.IsLoaded)
                 return;

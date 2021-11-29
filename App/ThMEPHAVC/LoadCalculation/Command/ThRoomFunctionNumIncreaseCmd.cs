@@ -21,7 +21,7 @@ namespace ThMEPHVAC.LoadCalculation.Command
     {
         public ThRoomFunctionNumIncreaseCmd()
         {
-            this.CommandName = "THFJDZ";
+            this.CommandName = "THFJBH";
             this.ActionName = "房间编号递增";
         }
         public void Dispose()
