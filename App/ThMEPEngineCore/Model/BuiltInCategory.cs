@@ -180,8 +180,12 @@
         /// </summary>
         PowerPosition,
         /// <summary>
-        /// 电源点位
+        /// UCS区域
         /// </summary>
         UCSPolyline,
+        /// <summary>
+        /// 中心线区域
+        /// </summary>
+        CenterPolyline,
     }
 }

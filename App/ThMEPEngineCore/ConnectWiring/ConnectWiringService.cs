@@ -73,6 +73,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     //allDatas.AddRange(GetUCSPolylines());
+                    //allDatas.AddRange(GetCenterLinePolylines());
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
@@ -307,6 +308,63 @@ namespace ThMEPEngineCore.ConnectWiring
                     geos.Add(geometry);
                 });
             }
+
+            return geos;
+        }
+
+        /// <summary>
+        /// 获取ucs框线
+        /// </summary>
+        /// <returns></returns>
+        private List<ThGeometry> GetCenterLinePolylines()
+        {
+            var geos = new List<ThGeometry>();
+            List<Polyline> allUCSPolys = new List<Polyline>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择中心线框线区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return geos;
+                }
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acadDatabase.Element<Polyline>(obj);
+                    allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
+                }
+            }
+            var objs = new DBObjectCollection();
+            foreach (var item in allUCSPolys)
+            {
+                objs.Add(item);
+            }
+            MPolygon mPolygon = objs.BuildMPolygon();
+            var geometry = new ThGeometry();
+            geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.CenterPolyline.ToString());
+            geometry.Boundary = mPolygon;
+            geos.Add(geometry);
+            //if (allUCSPolys.Count > 0)
+            //{
+            //    allUCSPolys.ForEach(o =>
+            //    {
+            //        var geometry = new ThGeometry();
+            //        geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.CenterPolyline.ToString());
+            //        geometry.Boundary = o;
+            //        geos.Add(geometry);
+            //    });
+            //}
 
             return geos;
         }
