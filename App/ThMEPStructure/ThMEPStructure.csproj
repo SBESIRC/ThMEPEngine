@@ -28,6 +28,7 @@
     <Compile Include="GirderConnect\Command\BeamConnectCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Test\TestCmds.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Test\ThHandleOverlap.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />

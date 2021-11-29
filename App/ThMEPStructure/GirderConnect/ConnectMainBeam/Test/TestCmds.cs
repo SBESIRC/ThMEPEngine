@@ -415,5 +415,32 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
             //    //var entitys= spatialIndex.SelectFence(polyline);
             //}
         }
+
+        [CommandMethod("TIANHUACAD", "THTestOverlapHandle", CommandFlags.Modal)]
+        public void THTestOverlapHandle()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                var per = Active.Editor.GetSelection();
+                if(per.Status!=PromptStatus.OK)
+                {
+                    return;
+                }
+                var polys = per.Value
+                    .GetObjectIds()
+                    .Select(o => acdb.Element<Entity>(o))
+                    .Where(o => o is Polyline)
+                    .ToCollection();
+
+                var handler = new ThHandleOverlap(polys.OfType<Polyline>().ToList());
+                var results = handler.Handle();
+                results.ForEach(p =>
+                {
+                    acdb.ModelSpace.Add(p);
+                    p.ColorIndex = 1;
+                    p.SetDatabaseDefaults();
+                });
+            }
+        }
     }
 }
