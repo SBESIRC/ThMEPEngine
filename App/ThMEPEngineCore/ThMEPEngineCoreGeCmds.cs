@@ -13,8 +13,8 @@ namespace ThMEPEngineCore
 {
     public class ThMEPEngineCoreGeCmds
     {
-        [CommandMethod("TIANHUACAD", "THPCENTERLINE", CommandFlags.Modal)]
-        public void THPCENTERLINE()
+        [CommandMethod("TIANHUACAD", "THKJZX", CommandFlags.Modal)]
+        public void THKJZX()
         {
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
