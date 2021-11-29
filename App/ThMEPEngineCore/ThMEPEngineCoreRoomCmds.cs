@@ -144,6 +144,34 @@ namespace ThMEPEngineCore
             }
         }
 
+        /// <summary>
+        /// 空间绘制
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKJHZ", CommandFlags.Modal)]
+        public void THKJHZ()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                acdb.Database.CreateAIRoomOutlineLayer();
+                acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
+                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+            }
+        }
+
+        /// <summary>
+        /// 空间分割
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKJFG", CommandFlags.Modal)]
+        public void THKJFG()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                acdb.Database.CreateAIRoomSplitlineLayer();
+                acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
+                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+            }
+        }
+
         private void PrintRoom(DBObjectCollection roomOutlines)
         {
             using (var acadDb = AcadDatabase.Active())
