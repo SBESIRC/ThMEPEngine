@@ -1,17 +1,15 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using ThCADCore.NTS;
-using static ThMEPArchitecture.GeoUtilities;
-using Linq2Acad;
-using ThCADExtension;
 using System.IO;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
+using static ThMEPArchitecture.GeoUtilities;
 
 namespace ThMEPArchitecture
 {
@@ -25,13 +23,12 @@ namespace ThMEPArchitecture
             Obstacles = obstacles;
             Boundary = boundary;
         }
-        private List<Polyline> Walls;
-        private List<Line> IniLanes;
-        private List<Polyline> Obstacles;
-        private Polyline Boundary;
-        private Polyline BoundingBox;
-        private DBObjectCollection Cutters = new DBObjectCollection();
-        private ThCADCoreNTSSpatialIndex ObstaclesSpatialIndex;
+        public List<Polyline> Walls;
+        public List<Line> IniLanes;
+        public List<Polyline> Obstacles;
+        public Polyline Boundary;
+        public DBObjectCollection Cutters = new DBObjectCollection();
+        public ThCADCoreNTSSpatialIndex ObstaclesSpatialIndex;
         private List<Polyline> CarSpots = new List<Polyline>();
 
         const double DisLaneWidth = 5500;
@@ -45,92 +42,20 @@ namespace ThMEPArchitecture
         const double LengthGenetateHalfLane = 10600;
         const double LengthGenetateModuleLane = 10600;
 
+        /// <summary>
+        ///  验证数据有效性并进行接口转换
+        /// </summary>
+        /// <returns></returns>
         public bool Validate()
         {
             if (IniLanes.Count == 0) return false;
-            //RemoveInvalidLanes();
-            //if (IniLanes.Count == 0) return false;
             GenerateWallsForInput();
             return true;
         }
 
-        public void Log()
-        {
-            string w = "";
-            string l = "";
-            foreach (var e in Walls)
-            {
-                foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
-                    w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
-            }
-            foreach (var e in IniLanes)
-            {
-                l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
-                    + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
-            }
-
-            FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-            StreamWriter sw = new StreamWriter(fs1);
-            sw.WriteLine(w);
-            sw.WriteLine(l);
-            sw.Close();
-            fs1.Close();
-        }
-
-        public void Initialize()
-        {
-            BoundingBox = Boundary.CalObb();
-            Walls.ForEach(e => Cutters.Add(e));
-            IniLanes.ForEach(e => Cutters.Add(e));
-            Obstacles.ForEach(e => Cutters.Add(e));
-            ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-        }
-
-        public int CalNumOfParkingSpaces()
-        {
-            int sum = 0;
-            GenerateParkingSpaces();
-            sum = CarSpots.Count;
-            return sum;
-        }
-
-        public void Draw()
-        {
-            GenerateParkingSpaces();
-            CarSpots.AddToCurrentSpace();
-        }
-
-        public void GenerateParkingSpaces()
-        {
-            GenerateLanes();
-            //IniLanes.AddToCurrentSpace();
-            GenerateParkingSpots();
-            //CarSpots.AddToCurrentSpace();
-        }
-
-        public void test()
-        {
-            var splited = new DBObjectCollection();
-            Boundary.Explode(splited);
-            var ls = splited.Cast<Line>().ToList();
-            //IniLanes.ForEach(e => ls.Remove(e));
-            foreach (var lane in IniLanes)
-            {
-                for (int i = 0; i < ls.Count; i++)
-                {
-                    if (Math.Abs(ls[i].Length - lane.Length) < 1
-                        && ls[i].GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 1
-                        && ls[i].GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 1)
-                    {
-                        ls.RemoveAt(i);
-                        break;
-                    }
-                }
-            }
-            var pls = JoinCurves(new List<Polyline>(), ls);
-            pls.AddToCurrentSpace();
-        }
-
+        /// <summary>
+        /// 从输入端的闭合边界提取出墙线
+        /// </summary>
         private void GenerateWallsForInput()
         {
             var splited = new DBObjectCollection();
@@ -150,38 +75,272 @@ namespace ThMEPArchitecture
                     }
                 }
             }
-            Walls = GeoUtilities.JoinCurves(new List<Polyline>(), ls);
+            Walls = JoinCurves(new List<Polyline>(), ls);
         }
 
-        private void RemoveInvalidLanes()
+        /// <summary>
+        /// 生成离线实时图形数据可视化调试进程
+        /// </summary>
+        /// <param name="path"></param>
+        public void Log(string path)
         {
+            string w = "";
+            string l = "";
+            foreach (var e in Walls)
+            {
+                foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                    w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            foreach (var e in IniLanes)
+            {
+                l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                    + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+            }
+
+            FileStream fs1 = new FileStream(path, FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs1);
+            sw.WriteLine(w);
+            sw.WriteLine(l);
+            sw.Close();
+            fs1.Close();
+        }
+
+        /// <summary>
+        /// 初始化
+        /// </summary>
+        public void Initialize()
+        {
+            Walls.ForEach(e => Cutters.Add(e));
+            IniLanes.ForEach(e => Cutters.Add(e));
+            Obstacles.ForEach(e => Cutters.Add(e));
+            ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+        }
+
+        /// <summary>
+        /// 计算停车位数量
+        /// </summary>
+        /// <returns></returns>
+        public int CalNumOfParkingSpaces()
+        {
+            GenerateParkingSpaces();
+            return CarSpots.Count;
+        }
+
+        /// <summary>
+        /// 显示车位排布结果
+        /// </summary>
+        public void Display()
+        {
+            GenerateParkingSpaces();
+            CarSpots.AddToCurrentSpace();
+        }
+
+        /// <summary>
+        /// 主函数
+        /// </summary>
+        public void GenerateParkingSpaces()
+        {
+            GenerateLanes();
+            GenerateParkingSpots();
+        }
+
+        /// <summary>
+        /// 生成车道中心线
+        /// </summary>
+        private void GenerateLanes()
+        {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                int count = 0;
+                while (true)
+                {
+                    count++;
+                    if (count > 10) break;
+                    int lanecount = IniLanes.Count;
+                    SortLinesByLength(IniLanes, false);
+
+                    //
+                    var generate_adjwall = GenerateLanesAdjWall();
+                    if (generate_adjwall) continue;
+
+                    var generated_wallext = GenerateLanesExtWall();
+                    if (generated_wallext) continue;
+
+                    SortLinesByLength(IniLanes, false);
+                    List<Line> offsetest = new List<Line>();
+                    foreach (var l in IniLanes)
+                        offsetest.AddRange(GenerateLanesForBackBackParking(l));
+                    if (offsetest.Count == 0) break;
+                    SortLinesByLength(offsetest, false);
+
+                    var generate_bblane = GenerateLanesBackToBack(offsetest);
+                    if (generate_bblane) continue;
+
+                    if (lanecount == IniLanes.Count) break;
+                }
+
+                //extent lane
+                ExtendLanesToBound();
+
+                //connect lane
+                ConnectIsolatedLanes();
+            }
+        }
+
+        /// <summary>
+        /// 生成车道两端的新车道线
+        /// </summary>
+        /// <returns></returns>
+        private bool GenerateLanesAdjWall()
+        {
+            bool generated_adjwall = false;
             for (int i = 0; i < IniLanes.Count; i++)
             {
-                var l = IniLanes[i];
-                var p_on_b = Boundary.GetClosePoint(l.StartPoint);
-                var p_on_l = l.GetClosestPointTo(p_on_b, false);
-                if (p_on_b.DistanceTo(p_on_l) > 1)
+                if (IniLanes[i].Length >= LengthGenetateHalfLane)
                 {
-                    IniLanes.RemoveAt(i);
-                    i--;
+                    var l = IniLanes[i];
+                    var lines = GenerateLanesFromExistingLaneEndpoint(l, Boundary);
+                    var newlane = new List<Line>();
+                    for (int j = 0; j < lines.Count; j++)
+                    {
+                        var k = (Line)SplitCurve(lines[j], Cutters)[0];
+                        Point3d ptori = j == 0 ? l.StartPoint : l.EndPoint;
+                        k = MoveLaneForMoreParkingSpace(k, ptori);
+                        bool hasNeighLane = false;
+                        foreach (var lane in IniLanes)
+                        {
+                            if (IsParallelLine(lane, k) && DisBetweenTwoParallelLines(lane, k) < DisModulus + DisCarAndHalfLane)
+                            {
+                                hasNeighLane = true;
+                                break;
+                            }
+                        }
+                        if (!hasNeighLane && k.Length >= LengthGenetateHalfLane && Boundary.IsPointIn(k.GetCenter()) && (!IsInAnyPolys(k.GetCenter(), Obstacles)))
+                        {
+                            IniLanes.Add(k);
+                            Cutters.Add(k);
+                            generated_adjwall = true;
+                        }
+                    }
+                    if (generated_adjwall) break;
                 }
             }
-            for (int i = 0; i < IniLanes.Count; i++)
+            return generated_adjwall;
+        }
+
+        /// <summary>
+        /// 生成靠墙单排的车道线
+        /// </summary>
+        /// <returns></returns>
+        private bool GenerateLanesExtWall()
+        {
+            bool generated_wallext = false;
+            foreach (var wall in Walls)
             {
-                var l = IniLanes[i];
-                DBObjectCollection obj = new DBObjectCollection();
-                obj.Add(Boundary);
-                var ls = SplitCurve(l, obj).Cast<Line>().ToList();
-                foreach (var e in ls)
+                var wallpl = wall.Clone() as Polyline;
+                DBObjectCollection explodedbounds = new DBObjectCollection();
+                wallpl.Explode(explodedbounds);
+                var edges = explodedbounds.Cast<Line>().ToList().Where(e => e.Length > DisModulus).ToList();
+                SortLinesByLength(edges, false);
+                foreach (var e in edges)
                 {
-                    var p = Boundary.GetClosestPointTo(e.GetCenter(), false);
-                    if (p.DistanceTo(e.GetCenter()) < 1)
+                    foreach (var lane in IniLanes)
                     {
-                        IniLanes[i] = e;
+                        Point3d ponlane = lane.GetClosestPointTo(e.StartPoint, false);
+                        Line ltest = new Line(ponlane, e.StartPoint);
+                        var cond = IsParallelLine(ltest, e);
+                        if (IsPerpLine(e, lane) && DisBetweenTwoParallelLines(e, lane) < DisModulus && e.Length > DisModulus && cond)
+                        {
+                            Point3d pes = e.StartPoint.DistanceTo(ponlane) > e.EndPoint.DistanceTo(ponlane) ? e.StartPoint : e.EndPoint;
+                            Line newlane = new Line(ponlane, pes);
+                            Vector3d vec = Vector(newlane).GetPerpendicularVector().GetNormal();
+                            Point3d ptest = e.GetCenter();
+                            ptest = ptest.TransformBy(Matrix3d.Displacement(vec));
+                            if (!Boundary.IsPointIn(ptest)) vec = -vec;
+                            newlane.TransformBy(Matrix3d.Displacement(vec * DisCarAndHalfLane));
+                            Line ln = new Line();
+                            var k = SplitCurve(newlane, Cutters).Cast<Line>().ToList();
+                            if (k.Count == 0) ln = newlane;
+                            else
+                            {
+                                for (int j = 0; j < k.Count; j++)
+                                {
+                                    if (k[j].Length > DisModulus && DisBetweenTwoParallelLines(k[j], lane) < 1000)
+                                    {
+                                        ln = k[j];
+                                        break;
+                                    }
+                                }
+                            }
+                            if (ln.Length > 0)
+                            {
+                                bool hasNeighLane = false;
+                                foreach (var exlane in IniLanes)
+                                {
+                                    if (IsParallelLine(exlane, ln) && DisBetweenTwoParallelLines(exlane, ln) < DisModulus * 2)
+                                    {
+                                        hasNeighLane = true;
+                                        break;
+                                    }
+                                }
+                                if (!hasNeighLane && ln.Length >= LengthGenetateHalfLane)
+                                {
+                                    IniLanes.Add(ln);
+                                    Cutters.Add(ln);
+                                    generated_wallext = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (generated_wallext) break;
+                }
+                if (generated_wallext) break;
+            }
+            return generated_wallext;
+        }
+
+        /// <summary>
+        /// 按双排模数生成车道线
+        /// </summary>
+        /// <returns></returns>
+        private bool GenerateLanesBackToBack(List<Line> offsetest)
+        {
+            bool generate_bblane = false;
+            foreach (var e in offsetest)
+            {
+                bool hasNeighLane = false;
+                bool IsInvalidLane = false;
+                foreach (var lane in IniLanes)
+                {
+                    if (IsParallelLine(lane, e) && DisBetweenTwoParallelLines(lane, e) < DisModulus - 100)
+                    {
+                        hasNeighLane = true;
                         break;
                     }
                 }
+                Point3d ps = new Point3d();
+                Point3d pe = new Point3d();
+                double ds = -1;
+                double de = -1;
+                int ist = -1;
+                int ie = -1;
+                ClosestPointInCurve(e.StartPoint, IniLanes.Cast<Curve>().ToList(), ref ps, ref ds, ref ist);
+                ClosestPointInCurve(e.EndPoint, IniLanes.Cast<Curve>().ToList(), ref pe, ref de, ref ie);
+                if (ds < 5000 && de < 5000 && e.Length <= DisModulus)
+                {
+                    IsInvalidLane = true;
+                    break;
+                }
+                if ((!hasNeighLane) && (!IsInvalidLane))
+                {
+                    IniLanes.Add(e);
+                    Cutters.Add(e);
+                    generate_bblane = true;
+                }
+                if (generate_bblane) break;
             }
+            return generate_bblane;
         }
 
         /// <summary>
@@ -243,185 +402,6 @@ namespace ThMEPArchitecture
                         AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// 生成车道中心线
-        /// </summary>
-        private void GenerateLanes()
-        {
-            using (AcadDatabase adb = AcadDatabase.Active())
-            {
-                int count = 0;
-                while (true)
-                {
-                    count++;
-                    if (count > 10) break;
-                    int lanecount = IniLanes.Count;
-                    SortLinesByLength(IniLanes, false);
-
-                    bool generated_adjwall = false;
-                    for (int i = 0; i < IniLanes.Count; i++)
-                    {
-                        if (IniLanes[i].Length >= LengthGenetateHalfLane)
-                        {
-                            var l = IniLanes[i];
-                            var lines = GenerateLanesFromExistingLaneEndpoint(l, Boundary);
-                            var newlane = new List<Line>();
-
-                            for (int j = 0; j < lines.Count; j++)
-                            {
-                                var k = (Line)SplitCurve(lines[j], Cutters)[0];
-                                Point3d ptori = j == 0 ? l.StartPoint : l.EndPoint;
-                                k = MoveLaneForMoreParkingSpace(k, ptori);
-                                bool hasNeighLane = false;
-                                foreach (var lane in IniLanes)
-                                {
-                                    if (IsParallelLine(lane, k) && DisBetweenTwoParallelLines(lane, k) < DisModulus + DisCarAndHalfLane)
-                                    {
-                                        hasNeighLane = true;
-                                        break;
-                                    }
-                                }
-                                if (!hasNeighLane && k.Length >= LengthGenetateHalfLane && Boundary.IsPointIn(k.GetCenter()) && (!IsInAnyPolys(k.GetCenter(), Obstacles)))
-                                {
-                                    IniLanes.Add(k);
-                                    Cutters.Add(k);
-                                    generated_adjwall = true;
-                                }
-                            }
-                            if (generated_adjwall) break;
-                        }
-                    }
-                    if (generated_adjwall) continue;
-
-                    bool generated_wallext = false;
-                    foreach (var wall in Walls)
-                    {
-                        var wallpl = wall.Clone() as Polyline;
-                        DBObjectCollection explodedbounds = new DBObjectCollection();
-                        wallpl.Explode(explodedbounds);
-                        var edges = explodedbounds.Cast<Line>().ToList().Where(e => e.Length > DisModulus).ToList();
-                        SortLinesByLength(edges, false);
-                        foreach (var e in edges)
-                        {
-                            foreach (var lane in IniLanes)
-                            {
-                                Point3d ponlane = lane.GetClosestPointTo(e.StartPoint, false);
-                                Line ltest = new Line(ponlane, e.StartPoint);
-                                var cond = IsParallelLine(ltest, e);
-                                if (IsPerpLine(e, lane) && DisBetweenTwoParallelLines(e, lane) < DisModulus && e.Length > DisModulus && cond)
-                                {
-                                    Point3d pes = e.StartPoint.DistanceTo(ponlane) > e.EndPoint.DistanceTo(ponlane) ? e.StartPoint : e.EndPoint;
-                                    Line newlane = new Line(ponlane, pes);
-                                    Vector3d vec = Vector(newlane).GetPerpendicularVector().GetNormal();
-                                    Point3d ptest = e.GetCenter();
-                                    ptest = ptest.TransformBy(Matrix3d.Displacement(vec));
-                                    if (!Boundary.IsPointIn(ptest)) vec = -vec;
-                                    newlane.TransformBy(Matrix3d.Displacement(vec * DisCarAndHalfLane));
-                                    Line ln = new Line();
-                                    var k = SplitCurve(newlane, Cutters).Cast<Line>().ToList();
-                                    if (k.Count == 0) ln = newlane;
-                                    else
-                                    {
-                                        for (int j = 0; j < k.Count; j++)
-                                        {
-                                            if (k[j].Length > DisModulus && DisBetweenTwoParallelLines(k[j], lane) < 1000)
-                                            {
-                                                ln = k[j];
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if (ln.Length > 0)
-                                    {
-                                        bool hasNeighLane = false;
-                                        foreach (var exlane in IniLanes)
-                                        {
-                                            if (IsParallelLine(exlane, ln) && DisBetweenTwoParallelLines(exlane, ln) < DisModulus * 2)
-                                            {
-                                                hasNeighLane = true;
-                                                break;
-                                            }
-                                        }
-                                        if (!hasNeighLane && ln.Length >= LengthGenetateHalfLane)
-                                        {
-                                            //ln.AddToCurrentSpace();
-                                            IniLanes.Add(ln);
-                                            Cutters.Add(ln);
-                                            generated_wallext = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                            if (generated_wallext) break;
-                        }
-                        if (generated_wallext) break;
-                    }
-                    if (generated_wallext) continue;
-
-                    bool generate_bblane = false;
-                    SortLinesByLength(IniLanes, false);
-                    List<Line> offsetest = new List<Line>();
-                    foreach (var l in IniLanes)
-                    {
-                        offsetest.AddRange(GenerateLanesForBackBackParking(l));
-                    }
-                    if (offsetest.Count == 0) break;
-                    SortLinesByLength(offsetest, false);
-                    foreach (var e in offsetest)
-                    {
-                        bool hasNeighLane = false;
-                        bool IsInvalidLane = false;
-                        foreach (var lane in IniLanes)
-                        {
-                            if (IsParallelLine(lane, e) && DisBetweenTwoParallelLines(lane, e) < DisModulus - 100)
-                            {
-                                hasNeighLane = true;
-                                break;
-                            }
-
-                        }
-
-
-
-                        Point3d ps = new Point3d();
-                        Point3d pe = new Point3d();
-                        double ds = -1;
-                        double de = -1;
-                        int ist = -1;
-                        int ie = -1;
-                        ClosestPointInCurve(e.StartPoint, IniLanes.Cast<Curve>().ToList(), ref ps, ref ds, ref ist);
-                        ClosestPointInCurve(e.EndPoint, IniLanes.Cast<Curve>().ToList(), ref pe, ref de, ref ie);
-                        if (ds < 5000 && de < 5000 && e.Length <= DisModulus)
-                        {
-                            IsInvalidLane = true;
-                            break;
-                        }
-
-
-
-                        if ((!hasNeighLane) && (!IsInvalidLane))
-                        {
-                            //e.AddToCurrentSpace();
-                            IniLanes.Add(e);
-                            Cutters.Add(e);
-                            generate_bblane = true;
-                        }
-                        if (generate_bblane) break;
-                    }
-                    if (generate_bblane) continue;
-
-                    if (lanecount == IniLanes.Count) break;
-                }
-
-                //extent lane
-                ExtendLanesToBound();
-
-                //connect lane
-                ConnectIsolatedLanes();
             }
         }
 
@@ -806,7 +786,12 @@ namespace ThMEPArchitecture
         public static List<Curve> SplitCurve(Curve curve, DBObjectCollection objs)
         {
             List<Point3d> pts = new List<Point3d>();
-            objs.Cast<Entity>().ToList().ForEach(e => pts.AddRange(curve.Intersect(e, Intersect.OnBothOperands)));
+            //objs.Cast<Entity>().ToList().ForEach(e => pts.AddRange(curve.Intersect(e, Intersect.OnBothOperands)));
+            foreach (var e in objs.Cast<Entity>().ToList())
+            {
+                if (e != null)
+                    pts.AddRange(curve.Intersect(e, Intersect.OnBothOperands));
+            }
             pts = RemoveDuplicatePts(pts, 1);
             for (int i = 0; i < pts.Count; i++)
             {

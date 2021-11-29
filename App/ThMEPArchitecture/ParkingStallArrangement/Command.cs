@@ -72,30 +72,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             layoutPara.Set(solution.Genome);
 
             //
-            int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 int index = layoutPara.AreaNumber[j];
                 layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                 layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
                 layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
-
-             
-
                 ParkingPartition p = new ParkingPartition(new List<Polyline>(), lanes, obstacles, boundary);
                 bool valid = p.Validate();
                 if (valid)
                 {
-                    //p.Log();
                     p.Initialize();
-                    p.Draw();
+                    p.Display();
                 }
             }
-            //
-
-
             Draw.DrawSeg(solution);
-
             ;
         }
 

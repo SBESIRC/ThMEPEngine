@@ -85,6 +85,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //var rand = new Random(guid.GetHashCode());
             //int num = rand.Next(10);
             //return num;
+
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
@@ -114,7 +115,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 sw.WriteLine(l);
                 sw.Close();
                 fs1.Close();
-
 
                 ParkingPartition p = new ParkingPartition(new List<Polyline>(), lanes, obstacles, boundary);
                 bool valid = p.Validate();

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
 
 namespace ThMEPArchitecture
 {
@@ -45,9 +46,16 @@ namespace ThMEPArchitecture
                     else if (o.Layer == "obstacles") obstacles.Add((Polyline)o);
                 }
             }
-            //ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles);
-            ////partition.GenerateParkingSpaces();
-            //partition.test();
+            var Cutters = new DBObjectCollection();
+            walls.ForEach(e => Cutters.Add(e));
+            iniLanes.ForEach(e => Cutters.Add(e));
+            obstacles.ForEach(e => Cutters.Add(e));
+            var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles, new Polyline());
+            partition.Boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
+            partition.Cutters = Cutters;
+            partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+            partition.Display();
         }
     }
 }
