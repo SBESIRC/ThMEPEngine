@@ -55,6 +55,7 @@
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="THKJHZ" Global="THKJSQ" />
                 <Command Local="THKJFG" Global="THKJSQ" />
+                <Command Local="THKJZX" Global="THKJZX" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THPPARTITION" Global="THPPARTITION" />
                 <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
@@ -79,6 +80,7 @@
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="THKJHZ" Global="THKJSQ" />
                 <Command Local="THKJFG" Global="THKJSQ" />
+                <Command Local="THKJZX" Global="THKJZX" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THPPARTITION" Global="THPPARTITION" />
                 <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
@@ -103,6 +105,7 @@
                 <Command Local="THKJSQ" Global="THKJSQ" />
                 <Command Local="THKJHZ" Global="THKJSQ" />
                 <Command Local="THKJFG" Global="THKJSQ" />
+                <Command Local="THKJZX" Global="THKJZX" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THPPARTITION" Global="THPPARTITION" />
                 <Command Local="THPCENTERLINE" Global="THPCENTERLINE" />
@@ -339,7 +342,6 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THLX" Global="THLX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -354,7 +356,6 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THLX" Global="THLX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -369,7 +370,6 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
-                <Command Local="THLX" Global="THLX" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -537,6 +537,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THLX" Global="THLX" />
                 <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
@@ -549,6 +550,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="ThMEPLightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THLX" Global="THLX" />
                 <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
@@ -561,6 +563,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting UI" AppName="LightingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THLX" Global="THLX" />
                 <Command Local="THZM" Global="THZM" />
                 <Command Local="THSSZSD" Global="THSSZSD" />
                 <Command Local="THYJZM" Global="THYJZM" />
