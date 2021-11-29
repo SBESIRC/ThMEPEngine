@@ -25,6 +25,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThFireAlarmRouteCommand.cs" />
     <Compile Include="Command\ThLigtingRouteComand.cs" />
     <Compile Include="Common\EnumParkingSource.cs" />
     <Compile Include="Common\ThEnumBlockScale.cs" />

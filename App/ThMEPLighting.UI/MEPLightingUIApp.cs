@@ -8,15 +8,19 @@ namespace ThMEPLighting.UI
     public class MEPLightingUIApp : IExtensionApplication
     {
         uiEvaIndicatorSign uiSign = null;
+        ThWiringConnectingUI uiConnect = null;
         public void Initialize()
         {
             uiSign = null;
+            uiConnect = null;
         }
 
         public void Terminate()
         {
             uiSign = null;
+            uiConnect = null ;
         }
+
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
         public void THSSUI()
         {
@@ -60,8 +64,11 @@ namespace ThMEPLighting.UI
         [CommandMethod("TIANHUACAD", "THLX", CommandFlags.Modal)]
         public void THLX()
         {
-            ThWiringConnectingUI wiringConnectingUI = new ThWiringConnectingUI();
-            AcadApp.ShowModelessWindow(wiringConnectingUI);
+            if (uiConnect == null)
+            {
+                uiConnect = new ThWiringConnectingUI();
+            }
+            AcadApp.ShowModelessWindow(uiConnect);
         }
     }
 }
