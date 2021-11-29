@@ -5,7 +5,6 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
-using ThMEPElectrical.Service;
 
 namespace ThMEPLighting.Command
 {

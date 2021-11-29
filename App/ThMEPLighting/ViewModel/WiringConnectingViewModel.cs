@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.IO;
 using System.Data;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
+using System.Collections.ObjectModel;
 using ThControlLibraryWPF.ControlUtils;
-using ThMEPElectrical.Model;
-using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.IO.IOService;
+using ThMEPEngineCore.IO.ExcelService;
+using ThMEPLighting.ServiceModels;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
-namespace ThMEPElectrical.ViewModel
+namespace ThMEPLighting.ViewModel
 {
-    public partial class WiringConnectingViewModel : NotifyPropertyChangedBase
+    public class WiringConnectingViewModel : NotifyPropertyChangedBase
     {
         static string roomConfigUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\连线回路配置表.xlsx";
         static string supportUrl = Path.Combine(ThCADCommon.SupportPath(), "连线回路配置表.xlsx");

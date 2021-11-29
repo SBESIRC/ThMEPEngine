@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Data;
-using System.Linq;
-using ThMEPElectrical.Model;
-using ThMEPElectrical.ViewModel;
+﻿using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Service
 {
@@ -25,29 +19,5 @@ namespace ThMEPElectrical.Service
         /// 安防平面
         /// </summary>
         public ThSecurityPlaneSystemParameter Parameter = new ThSecurityPlaneSystemParameter();
-
-        /// <summary>
-        /// 火灾报警
-        /// </summary>
-        public List<ThFireAlarmModel> fireAlarmParameter = ConvertToModel(new WiringConnectingViewModel().configLst);
-
-        public static List<ThFireAlarmModel> ConvertToModel(ObservableCollection<LoopConfig> configLst)
-        {
-            List<ThFireAlarmModel> thFireAlarms = new List<ThFireAlarmModel>();
-            var fireAlarmModel = configLst.Where(x => x.systemType == "火灾自动报警").FirstOrDefault();
-            if (fireAlarmModel == null)
-            {
-                return thFireAlarms;
-            }
-            foreach (var model in fireAlarmModel.configModels)
-            {
-                ThFireAlarmModel config = new ThFireAlarmModel();
-                config.loopType = model.loopType;
-                config.layerType = model.layerType;
-                config.pointNum = model.pointNum;
-                thFireAlarms.Add(config);
-            }
-            return thFireAlarms;
-        }
     }
 }

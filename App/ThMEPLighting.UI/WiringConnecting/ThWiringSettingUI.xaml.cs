@@ -1,6 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using ThMEPElectrical.ViewModel;
+using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.UI.WiringConnecting
 {

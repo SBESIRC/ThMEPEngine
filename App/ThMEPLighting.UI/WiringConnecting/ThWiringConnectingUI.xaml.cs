@@ -1,14 +1,9 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Windows;
-using System.Windows.Data;
 using System.Windows.Input;
-using ThMEPElectrical.Model;
-using ThMEPElectrical.Service;
-using ThMEPElectrical.ViewModel;
+using System.Collections.Generic;
+using ThMEPLighting.ViewModel;
 using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.UI.WiringConnecting
@@ -47,8 +42,8 @@ namespace ThMEPLighting.UI.WiringConnecting
         {
             if (this.fireAlarmSys.IsChecked == true)
             {
-                ThElectricalUIService.Instance.fireAlarmParameter = new List<ThFireAlarmModel>();
-                ThElectricalUIService.Instance.fireAlarmParameter = ThElectricalUIService.ConvertToModel(ThWiringSettingUI.settingVM.configLst);
+                ThMEPLightingService.Instance.AFASParameter = new List<ThFireAlarmModel>();
+                ThMEPLightingService.Instance.AFASParameter = ThMEPLightingService.ConvertToFireAlarmModel(ThWiringSettingUI.settingVM.configLst);
 
                 //聚焦到CAD
                 SetFocusToDwgView();
@@ -58,7 +53,7 @@ namespace ThMEPLighting.UI.WiringConnecting
             else if (this.lightingSys.IsChecked == true)
             {
                 ThMEPLightingService.Instance.Parameter = new List<ThLigitingWiringModel>();
-                ThMEPLightingService.Instance.Parameter = ThMEPLightingService.ConvertToModel(ThWiringSettingUI.settingVM.configLst);
+                ThMEPLightingService.Instance.Parameter = ThMEPLightingService.ConvertToLigitingWiringModel(ThWiringSettingUI.settingVM.configLst);
 
                 //聚焦到CAD
                 SetFocusToDwgView();

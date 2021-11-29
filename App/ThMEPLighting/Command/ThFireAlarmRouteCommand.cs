@@ -5,7 +5,6 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
-using ThMEPElectrical.Service;
 
 namespace ThMEPLighting.Command
 {
@@ -25,7 +24,7 @@ namespace ThMEPLighting.Command
             {
                 foreach (var info in config.loopInfoModels)
                 {
-                    var parameter = ThElectricalUIService.Instance.fireAlarmParameter.Where(x => x.loopType == info.LineContent).FirstOrDefault();
+                    var parameter = ThMEPLightingService.Instance.AFASParameter.Where(x => x.loopType == info.LineContent).FirstOrDefault();
                     info.LineType = parameter.layerType;
                     info.PointNum = int.TryParse(parameter.pointNum, out int num) ? num : int.MaxValue;
                 }
