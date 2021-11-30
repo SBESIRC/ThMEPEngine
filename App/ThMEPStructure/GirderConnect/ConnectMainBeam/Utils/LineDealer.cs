@@ -7,22 +7,6 @@ using Linq2Acad;
 using System.Collections;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
-using ThCADCore.NTS;
-using AcHelper;
-using DotNetARX;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.ApplicationServices;
-using NetTopologySuite.Triangulate;
-using NetTopologySuite.LinearReferencing;
-using AcHelper.Commands;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -60,7 +44,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             List<Tuple<Point3d, Point3d>> tuples = new List<Tuple<Point3d, Point3d>>();
             Point3d prePoint = polyline.GetPoint3dAt(0);
-            for (int i = 1; i < polyline.NumberOfVertices; ++i)
+            int n = polyline.NumberOfVertices;
+            for (int i = 1; i < n; ++i)
             {
                 Point3d curPoint = polyline.GetPoint3dAt(i);
                 if (prePoint.DistanceTo(curPoint) <= tolerance)
@@ -69,6 +54,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 tuples.Add(new Tuple<Point3d, Point3d>(prePoint, curPoint));
                 prePoint = curPoint;
+            }
+            if(polyline.GetPoint3dAt(0) != polyline.GetPoint3dAt(n - 1))
+            {
+                tuples.Add(new Tuple<Point3d, Point3d>(polyline.GetPoint3dAt(n - 1), polyline.GetPoint3dAt(0)));
             }
             return tuples;
         }
@@ -106,7 +95,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     polyline.AddVertexAt(cnt, new Point2d(edge.Item2.X, edge.Item2.Y), 0, 0, 0);
                     ++cnt;
                 }
-                polyline.Closed = true;
+                if(polyline.GetPoint3dAt(0).DistanceTo(polyline.GetPoint3dAt(cnt - 1)) < 10)
+                {
+                    polyline.Closed = true;
+                }
                 return polyline;
             }
         }
@@ -313,6 +305,79 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
+        public static void DeleteDiffClassLine(HashSet<Point3d> ptClassA, HashSet<Point3d> ptClassB, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
+        {
+            List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
+            foreach (var dic in dicTuples)
+            {
+                foreach (Point3d pt in dic.Value)
+                {
+                    tmpTuples.Add(new Tuple<Point3d, Point3d>(dic.Key, pt));
+                }
+            }
+            int cnt;
+            //delete line from A to B
+            foreach (var tuple in tmpTuples)
+            {
+                cnt = 0;
+                foreach (Point3d pt in ptClassA)
+                {
+                    if (pt.DistanceTo(tuple.Item1) < deviation)
+                    {
+                        ++cnt;
+                    }
+                }
+                foreach (Point3d pt in ptClassB)
+                {
+                    if (pt.DistanceTo(tuple.Item2) < deviation)
+                    {
+                        ++cnt;
+                    }
+                }
+                if (cnt >= 2)
+                {
+                    dicTuples[tuple.Item1].Remove(tuple.Item2);
+                    if (dicTuples[tuple.Item1].Count == 0)
+                    {
+                        dicTuples.Remove(tuple.Item1);
+                    }
+                }
+            }
+            //delete line from B to A
+            foreach (var tuple in tmpTuples)
+            {
+                cnt = 0;
+                foreach (Point3d pt in ptClassB)
+                {
+                    if (pt.DistanceTo(tuple.Item1) < deviation)
+                    {
+                        ++cnt;
+                    }
+                }
+                foreach (Point3d pt in ptClassA)
+                {
+                    if (pt.DistanceTo(tuple.Item2) < deviation)
+                    {
+                        ++cnt;
+                    }
+                }
+                if (cnt >= 2)
+                {
+                    if (!dicTuples.ContainsKey(tuple.Item1))
+                    {
+                        continue;
+                    }
+                    if (dicTuples[tuple.Item1].Contains(tuple.Item2))
+                    {
+                        dicTuples[tuple.Item1].Remove(tuple.Item2);
+                    }
+                    if (dicTuples[tuple.Item1].Count == 0)
+                    {
+                        dicTuples.Remove(tuple.Item1);
+                    }
+                }
+            }
+        }
 
         /// <summary>
         /// Merge very close points to one whithout change structure
@@ -446,7 +511,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="tuples"> 原始数据（可能有误差）</param>
         /// <param name="basePts"> 基于这些点 </param>
         /// <param name="deviation"> 误差</param>
-        public static Dictionary<Point3d, HashSet<Point3d>> TuplesStandardize(HashSet<Tuple<Point3d, Point3d>> tuples, Point3dCollection basePts, double deviation = 0.001)
+        public static Dictionary<Point3d, HashSet<Point3d>> TuplesStandardize(HashSet<Tuple<Point3d, Point3d>> tuples, Point3dCollection basePts, double deviation = 1)
         {
             Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
             Point3d tmpPtA = new Point3d();
@@ -519,7 +584,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Point3d tmpPtB = new Point3d();
             foreach (var dicTuple in dicTuples)
             {
-                foreach (var edPt in dicTuple.Value)
+                var hashpts = dicTuple.Value.ToList();
+                foreach (var edPt in hashpts)
                 {
                     int flag = 0;
                     foreach (Point3d ptA in basePts)
@@ -568,6 +634,34 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Get AngleCount which is bigger than 180
+        /// </summary>
+        /// <param name="tuples"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static int ObtuseAngleCount(List<Tuple<Point3d, Point3d>> tuples, double tolerance = Math.PI / 18 * 19)
+        {
+            int cnt = 0;
+            int n = tuples.Count;
+            if(n <= 2)
+            {
+                return -1;
+            }
+            var preVertex = tuples[n - 1].Item1 - tuples[n - 1].Item2;
+            for(int i = 0; i < n; ++i)
+            {
+                double curAngel = preVertex.GetAngleTo((tuples[i].Item2 - tuples[i].Item1), -Vector3d.ZAxis);
+                if(curAngel > tolerance)
+                {
+                    ++cnt;
+                }
+                preVertex = tuples[i].Item1 - tuples[i].Item2;
+            }
+            return cnt;
         }
     }
 }

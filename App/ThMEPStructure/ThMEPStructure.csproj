@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GirderConnect\Command\BeamConnectCommand.cs" />
+    <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Test\TestCmds.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
@@ -35,9 +36,17 @@
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\ShowInfo.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureBuilder.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\StructureDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThGroupService.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Utils\ThMainBuildingLayerManager.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ConnectSndBeam.cs" />
     <Compile Include="GirderConnect\ConnectProcess\ExtractInfo.cs" />
     <Compile Include="GirderConnect\ConnectProcess\GenerateLine.cs" />
+    <Compile Include="GirderConnect\Data\MainBeamPostProcess.cs" />
+    <Compile Include="GirderConnect\Data\MainBeamPreProcess.cs" />
+    <Compile Include="GirderConnect\Data\ThBeamConnectorDataFactory.cs" />
+    <Compile Include="GirderConnect\Data\ThMainBuildingHatchExtractionVisitor.cs" />
+    <Compile Include="GirderConnect\Data\Utils\DataClassify.cs" />
+    <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\SecondaryBeamConnectCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\ThSecondaryBeamSystemCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\RegionGrowAlgorithm.cs" />
@@ -76,8 +85,68 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="bin\Debug-NET40\" />
+    <Folder Include="bin\Debug-NET46\" />
+    <Folder Include="bin\Debug\" />
+    <Folder Include="bin\Release-NET40\" />
+    <Folder Include="bin\Release-NET45\" />
+    <Folder Include="bin\Release-NET46\" />
+    <Folder Include="bin\Release\" />
+    <Folder Include="GirderConnect\ConnectMainBeam\Data\" />
     <Folder Include="GirderConnect\Test\" />
     <Folder Include="GirderConnect\Utils\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug-NET45\acad.err" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Debug-NET45\AcCoreMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcCui.dll" />
+    <Content Include="bin\Debug-NET45\AcDbMgd.dll" />
+    <Content Include="bin\Debug-NET45\acdbmgdbrep.dll" />
+    <Content Include="bin\Debug-NET45\AcDx.dll" />
+    <Content Include="bin\Debug-NET45\AcMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcMPolygonMGD.dll" />
+    <Content Include="bin\Debug-NET45\AcMr.dll" />
+    <Content Include="bin\Debug-NET45\AcsCommon.dll" />
+    <Content Include="bin\Debug-NET45\AcsConnector.exe" />
+    <Content Include="bin\Debug-NET45\AcTcMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcWindows.dll" />
+    <Content Include="bin\Debug-NET45\AdWindows.dll" />
+    <Content Include="bin\Debug-NET45\BouncyCastle.Crypto.dll" />
+    <Content Include="bin\Debug-NET45\CADExtension.dll" />
+    <Content Include="bin\Debug-NET45\CADExtension.pdb" />
+    <Content Include="bin\Debug-NET45\DotNetARX.dll" />
+    <Content Include="bin\Debug-NET45\DotNetARX.pdb" />
+    <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.pdb" />
+    <Content Include="bin\Debug-NET45\ManagedLibrary.v16.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.Features.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.IO.GeoJSON.dll" />
+    <Content Include="bin\Debug-NET45\Newtonsoft.Json.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OOXML.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OpenXml4Net.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OpenXmlFormats.dll" />
+    <Content Include="bin\Debug-NET45\RestSharp.dll" />
+    <Content Include="bin\Debug-NET45\System.Buffers.dll" />
+    <Content Include="bin\Debug-NET45\System.Memory.dll" />
+    <Content Include="bin\Debug-NET45\System.Numerics.Vectors.dll" />
+    <Content Include="bin\Debug-NET45\System.Runtime.CompilerServices.Unsafe.dll" />
+    <Content Include="bin\Debug-NET45\ThCADCore.dll" />
+    <Content Include="bin\Debug-NET45\ThCADCore.pdb" />
+    <Content Include="bin\Debug-NET45\ThCADExtension.dll" />
+    <Content Include="bin\Debug-NET45\ThCADExtension.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPAnalytics.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPAnalytics.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPEngineCore.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPEngineCore.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPIdentity.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPIdentity.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPStructure.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPStructure.pdb" />
+    <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

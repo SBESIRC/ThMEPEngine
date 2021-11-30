@@ -29,7 +29,7 @@ namespace ThMEPEngineCore
     {
 
         [CommandMethod("TIANHUACAD", "THExtractColumn", CommandFlags.Modal)]
-        public void ThExtractColumn()
+        public void  ThExtractColumn()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))

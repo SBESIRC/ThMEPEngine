@@ -22,7 +22,10 @@ using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Triangulate;
 using NetTopologySuite.LinearReferencing;
 using AcHelper.Commands;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
+using NFox.Cad;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -131,7 +134,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 foreach (var pt in pts)
                 {
                     if (pt is Point3d ptt)
+                    {
                         ansPts.Add(ptt);
+                    }
                 }
             }
             return ansPts;
@@ -287,7 +292,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     if (basePoint.DistanceTo(removePoint) < deviation)
                     {
-                        if (basePoints.Contains(removePoint))
+                        if (ansPoints.Contains(removePoint) && basePoints.Contains(removePoint))
                         {
                             ansPoints.Remove(removePoint);
                         }
@@ -295,6 +300,30 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return ansPoints;
+        }
+        public static List<Point3d> RemoveSimmilerPoint(List<Point3d> points, double deviation = 1)
+        {
+            var ansPts = new List<Point3d>();
+            Dictionary<Point3d, bool> visitPt = new Dictionary<Point3d, bool>();
+            foreach(var point in points)
+            {
+                visitPt.Add(point, false);
+            }
+            foreach(var ptA in points)
+            {
+                if(visitPt[ptA] == false)
+                {
+                    visitPt[ptA] = true;
+                    foreach(var ptB in points)
+                    {
+                        if (visitPt[ptB] == false && ptA.DistanceTo(ptB) < deviation)
+                        {
+                            visitPt[ptB] = true;
+                        }
+                    }
+                }
+            }
+            return ansPts;
         }
 
         /// <summary>
@@ -315,6 +344,157 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     points.Remove(pt);
                 }
             }
+        }
+
+        /// <summary>
+        /// 获得墙的拐角点和边界点
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <param name="fstPts"></param>
+        /// <param name="SndPts"></param>
+        public static void WallCrossPoint(Polygon polygon, ref List<Point3d> fstPts, ref List<Point3d> SndPts)
+        {
+            fstPts.Clear();
+            SndPts.Clear();
+            //首先找出中心线
+            var lines = ThMEPPolygonService.CenterLine(polygon.ToDbMPolygon());
+            Dictionary<Point3d, HashSet<Point3d>> pt2Pts = LinesToTuples(lines);
+
+            //对块进行分割
+            var walls = new DBObjectCollection();
+            var columns = new DBObjectCollection();
+            ThVStructuralElementSimplifier.Classify(polygon.ToDbCollection(), columns, walls);
+
+            var zeroPts = new List<Point3d>();
+            foreach (var ent in columns)
+            {
+                if (ent is Polyline polyline)
+                {
+                    zeroPts.Add(polyline.GetCentroidPoint());
+                    fstPts.Add(polyline.GetCentroidPoint());
+                    ShowInfo.ShowPointAsO(polyline.GetCentroidPoint(), 3, 500);
+                }
+            }
+            foreach (var pt2Pt in pt2Pts)
+            {
+                var pt = pt2Pt.Key;
+                foreach (var ent in walls)
+                {
+                    if (ent is Polyline polyline)
+                    {
+                        if (polyline.ContainsOrOnBoundary(pt))
+                        {
+                            bool flag = false;
+                            foreach(var zeroPt in zeroPts)
+                            {
+                                if(pt.DistanceTo(zeroPt) < 300)
+                                {
+                                    flag = true;
+                                    break;
+                                }
+                            }
+                            if(flag == true)
+                            {
+                                continue;
+                            }
+                            if (IsCrossPt(pt, pt2Pts))
+                            {
+                                fstPts.Add(pt);
+                                ShowInfo.ShowPointAsO(pt, 1);
+                            }
+                            else
+                            {
+                                SndPts.Add(pt);
+                                ShowInfo.ShowPointAsO(pt, 5);
+                            }
+                        }
+                    }
+                }
+            }
+            //fstPts = RemoveSimmilerPoint(fstPts);
+            //SndPts = RemoveSimmilerPoint(SndPts);
+        }
+
+        public static Dictionary<Point3d, HashSet<Point3d>> LinesToTuples(List<Line> lines)
+        {
+            Dictionary<Point3d, HashSet<Point3d>> pt2Pts = new Dictionary<Point3d, HashSet<Point3d>>();
+            foreach (var line in lines)
+            {
+                var stPt = line.StartPoint;
+                var edPt = line.EndPoint;
+                if (!pt2Pts.ContainsKey(stPt))
+                {
+                    pt2Pts.Add(stPt, new HashSet<Point3d>());
+                }
+                if (!pt2Pts[stPt].Contains(edPt))
+                {
+                    pt2Pts[stPt].Add(edPt);
+                }
+                if (!pt2Pts.ContainsKey(edPt))
+                {
+                    pt2Pts.Add(edPt, new HashSet<Point3d>());
+                }
+                if (!pt2Pts[edPt].Contains(stPt))
+                {
+                    pt2Pts[edPt].Add(stPt);
+                }
+            }
+            return pt2Pts;
+        }
+
+        /// <summary>
+        /// Judge wether a point is a cross point
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="pt2Pts"></param>
+        /// <returns></returns>
+        public static bool IsCrossPt(Point3d pt, Dictionary<Point3d, HashSet<Point3d>> pt2Pts)
+        {
+            if (!pt2Pts.ContainsKey(pt))
+            {
+                return false;
+            }
+            foreach (var ptA in pt2Pts[pt])
+            {
+                var vecA = ptA - pt;
+                foreach (var ptB in pt2Pts[pt])
+                {
+                    var vecB = ptB - pt;
+                    var angel = vecA.GetAngleTo(vecB);
+                    if (angel > Math.PI / 6 && angel < Math.PI / 6 * 5)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// find pt intersect with columns
+        /// </summary>
+        /// <param name="clumnPts"></param>
+        /// <param name="outlineWalls"></param>
+        /// <returns></returns>
+        public static HashSet<Point3d> FindIntersectNearPt(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        {
+            var ansPts = new HashSet<Point3d>();
+            foreach(Polyline polyline in outlineWalls.Keys)
+            {
+                Polyline pl = polyline.Buffer(500)[0] as Polyline;
+                foreach (Point3d pt in clumnPts)
+                {
+                    if (pl.ContainsOrOnBoundary(pt) && !ansPts.Contains(pt))
+                    {
+                        ansPts.Add(pt);
+                    }
+                }
+            }
+            foreach(Point3d pt in clumnPts)
+            {
+
+            }
+            return ansPts;
         }
     }
 }

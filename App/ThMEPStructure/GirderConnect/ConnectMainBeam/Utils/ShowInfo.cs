@@ -143,6 +143,30 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
+        public static void ShowPoints(Point3dCollection pts, char type = 'X', int colorIndex = 80, double radius = 100)
+        {
+            if (type == 'X')
+            {
+                foreach (Point3d pt in pts)
+                {
+                    ShowPointAsX(pt, colorIndex, radius);
+                }
+            }
+            else if (type == 'O')
+            {
+                foreach (Point3d pt in pts)
+                {
+                    ShowPointAsO(pt, colorIndex, radius);
+                }
+            }
+            else
+            {
+                foreach (Point3d pt in pts)
+                {
+                    ShowPointAsU(pt, colorIndex, radius);
+                }
+            }
+        }
 
         /// <summary>
         /// 画一条线
