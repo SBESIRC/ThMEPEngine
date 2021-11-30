@@ -41,12 +41,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             IsCasing = new List<Point3d>();
             GateValve = new List<Point3d>();
             FireHydrant = new List<Point3d>();
-            var opt = new PromptPointOptions("指定消火栓系统图插入点: \n");
-            var propPtRes = Active.Editor.GetPoint(opt);
-            if(propPtRes.Status == PromptStatus.OK)
-            {
-                InsertPoint = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS()); ;
-            }
             DNList = new List<DBText>();
             ExtraTextDic = new Dictionary<Point3dEx, DBText>();
         }
