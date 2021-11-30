@@ -39,6 +39,14 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
+        public ICommand PickDoorOutlineCmd
+        {
+            get
+            {
+                return new RelayCommand(PickDoorOutline);
+            }
+        }
+
         private void DrawRoomOutline()
         {
             SetFocusToDwgView();
@@ -55,6 +63,12 @@ namespace ThMEPWSS.ViewModel
         {
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
+        }
+
+        private void PickDoorOutline()
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THEXTRACTDOOR");
         }
 
         public void ResetCurrentLayer()

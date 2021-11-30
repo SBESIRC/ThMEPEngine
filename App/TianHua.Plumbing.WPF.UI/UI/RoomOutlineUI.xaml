@@ -7,9 +7,9 @@
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
                     Title="房间框线"
                     SizeToContent="WidthAndHeight"
-                    Height="130"
+                    Height="150"
                     ResizeMode="NoResize"
-                    MaxHeight="135"
+                    MaxHeight="155"
              mc:Ignorable="d" Closed="ThCustomWindow_Closed">
     <Grid  Margin="5">
         <Grid.RowDefinitions>
@@ -22,6 +22,8 @@
                              Command="{Binding DrawRoomSplitlineCmd}"></cus:ImageButton>
             <cus:ImageButton Content="拾取房间框线" Name="btnPickRoomOutline" Height="24" Width="100" Margin="0,5,0,0"  TabIndex="3" 
                              Command="{Binding PickRoomOutlineCmd}"></cus:ImageButton>
+            <cus:ImageButton Content="拾取门框线" Name="btnPickDoorOutline" Height="24" Width="100" Margin="0,5,0,0"  TabIndex="4" 
+                             Command="{Binding PickDoorOutlineCmd}"></cus:ImageButton>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>
