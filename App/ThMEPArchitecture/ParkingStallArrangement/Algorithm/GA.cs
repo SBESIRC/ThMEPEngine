@@ -70,6 +70,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<Gene> Genome = new List<Gene>();
 
         public int Count { get; set; }
+        public int GenomeCount()
+        {
+            return Genome.Count;
+        }
         //Fitness method
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
@@ -136,7 +140,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
     }
 
-    public class GA
+    public class GA : IDisposable
     {
         Random Rand = new Random();
 
@@ -148,6 +152,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int ChromoLen = 2;
         double CrossRate;
         double MutationRate;
+        double GeneMutationRate;
 
         //Inputs
         GaParameter GaPara;
@@ -156,19 +161,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Range
         double Low, High;
 
+        //log file name
+        public static string LogFileName = @"C:\Users\qishaohua\AppData\Local\Temp\GaLog.txt";
+        private StreamWriter sw = null;
         public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
             IterationCount = iterationCnt;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = popSize;//种群数量
-            MaxTime = 100;//遗传代数
+            MaxTime = 10;//遗传代数
             CrossRate = 0.8;//交叉因子
             MutationRate = 0.2;//变异因子
-
-            //Inputs
+            GeneMutationRate = 0.3;//基因变异因子
+            //InputsF
             GaPara = gaPara;
             LayoutPara = layoutPara;
+
+            var fs = new FileStream(LogFileName, FileMode.OpenOrCreate);
+            sw = new StreamWriter(fs);
+            sw.AutoFlush = true;
         }
+        
+        
 
         private List<Gene> ConvertLineToGene(int index)
         {
@@ -188,15 +202,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();//创建第一代
-            Active.Editor.WriteMessage($"\n init pop cnt {pop.Count}");
-
+            var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
+            Active.Editor.WriteMessage(strFirstPopCnt);
+            sw.WriteLine(strFirstPopCnt);
+            
             var curIteration = 0;
             while (curIteration++ < IterationCount)
             {
-                Active.Editor.WriteMessage($"\n iteration index： {curIteration}");
+                var strCurIterIndex = $"\n iteration index： {curIteration}";
+                Active.Editor.WriteMessage(strCurIterIndex);
+                sw.WriteLine(strCurIterIndex);
                 selected = Selection(pop);
                 pop = CreateNextGeneration(selected);
-                //Mutation(pop);
+                Mutation(pop);
             }
 
             return selected;
@@ -205,6 +223,48 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public void Mutation(List<Chromosome> s)
         {
             //变异代码，有待完善
+            int cnt = Math.Min((int)(s.Count * MutationRate), 1);//需要变异的染色体数目，最小为1
+            int geneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
+            int index = 0;
+            HashSet<int> selectedChromosome = new HashSet<int>();//被选中的染色体号
+            HashSet<int> selectedGene = new HashSet<int>();//被选中的基因号
+            while (index >= cnt)//挑选染色体
+            {
+                int num = Rand.Next(0, cnt);//生成随机号
+                if (selectedChromosome.Contains(num))
+                {
+                    continue;//重新摇号
+                }
+                else
+                {
+                    selectedChromosome.Add(num);//直接添加
+                    index++;
+                }
+            }
+            index = 0;
+            while (index >= geneCnt)//挑选基因号
+            {
+                int num = Rand.Next(0, geneCnt);//生成随机号
+                if (selectedGene.Contains(num))
+                {
+                    continue;//重新摇号
+                }
+                else
+                {
+                    selectedGene.Add(num);//直接添加
+                    index++;
+                }
+            }
+
+            foreach(var i in selectedChromosome)
+            {
+                foreach(var j in selectedGene)
+                {
+                    var maxVal = s[i].Genome[j].MaxValue;
+                    var minVal = s[i].Genome[j].MinValue;
+                    s[i].Genome[j].Value = Rand.NextDouble() * (maxVal - minVal) + minVal;
+                }
+            }
         }
 
         private int RandInt(int range)
@@ -270,9 +330,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<Chromosome> Selection(List<Chromosome> inputSolution)
         {
             var sorted = inputSolution.OrderByDescending(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
-            
-            if(sorted.Count > 0)
-                Active.Editor.WriteMessage($"\n iteration index： {sorted.First().Count}");
+
+            var strBestCnt = $"\n iteration index： {sorted.First().Count}";
+            Active.Editor.WriteMessage(strBestCnt);
+            sw.WriteLine(strBestCnt);
 
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
@@ -280,6 +341,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 rst.Add(sorted[i]);
             }
             return rst;
+        }
+
+        public void Dispose()
+        {
+            if (sw != null)
+            {
+                sw.Dispose();
+                sw = null; 
+            }
         }
     }
 }
