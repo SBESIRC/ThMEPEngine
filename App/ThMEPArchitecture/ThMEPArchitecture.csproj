@@ -25,6 +25,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BuildingBoxTest.cs" />
     <Compile Include="ParkingPartition.cs" />
     <Compile Include="ParkingPartitionTest.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA.cs" />

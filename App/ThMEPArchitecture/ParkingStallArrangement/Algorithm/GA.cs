@@ -69,11 +69,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Group of genes
         public List<Gene> Genome = new List<Gene>();
 
+        public int Count { get; set; }
         //Fitness method
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
             layoutPara.Set(Genome);
             int result = GetParkingNums(layoutPara);
+            Count = result;
             return result;
         }
         
@@ -140,6 +142,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         //Genetic Algorithm parameters
         int MaxTime;
+        int IterationCount = 10;
         int PopulationSize;
         int SelectionSize = 6;
         int ChromoLen = 2;
@@ -153,8 +156,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Range
         double Low, High;
 
-        public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10)
+        public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
+            IterationCount = iterationCnt;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = popSize;//种群数量
             MaxTime = 100;//遗传代数
@@ -184,13 +188,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();//创建第一代
+            Active.Editor.WriteMessage($"\n init pop cnt {pop.Count}");
 
-            Active.Editor.WriteMessage($"init pop cnt {pop.Count}");
-            var cnt = 1;
-
-            while (cnt-- > 0)
+            var curIteration = 0;
+            while (curIteration++ < IterationCount)
             {
-                //Active.Editor.WriteMessage($"iteration cnt： {cnt}");
+                Active.Editor.WriteMessage($"\n iteration index： {curIteration}");
                 selected = Selection(pop);
                 pop = CreateNextGeneration(selected);
                 //Mutation(pop);
@@ -231,8 +234,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<Chromosome> CreateNextGeneration(List<Chromosome> solutions)
         {
             List<Chromosome> rst = new List<Chromosome>();
-
-            for (int i = 0; i < PopulationSize; ++i)
+            rst.Add(solutions.First());
+            for (int i = 0; i < PopulationSize - 1; ++i)
             {
                 int rd1 = RandInt(solutions.Count);
                 int rd2 = RandInt(solutions.Count);
@@ -266,7 +269,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Selection(List<Chromosome> inputSolution)
         {
-            var sorted = inputSolution.OrderBy(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
+            var sorted = inputSolution.OrderByDescending(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
+            
+            if(sorted.Count > 0)
+                Active.Editor.WriteMessage($"\n iteration index： {sorted.First().Count}");
+
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
             {

@@ -65,7 +65,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildLines, sortSegLines);
-            var geneAlgorithm = new GA(gaPara, layoutPara);
+
+            var rstInt = Active.Editor.GetInteger("\n Input GA iteration count:");
+            if (rstInt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+
+            var geneAlgorithm = new GA(gaPara, layoutPara, 10, rstInt.Value);
             var rst = geneAlgorithm.Run();
             var solution = rst.First();
 
