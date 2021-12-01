@@ -39,38 +39,25 @@ using ThFaAreaLayoutParameter = ThMEPElectrical.FireAlarmCombustibleGas.Model.Th
 
 namespace ThMEPElectrical.FireAlarmCombustibleGas
 {
-    public class ThfireAlarmGassCmdsNoUI
-    {
-        [CommandMethod("TIANHUACAD", "THGasLayout", CommandFlags.Modal)]
-        public void FireAlarmSmokeHeatCmd()
-        {
-            using (var cmd = new ThFireAlarmGasCmd())
-            {
-                cmd.Execute();
-            }
-        }
-    }
-
     public class ThFireAlarmGasCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs;
-
+        private bool UseUI { get; set; }
         private double _scale = 100;
         private bool _referBeam = true;
         private double _radius = 8000;
-        private double _wallThick = 100;
-        public ThFireAlarmGasCmd(FireAlarmViewModel uiConfigs)
-        {
-            _UiConfigs = uiConfigs;
-            CommandName = "THFireGasLayout";
-            ActionName = "布置";
+        private double _wallThick = 0;
 
-            SetInfo();
+        public ThFireAlarmGasCmd(bool UI)
+        {
+            UseUI = UI;
+            InitialCmdInfo();
+            InitialSetting();
         }
 
-        public ThFireAlarmGasCmd()
+        private void InitialCmdInfo()
         {
-
+            CommandName = "THFireAlarmGasLayout";
+            ActionName = "布置";
         }
 
         public override void SubExecute()
@@ -78,15 +65,13 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             FireAlarmGasLayoutExecute();
         }
 
-        private void SetInfo()
+        private void InitialSetting()
         {
-            if (_UiConfigs != null)
+            if (UseUI == true)
             {
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
-                _referBeam = _UiConfigs.ShouldConsiderBeam;
-                _radius = _UiConfigs.ProtectRadius;
-                //bug
-                _wallThick = 50;
+                _scale = FireAlarmSetting.Instance.Scale;
+                _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
+                _radius = FireAlarmSetting.Instance.ProtectRadius;
             }
         }
 
@@ -100,6 +85,17 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                //画框，提数据，转数据
+                var pts = ThFireAlarmUtils.GetFrameBlk();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+                if (UseUI == false)
+                {
+                    SettingNoUI();
+                }
+
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Gas, ThFaCommon.BlkName_Gas_ExplosionProf };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -110,14 +106,7 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.GetFrame();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
-
-                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam,_wallThick); //38s
+                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, false); //38s
                 if (geos.Count == 0)
                 {
                     return;
@@ -149,7 +138,7 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 layoutParameter.BlkNameGas = layoutBlkNameGas;
                 layoutParameter.BlkNameGasPrf = layoutBlkNameProfGas;
 
-                ThFireAlarmGasEngine.ThFaGasLayoutEngine(dataQuery,layoutParameter, out var layoutResult, out var blindsResult);
+                ThFireAlarmGasEngine.ThFaGasLayoutEngine(dataQuery, layoutParameter, out var layoutResult, out var blindsResult);
 
                 //转回到原始位置
                 layoutResult.ForEach(x => x.TransformBack(transformer));
@@ -159,5 +148,25 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
 
             }
         }
+
+
+        private void SettingNoUI()
+        {
+            var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
+            if (beam.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _referBeam = beam.Value == 1 ? true : false;
+
+            var radius = Active.Editor.GetDouble("\n保护半径：");
+            if (radius.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _radius = radius.Value;
+        }
+
+
     }
 }

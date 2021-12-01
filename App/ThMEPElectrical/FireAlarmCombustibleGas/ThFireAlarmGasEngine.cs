@@ -40,7 +40,7 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                     else if (layoutParameter.RoomType[frame] == ThFaSmokeCommon.layoutType.gas)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThFaSmokeCommon.layoutType.gas, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGasPrf);
+                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameGas);
                     }
                 }
                 catch

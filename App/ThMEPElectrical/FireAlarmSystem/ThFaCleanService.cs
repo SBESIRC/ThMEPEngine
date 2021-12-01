@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using ThCADCore.NTS;
 
-namespace ThMEPElectrical.FireAlarmSmokeHeat.Common
+namespace ThMEPElectrical
 {
     public static class ThFaCleanService
     {

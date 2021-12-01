@@ -112,7 +112,6 @@ namespace ThMEPElectrical.FireAlarm.Service
             return pts;
         }
 
-
         private static List<Entity> GetBlockInfo(BlockReference blockReference)
         {
             var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
@@ -130,7 +129,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick)
+        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
         {
             var bReadJson = false;
 
@@ -143,6 +142,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                     {
                         ReferBeam = referBeam,
                         WallThick = wallThick,
+                        NeedDetective= needDetective,
                     };
                     var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                     geos.AddRange(dataset.Container);
@@ -252,7 +252,7 @@ namespace ThMEPElectrical.FireAlarm.Service
         /// <param name="pts"></param>
         /// <param name="extractBlkList"></param>
         /// <returns></returns>
-        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick)
+        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
         {
             var fileInfo = new FileInfo(Active.Document.Name);
             var path = fileInfo.Directory.FullName;
@@ -265,7 +265,8 @@ namespace ThMEPElectrical.FireAlarm.Service
                 {
                     ReferBeam = referBeam,
                     WallThick = wallThick,
-                }; ;
+                    NeedDetective = needDetective,
+                }; 
                 var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                 geos.AddRange(dataset.Container);
 

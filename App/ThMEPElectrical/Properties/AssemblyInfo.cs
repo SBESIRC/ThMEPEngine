@@ -44,12 +44,9 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmDisplayDeviceLayoutCmdNoUI))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireProofMonitorLayoutCmdNoUI))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireTelLayoutCmdNoUI))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmSmokeHeat.ThFireAlarmSmokeHeatCmdsNoUI))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarmDistance.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.THAFASDebugCmds))]
+
 

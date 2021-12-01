@@ -11,7 +11,7 @@ namespace ThMEPLighting.IlluminationLighting
     public class ThIlluminationCommon
     {
         #region  固定布点。显示器监视器电话
-        public static string BlkName_Display_Fire = "E-BFAS030";
+        public static string BlkName_Display_District = "E-BFAS030";
         public static string BlkName_Display_Floor = "E-BFAS031";
         public static string BlkName_Monitor = "E-BEFPS110";
         public static string BlkName_FireTel = "E-BFAS220";
@@ -38,7 +38,7 @@ namespace ThMEPLighting.IlluminationLighting
         #endregion
 
         public static List<string> BlkNameList = new List<string>() {
-                                                                      BlkName_Display_Fire,
+                                                                      BlkName_Display_District,
                                                                       BlkName_Display_Floor,
                                                                       BlkName_Monitor,
                                                                       BlkName_FireTel,
@@ -57,7 +57,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         public static Dictionary<string, (double, double)> blk_size = new Dictionary<string, (double, double)>()
                                                                 {
-                                                                    {BlkName_Display_Fire,(5,3)},
+                                                                    {BlkName_Display_District,(5,3)},
                                                                     {BlkName_Display_Floor, (5,3)},
                                                                     {BlkName_Monitor, (5,3)},
                                                                     {BlkName_FireTel, (3, 3)},
@@ -76,7 +76,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
                                                                 {
-                                                                    {BlkName_Display_Fire,"E-FAS-EQPM"},
+                                                                    {BlkName_Display_District,"E-FAS-EQPM"},
                                                                     {BlkName_Display_Floor, "E-FAS-EQPM"},
                                                                     {BlkName_Monitor, "E-EFPS-DEVC"},
                                                                     {BlkName_FireTel, "E-FAS-DEVC"},

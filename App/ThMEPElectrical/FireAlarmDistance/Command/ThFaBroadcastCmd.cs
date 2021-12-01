@@ -28,66 +28,63 @@ using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmDistance.Service;
 
 using CLI;
-namespace ThMEPElectrical.FireAlarmDistance.Command
+namespace ThMEPElectrical.FireAlarmDistance
 {
-    public class ThFaDistLayoutCmd : ThMEPBaseCommand, IDisposable
+    public class ThFaBroadcastCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs;
+        private bool UseUI { get; set; }
         double _scale = 100;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
-        double _stepDistance = 20000;
-
-        public ThFaDistLayoutCmd()
+        double _stepLength = 25000;
+   
+        public ThFaBroadcastCmd(bool UI)
         {
+            UseUI = UI;
             InitialCmdInfo();
-        }
-
-        public ThFaDistLayoutCmd(FireAlarmViewModel UiConfig)
-        {
-            _UiConfigs = UiConfig;
-            InitialCmdInfo();
-            IntialParameterInfo();
-
+            InitialSetting();
         }
 
         private void InitialCmdInfo()
         {
-            CommandName = "THFireAlarmDistance";
+            CommandName = "ThFABroadcast";
             ActionName = "生成";
         }
 
-        private void IntialParameterInfo()
+        private void InitialSetting()
         {
-            if (_UiConfigs != null)
+            if (UseUI == true)
             {
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
-                _mode = _UiConfigs.IsWallChecked == true ? ThAFASPlacementMountModeMgd.Wall : ThAFASPlacementMountModeMgd.Ceiling;
-                _stepDistance = _UiConfigs.ProtectRadius;
+                _scale = FireAlarmSetting.Instance.Scale;
+                _mode = (ThAFASPlacementMountModeMgd)FireAlarmSetting.Instance.BroadcastLayout;
+                _stepLength = FireAlarmSetting.Instance.StepLengthBC;
             }
-        }
 
+
+        }
         public void Dispose()
         {
         }
 
         public override void SubExecute()
         {
-            ThFABroadcast();
+            ThFABroadcastExecute();
         }
 
-        public void ThFABroadcast()
+        public void ThFABroadcastExecute()
         {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+
                 var framePts = ThFireAlarmUtils.GetFrameBlk();
                 if (framePts.Count == 0)
                 {
                     return;
                 }
 
-                if (_UiConfigs == null)
+                if (UseUI == false)
                 {
-                    ThFADistnaceLayoutService.GetLayoutParaForNoUI(ref _mode, ref _stepDistance);
+                    SettingNoUI();
                 }
 
                 var extractBlkList = ThFaCommon.BlkNameList;
@@ -122,25 +119,44 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
                 {
-                    StepDistance = _stepDistance,
+                    StepDistance = _stepLength,
                     MountMode = _mode,
                 };
 
                 var outJson = engine.Place(geojson, context);
-                var features = ThFADistnaceLayoutService.Export2NTSFeatures(outJson);
+                var features = ThFADistanceLayoutService.Export2NTSFeatures(outJson);
 
                 string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
                 File.WriteAllText(path, outJson);
 
-                var ptsOutput = ThFADistnaceLayoutService.ConvertGeom(features);
+                var ptsOutput = ThFADistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
 
-                var ptDirList = ThFADistnaceLayoutService.FindOutputPtsDir(ptsOutput, room);
+                var ptDirList = ThFADistanceLayoutService.FindOutputPtsDir(ptsOutput, room);
                 ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
 
                 ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName], true);
 
             }
+        }
+
+        public void SettingNoUI()
+        {
+            var isWallPa = Active.Editor.GetInteger("\n吊装（0）壁装（1）");
+            if (isWallPa.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _mode = isWallPa.Value == 1 ? ThAFASPlacementMountModeMgd.Wall : ThAFASPlacementMountModeMgd.Ceiling;
+
+
+            var stepDistanceP = Active.Editor.GetDouble("\n步距：");
+            if (stepDistanceP.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _stepLength = stepDistanceP.Value;
+
         }
     }
 }

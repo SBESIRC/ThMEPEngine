@@ -3,81 +3,84 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
+using AcHelper.Commands;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.ConnectWiring;
+
 using ThMEPElectrical.FireAlarm.ViewModels;
-using ThMEPElectrical;
+using ThMEPElectrical.FireAlarm;
+
+
 namespace ThMEPElectrical.FireAlarm.Commands
 {
-    public class FireAlarmRouteCableCommand : ThMEPBaseCommand, IDisposable
-    {
-        readonly FireAlarmViewModel _UiConfigs = null;
-        public FireAlarmRouteCableCommand(FireAlarmViewModel uiConfigs)
-        {
-            _UiConfigs = uiConfigs;
-            CommandName = "THHZBJ";
-            ActionName = "连线";
-        }
+//    public class FireAlarmRouteCableCommand : ThMEPBaseCommand, IDisposable
+//    {
+//        readonly FireAlarmViewModel _UiConfigs = null;
+//        public FireAlarmRouteCableCommand(FireAlarmViewModel uiConfigs)
+//        {
+//            _UiConfigs = uiConfigs;
+//            CommandName = "THHZBJ";
+//            ActionName = "连线";
+//        }
 
-        public override void SubExecute()
-        {
-#if (ACAD2016 || ACAD2018)
-            //todo: route cables using _UiConfigs
-            //ConnectWiringService connectWiringService = new ConnectWiringService();
-            //connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
-#else
-            //
-#endif
+//        public override void SubExecute()
+//        {
+//#if (ACAD2016 || ACAD2018)
+//            //todo: route cables using _UiConfigs
+//            //ConnectWiringService connectWiringService = new ConnectWiringService();
+//            //connectWiringService.Routing(_UiConfigs.BusLoopPointMaxCount, "火灾报警");
+//#else
+//            //
+//#endif
 
-        }
+//        }
 
-        public void Dispose()
-        { }
-    }
+//        public void Dispose()
+//        { }
+//    }
 
     public class FireAlarmLayoutCommand : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs = null;
-        public FireAlarmLayoutCommand(FireAlarmViewModel uiConfigs)
+        public FireAlarmLayoutCommand()
         {
-            _UiConfigs = uiConfigs;
-            CommandName = "THHZBJ";
+            CommandName = "THFireAlarmLayout";
             ActionName = "布置";
         }
 
         public override void SubExecute()
         {
-            //todo: layout fire alarm components using _UiConfigs
-            if (_UiConfigs.IsSmokeTempratureSensorChecked)
+            switch (FireAlarmSetting.Instance.LayoutItem)
             {
-                var smokdCmd = new ThMEPElectrical.FireAlarmSmokeHeat.ThFireAlarmSmokeHeatCmd(_UiConfigs);
-                smokdCmd.Execute();
-            }
-            else if (_UiConfigs.IsFloorLoopChecked)
-            {
-                //楼层显示器
-                var displayCmd = new ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmDisplayDeviceLayoutCmd(_UiConfigs);
-                displayCmd.Execute();
-            }
-            else if (_UiConfigs.IsGasSensorChecked)
-            {
-                //可燃气体探测
-                var gasCmd = new ThMEPElectrical.FireAlarmCombustibleGas.ThFireAlarmGasCmd(_UiConfigs);
-                gasCmd.Execute();
-            }
-            else if (_UiConfigs.IsFireMonitorModuleChecked)
-            {
-                //防火门监控
-                var monitorCmd = new ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireProofMonitorLayoutCmd (_UiConfigs);
-                monitorCmd.Execute();
-            }
-            else if (_UiConfigs.IsFireProtectionPhoneChecked)
-            {
-                //消防电话
-                var fireTelCmd = new ThMEPElectrical.FireAlarmFixLayout.Command.ThFireAlarmFireTelLayoutCmd (_UiConfigs);
-                fireTelCmd.Execute();
+                case 0:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFASmoke");
+                    break;
+                case 1:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "ThFABroadcast");
+                    break;
+                case 2:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFADisplay");
+                    break;
+                case 3:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "ThFATel");
+                    break;
+                case 4:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFAGas");
+                    break;
+                case 5:
+                   CommandHandlerBase.ExecuteFromCommandLine(false, "ThFAManualAlarm");
+                    break;
+                case 6:
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFAMonitor");
+                    break;
+                default:
+                    break;
+
+
+
             }
         }
+
         public void Dispose()
         { }
     }

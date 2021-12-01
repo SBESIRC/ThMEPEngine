@@ -40,19 +40,19 @@ namespace TianHua.Electrical.UI
 
         private void btnLayout_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new FireAlarmLayoutCommand(UiConfigs))
-            {
-                FocusToCAD();
-                cmd.Execute();
-            }
+            //using (var cmd = new FireAlarmLayoutCommand(UiConfigs))
+            //{
+            //    FocusToCAD();
+            //    cmd.Execute();
+            //}
         }
 
         private void btnRouting_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new FireAlarmRouteCableCommand(UiConfigs))
-            {
-                cmd.Execute();
-            }
+            //using (var cmd = new FireAlarmRouteCableCommand(UiConfigs))
+            //{
+            //    cmd.Execute();
+            //}
         }
 
         void FocusToCAD()

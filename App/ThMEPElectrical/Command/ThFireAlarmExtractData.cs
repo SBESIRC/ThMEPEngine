@@ -26,21 +26,7 @@ namespace ThMEPElectrical.Command
 
         public override void SubExecute()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
-                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-                if (frame.Area < 1e-4)
-                {
-                    return;
-                }
-                var pts = frame.Vertices();
-                var datasetFactory = new ThFaFixLayoutDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                var fileInfo = new FileInfo(Active.Document.Name);
-                var path = fileInfo.Directory.FullName;
-                ThGeoOutput.Output(dataset.Container, path, fileInfo.Name + DateTime.Now.ToShortTimeString().Replace(':', '-'));
-            }
+          
         }
     }
 }

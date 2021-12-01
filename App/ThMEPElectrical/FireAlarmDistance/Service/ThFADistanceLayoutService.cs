@@ -11,9 +11,7 @@ using NFox.Cad;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Features;
 using NetTopologySuite.IO;
@@ -36,7 +34,7 @@ using ThMEPElectrical.FireAlarmDistance.Data;
 
 namespace ThMEPElectrical.FireAlarmDistance.Service
 {
-    public class ThFADistnaceLayoutService
+    public class ThFADistanceLayoutService
     {
         public static FeatureCollection Export2NTSFeatures(string geojson)
         {
@@ -82,6 +80,18 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
             return ptDir;
         }
 
+        public static List<KeyValuePair<Point3d, Vector3d>> FindOutputPtsOnTop(List<KeyValuePair<Point3d, Vector3d>> bottomBlk, string blkName, double scale)
+        {
+            var ptDir = new List<KeyValuePair<Point3d, Vector3d>>();
+            for (int i = 0; i < bottomBlk.Count; i++)
+            {
+                var pt = bottomBlk[i].Key + bottomBlk[i].Value * ThFaCommon.blk_size[blkName].Item2 * scale;
+                ptDir.Add(new KeyValuePair<Point3d, Vector3d>(pt, bottomBlk[i].Value));
+            }
+            return ptDir;
+        }
+
+
         private static Vector3d FindPtDir(Point3d pt, Polyline room)
         {
             var dir = new Vector3d(0, 1, 0);
@@ -110,25 +120,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
                 dir = (closeLine.EndPoint - closeLine.StartPoint).RotateBy(90 * Math.PI / 180, z).GetNormal();
             }
             return dir;
-        }
-
-        public static void GetLayoutParaForNoUI(ref ThAFASPlacementMountModeMgd mode, ref double stepDistance)
-        {
-            var isWallPa = Active.Editor.GetInteger("\n吊装（0）壁装（1）");
-            if (isWallPa.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            mode = isWallPa.Value == 1 ? ThAFASPlacementMountModeMgd.Wall : ThAFASPlacementMountModeMgd.Ceiling;
-
-
-            var stepDistanceP = Active.Editor.GetDouble("\n步距：");
-            if (stepDistanceP.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            stepDistance = stepDistanceP.Value;
-
         }
     }
 }

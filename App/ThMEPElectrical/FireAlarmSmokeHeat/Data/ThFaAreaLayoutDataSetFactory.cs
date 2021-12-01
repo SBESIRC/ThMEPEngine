@@ -18,6 +18,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
 {
     public class ThFaAreaLayoutDataSetFactory : ThMEPDataSetFactory
     {
+        public bool NeedDetective { get; set; } = false;
         public bool ReferBeam { get; set; } = true;
         public double WallThick { get; set; } = 100;
         private List<ThGeometry> Geos { get; set; }
@@ -80,8 +81,11 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             extractors.Add(palceConverage);
 
             //提取可布区域
-            var detectiveConverage = BuildDetectionRegion(extractors,WallThick);
-            extractors.Add(detectiveConverage);
+            if (NeedDetective ==true)
+            {
+                var detectiveConverage = BuildDetectionRegion(extractors, WallThick);
+                extractors.Add(detectiveConverage);
+            }
 
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));

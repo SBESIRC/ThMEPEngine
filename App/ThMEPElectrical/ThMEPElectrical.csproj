@@ -101,7 +101,6 @@
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGroundGridCommand.cs" />
     <Compile Include="Command\ThDclCommand.cs" />
-    <Compile Include="Command\ThFireAlarmExtractData.cs" />
     <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThGuardToourSystemCommand.cs" />
     <Compile Include="Command\ThInsertStoreyCommand.cs" />
@@ -133,15 +132,16 @@
     <Compile Include="FireAlarmCombustibleGas\Service\ThFaAreaLayoutRoomTypeService.cs" />
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasCmd.cs" />
     <Compile Include="FireAlarmCombustibleGas\ThFireAlarmGasEngine.cs" />
-    <Compile Include="FireAlarmDistance\Command\ThFaDistLayoutCmd.cs" />
+    <Compile Include="FireAlarmDistance\Command\ThFaBroadcastCmd.cs" />
+    <Compile Include="FireAlarmDistance\Command\ThFaManualAlarmCmd.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSet.cs" />
-    <Compile Include="FireAlarmDistance\Service\ThFADistnaceLayoutService.cs" />
+    <Compile Include="FireAlarmDistance\Service\ThFADistanceLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutBusinessDataSetFactory.cs" />
-    <Compile Include="FireAlarmSmokeHeat\Common\ThFaCleanService.cs" />
+    <Compile Include="FireAlarmSystem\ThFaCleanService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutBusinessDataSetFactory.cs" />
     <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmSmokeHeat\Data\ThSmokeDataQueryService.cs" />
@@ -156,6 +156,7 @@
     <Compile Include="FireAlarmSmokeHeat\ThFireAlarmSmokeHeatCmd.cs" />
     <Compile Include="FireAlarmSmokeHeat\ThFireAlarmSmokeHeatEngine.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmCommand.cs" />
+    <Compile Include="FireAlarmSystem\FireAlarmSetting.cs" />
     <Compile Include="FireAlarmSystem\FireAlarmViewModel.cs" />
     <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
     <Compile Include="AFAS\Data\ThAFASPlaceCoverageExtractor.cs" />
@@ -170,6 +171,7 @@
     <Compile Include="FireAlarmFixLayout\Service\ThFireAlarmInsertBlk.cs" />
     <Compile Include="AFAS\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="AFAS\Service\ThQueryHoleTextInfoService.cs" />
+    <Compile Include="FireAlarmSystem\FireAlarmNewViewModel.cs" />
     <Compile Include="FireAlarmSystem\ThFaCommon.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
