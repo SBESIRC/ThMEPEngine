@@ -8,6 +8,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.IO;
 using ThCADExtension;
+using Serilog;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -162,8 +163,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double Low, High;
 
         //log file name
-        public static string LogFileName = @"C:\Users\qishaohua\AppData\Local\Temp\GaLog.txt";
-        private StreamWriter sw = null;
+        public static string LogFileName = Path.Combine( System.IO.Path.GetTempPath(), "GaLog.txt");
+
+        Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName,rollingInterval:RollingInterval.Hour).CreateLogger();
+
         public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
             IterationCount = iterationCnt;
@@ -176,13 +180,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //InputsF
             GaPara = gaPara;
             LayoutPara = layoutPara;
-
-            var fs = new FileStream(LogFileName, FileMode.OpenOrCreate);
-            sw = new StreamWriter(fs);
-            sw.AutoFlush = true;
         }
-        
-        
 
         private List<Gene> ConvertLineToGene(int index)
         {
@@ -202,16 +200,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();//创建第一代
-            var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
+            var strFirstPopCnt = $"\n init pop cnt: {pop.Count}";
             Active.Editor.WriteMessage(strFirstPopCnt);
-            sw.WriteLine(strFirstPopCnt);
+            Logger.Information(strFirstPopCnt);
+            //sw.WriteLine(strFirstPopCnt);
             
             var curIteration = 0;
             while (curIteration++ < IterationCount)
             {
                 var strCurIterIndex = $"\n iteration index： {curIteration}";
                 Active.Editor.WriteMessage(strCurIterIndex);
-                sw.WriteLine(strCurIterIndex);
+                //sw.WriteLine(strCurIterIndex);
+                Logger.Information(strCurIterIndex);
                 selected = Selection(pop);
                 pop = CreateNextGeneration(selected);
                 Mutation(pop);
@@ -305,7 +305,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             return rst;
         }
-
         public Chromosome Crossover(Chromosome s1, Chromosome s2)
         {
             Chromosome newS = new Chromosome();
@@ -331,10 +330,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var sorted = inputSolution.OrderByDescending(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
 
-            var strBestCnt = $"\n iteration index： {sorted.First().Count}";
+            var strBestCnt = $"\n current best: {sorted.First().Count}";
             Active.Editor.WriteMessage(strBestCnt);
-            sw.WriteLine(strBestCnt);
-
+            //sw.WriteLine(strBestCnt);
+            Logger.Information(strBestCnt);
+            
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
             {
@@ -345,11 +345,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public void Dispose()
         {
-            if (sw != null)
-            {
-                sw.Dispose();
-                sw = null; 
-            }
+
         }
     }
 }

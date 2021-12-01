@@ -1170,7 +1170,14 @@ namespace ThMEPArchitecture
         public static Point3dCollection DivideCurveByLength(Curve crv, double length, ref DBObjectCollection segs)
         {
             Point3dCollection pts = new Point3dCollection(crv.GetPointsByDist(length).ToArray());
-            segs = crv.GetSplitCurves(pts);
+            try
+            {
+                segs = crv.GetSplitCurves(pts);
+            }
+            catch (Exception ex)
+            {
+                               
+            }
             return pts;
         }
 
