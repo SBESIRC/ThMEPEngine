@@ -245,20 +245,20 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                             if (edges[0].TrueSide.GetLineAngle(L1) < edges[0].TrueSide.GetLineAngle(L2))
                             {
                                 LayoutLines = layoutResult;
-                                if (CanAdjustment)
-                                {
-                                    HaveLayoutBackUp =true;
-                                    SpareLayoutLines =SparelayoutResult;
-                                }
+                                //if (CanAdjustment)
+                                //{
+                                //    HaveLayoutBackUp =true;
+                                //    SpareLayoutLines =SparelayoutResult;
+                                //}
                             }
                             else
                             {
                                 LayoutLines = SparelayoutResult;
-                                if (CanAdjustment)
-                                {
-                                    HaveLayoutBackUp =true;
-                                    SpareLayoutLines =layoutResult;
-                                }
+                                //if (CanAdjustment)
+                                //{
+                                //    HaveLayoutBackUp =true;
+                                //    SpareLayoutLines =layoutResult;
+                                //}
                             }
                         }
                         else if (edges[0].BeamType == BeamType.Beam)
@@ -348,20 +348,20 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                             if (edges[0].TrueSide.GetLineAngle(L1_2) < edges[0].TrueSide.GetLineAngle(L2_2))
                             {
                                 LayoutLines = layoutResult;
-                                if (CanAdjustment)
-                                {
-                                    HaveLayoutBackUp =true;
-                                    SpareLayoutLines =SparelayoutResult;
-                                }
+                                //if (CanAdjustment)
+                                //{
+                                //    HaveLayoutBackUp =true;
+                                //    SpareLayoutLines =SparelayoutResult;
+                                //}
                             }
                             else
                             {
                                 LayoutLines = SparelayoutResult;
-                                if (CanAdjustment)
-                                {
-                                    HaveLayoutBackUp =true;
-                                    SpareLayoutLines =layoutResult;
-                                }
+                                //if (CanAdjustment)
+                                //{
+                                //    HaveLayoutBackUp =true;
+                                //    SpareLayoutLines =layoutResult;
+                                //}
                             }
                         }
                         else if (edges[0].BeamType == BeamType.Beam)
@@ -417,8 +417,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
             {
                 connectType = ConnectSecondaryBeamType.None;
             }
+            else if((mind <= SecondaryBeamLayoutConfig.Dc))
+            {
+                connectType = ConnectSecondaryBeamType.None;
+            }
             //if Da < min（d1、d2）< Db ，or min（d1、d2） ≤ Da 且 max（d1、d2）＞ Db ，对地下室顶板（输入条件 - 楼层），将该区格从QGList中移除(对应框架大板无次梁的情况)。对地下室中板（输入条件 - 楼层），划分单次梁连线，
-            else if ((mind > SecondaryBeamLayoutConfig.Da && mind < SecondaryBeamLayoutConfig.Db) || (mind <= SecondaryBeamLayoutConfig.Da && maxd >= SecondaryBeamLayoutConfig.Db))
+            else if ((mind > SecondaryBeamLayoutConfig.Da && mind < SecondaryBeamLayoutConfig.Db) || (mind > SecondaryBeamLayoutConfig.Dc && mind <= SecondaryBeamLayoutConfig.Da && maxd >= SecondaryBeamLayoutConfig.Db))
             {
                 connectType = ConnectSecondaryBeamType.SingleConnect;
             }

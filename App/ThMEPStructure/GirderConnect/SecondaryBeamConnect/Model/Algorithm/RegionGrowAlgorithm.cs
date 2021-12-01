@@ -1,9 +1,17 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.AFASRegion.Utls;
+using ThMEPEngineCore.CAD;
+using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
 {
@@ -37,15 +45,20 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
     public class RegionGrowAlgorithm
     {
         public List<ThBeamTopologyNode> Nodes { get; set; }
-        public List<List<ThBeamTopologyNode>> space { get; set; }
+        public List<List<ThBeamTopologyNode>> Aggregatespace { get; set; }
+        public List<List<ThBeamTopologyNode>> Adjustmentspace { get; set; }
 
         public void RegionGrow(List<ThBeamTopologyNode> nodes)
         {
-            Nodes = nodes;
-            space = new List<List<ThBeamTopologyNode>>();
+            Nodes = nodes.Where(o => o.Edges.Count != 3 || o.Edges[0].BeamType != BeamType.Scrap).ToList();
+            Aggregatespace = new List<List<ThBeamTopologyNode>>();
+            Adjustmentspace =new List<List<ThBeamTopologyNode>>();
             CreatRandomSeed();
             //RegionalIntegration();
             RegionalOptimization();
+            MergeUnchangeableArea();
+            EliminateDents();
+            MergeChangeArea();
         }
 
         /// <summary>
@@ -56,8 +69,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             var seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0 && o.HaveLayoutBackUp);
             while (!seed.IsNull())
             {
-                var region = RegionGrowSmall(seed);
-                space.Add(region);
+                var region = RegionGrowSmall(this.Nodes, seed);
+                Aggregatespace.Add(region);
                 seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0 && o.HaveLayoutBackUp);
             }
         }
@@ -74,18 +87,18 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 foreach (var node in Nodes)
                 {
                     var neighbors = node.Neighbor.Select(o => o.Item2).Except(Nodes).ToList();
-                    if(neighbors.Count == 0)
+                    if (neighbors.Count == 0)
                     {
                         newNodes.Add(node);
                     }
-                    else if(neighbors.Count == 1)
+                    else if (neighbors.Count == 1)
                     {
-                        var list = space.First(o => o.Contains(neighbors[0]));
+                        var list = Aggregatespace.First(o => o.Contains(neighbors[0]));
                         list.Add(node);
                     }
                     else
                     {
-                        
+
                     }
                 }
                 Signal = Nodes.Count > newNodes.Count;
@@ -98,9 +111,9 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         /// </summary>
         private void RegionalOptimization()
         {
-            for (int i = 0; i < space.Count; i++)
+            for (int i = 0; i < Aggregatespace.Count; i++)
             {
-                var list = space[i];
+                var list = Aggregatespace[i];
                 bool Signal = true;
                 while (Signal)
                 {
@@ -126,12 +139,97 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                         Signal = false;
                     }
                 }
-                space[i] = list;
+                Aggregatespace[i] = list;
             }
-            space.RemoveAll(o => o.Count == 0);
+            Aggregatespace.RemoveAll(o => o.Count == 0);
         }
 
-        private List<ThBeamTopologyNode> RegionGrowSmall(ThBeamTopologyNode tempCall)
+        /// <summary>
+        /// 合并不可更改区域
+        /// </summary>
+        private void MergeUnchangeableArea()
+        {
+            var UnchangeableNodes = Nodes.Where(o => !o.HaveLayoutBackUp && o.LayoutLines.SecondaryBeamLines.Count > 0).ToList();
+            Nodes = Nodes.Except(UnchangeableNodes).ToList();
+            List<List<ThBeamTopologyNode>> UnchangeableSpaces = new List<List<ThBeamTopologyNode>>();
+            var seed = UnchangeableNodes.FirstOrDefault();
+            while (!seed.IsNull())
+            {
+                var region = RegionGrowSmall(UnchangeableNodes, seed);
+                UnchangeableSpaces.Add(region);
+                seed = UnchangeableNodes.FirstOrDefault();
+            }
+            foreach (var space in UnchangeableSpaces)
+            {
+                var Adjacentspace = Aggregatespace.Where(o => space.Any(x => x.Neighbor.Any(neighbor => o.Contains(neighbor.Item2) && x.CheckCurrentPixel(neighbor.Item2)))).ToList();
+                var list = space.ToArray().ToList();
+                foreach (var adjacent in Adjacentspace)
+                {
+                    Aggregatespace.Remove(adjacent);
+                    list.AddRange(adjacent);
+                }
+                Aggregatespace.Add(list);
+            }
+        }
+
+        /// <summary>
+        /// 消除凹包
+        /// </summary>
+        private void EliminateDents()
+        {
+            var nodeDic = this.Nodes.ToDictionary(o => o.Boundary, o => o);
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(nodeDic.Keys.ToCollection());
+            bool Signal = true;
+            while (Signal)
+            {
+                Signal = false;
+                for (int i = 0; i < Aggregatespace.Count; i++)
+                {
+                    var space = Aggregatespace[i];
+                    var UnionPolygon = space.UnionPolygon();
+                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                    var objs = spatialIndex.SelectFence(polyline);
+                    foreach (Polyline obj in objs)
+                    {
+                        var node = nodeDic[obj];
+                        if(this.Nodes.Contains(node))
+                        {
+                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                            {
+                                if (!node.CheckCurrentPixel(space.First()))
+                                    node.SwapLayout();
+                                if (node.CheckCurrentPixel(space.First()))
+                                {
+                                    this.Nodes.Remove(node);
+                                    space.Add(node);
+                                    Signal = true;
+                                }
+                            }
+                        }
+                    }
+                    Aggregatespace[i] = space;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 合并可以更改版本
+        /// </summary>
+        private void MergeChangeArea()
+        {
+            var seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+            while (!seed.IsNull())
+            {
+                var region = RegionGrowSmall(this.Nodes, seed, true);
+                Adjustmentspace.Add(region);
+                seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+            }
+        }
+
+        private List<ThBeamTopologyNode> RegionGrowSmall(List<ThBeamTopologyNode> nodes, ThBeamTopologyNode tempCall, bool IgnoreDir = false)
         {
             List<ThBeamTopologyNode> result = new List<ThBeamTopologyNode>();
 
@@ -145,7 +243,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             //int seedSum = 0;
 
             //标记种子
-            Nodes.Remove(tempCall);
+            nodes.Remove(tempCall);
 
             //种子进栈
             Seed.Push(tempCall);
@@ -157,28 +255,23 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 foreach (var NeighborCurrentPixel in currentPixel.Neighbor.Select(o => o.Item2))
                 {
                     //判断点是否在图像区域内
-                    if (!Nodes.Contains(NeighborCurrentPixel))
+                    if (!nodes.Contains(NeighborCurrentPixel))
                     {
                         continue;
                     }
-                    if (NeighborCurrentPixel.LayoutLines.edges.Count == 0)
+                    if (NeighborCurrentPixel.LayoutLines.edges.Count == 0 && !IgnoreDir)
                     {
                         continue;
                     }
-                    if (CheckCurrentPixel(currentPixel, NeighborCurrentPixel))
+                    if (currentPixel.CheckCurrentPixel(NeighborCurrentPixel) || IgnoreDir)
                     {
                         Seed.Push(NeighborCurrentPixel);
                         result.Add(NeighborCurrentPixel);
-                        Nodes.Remove(NeighborCurrentPixel);
+                        nodes.Remove(NeighborCurrentPixel);
                     }
                 }
             }
             return result;
-        }
-
-        private bool CheckCurrentPixel(ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
-        {
-            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 35);
         }
     }
 

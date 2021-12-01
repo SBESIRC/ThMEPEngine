@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -151,6 +152,61 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         public static double AreaRatio(this Polyline polyline1, Polyline polyline2, Polyline polyline3)
         {
             return Math.Min(Math.Min(polyline1.Area, polyline2.Area), polyline3.Area) / Math.Max(Math.Max(polyline1.Area, polyline2.Area), polyline3.Area);
+        }
+
+        public static Polyline UnionPolygon(this List<ThBeamTopologyNode> nodes)
+        {
+             return nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection().UnionPolygons().Cast<Polyline>().OrderByDescending(x => x.Area).First().Buffer(-10)[0] as Polyline;
+        }
+
+        public static Polyline UnionPolygon(this List<ThBeamTopologyNode> nodes, Polyline polyline)
+        {
+            var objs = nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection();
+            objs.Add(polyline.Buffer(10)[0] as Polyline);
+            return objs.UnionPolygons().Cast<Polyline>().OrderByDescending(x => x.Area).First().Buffer(-10)[0] as Polyline;
+        }
+
+        public static Polyline UnionPolygon(this ThBeamTopologyNode node, Polyline polyline)
+        {
+            var temp = new DBObjectCollection
+                        {
+                            node.Boundary.Buffer(10)[0] as Polyline,
+                            polyline.Buffer(10)[0] as Polyline,
+                        };
+            return temp.UnionPolygons().Cast<Polyline>().OrderByDescending(x => x.Area).First().Buffer(-10)[0] as Polyline;
+        }
+
+        public static Polyline ConvexHullPL(this Polyline polyline)
+        {
+            return ThCADCoreNTSPoint3dCollectionExtensions.ConvexHull(polyline.Vertices()).ToDbCollection().Cast<Polyline>().OrderByDescending(x => x.Area).First();
+        }
+
+        public static bool IsNeighbor(this List<ThBeamTopologyNode> nodes, List<ThBeamTopologyNode> node1, bool ConsiderDir = false)
+        {
+            if(nodes.Any(node => node.Neighbor.Any(o => node1.Contains(o.Item2))))
+            {
+                if (ConsiderDir)
+                {
+                    if(nodes.First().CheckCurrentPixel(node1.First()))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool CheckCurrentPixel(this ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
+        {
+            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 35);
         }
     }
 }

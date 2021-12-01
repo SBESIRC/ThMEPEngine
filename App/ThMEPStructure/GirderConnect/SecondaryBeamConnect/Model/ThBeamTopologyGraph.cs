@@ -76,10 +76,10 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         public void AdjustmentDirection()
         {
             //分类，划分区隔
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(200000,0,0)));
+            DrawGraph(Matrix3d.Displacement(new Vector3d(200000,0,0)));
             CorrectWrongDir();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(400000, 0, 0)));
-            //GroupBeamNodes();
+            DrawGraph(Matrix3d.Displacement(new Vector3d(400000, 0, 0)));
+            GroupBeamNodes();
         }
 
         /// <summary>
@@ -124,18 +124,65 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 int index = 1;
                 using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {
-                    foreach (var item in algorithm.space)
+                    foreach (var item in algorithm.Aggregatespace)
                     {
                         foreach (var a in item)
                         {
                             var entity = a.Boundary.Clone() as Polyline;
+                            entity = entity.Buffer(-500)[0] as Polyline;
                             entity.ColorIndex = index;
                             acad.ModelSpace.Add(entity);
                         }
-                        index++;
+                        index=index%3 +1;
                     }
+
+                    //foreach (var item in algorithm.Adjustmentspace)
+                    //{
+                    //    foreach (var a in item)
+                    //    {
+                    //        var entity = a.Boundary.Clone() as Polyline;
+                    //        try
+                    //        {
+                    //            entity = entity.Buffer(-2000)[0] as Polyline;
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+                    //            entity = entity.Buffer(-1000)[0] as Polyline;
+                    //        }
+                    //        entity.ColorIndex = index + 4;
+                    //        acad.ModelSpace.Add(entity);
+                    //    }
+                    //    index=index%3 +1;
+                    //}
                 }
             }
+
+            //GeneticAlgorithm genetic = new GeneticAlgorithm(algorithm.Aggregatespace, algorithm.Adjustmentspace[3]);
+            //genetic.Run();
+
+            foreach (var space in algorithm.Adjustmentspace)
+            {
+                var neighber = algorithm.Aggregatespace.Where(o => o.IsNeighbor(space)).OrderByDescending(o=>o.Count).ToList();
+                BeamGameTreeAlgorithm gameTree = new BeamGameTreeAlgorithm(neighber, space);
+                gameTree.Start();
+                var Result = gameTree.ChessGameResult;
+                if (!Result.IsNull())
+                {
+                    for (int i = 0; i < Result.Length; i++)
+                    {
+                        var node = space[i];
+                        if(!node.CheckCurrentPixel(neighber[Result[i] - 1].First()))
+                        {
+                            node.SwapLayout();
+                        }
+                    }
+                }
+                else
+                {
+                    //throw new NotImplementedException();
+                }
+            }
+
         }
 
         public void DrawGraph(Matrix3d matrix,bool drawBoundary = true)

@@ -49,7 +49,10 @@
     <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\SecondaryBeamConnectCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\ThSecondaryBeamSystemCmd.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\GeneticAlgorithm.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\RegionGrowAlgorithm.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\EvaluationModel.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\FusionRegion.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\LayoutResult.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\SecondaryBeamLayoutConfig.cs" />

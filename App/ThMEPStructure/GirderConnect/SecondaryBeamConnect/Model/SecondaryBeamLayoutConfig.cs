@@ -10,6 +10,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
     {
         public static double Da = 5500;//mm
         public static double Db = 6300;//mm
-        public static double Er = 1.2;
+        public static double Dc = 3300;//mm
+        public static double Er = 2.2;
     }
 }
