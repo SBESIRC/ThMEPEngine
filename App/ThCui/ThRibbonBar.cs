@@ -169,14 +169,14 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("EGENERAL", "电气通用");
             var row = panel.AddNewRibbonRow();
 
-            // 连线
-            row.AddNewButton("连线",
-                "天华电气连线",
-                "THLX",
-                "天华电气连线",
-                "IDI_THCAD_THLX_SMALL",
-                "IDI_THCAD_THLX_LARGE",
-                RibbonButtonStyle.LargeWithText);
+            //// 连线
+            //row.AddNewButton("连线",
+            //    "天华电气连线",
+            //    "THLX",
+            //    "天华电气连线",
+            //    "IDI_THCAD_THLX_SMALL",
+            //    "IDI_THCAD_THLX_LARGE",
+            //    RibbonButtonStyle.LargeWithText);
 
             // 提资转换
             row.AddNewButton("提资转换",
