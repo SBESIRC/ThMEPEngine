@@ -71,7 +71,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 return frame.Vertices();
             }
         }
-
         public static Point3d SelectPoint()
         {
             var point1 = Active.Editor.GetPoint("\n请选择水管起点位置");
@@ -83,22 +82,26 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public static List<ThFanCUModel> SelectFanCUModel()
         {
-            var retModeles = new List<ThFanCUModel>();
-            while (true)
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                using (var acadDb = Linq2Acad.AcadDatabase.Active())
+                var retModeles = new List<ThFanCUModel>();
+                PromptSelectionOptions options = new PromptSelectionOptions()
                 {
-                    var insertPtRst = Active.Editor.GetEntity("选择一个风机\n");
-                    if (insertPtRst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-                        break;
-                    if (insertPtRst.ObjectId.IsValid)
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择要布置的设备",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var result = Active.Editor.GetSelection(options);
+
+                if (result.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result.Value.GetObjectIds())
                     {
-                        var entity = acadDb.Element<Entity>(insertPtRst.ObjectId);
+                        var entity = acadDb.Element<Entity>(obj);
                         if (entity is BlockReference)
                         {
                             var blk = entity as BlockReference;
-                            var name = blk.GetEffectiveName();
-                            if (name.Contains("FCU") || name.Contains("1"))
+                            if (blk.ObjectId.GetDynBlockValue("水管连接点1 X") != null && blk.ObjectId.GetDynBlockValue("水管连接点1 Y") != null)
                             {
                                 var tmpFan = new ThFanCUModel();
                                 var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
@@ -116,8 +119,46 @@ namespace ThMEPHVAC.FanConnect.Command
                         }
                     }
                 }
+                return retModeles;
             }
-            return retModeles;
+        }
+        public static List<Line> SelectPipes()
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                List<Line> retLines = new List<Line>();
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择要布置的水管",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var result = Active.Editor.GetSelection(options);
+                if (result.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result.Value.GetObjectIds())
+                    {
+                        var entity = acadDb.Element<Entity>(obj);
+                        if(entity is Polyline)
+                        {
+                            var line = entity as Polyline;
+                            if(line.Layer.Contains("AI-水管路由"))
+                            {
+                                retLines.AddRange(line.ToLines());
+                            }
+                        }
+                        else if(entity is Line)
+                        {
+                            var line = entity as Line;
+                            if(line.Layer.Contains("AI-水管路由"))
+                            {
+                                retLines.Add(line);
+                            }
+                        }
+                    }
+                }
+                return retLines;
+            }
         }
         public static List<Line> GetNearbyLine(Point3d pt, List<Line> lines, int N = 3)
         {
@@ -134,35 +175,6 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return returnLines;
         }
-
-        public static void AnalysisPipe(Point3d startPt, List<Line> lines, List<Line> trunkLines, List<Line> branchLines)
-        {
-            //找到起始线，然后，从起始线开始遍历查询，找到一条首尾相接的线段，该线段为trunkLines
-            double tol = 10.0;
-            foreach(var l in lines)
-            {
-                if(l.StartPoint.DistanceTo(startPt) < tol)
-                {
-                    lines.Remove(l);
-                    trunkLines.Add(l);
-                    break;
-                }
-                else if(l.EndPoint.DistanceTo(startPt) < tol)
-                {
-                    var tmpPoint = l.StartPoint;
-                    l.StartPoint = l.EndPoint;
-                    l.EndPoint = tmpPoint;
-                    lines.Remove(l);
-                    trunkLines.Add(l);
-                    break;
-                }
-            }
-            if(trunkLines.Count == 0)
-            {
-                return;
-            }
-        }
-
         public static double DistanceToPoint(Line l ,Point3d pt,bool isExtend = false)
         {
             Point3d closestPoint = l.GetClosestPointTo(pt, isExtend);
@@ -367,6 +379,13 @@ namespace ThMEPHVAC.FanConnect.Command
             var str = tempDiff.Split('/');
             cool = GetDoubleFromString(str[0]);
             hot = GetDoubleFromString(str[1]);
+        }
+        public static double GetVectorAngle(Vector3d vector)
+        {
+            Vector3d basVector = new Vector3d(1, 0, 0);
+            Vector3d refVector = new Vector3d(0, 0, 1);
+            double retAngle = basVector.GetAngleTo(vector, refVector);
+            return retAngle;
         }
     }
 }

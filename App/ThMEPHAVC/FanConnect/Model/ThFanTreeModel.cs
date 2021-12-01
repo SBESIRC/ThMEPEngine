@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPHVAC.FanConnect.Command;
 
 namespace ThMEPHVAC.FanConnect.Model
 {
@@ -56,20 +57,20 @@ namespace ThMEPHVAC.FanConnect.Model
     public class ThFanTreeModel
     {
         public ThFanTreeNode<ThFanPipeModel> RootNode { set; get; }
-        public ThFanTreeModel(Point3d startPt, List<Line> lines)
+        public ThFanTreeModel(Point3d startPt, List<Line> lines,double space)
         {
-            RootNode = GetRootNode(startPt,lines);
+            RootNode = GetRootNode(startPt,lines, space);
         }
-        ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines)
+        ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines, double space)
         {
             var line = FindStartLine(startPt, lines);
             if(line == null)
             {
                 return null;
             }
-            var pipeModel = new ThFanPipeModel(line,PIPELEVEL.LEVEL1);
+            var pipeModel = new ThFanPipeModel(line, PIPELEVEL.LEVEL1, space);
             var rootNode = new ThFanTreeNode<ThFanPipeModel>(pipeModel);
-            InsertNodeFromLines(rootNode, lines);
+            InsertNodeFromLines(rootNode, lines, space);
             return rootNode;
         }
 
@@ -102,23 +103,28 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 if (l.StartPoint.DistanceTo(pt) < 10)
                 {
+                    l.StartPoint = pt;
                     remLines.Add(l);
                     retLines.Add(l);
                 }
                 else if (l.EndPoint.DistanceTo(pt) < 10)
                 {
-                    var tmpPt = l.StartPoint;
-                    l.StartPoint = l.EndPoint;
-                    l.EndPoint = tmpPt;
+                    //var tmpPt = l.StartPoint;
+                    //l.StartPoint = l.EndPoint;
+                    //l.EndPoint = tmpPt;
+                    l.EndPoint = l.StartPoint;
+                    l.StartPoint = pt;
                     retLines.Add(l);
                     remLines.Add(l);
                 }
                 else if(l.GetDistToPoint(pt) < 10)
                 {
                     //将l在pt处打断
-                    var closPt = l.GetClosestPointTo(pt,false);
-                    var line1 = new Line(closPt, l.StartPoint);
-                    var line2 = new Line(closPt, l.EndPoint);
+                    //var closPt = l.GetClosestPointTo(pt,false);
+                    //var line1 = new Line(closPt, l.StartPoint);
+                    //var line2 = new Line(closPt, l.EndPoint);
+                    var line1 = new Line(pt, l.StartPoint);
+                    var line2 = new Line(pt, l.EndPoint);
                     retLines.Add(line1);
                     retLines.Add(line2);
                     remLines.Add(l);
@@ -139,13 +145,16 @@ namespace ThMEPHVAC.FanConnect.Model
                 double endDist = line.GetDistToPoint(endPt);
                 if(startDist < 10.0)
                 {
+                    var closPt = line.GetClosestPointTo(l.StartPoint, false);
+                    l.StartPoint = closPt;
                     retLines.Add(l);
                     remLines.Add(l);
                 }
                 else if (endDist < 10.0)
                 {
-                    l.StartPoint = endPt;
+                    var closPt = line.GetClosestPointTo(l.EndPoint, false);
                     l.EndPoint = startPt;
+                    l.StartPoint = closPt;
                     retLines.Add(l);
                     remLines.Add(l);
                 }
@@ -166,7 +175,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             return retLines;
         }
-        void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines)
+        void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines, double space)
         {
             //取当前结点的末端点
             var endPt = node.Item.PLine.EndPoint;
@@ -196,7 +205,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 {
                     level = node.Parent.Item.PipeLevel;
                 }
-                var childModel = new ThFanPipeModel(l, level);
+                var childModel = new ThFanPipeModel(l, level, space);
                 childModel.IsFlag = isFlag;
                 if(node.Item.IsFlag)
                 {
@@ -206,7 +215,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 childModel.CroVector = croVector;
                 var childNode = new ThFanTreeNode<ThFanPipeModel>(childModel);
                 node.InsertChild(childNode);
-                InsertNodeFromLines(childNode, lines);
+                InsertNodeFromLines(childNode, lines, space);
             }
             //获取与该item.PLine中间相连的线
             var neaLines = FindNearLine(node.Item.PLine,ref lines);
@@ -219,7 +228,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 {
                     isFlag = true;
                 }
-                var childModel = new ThFanPipeModel(l, PIPELEVEL.LEVEL2);
+                var childModel = new ThFanPipeModel(l, PIPELEVEL.LEVEL2, space);
                 childModel.IsFlag = isFlag;
                 if (node.Item.IsFlag)
                 {
@@ -229,9 +238,110 @@ namespace ThMEPHVAC.FanConnect.Model
                 childModel.CroVector = croVector;
                 var childNode = new ThFanTreeNode<ThFanPipeModel>(childModel);
                 node.InsertChild(childNode);
-                InsertNodeFromLines(childNode, lines);
+                InsertNodeFromLines(childNode, lines, space);
                 
             }
+        }
+    }
+    public class ThPointTreeModel
+    {
+        public ThFanTreeNode<ThFanPointModel> RootNode { set; get; }
+        public ThPointTreeModel(ThFanTreeNode<ThFanPipeModel> rootNode, List<ThFanCUModel> fan)
+        {
+            //构建PointTree
+            RootNode = GetRootNode(rootNode);
+            //计算每个结点的流量
+            if (RootNode != null)
+            {
+                CalNodeValue(RootNode, fan);
+            }
+        }
+        ThFanTreeNode<ThFanPointModel> GetRootNode(ThFanTreeNode<ThFanPipeModel> treeModel)
+        {
+            var allLines = GetLinesFromNode(treeModel);
+            var pointModel = new ThFanPointModel();
+            pointModel.CntPoint = treeModel.Item.PLine.StartPoint;
+            var rootNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
+            InsertNodeFromPipeTree(rootNode,ref allLines);
+            return rootNode;
+        }
+        public void InsertNodeFromPipeTree(ThFanTreeNode<ThFanPointModel> node,ref List<Line> lines)
+        {
+            var remLines = new List<Line>();
+            foreach(var l in lines)
+            {
+                if (node.Item.CntPoint.IsEqualTo(l.StartPoint))
+                {
+                    var pointModel = new ThFanPointModel();
+                    pointModel.CntPoint = l.EndPoint;
+                    var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
+                    node.InsertChild(pointNode);
+                    remLines.Add(l);
+                }
+            }
+            lines = lines.Except(remLines).ToList();
+            foreach(var child in node.Children)
+            {
+                InsertNodeFromPipeTree(child,ref lines);
+            }
+        }
+        public void CalNodeValue(ThFanTreeNode<ThFanPointModel> node, List<ThFanCUModel> fans)
+        {
+            //优先计算子结点的值
+            foreach(var child in node.Children)
+            {
+                CalNodeValue(child, fans);
+            }
+
+            if(node.Children.Count == 0)
+            {
+                foreach (var f in fans)
+                {
+                    var distance = node.Item.CntPoint.DistanceTo(f.FanPoint);
+                    if (distance < 10.0)
+                    {
+                        node.Item.CoolCapa = f.CoolCapa;
+                        node.Item.CoolFlow = f.CoolFlow;
+                        node.Item.HotFlow = f.HotFlow;
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                foreach(var child in node.Children)
+                {
+                    node.Item.CoolCapa += child.Item.CoolCapa;
+                    node.Item.CoolFlow += child.Item.CoolFlow;
+                    node.Item.HotFlow += child.Item.HotFlow;
+                }
+            }
+        }
+        public List<Line> GetLinesFromNode(ThFanTreeNode<ThFanPipeModel> treeNode)
+        {
+            var retLines = new List<Line>();
+            foreach (var child in treeNode.Children)
+            {
+                retLines.AddRange(GetLinesFromNode(child));
+            }
+            var pts = new List<Point3d>();
+            pts.Add(treeNode.Item.PLine.StartPoint);
+            foreach (var child in treeNode.Children)
+            {
+                if(!child.Item.IsConnect)
+                {
+                    pts.Add(child.Item.PLine.StartPoint);
+                }
+            }
+            pts.Add(treeNode.Item.PLine.EndPoint);
+            pts = pts.Distinct().ToList();
+            pts = pts.OrderBy(o=> treeNode.Item.PLine.StartPoint.DistanceTo(o)).ToList();
+            for(int i = 0; i < pts.Count - 1;i++)
+            {
+                var tmpLine = new Line(pts[i], pts[i + 1]);
+                retLines.Add(tmpLine);
+            }
+            return retLines;
         }
     }
 }

@@ -15,7 +15,7 @@ namespace ThMEPHVAC.FanConnect.ViewModel
         public bool IsCWPipe { set; get; }//冷凝水管
         public bool IsCoolPipe { set; get; }//空调冷却水管
         public bool IsGenerValve { set; get; }//是否穿框线处生成阀门
-        public double FrictionCoeff { set; get; }//空调水比摩阻
+        public string FrictionCoeff { set; get; }//空调水比摩阻
         public double MarkHeigth { set; get; }//中心标高
         public ThWaterSystemConfigInfo()
         {
@@ -26,7 +26,7 @@ namespace ThMEPHVAC.FanConnect.ViewModel
             IsCWPipe = true;
             IsCoolPipe = true;
             IsGenerValve = true;
-            FrictionCoeff = 200;
+            FrictionCoeff = "150";
             MarkHeigth = 3.0;
         }
     }

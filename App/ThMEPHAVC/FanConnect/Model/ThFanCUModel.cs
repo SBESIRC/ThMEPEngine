@@ -11,6 +11,7 @@ namespace ThMEPHVAC.FanConnect.Model
     public class ThFanCUModel
     {
         public string FanType { set; get; }//类型
+        public double CoolCapa { set; get; }//制冷量
         public double CoolFlow { set; get; }//制冷流量
         public double HotFlow { set; get; }//制热流量
         public Point3d FanPoint { set; get; }//连接点

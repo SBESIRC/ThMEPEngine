@@ -30,7 +30,6 @@ namespace ThMEPHVAC.FanConnect.Engine
                 foreach(var blk in Results)
                 {
                     var tmpFan = new ThFanCUModel();
-
                     var attrib =  blk.ObjectId.GetAttributesInBlockReference();
                     if(attrib.ContainsKey("制冷量/制热量") && attrib.ContainsKey("冷水温差/热水温差"))
                     {
@@ -39,7 +38,7 @@ namespace ThMEPHVAC.FanConnect.Engine
                         
                         var strTempDiff = attrib["冷水温差/热水温差"];
                         ThFanConnectUtils.GetCoolAndHotTempDiff(strTempDiff, out double coolTempDiff, out double hotTempDiff);
-
+                        tmpFan.CoolCapa = coolCapacity;
                         tmpFan.CoolFlow = coolCapacity / 1.163 / coolTempDiff;
                         tmpFan.HotFlow = hotCapacity / 1.163 / hotTempDiff;
                     }

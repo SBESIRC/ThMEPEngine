@@ -52,7 +52,9 @@
     <Compile Include="FanConnect\Service\ThEquipElementExtractServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtendBaseServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtractServiece.cs" />
+    <Compile Include="FanConnect\Service\ThQueryDNServiece.cs" />
     <Compile Include="FanConnect\Service\ThWaterPipeExtendServiece.cs" />
+    <Compile Include="FanConnect\Service\ThWaterPipeMarkServiece.cs" />
     <Compile Include="FanConnect\ViewModel\ThAirPipeConfigInfo.cs" />
     <Compile Include="FanConnect\ViewModel\ThWaterPipeConfigInfo.cs" />
     <Compile Include="FanConnect\ViewModel\ThWaterPipeViewModel.cs" />
