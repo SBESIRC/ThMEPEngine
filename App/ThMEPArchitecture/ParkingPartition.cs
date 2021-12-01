@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,12 +20,14 @@ namespace ThMEPArchitecture
             List<Polyline> obstacles, Polyline boundary)
         {
             Walls = walls;
-            IniLanes = iniLanes;
+            IniLanes = new List<Line>(iniLanes);
             Obstacles = obstacles;
             Boundary = boundary;
+            SequenceLanes = new List<Line>(iniLanes);
         }
         public List<Polyline> Walls;
         public List<Line> IniLanes;
+        public List<Line> SequenceLanes;
         public List<Polyline> Obstacles;
         public Polyline Boundary;
         public DBObjectCollection Cutters = new DBObjectCollection();
@@ -117,6 +120,7 @@ namespace ThMEPArchitecture
             IniLanes.ForEach(e => Cutters.Add(e));
             Obstacles.ForEach(e => Cutters.Add(e));
             ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            
         }
 
         /// <summary>
@@ -136,6 +140,7 @@ namespace ThMEPArchitecture
         {
             GenerateParkingSpaces();
             CarSpots.AddToCurrentSpace();
+
         }
 
         /// <summary>
@@ -144,15 +149,17 @@ namespace ThMEPArchitecture
         public void GenerateParkingSpaces()
         {
             GenerateLanes();
+
+            //IniLanes.AddToCurrentSpace();
             GenerateParkingSpots();
 
             Line a = new Line(new Point3d(0, 0, 0), new Point3d(100, 0, 0));
             Line b = new Line(new Point3d(20, 0, 0), new Point3d(30, 0, 0));
 
-            var t = AnalysisLineList(IniLanes);
-            IniLanes.AddToCurrentSpace();
+            var t = AnalysisLineList(SequenceLanes);
+            //IniLanes.AddToCurrentSpace();
             CarSpots.ForEach(e => e.ColorIndex = 250);
-            CarSpots.AddToCurrentSpace();
+            //CarSpots.AddToCurrentSpace();
         }
 
         /// <summary>
@@ -166,7 +173,7 @@ namespace ThMEPArchitecture
                 while (true)
                 {
                     count++;
-                    if (count > 10) break;
+                    if (count > 20) break;
                     int lanecount = IniLanes.Count;
                     SortLinesByLength(IniLanes, false);
 
@@ -195,7 +202,42 @@ namespace ThMEPArchitecture
 
                 //connect lane
                 ConnectIsolatedLanes();
+
             }
+        }
+
+        private List<Line> RemoveCollisionalLanesForObstacles(Line lane)
+        {
+            var l = lane;
+            List<Line> results = new List<Line>();
+            var bf = l.Buffer(DisLaneWidth / 2);
+            var obstalesobjs = new DBObjectCollection();
+            Obstacles.ForEach(o => obstalesobjs.Add(o));
+            var splited = SplitCurve(bf, obstalesobjs);
+            List<Point3d> pts = new List<Point3d>();
+            foreach (var s in splited)
+            {
+                pts.Add(s.StartPoint);
+                pts.Add(s.EndPoint);
+            }
+            pts = pts.Distinct().ToList();
+            List<Point3d> ps = new List<Point3d>();
+            pts.ForEach(t => ps.Add(l.GetClosestPointTo(t, false)));
+            SortAlongCurve(ps, l);
+            var segs = l.GetSplitCurves(ps.ToCollection()).Cast<Line>().ToList();
+            segs = segs.Where(e => e.Length > 1).ToList();
+            List<Line> res = new List<Line>();
+            if (segs.Count > 1)
+            {
+                res.Add(segs[0]);
+                res.Add(segs[segs.Count - 1]);
+            }
+            else if (segs.Count == 1)
+            {
+                res.Add(segs[0]);
+            }
+            res = res.Where(e => e.Length > DisModulus).ToList();
+            return res;
         }
 
         /// <summary>
@@ -214,8 +256,21 @@ namespace ThMEPArchitecture
                     var newlane = new List<Line>();
                     for (int j = 0; j < lines.Count; j++)
                     {
+                        if (lines[j].StartPoint.DistanceTo(new Point3d(2830969.218, 3811183.719, 0)) < 1)
+                        {
+                            ;
+                        }
                         var k = (Line)SplitCurve(lines[j], Cutters)[0];
-                        Point3d ptori = j == 0 ? l.StartPoint : l.EndPoint;
+                        //Point3d ptori = j == 0 ? l.StartPoint : l.EndPoint;
+                        Point3d ptori;
+                        if(lines.Count>1) ptori = j == 0 ? l.StartPoint : l.EndPoint;
+                        else
+                        {
+                            var dis = l.StartPoint.DistanceTo(lines[j].StartPoint);
+                            ptori = Math.Abs(dis - DisCarAndHalfLane) < 1 ? l.StartPoint : l.EndPoint;
+                        }
+                        
+
                         k = MoveLaneForMoreParkingSpace(k, ptori);
                         bool hasNeighLane = false;
                         foreach (var lane in IniLanes)
@@ -232,6 +287,7 @@ namespace ThMEPArchitecture
                             //lines[j].AddToCurrentSpace();
                             //k.AddToCurrentSpace();
                             IniLanes.Add(k);
+                            SequenceLanes.Add(k);
                             Cutters.Add(k);
                             generated_adjwall = true;
                         }
@@ -302,6 +358,7 @@ namespace ThMEPArchitecture
                                 {
                                     //ln.AddToCurrentSpace();
                                     IniLanes.Add(ln);
+                                    SequenceLanes.Add(ln);
                                     Cutters.Add(ln);
                                     generated_wallext = true;
                                     break;
@@ -323,32 +380,73 @@ namespace ThMEPArchitecture
         private bool GenerateLanesBackToBack(List<Line> offsetest)
         {
             bool generate_bblane = false;
-            foreach (var e in offsetest)
+            foreach (var ef in offsetest)
             {
-                bool hasNeighLane = false;
-                bool IsInvalidLane = false;
-                foreach (var lane in IniLanes)
+                if (Math.Abs(ef.StartPoint.X - 2830969) < 1 && Math.Abs(ef.Length-137942)<1)
                 {
-                    if (IsParallelLine(lane, e) && DisBetweenTwoParallelLines(lane, e) < DisModulus - 100)
+                    ;
+                }
+
+                var res = RemoveCollisionalLanesForObstacles(ef);
+                //if (res.Count > 0)
+                //{
+                //    //res.AddToCurrentSpace();
+                //    IniLanes.AddRange(res);
+                //    SequenceLanes.AddRange(res);
+                //    res.ForEach(r => Cutters.Add(r));
+                //    generate_bblane = true;
+                //}
+                int tmpcout = IniLanes.Count;
+                foreach (var e in res)
+                {
+                    bool hasNeighLane = false;
+                    bool IsInvalidLane = false;
+                    foreach (var lane in IniLanes)
                     {
-                        hasNeighLane = true;
+                        if (IsParallelLine(lane, e) && (DisBetweenTwoParallelLines(e, lane) < DisModulus - 100
+                            && GetLengthDifferentFromParallelBofA(e, lane) < DisModulus))
+                        {
+                            hasNeighLane = true;
+                            GetLengthDifferentFromParallelBofA(e, lane);
+                            break;
+                        }
+                    }
+                    var ds = ClosestPointInCurves(e.StartPoint, IniLanes.Cast<Curve>().ToList());
+                    var de = ClosestPointInCurves(e.EndPoint, IniLanes.Cast<Curve>().ToList());
+                    if (ds < 5000 && de < 5000 && e.Length <= DisModulus*2)
+                    {
+                        IsInvalidLane = true;
                         break;
                     }
+                    if ((!hasNeighLane) && (!IsInvalidLane) && e.Length > DisModulus)
+                    {
+                        //if (Math.Abs(e.GetLength() - 111249) < 1)
+                        //{
+                        //    ;
+                        //}
+                        //var res = RemoveCollisionalLanesForObstacles(e);
+                        //if (res.Count > 0)
+                        //{
+                        //    ////res.AddToCurrentSpace();
+                        //    //IniLanes.AddRange(res);
+                        //    //SequenceLanes.AddRange(res);
+                        //    //res.ForEach(r => Cutters.Add(r));
+                        //    //generate_bblane = true;
+                        //}
+
+                        if (Math.Abs(e.Length - 17987) < 1)
+                        {
+                            ;
+                        }
+
+                        IniLanes.Add(e);
+                        SequenceLanes.Add(e);
+                        Cutters.Add(e);
+                        generate_bblane = true;
+                    }
                 }
-                var ds = ClosestPointInCurves(e.StartPoint, IniLanes.Cast<Curve>().ToList());
-                var de = ClosestPointInCurves(e.EndPoint, IniLanes.Cast<Curve>().ToList());
-                if (ds < 5000 && de < 5000 && e.Length <= DisModulus)
-                {
-                    IsInvalidLane = true;
-                    break;
-                }
-                if ((!hasNeighLane) && (!IsInvalidLane) && e.Length > DisModulus)
-                {
-                    //e.AddToCurrentSpace();
-                    IniLanes.Add(e);
-                    Cutters.Add(e);
-                    generate_bblane = true;
-                }
+                if (tmpcout != IniLanes.Count) generate_bblane = true;
+
                 if (generate_bblane) break;
             }
             return generate_bblane;
@@ -359,6 +457,8 @@ namespace ThMEPArchitecture
         /// </summary>
         private void GenerateParkingSpots()
         {
+            var cplys = new List<Polyline>(Obstacles);
+            cplys.ForEach(e => e.Closed = true);
             IniLanes.ForEach(e => AddToSpatialIndex(e, ref ObstaclesSpatialIndex));
             SortLinesByLength(IniLanes, false);
             List<Polyline> laneBoxes = new List<Polyline>();
@@ -400,14 +500,16 @@ namespace ThMEPArchitecture
                     b.TransformBy(Matrix3d.Scaling(0.9, b.GetCenter()));
                     var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
                     if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
-                        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes)))
+                        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
+                        && (!IsInAnyPolys(pla.GetCenter(), cplys)))
                     {
                         CarSpots.Add(pla);
                         AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
                     }
                     var crossedb = ObstaclesSpatialIndex.SelectCrossingPolygon(b);
                     if (crossedb.Count == 0 && Boundary.IsPointIn(plb.GetCenter())
-                        && (!IsInAnyPolys(plb.GetCenter(), laneBoxes)))
+                        && (!IsInAnyPolys(plb.GetCenter(), laneBoxes))
+                         && (!IsInAnyPolys(plb.GetCenter(), cplys)))
                     {
                         CarSpots.Add(plb);
                         AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
@@ -574,6 +676,38 @@ namespace ThMEPArchitecture
         }
 
         /// <summary>
+        /// 生成完整模块的车道线
+        /// </summary>
+        /// <param name="lane"></param>
+        private List<Line> GenerateLanesForBBParking(Line lane)
+        {
+            var offsetedtest = OffsetLine(lane, DisModulus);
+            List<Line> offseted = new List<Line>();
+            List<Line> results = new List<Line>();
+            foreach (var l in offsetedtest)
+            {
+                var bf = l.Buffer(DisLaneWidth / 2);
+                var splited = SplitCurve(bf, Cutters);
+                List<Point3d> pts = new List<Point3d>();
+                foreach (var s in splited)
+                {
+                    pts.Add(s.StartPoint);
+                    pts.Add(s.EndPoint);
+                }
+                pts = pts.Distinct().ToList();
+                List<Point3d> ps = new List<Point3d>();
+                pts.ForEach(t => ps.Add(l.GetClosestPointTo(t, false)));
+                SortAlongCurve(ps, l);
+                var segs = l.GetSplitCurves(ps.ToCollection()).Cast<Line>().ToList();
+                results.Add(segs[0]);
+                if (segs.Count > 1) results.Add(segs[segs.Count - 1]);
+
+            }
+            return results;
+        }
+
+
+        /// <summary>
         /// 延伸一些中断的车道线至边界上
         /// </summary>
         private void ExtendLanesToBound()
@@ -583,15 +717,9 @@ namespace ThMEPArchitecture
                 var l = IniLanes[i];
                 var pls = Cutters.Cast<Curve>().ToList();
                 pls.Remove(l);
-                var restlanes = new List<Curve>(IniLanes);
-                restlanes.Remove(l);
-                bool intersected = IsIntersect(l, restlanes);
-                if (ClosestPointInCurves(l.StartPoint, pls) > 1 && (!intersected) && i != 0)
+                if (ClosestPointInCurves(l.StartPoint, pls) > 10  )
                 {
-                    if (Math.Abs(l.Length - 81291) < 1)
-                    {
-                        ;
-                    }
+
                     Line ls = LineSDL(l.StartPoint, Vector(l.EndPoint, l.StartPoint), 100000);
                     var rs = new Line();
                     foreach (var k in SplitCurve(ls, Cutters))
@@ -599,16 +727,25 @@ namespace ThMEPArchitecture
                         if (k.GetClosestPointTo(l.StartPoint, false).DistanceTo(l.StartPoint) < 1) rs = (Line)k;
                     }
                     var ply = JoinCurves(new List<Polyline>(), new List<Line>() { rs, l })[0];
-                    IniLanes[i] = new Line(ply.StartPoint, ply.EndPoint);
-                    Cutters.Remove(l);
-                    Cutters.Add(IniLanes[i]);
-                }
-                if (ClosestPointInCurves(l.EndPoint, pls) > 1 && (!intersected) && i != 0)
-                {
-                    if (Math.Abs(l.Length - 81291) < 1)
+                    var nl = new Line(ply.StartPoint, ply.EndPoint);
+                    var res = RemoveCollisionalLanesForObstacles(nl);
+                    if (res.Count > 0)
                     {
-                        ;
+                        IniLanes[i] = res[0];
+                        SequenceLanes[i] = res[0];
+                        Cutters.Remove(l);
+                        Cutters.Add(IniLanes[i]);
                     }
+
+
+                    //IniLanes[i] = new Line(ply.StartPoint, ply.EndPoint);
+                    //SequenceLanes[i] = new Line(ply.StartPoint, ply.EndPoint);
+                    //Cutters.Remove(l);
+                    //Cutters.Add(IniLanes[i]);
+                }
+                if (ClosestPointInCurves(l.EndPoint, pls) > 10 )
+                {
+
                     Line le = LineSDL(l.EndPoint, Vector(l.StartPoint, l.EndPoint), 100000);
                     var re = new Line();
                     foreach (var k in SplitCurve(le, Cutters))
@@ -616,9 +753,21 @@ namespace ThMEPArchitecture
                         if (k.GetClosestPointTo(l.EndPoint, false).DistanceTo(l.EndPoint) < 1) re = (Line)k;
                     }
                     var ply = JoinCurves(new List<Polyline>(), new List<Line>() { l, re })[0];
-                    IniLanes[i] = new Line(ply.StartPoint, ply.EndPoint);
-                    Cutters.Remove(l);
-                    Cutters.Add(IniLanes[i]);
+
+                    var nl = new Line(ply.StartPoint, ply.EndPoint);
+                    var res = RemoveCollisionalLanesForObstacles(nl);
+                    if (res.Count > 0)
+                    {
+                        IniLanes[i] = res[0];
+                        SequenceLanes[i] = res[0];
+                        Cutters.Remove(l);
+                        Cutters.Add(IniLanes[i]);
+                    }
+
+                    //IniLanes[i] = new Line(ply.StartPoint, ply.EndPoint);
+                    //SequenceLanes[i]= new Line(ply.StartPoint, ply.EndPoint);
+                    //Cutters.Remove(l);
+                    //Cutters.Add(IniLanes[i]);
                 }
             }
         }
@@ -628,36 +777,93 @@ namespace ThMEPArchitecture
         /// </summary>
         private void ConnectIsolatedLanes()
         {
-            int c = 0;
-            while (true)
+            //int c = 0;
+            //while (true)
+            //{
+            //    c++;
+            //    if (c > 20) break;
+            //    bool found = false;
+            //    //foreach (var l in IniLanes)
+            //    //{
+            //    //    var lc = Cutters.Cast<Curve>().ToList();
+            //    //    lc.Remove(l);
+            //    //    var ps = new Point3d();
+            //    //    var pe = new Point3d();
+            //    //    double ds = -1;
+            //    //    double de = -1;
+            //    //    int ist = -1;
+            //    //    int ie = -1;
+            //    //    ClosestPointInCurves(l.StartPoint, lc, ref ps, ref ds, ref ist);
+            //    //    ClosestPointInCurves(l.EndPoint, lc, ref pe, ref de, ref ie);
+            //    //    if (ds > DisLaneWidth && de > DisLaneWidth)
+            //    //    {
+            //    //        found = true;
+            //    //        lc = lc.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
+            //    //        ClosestPointInCurves(l.StartPoint, lc, ref ps, ref ds, ref ist);
+            //    //        Line lx = new Line(l.StartPoint, ps);
+            //    //        lx.TransformBy(Matrix3d.Displacement(Vector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
+            //    //        IniLanes.Add(lx);
+            //    //        SequenceLanes.Add(lx);
+            //    //        break;
+            //    //    }
+            //    //}
+
+
+            //    for (int i = 0; i < IniLanes.Count; i++)
+            //    {
+            //        var l = IniLanes[i];
+            //        var ls = new List<Curve>(IniLanes);
+            //        ls.RemoveAt(i);
+            //        var intersected = IsIntersect(IniLanes[i], ls);
+            //        if (intersected) continue;
+            //        if (!intersected)
+            //        {
+            //            var ps = new Point3d();
+            //            var pe = new Point3d();
+            //            double ds = -1;
+            //            double de = -1;
+            //            int ist = -1;
+            //            int ie = -1;
+            //            found = true;
+            //            ls = ls.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
+            //            ClosestPointInCurves(l.StartPoint, ls, ref ps, ref ds, ref ist);
+            //            Line lx = new Line(l.StartPoint, ps);
+            //            lx.TransformBy(Matrix3d.Displacement(Vector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
+            //            IniLanes.Add(lx);
+            //            SequenceLanes.Add(lx);
+            //            break;
+            //        }
+            //    }
+
+
+            //    if (!found) break;
+            //}
+
+            for (int i = 0; i < IniLanes.Count; i++)
             {
-                c++;
-                if (c > 10) break;
-                bool found = false;
-                foreach (var l in IniLanes)
+                var l = IniLanes[i];
+                var ls = new List<Curve>(IniLanes);
+                ls.RemoveAt(i);
+                var intersected = ClosestPointInCurves(l.StartPoint, ls) < 10 || ClosestPointInCurves(l.EndPoint, ls) < 10
+                    || IsIntersect(l, ls);
+                if (intersected) continue;
+                if (!intersected)
                 {
-                    var lc = Cutters.Cast<Curve>().ToList();
-                    lc.Remove(l);
                     var ps = new Point3d();
                     var pe = new Point3d();
                     double ds = -1;
                     double de = -1;
                     int ist = -1;
                     int ie = -1;
-                    ClosestPointInCurves(l.StartPoint, lc, ref ps, ref ds, ref ist);
-                    ClosestPointInCurves(l.EndPoint, lc, ref pe, ref de, ref ie);
-                    if (ds > DisLaneWidth && de > DisLaneWidth)
-                    {
-                        found = true;
-                        lc = lc.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
-                        ClosestPointInCurves(l.StartPoint, lc, ref ps, ref ds, ref ist);
-                        Line lx = new Line(l.StartPoint, ps);
-                        lx.TransformBy(Matrix3d.Displacement(Vector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
-                        IniLanes.Add(lx);
-                        break;
-                    }
+                    var lps = ls.Select(e => new Line(e.StartPoint, e.EndPoint)).ToList();
+                    ls = ls.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
+                    var cs = lps.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
+                    ClosestPointInCurves(l.StartPoint, cs, ref ps, ref ds, ref ist);
+                    Line lx = new Line(l.StartPoint, ps);
+                    lx.TransformBy(Matrix3d.Displacement(Vector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
+                    IniLanes.Add(lx);
+                    SequenceLanes.Add(lx);
                 }
-                if (!found) break;
             }
         }
 
@@ -728,7 +934,7 @@ namespace ThMEPArchitecture
             }
         }
 
-        private static void SortAlongCurve(List<Point3d> points, Curve curve)
+        public static void SortAlongCurve(List<Point3d> points, Curve curve)
         {
             var comparer = new PointAlongCurveComparer(curve);
             points.Sort(comparer);
@@ -955,7 +1161,7 @@ namespace ThMEPArchitecture
         {
             foreach (var crv in crvs)
             {
-                if (crv.Intersect(crv, Intersect.OnBothOperands).Count > 0)
+                if (c.Intersect(crv, Intersect.OnBothOperands).Count > 0)
                     return true;
             }
             return false;
@@ -1011,17 +1217,26 @@ namespace ThMEPArchitecture
             return s;
         }
 
-        public static double GetLengthDifferentFromParallelBofA(Line a, Line b)
+        public static double GetLengthDifferentFromParallelBofA(Line a, Line b, double buffer = 15700)
         {
             double length = 0;
-            var pbs = b.StartPoint;
-            var pbe = b.EndPoint;
-            Line l = new Line(pbs, pbe);
-            var splited = SplitCurve(a, new DBObjectCollection() { l.Buffer(1) });
-            foreach (var e in splited)
+            //var pbs = b.StartPoint;
+            //var pbe = b.EndPoint;
+            //Line l = new Line(pbs, pbe);
+            //var splited = SplitCurve(a, new DBObjectCollection() { l.Buffer(1) });
+            //splited = SplitCurve(a, new DBObjectCollection() { l.Buffer(15700) });
+            //foreach (var e in splited)
+            //{
+            //    //if (e.GetCenter().DistanceTo(l.GetCenter()) > 1) length += e.GetLength();
+            //    if (a.GetClosestPointTo(e.GetCenter(), false).DistanceTo(e.GetCenter()) > 1) length += e.GetLength();
+            //}
+            //return length;
+
+            var pl = b.Buffer(buffer);
+            var splited = SplitCurve(a, new DBObjectCollection() { pl });
+            foreach (Line s in splited)
             {
-                //if (e.GetCenter().DistanceTo(l.GetCenter()) > 1) length += e.GetLength();
-                if (a.GetClosestPointTo(e.GetCenter(), false).DistanceTo(e.GetCenter()) > 1) length += e.GetLength();
+                if (!pl.IsPointIn(s.GetCenter())) length += s.Length;
             }
             return length;
         }
