@@ -251,6 +251,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFaDistData", CommandFlags.Modal)]
         public void THFaDistData()
         {
+#if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var extractBlkList = ThFaCommon.BlkNameList;
@@ -281,7 +282,9 @@ namespace ThMEPElectrical.FireAlarm
                 }
                 ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
             }
+#endif
         }
+
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "ThFaAreaData", CommandFlags.Modal)]
         public void ThFaAreaData()
