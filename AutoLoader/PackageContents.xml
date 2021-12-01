@@ -342,6 +342,7 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THHZBJ2" Global="THHZBJ2" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -356,6 +357,7 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THHZBJ2" Global="THHZBJ2" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -370,6 +372,7 @@
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THHZBJ2" Global="THHZBJ2" />
             </Commands>
         </ComponentEntry>
     </Components>
