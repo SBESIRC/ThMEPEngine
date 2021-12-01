@@ -151,9 +151,10 @@
     <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
     <Compile Include="ConnectWiring\Service\ConnectFactory\BranchConnectingFactory.cs" />
     <Compile Include="ConnectWiring\Service\BranchConnectingService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\CircleConnectService.cs" />
     <Compile Include="ConnectWiring\Service\ConnectFactory\ConnectBaseService.cs" />
     <Compile Include="ConnectWiring\Service\ConnectFactory\ConnectMethodService.cs" />
-    <Compile Include="ConnectWiring\Service\ConnectFactory\RectangleConnectService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\PointConnectService.cs" />
     <Compile Include="ConnectWiring\Service\ConnectingBranckService.cs" />
     <Compile Include="ConnectWiring\Service\LineTypeService.cs" />
     <Compile Include="ConnectWiring\Service\MultiLoopService.cs" />
@@ -712,6 +713,7 @@
     <Compile Include="ThMEPEngineCoreRoomService.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
+    <Compile Include="UCSDivisionService\UCSService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

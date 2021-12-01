@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.Algorithm
                     results.Add(obj as Line);
                 }
             });
-
+            results.AddRange(lines);
             return results;
         }
         public static List<Line> LineSimplifier(DBObjectCollection dBObjectCollection, double ArcChord, double DistGap2Extend, double DistGap2Merge, double AngleTolerance)

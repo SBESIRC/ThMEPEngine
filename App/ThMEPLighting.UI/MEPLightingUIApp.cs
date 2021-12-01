@@ -18,7 +18,7 @@ namespace ThMEPLighting.UI
         public void Terminate()
         {
             uiSign = null;
-            uiConnect = null ;
+            uiConnect = null;
         }
 
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
@@ -56,7 +56,6 @@ namespace ThMEPLighting.UI
             var ui = new TianHua.Lighting.UI.uiThLighting();
             AcadApp.ShowModelessWindow(ui);
         }
-
 
         /// <summary>
         /// 天华连线

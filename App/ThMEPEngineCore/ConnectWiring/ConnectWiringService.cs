@@ -23,6 +23,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.ConnectWiring.Data;
 using ThMEPEngineCore.ConnectWiring.Model;
 using ThMEPEngineCore.ConnectWiring.Service;
+using ThMEPEngineCore.ConnectWiring.Service.ConnectFactory;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 
@@ -46,7 +47,8 @@ namespace ThMEPEngineCore.ConnectWiring
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
-            BranchConnectingService branchConnecting = new BranchConnectingService();
+            //BranchConnectingService branchConnecting = new BranchConnectingService();
+            BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
@@ -72,8 +74,8 @@ namespace ThMEPEngineCore.ConnectWiring
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
-                    //allDatas.AddRange(GetUCSPolylines());
-                    //allDatas.AddRange(GetCenterLinePolylines());
+                    allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
+                    allDatas.AddRange(GetUCSPolylines(objs));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
@@ -103,7 +105,7 @@ namespace ThMEPEngineCore.ConnectWiring
                             List<Polyline> resLines = new List<Polyline>();
                             foreach (var line in loop.Value)
                             {
-                                var wiring = branchConnecting.CreateBranch(line, resBlocks);
+                                var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
                                 resLines.Add(wiring);
                             }
                             //插入线
@@ -269,7 +271,7 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取ucs框线
         /// </summary>
         /// <returns></returns>
-        private List<ThGeometry> GetUCSPolylines()
+        private List<ThGeometry> GetUCSPolylines(DBObjectCollection centerPolygon)
         {
             var geos = new List<ThGeometry>();
             List<Polyline> allUCSPolys = new List<Polyline>();
@@ -298,13 +300,16 @@ namespace ThMEPEngineCore.ConnectWiring
                     allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
                 }
             }
+            ThCADCoreNTSSpatialIndex thbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(centerPolygon);
             if (allUCSPolys.Count > 0)
             {
                 allUCSPolys.ForEach(o =>
                 {
+                    var polys = thbeamsSpatialIndex.SelectCrossingPolygon(o);
+                    var resPoly = ThMPolygonTool.CreateMPolygon(o, polys.Cast<Curve>().ToList());
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.UCSPolyline.ToString());
-                    geometry.Boundary = o;
+                    geometry.Boundary = resPoly;
                     geos.Add(geometry);
                 });
             }
@@ -316,8 +321,9 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取ucs框线
         /// </summary>
         /// <returns></returns>
-        private List<ThGeometry> GetCenterLinePolylines()
+        private List<ThGeometry> GetCenterLinePolylines(out DBObjectCollection objs)
         {
+            objs = new DBObjectCollection();
             var geos = new List<ThGeometry>();
             List<Polyline> allUCSPolys = new List<Polyline>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -345,7 +351,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
                 }
             }
-            var objs = new DBObjectCollection();
+            
             foreach (var item in allUCSPolys)
             {
                 objs.Add(item);
