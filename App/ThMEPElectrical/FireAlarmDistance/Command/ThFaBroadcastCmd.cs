@@ -34,6 +34,7 @@ namespace ThMEPElectrical.FireAlarmDistance
     {
         private bool UseUI { get; set; }
         double _scale = 100;
+        bool _referBeam = true;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
         double _stepLength = 25000;
    
@@ -57,6 +58,7 @@ namespace ThMEPElectrical.FireAlarmDistance
                 _scale = FireAlarmSetting.Instance.Scale;
                 _mode = (ThAFASPlacementMountModeMgd)FireAlarmSetting.Instance.BroadcastLayout;
                 _stepLength = FireAlarmSetting.Instance.StepLengthBC;
+                _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
             }
 
 
@@ -96,10 +98,11 @@ namespace ThMEPElectrical.FireAlarmDistance
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //取数据
-                var factory = new ThAFASDistanceDataSetFactory();
-                var ds = factory.Create(acadDatabase.Database, framePts);
+                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true ;
+                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
+                var data = new ThAFASDistanceDataSet(geos);
+                data.ExtendEquipment(cleanBlkName, _scale);
 
-                var data = new ThAFASDistanceDataSet(ds.Container);
                 var room = data.GetRoom();
 
                 ///debug
@@ -112,9 +115,8 @@ namespace ThMEPElectrical.FireAlarmDistance
                     DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
                     DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
                 }
-                ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
-                ///
 
+                data.FilterBeam();
                 var geojson = ThGeoOutput.Output(data.Data);
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
@@ -148,8 +150,16 @@ namespace ThMEPElectrical.FireAlarmDistance
                 return;
             }
             _mode = isWallPa.Value == 1 ? ThAFASPlacementMountModeMgd.Wall : ThAFASPlacementMountModeMgd.Ceiling;
-
-
+            if (_mode == ThAFASPlacementMountModeMgd.Ceiling)
+            {
+                var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
+                if (beam.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                _referBeam = beam.Value == 1 ? true : false;
+            }
+         
             var stepDistanceP = Active.Editor.GetDouble("\n步距：");
             if (stepDistanceP.Status != PromptStatus.OK)
             {

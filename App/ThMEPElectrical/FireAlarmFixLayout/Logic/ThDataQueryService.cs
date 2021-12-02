@@ -89,7 +89,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             Holes = QueryC(BuiltInCategory.Hole.ToString());
             FireProofs = QueryC(BuiltInCategory.LaneLine.ToString());
 
-            var equipments = QueryC(BuiltInCategory.Distribution.ToString());
+            var equipments = QueryC(BuiltInCategory.Equipment.ToString());
             CleanEquipments = equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
             AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
 
@@ -148,8 +148,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         private void GetFireLinkageRooms()
         {
-            List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房",
-                "主要通风和空调机房", "防排烟机房", "灭火控制系统操作装置处或控制室", "企业消防站", "消防值班室", "总调度室", "消防电梯机房" };
+            //List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房",
+            //    "主要通风和空调机房", "防排烟机房", "灭火控制系统操作装置处或控制室", "企业消防站", "消防值班室", "总调度室", "消防电梯机房" };
+            List<string> FireLinkageNames = new List<string> { "消防水泵房", "电气机房", "网络通信机房", "计算机机房", "通风机房",
+                                                                "空调机房", "防排烟机房", "控制室", "电梯机房" };
             List<string> NameCollection = new List<string>();
             foreach (string a in FireLinkageNames)
             {

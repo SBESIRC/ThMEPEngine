@@ -68,7 +68,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat.Data
             Holes = QueryC(BuiltInCategory.Hole.ToString());
             Rooms = QueryC(BuiltInCategory.Room.ToString());
             LayoutArea = QueryC("PlaceCoverage");
-            Equipments = QueryC(BuiltInCategory.Distribution.ToString());
+            Equipments = QueryC(BuiltInCategory.Equipment.ToString());
             DetectArea = QueryC("DetectionRegion");
         }
 

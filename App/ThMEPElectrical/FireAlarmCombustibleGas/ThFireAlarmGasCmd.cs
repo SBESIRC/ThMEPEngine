@@ -122,8 +122,8 @@ namespace ThMEPElectrical.FireAlarmCombustibleGas
                 dataQuery.ClassifyData();
                 var priorityExtend = ThFaAreaLayoutParamterCalculationService.GetPriorityExtendValue(cleanBlkName, _scale);
                 dataQuery.ExtendPriority(priorityExtend);
-                var roomType = ThMEPElectrical.FireAlarmCombustibleGas.Service.ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
+                var roomType = ThMEPElectrical.FireAlarmCombustibleGas.Service.ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
                 foreach (var frame in dataQuery.FrameHoleList)
                 {
                     DrawUtils.ShowGeometry(frame.Key, string.Format("l0room"), 30);

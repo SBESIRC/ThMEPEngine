@@ -77,8 +77,8 @@ namespace ThMEPLighting.IlluminationLighting.Data
             extractors.ForEach(o => o.Extract(database, collection));
 
             //提取可布区域
-            var palceConverage = BuildPlaceCoverage(extractors, ReferBeam);
-            extractors.Add(palceConverage);
+            var placeConverage = BuildPlaceCoverage(extractors, ReferBeam);
+            extractors.Add(placeConverage);
 
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));

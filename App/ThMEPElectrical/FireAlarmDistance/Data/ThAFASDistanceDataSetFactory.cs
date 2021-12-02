@@ -18,13 +18,18 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 {
     internal class ThAFASDistanceDataSetFactory : ThMEPDataSetFactory
     {
-        private List<ThGeometry> Geos { get; set; }
+        #region input
+        public bool ReferBeam { get; set; } = true;
+        public bool NeedConverage { get; set; } = true;
+        public List<string> BlkNameList { get; set; } = new List<string>();
+        #endregion input
 
         public ThAFASDistanceDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }
 
+        private List<ThGeometry> Geos { get; set; }
         protected override ThMEPDataSet BuildDataSet()
         {
             return new ThMEPDataSet()
@@ -94,12 +99,12 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                         UseDb3Engine=true,
                         Transformer = Transformer,
                     },
-                    //new ThAFASBeamExtractor()
-                    //{
-                    //    ElementLayer = "AI-梁",
-                    //    Transformer = Transformer,
-                    //    Db3ExtractResults = vm.DB3BeamVisitor.Results,
-                    //},
+                     new ThAFASBeamExtractor()
+                    {
+                        ElementLayer = "AI-梁",
+                        Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3BeamVisitor.Results,
+                    },
                     new ThAFASDoorOpeningExtractor()
                     {
                         ElementLayer = "AI-门",
@@ -121,6 +126,11 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                     {
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
+                    },
+                     new ThFireAlarmBlkExtractor()
+                    {
+                        Transformer = Transformer ,
+                        BlkNameList = this.BlkNameList, //add needed all blk name string 
                     },
                 };
             extractors.ForEach(o => o.Extract(database, collection));
@@ -172,6 +182,16 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             extractors.Add(storeyExtractor);
             extractors.Add(fireApartExtractor);
             /*Print(database, extractors);*/
+
+            //提取可布区域
+            if (NeedConverage == true)
+            {
+                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam);
+                placeConverage.Set(storeyInfos);
+                placeConverage.Group(fireApartExtractor.FireApartIds);
+                extractors.Add(placeConverage);
+            }
+
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
             // 移回原位
@@ -196,7 +216,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             extractor.Accept(visitors.DB3ShearWallVisitor);
             extractor.Accept(visitors.DB3ColumnVisitor);
             //extractor.Accept(visitors.DB3WindowVisitor);
-            //extractor.Accept(visitors.DB3BeamVisitor);
+            extractor.Accept(visitors.DB3BeamVisitor);
             //extractor.Accept(visitors.DB3RailingVisitor);
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);

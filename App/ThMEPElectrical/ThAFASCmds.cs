@@ -10,6 +10,7 @@ using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Model;
 using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
@@ -222,7 +223,7 @@ namespace ThMEPElectrical.FireAlarm
         public void ThFAManualAlarmNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaManualAlarmCmd (false))
+            using (var cmd = new ThFaManualAlarmCmd(false))
             {
                 cmd.Execute();
             }
@@ -254,6 +255,8 @@ namespace ThMEPElectrical.FireAlarm
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var scale = 100;
+                var referBeam = true;
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Broadcast_Ceiling, ThFaCommon.BlkName_Broadcast_Wall };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -264,23 +267,30 @@ namespace ThMEPElectrical.FireAlarm
                 {
                     return;
                 }
-                var factory = new ThAFASDistanceDataSetFactory();
-                var ds = factory.Create(acadDatabase.Database, framePts);
 
-                var data = new ThAFASDistanceDataSet(ds.Container);
+                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, referBeam, true);
+
+                var data = new ThAFASDistanceDataSet(geos);
+                data.ExtendEquipment(cleanBlkName, scale);
+                data.FilterBeam();
+                data.print();
+
                 var room = data.GetRoom();
 
-                ///debug
-                var roomLable = data.GetRoomGeom();
-                for (int i = 0; i < roomLable.Count; i++)
-                {
-                    var pl = roomLable[i].Boundary as Polyline;
-                    var pt = pl.GetCentroidPoint();
-                    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
-                }
-                ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
+                /////debug
+                //var roomLable = data.GetRoomGeom();
+                //for (int i = 0; i < roomLable.Count; i++)
+                //{
+                //    var pl = roomLable[i].Boundary as Polyline;
+                //    var pt = pl.GetCentroidPoint();
+                //    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
+                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
+                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
+                //}
+
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
 #endif
         }
@@ -299,17 +309,20 @@ namespace ThMEPElectrical.FireAlarm
             {
                 return;
             }
-            var bBean = true;
+            var referBeam = true;
             var wallThick = 100;
+            var needDetective = true;
+
             var theta = 0;
             var floorHight = 2;
             var layoutType = ThFaSmokeCommon.layoutType.smoke;
 
-            var geos = ThFireAlarmUtils.WriteSmokeData(pts, extractBlkList, bBean, wallThick, true);
-            if (geos.Count == 0)
-            {
-                return;
-            }
+            var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, referBeam, wallThick, needDetective);
+
+            var fileInfo = new FileInfo(Active.Document.Name);
+            var path = fileInfo.Directory.FullName;
+            ThGeoOutput.Output(geos, path, fileInfo.Name);
+
 
             var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
 
@@ -319,6 +332,7 @@ namespace ThMEPElectrical.FireAlarm
             DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
             DrawUtils.ShowGeometry(dataQuery.Holes.Select(x => x.Boundary).ToList(), "l0hole", 140);
             DrawUtils.ShowGeometry(dataQuery.DetectArea.Select(x => x.Boundary).ToList(), "l0DetectArea", 96);
+
             //洞,必须先做找到框线
             dataQuery.AnalysisHoles();
             var roomType = ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
@@ -336,27 +350,28 @@ namespace ThMEPElectrical.FireAlarm
                 DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 1, 0), string.Format("r:{0}", radius), "l0radius", 25, 25, 200);
                 DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 2, 0), string.Format("bIsAisleArea:{0}", bIsAisleArea), "l0Area", 25, 25, 200);
             }
-
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "THFAFixData", CommandFlags.Modal)]
         public void THFAFixData()
         {
+            var extractBlkList = ThFaCommon.BlkNameList;
+
             //把Cad图纸数据写出到Geojson File中
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var frame = ThFireAlarmUtils.GetFrame();
-                if (frame.Count == 0)
+                var pts = ThFireAlarmUtils.GetFrame();
+                if (pts.Count == 0)
                 {
                     return;
                 }
 
-                var datasetFactory = new ThFaFixLayoutDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, frame);
+                var geos = ThFireAlarmUtils.GetFixLayoutData(pts, extractBlkList);
+
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
-                ThGeoOutput.Output(dataset.Container, path, fileInfo.Name + DateTime.Now.ToShortTimeString().Replace(':', '-'));
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
         }
 

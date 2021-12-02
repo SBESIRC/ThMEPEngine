@@ -14,20 +14,27 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 
-namespace ThMEPElectrical.FireAlarm.Data
+using ThMEPElectrical.AFAS.Interface;
+
+namespace ThMEPElectrical.AFAS.Data
 {
-    class ThFireAlarmBlkExtractor : ThExtractorBase, ITransformer
+    class ThFireAlarmBlkExtractor : ThExtractorBase, ITransformer, IGroup, ISetStorey
     {
         public Dictionary<BlockReference, Polyline> Equipment { get; private set; } //key:origin blkreference, value: blk postition dbpoint
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
         public List<string> BlkNameList { get; set; }
+        private List<ThStoreyInfo> StoreyInfos { get; set; }
+        private Dictionary<BlockReference, Point3d> BlkCenterDict = new Dictionary<BlockReference, Point3d> ();
+        
         public ThFireAlarmBlkExtractor()
         {
-            Category = BuiltInCategory.Distribution.ToString();
+            Category = BuiltInCategory.Equipment.ToString();
             Equipment = new Dictionary<BlockReference, Polyline>();
+            StoreyInfos = new List<ThStoreyInfo>();
         }
         public override List<ThGeometry> BuildGeometries()
         {
@@ -38,6 +45,16 @@ namespace ThMEPElectrical.FireAlarm.Data
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Key.GetEffectiveName());
                 geometry.Properties.Add(ThExtractorPropertyNameManager.HandlerPropertyName, o.Key.Handle.ToString());
+
+                var parentId = BuildString(GroupOwner, o.Key );
+                if (string.IsNullOrEmpty(parentId))
+                {
+                    var storeyInfo = Query(o.Value );
+                    parentId = storeyInfo.Id;
+                }
+                geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
+
+
                 geometry.Boundary = o.Value;
                 geos.Add(geometry);
             });
@@ -50,7 +67,6 @@ namespace ThMEPElectrical.FireAlarm.Data
             {
                 var extractService = new ThExtractBlockReferenceService()
                 {
-                    //  ElementLayer = this.ElementLayer,
                     BlockName = blkName,
                 };
                 extractService.Extract(database, pts);
@@ -60,7 +76,6 @@ namespace ThMEPElectrical.FireAlarm.Data
                     var obb = x.ToOBB(x.BlockTransform);
                     if (obb != null && obb.Area > 1.0)
                     {
-                        //var bufferObb = obb.GetOffsetCurves(15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
                         var bufferObb = obb.GetOffsetClosePolyline(15);
                         if (bufferObb != null)
                         {
@@ -82,6 +97,26 @@ namespace ThMEPElectrical.FireAlarm.Data
         {
             Transformer.Reset(Equipment.Values.ToCollection());
         }
+        
+        public ThStoreyInfo Query(Entity entity)
+        {
+            //ToDo
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new ThStoreyInfo();
+        }
 
+        public void Set(List<ThStoreyInfo> storeyInfos)
+        {
+            StoreyInfos = storeyInfos;
+        }
+
+        public void Group(Dictionary<Entity, string> groupId)
+        {
+            
+            Equipment.ForEach(o =>
+            {
+                GroupOwner.Add(o.Key , FindCurveGroupIds(groupId, o.Value));
+            });
+        }
     }
 }

@@ -24,6 +24,7 @@ using ThMEPElectrical.Service;
 
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
+using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarm.Service
@@ -129,49 +130,23 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
+        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
         {
-            var bReadJson = false;
 
             var geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                if (bReadJson == false)
-                {
-                    var datasetFactory = new ThFaAreaLayoutDataSetFactory()
-                    {
-                        ReferBeam = referBeam,
-                        WallThick = wallThick,
-                        NeedDetective= needDetective,
-                    };
-                    var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                    geos.AddRange(dataset.Container);
 
-                    var businessDataFactory = new ThFaAreaLayoutBusinessDataSetFactory()
-                    {
-                        BlkNameList = extractBlkList,
-                    };
-                    var businessDataSet = businessDataFactory.Create(acadDatabase.Database, pts);
-                    geos.AddRange(businessDataSet.Container);
-                }
-                else
+                var datasetFactory = new ThFaAreaLayoutDataSetFactory()
                 {
-                    var psr = Active.Editor.GetFileNameForOpen("\n选择要打开的Geojson文件");
-                    if (psr.Status != PromptStatus.OK)
-                    {
-                        {
-                            return geos;
-                        }
-                    }
-                    var sName = psr.StringResult;
-                    geos = ThGeometryJsonReader.ReadFromFile(sName);
-                    var businessDataFactory = new ThFaAreaLayoutBusinessDataSetFactory()
-                    {
-                        BlkNameList = extractBlkList,
-                    };
-                    var businessDataSet = businessDataFactory.Create(acadDatabase.Database, pts);
-                    geos.AddRange(businessDataSet.Container);
-                }
+                    ReferBeam = referBeam,
+                    WallThick = wallThick,
+                    NeedDetective = needDetective,
+                    BlkNameList = extractBlkList,
+                };
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
+
             }
 
             return geos;
@@ -183,20 +158,35 @@ namespace ThMEPElectrical.FireAlarm.Service
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var datasetFactory = new ThFaFixLayoutDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                geos.AddRange(dataset.Container);
-                var businessDataFactory = new ThFaFixLayoutBusinessDataSetFactory()
+                var datasetFactory = new ThFaFixLayoutDataSetFactory()
                 {
                     BlkNameList = extractBlkList,
                 };
-                var businessDataSet = businessDataFactory.Create(acadDatabase.Database, pts);
-                geos.AddRange(businessDataSet.Container);
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
 
                 return geos;
             }
         }
 
+        public static List<ThGeometry> GetDistLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, bool needConverage)
+        {
+            var geos = new List<ThGeometry>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var datasetFactory = new ThAFASDistanceDataSetFactory()
+                {
+                    ReferBeam = referBeam,
+                    NeedConverage = needConverage,
+                    BlkNameList = extractBlkList,
+                };
+
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
+
+                return geos;
+            }
+        }
         /// <summary>
         /// 将数据转回原点。同时返回transformer
         /// </summary>
@@ -246,36 +236,36 @@ namespace ThMEPElectrical.FireAlarm.Service
 
 
         #region DebugFunction
-        /// <summary>
-        /// for debug
-        /// </summary>
-        /// <param name="pts"></param>
-        /// <param name="extractBlkList"></param>
-        /// <returns></returns>
-        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
-        {
-            var fileInfo = new FileInfo(Active.Document.Name);
-            var path = fileInfo.Directory.FullName;
+        ///// <summary>
+        ///// for debug
+        ///// </summary>
+        ///// <param name="pts"></param>
+        ///// <param name="extractBlkList"></param>
+        ///// <returns></returns>
+        //public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
+        //{
+        //    var fileInfo = new FileInfo(Active.Document.Name);
+        //    var path = fileInfo.Directory.FullName;
 
-            var geos = new List<ThGeometry>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
+        //    var geos = new List<ThGeometry>();
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
 
-                var datasetFactory = new ThFaAreaLayoutDataSetFactory()
-                {
-                    ReferBeam = referBeam,
-                    WallThick = wallThick,
-                    NeedDetective = needDetective,
-                }; 
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                geos.AddRange(dataset.Container);
+        //        var datasetFactory = new ThFaAreaLayoutDataSetFactory()
+        //        {
+        //            ReferBeam = referBeam,
+        //            WallThick = wallThick,
+        //            NeedDetective = needDetective,
+        //        }; 
+        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(dataset.Container);
 
-                ThGeoOutput.Output(geos, path, fileInfo.Name);
+        //        ThGeoOutput.Output(geos, path, fileInfo.Name);
 
-            }
+        //    }
 
-            return geos;
-        }
+        //    return geos;
+        //}
 
         /// <summary>
         /// for debug

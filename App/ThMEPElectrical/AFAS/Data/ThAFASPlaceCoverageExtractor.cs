@@ -1,14 +1,16 @@
-﻿using NFox.Cad;
-using DotNetARX;
-using System.Linq;
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Linq;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
+using DotNetARX;
+using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.AFASRegion;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
@@ -40,11 +42,13 @@ namespace ThMEPElectrical.AFAS.Data
                 transformer = value;
             }
         }
-
+        private List<ThStoreyInfo> StoreyInfos { get; set; }
         public ThAFASPlaceCoverageExtractor()
         {
             CanLayoutAreas = new List<Entity>();
             Category = "PlaceCoverage";
+            StoreyInfos = new List<ThStoreyInfo>();
+
         }
 
         public override List<ThGeometry> BuildGeometries()
@@ -58,6 +62,15 @@ namespace ThMEPElectrical.AFAS.Data
                 {
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
+
+                    var parentId = BuildString(GroupOwner, o);
+                    if (string.IsNullOrEmpty(parentId))
+                    {
+                        var storeyInfo = Query(o);
+                        parentId = storeyInfo.Id;
+                    }
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
+
                     geometry.Boundary = o;
                     geos.Add(geometry);
                 }
@@ -101,15 +114,22 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
+            CanLayoutAreas.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
 
         public void Set(List<ThStoreyInfo> storeyInfos)
         {
+            StoreyInfos = storeyInfos;
         }
 
         public ThStoreyInfo Query(Entity entity)
         {
-            return null;
+            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
+
+
+
+
     }
 }

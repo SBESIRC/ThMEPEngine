@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
+    <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="AlarmLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
@@ -139,9 +140,7 @@
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThFireAlarmFireTelLayoutCmd.cs" />
-    <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutBusinessDataSetFactory.cs" />
     <Compile Include="FireAlarmSystem\ThFaCleanService.cs" />
-    <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutBusinessDataSetFactory.cs" />
     <Compile Include="FireAlarmSmokeHeat\Data\ThFaAreaLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmSmokeHeat\Data\ThSmokeDataQueryService.cs" />
     <Compile Include="FireAlarmSmokeHeat\Model\ThFaAreaLayoutParameter.cs" />
@@ -159,7 +158,7 @@
     <Compile Include="FireAlarmSystem\FireAlarmViewModel.cs" />
     <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
     <Compile Include="AFAS\Data\ThAFASPlaceCoverageExtractor.cs" />
-    <Compile Include="FireAlarmFixLayout\Data\ThFireAlarmBlkExtractor.cs" />
+    <Compile Include="AFAS\Data\ThFireAlarmBlkExtractor.cs" />
     <Compile Include="FireAlarmFixLayout\Data\ThFaFixLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDataQueryService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />

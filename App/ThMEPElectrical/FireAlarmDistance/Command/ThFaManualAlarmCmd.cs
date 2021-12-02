@@ -96,10 +96,10 @@ namespace ThMEPElectrical.FireAlarmDistance
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //取数据
-                var factory = new ThAFASDistanceDataSetFactory();
-                var ds = factory.Create(acadDatabase.Database, framePts);
-
-                var data = new ThAFASDistanceDataSet(ds.Container);
+                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, false, false);
+                var data = new ThAFASDistanceDataSet(geos);
+                data.ExtendEquipment(cleanBlkName, _scale);
+                data.FilterBeam();
                 var room = data.GetRoom();
 
                 ///debug

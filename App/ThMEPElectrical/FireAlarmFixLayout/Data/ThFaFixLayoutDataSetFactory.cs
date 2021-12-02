@@ -26,6 +26,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
     public class ThFaFixLayoutDataSetFactory : ThMEPDataSetFactory
     {
+        public List<string> BlkNameList { get; set; }
         private List<ThGeometry> Geos { get; set; }
         public ThFaFixLayoutDataSetFactory()
         {
@@ -120,6 +121,11 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                     {
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
+                    },
+                    new ThFireAlarmBlkExtractor()
+                    {
+                        Transformer = Transformer ,
+                        BlkNameList = this.BlkNameList, //add needed all blk name string 
                     },
                 };
             extractors.ForEach(o => o.Extract(database, collection));
