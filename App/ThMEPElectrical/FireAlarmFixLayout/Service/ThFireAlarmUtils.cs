@@ -316,18 +316,13 @@ namespace ThMEPElectrical.FireAlarm.Service
         private static Polyline ProcessFrame(Polyline frame)
         {
             Polyline nFrame = null;
-            var tol = 1000;
-
             Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
-            // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
             if (nFrameNormal.Area > 10)
             {
                 nFrameNormal = nFrameNormal.DPSimplify(1);
                 nFrame = nFrameNormal;
             }
-
             return nFrame;
-
         }
 
         #endregion
