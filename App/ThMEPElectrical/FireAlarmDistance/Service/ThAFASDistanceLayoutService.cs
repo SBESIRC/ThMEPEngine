@@ -1,40 +1,20 @@
 ﻿#if (ACAD2016 || ACAD2018)
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Features;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
-
-using AcHelper;
-using Linq2Acad;
-using CLI;
-
-using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Command;
-
+using Newtonsoft.Json;
+using Dreambuild.AutoCAD;
+using NetTopologySuite.IO;
+using NetTopologySuite.Features;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.FireAlarm;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmDistance.Data;
-
 
 namespace ThMEPElectrical.FireAlarmDistance.Service
 {
-    public class ThFADistanceLayoutService
+    public class ThAFASDistanceLayoutService
     {
         public static FeatureCollection Export2NTSFeatures(string geojson)
         {

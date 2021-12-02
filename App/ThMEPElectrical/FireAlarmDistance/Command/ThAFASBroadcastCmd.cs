@@ -14,7 +14,6 @@ using Newtonsoft.Json;
 
 using AcHelper;
 using Linq2Acad;
-using CLI;
 
 using ThCADExtension;
 using ThCADCore.NTS;
@@ -28,16 +27,18 @@ using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmDistance.Service;
 
-
+using CLI;
 namespace ThMEPElectrical.FireAlarmDistance
 {
-    public class ThFaManualAlarmCmd : ThMEPBaseCommand, IDisposable
+    public class ThAFASBroadcastCmd : ThMEPBaseCommand, IDisposable
     {
         private bool UseUI { get; set; }
         double _scale = 100;
+        bool _referBeam = true;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
         double _stepLength = 25000;
-        public ThFaManualAlarmCmd(bool UI)
+   
+        public ThAFASBroadcastCmd(bool UI)
         {
             UseUI = UI;
             InitialCmdInfo();
@@ -46,7 +47,7 @@ namespace ThMEPElectrical.FireAlarmDistance
 
         private void InitialCmdInfo()
         {
-            CommandName = "ThFaManualAlarm";
+            CommandName = "ThFABroadcast";
             ActionName = "生成";
         }
 
@@ -55,7 +56,9 @@ namespace ThMEPElectrical.FireAlarmDistance
             if (UseUI == true)
             {
                 _scale = FireAlarmSetting.Instance.Scale;
-                _stepLength = FireAlarmSetting.Instance.StepLengthMA;
+                _mode = (ThAFASPlacementMountModeMgd)FireAlarmSetting.Instance.BroadcastLayout;
+                _stepLength = FireAlarmSetting.Instance.StepLengthBC;
+                _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
             }
 
 
@@ -66,10 +69,10 @@ namespace ThMEPElectrical.FireAlarmDistance
 
         public override void SubExecute()
         {
-            ThFaManualAlarmExecute();
+            ThFABroadcastExecute();
         }
 
-        public void ThFaManualAlarmExecute()
+        public void ThFABroadcastExecute()
         {
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -87,19 +90,19 @@ namespace ThMEPElectrical.FireAlarmDistance
                 }
 
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_ManualAlarm, ThFaCommon.BlkName_SoundLightAlarm };
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Broadcast_Ceiling, ThFaCommon.BlkName_Broadcast_Wall };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-                var layoutBlkNameBottom = ThFaCommon.BlkName_ManualAlarm;
-                var layoutBlkNameTop = ThFaCommon.BlkName_SoundLightAlarm;
+                var layoutBlkName = _mode == ThAFASPlacementMountModeMgd.Wall ? ThFaCommon.BlkName_Broadcast_Wall : ThFaCommon.BlkName_Broadcast_Ceiling;
 
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //取数据
-                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, false, false);
+                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true ;
+                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var data = new ThAFASDistanceDataSet(geos);
                 data.ExtendEquipment(cleanBlkName, _scale);
-                data.FilterBeam();
+
                 var room = data.GetRoom();
 
                 ///debug
@@ -112,9 +115,8 @@ namespace ThMEPElectrical.FireAlarmDistance
                     DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
                     DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
                 }
-                ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
-                ///
 
+                data.FilterBeam();
                 var geojson = ThGeoOutput.Output(data.Data);
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
@@ -124,25 +126,40 @@ namespace ThMEPElectrical.FireAlarmDistance
                 };
 
                 var outJson = engine.Place(geojson, context);
-                var features = ThFADistanceLayoutService.Export2NTSFeatures(outJson);
+                var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
 
                 string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
                 File.WriteAllText(path, outJson);
 
-                var ptsOutput = ThFADistanceLayoutService.ConvertGeom(features);
+                var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
 
-                var ptDirList = ThFADistanceLayoutService.FindOutputPtsDir(ptsOutput, room);
-                var ptDirListTop = ThFADistanceLayoutService.FindOutputPtsOnTop(ptDirList, layoutBlkNameTop, _scale);
+                var ptDirList = ThAFASDistanceLayoutService.FindOutputPtsDir(ptsOutput, room);
                 ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
 
-                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop , ThFaCommon.blk_layer[layoutBlkNameTop], true);
-                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameBottom , ThFaCommon.blk_layer[layoutBlkNameBottom], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName], true);
+
             }
         }
 
         public void SettingNoUI()
         {
+            var isWallPa = Active.Editor.GetInteger("\n吊装（0）壁装（1）");
+            if (isWallPa.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _mode = isWallPa.Value == 1 ? ThAFASPlacementMountModeMgd.Wall : ThAFASPlacementMountModeMgd.Ceiling;
+            if (_mode == ThAFASPlacementMountModeMgd.Ceiling)
+            {
+                var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
+                if (beam.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                _referBeam = beam.Value == 1 ? true : false;
+            }
+         
             var stepDistanceP = Active.Editor.GetDouble("\n步距：");
             if (stepDistanceP.Status != PromptStatus.OK)
             {

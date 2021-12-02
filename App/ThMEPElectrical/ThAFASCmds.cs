@@ -5,15 +5,11 @@ using System.IO;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
-using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 using ThMEPElectrical.FireAlarmSmokeHeat;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
@@ -197,7 +193,7 @@ namespace ThMEPElectrical.FireAlarm
         public void ThFABroadcastNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaBroadcastCmd(false))
+            using (var cmd = new ThAFASBroadcastCmd(false))
             {
                 cmd.Execute();
             }
@@ -210,7 +206,7 @@ namespace ThMEPElectrical.FireAlarm
         public void ThFABroadcast()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaBroadcastCmd(true))
+            using (var cmd = new ThAFASBroadcastCmd(true))
             {
                 cmd.Execute();
             }
@@ -223,7 +219,7 @@ namespace ThMEPElectrical.FireAlarm
         public void ThFAManualAlarmNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaManualAlarmCmd(false))
+            using (var cmd = new ThAFASManualAlarmCmd(false))
             {
                 cmd.Execute();
             }
@@ -236,7 +232,7 @@ namespace ThMEPElectrical.FireAlarm
         public void ThFAManualAlarm()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaManualAlarmCmd(true))
+            using (var cmd = new ThAFASManualAlarmCmd(true))
             {
                 cmd.Execute();
             }
