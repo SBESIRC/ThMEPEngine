@@ -64,6 +64,7 @@
     <Compile Include="SprinklerConnect\Data\ThSprinklerDataQueryService.cs" />
     <Compile Include="SprinklerConnect\Engine\ThSprinklerConnectEngine.cs" />
     <Compile Include="SprinklerConnect\Engine\ThSprinklerPtNetworkEngine.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerRowConnect.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerEdgeNode.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerNetGroup.cs" />
     <Compile Include="SprinklerConnect\Model\ThSprinklerParameter.cs" />

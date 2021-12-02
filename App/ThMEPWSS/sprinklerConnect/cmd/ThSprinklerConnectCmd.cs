@@ -165,7 +165,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 //sprinklerParameter.SubMainPipe = subMainLine;
                 //sprinklerParameter.AllPipe = allLines;
 
-                ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
+                //ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
 
             }
         }

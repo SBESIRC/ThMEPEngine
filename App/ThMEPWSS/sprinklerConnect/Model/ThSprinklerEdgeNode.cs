@@ -23,14 +23,11 @@ namespace ThMEPWSS.SprinklerConnect.Model
     {
         //
         public int NodeIndex { get; private set; }
-
+        public ThSprinklerEdgeNode FirstEdge { get; set; }
         public ThSprinklerVertexNode(int ptIndex)
         {
             NodeIndex = ptIndex;
         }
-
-        public ThSprinklerEdgeNode FirstEdge { get; set; }
-
     }
 
     public class ThSprinklerGraph

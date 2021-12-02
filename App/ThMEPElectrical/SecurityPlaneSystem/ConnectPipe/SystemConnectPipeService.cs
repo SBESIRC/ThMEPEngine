@@ -1,24 +1,18 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm.BFSAlgorithm;
+using ThMEPElectrical.ConnectPipe.Service;
+using ThMEPElectrical.SecurityPlaneSystem.Utls;
 using ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model;
 using ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Service;
-using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
-using ThMEPElectrical.SecurityPlaneSystem.Utils;
-using ThMEPElectrical.SecurityPlaneSystem.Utls;
-using ThMEPEngineCore.Algorithm.BFSAlgorithm;
-using ThCADExtension;
-using DotNetARX;
-using ThMEPEngineCore.CAD;
-using ThCADCore.NTS;
-using NFox.Cad;
-using ThMEPWSS.HydrantConnectPipe.Service;
-using ThMEPElectrical.ConnectPipe.Service;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
@@ -78,7 +72,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 {
                     var IntersectingPath = SpatialIndex.SelectFence(path.ExtendPolyline(-5));
                     IntersectingPath.Remove(Paths.Key);
-                    if(IntersectingPath.Count>0)
+                    if (IntersectingPath.Count > 0)
                     {
                         Line IntersectingLine = IntersectingPath[0] as Line;
                         var pts = new Point3dCollection();
@@ -124,7 +118,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             else
             {
-                var MaxLenLine = choiseLanes.Where(x =>Math.Abs( GetDistanceToLine(x, startPt) - minDistance)<5).OrderByDescending(x => x.Length).First();
+                var MaxLenLine = choiseLanes.Where(x => Math.Abs(GetDistanceToLine(x, startPt) - minDistance) < 5).OrderByDescending(x => x.Length).First();
                 choiseLine = MaxLenLine;
             }
             Line checkLine = new Line(startPt, choiseLine.GetClosestPointTo(startPt, false));
@@ -145,7 +139,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             Point3d connectPoint = model.position;
             PipePathService pipePathService = new PipePathService();
             Polyline snappath = pipePathService.CreatePipePath(polyline, closetLine, connectPoint, columns.Union(blocks).ToList());
-            if (snappath == null) 
+            if (snappath == null)
             {
                 snappath = pipePathService.CreatePipePath(polyline, closetLine, connectPoint, columns);
                 if (snappath == null)
@@ -295,7 +289,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                                 DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                                 beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
                                 sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
-                                DifferentDirPath=AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                DifferentDirPath = AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
                                 bool HasbeeLinePath = false;
                                 bool HassameDirPath = false;
                                 if (beeLinePath.Count > 0)
@@ -405,11 +399,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                             if (parallelDirPath.Count > 1)
                             {
                                 Vector3d vector = Vector3d.ZAxis.CrossProduct(endLineDic).GetNormal();
-                                sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2  && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
+                                sameDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//同向线
                                 DifferentDirPath = parallelDirPath.Where(o => o.NumberOfVertices > 2 && vector.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                                 beeLinePath = parallelDirPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
                                 sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
-                                DifferentDirPath=AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                                DifferentDirPath = AdjustSpacing(DifferentDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
                                 bool HasbeeLinePath = false;
                                 bool HassameDirPath = false;
                                 if (beeLinePath.Count > 0)
@@ -491,7 +485,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                         var DifferentDirPath = NeighborPath.Where(o => o.NumberOfVertices > 2 && endLineDic.Negate().GetAngleTo(o.GetPoint3dAt(o.NumberOfVertices - 2).GetVectorTo(o.GetPoint3dAt(o.NumberOfVertices - 3))) < 1).ToList();//逆向线
                         var beeLinePath = NeighborPath.Except(sameDirPath).Except(DifferentDirPath).ToList();//直线
                         sameDirPath = AdjustSpacing(sameDirPath).OrderBy(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
-                        DifferentDirPath= AdjustSpacing(DifferentDirPath).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
+                        DifferentDirPath = AdjustSpacing(DifferentDirPath).OrderByDescending(o => o.GetPoint3dAt(o.NumberOfVertices - 1).DistanceTo(o.GetPoint3dAt(o.NumberOfVertices - 2))).ToList();
                         if (beeLinePath.Count() == 0)
                         {
                             //距离足够，往后偏移
@@ -572,7 +566,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             return Path;
         }
-        
+
         /// <summary>
         /// 断开路径
         /// </summary>
@@ -788,11 +782,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             return path;
         }
 
-        private Polyline CreatNewPath(Point3d turning,Polyline oldPath,Line endLine)
+        private Polyline CreatNewPath(Point3d turning, Polyline oldPath, Line endLine)
         {
             Polyline newpolyline = new Polyline();
             newpolyline.AddVertexAt(0, oldPath.StartPoint.ToPoint2D(), 0, 0, 0);
-            
+
             int pathedgs = oldPath.Vertices().Count;
             if (pathedgs > 2)
             {
@@ -834,11 +828,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             return newpolyline;
         }
 
-        private Polyline ResetStartingPath(BlockModel model,Polyline oldPath,Line endLine)
+        private Polyline ResetStartingPath(BlockModel model, Polyline oldPath, Line endLine)
         {
             var Intersectpts = new Point3dCollection();
             oldPath.IntersectWith(model.Boundary, Intersect.OnBothOperands, Intersectpts, (IntPtr)0, (IntPtr)0);
-            if(Intersectpts.Count == 0)
+            if (Intersectpts.Count == 0)
             {
                 return new Polyline();
             }
@@ -846,7 +840,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             var pts = GetConnectPoints(model);
             int pathedgs = oldPath.NumberOfVertices;
             Point3d StartPt = pts.OrderBy(o => o.DistanceTo(intersectPt)).First();
-            
+
             int i = 1;
             Line line = new Line();
             while (i < pathedgs)
@@ -859,11 +853,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                 i++;
             }
             Line nextline = endLine;
-            if (pathedgs -i > 1)
+            if (pathedgs - i > 1)
             {
-                nextline = new Line(oldPath.GetPoint3dAt(i), oldPath.GetPoint3dAt(i +1));
+                nextline = new Line(oldPath.GetPoint3dAt(i), oldPath.GetPoint3dAt(i + 1));
             }
-            Point3d secondPt= nextline.GetClosestPointTo(StartPt, true);
+            Point3d secondPt = nextline.GetClosestPointTo(StartPt, true);
             Polyline newpolyline = new Polyline();
             newpolyline.AddVertexAt(0, StartPt.ToPoint2D(), 0, 0, 0);
             newpolyline.AddVertexAt(1, secondPt.ToPoint2D(), 0, 0, 0);
@@ -872,7 +866,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             {
                 newpolyline.AddVertexAt(j, oldPath.GetPoint3dAt(++i).ToPoint2D(), 0, 0, 0);
             }
-            if(!newpolyline.EndPoint.IsPointOnLine(endLine))
+            if (!newpolyline.EndPoint.IsPointOnLine(endLine))
             {
                 newpolyline.AddVertexAt(newpolyline.NumberOfVertices, oldPath.EndPoint.ToPoint2D(), 0, 0, 0);
             }
@@ -931,7 +925,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
                     keyPoints.Add(Furthespoint + dir * 150);
                     pointer = Furthespoint + dir * 150;
                 }
-                else if(Furthespoint.DistanceTo(line.EndPoint) > 150)
+                else if (Furthespoint.DistanceTo(line.EndPoint) > 150)
                 {
                     keyPoints[keyPoints.Count - 1] = Furthespoint + dir * 150;
                     pointer = Furthespoint + dir * 150;
@@ -939,7 +933,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             }
             keyPoints.Add(line.EndPoint);
             List<Line> reLines = new List<Line>();
-            for (int i = 0; i < keyPoints.Count; i+=2)
+            for (int i = 0; i < keyPoints.Count; i += 2)
             {
                 reLines.Add(new Line(keyPoints[i], keyPoints[i + 1]));
             }
@@ -947,7 +941,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             return reLines;
         }
 
-        private double GetDistanceToLine(Line line,Point3d point)
+        private double GetDistanceToLine(Line line, Point3d point)
         {
             Point3d closedPt = line.GetClosestPointTo(point, true);
             return point.DistanceTo(closedPt) + line.DistanceTo(closedPt, false);

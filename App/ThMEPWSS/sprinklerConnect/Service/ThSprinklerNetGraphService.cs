@@ -56,7 +56,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                 var p = pts[0];
                 CreateGraph(p, lines, alreadyAdded, net, graph);
-                pts.RemoveAll(x => net.pts.Contains(x));
+                pts.RemoveAll(x => IsContains(x, net.pts));
             }
 
             
@@ -168,23 +168,27 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
         }
 
-        public static void CreatePartGroup_test(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
+        public static ThSprinklerNetGroup CreatePartGroup_test(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
         {
 
             var lineList = new List<Line>();
             lineList.AddRange(netGroup.lines);
+            RemoveLineIntersectWithMain(lineList, mainPipe);
 
             BreakLineIntersectWithSub(lineList, subMainPipe, out var breakLine, out var breakPoint);
-
             var newNetGroup = CreateNetwork(netGroup.angle, lineList);
 
-
             AddBreakLineToGraph(newNetGroup, breakLine, breakPoint);
+
             for (int j = 0; j < newNetGroup.ptsGraph.Count; j++)
             {
                 var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
-                DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
+                //DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
             }
+
+            return newNetGroup;
+
+
         }
 
         /// <summary>
@@ -240,8 +244,19 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     if (breakPt.Count > 0)
                     {
                         breakPoint.Add(breakPt[0]);
-                        breakLine.Add(new Line(l.StartPoint, breakPt[0]));
-                        breakLine.Add(new Line(l.EndPoint, breakPt[0]));
+
+                        var first = new Line(l.StartPoint, breakPt[0]);
+                        if (first.Length > 1.0)
+                        {
+                            breakLine.Add(first);
+                        }
+
+                        var second = new Line(l.EndPoint, breakPt[0]);
+                        if (second.Length > 1.0)
+                        {
+                            breakLine.Add(second);
+                        }
+
                         breakLineRemove.Add(l);
                     }
                 }
@@ -286,6 +301,27 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 net.ptsGraph.Add(graph);
 
                 breakLine.RemoveAt(i);
+            }
+        }
+
+        private static bool IsContains(Point3d pt, List<Point3d> ptList)
+        {
+            var tol = new Tolerance(10, 10);
+            var i = 0;
+            for (;i<ptList.Count;i++)
+            {
+                if (pt.IsEqualTo(ptList[i], tol))
+                {
+                    break;
+                }
+            }
+            if (i == ptList.Count)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
     }

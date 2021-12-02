@@ -42,6 +42,7 @@
                              ImageHeight="20" ImageWidth="20"
                              BorderThickness="0"
                              MouseOverBackground="Red"
+                             MousedownBackground="#FF555555"
                              Click="Setting_Click">
                 </cus:ImageButton>
                 <Button x:Name="btnClose" Width="20" Height="20" Focusable="False" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="关闭窗体" Click="btnClose_Click">

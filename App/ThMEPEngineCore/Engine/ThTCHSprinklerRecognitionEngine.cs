@@ -151,15 +151,14 @@ namespace ThMEPEngineCore.Engine
                     continue;
                 }
 
-                var outline = block.GeometricExtents.ToRectangle();
-                if (frame != null && !frame.Intersects(outline))
+                if (frame != null && !frame.Intersects(new DBPoint(block.Position)))
                 {
                     continue;
                 }
 
                 var sprinkler = new ThSprinkler()
                 {
-                    Outline = outline,
+                    Outline = block.GeometricExtents.ToRectangle(),
                     Position = block.Position,
                 };
                 var dictionary = data.Data as Dictionary<string, object>;

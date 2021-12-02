@@ -32,7 +32,6 @@
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="AlarmLayout\Test\TestCmd.cs" />
-    <Compile Include="AlarmSensorLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
@@ -393,10 +392,6 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
-      <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
-      <Name>ThMEPWSS</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
