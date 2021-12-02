@@ -45,7 +45,6 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.AlarmLayout.Test.TestCmd))]
-[assembly: CommandClass(typeof(ThMEPElectrical.AlarmSensorLayout.Test.TestCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.ThAFASCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.THAFASDebugCmds))]
 
