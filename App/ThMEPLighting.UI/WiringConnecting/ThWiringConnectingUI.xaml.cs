@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Collections.Generic;
 using ThMEPLighting.ViewModel;
 using ThMEPLighting.ServiceModels;
+using System.Windows.Media;
 
 namespace ThMEPLighting.UI.WiringConnecting
 {
@@ -29,13 +30,14 @@ namespace ThMEPLighting.UI.WiringConnecting
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            base.Hide();
         }
 
         private void Setting_Click(object sender, RoutedEventArgs e)
         {
             ThWiringSettingUI thWiringSettingUI = new ThWiringSettingUI();
             thWiringSettingUI.ShowDialog();
+            this.Setting.Background = (Brush)(new SolidColorBrush(Color.FromRgb(85, 85, 85)));
         }
 
         private void btnConnectWiring_Click(object sender, RoutedEventArgs e)

@@ -165,7 +165,6 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
-    <Compile Include="Engine\ThSpatialElementVisitorManager.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
@@ -715,7 +714,10 @@
     <Compile Include="ThMEPEngineCoreRoomService.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
+    <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />
+    <Compile Include="UCSDivisionService\Utils\StructPolyService.cs" />
+    <Compile Include="UCSDivisionService\Utils\StructUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

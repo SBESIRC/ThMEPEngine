@@ -33,7 +33,6 @@ namespace ThMEPEngineCore.Algorithm
             // arc打成多段线
             arcs.ForEach(o =>
             {
-
                 var polyline = o.TessellateArcWithChord(ArcChord);
                 var entitySet = new DBObjectCollection();
                 polyline.Explode(entitySet);
