@@ -99,5 +99,37 @@ namespace ThMEPWSS.SprinklerConnect.Model
             return linesInGraph;
 
         }
+
+        /// 寻找图中的所有虚拟点
+        /// </summary>
+        /// <param name="graphIdx"></param>
+        /// <returns></returns>
+        public List<Point3d> GetVirtualPts(int graphIdx)
+        {
+            return GetGraphPts(graphIdx).Where(pt => ptsVirtual.Contains(pt)).ToList();
+        }
+
+        /// <summary>
+        /// 搜索图中所有的虚拟点在pts中的索引
+        /// </summary>
+        /// <param name="graphIdx"></param>
+        /// <returns></returns>
+        public List<int> GetVirtualPtsIndex(int graphIdx)
+        {
+            var ptsIndex = new List<int>();
+            var tol = new Tolerance(10, 10);
+
+            GetVirtualPts(graphIdx).ForEach(pt =>
+            {
+                var alreadyIn = pts.Where(x => x.IsEqualTo(pt, tol));
+                if (alreadyIn.Count() > 0)
+                {
+                    var idx = pts.IndexOf(alreadyIn.First());
+                    ptsIndex.Add(idx);
+                }
+            });
+
+            return ptsIndex;
+        }
     }
 }

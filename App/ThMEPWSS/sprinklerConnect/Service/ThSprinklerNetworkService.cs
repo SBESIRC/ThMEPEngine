@@ -71,8 +71,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             dtOrthogonalSeg = dtOrthogonalSeg.Distinct().ToList();
             dtSeg = dtLinesAll.Distinct().ToList();
 
-            DrawUtils.ShowGeometry(dtSeg, "l0DT", 154);
-            DrawUtils.ShowGeometry(dtOrthogonalSeg, "l0DTO", 241);
+            //DrawUtils.ShowGeometry(dtSeg, "l0DT", 154);
+            //DrawUtils.ShowGeometry(dtOrthogonalSeg, "l0DTO", 241);
 
             return dtOrthogonalSeg;
         }
@@ -173,11 +173,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <summary>
         /// 点找容差范围内的点，形成的线在容差范围内，加入组
         /// </summary>
-        /// <param name="dtLines"></param>
+        /// <param name="dtSeg"></param>
         /// <param name="groupList"></param>
         /// <param name="pts"></param>
         /// <param name="lengthTol"></param>
-        public static void AddSinglePTToGroup(List<Line> dtLines, List<KeyValuePair<double, List<Line>>> groupList, List<Point3d> pts, double lengthTol)
+        public static void AddSinglePTToGroup(List<Line> dtSeg, List<KeyValuePair<double, List<Line>>> groupList, List<Point3d> pts, double lengthTol)
         {
             var angleTol = 1;
             var newAddedline = new List<Line>();
@@ -188,22 +188,115 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                 for (int j = 0; j < nearPts.Count; j++)
                 {
-                    var nearPt = nearPts[j];
-                    var newLine = new Line(pt, nearPt);
+                    var newLine = new Line(pt, nearPts[j]);
 
-                    var overlapDT = dtLines.Where(x => OverlapLine(x, newLine) == true);
-                    var overlapTempGroup = newAddedline.Where(x => OverlapLine(x, newLine) == true);
-
-                    if (overlapDT.Count() == 0 && overlapTempGroup.Count() == 0)
+                    var n = 0;
+                    for (; n < dtSeg.Count; n++)
                     {
-                        var bAdd = AddLineToGroup(newLine, ref groupList, angleTol);
-                        if (bAdd == true)
+                        var angleChecker = Math.Abs(dtSeg[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
+                        // 如果存在两条线段overlap，则退出循环
+                        if(angleChecker 
+                            && newLine.DistanceTo(dtSeg[n].StartPoint, false) < 1.0 
+                            && newLine.DistanceTo(dtSeg[n].EndPoint, false) < 1.0)
+                        {
+                            break;
+                        }
+                    }
+
+                    // 当dtLines中没有重合线时
+                    if (n == dtSeg.Count)
+                    {
+                        var m = 0;
+                        for (; m < newAddedline.Count; m++)
+                        {
+                            var angleChecker = Math.Abs(newAddedline[m].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
+                            // 如果存在两条线段overlap，且新线短于旧线，则进行替换
+                            if (angleChecker
+                                && newAddedline[m].DistanceTo(newLine.StartPoint, false) < 1.0
+                                && newAddedline[m].DistanceTo(newLine.EndPoint, false) < 1.0)
+                            {
+                                // 新生成的线短于原线，则进行替换
+                                if(newAddedline[m].Length - newLine.Length > 1.0)
+                                {
+                                    newAddedline[m] = newLine;
+                                }
+                                break;
+                            }
+                        }
+
+                        // 添加新线
+                        if (m == newAddedline.Count && AddLineToGroup(newLine, ref groupList, angleTol))
                         {
                             newAddedline.Add(newLine);
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 将距离在容差范围内的短线加入组
+        /// </summary>
+        /// <param name="dtSeg"></param>
+        /// <param name="groupList"></param>
+        /// <param name="lengthTol"></param>
+        public static void AddShortLineToGroup(List<Line> dtSeg, List<KeyValuePair<double, List<Line>>> groupList, 
+            List<Point3d> pts, List<Line> subMainPipe, double lengthTol)
+        {
+            if (subMainPipe.Count == 0)
+            {
+                return;
+            }
+
+            var angleTol = 1;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                if (SearchClosePt(pts[i], subMainPipe, lengthTol, out var ptList))
+                {
+                    ptList.ForEach(closePt =>
+                    {
+                        var newLine = new Line(pts[i], closePt);
+                        var reduceLine = newLine.ExtendLine(-10.0);
+                        var n = 0;
+                        for (; n < dtSeg.Count; n++)
+                        {
+                            var angleChecker = Math.Abs(dtSeg[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
+                            // 如果存在两条线段overlap，则退出循环
+                            if (angleChecker
+                                && (dtSeg[n].DistanceTo(reduceLine.StartPoint, false) < 1.0
+                                || dtSeg[n].DistanceTo(reduceLine.EndPoint, false) < 1.0))
+                            {
+                                break;
+                            }
+                        }
+
+                        // 当dtLines中没有重合线时
+                        if (n == dtSeg.Count)
+                        {
+                            AddLineToGroup(LineExtend(newLine), ref groupList, angleTol);
+                        }
+                    });
+                }
+            }
+        }
+
+        public static List<KeyValuePair<double, List<Line>>> DeleteWallLine(List<KeyValuePair<double, List<Line>>> groupList, List<Polyline> geometry)
+        {
+            var tempGroup = new List<KeyValuePair<double, List<Line>>>();
+            groupList.ForEach(group =>
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(group.Value.ToCollection());
+                var vaildLines = new List<Line>();
+                geometry.ForEach(g =>
+                {
+                    vaildLines.AddRange(spatialIndex.SelectFence(g).OfType<Line>());
+                });
+                var filter = group.Value.Where(line => !vaildLines.Contains(line)).ToList();
+                var pair = new KeyValuePair<double, List<Line>>(group.Key, filter);
+                tempGroup.Add(pair);
+            });
+
+            return tempGroup;
         }
 
         /// <summary>
@@ -245,7 +338,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             {
                 var convex = GraphConvexHull(netList[0], i);
                 convexList.Add(convex);
-                DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", 0, i), 0 % 7, 30);
+                //DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", 0, i), 0 % 7, 30);
             }
 
             newNetList.Add(netList[0]);
@@ -258,7 +351,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 for (int j = net.ptsGraph.Count - 1; j >= 0; j--)
                 {
                     var convex = GraphConvexHull(net, j);
-                    DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", i, j), i % 7, 30);
+                    //DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", i, j), i % 7, 30);
 
                     var containby = convexList.Where(x => x.Contains(convex));
                     if (containby.Count() == 0)
@@ -282,7 +375,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var convexPl = new Polyline();
             var netI = net.GetGraphPts(graphIdx);
             var netI2d = netI.Select(x => x.ToPoint2d()).ToList();
-            netI.ForEach(x => DrawUtils.ShowGeometry(x, "l4ConvexPts", 42, 30));
+            //netI.ForEach(x => DrawUtils.ShowGeometry(x, "l4ConvexPts", 42, 30));
 
             var convex = netI2d.GetConvexHull();
 
@@ -318,7 +411,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var keyContain = distGroup.Where(x => x.Value.Contains(i)).FirstOrDefault();
                         if (keyContain.Equals(default(KeyValuePair<int, List<int>>)) == false)
                         {
-                            var jGroup = distGroup.Where(x => x.Value.Contains(j));
+                            var jGroup = distGroup.Where(x => x.Value.Contains(j)).ToList();
                             if (jGroup.Count() > 0)
                             {
                                 foreach (var otherG in jGroup)
@@ -496,8 +589,44 @@ namespace ThMEPWSS.SprinklerConnect.Service
             return filterGroup;
         }
 
+        /// <summary>
+        /// 搜索离支干管较近的点
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="subMainPipe"></param>
+        /// <param name="tol"></param>
+        /// <param name="closePt"></param>
+        /// <returns></returns>
+        private static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList)
+        {
+            ptList = new List<Point3d>();
+            for (int i = 0; i < subMainPipe.Count; i++)
+            {
+                var closePt = subMainPipe[i].GetClosestPointTo(pt, false);
+                if (Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].Delta.GetNormal())) > 0.005)
+                {
+                    continue;
+                }
+                var dist = closePt.DistanceTo(pt);
+                if(dist < tol)
+                {
+                    ptList.Add(closePt);
+                }
+            }
 
+            if (ptList.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
 
-
+        private static Line LineExtend(Line line)
+        {
+            return new Line(line.StartPoint, line.StartPoint + line.Delta.GetNormal() * (line.Length + 0.9));
+        }
     }
 }

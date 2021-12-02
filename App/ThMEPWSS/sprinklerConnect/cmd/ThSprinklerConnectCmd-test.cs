@@ -57,19 +57,21 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 }
 
                 //简略的写提取管子和点位（需要改）
-                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
+                var sprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
                 var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
                 var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
 
-                if (SprinklerPts.Count == 0 || mainPipe.Count == 0 || subMainPipe.Count == 0)
+                if (sprinklerPts.Count == 0 || subMainPipe.Count == 0)
                 {
                     return;
                 }
 
                 // 提取车位外包框
-                var parkingStallService = new ThSprinklerConnectParkingStallService();
-                parkingStallService.BlockNameDict = BlockNameDict;
-                var parkingStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
+                //var parkingStallService = new ThSprinklerConnectParkingStallService();
+                //parkingStallService.BlockNameDict = BlockNameDict;
+                //var parkingStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
+
+                var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
 
                 // 打印车位外包框
                 //parkingStall.ForEach(o =>
@@ -81,6 +83,28 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
                 var dataQuery = new ThSprinklerDataQueryService(geos);
                 dataQuery.ClassifyData();
+
+                var geometry = new List<Polyline>();
+                geometry.AddRange(dataQuery.ArchitectureWallList);
+                geometry.AddRange(dataQuery.ShearWallList);
+                geometry.AddRange(dataQuery.ColumnList);
+                geometry.AddRange(dataQuery.RoomList);
+
+                var smallRoom = dataQuery.RoomList.Where(r => r.Area < 1e8).ToList();
+                var ptInSmallRoom = new HashSet<Point3d>();
+                sprinklerPts.ForEach(pt =>
+                {
+                    smallRoom.ForEach(r =>
+                    {
+                        if(r.Contains(pt))
+                        {
+                            ptInSmallRoom.Add(pt);
+                        }
+                    });
+                });
+
+
+                //geometry.ForEach(g => acadDatabase.ModelSpace.Add(g));
 
                 //转回原点
                 //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
@@ -94,12 +118,13 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
 
                 var sprinklerParameter = new ThSprinklerParameter();
-                sprinklerParameter.SprinklerPt = SprinklerPts;
+                sprinklerParameter.SprinklerPt = sprinklerPts.Where(pt => !ptInSmallRoom.Contains(pt)).ToList();
                 sprinklerParameter.MainPipe = mainLine;
                 sprinklerParameter.SubMainPipe = subMainLine;
                 sprinklerParameter.AllPipe = allLines;
 
-                ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
+                var engine = new ThSprinklerConnectEngine(sprinklerParameter);
+                engine.SprinklerConnectEngine(doubleStall, geometry);
 
             }
         }
