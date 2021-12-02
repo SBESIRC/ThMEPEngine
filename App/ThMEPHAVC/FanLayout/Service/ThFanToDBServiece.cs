@@ -267,12 +267,12 @@ namespace ThMEPHVAC.FanLayout.Service
                 InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
             }
         }
-        public void InsertBlockReference(string layer, string blockName, Point3d position, double angle)
+        public void InsertBlockReference(string layer, string blockName, Point3d position, double angle, Scale3d scale)
         {
             using (var database = AcadDatabase.Active())
             {
                 Dictionary<string, string> attNameValues = new Dictionary<string, string>();
-                InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
+                InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, scale, angle, attNameValues);
             }
         }
         public void InsertText(string layer, string strText, Point3d position, double angle)

@@ -147,7 +147,6 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 return;
             }
-            
             var currentExLines = node.Item.ExPline;
             var parentExLines = node.Parent.Item.ExPline;
 
@@ -267,32 +266,73 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 case 0://水系统
                     {
-                        if (!node.Item.IsConnect || node.Item.PipeLevel == PIPELEVEL.LEVEL3)
+                        if (!node.Item.IsConnect || node.Item.PipeLevel == PIPELEVEL.LEVEL3 || node.Item.WayCount == 3)
                         {
-                            foreach (var pt in node.Item.ExPoint)
+                            if(node.Item.WayCount == 2)
                             {
-                                var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                DrawCircle(circle, "H-PIPE-DIMS");
+                                foreach (var pt in node.Item.ExPoint)
+                                {
+                                    var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                    DrawCircle(circle, "H-PIPE-DIMS");
+                                }
                             }
+                            else if(node.Item.WayCount == 3 || node.Item.WayCount == 4)
+                            {
+                                if(!node.Item.BrotherItem.IsContacted)
+                                {
+                                    foreach (var pt in node.Item.ExPoint)
+                                    {
+                                        var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                    }
+                                }
+                            }
+                            node.Item.IsContacted = true;
                         }
                     }
                     break;
                 case 1://冷媒系统
                     {
-                        if (!node.Item.IsConnect)
+                        if (!node.Item.IsConnect || node.Item.WayCount == 3)
                         {
                             if(node.Item.ExPoint.Count > 0 && node.Parent != null)
                             {
-                                if(node.Item.WayCount == 2)
+                                var toDbServiece = new ThFanToDBServiece();
+                                if (node.Item.WayCount == 2)
                                 {
-                                    var toDbServiece = new ThFanToDBServiece();
                                     var angle = node.Parent.Item.PLine.Angle + Math.PI / 2.0;
                                     var direction = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
                                     var tmpPt = node.Item.ExPoint[0] + direction * 100;
+                                    var scale = new Scale3d(1.0, 1.0, 1.0);
+                                    if(node.Item.CroVector.IsEqualTo(new Vector3d(0.0,0.0,-1.0)))
+                                    {
+                                        scale = new Scale3d(-1.0, 1.0, 1.0);
+                                        tmpPt = node.Item.ExPoint[0] - direction * 100;
+                                    }
                                     node.Item.ExPline[0].StartPoint = tmpPt;
-                                    toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle);
+                                    toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
                                     var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
                                     DrawCircle(circle, "H-PIPE-DIMS");
+                                }
+                                else if(node.Item.WayCount == 3)
+                                {
+                                    if(!node.Item.BrotherItem.IsContacted)
+                                    {
+                                        var angle = node.Parent.Item.PLine.Angle + Math.PI / 2.0;
+                                        var direction = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
+                                        var tmpPt = node.Item.ExPoint[0] + direction * 100;
+                                        var scale = new Scale3d(1.0, 1.0, 1.0);
+                                        if (node.Item.CroVector.IsEqualTo(new Vector3d(0.0, 0.0, -1.0)))
+                                        {
+                                            scale = new Scale3d(-1.0, 1.0, 1.0);
+                                            tmpPt = node.Item.ExPoint[0] - direction * 100;
+                                        }
+                                        node.Item.ExPline[0].StartPoint = tmpPt;
+                                        toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
+                                        var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
+                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                        node.Item.IsContacted = true;
+                                    }
                                 }
                             }
                         }
@@ -301,7 +341,6 @@ namespace ThMEPHVAC.FanConnect.Service
                 default:
                     break;
             }
-
         }
         public void DrawExLine(ThFanTreeNode<ThFanPipeModel> node)
         {

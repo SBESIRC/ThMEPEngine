@@ -115,7 +115,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //标记4通结点
- //               FindFourWay(treeModel.RootNode);
+                FindFourWay(treeModel.RootNode);
                 //
                 foreach (var fcu in fcus)
                 {
@@ -148,11 +148,29 @@ namespace ThMEPHVAC.FanConnect.Command
             {
                 return;
             }
-            foreach (var item in node.Children)
+            var connectChild = node.Children.Where(o => o.Item.IsConnect).ToList();
+            var nonConnectChild = node.Children.Where(o => !o.Item.IsConnect).ToList();
+            if (connectChild.Count == 2)
             {
-
+                connectChild[0].Item.WayCount = 3;
+                connectChild[0].Item.BrotherItem = connectChild[1].Item;
+                connectChild[1].Item.WayCount = 3;
+                connectChild[1].Item.BrotherItem = connectChild[0].Item;
             }
-
+            for(int i = 0; i < nonConnectChild.Count;i++)
+            {
+                for (int j = 0; j < nonConnectChild.Count; j++)
+                {
+                    if(i != j)
+                    {
+                        if(nonConnectChild[i].Item.PLine.StartPoint.IsEqualTo(nonConnectChild[j].Item.PLine.StartPoint))
+                        {
+                            nonConnectChild[i].Item.BrotherItem = nonConnectChild[j].Item;
+                            nonConnectChild[i].Item.WayCount = 4;
+                        }
+                    }
+                }
+            }
 
         }
         public void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Point3d pt)

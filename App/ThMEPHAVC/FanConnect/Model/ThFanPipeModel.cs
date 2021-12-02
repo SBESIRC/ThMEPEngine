@@ -32,6 +32,7 @@ namespace ThMEPHVAC.FanConnect.Model
     public class ThFanPipeModel
     {
         public int WayCount { set; get; }//是否是四通连接点
+        public bool IsContacted { set; get; }//是否绘制了连接点
         public bool IsFlag { set; get; }//标识位，表示是否反向ExPline顺序
         public bool IsConnect { set; get; }//与父结点是否连接
         public double PipeWidth { set; get; }//水管宽度
@@ -40,10 +41,11 @@ namespace ThMEPHVAC.FanConnect.Model
         public Line PLine { set; get; }//主体
         public List<Line> ExPline { set; get; }//扩展线
         public List<Point3d> ExPoint { set; get; }//扩展线的连接点
-        public List<ThFanPipeModel> BrotherItem { set; get; }
+        public ThFanPipeModel BrotherItem { set; get; }//共结点
         public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1,double width = 200)
         {
             WayCount = 2;
+            IsContacted = false;
             IsFlag = false;
             IsConnect = false;
             PipeWidth = width;
@@ -51,7 +53,6 @@ namespace ThMEPHVAC.FanConnect.Model
             PLine = line;
             ExPoint = new List<Point3d>();
             CroVector = new Vector3d(0.0,0.0,1.0);
-            BrotherItem = new List<ThFanPipeModel>();
         }
         
     }
