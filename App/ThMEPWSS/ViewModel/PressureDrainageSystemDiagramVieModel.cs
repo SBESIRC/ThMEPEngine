@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
@@ -116,7 +117,18 @@ namespace ThMEPWSS.Diagram.ViewModel
                 {
                     return new Extents3d();
                 }
-                return new Extents3d(InfoArea[0], InfoArea[2]);
+                double minx = InfoArea[0].X;
+                double maxx = InfoArea[0].X;
+                double miny = InfoArea[0].Y;
+                double maxy = InfoArea[0].Y;
+                foreach (Point3d p in InfoArea)
+                {
+                    minx = p.X < minx ? p.X : minx;
+                    miny = p.Y < miny ? p.Y : miny;
+                    maxx = p.X > maxx ? p.X : maxx;
+                    maxy = p.Y > maxy ? p.Y : maxy;
+                }
+                return new Extents3d(new Point3d(minx, miny, 0), new Point3d(maxx, maxy, 0));
             }
         }
         /// <summary>
