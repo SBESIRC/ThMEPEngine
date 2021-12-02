@@ -715,9 +715,11 @@
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
+    <Compile Include="UCSDivisionService\DivisionMethod\LayoutPointDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />
     <Compile Include="UCSDivisionService\Utils\StructPolyService.cs" />
     <Compile Include="UCSDivisionService\Utils\StructUtils.cs" />
+    <Compile Include="UCSDivisionService\Utils\UcsByPointsDivider.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
