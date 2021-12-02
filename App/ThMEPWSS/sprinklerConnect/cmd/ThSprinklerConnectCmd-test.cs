@@ -27,6 +27,8 @@ using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.SprinklerConnect.Engine;
 using ThMEPWSS.SprinklerConnect.Model;
+using ThMEPWSS.Sprinkler.Service;
+using ThMEPEngineCore;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
@@ -67,11 +69,16 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 }
 
                 // 提取车位外包框
-                //var parkingStallService = new ThSprinklerConnectParkingStallService();
-                //parkingStallService.BlockNameDict = BlockNameDict;
-                //var parkingStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
+                var parkingStallService = new ThSprinklerConnectParkingStallService();
+                parkingStallService.BlockNameDict = BlockNameDict;
+                var doubleStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
+                if(doubleStall.Count==0)
+                {
+                    return;
+                }
+                StallPresent(doubleStall);
 
-                var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
+                //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
 
                 // 打印车位外包框
                 //parkingStall.ForEach(o =>
@@ -126,6 +133,19 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var engine = new ThSprinklerConnectEngine(sprinklerParameter);
                 engine.SprinklerConnectEngine(doubleStall, geometry);
 
+            }
+        }
+
+        private void StallPresent(List<Polyline> results)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var layerId = acadDatabase.Database.CreateAILayer("AI-车位排-双排", 5);
+                results.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.LayerId = layerId;
+                });
             }
         }
     }
