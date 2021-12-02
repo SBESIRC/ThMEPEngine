@@ -120,7 +120,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFADisplayNoUI", CommandFlags.Modal)]
         public void THFADisplayNoUI()
         {
-            using (var cmd = new ThFireAlarmDisplayDeviceLayoutCmd(false))
+            using (var cmd = new ThAFASDisplayDeviceLayoutCmd(false))
             {
                 cmd.Execute();
             }
@@ -129,7 +129,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFADisplay", CommandFlags.Modal)]
         public void THFADisplay()
         {
-            using (var cmd = new ThFireAlarmDisplayDeviceLayoutCmd(true))
+            using (var cmd = new ThAFASDisplayDeviceLayoutCmd(true))
             {
                 cmd.Execute();
             }
@@ -138,7 +138,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFAMonitorNoUI", CommandFlags.Modal)]
         public void THFAMonitorNoUI()
         {
-            using (var cmd = new ThFireAlarmFireProofMonitorLayoutCmd(false))
+            using (var cmd = new ThAFASFireProofMonitorLayoutCmd(false))
             {
                 cmd.Execute();
             }
@@ -147,7 +147,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFAMonitor", CommandFlags.Modal)]
         public void THFAMonitor()
         {
-            using (var cmd = new ThFireAlarmFireProofMonitorLayoutCmd(true))
+            using (var cmd = new ThAFASFireProofMonitorLayoutCmd(true))
             {
                 cmd.Execute();
             }
@@ -156,7 +156,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "ThFATelNoUI", CommandFlags.Modal)]
         public void ThFATelNoUI()
         {
-            using (var cmd = new ThFireAlarmFireTelLayoutCmd(false))
+            using (var cmd = new ThAFASFireTelLayoutCmd(false))
             {
                 cmd.Execute();
             }
@@ -165,7 +165,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "ThFATel", CommandFlags.Modal)]
         public void ThFATel()
         {
-            using (var cmd = new ThFireAlarmFireTelLayoutCmd(true))
+            using (var cmd = new ThAFASFireTelLayoutCmd(true))
             {
                 cmd.Execute();
             }

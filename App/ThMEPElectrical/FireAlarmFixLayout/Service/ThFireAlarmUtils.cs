@@ -158,7 +158,7 @@ namespace ThMEPElectrical.FireAlarm.Service
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var datasetFactory = new ThFaFixLayoutDataSetFactory()
+                var datasetFactory = new ThAFASFixLayoutDataSetFactory()
                 {
                     BlkNameList = extractBlkList,
                 };

@@ -24,11 +24,11 @@ using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
-    public class ThFaFixLayoutDataSetFactory : ThMEPDataSetFactory
+    public class ThAFASFixLayoutDataSetFactory : ThMEPDataSetFactory
     {
         public List<string> BlkNameList { get; set; }
         private List<ThGeometry> Geos { get; set; }
-        public ThFaFixLayoutDataSetFactory()
+        public ThAFASFixLayoutDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }

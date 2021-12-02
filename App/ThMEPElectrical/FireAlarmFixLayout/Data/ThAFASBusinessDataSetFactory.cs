@@ -15,7 +15,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.FireAlarm.Data
 {
-    class ThFaBusinessDataSetFactory : ThMEPDataSetFactory
+    class ThAFASBusinessDataSetFactory : ThMEPDataSetFactory
     {
         #region input
         public List<string> BlkNameList { get; set; }
@@ -26,7 +26,7 @@ namespace ThMEPElectrical.FireAlarm.Data
 
         private List<ThGeometry> Geos { get; set; }
 
-        public ThFaBusinessDataSetFactory()
+        public ThAFASBusinessDataSetFactory()
         {
             Geos = new List<ThGeometry>();
         }

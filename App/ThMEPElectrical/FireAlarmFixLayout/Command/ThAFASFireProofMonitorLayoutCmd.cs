@@ -18,12 +18,12 @@ using ThMEPElectrical.FireAlarm;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
-    class ThFireAlarmFireProofMonitorLayoutCmd : ThMEPBaseCommand, IDisposable
+    class ThAFASFireProofMonitorLayoutCmd : ThMEPBaseCommand, IDisposable
     {
         private bool UseUI { get; set; }
         private double _scale = 100;
 
-        public ThFireAlarmFireProofMonitorLayoutCmd(bool UI)
+        public ThAFASFireProofMonitorLayoutCmd(bool UI)
         {
             UseUI = UI;
             InitialCmdInfo();
