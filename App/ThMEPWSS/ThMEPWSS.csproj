@@ -187,7 +187,6 @@
     <Compile Include="Command\ThPipeInsertFloorFrameCmd.cs" />
     <Compile Include="Command\ThRainSystemDiagramCmd.cs" />
     <Compile Include="Command\ThSprinklerBlindAreaCmd.cs" />
-    <Compile Include="Command\ThSprinklerDistanceCheckCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />

@@ -11,144 +11,63 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
 
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.IO;
 
-using ThMEPElectrical.Command;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
-using ThMEPElectrical.FireAlarmFixLayout;
-
 using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
 
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
-
-    public class ThFireAlarmDisplayDeviceLayoutCmdNoUI
-    {
-        [CommandMethod("TIANHUACAD", "THFireAlarmData", CommandFlags.Modal)]
-        public void THFireAlarmData()
-        {
-            //把Cad图纸数据写出到Geojson File中
-            using (var cmd = new ThFireAlarmCommand())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThDisplayDevice", CommandFlags.Modal)]
-        public void ThFireAlarmDisplayDeviceLayoutCmd()
-        {
-            using (var cmd = new ThFireAlarmDisplayDeviceLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
-    }
-
     class ThFireAlarmDisplayDeviceLayoutCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs;
-        private BuildingType buildingType = FireAlarmFixLayout.Data.BuildingType.None;
-        private string layoutBlkName = ThFaCommon.BlkName_Display_Fire;
+        private bool UseUI { get; set; }
+        private BuildingType _buildingType = FireAlarmFixLayout.Data.BuildingType.None;
+        private string layoutBlkName = ThFaCommon.BlkName_Display_District;
         private double _scale = 100;
-        public ThFireAlarmDisplayDeviceLayoutCmd(FireAlarmViewModel uiConfigs)
-        {
-            _UiConfigs = uiConfigs;
-            CommandName = "THFireAlarmDisplayDeviceLayout";
-            ActionName = "生成";
-            SetInfo();
-        }
-        public ThFireAlarmDisplayDeviceLayoutCmd()
-        {
-            SetInfoNoUI();
-        }
 
+        public ThFireAlarmDisplayDeviceLayoutCmd(bool UI)
+        {
+            UseUI = UI;
+            InitialCmdInfo();
+            InitialSetting();
+        }
+        private void InitialCmdInfo()
+        {
+            CommandName = "ThFireAlarmDisplayDeviceLayout";
+            ActionName = "布置";
+        }
+        private void InitialSetting()
+        {
+            if (UseUI == true)
+            {
+                _buildingType = (BuildingType)FireAlarmSetting.Instance.DisplayBuilding;
+                layoutBlkName = FireAlarmSetting.Instance.DisplayBlk == 0 ? ThFaCommon.BlkName_Display_Floor : ThFaCommon.BlkName_Display_District;
+                _scale = FireAlarmSetting.Instance.Scale;
+            }
+        }
         public override void SubExecute()
         {
             FireAlarmDisplayDeviceLayoutExecute();
         }
-        private void SetInfo()
-        {
-            if (_UiConfigs != null)
-            {
-                if (_UiConfigs.IsResidentChecked == true)
-                {
-                    buildingType = FireAlarmFixLayout.Data.BuildingType.Resident;
-                }
-                else
-                {
-                    buildingType = FireAlarmFixLayout.Data.BuildingType.Public;
-                }
-
-                if (_UiConfigs.IsFLChecked == true)
-
-                {
-                    layoutBlkName = ThFaCommon.BlkName_Display_Floor;
-                }
-                else
-                {
-                    layoutBlkName = ThFaCommon.BlkName_Display_Fire;
-                }
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
-
-            }
-        }
-
-        private void SetInfoNoUI()
-        {
-            // select an option
-            string strResident = "住宅";
-            string strPublic = "公建";
-
-            var options = new PromptKeywordOptions("");
-            options.Message = "\nPlease select option:";
-            options.Keywords.Add(strResident, "R", "住宅(R)");
-            options.Keywords.Add(strPublic, "P", "公建(P)");
-
-            var rst = Active.Editor.GetKeywords(options);
-            if (rst.Status != PromptStatus.OK)
-                return;
-
-            if (rst.StringResult.Equals(strResident))
-            {
-                buildingType = FireAlarmFixLayout.Data.BuildingType.Resident;
-            }
-            else if (rst.StringResult.Equals(strPublic))
-            {
-                buildingType = FireAlarmFixLayout.Data.BuildingType.Public;
-            }
-            else return;
-        }
-
         public void Dispose()
         {
         }
         private void FireAlarmDisplayDeviceLayoutExecute()
         {
-            if (buildingType == FireAlarmFixLayout.Data.BuildingType.None)
+            if (_buildingType == BuildingType.None)
             {
                 return;
             }
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_Fire, ThFaCommon.BlkName_Display_Floor };
-                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-
-                //导入块图层。free图层
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
                 //画框，提数据，转数据
                 //var pts = ThFireAlarmUtils.GetFrame();
                 var pts = ThFireAlarmUtils.GetFrameBlk();
@@ -156,6 +75,18 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 {
                     return;
                 }
+                if (UseUI == false)
+                {
+                    SettingNoUI();
+                }
+
+                var extractBlkList = ThFaCommon.BlkNameList;
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_District, ThFaCommon.BlkName_Display_Floor };
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+
+                //导入块图层。free图层
+                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
+
                 var geos = ThFireAlarmUtils.GetFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
@@ -172,7 +103,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 ThFixedPointLayoutService layoutService = null;
                 layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, cleanBlkName, avoidBlkName)
                 {
-                    BuildingType = buildingType,
+                    BuildingType = _buildingType,
                 };
 
                 var results = layoutService.Layout();
@@ -187,7 +118,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 });
 
                 //插入真实块
-                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName],true);
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName], true);
 
                 ////Print
                 //pairs.ForEach(p =>
@@ -203,5 +134,31 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 ////pairs.ForEach(x => FireAlarm.Service.DrawUtils.ShowGeometry(x.Key, x.Value, "l0result", 1, 40, 200));
             }
         }
+        private void SettingNoUI()
+        {
+            // select an option
+            string strResident = "住宅";
+            string strPublic = "公建";
+
+            var options = new PromptKeywordOptions("");
+            options.Message = "\nPlease select option:";
+            options.Keywords.Add(strResident, "R", "住宅(R)");
+            options.Keywords.Add(strPublic, "P", "公建(P)");
+
+            var rst = Active.Editor.GetKeywords(options);
+            if (rst.Status != PromptStatus.OK)
+                return;
+
+            if (rst.StringResult.Equals(strResident))
+            {
+                _buildingType = FireAlarmFixLayout.Data.BuildingType.Resident;
+            }
+            else if (rst.StringResult.Equals(strPublic))
+            {
+                _buildingType = FireAlarmFixLayout.Data.BuildingType.Public;
+            }
+            else return;
+        }
+
     }
 }

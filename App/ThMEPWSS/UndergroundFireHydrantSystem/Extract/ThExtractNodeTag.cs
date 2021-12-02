@@ -34,7 +34,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         private bool IsNode(string node)
         {
-            return node.ToUpper() == "消火栓环管节点标记";
+            return node.ToUpper() == "消火栓环管节点标记" ||
+                   node.ToUpper() == "消火栓环管节点标记-2";
         }
 
         public void GetPointList(ref FireHydrantSystemIn fireHydrantSysIn)
@@ -48,9 +49,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
                 var br = db as BlockReference;
                 var ptls = new List<Point3dEx>();
-
                 var mark1 = br.ObjectId.GetAttributeInBlockReference("节点1");
                 var mark2 = br.ObjectId.GetAttributeInBlockReference("节点2");
+                if ((db as BlockReference).GetEffectiveName() == "消火栓环管节点标记-2")
+                {
+                    mark1 = br.ObjectId.GetDynBlockValue("节点序号") + "'";
+                    mark2 = br.ObjectId.GetDynBlockValue("节点序号") ;
+                }
 
                 var offset1x = Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点1 X"));
                 var offset1y = Convert.ToDouble(br.ObjectId.GetDynBlockValue("节点1 Y"));

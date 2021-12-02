@@ -72,9 +72,15 @@ namespace ThMEPWSS.SprinklerConnect.Service
             dtSeg = dtLinesAll.Distinct().ToList();
 
             DrawUtils.ShowGeometry(dtSeg, "l0DT", 154);
-            //DrawUtils.ShowGeometry(dtOrthogonalSeg, "l0DTlins", 1);
+            DrawUtils.ShowGeometry(dtOrthogonalSeg, "l0DTO", 241);
 
             return dtOrthogonalSeg;
+        }
+
+
+        public static void FilterTooLongSeg(ref List<Line> dtOdtSeg, double DTTol)
+        {
+            dtOdtSeg = dtOdtSeg.Where(x => x.Length <= DTTol).ToList();
         }
 
         /// <summary>
@@ -201,26 +207,27 @@ namespace ThMEPWSS.SprinklerConnect.Service
         }
 
         /// <summary>
-        /// 拆分距离过远的组（没做完）
+        /// 拆分距离过远的组
         /// </summary>
         /// <param name="net"></param>
         /// <param name="distTol"></param>
         /// <returns></returns>
-        public static List<ThSprinklerNetGroup> SeparateNetByDist(ThSprinklerNetGroup net, double distTol)
+        public static List<KeyValuePair<double, List<Line>>> SeparateNetByDist(ThSprinklerNetGroup net, double distTol)
         {
-            var separateNet = new List<ThSprinklerNetGroup>();
+            var tempGroup = new List<KeyValuePair<double, List<Line>>>();
+
             if (net.ptsGraph.Count > 1)
             {
                 var regroup = RegroupNetByDist(net, distTol);
 
-                //SeparateNet;
+                tempGroup.AddRange ( SeparateNet(net, regroup));
             }
             else
             {
-                separateNet.Add(net);
+                tempGroup.Add(new KeyValuePair<double, List<Line>>(net.angle, net.GetGraphLines(0)));
             }
 
-            return separateNet;
+            return tempGroup;
         }
 
         /// <summary>
@@ -228,21 +235,64 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// 凸包在整90度有bug不稳
         /// </summary>
         /// <param name="net"></param>
-        public static void SeparateNetByConvexHull(ThSprinklerNetGroup net)
+        public static void FilterGroupNetByConvexHull(ref List<ThSprinklerNetGroup> netList)
         {
-            for (int i = 0; i < net.ptsGraph.Count; i++)
+            var newNetList = new List<ThSprinklerNetGroup>();
+            netList = netList.OrderByDescending(x => x.pts.Count).ToList();
+            var convexList = new List<Polyline>();
+
+            for (int i = 0; i < netList[0].ptsGraph.Count; i++)
             {
-                var netI = net.GetGraphPts(i);
-                var netI2d = netI.Select(x => x.ToPoint2d()).ToList();
-                netI.ForEach(x => DrawUtils.ShowGeometry(x, "l2ConvexPts", 42, 30));
-
-                var convex = netI2d.GetConvexHull();
-                for (int j = 0; j < convex.Count - 1; j++)
-                {
-                    DrawUtils.ShowGeometry(new Line(convex.ElementAt(j).ToPoint3d(), convex.ElementAt(j + 1).ToPoint3d()), "l2Convex", i % 7, 30);
-                }
-
+                var convex = GraphConvexHull(netList[0], i);
+                convexList.Add(convex);
+                DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", 0, i), 0 % 7, 30);
             }
+
+            newNetList.Add(netList[0]);
+
+            for (int i = 1; i < netList.Count; i++)
+            {
+                var net = netList[i];
+                var lineList = new List<Line>();
+
+                for (int j = net.ptsGraph.Count - 1; j >= 0; j--)
+                {
+                    var convex = GraphConvexHull(net, j);
+                    DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", i, j), i % 7, 30);
+
+                    var containby = convexList.Where(x => x.Contains(convex));
+                    if (containby.Count() == 0)
+                    {
+                        convexList.Add(convex);
+                        lineList.AddRange(net.GetGraphLines(j));
+                    }
+                }
+                if (lineList.Count > 0)
+                {
+                    var newNet = ThSprinklerNetGraphService.CreateNetwork(net.angle, lineList);
+                    newNetList.Add(newNet);
+                }
+            }
+            netList = newNetList;
+
+        }
+
+        private static Polyline GraphConvexHull(ThSprinklerNetGroup net, int graphIdx)
+        {
+            var convexPl = new Polyline();
+            var netI = net.GetGraphPts(graphIdx);
+            var netI2d = netI.Select(x => x.ToPoint2d()).ToList();
+            netI.ForEach(x => DrawUtils.ShowGeometry(x, "l4ConvexPts", 42, 30));
+
+            var convex = netI2d.GetConvexHull();
+
+            for (int j = 0; j < convex.Count; j++)
+            {
+                convexPl.AddVertexAt(convexPl.NumberOfVertices, convex.ElementAt(j), 0, 0, 0);
+            }
+            convexPl.Closed = true;
+
+            return convexPl;
         }
 
         /// <summary>
@@ -340,8 +390,19 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// 
         /// </summary>
         /// <param name="net"></param>
-        public static void SeparateNet(ThSprinklerNetGroup net)
+        public static List<KeyValuePair<double, List<Line>>> SeparateNet(ThSprinklerNetGroup net, Dictionary<int, List<int>> group)
         {
+            var newGroup =new List<KeyValuePair<double, List<Line>>>();
+
+            for (int i = 0; i < group.Count; i++)
+            {
+                var groupTemp = new KeyValuePair<double, List<Line>>(net.angle, new List<Line>());
+                var groupIdx = group.ElementAt(i).Value;
+                groupIdx.ForEach(x => groupTemp.Value.AddRange(net.GetGraphLines(x)));
+                newGroup.Add (groupTemp); 
+            }
+
+            return newGroup;
 
         }
 
@@ -434,6 +495,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             return filterGroup;
         }
+
+
+
 
     }
 }

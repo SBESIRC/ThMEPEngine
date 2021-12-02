@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.UI.UI;
+using ThMEPLighting.UI.WiringConnecting;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPLighting.UI
@@ -7,15 +8,19 @@ namespace ThMEPLighting.UI
     public class MEPLightingUIApp : IExtensionApplication
     {
         uiEvaIndicatorSign uiSign = null;
+        ThWiringConnectingUI uiConnect = null;
         public void Initialize()
         {
             uiSign = null;
+            uiConnect = null;
         }
 
         public void Terminate()
         {
             uiSign = null;
+            uiConnect = null;
         }
+
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
         public void THSSUI()
         {
@@ -50,6 +55,19 @@ namespace ThMEPLighting.UI
         {
             var ui = new TianHua.Lighting.UI.uiThLighting();
             AcadApp.ShowModelessWindow(ui);
+        }
+
+        /// <summary>
+        /// 天华连线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THLX", CommandFlags.Modal)]
+        public void THLX()
+        {
+            if (uiConnect == null)
+            {
+                uiConnect = new ThWiringConnectingUI();
+            }
+            AcadApp.ShowModelessWindow(uiConnect);
         }
     }
 }

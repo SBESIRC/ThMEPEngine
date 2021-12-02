@@ -1,6 +1,4 @@
-﻿using AcHelper.Commands;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using NFox.Cad;
@@ -8,9 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Algorithm.GraphDomain;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Engine;
 using ThMEPLighting.ParkingStall.CAD;
 using ThMEPLighting.ParkingStall.Model;
 using ThMEPLighting.ParkingStall.Worker.LightConnect;
@@ -19,7 +18,7 @@ using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.ParkingStall.Core
 {
-    class ParkLightConnectCommand : IAcadCommand, IDisposable
+    class ParkLightConnectCommand : ThMEPBaseCommand, IDisposable
     {
         List<LightBlockReference> _areaLightBlocks;//灯块
         BaseElement _baseElement;
@@ -45,8 +44,10 @@ namespace ThMEPLighting.ParkingStall.Core
             _allCalcALLines = new List<Line>();
             _allGraphRoutes = new List<GraphRoute>();
             _dbScanClusterSingleMaxCount = ThParkingStallService.Instance.GroupMaxLightCount;
+            CommandName = "THCWZMLX";
+            ActionName = "车位照明连线";
         }
-        public void Execute()
+        public override void SubExecute()
         {
             if (null == _polygonInfo)
                 return;

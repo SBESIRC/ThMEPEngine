@@ -6,10 +6,13 @@ using System.Text;
 
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using AcHelper;
 
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.IO;
 using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
@@ -17,145 +20,46 @@ using ThMEPElectrical.FireAlarm;
 using ThMEPElectrical.FireAlarmSmokeHeat.Data;
 using ThMEPElectrical.FireAlarmSmokeHeat.Service;
 using ThMEPElectrical.FireAlarmSmokeHeat.Model;
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmSmokeHeat
 {
-    public class ThFireAlarmSmokeHeatCmdsNoUI
-    {
-        [CommandMethod("TIANHUACAD", "THSmokeLayout", CommandFlags.Modal)]
-        public void FireAlarmSmokeHeatCmd()
-        {
-            using (var cmd = new ThFireAlarmSmokeHeatCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        public void ThCleanDebugLayer()
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                Common.ThFaCleanService.ClearDrawing();
-            }
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThFaDataGJson", CommandFlags.Modal)]
-        public void ThFaDataGJson()
-        {
-            var extractBlkList = ThFaCommon.BlkNameList;
-            var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Smoke, ThFaCommon.BlkName_Heat };
-            var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-
-            //画框，提数据，转数据
-            var pts = ThFireAlarmUtils.GetFrameBlk();
-            if (pts.Count == 0)
-            {
-                return;
-            }
-            var bBean = true;
-            var wallThick = 50;
-            var theta = 0;
-            var floorHight = 2;
-            var layoutType = ThFaSmokeCommon.layoutType.smoke;
-
-            var geos = ThFireAlarmUtils.WriteSmokeData(pts, extractBlkList, bBean, wallThick);
-            if (geos.Count == 0)
-            {
-                return;
-            }
-
-            var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
-
-            DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
-            DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
-            DrawUtils.ShowGeometry(dataQuery.Columns.Select(x => x.Boundary).ToList(), "l0Column", 3);
-            DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
-            DrawUtils.ShowGeometry(dataQuery.Holes.Select(x => x.Boundary).ToList(), "l0hole", 140);
-            DrawUtils.ShowGeometry(dataQuery.DetectArea.Select(x => x.Boundary).ToList(), "l0DetectArea", 96);
-            //洞,必须先做找到框线
-            dataQuery.AnalysisHoles();
-            var roomType = ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
-
-            foreach (var frame in dataQuery.FrameList)
-            {
-                DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
-                DrawUtils.ShowGeometry(frame.GetPoint3dAt(0), string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
-
-                //var radius = ThFaAreaLayoutParamterCalculationService.calculateRadius(frame.Area,floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
-                //DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
-            }
-
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThGetOffsetCurveTest", CommandFlags.Modal)]
-        public void ThGetOffsetCurveTest()
-        {
-            var frame = ThFireAlarmUtils.SelectFrame();
-            var dir = 1;
-            if (frame.IsCCW() == false)
-            {
-                dir = -1;
-            }
-            var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
-            DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
-        }
-
-
-    }
-
     public class ThFireAlarmSmokeHeatCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs;
+        private bool UseUI { get; set; }
 
         private int _theta = 0;
-        private int _floorHight = 0;
+        private int _floorHight = 2;
         private double _scale = 100;
         private bool _referBeam = true;
         private double _wallThick = 100;
-        public ThFireAlarmSmokeHeatCmd(FireAlarmViewModel uiConfigs)
+
+        public ThFireAlarmSmokeHeatCmd(bool UI)
         {
-            _UiConfigs = uiConfigs;
+            UseUI = UI;
+            InitialCmdInfo();
+            InitialSetting();
+        }
+        private void InitialCmdInfo()
+        {
             CommandName = "THFireAlarmSmokeLayout";
             ActionName = "布置";
-            SetInfo();
         }
-
-        public ThFireAlarmSmokeHeatCmd()
+        private void InitialSetting()
         {
-            SetInfo();
+            if (UseUI == true)
+            {
+                _theta = FireAlarmSetting.Instance.RoofGrade;
+                _floorHight = FireAlarmSetting.Instance.RoofHight;
+                _scale = FireAlarmSetting.Instance.Scale;
+                _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
+                _wallThick = FireAlarmSetting.Instance.RoofThickness;
+            }
         }
 
         public override void SubExecute()
         {
             FireAlarmSmokeHeatLayoutExecute();
-        }
-
-        private void SetInfo()
-        {
-            if (_UiConfigs != null)
-            {
-                _theta = _UiConfigs.SelectedIndexForAngle;
-                _floorHight = _UiConfigs.SelectedIndexForH;
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
-                _referBeam = _UiConfigs.ShouldConsiderBeam;
-                _wallThick = 50;
-            }
-            else
-            {
-                _theta = 0;
-                _floorHight = 2;
-                _scale = 100;
-                _referBeam = true;
-                _wallThick = 50;
-            }
         }
 
         public void Dispose()
@@ -167,6 +71,18 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                //画框，提数据，转数据
+                var pts = ThFireAlarmUtils.GetFrameBlk();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+                if (UseUI == false)
+                {
+                    SettingNoUI();
+                }
+
+
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Smoke, ThFaCommon.BlkName_Heat, ThFaCommon.BlkName_Smoke_ExplosionProf, ThFaCommon.BlkName_Heat_ExplosionProf };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -178,14 +94,7 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                //画框，提数据，转数据
-                var pts = ThFireAlarmUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
-
-                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick);
+                var geos = ThFireAlarmUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, true);
                 if (geos.Count == 0)
                 {
                     return;
@@ -244,5 +153,28 @@ namespace ThMEPElectrical.FireAlarmSmokeHeat
 
             }
         }
+        private void SettingNoUI()
+        {
+
+            _theta = 0;
+            _floorHight = 2;
+
+            var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
+            if (beam.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _referBeam = beam.Value == 1 ? true : false;
+
+
+            var wallThick = Active.Editor.GetDouble("\n板厚：");
+            if (wallThick.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _wallThick = wallThick.Value;
+
+        }
+
     }
 }

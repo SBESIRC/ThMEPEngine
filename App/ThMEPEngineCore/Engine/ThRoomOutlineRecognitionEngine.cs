@@ -69,13 +69,16 @@ namespace ThMEPEngineCore.Engine
                 transformer.Transform(curves);
                 var roomSimplifer = new ThRoomOutlineSimplifier();
                 var roomObjs = roomSimplifer.Close(
-                    curves.Cast<Polyline>().ToList()).ToCollection(); // 封闭
+                    curves.OfType<Polyline>().ToList()).ToCollection(); // 封闭
                 roomObjs = roomSimplifer.Normalize(roomObjs); // 处理狭长线
                 roomObjs = roomSimplifer.MakeValid(roomObjs); // 处理自交
                 roomObjs = roomSimplifer.Simplify(roomObjs);  // 处理简化线
                 roomObjs = roomSimplifer.Filter(roomObjs);
                 transformer.Reset(roomObjs);
-                Elements.AddRange(roomObjs.Cast<Polyline>().Select(o => ThIfcRoom.Create(o)));
+                Elements.AddRange(roomObjs.OfType<Polyline>().Select(o => ThIfcRoom.Create(o)));
+                var ellipseRoom = curves.OfType<Ellipse>().ToList().ToCollection();
+                transformer.Reset(ellipseRoom);
+                Elements.AddRange(ellipseRoom.OfType<Ellipse>().Select(o => ThIfcRoom.Create(o)));
             }
         }
 

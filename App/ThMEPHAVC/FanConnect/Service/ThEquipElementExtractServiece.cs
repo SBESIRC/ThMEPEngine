@@ -14,12 +14,12 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     public class ThEquipElementExtractServiece
     {
-        public static List<ThFanCUModel> GetFCUModels(Point3dCollection selectArea)
+        public static List<ThFanCUModel> GetFCUModels()
         {
             using (var database = AcadDatabase.Active())
             {
                 var fcuEngine = new ThFanCURecognitionEngine();
-                var retFcu = fcuEngine.Extract(database.Database, selectArea);
+                var retFcu = fcuEngine.Extract(database.Database);
                 return retFcu;
             }
         }
@@ -28,7 +28,7 @@ namespace ThMEPHVAC.FanConnect.Service
             using (var database = AcadDatabase.Active())
             {
                 var retLines = new List<Line>();
-                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains("AI-水管路由示意")).ToList();
+                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains("AI-水管路由")).ToList();
                 foreach(var l in tmpLines)
                 {
                     if(l is Line)

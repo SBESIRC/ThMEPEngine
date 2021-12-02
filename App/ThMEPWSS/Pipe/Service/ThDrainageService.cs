@@ -4784,6 +4784,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             var entityLayer = entity.Layer;
             entityLayer = GetEffectiveLayer(entityLayer);
             static bool isDLineLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && !layer.Contains(THESAURUSDEVIANT);
+            static bool isVentLayer(string layer) => layer != null && layer.Contains(THESAURUSREMNANT) && layer.Contains(THESAURUSINCENSE) && layer.Contains(THESAURUSDEVIANT);
             if (!HandleGroupAtCurrentModelSpaceOnly)
             {
                 ok_group_handles ??= new HashSet<Handle>();
@@ -4993,6 +4994,31 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     return;
                 }
             }
+            if (isVentLayer(entityLayer))
+            {
+                if (entity is Line line && line.Length > THESAURUSSTAMPEDE)
+                {
+                    var seg = line.ToGLineSegment().TransformBy(matrix);
+                    reg(fs, seg, vlines);
+                    return;
+                }
+                else if (entity is Polyline pl)
+                {
+                    foreach (var ln in pl.ExplodeToDBObjectCollection().OfType<Line>())
+                    {
+                        var seg = ln.ToGLineSegment().TransformBy(matrix);
+                        reg(fs, seg, vlines);
+                    }
+                    return;
+                }
+                if (dxfName is DISORGANIZATION)
+                {
+                    dynamic o = entity;
+                    var seg = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint).TransformBy(matrix);
+                    reg(fs, seg, vlines);
+                    return;
+                }
+            }
             if (dxfName is DISORGANIZATION)
             {
                 if (entityLayer is THESAURUSSINCERE or THESAURUSJUBILEE)
@@ -5128,6 +5154,17 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             {
                 var _name = br.GetEffectiveName() ?? THESAURUSDEPLORE;
                 var name = GetEffectiveBRName(_name);
+                if (name is THESAURUSDENOUNCE)
+                {
+                    var bd = br.Bounds.ToGRect().TransformBy(matrix);
+                    var pl = new Polygon(br.Bounds.ToGRect().ToLinearRing(matrix));
+                    fs.Add(new KeyValuePair<Geometry, Action>(bd.ToPolygon(), () =>
+                    {
+                        geoData.CleaningPorts.Add(pl);
+                        geoData.CleaningPortBasePoints.Add(br.Position.TransformBy(matrix).ToPoint2d());
+                    }));
+                    return;
+                }
                 if (xstNames.Contains(name))
                 {
                     var bd = br.Bounds.ToGRect().TransformBy(matrix);
@@ -5796,11 +5833,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 {
                     var e = DrawRectLazy(geoData.WashingMachines[cadDataMain.WashingMachines.IndexOf(o)]).ColorIndex = THESAURUSHOUSING;
                 }
-                foreach (var o in item.CleaningPorts)
-                {
-                    var m = geoData.CleaningPorts[cadDataMain.CleaningPorts.IndexOf(o)];
-                    DrawRectLazy(GRect.Create(m, DISPENSABLENESS));
-                }
                 foreach (var o in item.DownWaterPorts)
                 {
                     DrawRectLazy(geoData.DownWaterPorts[cadDataMain.DownWaterPorts.IndexOf(o)]);
@@ -6094,7 +6126,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             var pts = GeoFac.GetAlivePoints(segs.Distinct().ToList(), radius: radius);
                             {
                                 var _pts = pts.Select(x => new GCircle(x, radius).ToCirclePolygon(SUPERLATIVENESS, INTRAVASCULARLY)).ToGeometryList();
-                                var killer = GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.WaterPorts).Concat(item.CleaningPorts).Concat(item.FloorDrains).Distinct().ToList());
+                                var killer = GeoFac.CreateGeometryEx(item.VerticalPipes.Concat(item.WaterPorts).Concat(item.FloorDrains).Distinct().ToList());
                                 pts = pts.Except(F(_pts)(killer).Select(_pts).ToList(pts)).ToList();
                             }
                             foreach (var pt in pts)
@@ -6783,7 +6815,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<GRect> WashingMachines;
         public List<GRect> Basins;
         public List<GRect> MopPools;
-        public List<Point2d> CleaningPorts;
+        public List<Geometry> CleaningPorts;
+        public HashSet<Point2d> CleaningPortBasePoints;
         public List<Point2d> SideFloorDrains;
         public List<GRect> PipeKillers;
         public List<GRect> DownWaterPorts;
@@ -6792,6 +6825,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<KeyValuePair<Point2d, string>> WrappingPipeRadius;
         public List<GLineSegment> WrappingPipeLabelLines;
         public List<CText> WrappingPipeLabels;
+        public List<StoreyInfo> StoreyInfos;
         public List<GRect> zbqs;
         public List<GRect> xsts;
         public void Init()
@@ -6813,7 +6847,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             WaterPortLabels ??= new List<string>();
             WashingMachines ??= new List<GRect>();
             Basins ??= new List<GRect>();
-            CleaningPorts ??= new List<Point2d>();
+            CleaningPorts ??= new List<Geometry>();
+            CleaningPortBasePoints ??= new HashSet<Point2d>();
             SideFloorDrains ??= new List<Point2d>();
             PipeKillers ??= new List<GRect>();
             MopPools ??= new List<GRect>();
@@ -6823,6 +6858,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             WrappingPipeRadius ??= new List<KeyValuePair<Point2d, string>>();
             WrappingPipeLabelLines ??= new List<GLineSegment>();
             WrappingPipeLabels ??= new List<CText>();
+            StoreyInfos ??= new List<StoreyInfo>();
         }
         Dictionary<Point2d, string> floorDrainTypeDict;
         public void UpdateFloorDrainTypeDict(Point2d bd, string v)
@@ -6900,13 +6936,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<Geometry> Labels;
         public List<Geometry> LabelLines;
         public List<Geometry> DLines;
+        public List<Geometry> VLines;
         public List<Geometry> VerticalPipes;
         public List<Geometry> WrappingPipes;
         public List<Geometry> FloorDrains;
         public List<Geometry> WaterPorts;
         public List<Geometry> WaterWells;
         public List<Geometry> WashingMachines;
-        public List<Geometry> CleaningPorts;
         public List<Geometry> SideFloorDrains;
         public List<Geometry> PipeKillers;
         public List<Geometry> Basins;
@@ -6919,13 +6955,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             Labels ??= new List<Geometry>();
             LabelLines ??= new List<Geometry>();
             DLines ??= new List<Geometry>();
+            VLines ??= new List<Geometry>();
             VerticalPipes ??= new List<Geometry>();
             WrappingPipes ??= new List<Geometry>();
             FloorDrains ??= new List<Geometry>();
             WaterPorts ??= new List<Geometry>();
             WaterWells ??= new List<Geometry>();
             WashingMachines ??= new List<Geometry>();
-            CleaningPorts ??= new List<Geometry>();
             SideFloorDrains ??= new List<Geometry>();
             PipeKillers ??= new List<Geometry>();
             Basins ??= new List<Geometry>();
@@ -6943,6 +6979,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (INTRAVASCULARLY) o.LabelLines.AddRange(data.LabelLines.Select(NewMethod(bfSize)));
             else o.LabelLines.AddRange(data.LabelLines.Select(ConvertLabelLinesF()));
             o.DLines.AddRange(data.DLines.Select(ConvertDLinesF()));
+            o.VLines.AddRange(data.VLines.Select(ConvertVLinesF()));
             o.WrappingPipes.AddRange(data.WrappingPipes.Select(ConvertWrappingPipesF()));
             if (INTRAVASCULARLY) o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesPreciseF()));
             else o.VerticalPipes.AddRange(data.VerticalPipes.Select(ConvertVerticalPipesF()));
@@ -6952,7 +6989,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             o.WashingMachines.AddRange(data.WashingMachines.Select(ConvertWashingMachinesF()));
             o.Basins.AddRange(data.Basins.Select(ConvertWashingMachinesF()));
             o.MopPools.AddRange(data.MopPools.Select(ConvertWashingMachinesF()));
-            o.CleaningPorts.AddRange(data.CleaningPorts.Select(ConvertCleaningPortsF()));
             o.SideFloorDrains.AddRange(data.SideFloorDrains.Select(ConvertSideFloorDrains()));
             o.PipeKillers.AddRange(data.PipeKillers.Select(x => x.ToPolygon()));
             o.DownWaterPorts.AddRange(data.DownWaterPorts.Select(x => x.ToPolygon()));
@@ -7018,13 +7054,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             ret.AddRange(Labels);
             ret.AddRange(LabelLines);
             ret.AddRange(DLines);
+            ret.AddRange(VLines);
             ret.AddRange(VerticalPipes);
             ret.AddRange(WrappingPipes);
             ret.AddRange(FloorDrains);
             ret.AddRange(WaterPorts);
             ret.AddRange(WaterWells);
             ret.AddRange(WashingMachines);
-            ret.AddRange(CleaningPorts);
             ret.AddRange(SideFloorDrains);
             ret.AddRange(PipeKillers);
             ret.AddRange(Basins);
@@ -7046,13 +7082,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 o.Labels.AddRange(objs.Where(x => this.Labels.Contains(x)));
                 o.LabelLines.AddRange(objs.Where(x => this.LabelLines.Contains(x)));
                 o.DLines.AddRange(objs.Where(x => this.DLines.Contains(x)));
+                o.VLines.AddRange(objs.Where(x => this.VLines.Contains(x)));
                 o.VerticalPipes.AddRange(objs.Where(x => this.VerticalPipes.Contains(x)));
                 o.WrappingPipes.AddRange(objs.Where(x => this.WrappingPipes.Contains(x)));
                 o.FloorDrains.AddRange(objs.Where(x => this.FloorDrains.Contains(x)));
                 o.WaterPorts.AddRange(objs.Where(x => this.WaterPorts.Contains(x)));
                 o.WaterWells.AddRange(objs.Where(x => this.WaterWells.Contains(x)));
                 o.WashingMachines.AddRange(objs.Where(x => this.WashingMachines.Contains(x)));
-                o.CleaningPorts.AddRange(objs.Where(x => this.CleaningPorts.Contains(x)));
                 o.SideFloorDrains.AddRange(objs.Where(x => this.SideFloorDrains.Contains(x)));
                 o.PipeKillers.AddRange(objs.Where(x => this.PipeKillers.Contains(x)));
                 o.Basins.AddRange(objs.Where(x => this.Basins.Contains(x)));

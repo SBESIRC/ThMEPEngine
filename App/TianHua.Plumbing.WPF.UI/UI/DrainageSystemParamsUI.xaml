@@ -74,7 +74,7 @@
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Row="0"  Margin="0,5,0,5" Grid.Column="0" Content="洗衣地漏："></Label>
-                    <ComboBox Grid.Row="0"  Margin="0,5,0,5" Grid.Column="1" x:Name="FloorDrain" Width="80" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+                    <ComboBox Grid.Row="0"  Margin="0,5,0,5" Grid.Column="1" x:Name="cbxFloorDrain" Width="80" SelectedIndex="0" Text="{Binding WashingMachineFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
                     <Label Grid.Row="1"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆："></Label>
                     <ComboBox Grid.Row="1" Margin="0,0,0,5" Grid.Column="1" x:Name="Basin" Width="80" Text="{Binding Basin,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
                     <Label Grid.Row="2"  Margin="0,0,0,5" Grid.Column="0" Content="厨房洗涤盆管径："></Label>

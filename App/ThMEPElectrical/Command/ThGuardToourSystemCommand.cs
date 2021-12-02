@@ -18,18 +18,25 @@ using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThGuardToourSystemCommand : IAcadCommand, IDisposable
+    public class ThGuardToourSystemCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThGuardToourSystemCommand()
+        {
+            this.ActionName="安防平面-电子巡更系统布置";
+            this.CommandName="THGTSYSTEM";
+        }
+
         public void Dispose()
         {
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

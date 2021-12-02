@@ -1,19 +1,26 @@
 ﻿using System;
-using AcHelper.Commands;
+using ThMEPEngineCore.Command;
 using TianHua.Hvac.UI.LoadCalculation.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
-    public class ThHvacOutdoorVentilationCmd : IAcadCommand, IDisposable
+    public class ThHvacOutdoorVentilationCmd : ThMEPBaseCommand, IDisposable
     {
         OutdoorParameterSetting loadCalculation;
+
+        public ThHvacOutdoorVentilationCmd()
+        {
+            CommandName = "THSWSZ";
+            ActionName = "室外参数设置";
+        }
+
         public void Dispose()
         {
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             if (null != loadCalculation && loadCalculation.IsLoaded)
                 return;

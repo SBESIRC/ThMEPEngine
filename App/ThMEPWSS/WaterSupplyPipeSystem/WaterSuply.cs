@@ -124,7 +124,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem
 
             //提取本地块内的房间名称
             var markExtractEngine = new ThWaterRoomMarkExtractionEngine();
-            markExtractEngine.Extract(acadDatabase.Database);
+            markExtractEngine.ExtractFromMS(acadDatabase.Database);
 
             var markRecognizeEngine = new ThRoomMarkRecognitionEngine();
             markRecognizeEngine.Recognize(markExtractEngine.Results, selectArea);

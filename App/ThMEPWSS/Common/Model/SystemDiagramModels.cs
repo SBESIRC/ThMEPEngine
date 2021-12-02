@@ -497,8 +497,8 @@ namespace ThMEPWSS.Uitl
             if (matrix == Matrix3d.Identity) return this.ToLinearRing();
             var p1 = this.LeftTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
             var p2 = this.LeftButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
-            var p3 = this.RightTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
-            var p4 = this.RightButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p3 = this.RightButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p4 = this.RightTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
             return new LinearRing(new Coordinate[] { p1, p2, p3, p4, p1 });
         }
         public GRect TransformBy(Matrix3d matrix)

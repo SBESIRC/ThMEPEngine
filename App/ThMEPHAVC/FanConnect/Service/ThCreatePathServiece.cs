@@ -9,6 +9,8 @@ using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using NFox.Cad;
 using ThCADExtension;
+using ThMEPWSS.HydrantConnectPipe.Command;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -24,7 +26,13 @@ namespace ThMEPHVAC.FanConnect.Service
         public void InitData()
         {
             HoleIndex = new ThCADCoreNTSSpatialIndex(ObstacleHoles.ToCollection());
-            RoomIndex = new ThCADCoreNTSSpatialIndex(ObstacleRooms.ToCollection());
+
+            var tmpLines = new List<Line>();
+            foreach(var room in ObstacleRooms)
+            {
+                tmpLines.AddRange(room.ToLines());
+            }
+            RoomIndex = new ThCADCoreNTSSpatialIndex(tmpLines.ToCollection());
         }
         public Polyline CreatePath(ThFanCUModel model)
         {
@@ -47,11 +55,14 @@ namespace ThMEPHVAC.FanConnect.Service
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
         {
+            var collection = ObstacleHoles.ToCollection();
+            collection.Add(model.FanObb);
             //根据model的类型，先走一步
             var stepPt = TakeStep(model.FanObb, model.FanPoint,500);
             //根据model位置和line，构建一个框frame
             var frame = ThFanConnectUtils.CreateMapFrame(line, stepPt,10000);
             //提取frame里面的hole和room
+            HoleIndex.Reset(collection);
             var dbHoles = HoleIndex.SelectCrossingPolygon(frame);
             var holes = new List<Polyline>();
             foreach (var dbHole in dbHoles)
@@ -71,25 +82,13 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
             }
             //----简单的一条延伸线且不穿洞
-            var tmpLine = CreateSymbolLine(frame, line, stepPt, holes, rooms);
-            if (tmpLine != null)
-            {
-                return tmpLine;
-            }
-            else
+            var retLine = CreateSymbolLine(frame, line, stepPt, holes, rooms);
+            if (retLine == null)
             {
                 //使用A*算法，跑出路径
-                tmpLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
+                retLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
             }
-            var pts = tmpLine.Vertices();
-
-            var retLine = new Polyline();
             retLine.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
-
-            for(int i = 0; i < pts.Count;i++)
-            {
-                retLine.AddVertexAt(i+1, pts[i].ToPoint2D(), 0.0, 0.0, 0.0);
-            }
             return retLine;
         }
 
@@ -143,7 +142,9 @@ namespace ThMEPHVAC.FanConnect.Service
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
             AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
             var costGetter = new ToLineCostGetterEx();
+            var pathAdjuster = new ThFanPipeAdjustPath();
             aStarRoute.costGetter = costGetter;
+            aStarRoute.PathAdjuster = pathAdjuster;
             //----设置障碍物
             aStarRoute.SetObstacle(holes);
             //----设置房间

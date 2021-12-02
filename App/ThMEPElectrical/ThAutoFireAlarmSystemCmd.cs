@@ -1,18 +1,5 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using GeometryExtensions;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical.Command;
-using ThMEPElectrical.SystemDiagram.Engine;
-using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPElectrical.SystemDiagram.Service;
-using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical
 {

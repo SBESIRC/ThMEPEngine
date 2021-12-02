@@ -1,4 +1,6 @@
-﻿using System.Collections.ObjectModel;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.ViewModel
@@ -7,6 +9,7 @@ namespace ThMEPWSS.ViewModel
     {
         public string BlockName { get; set; }
         private ObservableCollection<BlockNameConfigViewModel> _configList { get; set; }
+        public Dictionary<string,DBObjectCollection> Frames { get; set; }
         public ObservableCollection<BlockNameConfigViewModel> ConfigList 
         {
             get { return _configList; }
@@ -18,6 +21,7 @@ namespace ThMEPWSS.ViewModel
         }
         public BlockConfigSetViewModel()
         {
+            Frames = new Dictionary<string, DBObjectCollection>();
             this.ConfigList = new ObservableCollection<BlockNameConfigViewModel>();
         }
         public BlockConfigSetViewModel Clone()
@@ -29,8 +33,14 @@ namespace ThMEPWSS.ViewModel
                 var configClone = new BlockNameConfigViewModel((string)(config.layerName?.Clone()));
                 cloned.ConfigList.Add(configClone);
             }
+            foreach (var frame in Frames)
+            {
+                cloned.Frames.Add(frame.Key,frame.Value);
+            }
+
             return cloned;
         }
+
     }
     public class BlockNameConfigViewModel : NotifyPropertyChangedBase
     {

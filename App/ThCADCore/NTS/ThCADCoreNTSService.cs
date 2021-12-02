@@ -20,6 +20,7 @@ namespace ThCADCore.NTS
         public bool PrecisionReduce { get; set; }
 
         public double AcadGlobalTolerance = 1e-8;
+        public double ChordHeightTolerance = 50.0;
         public double ArcTessellationLength { get; set; } = 1000.0;
 
         private GeometryFactory geometryFactory;

@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -41,7 +42,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             //先提取楼层框线
             var storeyExtractor = new ThAFASEStoreyExtractor()
             {
-                ElementLayer = "AI-楼层框定E",
+                // ElementLayer = "AI-楼层框定E",
+                ElementLayer = "AD-FLOOR-AREA",
                 Transformer = Transformer,
             };
             storeyExtractor.Extract(database, collection);
@@ -226,5 +228,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             handleBufferService.Handle();
             return handleBufferService.Walls;
         }
+
     }
 }

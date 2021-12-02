@@ -351,8 +351,8 @@ namespace ThMEPEngineCore.CAD
         {
             //first完全包含second
             //second所有的点在A的内部，且没有任何一个点在A的边界上
-            var firstPolygon = first.ToNTSPolygon();
-            var secondPolygon = second.ToNTSPolygon();
+            var firstPolygon = first.ToNTSPolygonalGeometry();
+            var secondPolygon = second.ToNTSPolygonalGeometry();
             if (firstPolygon == null || secondPolygon == null)
             {
                 return false;

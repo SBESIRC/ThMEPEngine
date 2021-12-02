@@ -19,60 +19,61 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
     class StructureDealer
     {
         /// <summary>
-        /// 将多边形分割成四边形或三角形列表
-        ///  每次只切一刀，将一个多边形切成两个多边形，然后分别对切割后的多边形进行递归切割
+        /// Split Polyline
         /// </summary>
-        /// <param name="tuples">要分割的图形（多于4边）</param>
-        /// <returns>分割后的图形</returns>
+        /// <param name="tuples">the polyline will be split</param>
+        /// <returns>a list of polylines splited</returns>
         public static void SplitPolyline(List<Tuple<Point3d, Point3d>> tuples, List<List<Tuple<Point3d, Point3d>>> tupleLines)
         {
             //Recursion boundary
             int n = tuples.Count;
-            if (n == 0)
+            if (n == 0 || n > 10)
             {
                 return;
             }
-            if (n <= 5) // 只有当符合条件的时候才在数据库中加入这个多边形（不会再分割）
+            if (n <= 5)
             {
                 tupleLines.Add(tuples);
                 return;
             }
 
             //Initialization
-            Polyline polyline = LineDealer.Tuples2Polyline(tuples);
+            //Polyline polyline = LineDealer.Tuples2Polyline(tuples);
             tuples = LineDealer.OrderTuples(tuples);
-            double area = polyline.Area;
-            double halfArea = area / 2.0;
-            double minCmp = double.MaxValue;
-            double curCmp;
+            n = tuples.Count;
+            //double area = polyline.Area;
+            //double halfArea = area / 2.0;
+            //double minCmp = double.MaxValue;
+            //double curCmp;
             int halfCnt = n / 2;
-            List<Tuple<Point3d, Point3d>> tmpTuplesA = new List<Tuple<Point3d, Point3d>>();
-            List<Tuple<Point3d, Point3d>> tmpTuplesB = new List<Tuple<Point3d, Point3d>>();
             List<Tuple<Point3d, Point3d>> tuplesA = new List<Tuple<Point3d, Point3d>>();
             List<Tuple<Point3d, Point3d>> tuplesB = new List<Tuple<Point3d, Point3d>>();
-            double areaA;
-            double areaB;
+            //double areaA;
+            //double areaB;
             int splitA;
             int splitB;
             int flag;
-            //double mindis = double.MaxValue;
-            //double curdis;
+            double mindis = double.MaxValue;
+            double curdis;
 
-            Tuple<Point3d, Point3d> tmpTuple;
             //Catulate
             //find best split
-            //如果边的数量是奇数：遍历n次，每次间隔(n - 1)/2边
-            //如果边的数量是偶数：遍历n/2次，每次间隔n/2边
-            int loopCnt = (n & 1) == 1 ? n : n / 2;
+            int loopCnt = (n & 1) == 1 ? n : (n / 2);
             for (int i = 0; i < loopCnt; ++i)
             {
-                splitA = (i - 1 + n) % n;
-                splitB = (i - 1 + halfCnt) % n;
-                //splitA = i;
-                //splitB = (i + halfCnt) % n;
+                splitA = i;
+                splitB = (i + halfCnt) % n;
+
+                curdis = tuples[splitA].Item1.DistanceTo(tuples[splitB].Item1);
+                //if (curdis > 9000)
+                //{
+                //    continue;
+                //}
 
                 flag = 0;
-                tmpTuple = new Tuple<Point3d, Point3d>(tuples[i].Item1, tuples[(i + halfCnt) % n].Item1);
+                //var x = tuples[splitA].Item1;
+                //var xx = tuples[splitB].Item1;
+                Tuple<Point3d, Point3d> tmpTuple = new Tuple<Point3d, Point3d>(tuples[splitA].Item1, tuples[splitB].Item1);
                 foreach (var curTuple in tuples)
                 {
                     if (LineDealer.IsIntersect(tmpTuple.Item1, tmpTuple.Item2, curTuple.Item1, curTuple.Item2))
@@ -86,20 +87,20 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     continue;
                 }
-
+                var tmpTuplesA = new List<Tuple<Point3d, Point3d>>();
+                var tmpTuplesB = new List<Tuple<Point3d, Point3d>>();
                 Split2Order(tuples, splitA, splitB, tmpTuplesA, tmpTuplesB);
-                areaA = LineDealer.Tuples2Polyline(tmpTuplesA).Area;
-                areaB = LineDealer.Tuples2Polyline(tmpTuplesB).Area;
-                //每一🔪尽可能从中间去切开，找到能把切开后面积的方差最小的，如有面积相似的，找连接线长最短的(连接线长*面积的方差和最小的(此处可调参))
+                //areaA = LineDealer.Tuples2Polyline(tmpTuplesA).Area;
+                //areaB = LineDealer.Tuples2Polyline(tmpTuplesB).Area;
                 //curCmp = (Math.Pow(areaA - halfArea, 2.0) + Math.Pow(areaB - halfArea, 2.0)) * Math.Pow(tuples[i].Item1.DistanceTo(tuples[(i + halfCnt) % n].Item1), 4);
-                curCmp = (Math.Pow(areaA - halfArea, 2.0) + Math.Pow(areaB - halfArea, 2.0)) * Math.Pow(tuples[splitA].Item1.DistanceTo(tuples[splitB].Item1), 4);
+                //curCmp = (Math.Pow(areaA - halfArea, 2.0) + Math.Pow(areaB - halfArea, 2.0)) * Math.Pow(tuples[splitA].Item1.DistanceTo(tuples[splitB].Item1), 4);
 
-                //curdis = tuples[splitA].Item1.DistanceTo(tuples[splitB].Item1);
-                if (curCmp < minCmp)
-                //if(curdis < mindis)
+                
+                //if (curCmp < minCmp)
+                if (curdis < mindis)
                 {
-                    //mindis = curdis;
-                    minCmp = curCmp;
+                    mindis = curdis;
+                    //minCmp = curCmp;
                     tuplesA = tmpTuplesA;
                     tuplesB = tmpTuplesB;
                 }
@@ -123,7 +124,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             tuplesA.Clear();
             tuplesB.Clear();
             int n = tuples.Count;
-            if (splitA > n || splitA < 0 || splitB > n || splitB < 0)
+            if (splitA >= n || splitA < 0 || splitB >= n || splitB < 0)
             {
                 return;
             }
@@ -154,25 +155,64 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="polylineA"></param>
         /// <param name="polylineB"></param>
-        /// <returns></returns>
+        /// <returns>成功（要求有共线）返回合并后的结果，失败返回第一个多边形</returns>
         public static List<Tuple<Point3d, Point3d>> MergePolyline(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB, double tolerance = 1)
         {
-            HashSet<Tuple<Point3d, Point3d>> lineVisited = new HashSet<Tuple<Point3d, Point3d>>();
+            HashSet<Tuple<Point3d, Point3d>> nowTuples = new HashSet<Tuple<Point3d, Point3d>>();
             foreach (var line in polylineA)
             {
-                lineVisited.Add(line);
+                nowTuples.Add(line);
             }
             foreach (var line in polylineB)
             {
                 var converseLine = new Tuple<Point3d, Point3d>(line.Item2, line.Item1);
-                if (lineVisited.Contains(converseLine))
+                if (nowTuples.Contains(converseLine))
                 {
-                    lineVisited.Remove(converseLine);
+                    nowTuples.Remove(converseLine);
                     continue;
                 }
-                lineVisited.Add(line);
+                nowTuples.Add(line);
             }
-            return LineDealer.OrderTuples(lineVisited.ToList());
+            return LineDealer.OrderTuples(nowTuples.ToList(), tolerance);
+        }
+        public static List<Tuple<Point3d, Point3d>> MergePolyline(List<Tuple<Point3d, Point3d>> polylineA, List<Tuple<Point3d, Point3d>> polylineB,
+            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Dictionary<Tuple<Point3d, Point3d>, int> lineVisit, double tolerance = 1)
+        {
+            HashSet<Tuple<Point3d, Point3d>> nowTuples = new HashSet<Tuple<Point3d, Point3d>>();
+            foreach (var lineA in polylineA)
+            {
+                nowTuples.Add(lineA);
+                if (lineVisit.ContainsKey(lineA))
+                {
+                    lineVisit[lineA] = 1;
+                    findPolylineFromLines.Remove(lineA);
+                }
+            }
+            foreach (var lineB in polylineB)
+            {
+                var converseLine = new Tuple<Point3d, Point3d>(lineB.Item2, lineB.Item1);
+                if (nowTuples.Contains(converseLine))
+                {
+                    nowTuples.Remove(converseLine);
+                    if (lineVisit.ContainsKey(converseLine))
+                    {
+                        lineVisit[converseLine] = 2;
+                        lineVisit[lineB] = 2;
+                        findPolylineFromLines.Remove(converseLine);
+                    }
+                    continue;
+                }
+                nowTuples.Add(lineB);
+            }
+            List<Tuple<Point3d, Point3d>> ansTuples = LineDealer.OrderTuples(nowTuples.ToList(), tolerance);
+            foreach (var tuple in ansTuples)
+            {
+                if (!findPolylineFromLines.ContainsKey(tuple))
+                {
+                    findPolylineFromLines.Add(tuple, ansTuples);
+                }
+            }
+            return ansTuples;
         }
 
         /// <summary>
@@ -291,7 +331,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outline"></param>
         /// <param name="toleranceDegree"></param>
         /// <returns></returns>
-        public static Point3d BestConnectPt(Point3d basePt, Point3d verticalPt, List<Point3d> fstPts, List<Point3d> thdPts, List<Polyline> walls, Line closetLine, double toleranceDegree = Math.PI / 4)
+        public static Point3d BestConnectPt(Point3d basePt, Point3d verticalPt, List<Point3d> fstPts, List<Point3d> thdPts, HashSet<Polyline> walls, Line closetLine, double toleranceDegree = Math.PI / 4)
         {
             double baseRadius = basePt.DistanceTo(verticalPt) / Math.Cos(toleranceDegree); // * sec(x)
             baseRadius = baseRadius > 9000 ? 9000 : baseRadius;
@@ -438,16 +478,69 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 将点的连接增加至4个
         /// </summary>
         /// <param name="dicTuples"></param>
-        public static void AddConnectUpToFour(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void AddConnectUpToFour(Dictionary<Point3d, HashSet<Point3d>> dicTuples, 
+            Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Point3dCollection basePts, HashSet<Point3d> itcNearPts)
         {
-            foreach (var dic in dicTuples)
+            double partice = Math.PI / 36;
+            foreach (Point3d basePt in basePts)
             {
-                int cnt = dic.Value.Count;
-                if (cnt == 2 || cnt == 3)
+                if (itcNearPts.Contains(basePt))
                 {
-                    //找到其中角度最接近90度或者180度的
-                    //向另一个方向找点
-
+                    continue;
+                }
+                ShowInfo.ShowPointAsX(basePt, 6, 700);
+                if (dicTuples.ContainsKey(basePt))
+                {
+                    var nowCntPts = dicTuples[basePt].ToList();
+                    int cnt = nowCntPts.Count;
+                    if (cnt == 0)
+                    {
+                        //ShowInfo.ShowPointAsO(basePt, 6, 700);
+                    }
+                    else if (cnt == 1)
+                    {
+                        //ShowInfo.ShowPointAsO(basePt, 6, 700);
+                        var baseVector = nowCntPts[0] - basePt;
+                        for (int i = 1; i <= 3; ++i)
+                        {
+                            var ansPt = GetObject.GetPointByDirection(basePt ,baseVector.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis), basePts, partice * 3);
+                            ShowInfo.DrawLine(ansPt, basePt, 6);
+                        }
+                    }
+                    else if (cnt == 2)
+                    {
+                        //ShowInfo.ShowPointAsO(basePt, 6, 700);
+                        var vecA = nowCntPts[0] - basePt;
+                        var vecB = nowCntPts[1] - basePt;
+                        double baseAngel = vecA.GetAngleTo(vecB);
+                        if (baseAngel > partice * 18 && baseAngel < partice * 22)
+                        {
+                            var ansPtA = GetObject.GetPointByDirection(basePt, -vecA, basePts, partice * 3);
+                            ShowInfo.DrawLine(ansPtA, basePt, 6);
+                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecB, basePts, partice * 3);
+                            ShowInfo.DrawLine(ansPtB, basePt, 6);
+                        }
+                        else if(baseAngel > Math.PI - partice * 4)
+                        {
+                            var ansPtA = GetObject.GetPointByDirection(basePt, vecA + vecB, basePts, partice * 3);
+                            ShowInfo.DrawLine(ansPtA, basePt, 6);
+                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecA - vecB, basePts, partice * 3);
+                            ShowInfo.DrawLine(ansPtB, basePt, 6);
+                        }
+                    }
+                    else if(cnt == 3)
+                    {
+                        ShowInfo.ShowPointAsO(basePt, 6, 700);
+                        //找到最接近90/180的 然后另外一个方向
+                        var findVec = GetObject.GetDirectionByThreeVecs(basePt, nowCntPts[0], nowCntPts[1], nowCntPts[2]);
+                        var ansPt = GetObject.GetPointByDirection(basePt, findVec, basePts, partice * 3);
+                        ShowInfo.DrawLine(ansPt, basePt, 2);
+                    }
+                }
+                else
+                {
+                    ShowInfo.ShowPointAsO(basePt, 2, 1000);
+                    //cnt = 0;
                 }
             }
         }

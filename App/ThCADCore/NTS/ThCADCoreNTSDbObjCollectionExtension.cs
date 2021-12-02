@@ -1,7 +1,7 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using Autodesk.AutoCAD.Geometry;
+using ThCADExtension;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -16,13 +16,13 @@ namespace ThCADCore.NTS
     {
         public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygon());
+            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygonalGeometry());
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection objs)
         {
-            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLineString());
+            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLinealGeometry());
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
@@ -47,7 +47,7 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
-            if(curves.Count>0)
+            if (curves.Count > 0)
             {
                 return curves.UnionGeometries().ToDbCollection();
             }
@@ -97,6 +97,23 @@ namespace ThCADCore.NTS
         public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
             return geometry.ToDbObjects(keepHoles).ToCollection();
+        }
+
+        public static DBObjectCollection Tessellate(this DBObjectCollection curves)
+        {
+            var objs = new DBObjectCollection();
+            foreach (Entity e in curves)
+            {
+                if (e is Ellipse ellipse)
+                {
+                    objs.Add(ellipse.Tessellate(ThCADCoreNTSService.Instance.ChordHeightTolerance));
+                }
+                else
+                {
+                    objs.Add(e);
+                }
+            }
+            return objs;
         }
     }
 }

@@ -74,6 +74,12 @@
     <Compile Include="FireAlarm\uiThFireAlarm.xaml.cs">
       <DependentUpon>uiThFireAlarm.xaml</DependentUpon>
     </Compile>
+    <Compile Include="FireAlarm\UIThFireAlarmNew.xaml.cs">
+      <DependentUpon>UIThFireAlarmNew.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
+      <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
+    </Compile>
     <Compile Include="fmBasementLighting.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -102,14 +108,6 @@
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
-    <Compile Include="WiringConnecting\ThWiringSettingUI.xaml.cs">
-      <DependentUpon>ThWiringSettingUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
-      <DependentUpon>ThWiringConnectingUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="WiringConnecting\ViewModel\ConfigModel.cs" />
-    <Compile Include="WiringConnecting\ViewModel\WiringConnectingViewModel.cs" />
     <EmbeddedResource Include="fmBasementLighting.resx">
       <DependentUpon>fmBasementLighting.cs</DependentUpon>
     </EmbeddedResource>
@@ -264,6 +262,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="FireAlarm\UIThFireAlarmNew.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="FireAlarm\UIThFireAlarmSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -271,14 +277,6 @@
     <Page Include="SystemDiagram\UI\SelectLayers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="WiringConnecting\ThWiringSettingUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="WiringConnecting\ThWiringConnectingUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

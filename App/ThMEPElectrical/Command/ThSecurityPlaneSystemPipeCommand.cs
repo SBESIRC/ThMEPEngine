@@ -17,18 +17,24 @@ using ThMEPElectrical.SecurityPlaneSystem.ConnectPipe;
 using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThSecurityPlaneSystemPipeCommand : IAcadCommand, IDisposable
+    public class ThSecurityPlaneSystemPipeCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThSecurityPlaneSystemPipeCommand()
+        {
+            this.ActionName="安防平面-连线";
+            this.CommandName="THSPPIPE";
+        }
         public void Dispose()
         {
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

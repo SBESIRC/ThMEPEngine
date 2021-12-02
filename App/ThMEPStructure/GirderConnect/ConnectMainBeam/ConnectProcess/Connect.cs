@@ -1,6 +1,4 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,14 +11,8 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.ApplicationServices;
-using NetTopologySuite.Triangulate;
-using NetTopologySuite.LinearReferencing;
-using AcHelper.Commands;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
@@ -33,7 +25,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static HashSet<Tuple<Point3d, Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, List<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns, AcadDatabase acdb = null)
+        public static HashSet<Tuple<Point3d, Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, AcadDatabase acdb = null)
         {
             //Steps:
             //1.1:Get near points of outlines
@@ -62,7 +55,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     borderPts.Add(pt);
                 }
             }
-
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt in borderPt2NearPts.Keys)
@@ -70,6 +62,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     borderPts.Add(borderPt);
                     allPts.Add(borderPt);
                     //ShowInfo.ShowPointAsX(borderPt, 230, 300);
+                    //foreach(var nearpt in borderPt2NearPts[borderPt])
+                    //{
+                    //    ShowInfo.DrawLine(nearpt, borderPt);
+                    //}
                 }
             }
 
@@ -77,49 +73,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //HashSet<Tuple<Point3d, Point3d>> tuples = StructureBuilder.DelaunayTriangulationConnect(allPts);
             HashSet<Tuple<Point3d, Point3d>> tuples = StructureBuilder.VoronoiDiagramConnect(allPts);
 
-            #region test
-            /*
-            //4:Delete borderPoints`s connects && add line of boredrPoint connect with nearPoint
-            HashSet<Point3d> delPts = new HashSet<Point3d>();
-            foreach (var pts in outlineNearPts.Values)
-            {
-                foreach (var pt in pts)
-                {
-                    if (pt is Point3d ptt && !delPts.Contains(ptt))
-                    {
-                        delPts.Add(ptt);
-                    }
-                }
-            }
-            foreach(var pt in borderPts)
-            {
-                if (!delPts.Contains(pt))
-                {
-                    delPts.Add(pt);
-                }
-            }
-
-            HashSet<Point3d> nearPts = new HashSet<Point3d>();
-            foreach (Point3dCollection pts in outlineNearPts.Values)
-            {
-                foreach (Point3d pt in pts)
-                {
-                    nearPts.Add(pt);
-                }
-            }
-            */
-
-            //disposed
-            //删除和近点相连的内点，使只剩一根连线
-            //StructureDealer.DeleteLineConnectToSingle(outlineNearPts, clumnPts, dicTuples);
-
-            //LineDealer.DeleteSameClassLine(delPts, tuples); //注释掉是正确的
-            //LineDealer.DeleteDiffClassLine(borderPts, clumnPts, tuples);//(borderPts, allPts, tuples)
-            //LineDealer.DeleteSameClassLine(borderPts, tuples);
-            //LineDealer.DeleteSameClassLine(nearPts, tuples); //注释掉是正确的
-            //LineDealer.AddSpecialLine(borderPt2NearPts, tuples);
-            #endregion
-
+            //foreach(var tup in tuples)
+            //{
+            //    ShowInfo.DrawLine(tup.Item1, tup.Item2);
+            //}
             Dictionary<Point3d, HashSet<Point3d>> dicTuples = LineDealer.TuplesStandardize(tuples, allPts);
 
             //1.4:find true border points with it`s near point of a outline
@@ -144,34 +101,29 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.DeleteSameClassLine(borderPts, dicTuples);
             LineDealer.DeleteDiffClassLine(borderPts, clumnPts, dicTuples); //重要区分,删除与否要看情况
             LineDealer.AddSpecialLine(outline2BorderNearPts, dicTuples);
+
             //2.1、delete connect up to four
             StructureDealer.DeleteConnectUpToFour(dicTuples, outline2BorderNearPts);
+            
+
             //2.2 close border
             Dictionary<Point3d, Point3d> closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
+            //ShowDic(closeBorderLines, 2);
             //2.3 show off
+            //foreach (var outline2BorderNearPt in outline2BorderNearPts)
+            //{
+            //    foreach (var border2NearPts in outline2BorderNearPt.Value)
+            //    {
+            //        foreach (var nearPt in border2NearPts.Value)
+            //        {
+            //            ShowInfo.DrawLine(border2NearPts.Key, nearPt, 3);
+            //            ShowInfo.DrawLine(nearPt, border2NearPts.Key, 3);
+            //        }
+            //    }
+            //}
 
-            foreach (var outline2BorderNearPt in outline2BorderNearPts)
-            {
-                foreach (var border2NearPts in outline2BorderNearPt.Value)
-                {
-                    foreach (var nearPt in border2NearPts.Value)
-                    {
-                        //ShowInfo.DrawLine(border2NearPts.Key, nearPt, 210);
-                        //ShowInfo.DrawLine(nearPt, border2NearPts.Key, 210);
-                    }
-                }
-            }
-            foreach (var dicTuple in dicTuples)
-            {
-                foreach (Point3d pt in dicTuple.Value)
-                {
-                    //ShowInfo.DrawLine(dicTuple.Key, pt, 130);
-                }
-            }
             foreach (var closeBorderLine in closeBorderLines)
             {
-                //ShowInfo.DrawLine(closeBorderLine.Key, closeBorderLine.Value, 90);
-                //ShowInfo.DrawLine(closeBorderLine.Value, closeBorderLine.Key, 90);
                 if (!dicTuples.ContainsKey(closeBorderLine.Key))
                 {
                     dicTuples.Add(closeBorderLine.Key, new HashSet<Point3d>());
@@ -182,18 +134,96 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 }
             }
 
-            //3.0
+            //3.0 Split & Merge
             LineDealer.DicTuplesStandardize(dicTuples, allPts);
-            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLine = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLine, acdb);
+            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines, acdb);
+            //3.1、splic polyline
+            StructureBuilder.SplitBlock(findPolylineFromLines, acdb, closeBorderLines);
 
-            //3.1、add connect up tp four / splic polyline
-            //StructureDealer.AddConnectUpToFour(dicTuples);
-            //Split polyline && Merge polylines
-            //postponed:May be "split polyline" will be replaced by "connrct nearPt to innerPt to utmost 4"
-            //answer: can not batter than split to four
+            //ShowHash(findPolylineFromLines.Keys.ToList());
+            //3.2、merge fragments and split if possible
+            StructureBuilder.MergeFragments(findPolylineFromLines, acdb, closeBorderLines);
+            var mainBeam = findPolylineFromLines.Keys.ToHashSet();
+            foreach (var borderLine in closeBorderLines)
+            {
+                var tuple = new Tuple<Point3d, Point3d>(borderLine.Key, borderLine.Value);
+                var converseTuple = new Tuple<Point3d, Point3d>(borderLine.Value, borderLine.Key);
+                if (mainBeam.Contains(tuple))
+                {
+                    mainBeam.Remove(tuple);
+                }
+                if (mainBeam.Contains(converseTuple))
+                {
+                    mainBeam.Remove(converseTuple);
+                }
+            }
+            //ShowDic(dicTuples);
+            //4.0 Deal with Intersect Near Pointsnetload
+            dicTuples.Clear();
+            dicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
+            //ShowDic(dicTuples, 1);
+            var itcNearPts = PointsDealer.FindIntersectNearPt(allPts, outlineWalls);
+            
+            //ShowInfo.ShowPoints(itcNearPts.ToList(), 'O', 2, 600);///////////
+            //ShowInfo.ShowPoints(allPts, 'X', 2, 600);
+            LineDealer.DeleteSameClassLine(itcNearPts, mainBeam); //删除相交近点互相之间的连线
+            LineDealer.DeleteDiffClassLine(itcNearPts, borderPts, dicTuples);//删除近点和其连接的边界点之间的连线
+            //LineDealer.DeleteDiffClassLine(itcNearPts, itcNearPts, dicTuples);
 
-            return tuples;
+            //StructureDealer.DeleteConnectUpToFour(dicTuples, outline2BorderNearPts);
+
+            //add to four constrained
+            foreach(var tup in mainBeam)
+            {
+                if (!dicTuples.ContainsKey(tup.Item1))
+                {
+                    dicTuples.Add(tup.Item1, new HashSet<Point3d>());
+                }
+                if (!dicTuples[tup.Item1].Contains(tup.Item2))
+                {
+                    dicTuples[tup.Item1].Add(tup.Item2);
+                }
+                if (!dicTuples.ContainsKey(tup.Item2))
+                {
+                    dicTuples.Add(tup.Item2, new HashSet<Point3d>());
+                }
+                if (!dicTuples[tup.Item2].Contains(tup.Item1))
+                {
+                    dicTuples[tup.Item2].Add(tup.Item1);
+                }
+            }
+
+            StructureDealer.AddConnectUpToFour(dicTuples, outline2BorderNearPts, allPts, itcNearPts);
+            //delete to four
+
+            return mainBeam;
+        }
+
+
+        public static void ShowDic(Dictionary<Point3d, HashSet<Point3d>> dicTuples, int color = 1)
+        {
+            foreach(var dic in dicTuples)
+            {
+                foreach(var pt in dic.Value)
+                {
+                    ShowInfo.DrawLine(dic.Key, pt, color);
+                }
+            }
+        }
+        public static void ShowDic(Dictionary<Point3d, Point3d> dicTuples, int color = 2)
+        {
+            foreach (var dic in dicTuples)
+            {
+                ShowInfo.DrawLine(dic.Key, dic.Value, color);
+            }
+        }
+        public static void ShowHash(List<Tuple<Point3d, Point3d>> tuples, int color = 2)
+        {
+            foreach(var tuple in tuples)
+            {
+                ShowInfo.DrawLine(tuple.Item1, tuple.Item2, color);
+            }
         }
     }
 }

@@ -13,17 +13,24 @@ using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThPolylineAutoFireAlarmSystemCommand : IAcadCommand, IDisposable
+    public class ThPolylineAutoFireAlarmSystemCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThPolylineAutoFireAlarmSystemCommand()
+        {
+            this.ActionName="火灾报警系统图-选择防火分区";
+            this.CommandName="THHZXTP";
+        }
+
         public void Dispose()
         {
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())

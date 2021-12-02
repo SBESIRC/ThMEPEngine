@@ -44,23 +44,40 @@ namespace ThMEPWSS.Command
 
         public override void AfterExecute()
         {
+            base.AfterExecute();
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
         public void CreateFireHydrantSystem(AcadDatabase curDb)
         {
-            var opt = new PromptPointOptions("请指定环管标记起点: \n");
-            var propPtRes = Active.Editor.GetPoint(opt);
-            if (propPtRes.Status != PromptStatus.OK)
+            Autodesk.AutoCAD.Geometry.Point3d loopStartPt;
+            {
+                var opt = new PromptPointOptions("请指定环管标记起点: \n");
+                var propPtRes = Active.Editor.GetPoint(opt);
+                if (propPtRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                loopStartPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+            }
+
+            var selectArea = Common.Utils.SelectAreas();//生成候选区域
+            if (selectArea.Count == 0)
             {
                 return;
             }
 
-            var loopStartPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
-            var selectArea = Common.Utils.SelectAreas();//生成候选区域
             var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
-
+            {
+                var opt = new PromptPointOptions("指定消火栓系统图插入点: \n");
+                var propPtRes = Active.Editor.GetPoint(opt);
+                if (propPtRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                fireHydrantSysOut.InsertPoint = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+            }
             GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
 
             var mainPathList = MainLoop.Get(ref fireHydrantSysIn);//主环提取
@@ -77,7 +94,7 @@ namespace ThMEPWSS.Command
             var visited = new HashSet<Point3dEx>();//访问标志
             visited.AddVisit(mainPathList);
             visited.AddVisit(subPathList);
-            
+
             var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 端点
             var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);

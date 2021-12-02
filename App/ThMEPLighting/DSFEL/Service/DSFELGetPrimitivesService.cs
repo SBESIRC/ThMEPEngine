@@ -1,18 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
+using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
-using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.DSFEL.Service
 {
@@ -30,7 +29,7 @@ namespace ThMEPLighting.DSFEL.Service
         /// <param name="polyline"></param>
         /// <returns></returns>
         public Dictionary<ThIfcRoom, List<Polyline>> GetRoomInfo(Polyline polyline)
-        {   
+        {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var roomEngine = new ThRoomOutlineExtractionEngine();
@@ -72,7 +71,7 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var doors = acdb.ModelSpace
                 .OfType<Polyline>()
-                .Where(o => o.Layer == ThMEPLightingCommon.DOOR_LAYER);
+                .Where(o => o.Layer == ThMEPEngineCoreLayerUtils.DOOR);
                 doors.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
@@ -89,14 +88,14 @@ namespace ThMEPLighting.DSFEL.Service
         /// 获取中心线
         /// </summary>
         /// <returns></returns>
-        public List<Line> GetCentterLines(Polyline frame, List<Polyline> polylines)
+        public List<Line> GetCenterLines(Polyline frame, List<Polyline> polylines)
         {
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var centerLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPLightingCommon.CENTER_LINE_LAYER);
+                .Where(o => o.Layer == ThMEPEngineCoreLayerUtils.CENTERLINE);
                 centerLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
@@ -122,7 +121,7 @@ namespace ThMEPLighting.DSFEL.Service
                 }
                 resLines.AddRange(centerLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList());
             }
-            
+
             //处理车道线
             var handleLines = ThMEPLineExtension.LineSimplifier(resLines.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
             var parkingLinesService = new ParkingLinesService();

@@ -104,11 +104,11 @@ namespace ThMEPElectrical.AFAS.Service
         }
         private DBObjectCollection Difference(Entity firstArea, Entity secondArea)
         {
-            return firstArea.ToNTSPolygon().Difference(secondArea.ToNTSPolygon()).ToDbCollection(true);
+            return firstArea.ToNTSPolygonalGeometry().Difference(secondArea.ToNTSPolygonalGeometry()).ToDbCollection(true);
         }
         private DBObjectCollection DifferenceMP(Entity area, DBObjectCollection intersectObjs)
         {
-            return area.ToNTSPolygon().Difference(intersectObjs.UnionGeometries()).ToDbCollection(true);
+            return area.ToNTSPolygonalGeometry().Difference(intersectObjs.UnionGeometries()).ToDbCollection(true);
         }
     }
 }

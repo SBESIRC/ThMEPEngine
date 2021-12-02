@@ -49,7 +49,7 @@ namespace ThMEPWSS.Sprinkler.Service
         private bool IsOverlap(Entity first, Entity second)
         {
             //规则待定
-            var relateMatrix = new ThCADCoreNTSRelate(first.ToNTSPolygon(), second.ToNTSPolygon());
+            var relateMatrix = new ThCADCoreNTSRelate(first.ToNTSPolygonalGeometry(), second.ToNTSPolygonalGeometry());
             if (relateMatrix.IsOverlaps)
                 return true;
             else if (relateMatrix.IsContains)

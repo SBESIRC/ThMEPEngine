@@ -131,8 +131,10 @@
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\ShowInfo.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UnderUCSOpt.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UpUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Command\THALGLTest.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\SmallDetectUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\LargeDetectUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
@@ -149,7 +151,13 @@
     <Compile Include="ConnectWiring\Data\ThLaneLineExtractor.cs" />
     <Compile Include="ConnectWiring\Model\BlockConfigModel.cs" />
     <Compile Include="ConnectWiring\Service\BlockConfigSrervice.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\BranchConnectingFactory.cs" />
     <Compile Include="ConnectWiring\Service\BranchConnectingService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\CircleConnectService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\ConnectBaseService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\ConnectMethodService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectFactory\PointConnectService.cs" />
+    <Compile Include="ConnectWiring\Service\ConnectingBranckService.cs" />
     <Compile Include="ConnectWiring\Service\LineTypeService.cs" />
     <Compile Include="ConnectWiring\Service\MultiLoopService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
@@ -157,6 +165,7 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
+    <Compile Include="Engine\ThSpatialElementVisitorManager.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
@@ -698,6 +707,7 @@
     <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreExtractCmds.cs" />
+    <Compile Include="ThMEPEngineCoreGeCmds.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
     <Compile Include="ThMEPEngineCoreInternalCmds.cs" />
     <Compile Include="ThMEPEngineCoreLayerUtils.cs" />
@@ -705,6 +715,7 @@
     <Compile Include="ThMEPEngineCoreRoomService.cs" />
     <Compile Include="ThMEPEngineCoreService.cs" />
     <Compile Include="Engine\ThRawBeamRecognitionEngine.cs" />
+    <Compile Include="UCSDivisionService\UCSService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

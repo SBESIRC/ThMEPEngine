@@ -29,7 +29,7 @@ namespace ThMEPEngineCore
     {
 
         [CommandMethod("TIANHUACAD", "THExtractColumn", CommandFlags.Modal)]
-        public void ThExtractColumn()
+        public void  ThExtractColumn()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
@@ -639,15 +639,21 @@ namespace ThMEPEngineCore
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
 
+                // 准备图层
+                var layerId = acadDatabase.Database.CreateAIDoorLayer();
+                if (!layerId.IsValid)
+                {
+                    return ;
+                }
+
                 var doorEngine = new ThDB3DoorRecognitionEngine();
                 doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 doorEngine.Elements.ForEach(o =>
                 {
-                    o.Outline.ColorIndex = 4;
+                    o.Outline.LayerId = layerId;
                     o.Outline.SetDatabaseDefaults();
                     acadDatabase.ModelSpace.Add(o.Outline);
                 });
-
             }
         }
 

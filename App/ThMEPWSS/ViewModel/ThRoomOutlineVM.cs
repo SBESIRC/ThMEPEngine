@@ -1,11 +1,8 @@
 ﻿using AcHelper;
 using DotNetARX;
 using Linq2Acad;
-using ThCADExtension;
-using ThMEPEngineCore;
 using AcHelper.Commands;
 using System.Windows.Input;
-using ThMEPEngineCore.CAD;
 using GalaSoft.MvvmLight.Command;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -42,80 +39,24 @@ namespace ThMEPWSS.ViewModel
             }
         }
 
+        public ICommand PickDoorOutlineCmd
+        {
+            get
+            {
+                return new RelayCommand(PickDoorOutline);
+            }
+        }
+
         private void DrawRoomOutline()
         {
             SetFocusToDwgView();
-            using (var lockDoc = Active.Document.LockDocument())
-            using (var acdb = AcadDatabase.Active())
-            {
-                AddRoomOutlineLayer();
-                UnLockLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
-                SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMOUTLINE);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
-            }
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THKJHZ");
         }
 
         private void DrawRoomSplitline()
         {
             SetFocusToDwgView();
-            using (var lockDoc = Active.Document.LockDocument())
-            using (var acdb = AcadDatabase.Active())
-            {
-                AddRoomSplitlineLayer();
-                UnLockLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
-                SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
-                Active.Document.SendStringToExecute("_Polyline ", true, false, true);
-            }
-        }
-
-        public void ResetCurrentLayer()
-        {
-            using (var lockDoc = Active.Document.LockDocument())
-            {
-                SetCurrentLayer(currentLayer);
-            }  
-        }
-
-        private void DrawRoomOutlineByJig()
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                var poly = ThMEPPolylineEntityJig.PolylineJig(256, "\n选择下一个点");
-                var roomOutline = poly.WashClone();
-                if (roomOutline == null || roomOutline.Area < 1.0)
-                    return;
-                AddRoomOutlineLayer();
-
-                // 添加到图纸中
-                acdb.ModelSpace.Add(roomOutline);
-                roomOutline.Layer = ThMEPEngineCoreLayerUtils.ROOMOUTLINE;
-                roomOutline.ColorIndex = (int)ColorIndex.BYLAYER;
-                roomOutline.LineWeight = LineWeight.ByLayer;
-                roomOutline.Linetype = "ByLayer";
-            }
-        }
-
-        private void DrawRoomSplitlineByJig()
-        {
-            SetFocusToDwgView();
-            using (var lockDoc = Active.Document.LockDocument())
-            using (var acdb = AcadDatabase.Active())
-            {
-                var roomSplitline = ThMEPPolylineEntityJig.PolylineJig(256,"\n选择下一个点",false);
-                if (roomSplitline == null )
-                {
-                    return;
-                }
-                AddRoomSplitlineLayer();
-
-                // 添加到图纸中
-                acdb.ModelSpace.Add(roomSplitline);
-                // 设置到指定图层
-                roomSplitline.Layer = ThMEPEngineCoreLayerUtils.ROOMSPLITLINE;
-                roomSplitline.ColorIndex = (int)ColorIndex.BYLAYER;
-                roomSplitline.LineWeight = LineWeight.ByLayer;
-                roomSplitline.Linetype = "ByLayer";
-            }            
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THKJFG");
         }
 
         private void PickRoomOutline()
@@ -124,38 +65,17 @@ namespace ThMEPWSS.ViewModel
             CommandHandlerBase.ExecuteFromCommandLine(false, "THKJSQ");
         }
 
-        private void AddRoomOutlineLayer()
+        private void PickDoorOutline()
         {
-            using (var acdb = AcadDatabase.Active())
-            {
-                if (!acdb.Layers.Contains(ThMEPEngineCoreLayerUtils.ROOMOUTLINE))
-                {
-                    acdb.Database.CreateAIRoomOutlineLayer();
-                }
-            }
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THEXTRACTDOOR");
         }
 
-        private void AddRoomSplitlineLayer()
+        public void ResetCurrentLayer()
         {
-            using (var acdb = AcadDatabase.Active())
+            using (var lockDoc = Active.Document.LockDocument())
             {
-                if (!acdb.Layers.Contains(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE))
-                {
-                    acdb.Database.CreateAIRoomSplitlineLayer();
-                }
-            }
-        }
-
-        private void UnLockLayer(string layer)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                if (acdb.Layers.Contains(layer))
-                {
-                    acdb.Database.UnLockLayer(layer);
-                    acdb.Database.UnFrozenLayer(layer);
-                    acdb.Database.UnOffLayer(layer);
-                }
+                SetCurrentLayer(currentLayer);
             }
         }
 

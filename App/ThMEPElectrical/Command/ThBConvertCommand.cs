@@ -1,27 +1,29 @@
 ﻿using System;
-using NFox.Cad;
-using AcHelper;
 using System.IO;
-using Linq2Acad;
-using DotNetARX;
 using System.Linq;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+
+using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using AcHelper.Commands;
-using GeometryExtensions;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
-using System.Text.RegularExpressions;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThBConvertCommand : IAcadCommand, IDisposable
+    public class ThBConvertCommand : ThMEPBaseCommand, IDisposable
     {
         readonly static string BConvertConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "提资转换配置表.xlsx");
 
@@ -46,7 +48,8 @@ namespace ThMEPElectrical.Command
         /// <param name="mode"></param>
         public ThBConvertCommand()
         {
-            //
+            CommandName = "THTZZH";
+            ActionName = "提资转换";
         }
 
         public void Dispose()
@@ -72,7 +75,7 @@ namespace ThMEPElectrical.Command
             throw new NotSupportedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase currentDb = AcadDatabase.Active())
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
@@ -125,7 +128,7 @@ namespace ThMEPElectrical.Command
                     // 从图纸中提取集水井提资表表身
                     var collectingWellEngine = new ThBConvertElementExtractionEngine()
                     {
-                        NameFilter = new List<string>{ ThBConvertCommon.COLLECTING_WELL }
+                        NameFilter = new List<string> { ThBConvertCommon.COLLECTING_WELL }
                     };
                     collectingWellEngine.Extract(currentDb.Database);
 
@@ -137,7 +140,7 @@ namespace ThMEPElectrical.Command
                         targetNames.Add(targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME));
 
                         var str = targetBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL);
-                        if(!str.IsNullOrEmpty())
+                        if (!str.IsNullOrEmpty())
                         {
                             targetNames.AddRange(str.Split(','));
                         }
@@ -210,7 +213,7 @@ namespace ThMEPElectrical.Command
                                             {
                                                 transformedBlock = manager.TransformRule(srcName);
                                             }
-                                            else if(ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
+                                            else if (ThStringTools.CompareWithChinesePunctuation(o.CurrentVisibilityStateValue(), visibility))
                                             {
                                                 transformedBlock = manager.TransformRule(
                                                     srcName,

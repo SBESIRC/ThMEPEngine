@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.Model;
+﻿using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Service
 {
@@ -20,6 +15,9 @@ namespace ThMEPElectrical.Service
         public static ThElectricalUIService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
+        /// <summary>
+        /// 安防平面
+        /// </summary>
         public ThSecurityPlaneSystemParameter Parameter = new ThSecurityPlaneSystemParameter();
     }
 }

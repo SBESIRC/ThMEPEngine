@@ -58,7 +58,7 @@ namespace ThMEPWSS.Assistant
         public static LinearRing Offset(this LinearRing lr, Vector2d v) => lr.Offset(v.X, v.Y);
         public static Polygon Offset(this Polygon pl, Vector2d v) => pl.Offset(v.X, v.Y);
         public static GeometryCollection Offset(this GeometryCollection colle, Vector2d v) => colle.Offset(v.X, v.Y);
-        public static Geometry Offset(Geometry geo, Vector2d v) => geo.Offset(v.X, v.Y);
+        public static Geometry Offset(this Geometry geo, Vector2d v) => geo.Offset(v.X, v.Y);
         public static Coordinate Offset(this Coordinate c, double dx, double dy) => new(c.X + dx, c.Y + dy);
         public static Point Offset(this Point pt, double dx, double dy) => new(pt.X + dx, pt.Y + dy);
         public static LineString Offset(this LineString ls, double dx, double dy) => new(ls.Coordinates.Select(x => x.Offset(dx, dy)).ToArray());
@@ -1846,7 +1846,7 @@ namespace ThMEPWSS.Assistant
         {
             return _DrawingTransaction.Current.IsLayerVisible(layer);
         }
-        public static void LayerThreeAxes(List<string> layers)
+        public static void LayerThreeAxes(IEnumerable<string> layers)
         {
             static void EnsureLayerOn(string layerName)
             {
@@ -2285,92 +2285,23 @@ namespace ThMEPWSS.Assistant
         }
         public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle)
         {
-            ObjectId blockRefId;//存储要插入的块参照的Id
-            Database db = spaceId.Database;//获取数据库对象
-                                           //以读的方式打开块表
-            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
-            //如果没有blockName表示的块，则程序返回
-            if (!bt.Has(blockName)) return ObjectId.Null;
-            //以写的方式打开空间（模型空间或图纸空间）
-            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
-            //创建一个块参照并设置插入点
-            BlockReference br = new BlockReference(position, bt[blockName]);
-            br.ScaleFactors = scale;//设置块参照的缩放比例
-            if (layer != null) br.Layer = layer;//设置块参照的层名
-            br.Rotation = rotateAngle;//设置块参照的旋转角度
-            ObjectId btrId = bt[blockName];//获取块表记录的Id
-                                           //打开块表记录
-            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
-            //添加可缩放性支持
-            if (record.Annotative == AnnotativeStates.True)
+            if (layer == null)
             {
-                ObjectContextCollection contextCollection = db.ObjectContextManager.GetContextCollection("ACDB_ANNOTATIONSCALES");
-                ObjectContexts.AddContext(br, contextCollection.GetContext("1:1"));
+                layer = ((LayerTableRecord)spaceId.Database.Clayer.GetObject(OpenMode.ForRead)).Name;
             }
-            blockRefId = space.AppendEntity(br);//在空间中加入创建的块参照
-            db.TransactionManager.AddNewlyCreatedDBObject(br, true);//通知事务处理加入创建的块参照
-            space.DowngradeOpen();//为了安全，将块表状态改为读
-            return blockRefId;//返回添加的块参照的Id
-        }
-        public static void DrawBlockReference(string blkName, Point3d basePt)
-        {
-            DrawingQueue.Enqueue(adb =>
-            {
-                var id = adb.ModelSpace.ObjectId;
-                if (!id.IsValid) return;
-                InsertBlockReference(id, null, blkName, basePt, new Scale3d(1), 0);
-            });
+            return spaceId.InsertBlockReference(layer, blockName, position, scale, rotateAngle);
         }
         public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
         {
-            Database db = spaceId.Database;//获取数据库对象
-                                           //以读的方式打开块表
-            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
-            //如果没有blockName表示的块，则程序返回
-            if (!bt.Has(blockName)) return ObjectId.Null;
-            //以写的方式打开空间（模型空间或图纸空间）
-            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
-            ObjectId btrId = bt[blockName];//获取块表记录的Id
-                                           //打开块表记录
-            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
-            //创建一个块参照并设置插入点
-            BlockReference br = new BlockReference(position, bt[blockName]);
-            br.ScaleFactors = scale;//设置块参照的缩放比例
-            if (layer != null) br.Layer = layer;//设置块参照的层名
-            br.Rotation = rotateAngle;//设置块参照的旋转角度
-            space.AppendEntity(br);//为了安全，将块表状态改为读 
-                                   //判断块表记录是否包含属性定义
-            if (attNameValues != null && record.HasAttributeDefinitions)
+            if (layer == null)
             {
-                //若包含属性定义，则遍历属性定义
-                foreach (ObjectId id in record)
-                {
-                    //检查是否是属性定义
-                    AttributeDefinition attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
-                    if (attDef != null)
-                    {
-                        //创建一个新的属性对象
-                        AttributeReference attribute = new AttributeReference();
-                        //从属性定义获得属性对象的对象特性
-                        attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
-                        //设置属性对象的其它特性
-                        attribute.Position = attDef.Position.TransformBy(br.BlockTransform);
-                        attribute.Rotation = attDef.Rotation;
-                        attribute.AdjustAlignment(db);
-                        //判断是否包含指定的属性名称
-                        if (attNameValues.ContainsKey(attDef.Tag.ToUpper()))
-                        {
-                            //设置属性值
-                            attribute.TextString = attNameValues[attDef.Tag.ToUpper()].ToString();
-                        }
-                        //向块参照添加属性对象
-                        br.AttributeCollection.AppendAttribute(attribute);
-                        db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
-                    }
-                }
+                layer = ((LayerTableRecord)spaceId.Database.Clayer.GetObject(OpenMode.ForRead)).Name;
             }
-            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
-            return br.ObjectId;//返回添加的块参照的Id
+            if (attNameValues == null)
+            {
+                attNameValues = new Dictionary<string, string>();
+            }
+            return spaceId.InsertBlockReference(layer, blockName, position, scale, rotateAngle, attNameValues);
         }
         public static void DrawBlockReference(string blkName, Point3d basePt, Action<BlockReference> cb = null, Dictionary<string, string> props = null, string layer = null, double scale = 1, double rotateDegree = 0)
         {

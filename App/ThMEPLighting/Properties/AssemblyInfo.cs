@@ -33,10 +33,11 @@ using System.Runtime.InteropServices;
 //可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.6.0")]
-[assembly: AssemblyFileVersion("1.6.6.0")]
+[assembly: AssemblyVersion("1.6.7.0")]
+[assembly: AssemblyFileVersion("1.6.7.0")]
 
 [assembly: CommandClass(typeof(ThMEPLighting.ThFEICmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThEmgLightCmds))]
+[assembly: CommandClass(typeof(ThMEPLighting.ThLightingWiringCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPGarageLightingCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPParkingStallLightingCmd))]

@@ -129,7 +129,7 @@ namespace ThMEPWSS.Hydrant.Data
             var result = new Dictionary<Entity, double>();
             rooms.ForEach(r =>
             {
-                var dis = r.Boundary.ToNTSPolygon().Dictance(pt);
+                var dis = r.Boundary.ToNTSPolygonalGeometry().Dictance(pt);
                 if (dis <= width + MaxDistanceToRoom)
                 {
                     result.Add(r.Boundary, dis);
@@ -139,7 +139,7 @@ namespace ThMEPWSS.Hydrant.Data
         }
         private Point3d MovePtToRoom(Point3d pt, Entity room)
         {
-            var closePt = ThCADCoreNTSDistance.GetClosePoint(room.ToNTSPolygon(), pt);
+            var closePt = ThCADCoreNTSDistance.GetClosePoint(room.ToNTSPolygonalGeometry(), pt);
             var vec = pt.GetVectorTo(closePt);
             int increAng = 5;
             int count = 360 / increAng;

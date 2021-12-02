@@ -36,3 +36,4 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
 [assembly: CommandClass(typeof(ThMEPStructure.GirderConnect.ConnectMainBeam.Test.TestCmds))]
+[assembly: CommandClass(typeof(ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command.ThSecondaryBeamSystemCmd))]

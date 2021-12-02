@@ -375,7 +375,7 @@ namespace ThMEPEngineCore.AFASRegion.Model.DetectionRegionGraphModel
         public DetectionRegionVertexModel(DetectionRegionVertexModel v1, DetectionRegionVertexModel v2)
         {
             edgs = new List<DetectionRegionEdgeModel>();
-            this.Data = v1.Data.ToNTSPolygon().Union(v2.Data.ToNTSPolygon()).ToDbCollection()[0] as Entity;
+            this.Data = v1.Data.ToNTSPolygonalGeometry().Union(v2.Data.ToNTSPolygonalGeometry()).ToDbCollection()[0] as Entity;
             Leval = Math.Min(v1.Leval, v2.Leval);
             FusionNum = v1.FusionNum + v2.FusionNum;
             if (Data is MPolygon mPolygon)

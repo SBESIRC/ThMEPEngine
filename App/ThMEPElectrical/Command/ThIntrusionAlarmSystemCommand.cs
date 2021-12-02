@@ -20,17 +20,23 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem.Model;
 using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.Service;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThIntrusionAlarmSystemCommand : IAcadCommand, IDisposable
+    public class ThIntrusionAlarmSystemCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThIntrusionAlarmSystemCommand()
+        {
+            this.ActionName="安防平面-入侵报警系统布置";
+            this.CommandName="THIASYSTEM";
+        }
         public void Dispose()
         {
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

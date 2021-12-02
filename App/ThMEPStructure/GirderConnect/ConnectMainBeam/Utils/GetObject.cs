@@ -121,7 +121,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return result.Value.GetObjectIds().Select(o => acdb.Element<Polyline>(o)).ToList();
         }
-
         /// <summary>
         /// 获得多个所选多边形的中点
         /// </summary>
@@ -194,7 +193,63 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
+            if (ansFstPt != fromPt)
+            {
+                return ansFstPt;
+            }
+            else if (ansSndPt != fromPt)
+            {
+                return ansSndPt;
+            }
+            else if (ansThdPt != fromPt)
+            {
+                return ansThdPt;
+            }
+            return fromPt;
+        }
+        public static Point3d GetPointByDirection(Point3d fromPt ,Vector3d aimDirection, Point3dCollection basePts, double tolerance = Math.PI / 12, double constrain = 9000)
+        {
+            double minFstCross = double.MaxValue;
+            double minSndCross = double.MaxValue;
+            double minThdCross = double.MaxValue;
 
+            Point3d ansFstPt = fromPt;
+            Point3d ansSndPt = fromPt;
+            Point3d ansThdPt = fromPt;
+
+            foreach (Point3d curPt in basePts)
+            {
+                double curRotate = aimDirection.GetAngleTo(curPt - fromPt);
+                double curDis = fromPt.DistanceTo(curPt);
+                double curCross = curRotate * curDis;
+                if (curRotate < tolerance && curDis < constrain && curDis > 200)
+                {
+                    if (curDis < constrain / 2)
+                    {
+                        if (curCross < minFstCross)
+                        {
+                            minFstCross = curCross;
+                            ansFstPt = curPt;
+                        }
+                    }
+                    else if (curRotate < tolerance / 2)
+                    {
+                        if (curCross < minSndCross)
+                        {
+                            minSndCross = curCross;
+                            ansSndPt = curPt;
+                        }
+                    }
+                    else
+                    {
+                        if (curCross < minThdCross)
+                        {
+                            minThdCross = curCross;
+                            ansThdPt = curPt;
+                        }
+                    }
+                }
+            }
             if (ansFstPt != fromPt)
             {
                 return ansFstPt;
@@ -318,6 +373,94 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// 根据三个方向确定第四个方向
+        /// </summary>
+        /// <param name="basePt"></param>
+        /// <param name="ptA"></param>
+        /// <param name="ptB"></param>
+        /// <param name="ptC"></param>
+        /// <returns></returns>
+        public static Vector3d GetDirectionByThreeVecs(Point3d basePt, Point3d ptA, Point3d ptB, Point3d ptC)
+        {
+            var vecA = ptA - basePt;
+            var vecB = ptB - basePt;
+            var vecC = ptC - basePt;
+            double angelAB = vecA.GetAngleTo(vecB, Vector3d.ZAxis);
+            double angelCA = vecC.GetAngleTo(vecA, Vector3d.ZAxis);
+            double angelBC = vecB.GetAngleTo(vecC, Vector3d.ZAxis);
+            double absAB90 = Math.Abs(angelAB - Math.PI / 2);
+            double absCA90 = Math.Abs(angelCA - Math.PI / 2);
+            double absBC90 = Math.Abs(angelBC - Math.PI / 2);
+            double absAB180 = Math.Abs(angelAB - Math.PI);
+            double absCA180 = Math.Abs(angelCA - Math.PI);
+            double absBC180 = Math.Abs(angelBC - Math.PI);
+            double min90 = double.MaxValue;
+            double min180 = double.MaxValue;
+            //Point3d pt9X, pt9Y, pt9Z;
+            //Point3d pt18X, pt18Y, pt18Z;
+            Vector3d vec9X, vec9Y, vec9Z;
+            Vector3d vec18X, vec18Y, vec18Z;
+            if (absAB90 <= absCA90 && absAB90 <= absBC90)
+            {
+                min90 = absAB90;
+                vec9X = vecA;
+                vec9Y = vecB;
+                vec9Z = vecC;
+            }
+            else if (absCA90 <= absBC90)
+            {
+                min90 = absCA90;
+                vec9X = vecC;
+                vec9Y = vecA;
+                vec9Z = vecB;
+            }
+            else
+            {
+                min90 = absBC90;
+                vec9X = vecB;
+                vec9Y = vecC;
+                vec9Z = vecA;
+            }
+            if (absAB180 <= absCA180 && absAB180 <= absBC180)
+            {
+                min180 = absAB180;
+                vec18X = vecA;
+                vec18Y = vecB;
+                vec18Z = vecC;
+            }
+            else if (absCA180 <= absBC180)
+            {
+                min180 = absCA180;
+                vec18X = vecC;
+                vec18Y = vecA;
+                vec18Z = vecB;
+            }
+            else
+            {
+                min180 = absBC180;
+                vec18X = vecB;
+                vec18Y = vecC;
+                vec18Z = vecA;
+            }
+            if(min90 < min180)
+            {
+                var angelXY = vec9X.GetAngleTo(vec9Y, Vector3d.ZAxis);
+                if (vec9Z.GetAngleTo(vec9X, Vector3d.ZAxis) > Math.PI - angelXY / 2)
+                {
+                    return vec9X.RotateBy(Math.PI - angelXY, -Vector3d.ZAxis);
+                }
+                else
+                {
+                    return vec9Y.RotateBy(Math.PI - angelXY, Vector3d.ZAxis);
+                }
+            }
+            else
+            {
+                return vec18X.RotateBy((vec18X.GetAngleTo(vec18Y, Vector3d.ZAxis)) / 2, Vector3d.ZAxis);
+            }
         }
     }
 }

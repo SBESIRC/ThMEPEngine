@@ -57,6 +57,16 @@ namespace ThMEPEngineCore.IO.IOService
             return true;
         }
 
+        /// <summary>
+        /// 创建新文件
+        /// </summary>
+        /// <param name="oldUrl"></param>
+        /// <param name="strAttURL"></param>
+        public static void CreateNewFile(string oldUrl, string strAttURL)
+        {
+            File.Copy(oldUrl, strAttURL);
+        }
+
         /// <summary> 
         /// 输出成txt
         /// </summary>

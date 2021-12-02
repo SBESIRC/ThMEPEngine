@@ -107,7 +107,7 @@ namespace ThMEPEngineCore.Engine
             polygons = polygons.FilterSmallArea(1.0);
             polygons.Cast<Entity>().ForEach(e =>
             {
-                e.ToNTSPolygon().Buffer(length, new BufferParameters() { JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
+                e.ToNTSPolygonalGeometry().Buffer(length, new BufferParameters() { JoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
                 .ToDbCollection().Cast<Entity>()
                 .ForEach(o => results.Add(o));
             });

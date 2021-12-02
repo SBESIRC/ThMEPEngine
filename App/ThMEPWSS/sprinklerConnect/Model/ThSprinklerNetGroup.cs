@@ -66,7 +66,7 @@ namespace ThMEPWSS.SprinklerConnect.Model
         public List<Point3d> GetGraphPts(int graphIdx)
         {
             var ptsInGraph = new List<Point3d>();
-            for (int i = 0; i < ptsGraph[graphIdx]. SprinklerVertexNodeList.Count; i++)
+            for (int i = 0; i < ptsGraph[graphIdx].SprinklerVertexNodeList.Count; i++)
             {
                 var p = pts[ptsGraph[graphIdx].SprinklerVertexNodeList[i].NodeIndex];
                 ptsInGraph.Add(p);
@@ -75,5 +75,29 @@ namespace ThMEPWSS.SprinklerConnect.Model
             return ptsInGraph;
         }
 
+        public List<Line> GetGraphLines(int graphIdx)
+        {
+            var linesInGraph = new List<Line>();
+            var linesInGraphHash = new HashSet <Line>();
+            var graph = ptsGraph[graphIdx];
+
+            for (int i = 0; i < graph.SprinklerVertexNodeList.Count; i++)
+            {
+                var node = graph.SprinklerVertexNodeList[i].FirstEdge;
+                while (node != null)
+                {
+                    var sp = pts[graph.SprinklerVertexNodeList[i].NodeIndex];
+                    var ep = pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+
+                    var lineTemp = ThSprinklerLineService.GetLineFromList(lines, sp, ep);
+                    lineTemp.ForEach (x=> linesInGraphHash.Add(x));
+                    node = node.Next;
+                }
+            }
+
+            linesInGraph = linesInGraphHash.ToList();
+            return linesInGraph;
+
+        }
     }
 }

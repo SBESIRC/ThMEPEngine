@@ -20,14 +20,14 @@ namespace ThMEPHVAC.FanConnect.Service
         /// <summary>
         /// 提取剪力墙
         /// </summary>
-        /// <param name="selectArea"></param>
         /// <returns></returns>
-        public static List<ThFanShearWallModel> GetShearWalls(Point3dCollection selectArea)
+        public static List<ThFanShearWallModel> GetShearWalls()
         {
             var results = new List<ThFanShearWallModel>();
             using (var database = AcadDatabase.Active())
             using (var shearWallEngine = new ThShearWallRecognitionEngine())
             {
+                Point3dCollection selectArea = new Point3dCollection();
                 shearWallEngine.Recognize(database.Database, selectArea);
                 List<ThIfcWall> shearWalls = shearWallEngine.Elements.Cast<ThIfcWall>().ToList();
                 foreach (var shearWall in shearWalls)
@@ -42,12 +42,13 @@ namespace ThMEPHVAC.FanConnect.Service
         /// </summary>
         /// <param name="selectArea"></param>
         /// <returns></returns>
-        public static List<ThFanColumnModel> GetColumns(Point3dCollection selectArea)
+        public static List<ThFanColumnModel> GetColumns()
         {
             var results = new List<ThFanColumnModel>();
             using (var database = AcadDatabase.Active())
             using (var columnEngine = new ThColumnRecognitionEngine())
             {
+                Point3dCollection selectArea = new Point3dCollection();
                 columnEngine.Recognize(database.Database, selectArea);
                 List<ThIfcColumn> structureCols = columnEngine.Elements.Cast<ThIfcColumn>().ToList();
                 foreach (var structureCol in structureCols)

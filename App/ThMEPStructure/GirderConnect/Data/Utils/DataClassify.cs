@@ -1,0 +1,182 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using AcHelper.Commands;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using ThCADCore.NTS;
+using ThCADExtension;
+using AcHelper;
+using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using ThMEPEngineCore.Service;
+using NFox.Cad;
+
+namespace ThMEPStructure.GirderConnect.Data.Utils
+{
+    class DataClassify
+    {
+        private const double SIMILARITY_MEASURE_TOLERANCE = 0.99;
+
+        /// <summary>
+        /// 对房间中的事物进行分类
+        /// </summary>
+        /// <param name="outlineWalls"></param>
+        /// <param name="outlineClumns"></param>
+        public static void ClassifyOutlineWalls(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        {
+            foreach (var outlineWall in outlineWalls)
+            {
+                var houseOutline = outlineWall.Key;
+                if (!outlineClumns.ContainsKey(houseOutline))
+                {
+                    outlineClumns.Add(houseOutline, new HashSet<Point3d>());
+                }
+                if (!outlineWalls.ContainsKey(houseOutline))
+                {
+                    outlineWalls.Add(houseOutline, new HashSet<Polyline>());
+                }
+                Classify(PreprocessLinealElements(outlineWall.Value.ToCollection()), outlineClumns[houseOutline], outlineWalls[houseOutline]);
+            }
+        }
+
+        /// <summary>
+        /// 分类：多边形分为柱或墙
+        /// </summary>
+        /// <param name="curves"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        private static void Classify(DBObjectCollection curves, HashSet<Point3d> columns, HashSet<Polyline> walls)
+        {
+            foreach (var curve in curves)
+            {
+                if (curve is Polyline polyline)
+                {
+                    polyline.Closed = true;
+                    if (IsColumns(polyline))
+                    {
+                        columns.Add(polyline.GetCentroidPoint());
+                    }
+                    else
+                    {
+                        walls.Add(polyline);
+                    }
+                }
+            }
+        }
+        private static void Classify(HashSet<Entity> curves, HashSet<Polyline> columns, HashSet<Polyline> walls)
+        {
+            foreach (var curve in curves)
+            {
+                if (curve is Polyline polyline)
+                {
+                    polyline.Closed = true;
+                    if (IsColumns(polyline) && !columns.Contains(polyline))
+                    {
+                        columns.Add(polyline);
+                    }
+                    else if (!walls.Contains(polyline))
+                    {
+                        walls.Add(polyline);
+                    }
+                }
+            }
+        }
+        public static void OuterClassify(List<Entity> entities, Point3dCollection points, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
+        {
+            HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
+            //outsideColumns -> clumnPts
+            foreach (var entity in entities)
+            {
+                if (entity is Polyline polyline)
+                {
+                    polyline.Closed = true;
+                    if (IsColumns(polyline))
+                    {
+                        polylineColumns.Add(polyline);
+                    }
+                    else
+                    {
+                        DataProcess.AddOutline(polyline, ref outlineWalls);
+                    }
+                }
+            }
+            //outsideShearwall -> outlineWalls
+            foreach (var shearwall in outsideShearwall)
+            {
+                if (shearwall is Polyline houseOutline)
+                {
+                    houseOutline.Closed = true;
+                    DataProcess.AddOutline(houseOutline, ref outlineWalls);
+                }
+            }
+            polylineColumns = DataProcess.DeleteOverlap(polylineColumns);
+            foreach (var polylineColumn in polylineColumns)
+            {
+                points.Add(polylineColumn.GetCentroidPoint());
+            }
+        }
+        public static void InnerColumnTypeClassify(Dictionary<Entity, HashSet<Entity>> columnGroupDict,
+            Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns)
+        {
+            foreach (var columnGroup in columnGroupDict)
+            {
+                var columnGroupKey = columnGroup.Key;
+                if (columnGroupKey is Polyline outline)
+                {
+                    if (!outlineWalls.ContainsKey(outline))
+                    {
+                        outlineWalls.Add(outline, new HashSet<Polyline>());
+                    }
+                    if (!outlinePlColumns.ContainsKey(outline))
+                    {
+                        outlinePlColumns.Add(outline, new HashSet<Polyline>());
+                    }
+                    Classify(columnGroup.Value, outlinePlColumns[outline], outlineWalls[outline]);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// 判断是否形似矩形
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <returns></returns>
+        private static bool IsRectangle(Polyline polygon)
+        {
+            return polygon.IsSimilar(polygon.GetMinimumRectangle(), SIMILARITY_MEASURE_TOLERANCE);
+        }
+
+        /// <summary>
+        /// 判断是不是柱子
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <returns></returns>
+        private static bool IsColumns(Polyline polygon)
+        {
+            return IsRectangle(polygon) && AspectRatio(polygon);
+        }
+
+        private static bool AspectRatio(Polyline polygon)
+        {
+            var obb = polygon.GetMinimumRectangle();
+            var length1 = obb.GetPoint2dAt(0).GetDistanceTo(obb.GetPoint2dAt(1));
+            var length2 = obb.GetPoint2dAt(1).GetDistanceTo(obb.GetPoint2dAt(2));
+            return length1 > length2 ? (length1 / length2 < 3 && length2 > 450) : (length2 / length1 < 3 && length1 > 450);
+        }
+        
+        private static DBObjectCollection PreprocessLinealElements(DBObjectCollection curves)
+        {
+            var results = ThVStructuralElementSimplifier.Tessellate(curves);
+            results = ThVStructuralElementSimplifier.MakeValid(curves);
+            results = ThVStructuralElementSimplifier.Normalize(results);
+            results = ThVStructuralElementSimplifier.Simplify(results);
+            return results;
+        }
+    }
+}

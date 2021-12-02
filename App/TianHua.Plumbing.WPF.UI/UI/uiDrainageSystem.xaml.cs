@@ -45,16 +45,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             try
             {
-                using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel))
+                var blockConfig = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+                using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel, blockConfig))
                 {
                     var insertOpt = new PromptPointOptions("\n指定图纸的插入点");
                     var optRes = Active.Editor.GetPoint(insertOpt);
                     if (optRes.Status == PromptStatus.OK)
                     {
-                        var blockConfig = uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
-
                         viewModel.InsertPt = optRes.Value.TransformBy(Active.Editor.UCS2WCS());
-                        cmd.Execute(blockConfig);
+                        cmd.Execute();
                     }
                 }
             }

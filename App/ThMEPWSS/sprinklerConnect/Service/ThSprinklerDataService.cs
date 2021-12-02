@@ -33,7 +33,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             {
                  frame = processFrame(frameOrig);
             }
-
+           
             return frame;
         }
 

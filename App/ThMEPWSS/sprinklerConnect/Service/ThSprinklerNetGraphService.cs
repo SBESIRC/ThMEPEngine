@@ -40,9 +40,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public static ThSprinklerNetGroup CreateNetwork(double angle, List<Line> groupLine)
         {
             var tol = new Tolerance(10, 10);
+            var lines = new List<Line>();
+            var graphListTemp = new List<ThSprinklerGraph>();
 
             var pts = ThSprinklerLineService.LineListToPtList(groupLine);
-            var lines = new List<Line>();
             lines.AddRange(groupLine);
 
             var net = new ThSprinklerNetGroup();
@@ -51,12 +52,18 @@ namespace ThMEPWSS.SprinklerConnect.Service
             while (pts.Count > 0)
             {
                 var graph = new ThSprinklerGraph();
-                net.ptsGraph.Add(graph);
+                graphListTemp.Add(graph);
 
                 var p = pts[0];
                 CreateGraph(p, lines, alreadyAdded, net, graph);
                 pts.RemoveAll(x => net.pts.Contains(x));
             }
+
+            
+            net.ptsGraph.AddRange(graphListTemp.OrderByDescending(x => x.SprinklerVertexNodeList.Count).ToList());
+
+
+
 
             return net;
 
@@ -159,10 +166,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
                 DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
             }
-
-
-
-
         }
 
         public static void CreatePartGroup_test(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)

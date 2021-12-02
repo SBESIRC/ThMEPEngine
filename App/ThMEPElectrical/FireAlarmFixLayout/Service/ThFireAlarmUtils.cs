@@ -70,7 +70,8 @@ namespace ThMEPElectrical.FireAlarm.Service
             {
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
             };
-            var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+            //var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
+            var filter = ThSelectionFilterTool.Build(dxfNames);
             var result = Active.Editor.GetSelection(options, filter);
             if (result.Status != PromptStatus.OK)
             {
@@ -111,7 +112,6 @@ namespace ThMEPElectrical.FireAlarm.Service
             return pts;
         }
 
-
         private static List<Entity> GetBlockInfo(BlockReference blockReference)
         {
             var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
@@ -129,7 +129,7 @@ namespace ThMEPElectrical.FireAlarm.Service
             }
         }
 
-        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick)
+        public static List<ThGeometry> GetSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
         {
             var bReadJson = false;
 
@@ -142,6 +142,7 @@ namespace ThMEPElectrical.FireAlarm.Service
                     {
                         ReferBeam = referBeam,
                         WallThick = wallThick,
+                        NeedDetective= needDetective,
                     };
                     var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                     geos.AddRange(dataset.Container);
@@ -232,7 +233,8 @@ namespace ThMEPElectrical.FireAlarm.Service
             var roomTableConfig = new List<RoomTableTree>();
             ReadExcelService excelSrevice = new ReadExcelService();
             var dataSet = excelSrevice.ReadExcelToDataSet(roomConfigUrl, true);
-            var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
+            var roomNameControl = "房间名称处理";
+            var table = dataSet.Tables[roomNameControl];
             if (table != null)
             {
                 roomTableConfig = RoomConfigTreeService.CreateRoomTree(table);
@@ -250,7 +252,7 @@ namespace ThMEPElectrical.FireAlarm.Service
         /// <param name="pts"></param>
         /// <param name="extractBlkList"></param>
         /// <returns></returns>
-        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam,double wallThick)
+        public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
         {
             var fileInfo = new FileInfo(Active.Document.Name);
             var path = fileInfo.Directory.FullName;
@@ -263,7 +265,8 @@ namespace ThMEPElectrical.FireAlarm.Service
                 {
                     ReferBeam = referBeam,
                     WallThick = wallThick,
-                }; ;
+                    NeedDetective = needDetective,
+                }; 
                 var dataset = datasetFactory.Create(acadDatabase.Database, pts);
                 geos.AddRange(dataset.Container);
 

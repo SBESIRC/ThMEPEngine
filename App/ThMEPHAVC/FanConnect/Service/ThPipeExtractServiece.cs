@@ -14,7 +14,7 @@ using ThMEPHVAC.FanConnect.Model;
 namespace ThMEPHVAC.FanConnect.Service
 {
     /// <summary>
-    /// 管路提取器，得到管路树
+    /// 管路路由生成器
     /// </summary>
     public class ThPipeExtractServiece
     {
@@ -29,22 +29,22 @@ namespace ThMEPHVAC.FanConnect.Service
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public ThFanTreeModel<ThFanPipeModel> CreatePipePath(int type)
+        public List<Polyline> CreatePipePath(int type)
         {
-            ThFanTreeModel<ThFanPipeModel> retTree = null;
+            List<Polyline> retPline = null;
             switch (type)
             {
                 case 0:
-                    retTree = GetPipeTreeModel0();
+                    retPline = GetPipeTreeModel0();
                     break;
                 case 1:
-                    retTree = GetPipeTreeModel1();
+                    retPline = GetPipeTreeModel1();
                     break;
                 default:
                     break;
             }
 
-            return retTree;
+            return retPline;
         }
         private List<Polyline> GetPipePath0()
         {
@@ -70,72 +70,58 @@ namespace ThMEPHVAC.FanConnect.Service
 
             return retList;
         }
-        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel0()
+        private List<Polyline> GetPipeTreeModel0()
         {
-            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
             //将设备进行连接，得到管路路由
             var termLine = GetPipePath0();//支路
-            //通过起点，干路线，支干路，支路得到TreeModel
-            foreach(var l in termLine)
-            {
-                l.ColorIndex = 5;
-                Draw.AddToCurrentSpace(l);
-            }
-            return retTree;
+            return termLine;
         }
-        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel2()
+        private List<Polyline> GetPipeTreeModel1()
         {
-            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
-
-            //root结点
-            var rootLine = new Line();
-            rootLine.StartPoint = new Point3d(0.0, 1000.0,0.0);
-            rootLine.EndPoint = new Point3d(3000.0, 1000.0,0.0);
-            ThFanPipeModel rooModel = new ThFanPipeModel(rootLine, PIPELEVEL.LEVEL1);
-            rooModel.PipeWidth = 100;
-            ThFanTreeNode<ThFanPipeModel> rootNode = new ThFanTreeNode<ThFanPipeModel>(rooModel);
-            //Child1
-            var childLine1 = new Line();
-            childLine1.StartPoint = new Point3d(2000.0, 1000.0, 0.0);
-            childLine1.EndPoint = new Point3d(2000.0, 4000.0,0.0);
-            ThFanPipeModel childModel1 = new ThFanPipeModel(childLine1, PIPELEVEL.LEVEL2);
-            childModel1.PipeWidth = 50;
-            ThFanTreeNode<ThFanPipeModel> childNode1 = new ThFanTreeNode<ThFanPipeModel>(childModel1);
-
-            //Child2
-            var childLine2 = new Line();
-            childLine2.StartPoint = new Point3d(3000.0, 1000.0, 0.0);
-            childLine2.EndPoint = new Point3d(3000.0, 0.0,0.0);
-            ThFanPipeModel childModel2 = new ThFanPipeModel(childLine2, PIPELEVEL.LEVEL2);
-            childModel2.PipeWidth = 50;
-            ThFanTreeNode<ThFanPipeModel> childNode2 = new ThFanTreeNode<ThFanPipeModel>(childModel2);
-            //Child Child1
-            var childChildLine1 = new Line();
-            childChildLine1.StartPoint = new Point3d(2000.0, 3000.0, 0.0);
-            childChildLine1.EndPoint = new Point3d(1000.0, 3000.0,0.0);
-            
-            ThFanPipeModel childChildModel1 = new ThFanPipeModel(childChildLine1, PIPELEVEL.LEVEL3);
-            childChildModel1.PipeWidth = 20;
-            ThFanTreeNode<ThFanPipeModel> childChildNode1 = new ThFanTreeNode<ThFanPipeModel>(childChildModel1);
-            childNode1.InsertChild(childChildNode1);
-            rootNode.InsertChild(childNode1);
-            rootNode.InsertChild(childNode2);
-            retTree.RootNode = rootNode;
-            return retTree;
-        }
-        private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel1()
-        {
-            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
+            List<Polyline> retPLine = new List<Polyline>();
             //可以引用自己写类和方法
-            //生成管线路由放入到List<Line>
-            var lines = GetPipePath1();
-            return GetTreeModel(PipeStartPt, lines);
+            return retPLine;
         }
+        //private ThFanTreeModel<ThFanPipeModel> GetPipeTreeModel2()
+        //{
+        //    ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
 
-        private ThFanTreeModel<ThFanPipeModel> GetTreeModel(Point3d startPt,List<Line> lines)
-        {
-            ThFanTreeModel<ThFanPipeModel> retTree = new ThFanTreeModel<ThFanPipeModel>();
-            return retTree;
-        }
+        //    //root结点
+        //    var rootLine = new Line();
+        //    rootLine.StartPoint = new Point3d(0.0, 1000.0,0.0);
+        //    rootLine.EndPoint = new Point3d(3000.0, 1000.0,0.0);
+        //    ThFanPipeModel rooModel = new ThFanPipeModel(rootLine, PIPELEVEL.LEVEL1);
+        //    rooModel.PipeWidth = 100;
+        //    ThFanTreeNode<ThFanPipeModel> rootNode = new ThFanTreeNode<ThFanPipeModel>(rooModel);
+        //    //Child1
+        //    var childLine1 = new Line();
+        //    childLine1.StartPoint = new Point3d(2000.0, 1000.0, 0.0);
+        //    childLine1.EndPoint = new Point3d(2000.0, 4000.0,0.0);
+        //    ThFanPipeModel childModel1 = new ThFanPipeModel(childLine1, PIPELEVEL.LEVEL2);
+        //    childModel1.PipeWidth = 50;
+        //    ThFanTreeNode<ThFanPipeModel> childNode1 = new ThFanTreeNode<ThFanPipeModel>(childModel1);
+
+        //    //Child2
+        //    var childLine2 = new Line();
+        //    childLine2.StartPoint = new Point3d(3000.0, 1000.0, 0.0);
+        //    childLine2.EndPoint = new Point3d(3000.0, 0.0,0.0);
+        //    ThFanPipeModel childModel2 = new ThFanPipeModel(childLine2, PIPELEVEL.LEVEL2);
+        //    childModel2.PipeWidth = 50;
+        //    ThFanTreeNode<ThFanPipeModel> childNode2 = new ThFanTreeNode<ThFanPipeModel>(childModel2);
+        //    //Child Child1
+        //    var childChildLine1 = new Line();
+        //    childChildLine1.StartPoint = new Point3d(2000.0, 3000.0, 0.0);
+        //    childChildLine1.EndPoint = new Point3d(1000.0, 3000.0,0.0);
+
+        //    ThFanPipeModel childChildModel1 = new ThFanPipeModel(childChildLine1, PIPELEVEL.LEVEL3);
+        //    childChildModel1.PipeWidth = 20;
+        //    ThFanTreeNode<ThFanPipeModel> childChildNode1 = new ThFanTreeNode<ThFanPipeModel>(childChildModel1);
+        //    childNode1.InsertChild(childChildNode1);
+        //    rootNode.InsertChild(childNode1);
+        //    rootNode.InsertChild(childNode2);
+        //    retTree.RootNode = rootNode;
+        //    return retTree;
+        //}
+
     }
 }

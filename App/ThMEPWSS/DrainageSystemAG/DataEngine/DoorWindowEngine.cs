@@ -32,7 +32,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                 doorRecognitionEngine.Recognize(doorEngine.Results, polyline.Vertices());
                 doorRecognitionEngine.Elements.ForEach(o =>
                 {
-                    var pLine = o.Outline.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    var pLine = o.Outline.ToNTSPolygonalGeometry().ToDbPolylines().FirstOrDefault();
                     doorPlines.Add(pLine);
                 });
             }
@@ -47,7 +47,7 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                 recognitionEngine.Recognize(windowEngine.Results, polyline.Vertices());
                 recognitionEngine.Elements.ForEach(o =>
                 {
-                    var pLine = o.Outline.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    var pLine = o.Outline.ToNTSPolygonalGeometry().ToDbPolylines().FirstOrDefault();
                     doorPlines.Add(pLine);
                 });
             }

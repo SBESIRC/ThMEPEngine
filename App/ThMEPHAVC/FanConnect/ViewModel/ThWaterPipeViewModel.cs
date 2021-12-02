@@ -81,7 +81,7 @@ namespace ThMEPHVAC.FanConnect.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        public double FrictionCoeff
+        public string FrictionCoeff
         {
             get { return WaterPipeConfigInfo.WaterSystemConfigInfo.FrictionCoeff; }
             set

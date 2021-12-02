@@ -1,28 +1,31 @@
-﻿using System;
-using NFox.Cad;
-using AcHelper;
-using Linq2Acad;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
-using System.Linq;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Linq2Acad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using AcHelper.Commands;
-using GeometryExtensions;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Stair;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThStairCommand : IAcadCommand, IDisposable
+    public class ThStairCommand : ThMEPBaseCommand, IDisposable
     {
-        public void Execute()
+        public ThStairCommand()
+        {
+            CommandName = "THLTSBBZ";
+            ActionName = "楼梯设备布置";
+        }
+
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))

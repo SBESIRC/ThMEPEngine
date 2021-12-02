@@ -1,6 +1,4 @@
-﻿#if (ACAD2016 || ACAD2018)
-using CLI;
-using System;
+﻿using System;
 using NFox.Cad;
 using Linq2Acad;
 using System.IO;
@@ -17,6 +15,9 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+#if (ACAD2016 || ACAD2018)
+using CLI;
+#endif
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -33,6 +34,7 @@ namespace ThMEPEngineCore.Algorithm
         /// <returns></returns>
         public static List<Line> CenterLine(Entity polygon)
         {
+#if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var engine = new ThPolygonCenterLineMgd();
@@ -56,13 +58,45 @@ namespace ThMEPEngineCore.Algorithm
                         }
                     }
                     return lines;
-                    //var merge = new ThListLineMerge(ThLineUnionService.UnionLineList(lines));
-                    //while (merge.Needtomerge(out Line refline, out Line moveline))
-                    //{
-                    //    merge.Domoveparallellines(refline, moveline);
-                    //}
-                    //merge.Simplifierlines();
-                    //return merge.Lines;
+                }
+            }
+#else
+            return new List<Line>();
+#endif
+        }
+
+#if (ACAD2016 || ACAD2018)
+        /// <summary>
+        /// 骨架线
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <returns></returns>
+        public static List<Line> StraightSkeleton(Entity polygon)
+        {
+            //
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var engine = new ThPolygonCenterLineMgd();
+                var serializer = GeoJsonSerializer.Create();
+                var geos = new List<ThGeometry>();
+                geos.Add(new ThGeometry()
+                {
+                    Boundary = polygon,
+                });
+                var results = engine.StraightSkeleton(ThGeoOutput.Output(geos));
+                using (var stringReader = new StringReader(results))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var lines = new List<Line>();
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    foreach (var f in features)
+                    {
+                        if (f.Geometry is LineString line)
+                        {
+                            lines.Add(line.ToDbline());
+                        }
+                    }
+                    return lines;
                 }
             }
         }
@@ -154,6 +188,7 @@ namespace ThMEPEngineCore.Algorithm
                 }
             }
         }
+#endif
 
         private static AcPolygon MakeValid(AcPolygon line)
         {
@@ -194,4 +229,3 @@ namespace ThMEPEngineCore.Algorithm
         }
     }
 }
-#endif

@@ -56,10 +56,10 @@ namespace ThMEPElectrical.AFAS.Data
             //对于起、终点间距小于一定距离的，做缝合
             for (int i = 0; i < rooms.Count; i++)
             {
-                rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Polyline);
+                rooms[i].Boundary = ThHandleNonClosedPolylineService.Handle(rooms[i].Boundary as Curve);
             }
             //过滤无效的房间框线
-            rooms = rooms.Where(o => (o.Boundary as Polyline).Area >= 1.0).ToList();
+            rooms = rooms.Where(o => (o.Boundary as Curve).Area >= 1.0).ToList();
 
             //造房间
             var roomBuilder = new ThRoomBuilderEngine();
@@ -266,22 +266,22 @@ namespace ThMEPElectrical.AFAS.Data
         private Entity GetMaximumIntersectFireApart(Entity room, DBObjectCollection fireAparts)
         {
             //获取与房间相交面积最大的防火分区
-            var roomPolygon = room.ToNTSPolygon();
+            var roomPolygon = room.ToNTSPolygonalGeometry();
             var areaDic = new Dictionary<Entity, double>();
             foreach (Entity fireApart in fireAparts)
             {
                 var bufferService = new ThNTSBufferService();
-                var objs = fireApart.ToNTSPolygon().Buffer(0).ToDbCollection(true);
+                var objs = fireApart.ToNTSPolygonalGeometry().Buffer(0).ToDbCollection(true);
                 double intersectArea = 0.0;
                 foreach (Entity obj in objs)
                 {
                     var newFireApart = bufferService.Buffer(obj, -1.0);
-                    var firePolygon = newFireApart.ToNTSPolygon();
+                    var firePolygon = newFireApart.ToNTSPolygonalGeometry();
                     foreach (Entity intersect in roomPolygon.Intersection(firePolygon).ToDbCollection())
                     {
                         if (intersect is Polyline || intersect is MPolygon)
                         {
-                            intersectArea += intersect.ToNTSPolygon().Area;
+                            intersectArea += intersect.ToNTSPolygonalGeometry().Area;
                         }
                     }
                 }

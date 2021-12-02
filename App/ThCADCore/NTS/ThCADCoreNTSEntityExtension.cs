@@ -12,7 +12,7 @@ namespace ThCADCore.NTS
         {
             if (obj is Curve curve)
             {
-                return curve.ToNTSLineString();
+                return curve.ToNTSLinealGeometry();
             }
             else if (obj is DBPoint point)
             {
@@ -32,7 +32,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Polygon ToNTSPolygon(this Entity entity)
+        public static Polygon ToNTSPolygonalGeometry(this Entity entity)
         {
             if (entity is Polyline polyline)
             {
@@ -46,13 +46,17 @@ namespace ThCADCore.NTS
             {
                 return mPolygon.ToNTSPolygon();
             }
+            else if (entity is Ellipse ellipse)
+            {
+                return ellipse.ToNTSPolygon();
+            }
             else
             {
                 throw new NotSupportedException();
             }
         }
 
-        public static LineString ToNTSLineString(this Curve curve)
+        public static LineString ToNTSLinealGeometry(this Curve curve)
         {
             if (curve is Line line)
             {
@@ -74,6 +78,10 @@ namespace ThCADCore.NTS
             {
                 return arc.ToNTSLineString();
             }
+            else if (curve is Ellipse ellipse)
+            {
+                return ellipse.ToNTSLineString();
+            }
             else
             {
                 throw new NotSupportedException();
@@ -83,15 +91,15 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Intersection(Entity first, Entity other, bool keepHoles = false)
         {
             return OverlayNGRobust.Overlay(
-                first.ToNTSPolygon(),
-                other.ToNTSPolygon(), 
+                first.ToNTSPolygonalGeometry(),
+                other.ToNTSPolygonalGeometry(), 
                 SpatialFunction.Intersection).ToDbCollection(keepHoles);
         }
 
         public static DBObjectCollection Intersection(Entity entity, DBObjectCollection objs, bool keepHoles = false)
         {
             return OverlayNGRobust.Overlay(
-                entity.ToNTSPolygon(),
+                entity.ToNTSPolygonalGeometry(),
                 objs.UnionGeometries(),
                 SpatialFunction.Intersection).ToDbCollection(keepHoles);
         }
@@ -99,7 +107,7 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Difference(Entity entity, DBObjectCollection objs,bool keepHoles=false)
         {
             return OverlayNGRobust.Overlay(
-                entity.ToNTSPolygon(),
+                entity.ToNTSPolygonalGeometry(),
                 objs.UnionGeometries(),
                 SpatialFunction.Difference).ToDbCollection(keepHoles);
         }

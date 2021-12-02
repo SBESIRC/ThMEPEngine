@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using ThMEPEngineCore.Command;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Uitl.ExtensionsNs;
@@ -16,28 +17,33 @@ using ThMEPWSS.WaterSupplyPipeSystem.tool;
 
 namespace ThMEPWSS.Command
 {
-    public class ThWaterSuplySystemDiagramCmd : IAcadCommand, IDisposable
+    public class ThWaterSuplySystemDiagramCmd : ThMEPBaseCommand, IDisposable
     {
         readonly DrainageViewModel _UiConfigs;
+        Dictionary<string, List<string>> BlockConfig;
 
-        public ThWaterSuplySystemDiagramCmd(DrainageViewModel uiConfigs)
+        public ThWaterSuplySystemDiagramCmd(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
             _UiConfigs = uiConfigs;
+            BlockConfig = blockConfig;
+            CommandName = "THJSXTT";
+            ActionName = "生成";
         }
         public void Dispose()
         {
         }
-        public void Execute(Dictionary<string, List<string>> blockConfig)
+        public override void SubExecute()
         {
             try
             {
-                Execute(_UiConfigs, blockConfig);
+                Execute(_UiConfigs, BlockConfig);
             }
             catch (Exception ex)
             {
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
+        
         public void ExecuteTest(DrainageViewModel uiConfigs, Dictionary<string, List<string>> blockConfig)
         {
             var tmpUiConfigs = uiConfigs;
@@ -579,9 +585,9 @@ namespace ThMEPWSS.Command
             }
         }
 
-        public void Execute()
+        public override void AfterExecute()
         {
-            throw new NotImplementedException();
+            Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
     }
 }

@@ -25,9 +25,9 @@ namespace ThMEPEngineCore.Service
         public void Split(Entity outline)
         {
             List<Polyline> results = new List<Polyline>();
-            var outlinePolygon = outline.ToNTSPolygon();
+            var outlinePolygon = outline.ToNTSPolygonalGeometry();
             ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(
-                LineBeam.Outline.ToNTSPolygon(), outlinePolygon);
+                LineBeam.Outline.ToNTSPolygonalGeometry(), outlinePolygon);
             if (thCADCoreNTSRelate.IsCovers || thCADCoreNTSRelate.IsOverlaps)
             {
                 if (thCADCoreNTSRelate.IsCovers)
@@ -40,7 +40,7 @@ namespace ThMEPEngineCore.Service
                 }
                 SplitBeams = SplitBeams.Where(o =>
                   {
-                      ThCADCoreNTSRelate cadCoreNTSRelateOne = new ThCADCoreNTSRelate(outlinePolygon, o.Outline.ToNTSPolygon());
+                      ThCADCoreNTSRelate cadCoreNTSRelateOne = new ThCADCoreNTSRelate(outlinePolygon, o.Outline.ToNTSPolygonalGeometry());
                       return !cadCoreNTSRelateOne.IsCovers && !cadCoreNTSRelateOne.IsWithIn;
                   }).ToList();
                 SplitBeams = SplitBeams.Where(o => Math.Abs(o.Width - LineBeam.Width) <= 1.0).ToList();

@@ -95,7 +95,7 @@
     <Resource Include="Images\CADIcon.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\SetIcon.png" />
+    <Resource Include="Images\SettingIcon.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

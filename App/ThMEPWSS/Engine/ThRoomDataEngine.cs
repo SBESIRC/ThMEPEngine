@@ -84,7 +84,7 @@ namespace ThMEPWSS.Engine
                 {
                     if (room == null)
                         continue;
-                    var roomGeo = room.Boundary.ToNTSPolygon();
+                    var roomGeo = room.Boundary.ToNTSPolygonalGeometry();
                     if (originTransformer != null)
                     {
                         //偏移数据，暂时不处理
@@ -112,7 +112,7 @@ namespace ThMEPWSS.Engine
             {
                 var pRoom = new RoomModel();
                 pRoom.thIFCRoom = item;
-                var ntsPLine = item.Boundary.ToNTSPolygon();
+                var ntsPLine = item.Boundary.ToNTSPolygonalGeometry();
                 pRoom.outLine = ntsPLine.ToDbPolylines().FirstOrDefault();
                 pRoom.roomTypeName = EnumRoomType.Other;
                 if (item.Tags != null && item.Tags.Count > 0)
@@ -205,7 +205,7 @@ namespace ThMEPWSS.Engine
                 {
                     var room = new RoomModel();
                     room.thIFCRoom = ThIfcRoom.Create(item.GeometricExtents.ToNTSPolygon().ToDbEntity());
-                    room.outLine = room.thIFCRoom.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    room.outLine = room.thIFCRoom.Boundary.ToNTSPolygonalGeometry().ToDbPolylines().FirstOrDefault();
                     if (room.outLine.Area < 10)
                         continue;
                     room.roomTypeName = EnumRoomType.TubeWell;
@@ -218,7 +218,7 @@ namespace ThMEPWSS.Engine
                 {
                     var room = new RoomModel();
                     room.thIFCRoom = ThIfcRoom.Create(item.GeometricExtents.ToNTSPolygon().ToDbEntity());
-                    room.outLine = room.thIFCRoom.Boundary.ToNTSPolygon().ToDbPolylines().FirstOrDefault();
+                    room.outLine = room.thIFCRoom.Boundary.ToNTSPolygonalGeometry().ToDbPolylines().FirstOrDefault();
                     if (room.outLine.Area < 10)
                         continue;
                     room.roomTypeName = EnumRoomType.FlueWell;

@@ -74,6 +74,12 @@
     <Compile Include="ViewModels\ExampleViewModel.cs" />
     <Compile Include="ViewModels\MultiCheckItem.cs" />
     <Compile Include="ViewModels\ParkingLightViewModel.cs" />
+    <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
+      <DependentUpon>ThWiringConnectingUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WiringConnecting\ThWiringSettingUI.xaml.cs">
+      <DependentUpon>ThWiringSettingUI.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -138,6 +144,14 @@
     <Page Include="UI\uiParkingLight.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WiringConnecting\ThWiringConnectingUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="WiringConnecting\ThWiringSettingUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

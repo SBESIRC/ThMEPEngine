@@ -2,19 +2,24 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
              mc:Ignorable="d" 
-             Title="水管连接" Width="415.198" Height="400.142">
+             Title="水管连接" Width="415.198" Height="394.892">
     <Window.Resources>
         <ResourceDictionary>
             <local1:FanLayoutIntToBool x:Key="layoutTypeConverter"/>
             <local1:FanLayoutIntToVisibilty x:Key="layoutVisibiltyConverter"/>
+            <x:Array x:Key="CoeffList" Type ="sys:String">
+                <sys:String>150</sys:String>
+                <sys:String>200</sys:String>
+            </x:Array>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid>
-        <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="365" VerticalAlignment="Top" Width="200">
+    <Grid Height="382" VerticalAlignment="Top" Margin="0,0,0,-2">
+        <GroupBox x:Name="groupBox" Header="系统配置" HorizontalAlignment="Left" Height="360" VerticalAlignment="Top" Width="200">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -69,7 +74,7 @@
                 <StackPanel Orientation="Vertical" Grid.Row="4">
                     <Label x:Name="label4" Content="空调水比摩阻控制："/>
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
-                        <ComboBox x:Name="comboBox" Width="80"/>
+                        <ComboBox x:Name="comboBox" Width="70" ItemsSource="{Binding Source={StaticResource CoeffList}}" SelectedIndex="0" SelectedValue="{Binding FrictionCoeff}"/>
                         <Label x:Name="label5" Content="Pa/m"/>
                     </WrapPanel>
                 </StackPanel>
@@ -90,7 +95,7 @@
                 </StackPanel>
             </Grid>
         </GroupBox>
-        <GroupBox x:Name="groupBox1" Header="阀门选择" HorizontalAlignment="Left" Height="285" VerticalAlignment="Top" Width="200" Margin="205,0,0,0">
+        <GroupBox x:Name="groupBox1" Header="阀门选择" HorizontalAlignment="Left" Height="270" VerticalAlignment="Top" Width="200" Margin="205,0,0,0">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -141,7 +146,8 @@
                 </StackPanel>
             </Grid>
         </GroupBox>
-        <Button x:Name="btnGeneraSPM" Content="生成水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,290,0,0" Height="35" Click="btnGeneraSPM_Click"/>
-        <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,330,0,0" Height="35" Click="btnUpdateSPM_Click"/>
+        <Button x:Name="btnConnectPipe" Content="生成水管路由" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,275,0,0" Height="25" Click="btnConnectPipe_Click"/>
+        <Button x:Name="btnGeneraSPM" Content="生成水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,305,0,0" Height="25" Click="btnGeneraSPM_Click"/>
+        <Button x:Name="btnUpdateSPM" Content="更新水管平面" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="207,335,0,0" Height="25" Click="btnUpdateSPM_Click"/>
     </Grid>
 </cus:ThCustomWindow>

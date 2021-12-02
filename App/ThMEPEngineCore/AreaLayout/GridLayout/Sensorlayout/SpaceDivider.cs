@@ -195,16 +195,19 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
     {
         public List<int> layouts;
         public double angle;
+        public double area;
 
         public LayoutGroup(Layout layout)
         {
             layouts = new List<int>();
             layouts.Add(layout.ID);
             angle = layout.angle;
+            area = layout.ent.Area;
         }
         public void insert(Layout layout)
         {
-            angle = (angle * layouts.Count + layout.angle) / (layouts.Count + 1);
+            angle = (angle * area + layout.angle * layout.ent.Area) / (area + layout.ent.Area);
+            area += layout.ent.Area;
             layouts.Add(layout.ID);
         }
     }

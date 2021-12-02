@@ -24,6 +24,11 @@ using AcHelper.Commands;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
 using NFox.Cad;
+using ThMEPStructure.GirderConnect.Data;
+using ThMEPStructure.GirderConnect.Command;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore;
+using ThMEPStructure.GirderConnect.Data.Utils;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
 {
@@ -313,54 +318,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
         [CommandMethod("TIANHUACAD", "THBorderPoint", CommandFlags.Modal)]
         public void THBorderPoint()
         {
-            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (var cmd = new ThBeamConnectorCommand())
             {
-                //获取柱点
-                var clumnPts = GetObject.GetCenters(acdb);
-                Dictionary<Polyline, List<Polyline>> outlineWalls = new Dictionary<Polyline, List<Polyline>>();
-                Dictionary<Polyline, HashSet<Point3d>> outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
-                for (int i = 0; i < 6; ++i)
-                {
-                    //获取某个墙外边框
-                    Polyline outline = GetObject.GetPolyline(acdb);
-                    if (outline == null)
-                    {
-                        return;
-                    }
-                    if (!outlineClumns.ContainsKey(outline))
-                    {
-                        outlineClumns.Add(outline, new HashSet<Point3d>());
-                    }
-                    //获取此多边形包含的墙
-                    List<Polyline> walls = GetObject.GetPolylines(acdb);
-                    if (walls == null)
-                    {
-                        return;
-                    }
-                    outlineWalls.Add(outline, walls);
-                }
-                GetObject.FindPointsInOutline(clumnPts, outlineClumns);
-
-                //预处理
-                Point3dCollection ptsInOutline = new Point3dCollection();
-                foreach (var sets in outlineClumns.Values)
-                {
-                    foreach (Point3d pt in sets)
-                    {
-                        ptsInOutline.Add(pt);
-                    }
-                }
-                Point3dCollection newClumnPts = PointsDealer.RemoveSimmilerPoint(clumnPts, ptsInOutline);
-
-                //计算
-                Connect.Calculate(newClumnPts, outlineWalls, outlineClumns);
+                cmd.SubExecute();
             }
         }
 
         [CommandMethod("TIANHUACAD", "THCntNear2Wall", CommandFlags.Modal)]
         public void THCntNear2Wall()
         {
-            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (AcadDatabase acdb = AcadDatabase.Active()) 
             {
                 //获取柱点
                 var clumnPts = GetObject.GetCenters(acdb);
@@ -376,7 +343,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
                     outlineClumns.Add(outline, new HashSet<Point3d>());
                 }
                 //获取多边形
-                List<Polyline> walls = GetObject.GetPolylines(acdb);
+                HashSet<Polyline> walls = GetObject.GetPolylines(acdb).ToHashSet();
                 if (walls == null)
                 {
                     return;
@@ -394,11 +361,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
                 }
                 Point3dCollection newClumnPts = PointsDealer.RemoveSimmilerPoint(clumnPts, ptsInOutline);
 
-                Dictionary<Polyline, List<Polyline>> outlineWalls = new Dictionary<Polyline, List<Polyline>>();
+                Dictionary<Polyline, HashSet<Polyline>> outlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 outlineWalls.Add(outline, walls);
 
                 //计算
-                Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
+                DataProcess.MergeWall(outlineWalls);
+                var tuples = Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
+                
+                // 输出
+                MainBeamPostProcess.MPostProcess(tuples);
             }
             //{
             //    //DBObjectCollection objs = new DBObjectCollection();
@@ -414,6 +385,40 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
             //    //var entitys= spatialIndex.SelectWindowPolygon(polyline);
             //    //var entitys= spatialIndex.SelectFence(polyline);
             //}
+        }
+        [CommandMethod("TIANHUACAD", "THPCL", CommandFlags.Modal)]
+        public void THPCL()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                //ThMEPEngineCoreLayerUtils.CreateAICenterLineLayer(acadDatabase.Database);
+                objs.BuildArea()
+                    .OfType<Entity>()
+                    .ForEach(e =>
+                    {
+                        ThMEPPolygonService.CenterLine(e)
+                        .ToCollection()
+                        .LineMerge()
+                        .OfType<Entity>()
+                        .ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            //o.Layer = ThMEPEngineCoreLayerUtils.CENTERLINE;
+                        });
+                    });
+            }
         }
     }
 }

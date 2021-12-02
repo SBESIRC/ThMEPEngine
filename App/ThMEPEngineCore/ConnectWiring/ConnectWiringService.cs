@@ -23,6 +23,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.ConnectWiring.Data;
 using ThMEPEngineCore.ConnectWiring.Model;
 using ThMEPEngineCore.ConnectWiring.Service;
+using ThMEPEngineCore.ConnectWiring.Service.ConnectFactory;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 
@@ -30,7 +31,7 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(int count, string systemName, bool wall = false, bool column = false)
+        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false)
         {
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
@@ -38,23 +39,22 @@ namespace ThMEPEngineCore.ConnectWiring
                 return;
             }
 
-            BlockConfigSrervice configSrervice = new BlockConfigSrervice();
-            var configInfo = configSrervice.GetLoopInfo(systemName);
-
             //获取所有的块
-            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blockNames).ToList();
+            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
             ThBlockPointsExtractor thBlockPointsExtractor = new ThBlockPointsExtractor(allConfigBlocks);
             using (AcadDatabase db = AcadDatabase.Active())
             {
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
-            BranchConnectingService branchConnecting = new BranchConnectingService();
+            //BranchConnectingService branchConnecting = new BranchConnectingService();
+            BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
             {
-                var configBlocks = info.loopInfoModels.First().blockNames;
+                var blockInfos = info.loopInfoModels.First().blocks;
+                var configBlocks = blockInfos.Select(x => x.blockName);
                 var resBlocks = allBlocks
                 .Where(x =>
                 {
@@ -63,7 +63,7 @@ namespace ThMEPEngineCore.ConnectWiring
                 }).ToList();
                 if (data.Count > 0 && resBlocks.Count > 0)
                 {
-                    var maxNum = count;
+                    var maxNum = info.loopInfoModels.First().PointNum;
                     if (info.loopInfoModels.First().LineType == "E-FAS-WIRE4")
                     {
                         maxNum = 1;
@@ -74,7 +74,8 @@ namespace ThMEPEngineCore.ConnectWiring
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
-                    allDatas.AddRange(GetUCSPolylines());
+                    allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
+                    allDatas.AddRange(GetUCSPolylines(objs));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
@@ -104,7 +105,7 @@ namespace ThMEPEngineCore.ConnectWiring
                             List<Polyline> resLines = new List<Polyline>();
                             foreach (var line in loop.Value)
                             {
-                                var wiring = branchConnecting.CreateBranch(line, resBlocks);
+                                var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
                                 resLines.Add(wiring);
                             }
                             //插入线
@@ -270,7 +271,7 @@ namespace ThMEPEngineCore.ConnectWiring
         /// 获取ucs框线
         /// </summary>
         /// <returns></returns>
-        private List<ThGeometry> GetUCSPolylines()
+        private List<ThGeometry> GetUCSPolylines(DBObjectCollection centerPolygon)
         {
             var geos = new List<ThGeometry>();
             List<Polyline> allUCSPolys = new List<Polyline>();
@@ -299,16 +300,77 @@ namespace ThMEPEngineCore.ConnectWiring
                     allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
                 }
             }
+            ThCADCoreNTSSpatialIndex thbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(centerPolygon);
             if (allUCSPolys.Count > 0)
             {
                 allUCSPolys.ForEach(o =>
                 {
+                    var polys = thbeamsSpatialIndex.SelectCrossingPolygon(o);
+                    var resPoly = ThMPolygonTool.CreateMPolygon(o, polys.Cast<Curve>().ToList());
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.UCSPolyline.ToString());
-                    geometry.Boundary = o;
+                    geometry.Boundary = resPoly;
                     geos.Add(geometry);
                 });
             }
+
+            return geos;
+        }
+
+        /// <summary>
+        /// 获取ucs框线
+        /// </summary>
+        /// <returns></returns>
+        private List<ThGeometry> GetCenterLinePolylines(out DBObjectCollection objs)
+        {
+            objs = new DBObjectCollection();
+            var geos = new List<ThGeometry>();
+            List<Polyline> allUCSPolys = new List<Polyline>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择中心线框线区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return geos;
+                }
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acadDatabase.Element<Polyline>(obj);
+                    allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
+                }
+            }
+            
+            foreach (var item in allUCSPolys)
+            {
+                objs.Add(item);
+            }
+            MPolygon mPolygon = objs.BuildMPolygon();
+            var geometry = new ThGeometry();
+            geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.CenterPolyline.ToString());
+            geometry.Boundary = mPolygon;
+            geos.Add(geometry);
+            //if (allUCSPolys.Count > 0)
+            //{
+            //    allUCSPolys.ForEach(o =>
+            //    {
+            //        var geometry = new ThGeometry();
+            //        geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.CenterPolyline.ToString());
+            //        geometry.Boundary = o;
+            //        geos.Add(geometry);
+            //    });
+            //}
 
             return geos;
         }

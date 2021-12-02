@@ -19,18 +19,25 @@ using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPElectrical.VideoMonitoringSystem;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThVideoMonitoringSystemCommand : IAcadCommand, IDisposable
+    public class ThVideoMonitoringSystemCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThVideoMonitoringSystemCommand()
+        {
+            this.ActionName="安防平面-视频监控系统布置";
+            this.CommandName="THVMSYSTEM";
+        }
+
         public void Dispose()
         {
             //throw new NotImplementedException();
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

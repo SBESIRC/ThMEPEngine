@@ -21,6 +21,7 @@ namespace ThMEPWSS.SprinklerConnect.Model
 
     public class ThSprinklerVertexNode
     {
+        //
         public int NodeIndex { get; private set; }
 
         public ThSprinklerVertexNode(int ptIndex)
@@ -90,6 +91,9 @@ namespace ThMEPWSS.SprinklerConnect.Model
                 while (node != null)
                 {
                     var l = new Line(pts[SprinklerVertexNodeList[i].NodeIndex], pts[SprinklerVertexNodeList[node.EdgeIndex].NodeIndex]);
+
+           
+
                     if (containLine(l, lines) == false)
                     {
                         lines.Add(l);

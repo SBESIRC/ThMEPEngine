@@ -242,5 +242,98 @@ namespace ThMEPHVAC.FanLayout.Service
             tvs.Add(new TypedValue((int)DxfCode.ExtendedDataReal, info.FanWeight));
             blkId.AddXData("FanProperty", tvs);
         }
+
+        public void InsertEntity(Entity entity,string layer)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                database.ModelSpace.Add(entity);
+                entity.Layer = layer;
+                entity.Linetype = "ByLayer";
+                entity.LineWeight = LineWeight.ByLayer;
+                entity.ColorIndex = (int)ColorIndex.BYLAYER;
+            }
+        }
+        public void InsertPipeMark(string layer, string blockName, Point3d position,double angle,List<string> properties)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                for(int i = 0;i < properties.Count;i++)
+                {
+                    string strKey = "水管标注" + (i + 1).ToString();
+                    attNameValues.Add(strKey, properties[i]);
+                }
+                InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
+            }
+        }
+        public void InsertBlockReference(string layer, string blockName, Point3d position, double angle)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
+            }
+        }
+        public void InsertText(string layer, string strText, Point3d position, double angle)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                var dbText = new DBText();
+                dbText.Layer = layer;
+                dbText.TextString = strText;
+                dbText.Position = position;
+                dbText.Rotation = angle;
+                database.ModelSpace.Add(dbText);
+            }
+        }
+        public ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
+        {
+            Database db = spaceId.Database;//获取数据库对象
+            //以读的方式打开块表
+            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            //如果没有blockName表示的块，则程序返回
+            if (!bt.Has(blockName)) return ObjectId.Null;
+            //以写的方式打开空间（模型空间或图纸空间）
+            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+            ObjectId btrId = bt[blockName];//获取块表记录的Id
+            //打开块表记录
+            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+            //创建一个块参照并设置插入点
+            BlockReference br = new BlockReference(position, bt[blockName]);
+            br.ScaleFactors = scale;//设置块参照的缩放比例
+            br.Layer = layer;//设置块参照的层名
+            br.Rotation = rotateAngle;//设置块参照的旋转角度
+            space.AppendEntity(br);//为了安全，将块表状态改为读 
+            //判断块表记录是否包含属性定义
+            if (record.HasAttributeDefinitions)
+            {
+                //若包含属性定义，则遍历属性定义
+                foreach (ObjectId id in record)
+                {
+                    //检查是否是属性定义
+                    AttributeDefinition attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (attDef != null)
+                    {
+                        //创建一个新的属性对象
+                        AttributeReference attribute = new AttributeReference();
+                        //从属性定义获得属性对象的对象特性
+                        attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
+                        //判断是否包含指定的属性名称
+                        if (attNameValues.ContainsKey(attDef.Tag.ToUpper()))
+                        {
+                            //设置属性值
+                            attribute.TextString = attNameValues[attDef.Tag.ToUpper()].ToString();
+                        }
+                        //向块参照添加属性对象
+                        br.AttributeCollection.AppendAttribute(attribute);
+                        db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
+                    }
+                }
+            }
+            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+            return br.ObjectId;//返回添加的块参照的Id
+        }
+
     }
 }

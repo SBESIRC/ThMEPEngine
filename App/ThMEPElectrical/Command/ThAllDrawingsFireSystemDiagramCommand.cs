@@ -15,17 +15,24 @@ using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
 using NFox.Cad;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPElectrical.Command
 {
-    class ThAllDrawingsFireSystemDiagramCommand : IAcadCommand, IDisposable
+    class ThAllDrawingsFireSystemDiagramCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThAllDrawingsFireSystemDiagramCommand()
+        {
+            this.ActionName="火灾报警系统图-手动选择图纸";
+            this.CommandName="THHZXTA";
+        }
+
         public void Dispose()
         {
             //
         }
 
-        public void Execute()
+        public override void SubExecute()
         {
             //火灾自动报警系统diagram实例化
             ThAutoFireAlarmSystemModel diagram;

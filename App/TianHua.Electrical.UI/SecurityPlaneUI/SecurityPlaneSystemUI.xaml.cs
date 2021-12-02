@@ -272,7 +272,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
 
             //存储成excel
             ReadExcelService excelService = new ReadExcelService();
-            excelService.ConvertExcelToDataSet(dataSet, url);
+            excelService.ConvertDataSetToExcel(dataSet, url);
         }
 
         #region check输入

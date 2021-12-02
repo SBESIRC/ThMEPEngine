@@ -56,10 +56,12 @@ namespace ThMEPWSS.ViewModel
                     using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
                     {
                         var valueDic = new Dictionary<string, string>();
-                        valueDic.Add("节点1", "A");
-                        valueDic.Add("节点2", "A'");
-                        var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记",
-                                    pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0, valueDic);
+                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记-2",
+                                    pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0);
+                        //valueDic.Add("节点1", "A");
+                        //valueDic.Add("节点2", "A'");
+                        //var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记-2",
+                        //            pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0, valueDic);
                     }
                 }
             }

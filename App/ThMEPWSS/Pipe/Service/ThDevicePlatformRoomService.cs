@@ -86,7 +86,7 @@ namespace ThMEPWSS.Pipe.Service
                     var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
                     // 找到不包含子空间的，且不含有Tag名称的空间
                     var balconies = crossSpaces.Where(m => spacePredicateService.Contains(m).Count == 0 && m.Tags.Count == 0);
-                    var outerSpaces = balconies.Where(o => !BalconySpace.Boundary.ToNTSPolygon().Contains(o.Boundary.ToNTSPolygon().Buffer(-5.0)));
+                    var outerSpaces = balconies.Where(o => !BalconySpace.Boundary.ToNTSPolygonalGeometry().Contains(o.Boundary.ToNTSPolygonalGeometry().Buffer(-5.0)));
                     var relatedbalconies = outerSpaces.Where(o => (GetSpaceArea(o) > ThWPipeCommon.MIN_DEVICEPLATFORM_AREA && GetSpaceArea(o) < ThWPipeCommon.MAX_DEVICEPLATFORM_AREA)).ToList();
                     PlatformSpaces.Add(Tuple.Create(BalconySpace, relatedbalconies));
                 }

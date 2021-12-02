@@ -31,17 +31,47 @@ namespace ThMEPHVAC.FanConnect.Model
 
     public class ThFanPipeModel
     {
-        public double PipeWidth { set; get; }
-        public PIPELEVEL PipeLevel { set; get; }
-        public Line PLine { set; get; }
-        public List<Line> ExPline { set; get; }
-        public List<Point3d> ExPoint { set; get; }
-        public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1)
+        public int WayCount { set; get; }//是否是四通连接点
+        public bool IsFlag { set; get; }//标识位，表示是否反向ExPline顺序
+        public bool IsConnect { set; get; }//与父结点是否连接
+        public double PipeWidth { set; get; }//水管宽度
+        public PIPELEVEL PipeLevel { set; get; }//主体级别
+        public Vector3d CroVector { set; get; }//与父结点叉乘方向
+        public Line PLine { set; get; }//主体
+        public List<Line> ExPline { set; get; }//扩展线
+        public List<Point3d> ExPoint { set; get; }//扩展线的连接点
+        public List<ThFanPipeModel> BrotherItem { set; get; }
+        public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1,double width = 200)
         {
+            WayCount = 2;
+            IsFlag = false;
+            IsConnect = false;
+            PipeWidth = width;
             PipeLevel = level;
             PLine = line;
             ExPoint = new List<Point3d>();
+            CroVector = new Vector3d(0.0,0.0,1.0);
+            BrotherItem = new List<ThFanPipeModel>();
         }
         
+    }
+    public class ThFanPointModel
+    {
+        public bool IsCondMarked { set; get; }//是否已标记冷凝水管
+        public bool IsCoolHotMarked { set; get; }//是否已标记冷热水
+        public double CoolCapa { set; get; }//制冷量
+        public double CoolFlow { set; get; }//制冷流量值
+        public double HotFlow { set; get; }//制热流量值
+        public Point3d CntPoint { set; get; }//连接点
+        public double MarkSpace { set; get; }//标记间隔
+        public ThFanPointModel()
+        {
+            IsCondMarked = false;
+            IsCoolHotMarked = false;
+            CoolCapa = 0.0;
+            CoolFlow = 0.0;
+            HotFlow = 0.0;
+            MarkSpace = 200.0;
+        }
     }
 }

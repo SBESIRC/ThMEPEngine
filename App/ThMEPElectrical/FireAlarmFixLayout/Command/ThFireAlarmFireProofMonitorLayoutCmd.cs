@@ -9,69 +9,44 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-using AcHelper;
 using Linq2Acad;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
-
-using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.Command;
 
-using ThMEPElectrical.Command;
-using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
-using ThMEPElectrical.FireAlarmFixLayout;
-
 using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.ViewModels;
 using ThMEPElectrical.FireAlarm;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
-
-
-    public class ThFireAlarmFireProofMonitorLayoutCmdNoUI
-    {
-        [CommandMethod("TIANHUACAD", "ThFireProofMonitor", CommandFlags.Modal)]
-        public void ThFireAlarmFireProofMonitorLayoutCmd()
-        {
-            using (var cmd = new ThFireAlarmFireProofMonitorLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
-    }
-
     class ThFireAlarmFireProofMonitorLayoutCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly FireAlarmViewModel _UiConfigs;
+        private bool UseUI { get; set; }
         private double _scale = 100;
 
-        public ThFireAlarmFireProofMonitorLayoutCmd(FireAlarmViewModel uiConfigs)
+        public ThFireAlarmFireProofMonitorLayoutCmd(bool UI)
         {
-            _UiConfigs = uiConfigs;
-            CommandName = "THFireAlarmProofMonitorLayout";
-            ActionName = "生成";
-            SetInfo();
+            UseUI = UI;
+            InitialCmdInfo();
+            InitialSetting();
         }
-        public ThFireAlarmFireProofMonitorLayoutCmd()
+        private void InitialCmdInfo()
         {
+            CommandName = "ThFireAlarmFireProofMonitorLayout";
+            ActionName = "布置";
+        }
+        private void InitialSetting()
+        {
+            if (UseUI == true)
+            {
+                _scale = FireAlarmSetting.Instance.Scale;
+            }
+        }
 
-        }
         public override void SubExecute()
         {
             FireAlarmFireProofMonitorLayoutExecute();
         }
-        private void SetInfo()
-        {
-            if (_UiConfigs != null)
-            {
-                _scale = _UiConfigs.BlockRatioIndex == 0 ? 100 : 150;
-            }
-        }
+        
         public void Dispose()
         {
         }
@@ -80,6 +55,14 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                //画框，提数据，转数据
+                //var pts = ThFireAlarmUtils.GetFrame();
+                var pts = ThFireAlarmUtils.GetFrameBlk();
+                if (pts.Count == 0)
+                {
+                    return;
+                }
+
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Monitor };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -88,13 +71,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                //画框，提数据，转数据
-                //var pts = ThFireAlarmUtils.GetFrame();
-                var pts = ThFireAlarmUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
                 var geos = ThFireAlarmUtils.GetFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {

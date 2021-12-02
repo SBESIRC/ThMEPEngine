@@ -25,6 +25,10 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
+          - text: "提空间中心线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
           - text: "图块配置"
             attributes: { "IsVisible": false, "IsEnabled": false }
       - text: ""
@@ -152,6 +156,15 @@ panels:
           - text: "风管留洞"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlEGENERAL"
+    name: "EGENERAL"
+    title: "电气通用"
+    items:
+        - text: "连线"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "提资转换"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlEAFAS"
     name: "EAFAS"
     title: "火灾报警系统"
@@ -199,13 +212,6 @@ panels:
     title: "弱电系统"
     items:
         - text: "安防平面"
-          attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlEEXCHANGE"
-    name: "EEXCHANGE"
-    title: "提资接收"
-    items:
-        - text: "提资转换"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlAEXCHANGE"

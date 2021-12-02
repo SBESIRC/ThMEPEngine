@@ -156,7 +156,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     var centerLines = acadDatabase.ModelSpace
                     .OfType<Curve>()
                     .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME ||
-                    o.Layer == ThMEPEngineCoreCommon.CENTER_LINE_LAYER);
+                    o.Layer == ThMEPEngineCoreLayerUtils.CENTERLINE);
                     foreach (var cLine in centerLines)
                     {
                         var transCurve = cLine.Clone() as Curve;

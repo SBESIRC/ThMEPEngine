@@ -1,22 +1,13 @@
-﻿using System;
+﻿using Linq2Acad;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
-
-using ThMEPStructure.Command;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
+using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+using System;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
-    class BeamConnectCommand : ThMEPBaseCommand
+    public class BeamConnectCommand : ThMEPBaseCommand, IDisposable
     {
         //input
         public Polyline frame { get; set; }//车库边界轮廓
@@ -27,6 +18,11 @@ namespace ThMEPStructure.GirderConnect.Command
 
         //output
         public List<Line> lines { get; set; } //主梁连接线
+
+        public void Dispose()
+        {
+            //
+        }
 
         public override void SubExecute()
         {
