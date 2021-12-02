@@ -131,8 +131,10 @@
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\ShowInfo.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UnderUCSOpt.cs" />
-    <Compile Include="AreaLayout\GridLayout\Sensorlayout\UpUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Command\THALGLTest.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\SmallDetectUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\LargeDetectUCSOpt.cs" />
+    <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />

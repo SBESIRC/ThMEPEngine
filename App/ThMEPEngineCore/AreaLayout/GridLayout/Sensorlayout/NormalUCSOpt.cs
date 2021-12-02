@@ -17,41 +17,39 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Method;
 
 namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
 {
-    public class UnderUCSOpt
+    public class NormalUCSOpt
     {
-        private Polygon area;//区域
-        private double angle;//区域方向
-        private Point3d center;//旋转中心
+        public List<Coordinate> PlacePoints { get; set; } = new List<Coordinate>();//布点位置
+        public List<Coordinate> PlaceBoundPoints { get; set; } = new List<Coordinate>();//布点位置
+
+        private Polygon area { get; set; }//区域
+        public double angle { get; set; }//区域方向
+        public Point3d center { get; set; }//旋转中心
         private List<Polygon> layouts { get; set; } = new List<Polygon>();//可布置区域
-        private List<Coordinate> columnCenters { get; set; } = new List<Coordinate>();//柱子点位
-        private List<LineSegment> hLines { get; set; } = new List<LineSegment>();//横线，自上向下排序
-        private List<LineSegment> vLines { get; set; } = new List<LineSegment>();//竖线，自左向右排序
+        public List<LineSegment> hLines { get; set; } = new List<LineSegment>();//横线，自上向下排序
+        public List<LineSegment> vLines { get; set; } = new List<LineSegment>();//竖线，自左向右排序
         private List<List<bool>> validPoints { get; set; } = new List<List<bool>>();//交点是否有效
         private List<List<Coordinate>> Positions { get; set; } = new List<List<Coordinate>>();//交点位置
         private List<Coordinate> boundsPoints { get; set; } = new List<Coordinate>();//边界补点
-        
-        public List<Coordinate> PlacePoints { get; set; } = new List<Coordinate>();//布点位置
+
+        private List<double> x_mark { get; set; }
+        private List<double> y_mark { get; set; }
 
         private ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex;
-        private double minGap = 5800;
-        private double maxGap = 8201;
-        private double adjustGap = 5800 * Math.Sqrt(2);
-        private double beamGap = 1300;
-        private double bufferDist = 500;
-        private double radius;
+        private double maxGap { get; set; } = 8000;
+        private double bufferDist { get; set; } = 500;
+        private double radius { get; set; }
 
-        private double minX;
-        private double minY;
-        private double maxX;
-        private double maxY;
+        private double minX { get; set; }
+        private double minY { get; set; }
+        private double maxX { get; set; }
+        private double maxY { get; set; }
 
-        public UnderUCSOpt(Polyline boundary, double angle, Polygon room, List<Polygon> layouts, List<Coordinate> columnCenters,
-            double min, double max, double radius, double adjust, double buffer)
+        public NormalUCSOpt(Polyline boundary, double angle, Polygon room, List<Polygon> layouts, double max, double radius, double buffer)
         {
             //生成区域
             boundary = boundary.Buffer(300).Cast<Polyline>().First();
             var geom = OverlayNGRobust.Overlay(boundary.ToNTSPolygon(), room, SpatialFunction.Intersection);
-            //var geom = boundary.ToNTSPolygon().Intersection(room);
             if (geom is Polygon polygon)
                 area = polygon;
             else if (geom is GeometryCollection geometrycollection)
@@ -65,6 +63,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 area = tmpPoly;
             }
             this.angle = angle;
+            angle = this.angle;
             center = Centroid.GetCentroid(area).ToAcGePoint3d();
             //提取旋转后的可布置区域
             foreach (var layout in layouts)
@@ -86,20 +85,12 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 if (tarlayout != null)
                     this.layouts.Add(tarlayout);
             }
-            var region = area.Shell.ToDbPolyline().Buffer(beamGap).ToNTSMultiPolygon().OrderByDescending(o => o.Area).First() as Polygon;
-            foreach (var columnCenter in columnCenters)
-            {
-                if (FireAlarmUtils.PolygonContainPoint(region, columnCenter))
-                {
-                    var dbcenter = columnCenter.ToAcGePoint3d();
-                    dbcenter.RotateBy(-angle, Vector3d.ZAxis, center);
-                    this.columnCenters.Add(dbcenter.ToNTSCoordinate());
-                }
-            }
             //旋转区域
             var dbarea = area.ToDbMPolygon();
             dbarea.Rotate(center, -angle);
             area = dbarea.ToNTSPolygon();
+
+
             //建立关于可布置区域的索引
             DBObjectCollection dBObjectCollection = new DBObjectCollection();
             foreach (var layout in this.layouts)
@@ -107,15 +98,13 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
 
             //设置参数
-            minGap = min;
             maxGap = max;
-            adjustGap = adjust;
             bufferDist = buffer;
             this.radius = radius;
         }
-        public void CalculatePlace()
+        public void Calculate()
         {
-            if (layouts.Count == 0 || columnCenters.Count == 0)
+            if (layouts.Count == 0)
                 return;
             InitXYSegments();
             InitPoints();
@@ -138,125 +127,203 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 var p = boundPoint.ToAcGePoint3d();
                 p = p.RotateBy(angle, Vector3d.ZAxis, center);
                 var NTSp = new Coordinate(p.X, p.Y);
-                PlacePoints.Add(NTSp);
+                PlaceBoundPoints.Add(NTSp);
             }
         }
+
         //初步生成布置线
         private void InitXYSegments()
         {
             //计算UCS区域的边缘
-            var minRect = area.Envelope as Polygon;
-            minX = minRect.Coordinates[0].X;
-            minY = minRect.Coordinates[0].Y;
-            maxX = minRect.Coordinates[2].X;
-            maxY = minRect.Coordinates[2].Y;
-            //根据柱子的分布对x和y方向进行区间划分
+            var minRect = area.EnvelopeInternal;
+            minX = minRect.MinX;
+            minY = minRect.MinY;
+            maxX = minRect.MaxX;
+            maxY = minRect.MaxY;
+            if (layouts.Count() < 10)
+            {
+                var xNum = Math.Ceiling((maxX - minX) / maxGap);
+                var yNum = Math.Ceiling((maxY - minY) / maxGap);
+                var dx = (maxX - minX) / xNum;
+                var dy = (maxY - minY) / yNum;
+                for (double i = 0.5; i < yNum; i++)
+                    hLines.Add(new LineSegment(minX, minY + dy * i, maxX, minY + dy * i));
+                for (double i = 0.5; i < xNum; i++)
+                    vLines.Add(new LineSegment(minX + dx * i, minY, minX + dx * i, maxY));
+                hLines.Reverse();
+                return;
+            }
+            //根据layouts获取x，y集合
             List<double> column_xs = new List<double>();
             List<double> column_ys = new List<double>();
-            foreach (var coor in columnCenters)
+            int hLs = 0, vLs = 0;
+            double minLy = double.MaxValue, minLx = double.MaxValue, maxLy = double.MinValue, maxLx = double.MinValue;
+            foreach (var layout in layouts)
             {
-                column_xs.Add(coor.X);
-                column_ys.Add(coor.Y);
+                minRect = layout.EnvelopeInternal;
+                column_xs.Add(minRect.Centre.X);
+                if (minRect.Width >= 3500)
+                {
+                    column_xs.Add(minRect.Centre.X - minRect.Width * 0.3);
+                    column_xs.Add(minRect.Centre.X - minRect.Width * 0.1);
+                    column_xs.Add(minRect.Centre.X + minRect.Width * 0.1);
+                    column_xs.Add(minRect.Centre.X + minRect.Width * 0.3);
+                }
+                column_ys.Add(minRect.Centre.Y);
+                if (minRect.Height >= 3500)
+                {
+                    column_ys.Add(minRect.Centre.Y - minRect.Height * 0.3);
+                    column_ys.Add(minRect.Centre.Y - minRect.Height * 0.1);
+                    column_ys.Add(minRect.Centre.Y + minRect.Height * 0.3);
+                    column_ys.Add(minRect.Centre.Y + minRect.Height * 0.3);
+                }
+                if (minRect.Height > minRect.Width)
+                    vLs++;
+                else hLs++;
+
+                minLy = Math.Min(minLy, minRect.MinY);
+                minLx = Math.Min(minLx, minRect.MinX);
+                maxLy = Math.Max(maxLy, minRect.MaxY);
+                maxLx = Math.Max(maxLx, minRect.MaxX);
             }
             column_xs.Sort();
             column_ys.Sort();
-
-            int num = 1;
-            double sum = column_xs[0];
-            List<double> x_mark = new List<double>();
-            for (int index = 1; index < column_xs.Count; index++)
+            //获取归类的x，y坐标
+            x_mark = FireAlarmUtils.GetMask(column_xs);
+            if (x_mark.Count <= 1)
             {
-                if (column_xs[index] - column_xs[index - 1] > 500)
-                {
-                    if (num > 1)
-                        x_mark.Add(sum / num);
-                    num = 1;
-                    sum = column_xs[index] + 1;
-                }
-                else
-                {
-                    num++;
-                    sum += column_xs[index];
-                }
+                x_mark.Clear();
+                var xNum = Math.Ceiling((maxX - minX) / maxGap);
+                var dx = (maxX - minX) / xNum;
+                for (double i = 0.5; i < xNum; i++)
+                    x_mark.Add(minX + dx * i);
             }
-            if (num > 1)
-                x_mark.Add(sum / num);
-            while (x_mark.First() > minX)
+            while (x_mark.First() > minLx)
                 x_mark.Insert(0, x_mark[0] - (x_mark[1] - x_mark[0]));
-            while (maxX > x_mark.Last())
+            while (maxLx > x_mark.Last())
                 x_mark.Add(x_mark.Last() + (x_mark.Last() - x_mark[x_mark.Count - 2]));
 
-            List<double> y_mark = new List<double>();
-            num = 1;
-            sum = column_ys[0];
-            for (int index = 1; index < column_ys.Count; index++)
+            y_mark = FireAlarmUtils.GetMask(column_ys);
+            if (y_mark.Count <= 1)
             {
-                if (column_ys[index] - column_ys[index - 1] > 500)
-                {
-                    if (num > 1)
-                        y_mark.Add(sum / num);
-                    num = 1;
-                    sum = column_ys[index] + 1;
-                }
-                else
-                {
-                    num++;
-                    sum += column_ys[index];
-                }
+                y_mark.Clear();
+                var yNum = Math.Ceiling((maxY - minY) / maxGap);
+                var dy = (maxY - minY) / yNum;
+                for (double i = 0.5; i < yNum; i++)
+                    y_mark.Add(minY + dy * i);
             }
-            if (num > 1)
-                y_mark.Add(sum / num);
-            while (y_mark.First() > minY)
+            while (y_mark.First() > minLy && y_mark.Count > 1)
                 y_mark.Insert(0, y_mark[0] - (y_mark[1] - y_mark[0]));
-            while (maxY > y_mark.Last())
+            while (maxLy > y_mark.Last() && y_mark.Count > 1)
                 y_mark.Add(y_mark.Last() + (y_mark.Last() - y_mark[y_mark.Count - 2]));
 
+            //获取初始线的x,y坐标
+            var hLineYset = new List<double>();
             var vLineXset = new List<double>();
-            double x0 = minX + maxGap / 2;
-            for (var index = 0; index < x_mark.Count - 1;)
+            if (vLs > hLs)//可布置区域竖向排列
             {
-                var left = x_mark[index];
-                var right = x_mark[index + 1];
-                var left1_4 = left + (right - left) * 0.25;
-                var right1_4 = left + (right - left) * 0.75;
-
-                if (x0 < left1_4)
+                double x0 = minX + maxGap / 2;
+                for (var index = 0; index < x_mark.Count - 1;)
                 {
-                    if (index > 0)
-                        x0 = x_mark[index - 1] + (x_mark[index] - x_mark[index - 1]) * 0.75;
-                }
-                else if (x0 > right1_4 && x0 < right)
-                    x0 = right1_4;
-                else if (x0 > right)
-                {
-                    index++;
-                    continue;
+                    if (x_mark[index] < x0)
+                    {
+                        index++;
+                        continue;
+                    }
+                    if (vLineXset.Count > 0 && x_mark[index] - vLineXset.Last() < maxGap * 1.2)
+                        vLineXset.Add(x_mark[index]);
+                    else if (vLineXset.Count == 0 || (vLineXset.Count > 0 && x_mark[index - 1] > vLineXset.Last()))
+                    {
+                        if (x_mark[index] - x0 < 700)
+                            vLineXset.Add(x0);
+                        else vLineXset.Add(x_mark[index - 1]);
+                    }
+                    else vLineXset.Add(x0);
+                    x0 = vLineXset.Last() + maxGap;
+                    if (maxX - x0 < 0.5 * maxGap)
+                        x0 -= 0.1 * maxGap;
                 }
                 vLineXset.Add(x0);
-                if (maxX - x0 > 1.5 * maxGap)
-                    x0 += maxGap;
-                else x0 += 0.9 * maxGap;
-            }
-            var hLineYset = new List<double>();
-            double y0 = maxY - maxGap / 2;
-            for (var index = y_mark.Count - 1; index > 0; index--)
-            {
-                var top = y_mark[index];
-                var bottom = y_mark[index - 1];
-                var top1_4 = top - (top - bottom) * 0.25;
-                var bottom1_4 = top - (top - bottom) * 0.75;
-                if (y0 > top1_4)
+
+                double x_maxGap = -1;
+                for (int i = 0; i < vLineXset.Count - 1; i++)
+                    x_maxGap = Math.Max(x_maxGap, vLineXset[i + 1] - vLineXset[i]);
+                double y_maxGap = Math.Sqrt(radius * radius * 4 - x_maxGap * x_maxGap);
+
+                double y0 = maxY - y_maxGap / 2;
+                for (var index = y_mark.Count - 1; index >= 0;)
                 {
-                    if (index < y_mark.Count - 1)
-                        y0 = y_mark[index + 1] - (y_mark[index + 1] - y_mark[index]) * 0.75;
+                    if (y_mark[index] > y0)
+                    {
+                        index--;
+                        continue;
+                    }
+                    if ((hLineYset.Count == 0 && index < y_mark.Count - 1) || (hLineYset.Count > 0 && y_mark[index + 1] < hLineYset.Last()))
+                    {
+                        if (y0 - y_mark[index] < 700)
+                            hLineYset.Add(y0);
+                        else hLineYset.Add(y_mark[index + 1]);
+                    }
+                    else hLineYset.Add(y0);
+                    y0 = hLineYset.Last() - y_maxGap;
+                    if (y0 - minY < 0.5 * y_maxGap)
+                        y0 += 0.1 * y_maxGap;
                 }
-                else if (y0 < bottom1_4 && y0 > bottom)
-                    y0 = bottom1_4;
-                else if (y0 < bottom)
-                    continue;
                 hLineYset.Add(y0);
-                y0 -= maxGap;
             }
+            else//可布置区域横向排列
+            {
+                double y0 = maxY - maxGap / 2;
+                for (var index = y_mark.Count - 1; index >= 0;)
+                {
+                    if (y_mark[index] > y0)
+                    {
+                        index--;
+                        continue;
+                    }
+                    if (hLineYset.Count > 0 && hLineYset.Last() - y_mark[index] < maxGap * 1.2)
+                        hLineYset.Add(y_mark[index]);
+                    else if (hLineYset.Count == 0 || (hLineYset.Count > 0 && y_mark[index + 1] < hLineYset.Last()))
+                    {
+                        if (y0 - y_mark[index] < 700)
+                            hLineYset.Add(y0);
+                        else hLineYset.Add(y_mark[index + 1]);
+                    }
+                    else hLineYset.Add(y0);
+                    y0 = hLineYset.Last() - maxGap;
+                    if (y0 - minY < 0.5 * maxGap)
+                        y0 += 0.1 * maxGap;
+                }
+                hLineYset.Add(y0);
+
+                double y_maxGap = -1;
+                for (int i = 0; i < hLineYset.Count - 2; i++)
+                    y_maxGap = Math.Max(y_maxGap, hLineYset[i] - hLineYset[i + 1]);
+                double x_maxGap = Math.Sqrt(radius * radius * 4 - y_maxGap * y_maxGap);
+
+                double x0 = minX + x_maxGap / 2;
+                for (var index = 0; index < x_mark.Count - 1;)
+                {
+                    if (x_mark[index] < x0)
+                    {
+                        index++;
+                        continue;
+                    }
+                    if ((vLineXset.Count == 0 && index > 0) || (vLineXset.Count > 0 && x_mark[index - 1] > vLineXset.Last()))
+                    {
+                        if (x_mark[index] - x0 < 700)
+                            vLineXset.Add(x0);
+                        else vLineXset.Add(x_mark[index - 1]);
+                    }
+                    else vLineXset.Add(x0);
+                    x0 = vLineXset.Last() + x_maxGap;
+                    if (maxX - x0 < 0.5 * x_maxGap)
+                        x0 -= 0.1 * x_maxGap;
+                }
+                vLineXset.Add(x0);
+            }
+
+
             foreach (var x in vLineXset)
             {
                 if (x > minX && x < maxX)
@@ -379,8 +446,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 }
                 if (boundFlag[0] && boundFlag[1] && boundFlag[2] && boundFlag[3])
                 {
-                    double Ty = vLines[h_index - 1].P0.Y;
-                    double By = vLines[h_index + 1].P0.Y;
+                    double Ty = hLines[h_index - 1].P0.Y;
+                    double By = hLines[h_index + 1].P0.Y;
                     if (Ty - BBy > maxGap * 1.5 && TBy - By > maxGap * 1.5)
                     {
                         double nCy1 = Math.Max(0.67 * Ty + 0.33 * By, TBy - 0.5 * maxGap);
@@ -388,9 +455,9 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                         //修改current、left、right
                         UpdateHLine(h_index, nCy2);
                         if (h_index - 2 > 0)
-                            UpdateVLine(h_index - 1, (hLines[h_index - 2].P0.Y + nCy1) / 2);
+                            UpdateHLine(h_index - 1, (hLines[h_index - 2].P0.Y + nCy1) / 2);
                         if (h_index + 2 < hLines.Count)
-                            UpdateVLine(h_index + 1, (vLines[h_index + 2].P0.X + nCy2) / 2);
+                            UpdateHLine(h_index + 1, (hLines[h_index + 2].P0.Y + nCy2) / 2);
                         //新增一条线
                         hLines.Insert(h_index, new LineSegment(minX, nCy1, maxX, nCy1));
                         validPoints.Insert(h_index, new List<bool>());
@@ -415,11 +482,64 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     var current = Positions[h_index][v_index];
 
                     //移动到最近的可布置区域
-                    Positions[h_index][v_index] = FindNearestPointWithBuffer(current, bufferDist);
-
+                    var target = FindTargetPoint(current, bufferDist);
+                    if (target.X != current.X)
+                    {
+                        bool flag = true;
+                        for (int i = 0; i < hLines.Count; i++)
+                        {
+                            var tmp = GetNearLayouts(Positions[i][v_index]);
+                            var tmpPoint = new Coordinate(target.X, Positions[i][v_index].Y);
+                            if (FireAlarmUtils.MultiPolygonContainPoint(tmp, Positions[i][v_index]))
+                            {
+                                if (!FireAlarmUtils.MultiPolygonContainPoint(tmp, tmpPoint))
+                                {
+                                    flag = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (flag)
+                        {
+                            for (int i = 0; i < hLines.Count; i++)
+                                Positions[i][v_index] = new Coordinate(target.X, Positions[i][v_index].Y);
+                        }
+                    }
+                    if (target.Y != current.Y && HasRight(h_index, v_index))
+                    {
+                        bool flag = true;
+                        for (int i = 0; i < vLines.Count; i++)
+                        {
+                            var tmp = GetNearLayouts(Positions[h_index][i]);
+                            var tmpPoint = new Coordinate(Positions[h_index][i].X, target.Y);
+                            if (FireAlarmUtils.MultiPolygonContainPoint(tmp, Positions[h_index][i]))
+                            {
+                                if (!FireAlarmUtils.MultiPolygonContainPoint(tmp, tmpPoint))
+                                {
+                                    flag = false;
+                                    break;
+                                }
+                            }
+                        }
+                        if (flag)
+                        {
+                            for (int i = 0; i < vLines.Count; i++)
+                                Positions[h_index][i] = new Coordinate(Positions[h_index][i].X, target.Y);
+                        }
+                    }
+                    Positions[h_index][v_index] = target;
+                }
+            }
+            for (int h_index = 0; h_index < hLines.Count; h_index++)
+            {
+                for (int v_index = 0; v_index < vLines.Count; v_index++)
+                {
+                    //当前点不在房间内
+                    if (!validPoints[h_index][v_index])
+                        continue;
+                    var current = Positions[h_index][v_index];
                     //处理边界
-                    Coordinate newPoint = null;//新增点
-                    Coordinate newPosition = null;//移动点
+                    List<Coordinate> NewPoints = new List<Coordinate>();
 
                     bool hasLeft = HasLeft(h_index, v_index);
                     bool hasRight = HasRight(h_index, v_index);
@@ -430,107 +550,30 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     var top = GetTopPoint(h_index, v_index);
                     var bottom = GetBottomPoint(h_index, v_index);
 
-                    int movedir = -1;//移动方向：1234->左右上下
-                    //距离左边界太远
-                    if (!hasLeft && current.X - left.X > maxGap / 2)
-                    {
-                        if (right.X - left.X < 1.5 * maxGap)
-                        {
-                            if (hasRight)
-                            {
-                                newPosition = new Coordinate(left.X + maxGap / 2, current.Y);
-                                movedir = 1;
-                            }
-                            else
-                                newPosition = new Coordinate((left.X + right.X) / 2, current.Y);
-                        }
-                        else
-                            newPoint = new Coordinate(0.5 * (right.X + left.X) - maxGap * 0.75, current.Y);
-                    }
-                    //距离右边界太远
-                    else if (!hasRight && right.X - current.X > maxGap / 2)
-                    {
-                        if (hasLeft)
-                        {
-                            if (right.X - left.X < 1.5 * maxGap)
-                            {
-                                newPosition = new Coordinate(right.X - maxGap / 2, current.Y);
-                                movedir = 2;
-                            }
-                            else
-                                newPoint = new Coordinate(0.5 * (right.X + left.X) + maxGap * 0.75, current.Y);
-                        }
-                    }
-                    //距离上边界太远
-                    else if (!hasTop && top.Y - current.Y > maxGap / 2)
-                    {
-                        if (top.Y - bottom.Y < 1.5 * maxGap)
-                        {
-                            if (hasBottom)
-                            {
-                                newPosition = new Coordinate(current.X, top.Y - maxGap / 2);
-                                movedir = 3;
-                            }
-                            else
-                            {
-                                newPosition = new Coordinate(current.X, top.Y - maxGap / 2);
-                                newPoint = new Coordinate(current.X, bottom.Y + maxGap / 2);
-                            }
-                        }
-                        else
-                            newPoint = new Coordinate(current.X, 0.5 * (top.Y + bottom.Y) + 0.75 * maxGap);
-                    }
-                    //距离下边界太远
-                    else if (!hasBottom && current.Y - bottom.Y > maxGap / 2)
-                    {
-                        if (hasTop)
-                        {
-                            if (top.Y - bottom.Y < 1.5 * maxGap)
-                            {
-                                newPosition = new Coordinate(current.X, bottom.Y + maxGap / 2);
-                                movedir = 4;
-                            }
-                            else
-                                newPoint = new Coordinate(current.X, 0.5 * (top.Y + bottom.Y) - 0.75 * maxGap);
-                        }
-                    }
-                    //如果需要移动点，那么保证新位置在可布置区域内
-                    if (newPosition != null)
-                    {
-                        if (movedir == -1)
-                        {
-                            newPosition = FindNearestPointWithBuffer(newPosition, bufferDist);
-                            Positions[h_index][v_index] = newPosition;
-                        }
-                        if (movedir == 1 || movedir == 2)
-                        {
-                            for (int i = h_index; i < hLines.Count; i++)
-                            {
-                                var updatePoint = new Coordinate(newPosition.X, Positions[i][v_index].Y);
-                                if (FireAlarmUtils.PolygonContainPoint(area, updatePoint))
-                                    Positions[i][v_index] = FindNearestPointWithBuffer(updatePoint, bufferDist);
-                            }
+                    var x_maxGap = Math.Sqrt(radius * radius * 4 - Math.Pow(Math.Max(top.Y - current.Y, current.Y - bottom.Y), 2));
+                    var y_maxGap = Math.Sqrt(radius * radius * 4 - Math.Pow(Math.Max(right.X - current.X, current.X - left.X), 2));
 
-                        }
-                        if (movedir == 3 || movedir == 4)
-                        {
-                            for (int j = v_index; j < vLines.Count; j++)
-                            {
-                                var updatePoint = new Coordinate(Positions[h_index][j].X, newPosition.Y);
-                                if (FireAlarmUtils.PolygonContainPoint(area, updatePoint))
-                                    Positions[h_index][j] = FindNearestPointWithBuffer(updatePoint, bufferDist);
-                            }
-                        }
-                    }
+                    //距离左边界太远
+                    if (!hasLeft && current.X - left.X > x_maxGap / 2) NewPoints.Add(new Coordinate(0.5 * (right.X + left.X) - x_maxGap * 0.75, current.Y));
+                    //距离右边界太远
+                    if (!hasRight && right.X - current.X > x_maxGap / 2) NewPoints.Add(new Coordinate(0.5 * (right.X + left.X) + x_maxGap * 0.75, current.Y));
+                    //距离上边界太远
+                    if (!hasTop && top.Y - current.Y > y_maxGap / 2) NewPoints.Add(new Coordinate(current.X, 0.5 * (top.Y + bottom.Y) + 0.75 * y_maxGap));
+                    //距离下边界太远
+                    if (!hasBottom && current.Y - bottom.Y > y_maxGap / 2)
+                        NewPoints.Add(new Coordinate(current.X, 0.5 * (top.Y + bottom.Y) - 0.75 * y_maxGap));
                     //如果需要添加点，那么保证该点在可布置区域内
-                    if (newPoint != null)
+                    foreach (var newPoint in NewPoints)
                     {
-                        newPoint = FindNearestPointWithBuffer(newPoint, bufferDist);
-                        boundsPoints.Add(newPoint);
+                        var tmp = FindTargetPoint(newPoint, bufferDist);
+                        if (tmp.Distance(current) > 1500)
+                            boundsPoints.Add(tmp);
                     }
                 }
             }
         }
+
+
         //寻找point附近的可布置区域
         private List<Polygon> GetNearLayouts(Coordinate point)
         {
@@ -542,10 +585,19 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 polygon_layouts.Add(layout.ToNTSPolygon());
             return polygon_layouts;
         }
-        //计算距离point最近的可布置区域内的点，带buffer
-        private Coordinate FindNearestPointWithBuffer(Coordinate point, double buffer)
+        //计算目标点
+        private Coordinate FindTargetPoint(Coordinate point, double buffer)
         {
             var nearLayouts = GetNearLayouts(point);
+            var res = new List<Coordinate>();
+            res.Add(FindNearestPointWithBuffer(point, buffer, nearLayouts));
+            res.Add(FindNearestPointOnHLineWithBuffer(point, buffer, nearLayouts));
+            res.Add(FindNearestPointOnVLineWithBuffer(point, buffer, nearLayouts));
+            return res.OrderBy(o => o.Distance(point)).First();
+        }
+        //计算距离point最近的可布置区域内的点，带buffer
+        private Coordinate FindNearestPointWithBuffer(Coordinate point, double buffer, List<Polygon> nearLayouts)
+        {
             if (FireAlarmUtils.MultiPolygonContainPoint(nearLayouts, point))
                 return point;
             Coordinate target = new Coordinate(point.X + radius, point.Y + radius);
@@ -568,19 +620,83 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             }
             return target;
         }
+        //计算横线上距离point最近的可布置区域内的点，带buffer
+        private Coordinate FindNearestPointOnHLineWithBuffer(Coordinate point, double buffer, List<Polygon> nearLayouts)
+        {
+            List<Coordinate> possible_points = new List<Coordinate>();
+            //点所在横线
+            var left = new Coordinate(point.X - radius, point.Y);
+            var right = new Coordinate(point.X + radius, point.Y);
+            var hline = new LineSegment(left, right);
+            //与可布置区域的交集
+            var intersectLine = FireAlarmUtils.LineIntersectWithMutiPolygon(hline, nearLayouts);
+            //没有交集，返回失败
+            if (intersectLine.Count == 0)
+                return new Coordinate(point.X + radius, point.Y + radius);
+            //有交集，找目标点
+            foreach (var seg in intersectLine)
+            {
+                Coordinate pos = new Coordinate();
+                if (seg.Length > buffer * 2)//线长大于2*buffer，两端内缩buffer取较近点
+                {
+                    var p0 = seg.P0.Distance(point) < seg.P1.Distance(point) ? seg.P0 : seg.P1;
+                    var p1 = p0 == seg.P0 ? seg.P1 : seg.P0;
+                    pos.Y = point.Y;
+                    pos.X = p1.X > p0.X ? p0.X + buffer : p0.X - buffer;
+                }
+                else pos = seg.MidPoint;//线长小于2*buffer，取中点
+                possible_points.Add(pos);
+            }
+            if (possible_points.Count == 0) return new Coordinate(point.X + radius, point.Y + radius);
+            return possible_points.OrderBy(o => o.Distance(point)).First();
+        }
+        //计算竖线上距离point最近的可布置区域内的点，带buffer
+        private Coordinate FindNearestPointOnVLineWithBuffer(Coordinate point, double buffer, List<Polygon> nearLayouts)
+        {
+            List<Coordinate> possible_points = new List<Coordinate>();
+            //点所在竖线
+            var top = new Coordinate(point.X, point.Y + radius);
+            var bottom = new Coordinate(point.X, point.Y - radius);
+            var vline = new LineSegment(bottom, top);
+            //与可布置区域的交集
+            var intersectLine = FireAlarmUtils.LineIntersectWithMutiPolygon(vline, nearLayouts);
+            //没有交集，返回失败
+            if (intersectLine.Count == 0)
+                return new Coordinate(point.X + radius, point.Y + radius);
+            //有交集，先找目标点
+            foreach (var seg in intersectLine)
+            {
+                Coordinate pos = new Coordinate();
+                if (seg.Length > 2 * buffer) //线长大于2*buffer，两端内缩buffer取较近点
+                {
+                    var p0 = seg.P0.Distance(point) < seg.P1.Distance(point) ? seg.P0 : seg.P1;
+                    var p1 = p0 == seg.P0 ? seg.P1 : seg.P0;
+                    pos.X = point.X;
+                    pos.Y = p1.Y > p0.Y ? p0.Y + buffer : p0.Y - buffer;
+                }
+                else pos = seg.MidPoint;//线长小于2*buffer，取中点
+                possible_points.Add(pos);
+            }
+            if (possible_points.Count == 0) return new Coordinate(point.X + radius, point.Y + radius);
+            return possible_points.OrderBy(o => o.Distance(point)).First();
+        }
 
+        //是否有左点
         private bool HasLeft(int i, int j)
         {
             return j > 0 && validPoints[i][j - 1] == true;
         }
+        //是否有下点
         private bool HasTop(int i, int j)
         {
             return i > 0 && validPoints[i - 1][j] == true;
         }
+        //是否有右点
         private bool HasRight(int i, int j)
         {
             return j < vLines.Count - 1 && validPoints[i][j + 1] == true;
         }
+        //是否有下点
         private bool HasBottom(int i, int j)
         {
             return i < hLines.Count - 1 && validPoints[i + 1][j] == true;

@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
         //输入区域参数
         public Polygon room { get; private set; }//房间区域
         public List<Polygon> layouts { get; private set; } = new List<Polygon>();//可布置区域
-        public List<Polyline> detects { get; private set; }//探测区域
+        public List<Polygon> detects { get; private set; } = new List<Polygon>();//探测区域
 
         public List<Coordinate> columnCenters { get; private set; } = new List<Coordinate>();//柱子中心
         protected Dictionary<Polyline, double> UCS { get; private set; } = new Dictionary<Polyline, double>();//UCS，弧度
@@ -49,6 +49,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
             room = inputArea.room.ToNTSPolygon();
             foreach (var hole in inputArea.holes)
             {
+                if (hole.Area / room.Area > 0.9) continue;
                 var geo = OverlayNGRobust.Overlay(room, hole.ToNTSPolygon(), SpatialFunction.Difference);
                 if (geo is Polygon polygon)
                     room = polygon;
@@ -115,11 +116,18 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
                         layouts.Add(poly);
                 }
             }
+            //生成柱子中点
             foreach (var column in inputArea.columns)
             {
                 var centerPoint = column.GetCentroidPoint().ToNTSCoordinate();
                 columnCenters.Add(centerPoint);
             }
+
+            //生成探测区域
+            foreach (var detect in inputArea.detect_area)
+                detects.Add(detect.ToNTSPolygon());
+            detects = detects.OrderByDescending(o => o.Area).ToList();
+
             //生成UCS
             foreach (var record in inputArea.UCS)
             {

@@ -88,5 +88,29 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                 return GetClosePointOnMultiPolygon(multiPolygon, center);
             return null;
         }
+        public static List<double> GetMask(List<double> x, double buffer = 100)
+        {
+            List<double> res = new List<double>();
+            int num = 1;
+            double sum = x[0];
+            for (int index = 1; index < x.Count; index++)
+            {
+                if (x[index] - x[index - 1] > buffer)
+                {
+                    if (num > 1)
+                        res.Add(sum / num);
+                    num = 1;
+                    sum = x[index] + 1;
+                }
+                else
+                {
+                    num++;
+                    sum += x[index];
+                }
+            }
+            if (num > 1)
+                res.Add(sum / num);
+            return res;
+        }
     }
 }
