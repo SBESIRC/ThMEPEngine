@@ -52,13 +52,14 @@ namespace ThMEPWSS.Command
         {
             Autodesk.AutoCAD.Geometry.Point3d loopStartPt;
             {
-                var opt = new PromptPointOptions("请指定环管标记起点: \n");
-                var propPtRes = Active.Editor.GetPoint(opt);
-                if (propPtRes.Status != PromptStatus.OK)
+                var opt = Active.Editor.GetPoint("请指定环管标记起点:");
+                if (opt.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                loopStartPt = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+                var propPtRes = opt.Value;
+                
+                loopStartPt = propPtRes.TransformBy(Active.Editor.UCS2WCS());
             }
 
             var selectArea = Common.Utils.SelectAreas();//生成候选区域
@@ -70,13 +71,13 @@ namespace ThMEPWSS.Command
             var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
-                var opt = new PromptPointOptions("指定消火栓系统图插入点: \n");
-                var propPtRes = Active.Editor.GetPoint(opt);
-                if (propPtRes.Status != PromptStatus.OK)
+                var opt = Active.Editor.GetPoint("指定消火栓系统图插入点:");
+
+                if (opt.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                fireHydrantSysOut.InsertPoint = propPtRes.Value.TransformBy(Active.Editor.UCS2WCS());
+                fireHydrantSysOut.InsertPoint = opt.Value.TransformBy(Active.Editor.UCS2WCS());
             }
             GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
 
