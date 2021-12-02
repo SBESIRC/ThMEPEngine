@@ -72,27 +72,40 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var popSize = Active.Editor.GetInteger("\n Input population size:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            using (var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value))
+            var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            var rst = new List<Chromosome>();
+            //try
+            //{
+                rst = geneAlgorithm.Run();
+                
+            //}
+            //catch(Exception ex)
+            //{
+
+            //}
+
+            var solution = rst.First();
+            layoutPara.Set(solution.Genome);
+
+            //
+            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                var rst = geneAlgorithm.Run();
-                var solution = rst.First();
-                layoutPara.Set(solution.Genome);
-                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                int index = layoutPara.AreaNumber[j];
+                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
+                layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+                bool valid = p.Validate();
+                if (valid)
                 {
-                    int index = layoutPara.AreaNumber[j];
-                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
-                    ParkingPartition p = new ParkingPartition(new List<Polyline>(), lanes, obstacles, boundary);
-                    bool valid = p.Validate();
-                    if (valid)
-                    {
-                        p.Initialize();
-                        p.Display();
-                    }
+                    p.Initialize();
+                    p.Display();
                 }
-                Draw.DrawSeg(solution);
             }
+            Draw.DrawSeg(solution);
+            ;
         }
 
         private static Point3dCollection SelectAreas()

@@ -22,6 +22,7 @@ namespace ThMEPArchitecture
             var obstacles = new List<Polyline>();
             Read(walls, iniLanes, obstacles);
             var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
+            ;
         }
         public void Read(List<Polyline> walls, List<Line> iniLanes, List<Polyline> obstacles)
         {
@@ -51,21 +52,10 @@ namespace ThMEPArchitecture
             }
         }
 
-        public List<BuildingBox> f(List<Polyline> walls, List<Line> iniLanes, List<Polyline> obstacles, Polyline boundary)
+        public void f(List<Polyline> walls, List<Line> iniLanes, List<Polyline> obstacles, Polyline boundary)
         {
-            List<BuildingBox> res = new List<BuildingBox>();
-            return res;
+            return ;
         }
 
-        public class BuildingBox
-        {
-            public BuildingBox(Polyline polyOut, Polyline polyIn)
-            {
-                PolyOut = polyOut;
-                PolyIn = polyIn;
-            }
-            private Polyline PolyOut;
-            private Polyline PolyIn;
-        }
     }
 }

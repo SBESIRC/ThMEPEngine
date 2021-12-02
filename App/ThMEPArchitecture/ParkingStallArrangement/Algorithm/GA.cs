@@ -100,9 +100,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                 layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
                 layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
 
                 //log
-                List<Polyline> pls = new List<Polyline>() { boundary };
+                List<Polyline> pls = walls;
                 string w = "";
                 string l = "";
                 foreach (var e in pls)
@@ -110,7 +112,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
                         w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
                 }
-                foreach (var e in lanes)
+                foreach (var e in inilanes)
                 {
                     l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
@@ -123,13 +125,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 sw.Close();
                 fs1.Close();
 
-                ParkingPartition p = new ParkingPartition(new List<Polyline>(), lanes, obstacles, boundary);
-                bool valid = p.Validate();
-                if (valid)
+                ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+                //bool valid = p.Validate();
+                if (true)
                 {
                     //p.Log();
                     p.Initialize();
-                    count += p.CalNumOfParkingSpaces();
+
+                    try
+                    {
+                        count += p.CalNumOfParkingSpaces();
+                    }
+                    catch(Exception ex)
+                    {
+                        ;
+                    }
+
                 }
             }
             return count;
@@ -163,10 +174,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double Low, High;
 
         //log file name
-        public static string LogFileName = Path.Combine( System.IO.Path.GetTempPath(), "GaLog.txt");
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName,rollingInterval:RollingInterval.Hour).CreateLogger();
+            .File(LogFileName, rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
@@ -200,20 +211,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();//创建第一代
-            var strFirstPopCnt = $"\n init pop cnt: {pop.Count}";
+            var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
             Active.Editor.WriteMessage(strFirstPopCnt);
             Logger.Information(strFirstPopCnt);
-            //sw.WriteLine(strFirstPopCnt);
-            
             var curIteration = 0;
-            while (curIteration++ < IterationCount)
+            int maxCount = 0;
+            int maxNums = 0;
+
+            while (curIteration++ < IterationCount && maxCount < 5)
             {
-                var strCurIterIndex = $"\n iteration index： {curIteration}";
+                var strCurIterIndex = $"\n iteration index：     {curIteration}";
                 Active.Editor.WriteMessage(strCurIterIndex);
-                //sw.WriteLine(strCurIterIndex);
                 Logger.Information(strCurIterIndex);
-                selected = Selection(pop);
+                selected = Selection(pop, out int curNums);
                 pop = CreateNextGeneration(selected);
+                if(maxNums == curNums)
+                {
+                    maxCount++;
+                }
+                else
+                {
+                    maxNums = curNums;
+                }
                 Mutation(pop);
             }
 
@@ -305,6 +324,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             return rst;
         }
+
         public Chromosome Crossover(Chromosome s1, Chromosome s2)
         {
             Chromosome newS = new Chromosome();
@@ -326,15 +346,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return newS;
         }
 
-        public List<Chromosome> Selection(List<Chromosome> inputSolution)
+        public List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
         {
             var sorted = inputSolution.OrderByDescending(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
-
-            var strBestCnt = $"\n current best: {sorted.First().Count}";
+            maxNums = sorted.First().GetMaximumNumber(LayoutPara, GaPara);
+            var strBestCnt = $"\n Current best： {sorted.First().Count}";
             Active.Editor.WriteMessage(strBestCnt);
-            //sw.WriteLine(strBestCnt);
             Logger.Information(strBestCnt);
-            
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
             {

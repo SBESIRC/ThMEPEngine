@@ -38,3 +38,4 @@ using System.Runtime.InteropServices;
 
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangement))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingPartitionTest))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.BuildingBoxTest))]
