@@ -39,22 +39,28 @@ namespace ThCADExtension
         /// <returns></returns>
         public static Polyline TessellateCircleWithChord(this Circle circle, double length)
         {
-            return TessellateCircleWithArc(circle, circle.ChordLengthToArcLength(length));
+            return TessellateCircleWithArc(circle, ChordLength2ArcLength(length, circle.Radius));
         }
 
-        /// <summary>
-        /// 根据弦长求解对应较短弧的弧长
-        /// </summary>
-        /// <param name="circle"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static double ChordLengthToArcLength(this Circle circle, double length)
+        public static double ChordLength2ArcLength(double chordLength, double radius)
         {
-            if(length > circle.Diameter)
-            {
-                throw new ArgumentOutOfRangeException();
-            }
-            return 2 * circle.Radius * Math.Asin(length / circle.Diameter);
+            // Circle - Arc Length from Chord Length and Radius
+            // https://www.vcalc.com/equation/?uuid=7d9b22c3-5fe3-11ea-a7e4-bc764e203090
+            return 2 * radius * Math.Asin(chordLength / radius * 2);
+        }
+
+        public static double ArcLength2ChordLength(double chordLength, double radius)
+        {
+            // Circle - Chord Length from Arc Length and Radius
+            // https://www.vcalc.com/wiki/vCalc/Circle+-+Chord+Length+from+Arc+Length+and+Radius
+            return 2 * radius * Math.Sin(chordLength / (2 * radius));
+        }
+
+        public static double ChordLength2ChordHeight(double chordLength, double radius)
+        {
+            // Circle - Radius from chord length and arc height
+            // https://www.vcalc.com/equation/?uuid=79418cb6-a6b2-11e6-9770-bc764e2038f2
+            return radius - Math.Sqrt(Math.Pow(radius, 2) - Math.Pow(chordLength / 2.0, 2));
         }
     }
 }
