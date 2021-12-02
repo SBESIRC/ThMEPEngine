@@ -7,6 +7,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
              mc:Ignorable="d" 
+             Closing="ThCustomWindow_Closing"
              Title="水管连接" Width="415.198" Height="394.892">
     <Window.Resources>
         <ResourceDictionary>

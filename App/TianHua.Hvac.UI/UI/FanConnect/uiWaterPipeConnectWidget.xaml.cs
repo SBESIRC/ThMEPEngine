@@ -59,5 +59,10 @@ namespace TianHua.Hvac.UI.UI.FanConnect
             waterPipeConnectExtractCmd.ConfigInfo = ViewModel.WaterPipeConfigInfo;
             waterPipeConnectExtractCmd.Execute();
         }
+        private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = true;
+            this.Hide();
+        }
     }
 }
