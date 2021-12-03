@@ -10,11 +10,42 @@ using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPLighting.Lighting.ViewModels
 {
+    public enum LightingLayoutTypeEnum
+    {
+        /// <summary>
+        /// 照明灯具
+        /// </summary>
+        IlluminationLighting,
+        /// <summary>
+        /// 车道照明
+        /// </summary>
+        GarageLighting,
+        /// <summary>
+        /// 疏散指示
+        /// </summary>
+        EvacuationIndicator,
+        /// <summary>
+        /// 应急照明
+        /// </summary>
+        EmergencyLighting,
+    }
     public enum LightTypeEnum
     {
+        /// <summary>
+        /// 圆形吸顶灯
+        /// </summary>
         circleCeiling,
+        /// <summary>
+        /// 半球吸顶灯
+        /// </summary>
         domeCeiling,
+        /// <summary>
+        /// 感应吸顶灯
+        /// </summary>
         inductionCeiling,
+        /// <summary>
+        /// 筒灯
+        /// </summary>
         downlight,
         //emergencyLight
     }
@@ -73,14 +104,17 @@ namespace ThMEPLighting.Lighting.ViewModels
     public class LightingViewModel : NotifyPropertyChangedBase
     {
         #region illuminationLight
-        bool _IsIlluminationLightChecked = false;
-        public bool IsIlluminationLightChecked
+        private LightingLayoutTypeEnum _LightingLayoutType = LightingLayoutTypeEnum.IlluminationLighting;
+        public LightingLayoutTypeEnum LightingLayoutType
         {
-            get { return _IsIlluminationLightChecked; }
+            get
+            {
+                return _LightingLayoutType;
+            }
             set
             {
-                _IsIlluminationLightChecked = value;
-                OnPropertyChanged("IsIlluminationLightChecked");
+                _LightingLayoutType = value;
+                OnPropertyChanged("LightingLayoutType");
             }
         }
 
@@ -174,8 +208,8 @@ namespace ThMEPLighting.Lighting.ViewModels
                 OnPropertyChanged("NotShouldConsiderBeam");
             }
         }
-        #endregion 
-
+        #endregion
+        #region garageLight
         string _IlluminanceControl = "单排布置";
         public string IlluminanceControl
         {
@@ -214,6 +248,20 @@ namespace ThMEPLighting.Lighting.ViewModels
                 {
                     _LayoutMode = value;
                     OnPropertyChanged(nameof(LayoutMode));
+                }
+            }
+        }
+
+        string _ConnectMode = "弧线连接";
+        public string ConnectMode
+        {
+            get => _ConnectMode;
+            set
+            {
+                if (value != _ConnectMode)
+                {
+                    _ConnectMode = value;
+                    OnPropertyChanged(nameof(ConnectMode));
                 }
             }
         }
@@ -260,8 +308,8 @@ namespace ThMEPLighting.Lighting.ViewModels
             }
         }
 
-        string _StartingNumber = "01";
-        public string StartingNumber
+        int _StartingNumber = 1;
+        public int StartingNumber
         {
             get => _StartingNumber;
             set
@@ -274,7 +322,7 @@ namespace ThMEPLighting.Lighting.ViewModels
             }
         }
 
-        double _TrunkingWidth = 300;
+        double _TrunkingWidth = 150;
         public double TrunkingWidth
         {
             get => _TrunkingWidth;
@@ -315,7 +363,7 @@ namespace ThMEPLighting.Lighting.ViewModels
                 }
             }
         }
-
+        #endregion
         string _EvacuationInstructions = "优先壁装";
         public string EvacuationInstructions
         {
@@ -417,9 +465,9 @@ namespace ThMEPLighting.Lighting.ViewModels
         public LightingViewModel()
         {
             ScaleSelectIndex = 0;
-            LightingType = LightTypeEnum.circleCeiling;
             ShouldConsiderBeam = true;
-            IsIlluminationLightChecked = true;
+            LightingType = LightTypeEnum.circleCeiling;
+            LightingLayoutType = LightingLayoutTypeEnum.IlluminationLighting;
         }
 
         public class Item : NotifyPropertyChangedBase
@@ -437,9 +485,29 @@ namespace ThMEPLighting.Lighting.ViewModels
                     }
                 }
             }
-        }
 
+            bool _isSelected;
+            public bool IsSelected
+            {
+                get => _isSelected;
+                set
+                {
+                    if (value != _isSelected)
+                    {
+                        _isSelected = value;
+                        OnPropertyChanged(nameof(IsSelected));
+                    }
+                }
+            }
+        }
         ObservableCollection<Item> _items = new ObservableCollection<Item>();
         public ObservableCollection<Item> Items => _items;
+        public void Add(string text)
+        {
+            if(_items.Where(o => o.Text == text).Any()==false)
+            {
+                _items.Add(new Item() { Text = text ,IsSelected=true});
+            }
+        }
     }
 }

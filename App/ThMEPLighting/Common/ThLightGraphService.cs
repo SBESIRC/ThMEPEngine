@@ -11,9 +11,23 @@ namespace ThMEPLighting.Common
     public class ThLightGraphService
     {
         protected Point3d Start { get; set; }
-        protected List<ThLightEdge> Edges { get; set; }
+        /// <summary>
+        /// 用传入的线创建的边
+        /// 遍历完后某些边可能是未被遍历过的
+        /// </summary>
+        private List<ThLightEdge> Edges { get; set; }
         protected ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         public List<ThLinkPath> Links { get; set; }
+        /// <summary>
+        /// 创建当前图所有的边
+        /// </summary>
+        public List<ThLightEdge> GraphEdges
+        {
+            get
+            {
+                return Links.SelectMany(l => l.Edges).ToList();
+            }
+        }
         public Point3d StartPoint
         {
             get
@@ -53,7 +67,7 @@ namespace ThMEPLighting.Common
             var linkPath = new ThLinkPath
             {
                 Start = Start,
-                Path = links,
+                Edges = links,
                 IsMain = true
             };
             Links.Add(linkPath);
@@ -76,7 +90,7 @@ namespace ThMEPLighting.Common
                     var linkPath = new ThLinkPath
                     {
                         Start = branch.Item1,
-                        Path = branchLinks,
+                        Edges = branchLinks,
                         PreEdge = lightEdge
                     };
                     Links.Add(linkPath);
@@ -98,6 +112,7 @@ namespace ThMEPLighting.Common
         protected virtual Point3d UpdateEdge(ThLightEdge lightEdge, Point3d start)
         {
             //找出第一根边上的分支
+            BuildMultiBranch(lightEdge, start); //获取一条边下一端的支路
             Point3d nextPt = GetNextLinkPt(lightEdge, start);
             BuildMultiBranch(lightEdge, nextPt); //获取一条边下一端的支路
             lightEdge.Update(start);
@@ -222,7 +237,7 @@ namespace ThMEPLighting.Common
                         branchRes.Add(Tuple.Create(pts[0], o));
                     }
                 });
-                mainEdge.MultiBranch = branchRes.OrderBy(o => portPt.DistanceTo(o.Item1)).ToList();
+                mainEdge.MultiBranch.AddRange(branchRes.OrderBy(o => portPt.DistanceTo(o.Item1)).ToList());
             }
         }
 
@@ -246,18 +261,18 @@ namespace ThMEPLighting.Common
     {
         public Point3d Start { get; set; }
         public ThLightEdge PreEdge { get; set; }
-        public List<ThLightEdge> Path { get; set; }
+        public List<ThLightEdge> Edges { get; set; }
         public bool IsMain { get; set; }
         public ThLinkPath()
         {
-            Path = new List<ThLightEdge>();
+            Edges = new List<ThLightEdge>();
         }
         public double Length
         {
             get
             {
                 double sum = 0;
-                Path.ForEach(p => sum += p.Edge.Length);
+                Edges.ForEach(p => sum += p.Edge.Length);
                 return sum;
             }
         }

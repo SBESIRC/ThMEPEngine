@@ -1,62 +1,141 @@
-﻿using ThMEPLighting.Common;
+﻿using System;
+using NFox.Cad;
+using System.Linq;
+using Dreambuild.AutoCAD;
+using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Service.Number;
+using ThMEPLighting.Garage.Service.LayoutPoint;
 
 namespace ThMEPLighting.Garage.Engine
 {
     public class ThSingleRowArrangementEngine : ThArrangementEngine
-    {       
+    {
         public ThSingleRowArrangementEngine(
-            ThLightArrangeParameter arrangeParameter,
-            ThRacewayParameter racewayParameter)
-            :base(arrangeParameter, racewayParameter)
+            ThLightArrangeParameter arrangeParameter)
+            :base(arrangeParameter)
         {
         }
-        public override void Arrange(List<ThRegionBorder> regionBorders)
+        protected override void Preprocess(ThRegionBorder regionBorder)
         {
-            regionBorders.ForEach(o => Arrange(o));
+            regionBorder.Trim(); // 裁剪           
+            regionBorder.Shorten(ThGarageLightCommon.RegionBorderBufferDistance); // 缩短
+            regionBorder.Clean(); // 清理
+            Filter(regionBorder); // 过滤
+            regionBorder.Normalize(); //单位化
+            regionBorder.Sort(); // 排序
         }
-        private void Arrange(ThRegionBorder regionBorder)
+        public override void Arrange(ThRegionBorder regionBorder)
         {
             // 预处理
-            TrimAndShort(regionBorder);
-            CleanAndFilter(); //对DxLines操作 
+            Preprocess(regionBorder);
 
-            // 合并车道线,小于线槽的宽度
-            var mergeDxLines = MergeDxLine(regionBorder.RegionBorder, DxLines, ArrangeParameter.Width);
-            DxLines = Explode(mergeDxLines); //把合并的车道线重新设成
-            DxLines = ThPreprocessLineService.Preprocess(DxLines);
-
-
-            // 根据桥架中心线建立线槽
-            var ports = new List<Point3d>();
-            var cableCenterLines = new List<Line>();
-            cableCenterLines.AddRange(DxLines);
-            cableCenterLines.AddRange(FdxLines);
-            using (var buildRacywayEngine = new ThBuildRacewayEngineEx(cableCenterLines, ArrangeParameter.Width))
+            // 布点
+            var linePoints = new Dictionary<Line, List<Point3d>>();
+            if (ArrangeParameter.AutoGenerate)
             {
-                buildRacywayEngine.Build();
-                ports = buildRacywayEngine.GetPorts();
-                //电缆桥架的边线和中线及配对的结果返回给->regionBorder
-                //便于后期打印
-                regionBorder.CableTrayCenters = buildRacywayEngine.SplitCenters;
-                regionBorder.CableTraySides = buildRacywayEngine.SplitSides;
-                regionBorder.CableTrayGroups = buildRacywayEngine.CenterWithSides;
-                regionBorder.CableTrayPorts = buildRacywayEngine.CenterWithPorts;
+                var points = LayoutPoints(regionBorder);
+                linePoints = ThQueryPointService.Query(points, regionBorder.DxCenterLines);
+            }
+            else
+            {
+                linePoints = ThQueryPointService.Query(regionBorder.Lights, regionBorder.DxCenterLines);
             }
 
-            // 创建灯和编号
+            // 优化布置的点
+            var optimizer = new ThLayoutPointOptimizeService(linePoints, FilterPointDistance);
+            optimizer.Optimize();
+
+            // 计算回路数量
+            var lightNumber = linePoints.Sum(o => o.Value.Count);
+            LoopNumber = GetLoopNumber(lightNumber);
+
+            // 创建边
+            var lightEdges = BuildEdges(linePoints);
+
+            // 编号
+            Graphs = CreateGraphs(lightEdges);
+            Graphs.ForEach(g =>
+            {
+                g.Number(LoopNumber, true, base.DefaultStartNumber);
+            });
+        }
+
+        private List<ThLightEdge> BuildEdges(Dictionary<Line, List<Point3d>> edgePoints)
+        {
             var lightEdges = new List<ThLightEdge>();
-            DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
-            using (var buildNumberEngine = new ThSingleRowNumberEngine(ports, lightEdges, ArrangeParameter))
-            {                
-                buildNumberEngine.Build();
-                //将创建的灯边返回给->regionBorder
-                regionBorder.LightEdges = buildNumberEngine.DxLightEdges;
+            edgePoints.ForEach(e=>
+            {
+                var lightEdge = new ThLightEdge(e.Key);
+                e.Value.ForEach(p => lightEdge.LightNodes.Add(new ThLightNode { Position = p }));
+                lightEdges.Add(lightEdge);
+            });
+            return lightEdges;
+        }
+
+        private List<Point3d> LayoutPoints(ThRegionBorder regionBorder)
+        {
+            // Curve 仅支持Line，和Line组成的多段线
+            var results = new List<Point3d>();
+            ThLayoutPointService layoutPointService = null;
+            switch (ArrangeParameter.LayoutMode)
+            {
+                case LayoutMode.AvoidBeam:
+                    layoutPointService = new ThAvoidBeamLayoutPointService(
+                        regionBorder.Beams.Select(b => b.Outline).ToCollection());
+                    break;
+                case LayoutMode.ColumnSpan:
+                    layoutPointService = new ThColumnSpanLayoutPointService(
+                        regionBorder.Columns.Select(c => c.Outline).ToCollection(),
+                        ArrangeParameter.NearByDistance);
+                    break;
+                case LayoutMode.SpanBeam:
+                    layoutPointService = new ThSpanBeamLayoutPointService(
+                        regionBorder.Beams.Select(b => b.Outline).ToCollection());
+                    break;
+                default:
+                    layoutPointService = new ThEqualDistanceLayoutPointService();
+                    break;
             }
-        }    
+            if (layoutPointService != null)
+            {
+                layoutPointService.Margin = ArrangeParameter.Margin;
+                layoutPointService.Interval = ArrangeParameter.Interval;
+                results = layoutPointService.Layout(regionBorder.DxCenterLines);
+            }
+            return results;
+        }
+
+        private int GetLoopNumber(int lightNumber)
+        {
+            if (ArrangeParameter.AutoCalculate)
+            {
+               return CalculateLoopNumber(lightNumber,
+                    ArrangeParameter.LightNumberOfLoop);
+            }
+            else
+            {
+               return GetUILoopNumber();
+            }
+        }
+
+        private int GetUILoopNumber()
+        {
+            return ArrangeParameter.LoopNumber < 2 ? 2 : ArrangeParameter.LoopNumber;
+        }
+
+        private int CalculateLoopNumber(int lightNumbers,int lightNumberOfLoop)
+        {
+            double number = Math.Ceiling(lightNumbers * 1.0 / lightNumberOfLoop);
+            if (number < 2)
+            {
+                number = 2;
+            }
+            return (int)number;
+        }
     }
 }

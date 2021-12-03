@@ -17,8 +17,8 @@
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:s="clr-namespace:System;assembly=mscorlib"
                          xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
-                                         Title="照明" SizeToContent="Manual" Height="885"
-                                        Width="485" MaxWidth="1000" MaxHeight="1000"
+                                         Title="照明" SizeToContent="Manual" Height="650"
+                                        Width="485" MaxWidth="600" MaxHeight="1000"
                          mc:Ignorable="d" >
     <Window.Resources>
         <ResourceDictionary>
@@ -26,15 +26,22 @@
             <viewmodels:EnumBooleanConverter x:Key="EnumBooleanConverter" ></viewmodels:EnumBooleanConverter>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="10,10,10,10">
+    <Grid Margin="5,5,5,5">
         <StackPanel Orientation="Vertical">
+            <StackPanel Height="24" Orientation="Horizontal"  Margin="10,5,5,5">
+                <TextBlock Height="18" FontSize="16" FontWeight="Bold">全局比例：</TextBlock>
+                <ComboBox Width="80" Height="24" FontFamily="宋体"  FontSize="16" 
+                          SelectedIndex="{Binding ScaleSelectIndex}" Text="{Binding BlockRatio,Mode=OneWayToSource}">
+                    <ComboBoxItem>1:100</ComboBoxItem>
+                    <ComboBoxItem>1:150</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,5">
                 <StackPanel >
                     <GroupBox>
                         <GroupBox.Header>
-                            <CheckBox  FontSize="20" FontWeight="Bold" IsChecked="{Binding IsIlluminationLightChecked,Mode=TwoWay ,UpdateSourceTrigger=PropertyChanged}">
-                                照明灯具
-                            </CheckBox>
+                            <!--<RadioButton GroupName="LightingLayoutType"  FontSize="20" FontWeight="Bold" IsChecked="{Binding LightingLayoutType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightingLayoutTypeEnum.IlluminationLighting},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">照明灯具</RadioButton>-->
+                            <TextBlock Text="照明灯具" FontSize="20" FontWeight="Bold"/>
                         </GroupBox.Header>
                         <Grid>
                             <Grid.RowDefinitions></Grid.RowDefinitions>
@@ -68,7 +75,6 @@
                         </Grid>
                     </GroupBox>
                 </StackPanel>
-
                 <StackPanel Orientation="Vertical">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Margin="10,5,5,5" HorizontalAlignment="Center" VerticalAlignment="Center">正常照明灯具布置半径(mm)：</TextBlock>
@@ -84,18 +90,27 @@
                     <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=true,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">是</RadioButton>
                     <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=false,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">否</RadioButton>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <RadioButton GroupName="rbBeam" Margin="10,5,0,0" 
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="0.5*"/>
+                        <ColumnDefinition Width="0.5*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
+                        <RadioButton GroupName="rbBeam" Margin="10,5,0,0" 
                              IsChecked="{Binding ShouldConsiderBeam}">考虑梁</RadioButton>
-                    <RadioButton GroupName="rbBeam" Margin="10,5,0,0"
+                        <RadioButton GroupName="rbBeam" Margin="10,5,0,0"
                              IsChecked ="{Binding NotShouldConsiderBeam }" >不考虑梁</RadioButton>
-                </StackPanel>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
+                        <Button Grid.Column="2" Name="btnRouting" Width="100" Height="25" Click="btnRouting_Click" Margin="5,5,10,5">连线</Button>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
-            <GroupBox IsEnabled="False" >
+            <GroupBox IsEnabled="True" >
                 <GroupBox.Header>
-                    <CheckBox FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        车道照明
-                    </CheckBox>
+                    <!--<RadioButton GroupName="LightingLayoutType"  FontSize="20" FontWeight="Bold" IsChecked="{Binding LightingLayoutType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightingLayoutTypeEnum.GarageLighting},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">车道照明</RadioButton>-->
+                    <TextBlock Text="车道照明" FontSize="20" FontWeight="Bold"/>
                 </GroupBox.Header>
                 <Grid>
                     <Grid.RowDefinitions></Grid.RowDefinitions>
@@ -126,7 +141,7 @@
                                 <Button Grid.Row="3"  Grid.Column="1" Height="25" VerticalAlignment="Bottom" Click="btnPickUp">拾取</Button>
                             </Grid>
                         </StackPanel>
-                        <ListBox x:Name="lstBox" Height="100"
+                        <ListBox x:Name="lstBox" Height="80" 
                                          ScrollViewer.HorizontalScrollBarVisibility="Visible"
                                          ScrollViewer.VerticalScrollBarVisibility="Visible"
                              SelectionMode="Extended"
@@ -138,9 +153,7 @@
                                         <Setter.Value>
                                             <ControlTemplate TargetType="{x:Type ListBoxItem}">
                                                 <Border BorderThickness="{TemplateBinding Border.BorderThickness}" Padding="{TemplateBinding Padding}" BorderBrush="{TemplateBinding Border.BorderBrush}" Background="{TemplateBinding Panel.Background}" x:Name="Bd" SnapsToDevicePixels="True">
-                                                    <CheckBox
-                                                                                        IsChecked="{Binding IsSelected, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
-                                                                                        >
+                                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
                                                         <ContentPresenter Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" ContentStringFormat="{TemplateBinding ContentStringFormat}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
                                                     </CheckBox>
                                                 </Border>
@@ -230,6 +243,9 @@
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
+                        <StackPanel HorizontalAlignment="Right">
+                            <Button Name="btnExtractLaneLine" IsEnabled="true" Width="116" Height="Auto" Click="btnExtractLaneLine_Click" Margin="5">提取车道中心线</Button>
+                        </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5,10,5,5">
                             <TextBlock>线槽宽度：</TextBlock>
                             <TextBox Width="100" Text="{Binding TrunkingWidth}"></TextBox>
@@ -237,7 +253,10 @@
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <TextBlock>双排间距：</TextBlock>
-                            <TextBox Width="100" Text="{Binding DoubleRowSpacing}"></TextBox>
+                            <TextBox Width="100" Text="{Binding DoubleRowSpacing}" 
+                                     IsEnabled="{Binding ElementName=rbDoubleRow,
+                                Path=IsChecked,Mode=OneWay}">
+                            </TextBox>
                             <TextBlock>mm</TextBlock>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="5">
@@ -248,6 +267,7 @@
                     </StackPanel>
                     <Grid Margin="5" Grid.Column="1">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
                             <RowDefinition Height="Auto"></RowDefinition>
@@ -263,19 +283,38 @@
                             <GroupBox Grid.Row="0" Grid.Column="0">
                                 <GroupBox.Header>照度控制</GroupBox.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <RadioButton   Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=单排布置}">单排布置</RadioButton>
-                                    <RadioButton  Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=双排布置}">双排布置</RadioButton>
+                                    <RadioButton Name="rbSingleRow"  Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter},
+                                        ConverterParameter=单排布置}" Checked="rbSingleRow_Checked" >单排布置</RadioButton>
+                                    <RadioButton Name="rbDoubleRow" Margin="5,5,0,0"  IsChecked="{Binding IlluminanceControl, Converter={StaticResource RadioUiValueConverter}, 
+                                        ConverterParameter=双排布置}" Checked="rbDoubleRow_Checked">双排布置</RadioButton>
                                 </StackPanel>
                             </GroupBox>
                             <GroupBox Grid.Row="0" Grid.Column="1">
                                 <GroupBox.Header>安装方式</GroupBox.Header>
                                 <StackPanel Orientation="Vertical">
-                                    <RadioButton    Margin="5,5,0,0"  IsChecked="{Binding InstallationMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=线槽安装}">线槽安装</RadioButton>
+                                    <RadioButton Name="rbCableTray" Margin="5,5,0,0" Checked="rbCableTray_Checked" Unchecked="rbCableTray_Unchecked"
+                                                    IsChecked="{Binding InstallationMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=线槽安装}">线槽安装</RadioButton>
                                     <RadioButton  Margin="5,5,0,0"  IsChecked="{Binding InstallationMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=吊链安装}">吊链安装</RadioButton>
                                 </StackPanel>
                             </GroupBox>
                         </Grid>
-                        <GroupBox Grid.Row="1">
+                        <GroupBox x:Name="connectModeGroup" Grid.Row="1">
+                            <GroupBox.Header>连线模式</GroupBox.Header>
+                            <StackPanel Orientation="Vertical">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition></ColumnDefinition>
+                                        <ColumnDefinition></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <RadioButton Grid.Row="0" Grid.Column="0"  Margin="5,5,0,0"  IsChecked="{Binding ConnectMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=弧线连接}">弧线连接</RadioButton>
+                                    <RadioButton Grid.Row="0" Grid.Column="1"  Margin="11,5,0,0"  IsChecked="{Binding ConnectMode, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=直线连接}">直线连接</RadioButton>
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Grid.Row="2">
                             <GroupBox.Header>布置模式</GroupBox.Header>
                             <StackPanel Orientation="Vertical">
                                 <Grid>
@@ -294,7 +333,7 @@
                                 </Grid>
                             </StackPanel>
                         </GroupBox>
-                        <GroupBox Grid.Row="2">
+                        <GroupBox Grid.Row="3">
                             <GroupBox.Header>回路数量</GroupBox.Header>
                             <StackPanel Orientation="Vertical">
                                 <RadioButton     Margin="5,5,0,0"  IsChecked="{Binding NumberOfCircuits, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=自动计算}">
@@ -313,24 +352,21 @@
                                 </RadioButton>
                             </StackPanel>
                         </GroupBox>
-                        <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Orientation="Vertical">
+                        <StackPanel Grid.Row="4" VerticalAlignment="Bottom" Orientation="Vertical">
                             <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal" Margin="5">
                                 <TextBlock Margin="0,0,5,0">起始编号：WL</TextBlock>
-                                <TextBox Width="40" Text="{Binding StartingNumber}"></TextBox>
+                                <TextBox Width="40" Text="{Binding StartingNumber}" TextAlignment="Center"></TextBox>
                             </StackPanel>
-                            <WrapPanel VerticalAlignment="Bottom" Margin="5">
-                                <Button Width="120" Height="25" Click="btnReGen">重新生成回路标注</Button>
+                            <WrapPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="5,5,5,0">
+                                <Button x:Name="btnCdzmLayout" Width="100" Height="25" Click="btnPlace_Click">布置</Button>
                             </WrapPanel>
                         </StackPanel>
                     </Grid>
                 </Grid>
             </GroupBox>
-
-            <GroupBox IsEnabled="False">
+            <GroupBox IsEnabled="False" Visibility="Collapsed">
                 <GroupBox.Header>
-                    <CheckBox FontSize="20" FontWeight="Bold">
-                        疏散指示
-                    </CheckBox>
+                    <RadioButton GroupName="LightingLayoutType"  FontSize="20" FontWeight="Bold" IsChecked="{Binding LightingLayoutType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightingLayoutTypeEnum.EvacuationIndicator},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">疏散指示</RadioButton>
                 </GroupBox.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -367,11 +403,9 @@
                     </StackPanel>
                 </Grid>
             </GroupBox>
-            <GroupBox IsEnabled="False">
+            <GroupBox IsEnabled="False" Visibility="Collapsed">
                 <GroupBox.Header>
-                    <CheckBox FontSize="20" FontWeight="Bold">
-                        地库应急照明
-                    </CheckBox>
+                    <RadioButton GroupName="LightingLayoutType"  FontSize="20" FontWeight="Bold" IsChecked="{Binding LightingLayoutType, Converter={StaticResource EnumBooleanConverter}, ConverterParameter={x:Static viewmodels:LightingLayoutTypeEnum.EmergencyLighting},UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}">地库应急照明</RadioButton>
                 </GroupBox.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -401,22 +435,6 @@
                     </StackPanel>
                 </Grid>
             </GroupBox>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="3*"></ColumnDefinition>
-                    <ColumnDefinition Width="3.5*"></ColumnDefinition>
-                    <ColumnDefinition Width="3.5*"></ColumnDefinition>
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Horizontal" Grid.Column="0" Margin="10,5,5,5">
-                    <TextBlock Height="20" >全局比例：</TextBlock>
-                    <ComboBox Width="55" Height="20"  SelectedIndex="{Binding ScaleSelectIndex}" Text="{Binding BlockRatio,Mode=OneWayToSource}">
-                        <ComboBoxItem>1:100</ComboBoxItem>
-                        <ComboBoxItem>1:150</ComboBoxItem>
-                    </ComboBox>
-                </StackPanel>
-                <Button Grid.Column="1" Name="btnLayout" Width="116" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
-                <Button Grid.Column="2" Name="btnRouting" Width="120" Height="25" Click="btnRouting_Click" Margin="5">连线</Button>
-            </Grid>
         </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

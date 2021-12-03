@@ -15,6 +15,5 @@
 	<module path="ThMEPEngineCore.dll" />
 	<module path="ThMEPHVAC.dll" />
 	<module path="ThMEPElectrical.dll" />
-	<module path="ThMEPLighting.dll" />
 	<module path="ThMEPWSS.dll" />
 </project>

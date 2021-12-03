@@ -157,10 +157,10 @@ namespace TianHua.Electrical.UI
             {
                 ThMEPLightingService.Instance.LightArrangeUiParameter.Width = width;
             }
-            double racywaySpace = 0.0;
-            if (double.TryParse(TxtDistance.Text, out racywaySpace))
+            double offsetDistance = 0.0;
+            if (double.TryParse(TxtDistance.Text, out offsetDistance))
             {
-                ThMEPLightingService.Instance.LightArrangeUiParameter.RacywaySpace = racywaySpace;
+                ThMEPLightingService.Instance.LightArrangeUiParameter.DoubleRowOffsetDis = offsetDistance;
             }
             double lightInterval = 0.0;
             if (double.TryParse(TxtSpacing.Text, out lightInterval))

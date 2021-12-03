@@ -9,7 +9,7 @@ namespace ThMEPLighting.Garage.Model
 {
     public class ThShortenParameter
     {
-        public Polyline Border { get; set; }
+        public Entity Border { get; set; }
         public List<Line> DxLines { get; set; }
         public List<Line> FdxLines { get; set; }
         public double Distance { get; set; }

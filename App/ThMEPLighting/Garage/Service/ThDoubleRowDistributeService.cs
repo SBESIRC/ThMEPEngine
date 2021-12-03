@@ -35,11 +35,11 @@ namespace ThMEPLighting.Garage.Service
         /// <summary>
         /// 查询灯块的服务
         /// </summary>
-        protected ThQueryLightBlockService QueryLightBlockService { get; set; }
+        protected ThQueryPointService QueryLightBlockService { get; set; }
         public ThDistributeMainService(
             ThLightGraphService lightGraph, 
             ThLightArrangeParameter arrangeParameter,
-            ThQueryLightBlockService queryLightBlockService
+            ThQueryPointService queryLightBlockService
             )
         {
             LightGraph = lightGraph;
@@ -49,24 +49,10 @@ namespace ThMEPLighting.Garage.Service
             DistributedEdges = new List<ThLightEdge>();
             LightGraph.Links.ForEach(o =>
             {
-                o.Path.ForEach(p => GraphEdges.Add(p));
+                o.Edges.ForEach(p => GraphEdges.Add(p));
             });
         }
         public abstract void Distribute();
-        protected void RepairLineDir(List<Line> lines,Point3d startPt)
-        {
-            var newStartPt = new Point3d(startPt.X, startPt.Y, startPt.Z);
-            for (int i =0;i<lines.Count;i++)
-            {
-                if (newStartPt.DistanceTo(lines[i].StartPoint) >
-                    newStartPt.DistanceTo(lines[i].EndPoint))
-                {
-                    var tempPt = lines[i].StartPoint;
-                    lines[i].StartPoint = lines[i].EndPoint;
-                    lines[i].EndPoint = tempPt;
-                }
-            }
-        }
         protected abstract List<List<Point3d>> GetCanLayoutSegments(List<Line> lines);
         protected List<List<Point3d>> MergeLayoutSegments(List<ThAdjustLightDistributePosService> adjustServices)
         {
@@ -94,15 +80,15 @@ namespace ThMEPLighting.Garage.Service
     /// </summary>
     public class ThDoubleRowDistributeService: ThDistributeMainService
     {
-        private ThWireOffsetDataService WireOffsetDataService { get; set; }
+        private ThFirstSecondPairService FirstSecondPairService { get; set; }
         public ThDoubleRowDistributeService(
             ThLightGraphService lightGraph, 
             ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService,
-            ThQueryLightBlockService queryLightBlockService)
+            ThFirstSecondPairService firstSecondPairService,
+            ThQueryPointService queryLightBlockService)
             :base(lightGraph, arrangeParameter, queryLightBlockService)
         {
-            WireOffsetDataService = wireOffsetDataService;
+            FirstSecondPairService = firstSecondPairService;
         }
         public override void Distribute()
         {
@@ -114,9 +100,9 @@ namespace ThMEPLighting.Garage.Service
         private void Distribute(ThLinkPath singleLinkPath)
         {
             var startPt = singleLinkPath.Start;
-            for (int i = 0; i < singleLinkPath.Path.Count; i++)
+            for (int i = 0; i < singleLinkPath.Edges.Count; i++)
             {
-                var currentEdge = singleLinkPath.Path[i];
+                var currentEdge = singleLinkPath.Edges[i];
                 if(!currentEdge.IsDX)
                 {
                     //如果是非灯线的边，在其中点创建一个灯，用于传递起始灯编号
@@ -127,10 +113,10 @@ namespace ThMEPLighting.Garage.Service
                 }
                 var edges = new List<ThLightEdge> { currentEdge };
                 int j = i + 1;
-                for (; j < singleLinkPath.Path.Count; j++)
+                for (; j < singleLinkPath.Edges.Count; j++)
                 {
                     var preEdge = edges.Last();
-                    var nextEdge = singleLinkPath.Path[j];
+                    var nextEdge = singleLinkPath.Edges[j];
                     if(ThGarageUtils.IsLessThan45Degree(
                         preEdge.Edge.StartPoint, preEdge.Edge.EndPoint, nextEdge.Edge.StartPoint, nextEdge.Edge.EndPoint))
                     {
@@ -144,10 +130,10 @@ namespace ThMEPLighting.Garage.Service
                 i = j - 1;
                 //分析在线路上无需布灯的区域，返回可以布点的区域
                 var lines = edges.Select(o => o.Edge).ToList();
-                RepairLineDir(lines, startPt);
+                lines.RepairLineDir(startPt);
                 var segments = GetCanLayoutSegments(lines);//可以布置的区域
                 startPt = lines[lines.Count-1].EndPoint;//调整起点到末端
-                var doubleRowService = new ThBuildDoubleRowPosService(
+                var doubleRowService = new ThBuildLightPosService(
                     edges, segments, ArrangeParameter, QueryLightBlockService);
                 doubleRowService.Build();
                 DistributedEdges.AddRange(edges);
@@ -161,7 +147,7 @@ namespace ThMEPLighting.Garage.Service
             {
                 linearrangment.Add(new ThAdjustDoubleRowDistributePosService(
                     Tuple.Create(lines[i].StartPoint, lines[i].EndPoint),
-                    ArrangeParameter, GraphEdges, DistributedEdges, WireOffsetDataService));
+                    ArrangeParameter, GraphEdges, DistributedEdges, FirstSecondPairService));
             }
             return MergeLayoutSegments(linearrangment.Cast<ThAdjustLightDistributePosService>().ToList());
         }

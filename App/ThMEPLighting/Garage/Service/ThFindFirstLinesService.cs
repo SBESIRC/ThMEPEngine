@@ -1,16 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -62,9 +59,9 @@ namespace ThMEPLighting.Garage.Service
             }
             else if (pairs.Item1 is Polyline polyline)
             {
-                var centerLines = Expode(polyline);
-                var leftLines = Expode(pairs.Item2 as Polyline);
-                var rightLines = Expode(pairs.Item3 as Polyline);
+                var centerLines = Expode(polyline.DPSimplify(1.0));
+                var leftLines = Expode((pairs.Item2 as Polyline).DPSimplify(1.0));
+                var rightLines = Expode((pairs.Item3 as Polyline).DPSimplify(1.0));
                 centerLines.ForEach(o =>
                     {
                         var first = FindSideLine(o, leftLines);

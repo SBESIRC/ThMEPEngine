@@ -15,16 +15,16 @@ namespace ThMEPLighting.Garage.Service
     /// </summary>
     public class ThAdjustDoubleRowDistributePosService: ThAdjustLightDistributePosService
     {
-        private ThWireOffsetDataService WireOffsetDataService { get; set; }
+        private ThFirstSecondPairService FirstSecondPairService { get; set; }
 
         public ThAdjustDoubleRowDistributePosService(
             Tuple<Point3d,Point3d> linePorts, 
             ThLightArrangeParameter arrangeParameter,
             List<ThLightEdge>  graphEdges,
             List<ThLightEdge> distributedEdges,
-            ThWireOffsetDataService wireOffsetDataService):base(linePorts, arrangeParameter, graphEdges, distributedEdges)
+            ThFirstSecondPairService firstSecondPairService) :base(linePorts, arrangeParameter, graphEdges, distributedEdges)
         {
-            WireOffsetDataService = wireOffsetDataService;
+            FirstSecondPairService = firstSecondPairService;
         }
         public override List<Tuple<Point3d, Point3d>> Distribute()
         {
@@ -42,14 +42,14 @@ namespace ThMEPLighting.Garage.Service
             branchEdges.ForEach(o =>
             {
                 var midPt = o.Edge.StartPoint.GetMidPt(o.Edge.EndPoint);
-                var orignFirst=WireOffsetDataService.FindFirstByPt(midPt);
+                var orignFirst= FirstSecondPairService.FindFirstByPt(midPt);
                 branchOriginFirstLines.Add(orignFirst);
             });
             //找出(未分割前）的1号边对应说的2号边
             var firstSecondParis = new List<Tuple<Line, Line>>();
             branchOriginFirstLines.ForEach(o =>
             {
-                var seconds = WireOffsetDataService.FindSecondByFirst(o);
+                var seconds = FirstSecondPairService.Query(o);
                 if (seconds.Count > 0)
                 {
                     var result = seconds.GetCollinearMaxPts();
@@ -87,8 +87,8 @@ namespace ThMEPLighting.Garage.Service
             {
                 if (CheckBranchIsValid(main, o.Item1, o.Item2))
                 {
-                    var firstInters = ThGeometryTool.IntersectPts(main, o.Item1, Intersect.ExtendBoth,5.0);
-                    var secondInters = ThGeometryTool.IntersectPts(main, o.Item2, Intersect.ExtendBoth,5.0);
+                    var firstInters = main.IntersectPts(o.Item1, Intersect.ExtendBoth,5.0);
+                    var secondInters = main.IntersectPts(o.Item2, Intersect.ExtendBoth,5.0);
                     splitPoints.Add(Tuple.Create(firstInters[0], secondInters[0]));
                 }
             });
@@ -98,8 +98,8 @@ namespace ThMEPLighting.Garage.Service
         }
         private bool CheckBranchIsValid(Line main,Line branchFirst,Line branchSecond)
         {
-            var firstInters = ThGeometryTool.IntersectPts(main, branchFirst, Intersect.ExtendBoth);
-            var secondInters = ThGeometryTool.IntersectPts(main, branchSecond, Intersect.ExtendBoth);
+            var firstInters = main.IntersectPts(branchFirst, Intersect.ExtendBoth);
+            var secondInters = main.IntersectPts(branchSecond, Intersect.ExtendBoth);
             if(firstInters.Count > 0 && secondInters.Count > 0)
             {
                 bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0], 1.0) ||
@@ -125,7 +125,7 @@ namespace ThMEPLighting.Garage.Service
                 rad -= Math.PI;
             }
             double verDis = Math.Sin(rad) * dis;
-            return Math.Abs(ArrangeParameter.RacywaySpace- verDis)<=5.0;
+            return Math.Abs(ArrangeParameter.DoubleRowOffsetDis- verDis)<=5.0;
         }
     } 
 }

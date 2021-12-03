@@ -44,9 +44,14 @@ namespace ThMEPLighting.Lighting.Commands
         public override void SubExecute()
         {
             //todo: layout lighting components using _UiConfigs
-            if (_UiConfigs.IsIlluminationLightChecked == true)
+            if (_UiConfigs.LightingLayoutType == LightingLayoutTypeEnum.IlluminationLighting)
             {
                 var cmd = new IlluminationLighting.IlluminationLightingCmd(_UiConfigs);
+                cmd.Execute();
+            }
+            else if (_UiConfigs.LightingLayoutType == LightingLayoutTypeEnum.GarageLighting)
+            {
+                var cmd = new Garage.ThGarageLightingCmd(_UiConfigs);
                 cmd.Execute();
             }
         }

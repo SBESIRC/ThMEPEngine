@@ -1,122 +1,94 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
 {
     public abstract class ThArrangementEngine : IDisposable
     {
-        protected List<Line> DxLines { get; set; }
-        protected List<Line> FdxLines { get; set; }
-        protected ThRacewayParameter RacewayParameter { get; set; }
         protected ThLightArrangeParameter ArrangeParameter { get; set; }
-        public ThArrangementEngine(
-            ThLightArrangeParameter arrangeParameter,
-            ThRacewayParameter racewayParameter)
+        /// <summary>
+        /// 根据一个分区的布灯点的数量，计算的回路数
+        /// </summary>
+        public int LoopNumber { get; protected set; }
+
+        protected int DefaultStartNumber { get; set; }
+        /// <summary>
+        /// 通过布灯线生成的图
+        /// </summary>
+        public List<ThLightGraphService> Graphs { get; protected set; }
+
+        public ThArrangementEngine(ThLightArrangeParameter arrangeParameter)
         {
-            DxLines = new List<Line>();
-            FdxLines = new List<Line>();
             ArrangeParameter = arrangeParameter;
-            RacewayParameter = racewayParameter;
+            Graphs = new List<ThLightGraphService>();
+            DefaultStartNumber = arrangeParameter.DefaultStartNumber;
         }
         public void Dispose()
         {
         }
-        public abstract void Arrange(List<ThRegionBorder> regionBorders);
-        protected List<Line> Trim(List<Line> lines, Polyline regionBorder)
+        public abstract void Arrange(ThRegionBorder regionBorder);
+        protected abstract void Preprocess(ThRegionBorder regionBorder);
+        
+        protected virtual void Filter(ThRegionBorder regionBorder)
         {
-            // Clip的结果中可能有点（DBPoint)，这里可以忽略点
-            var results = ThCADCoreNTSGeometryClipper.Clip(regionBorder, lines.ToCollection());
-            var curves = results.OfType<Curve>().ToCollection();
-            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
-        }
-        protected void TrimAndShort(ThRegionBorder regionBorder)
-        {
-            //裁剪 和 缩短
-            DxLines = new List<Line>();
-            FdxLines = new List<Line>();
-            // 裁剪并获取框内的车道线
-            var dxTrimLines = Trim(regionBorder.DxCenterLines, regionBorder.RegionBorder);
-            var fdxTrimLines = Trim(regionBorder.FdxCenterLines, regionBorder.RegionBorder);
-            if (dxTrimLines.Count == 0)
-            {
-                return;
-            }            
-            // 为了避免线槽和防火卷帘冲突
-            // 缩短车道线，和框线保持500的间隙
-            var shortenPara = new ThShortenParameter
-            {
-                Border = regionBorder.RegionBorder,
-                DxLines = dxTrimLines,
-                FdxLines = fdxTrimLines,
-                Distance = ThGarageLightCommon.RegionBorderBufferDistance
-            };
-            var dxLines = ThShortenLineService.Shorten(shortenPara);
-            var fdxLines = fdxTrimLines;
-            if (dxLines.Count == 0)
-            {
-                return;
-            }            
-            
-            // 保持车道线和非车道线
-            DxLines.AddRange(dxLines);
-            FdxLines.AddRange(fdxLines);
-        }
-
-        protected void CleanAndFilter()
-        {
-            // 将车道线规整
-            DxLines = ThPreprocessLineService.Preprocess(DxLines);
-            if (DxLines.Count == 0)
-            {
-                return;
-            }
             double tTypeBranchFilterLength = Math.Max(ArrangeParameter.MinimumEdgeLength,
                 ArrangeParameter.Margin*2.0+ ArrangeParameter.Interval / 2.0);
-            DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, tTypeBranchFilterLength);
-            // 过滤车道线
-            if (!ArrangeParameter.IsSingleRow)
-            {                
-                DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace / 2.0);
-                DxLines = ThFilterElbowCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
-            }            
-        }
-
-        protected virtual List<Curve> MergeDxLine(Polyline border, List<Line> dxLines,double mergeRange)
+            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
+                regionBorder.DxCenterLines, tTypeBranchFilterLength);      
+        }        
+        protected List<ThLightGraphService> CreateGraphs(List<ThLightEdge> lightEdges)
         {
-            //单位化、修正方向
-            var dxNomalLines = new List<Line>();
-            dxLines.ForEach(o => dxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
-            //从小汤车道线合并服务中获取合并的主道线，辅道线            
-            return ThMergeLightCenterLines.Merge(border, dxNomalLines, mergeRange);
-        }
-        protected List<Line> Explode(List<Curve> curves)
-        {
-            var results = new List<Line>();
-            curves.ForEach(c =>
+            // 传入的Edges是
+            var results = new List<ThLightGraphService>();
+            while (lightEdges.Count > 0)
             {
-                if(c is Line line)
+                if (lightEdges.Where(o => o.IsDX).Count() == 0)
                 {
-                    results.Add(line.Clone() as Line);
+                    break;
                 }
-                else if(c is Polyline poly)
+                Point3d findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
+                var priorityStart= lightEdges.Select(o => o.Edge).ToList().FindPriorityStart(ThGarageLightCommon.RepeatedPointDistance);
+                if(priorityStart!=null)
                 {
-                    results.AddRange(poly.ToLines());
+                    findSp = priorityStart.Item2;
                 }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            });
+                //对灯线边建图,创建从findSp开始可以连通的图
+                var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
+                lightGraph.Build();
+
+                var traversedLightEdges = lightGraph.GraphEdges;
+
+                //找到从ports中的点出发拥有最长边的图
+                var centerEdges = traversedLightEdges.Select(e=>new ThLightEdge(e.Edge)).ToList();
+                var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
+
+                // 使用珣若算的最优起点重新建图
+                traversedLightEdges.ForEach(e => e.IsTraversed = false);
+                var newLightGraph = new ThCdzmLightGraphService(traversedLightEdges, centerStart);
+                newLightGraph.Build();
+                //newLightGraph.Print();
+
+                lightEdges = lightEdges.Where(o => o.IsTraversed == false).ToList();
+                results.Add(newLightGraph);
+            }
             return results;
+        }
+        public void SetDefaultStartNumber(int defaultStartNumber)
+        {
+            this.DefaultStartNumber = defaultStartNumber;
+        }
+        protected double FilterPointDistance
+        {
+            get
+            {
+                return 0.4 * ArrangeParameter.Interval;
+            }
         }
     }
 }

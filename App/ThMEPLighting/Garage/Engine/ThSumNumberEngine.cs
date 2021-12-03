@@ -12,21 +12,21 @@ namespace ThMEPLighting.Garage.Engine
     public class ThSumNumberEngine:IDisposable
     {
         public double FindLength { get; set; } = 500.0;
-        public Dictionary<Polyline, List<ThLightSumInfo>> SumInfos { get; set; }
+        public Dictionary<Entity, List<ThLightSumInfo>> SumInfos { get; set; }
         public ThSumNumberEngine()
         {
-            SumInfos = new Dictionary<Polyline, List<ThLightSumInfo>>();
+            SumInfos = new Dictionary<Entity, List<ThLightSumInfo>>();
         }
-        public void Sum(List<ThRegionLightEdge> regionLightEdges)
+        public void Sum(List<ThRegionBorder> regionBorders)
         {
-            regionLightEdges.ForEach(o => Sum(o));
+            regionBorders.ForEach(o => Sum(o));
         }
-        private void Sum(ThRegionLightEdge regionLightEdge)
+        private void Sum(ThRegionBorder regionBorder)
         {
             var lightInfos = new List<Tuple<string, EdgePattern>>();
-            regionLightEdge.Lights.ForEach(o =>
+            regionBorder.Lights.ForEach(o =>
             {
-                var lightNumer = ThFindLightBlockNumberService.Find(o.Position, regionLightEdge.Edges, regionLightEdge.Texts,FindLength);
+                var lightNumer = ThFindLightBlockNumberService.Find(o.Position, regionBorder.CenterLines, regionBorder.Texts,FindLength);
                 //var lightInfo = XDataTools.GetXData(o.ObjectId, ThGarageLightCommon.ThGarageLightAppName);
                 //if(lightInfo.Count>2)
                 //{
@@ -43,7 +43,7 @@ namespace ThMEPLighting.Garage.Engine
             {
                 sumInfos.Add( new ThLightSumInfo { Nubmer = group.Key ,Count= group.Count() });
             }
-            SumInfos.Add(regionLightEdge.RegionBorder, sumInfos);
+            SumInfos.Add(regionBorder.RegionBorder, sumInfos);
         }
         public void Dispose()
         {

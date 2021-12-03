@@ -1,14 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.LaneLine;
-using ThMEPLighting.Common;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -65,7 +61,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private List<Line> Preprocess(List<Line> lines)
         {
-            var newLines =ThPreprocessLineService.Preprocess(lines);
+            var newLines = lines.Preprocess();
             var nodedLines = ThLaneLineEngine.Noding(newLines.ToCollection());
             nodedLines = ThLaneLineEngine.CleanZeroCurves(nodedLines);
             return nodedLines.Cast<Line>().ToList();

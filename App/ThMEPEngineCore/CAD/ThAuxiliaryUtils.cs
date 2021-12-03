@@ -48,13 +48,6 @@ namespace ThMEPEngineCore.CAD
             }
         }
 
-        public static bool IsVertical(this Line first, Line second,double radTolerance=1.0)
-        {
-            var rad = first.LineDirection().GetAngleTo(second.LineDirection());
-            var ang = rad * 180 / Math.PI;
-            return Math.Abs(ang % 180 - 90.0) <= radTolerance;
-        }
-
         public static List<Line> GetEdges(this Polyline poly)
         {
             List<Line> lines = new List<Line>();
@@ -258,6 +251,13 @@ namespace ThMEPEngineCore.CAD
             {
                 throw new System.NotSupportedException();
             }
+        }
+        public static DBObjectCollection Clone(this DBObjectCollection objs)
+        {
+            return objs
+                .Cast<Entity>()
+                .Select(e => e.Clone() as Entity)
+                .ToCollection();
         }
     }
 }

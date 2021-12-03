@@ -1,13 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.Common;
-using System;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -19,20 +19,18 @@ namespace ThMEPLighting.Garage.Service
     {
         public Dictionary<Line, List<Line>> SideLinesDic { get; set; }
         public Dictionary<Line, List<Line>> PortLinesDic { get; set; }
-
         protected ThFindSideLinesParameter FindParameter { get; set; }
-
         protected ThCADCoreNTSSpatialIndex SideSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
-        protected double SideTolerance = 3.0;
+        private const double SideTolerance = 3.0;
+        private const double EnvelopLength = 4.0;
+        private const double LineCommonLowerLimitedValue = 5.0; //两条平行线公共部分的长度下限值
 
-        protected ThFindSideLinesService(ThFindSideLinesParameter findParameter)
+        public ThFindSideLinesService(ThFindSideLinesParameter findParameter)
         {
             FindParameter = findParameter;
             SideLinesDic = new Dictionary<Line, List<Line>>();
             PortLinesDic = new Dictionary<Line, List<Line>>();
             SideSpatialIndex = ThGarageLightUtils.BuildSpatialIndex(FindParameter.SideLines);
-            CenterSpatialIndex = ThGarageLightUtils.BuildSpatialIndex(FindParameter.CenterLines);
         }
         public static ThFindSideLinesService Find(ThFindSideLinesParameter findParameter)
         {
@@ -40,6 +38,30 @@ namespace ThMEPLighting.Garage.Service
             instance.FindSide();
             instance.FindPort();
             return instance;
+        }
+        public Dictionary<Line, Tuple<List<Line>, List<Line>>> FindSides()
+        {
+            var results = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
+            FindParameter.CenterLines.ForEach(o =>
+            {
+                var dir = o.LineDirection();
+                var upDir = dir.GetPerpendicularVector();
+                var downDir = upDir.Negate();
+                var upLines = FilterSides(o, upDir).Where(u=>!IsIn(u, results)).ToList();
+                var downLines = FilterSides(o, downDir).Where(d => !IsIn(d, results)).ToList();
+                results.Add(o, Tuple.Create(upLines, downLines));
+            });
+            return results;
+        }
+        private bool IsIn(Line line, Dictionary<Line, Tuple<List<Line>, List<Line>>> dict)
+        {
+            return dict.SelectMany(o =>
+            {
+                var results = new List<Line>();
+                results.AddRange(o.Value.Item1);
+                results.AddRange(o.Value.Item2);
+                return results;
+            }).ToList().Contains(line);
         }
         private void FindSide()
         {
@@ -75,9 +97,21 @@ namespace ThMEPLighting.Garage.Service
             return objs
                 .Cast<Line>()
                 .Where(o=>o.Length>0.0)
-                .Where(o => ThGeometryTool.IsParallelToEx(center.LineDirection(), o.LineDirection()))
+                .Where(o => center.LineDirection().IsParallelToEx(o.LineDirection()))
                 .Where(o => DistanceIsValid(center, o))
                 .Where(o=>!IsUsed(o))
+                .ToList();
+        }
+        private List<Line> FilterSides(Line center,Vector3d vec)
+        {
+            var sp = center.StartPoint + vec.GetNormal().MultiplyBy(FindParameter.HalfWidth);
+            var ep = center.EndPoint + vec.GetNormal().MultiplyBy(FindParameter.HalfWidth);
+            var outline = ThDrawTool.ToRectangle(sp, ep, SideTolerance);
+            var objs = SideSpatialIndex.SelectCrossingPolygon(outline);
+            return objs.Cast<Line>()
+                .Where(o => o.Length > 0.0)
+                .Where(o => center.HasCommon(o,LineCommonLowerLimitedValue))  //平行且有公共区域的线
+                .Where(o => DistanceIsValid(center, o)) // 间距满足一定距离
                 .ToList();
         }
         private bool IsUsed(Line line)
@@ -110,8 +144,7 @@ namespace ThMEPLighting.Garage.Service
         private List<Line> GetPorts(Line center, Point3d portPt)
         {
             var results = new List<Line>();
-            var square = ThDrawTool.CreateSquare(portPt, 4.0);
-            var portObjs = SideSpatialIndex.SelectCrossingPolygon(square);
+            var portObjs = portPt.Query(SideSpatialIndex, EnvelopLength);
             portObjs.Remove(center);
             if (portObjs.Count == 1)
             {
@@ -124,15 +157,10 @@ namespace ThMEPLighting.Garage.Service
             }
             return results;
         }
+        
         private bool IsUprightAngle(Line first,Line second)
         {
-            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint);
-            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint);
-
-            var ang = firstVec.GetAngleTo(secondVec);
-            ang = ang / Math.PI * 180.0;
-
-            return Math.Abs(ang - 90.0) <= 1.0;
+            return first.LineDirection().IsVertical(second.LineDirection());
         }
 
         protected bool DistanceIsValid(Line first,Line second)
@@ -140,6 +168,25 @@ namespace ThMEPLighting.Garage.Service
             double dis = first.Distance(second);
             return dis >= (FindParameter.HalfWidth - SideTolerance / 2.0) &&
                 dis <= (FindParameter.HalfWidth + SideTolerance / 2.0);
+        }
+        private List<Line> FilterUncertainSides(Line center, List<Line> sideLines)
+        {
+            // 长度<= FindParameter.HalfWidth
+            // 首尾有连接
+            // 投影都在center里的
+            return sideLines
+                .Where(l => l.Length <= FindParameter.HalfWidth)
+                .Where(l => IsLink(l))
+                .Where(l => ThGeometryTool.IsProjectionPtInLine(center.StartPoint, center.EndPoint, l.StartPoint) &&
+                ThGeometryTool.IsProjectionPtInLine(center.StartPoint, center.EndPoint, l.EndPoint)).ToList();
+        }
+        private bool IsLink(Line sideLine)
+        {
+            var startObjs = sideLine.StartPoint.Query(SideSpatialIndex, EnvelopLength);
+            var endObjs = sideLine.EndPoint.Query(SideSpatialIndex, EnvelopLength);
+            startObjs.Remove(sideLine);
+            endObjs.Remove(sideLine);
+            return startObjs.Count > 0 && endObjs.Count > 0;
         }
     }
 }

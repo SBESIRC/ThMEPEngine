@@ -1,13 +1,15 @@
 ﻿using System.Linq;
 using ThMEPEngineCore.CAD;
-using ThMEPLighting.Garage;
+using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Common
+namespace ThMEPLighting.Garage.Service
 {
     public class ThCdzmLightGraphService : ThLightGraphService
     {
+
         public ThCdzmLightGraphService(List<ThLightEdge> edges, Point3d start) : base(edges, start)
         {
         }
@@ -49,13 +51,14 @@ namespace ThMEPLighting.Common
                 return neighbourEdge;
             }
         }
-        protected override Point3d UpdateEdge(ThLightEdge lightEdge, Point3d startPt)
+        protected override Point3d UpdateEdge(ThLightEdge lightEdge, Point3d start)
         {
             //找出第一根边上的分支
-            BuildMultiBranch(lightEdge, startPt); //获取一条边下一端的支路
-            Point3d nextPt = GetNextLinkPt(lightEdge, startPt);
+            //找出第一根边上的分支
+            BuildMultiBranch(lightEdge, start); //获取一条边下一端的支路
+            Point3d nextPt = GetNextLinkPt(lightEdge, start);
             BuildMultiBranch(lightEdge, nextPt); //获取一条边下一端的支路
-            lightEdge.Update(startPt);
+            lightEdge.Update(start);
             return nextPt;
         }
     }

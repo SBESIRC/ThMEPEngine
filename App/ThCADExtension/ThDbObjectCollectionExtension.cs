@@ -24,14 +24,38 @@ namespace ThCADExtension
             var results = new DBObjectCollection();
             foreach (DBObject dbObj in first)
             {
-                if(!results.Contains(dbObj))
+                if (!results.Contains(dbObj))
                 {
                     results.Add(dbObj);
-                }                
+                }
             }
             foreach (DBObject dbObj in second)
             {
                 if (!results.Contains(dbObj))
+                {
+                    results.Add(dbObj);
+                }
+            }
+            return results;
+        }
+
+        public static DBObjectCollection Difference(this DBObjectCollection first, DBObjectCollection second)
+        {
+            var results = new DBObjectCollection();
+            results = Union(results, first);
+            foreach (DBObject dbObj in second)
+            {
+                results.Remove(dbObj);
+            }
+            return results;
+        }
+
+        public static DBObjectCollection Distinct(this DBObjectCollection objs)
+        {
+            var results = new DBObjectCollection();
+            foreach(DBObject dbObj in objs)
+            {
+                if(!results.Contains(dbObj))
                 {
                     results.Add(dbObj);
                 }

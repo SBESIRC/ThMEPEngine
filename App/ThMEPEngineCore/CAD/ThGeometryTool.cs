@@ -81,11 +81,11 @@ namespace ThMEPEngineCore.CAD
         {
             return firstEnt.IntersectWithEx(secondEnt).Count > 0 ? true : false;
         }
-        public static Point3dCollection IntersectWithEx(this Entity firstEntity, Entity secondEntity)
+        public static Point3dCollection IntersectWithEx(this Entity firstEntity, Entity secondEntity, Intersect intersectType = Intersect.OnBothOperands)
         {
             Point3dCollection pts = new Point3dCollection();
             Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
-            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
+            firstEntity.IntersectWith(secondEntity, intersectType, plane, pts, IntPtr.Zero, IntPtr.Zero);
             plane.Dispose();
             return pts;
         }
@@ -119,6 +119,13 @@ namespace ThMEPEngineCore.CAD
             Point3d newPt = outerPt.TransformBy(wcsToUcs);
             return newPt.Z >= 0 && newPt.Z <= lineSp.DistanceTo(lineEp);
         }
+        public static bool IsVertical(this Vector3d first, Vector3d second, double angTolerance = 1.0)
+        {
+            var ang = first.GetAngleTo(second).RadToAng();
+            ang = ang % 180.0;
+            return Math.Abs(ang - 90.0) <= angTolerance;
+        }
+
         public static Polyline TextOBB(this DBText dBText)
         {
             try
@@ -198,25 +205,15 @@ namespace ThMEPEngineCore.CAD
             double rad = a.GetAngleTo(b);
             return b.Length * Math.Cos(rad);
         }
+
         public static Point3dCollection IntersectPts(
-            Line first, Line second, Intersect intersectType, double distance = 1.0)
+            this Line first, Line second, Intersect intersectType, double distance = 1.0)
         {
-            var pts = new Point3dCollection();
-            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint).GetNormal();
-            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint).GetNormal();
-
-            var firstSp = first.StartPoint - firstVec.MultiplyBy(distance);
-            var firstEp = first.EndPoint + firstVec.MultiplyBy(distance);
-
-            var secondSp = second.StartPoint - secondVec.MultiplyBy(distance);
-            var secondEp = second.EndPoint + secondVec.MultiplyBy(distance);
-
-            var firstNew = new Line(firstSp, firstEp);
-            var secondNew = new Line(secondSp, secondEp);
-
-            firstNew.IntersectWith(secondNew, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
-            return pts;
+            var firstNew = first.ExtendLine(distance);
+            var secondNew = second.ExtendLine(distance);
+            return firstNew.IntersectWithEx(secondNew, intersectType);
         }
+
         public static Tuple<Point3d, Point3d> GetCollinearMaxPts(this List<Line> lines)
         {
             //传入的线要共线
