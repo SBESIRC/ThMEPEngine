@@ -36,9 +36,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.6.8.0")]
 [assembly: AssemblyFileVersion("1.6.8.0")]
 
-#if (ACAD2016 || ACAD2018) 
-[assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreCGALCmds))]
-#endif
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreApp))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreGeCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreRoomCmds))]

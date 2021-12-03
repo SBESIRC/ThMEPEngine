@@ -702,7 +702,6 @@
     <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="Temp\ThWindowExtractor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
-    <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreExtractCmds.cs" />
     <Compile Include="ThMEPEngineCoreGeCmds.cs" />

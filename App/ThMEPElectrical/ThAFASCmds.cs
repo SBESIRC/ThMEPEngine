@@ -26,77 +26,6 @@ namespace ThMEPElectrical.AFAS
 {
     public class ThAFASCmds
     {
-        //[CommandMethod("TIANHUACAD", "THAFAS", CommandFlags.Modal)]
-        //public void THAFAS()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        var result = Active.Editor.GetEntity("\n请选择对象");
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-
-        //        var frame = acadDatabase.Element<Polyline>(result.ObjectId);
-        //        var factory = new ThAFASDistanceDataSetFactory();
-        //        var ds = factory.Create(acadDatabase.Database, frame.Vertices());
-
-        //        //
-        //        var partId = ds.Container.Where(o => o.Properties["Category"].ToString() == "FireApart").First().Properties["Id"].ToString();
-        //        ds.Container.RemoveAll(o =>
-        //        {
-        //            if (o.Properties.ContainsKey("ParentId"))
-        //            {
-        //                if (o.Properties["ParentId"] == null)
-        //                {
-        //                    return true;
-        //                }
-        //                if (o.Properties["ParentId"].ToString() != partId && o.Properties["Category"].ToString() != "FireApart")
-        //                {
-        //                    return true;
-        //                }
-        //            }
-        //            return false;
-        //        });
-
-        //        ThGeoOutput.Output(ds.Container, Active.DocumentDirectory, Active.DocumentName);
-        //        var geojson = ThGeoOutput.Output(ds.Container);
-
-        //        ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
-        //        ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
-        //        {
-        //            StepDistance = 20000,
-        //            MountMode = ThAFASPlacementMountModeMgd.Wall,
-        //        };
-
-        //        var features = Export2NTSFeatures(engine.Place(geojson, context));
-
-        //        var dxfNames = new string[]
-        //        {
-        //            RXClass.GetClass(typeof(Polyline)).DxfName,
-        //        };
-        //        var filter = ThSelectionFilterTool.Build(dxfNames);
-        //        var psr = Active.Editor.GetSelection(filter);
-        //        if (psr.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-
-        //        var objs = new DBObjectCollection();
-        //        foreach (var obj in psr.Value.GetObjectIds())
-        //        {
-        //            objs.Add(acadDatabase.Element<Polyline>(obj));
-        //        }
-        //        objs = objs.BuildArea();
-
-        //        var geos = objs
-        //            .OfType<Entity>()
-        //            .Select(o => new ThGeometry() { Boundary = o })
-        //            .ToList();
-        //        ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
-        //    }
-        //}
-
         [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Modal)]
         public void THFASmokeNoUI()
         {
@@ -371,54 +300,53 @@ namespace ThMEPElectrical.AFAS
             }
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        public void ThCleanDebugLayer()
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                ThFaCleanService.ClearDrawing();
-            }
-        }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
+        //public void ThCleanDebugLayer()
+        //{
+        //    // 调试按钮关闭且图层不是保护半径有效图层
+        //    var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
+        //    if (debugSwitch)
+        //    {
+        //        ThFaCleanService.ClearDrawing();
+        //    }
+        //}
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "THFaBuffer", CommandFlags.Modal)]
-        public void ThFaBuffer()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
-                var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
-                var a = bufferService.Buffer(obj, 1000);
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "THFaBuffer", CommandFlags.Modal)]
+        //public void ThFaBuffer()
+        //{
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        var result = Active.Editor.GetEntity("\n请选择对象");
+        //        if (result.Status != PromptStatus.OK)
+        //        {
+        //            return;
+        //        }
+        //        var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
+        //        var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
+        //        var a = bufferService.Buffer(obj, 1000);
 
-                DrawUtils.ShowGeometry(a, "l0buffer");
+        //        DrawUtils.ShowGeometry(a, "l0buffer");
 
-            }
+        //    }
 
 
 
-        }
+        //}
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "THGetOffsetCurveTest", CommandFlags.Modal)]
-        public void ThGetOffsetCurveTest()
-        {
-            var frame = ThAFASUtils.SelectFrame();
-            var dir = 1;
-            if (frame.IsCCW() == false)
-            {
-                dir = -1;
-            }
-            var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
-            DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
-        }
-
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "THGetOffsetCurveTest", CommandFlags.Modal)]
+        //public void ThGetOffsetCurveTest()
+        //{
+        //    var frame = ThAFASUtils.SelectFrame();
+        //    var dir = 1;
+        //    if (frame.IsCCW() == false)
+        //    {
+        //        dir = -1;
+        //    }
+        //    var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
+        //    DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
+        //}
     }
 }
