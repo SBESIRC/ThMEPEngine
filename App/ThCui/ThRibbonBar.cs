@@ -200,7 +200,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("火灾报警",
                     "天华火灾报警",
-                    "THHZBJ2",
+                    "THHZBJ",
                     "天华火灾报警",
                     "IDI_THCAD_THHZBJ_SMALL",
                     "IDI_THCAD_THHZBJ_LARGE",
