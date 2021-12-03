@@ -13,18 +13,15 @@ namespace TianHua.Electrical.UI
     public class ElectricalUIApp : IExtensionApplication
     {
         private fmSmokeLayout SmokeLayoutUI { get; set; }
-        private fmBasementLighting BasementLightingUI { get; set; }
 
         public void Initialize()
         {
             SmokeLayoutUI = null;
-            BasementLightingUI = null;
         }
 
         public void Terminate()
         {
             SmokeLayoutUI = null;
-            BasementLightingUI = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYWG", CommandFlags.Modal)]
@@ -93,16 +90,6 @@ namespace TianHua.Electrical.UI
                 }
                 cmd.Execute();
             }
-        }
-
-        [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
-        public void THCDZM()
-        {
-            if (BasementLightingUI == null)
-            {
-                BasementLightingUI = new fmBasementLighting();
-            }
-            AcadApp.ShowModelessDialog(BasementLightingUI);
         }
 
         [CommandMethod("TIANHUACAD", "THAFPM", CommandFlags.Modal)]
