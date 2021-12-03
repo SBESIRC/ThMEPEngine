@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.IO;
 using ThCADExtension;
 using Serilog;
+using System.Diagnostics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -22,10 +23,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public double EndValue { get; set; }//线的终止点另一维
         public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
         {
+            double diswidthlane = 5500;
             Value = value;
             Direction = direction;
-            MinValue = minValue;
-            MaxValue = maxValue;
+            MinValue = minValue /*+ diswidthlane / 2*/;
+            MaxValue = maxValue /*- diswidthlane / 2*/;
             StartValue = startValue;
             EndValue = endValue;
         }
@@ -184,7 +186,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             IterationCount = iterationCnt;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = popSize;//种群数量
-            MaxTime = 10;//遗传代数
+            MaxTime = 300;
             CrossRate = 0.8;//交叉因子
             MutationRate = 0.2;//变异因子
             GeneMutationRate = 0.3;//基因变异因子
@@ -218,7 +220,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int maxCount = 0;
             int maxNums = 0;
 
-            while (curIteration++ < IterationCount && maxCount < 5)
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
             {
                 var strCurIterIndex = $"\n iteration index：     {curIteration}";
                 Active.Editor.WriteMessage(strCurIterIndex);
@@ -235,7 +239,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 Mutation(pop);
             }
-
+            stopWatch.Stop();
             return selected;
         }
 
@@ -249,7 +253,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             HashSet<int> selectedGene = new HashSet<int>();//被选中的基因号
             while (index >= cnt)//挑选染色体
             {
-                int num = Rand.Next(0, cnt);//生成随机号
+                int num = RandInt(cnt);//生成随机号
                 if (selectedChromosome.Contains(num))
                 {
                     continue;//重新摇号
@@ -263,7 +267,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             index = 0;
             while (index >= geneCnt)//挑选基因号
             {
-                int num = Rand.Next(0, geneCnt);//生成随机号
+                int num = RandInt(geneCnt);//生成随机号
                 if (selectedGene.Contains(num))
                 {
                     continue;//重新摇号
