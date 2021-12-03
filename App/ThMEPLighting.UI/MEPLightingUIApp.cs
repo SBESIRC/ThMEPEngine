@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.UI.UI;
+using ThMEPLighting.UI.emgLightLayout;
 using ThMEPLighting.UI.WiringConnecting;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -9,16 +10,23 @@ namespace ThMEPLighting.UI
     {
         uiEvaIndicatorSign uiSign = null;
         ThWiringConnectingUI uiConnect = null;
+        UIEmgLightLayout uiEmgLightLayout = null;
+        UIEmgLightConnect uiEmgLightConnect = null;
+
         public void Initialize()
         {
             uiSign = null;
             uiConnect = null;
+            uiEmgLightLayout = null;
+            uiEmgLightConnect = null;
         }
 
         public void Terminate()
         {
             uiSign = null;
             uiConnect = null;
+            uiEmgLightLayout = null;
+            uiEmgLightConnect = null;
         }
 
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
@@ -29,24 +37,33 @@ namespace ThMEPLighting.UI
 
             uiSign = new uiEvaIndicatorSign();
             AcadApp.ShowModelessWindow(uiSign);
-            //var isOk = AcadApp.ShowModalWindow(uiSign);
-            //if (isOk == true) 
-            //{
-            //    if (uiSign.commondType == 0)
-            //    {
-            //        CommandHandlerBase.ExecuteFromCommandLine(false, "THFEI");
-            //    }
-            //    else if (uiSign.commondType == 1)
-            //    {
-            //        CommandHandlerBase.ExecuteFromCommandLine(false, "THSSZSDBZ");
-            //    }
-            //}
         }
+
         [CommandMethod("TIANHUACAD", "THCWZM", CommandFlags.Modal)]
         public void THParkLightUI()
         {
             uiParkingLight uiPLight = new uiParkingLight();
             AcadApp.ShowModelessWindow(uiPLight);
+        }
+
+        [CommandMethod("TIANHUACAD", "THYJZM", CommandFlags.Modal)]
+        public void THYJZMUI()
+        {
+            if (uiEmgLightLayout != null && uiEmgLightLayout.IsLoaded)
+                return;
+
+            uiEmgLightLayout = new UIEmgLightLayout();
+            AcadApp.ShowModelessWindow(uiEmgLightLayout);
+        }
+
+        [CommandMethod("TIANHUACAD", "THYJZMLXUI", CommandFlags.Modal)]
+        public void THYJZMLXUI()
+        {
+            if (uiEmgLightConnect != null && uiEmgLightConnect.IsLoaded)
+                return;
+
+            uiEmgLightConnect = new UIEmgLightConnect();
+            AcadApp.ShowModelessWindow(uiEmgLightConnect);
         }
 
         //照明
