@@ -4,15 +4,22 @@ using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using ThMEPLighting.Common;
 using ThMEPEngineCore.Command;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage
 {
     public class ThSingleRowCenterDrawingCmd : ThMEPBaseCommand, IDisposable
     {
+        public ThSingleRowCenterDrawingCmd()
+        {
+            CommandName = "THDDXC";
+            ActionName = "单排线槽中心线";
+        }
+
         public void Dispose()
         {
+            //
         }
 
         public override void SubExecute()
