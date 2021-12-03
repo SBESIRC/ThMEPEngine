@@ -13,9 +13,10 @@ using Linq2Acad;
 
 using ThMEPEngineCore.Command;
 
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
@@ -55,8 +56,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 //画框，提数据，转数据
-                //var pts = ThFireAlarmUtils.GetFrame();
-                var pts = ThFireAlarmUtils.GetFrameBlk();
+                //var pts = ThAFASUtils.GetFrame();
+                var pts = ThAFASUtils.GetFrameBlk();
                 if (pts.Count == 0)
                 {
                     return;
@@ -70,12 +71,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                var geos = ThFireAlarmUtils.GetFixLayoutData(pts, extractBlkList);
+                var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
-                var transformer = ThFireAlarmUtils.TransformToOrig(pts, geos);
+                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
 
                 ThFixedPointLayoutService layoutService = null;
                 layoutService = new ThFireTelFixedPointLayoutService(geos, cleanBlkName, avoidBlkName);

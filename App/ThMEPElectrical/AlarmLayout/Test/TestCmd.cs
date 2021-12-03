@@ -1,35 +1,26 @@
 ﻿using AcHelper.Commands;
 using System;
 using System.Linq;
-using AcHelper;
-using Linq2Acad;
-using ThCADCore.NTS;
+using System.Collections.Generic;
+
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
-using System.Collections.Generic;
-using ThMEPEngineCore.Algorithm;
-using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
+
+using AcHelper;
+using Linq2Acad;
+using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
-
-
-using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.GeoJSON;
-
-using ThMEPEngineCore.AreaLayout.GridLayout.Command;
-
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmSmokeHeat.Data;
-using ThMEPElectrical.FireAlarmSmokeHeat.Service;
-using ThMEPElectrical.FireAlarm.ViewModels;
-using ThMEPElectrical.FireAlarm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
+
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.AlarmLayout.Test
 {

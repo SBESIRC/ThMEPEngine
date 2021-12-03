@@ -14,6 +14,7 @@ using Newtonsoft.Json;
 
 using AcHelper;
 using Linq2Acad;
+using CLI;
 
 using ThCADExtension;
 using ThCADCore.NTS;
@@ -21,13 +22,12 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Command;
 
-using ThMEPElectrical.FireAlarm;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.ViewModels;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmDistance.Service;
 
-using CLI;
 namespace ThMEPElectrical.FireAlarmDistance
 {
     public class ThAFASBroadcastCmd : ThMEPBaseCommand, IDisposable
@@ -78,7 +78,7 @@ namespace ThMEPElectrical.FireAlarmDistance
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
 
-                var framePts = ThFireAlarmUtils.GetFrameBlk();
+                var framePts = ThAFASUtils.GetFrameBlk();
                 if (framePts.Count == 0)
                 {
                     return;
@@ -99,7 +99,7 @@ namespace ThMEPElectrical.FireAlarmDistance
 
                 //取数据
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true ;
-                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var data = new ThAFASDistanceDataSet(geos);
                 data.ExtendEquipment(cleanBlkName, _scale);
 

@@ -18,6 +18,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-NET45|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -71,11 +74,8 @@
     <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
-    <Compile Include="FireAlarm\uiThFireAlarm.xaml.cs">
-      <DependentUpon>uiThFireAlarm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="FireAlarm\UIThFireAlarmNew.xaml.cs">
-      <DependentUpon>UIThFireAlarmNew.xaml</DependentUpon>
+    <Compile Include="FireAlarm\UIThFireAlarm.xaml.cs">
+      <DependentUpon>UIThFireAlarm.xaml</DependentUpon>
     </Compile>
     <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
       <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
@@ -258,11 +258,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="FireAlarm\uiThFireAlarm.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="FireAlarm\UIThFireAlarmNew.xaml">
+    <Page Include="FireAlarm\UIThFireAlarm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

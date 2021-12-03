@@ -10,7 +10,7 @@ using NetTopologySuite.Features;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.FireAlarm;
+using ThMEPElectrical.AFAS;
 
 namespace ThMEPElectrical.FireAlarmDistance.Service
 {

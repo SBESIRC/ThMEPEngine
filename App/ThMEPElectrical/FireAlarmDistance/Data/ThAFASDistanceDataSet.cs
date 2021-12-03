@@ -22,8 +22,9 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.LaneLine;
 using NetTopologySuite.Geometries;
 
-using ThMEPElectrical.FireAlarmSmokeHeat.Service;
-using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.FireAlarmArea.Service;
 
 namespace ThMEPElectrical.FireAlarmDistance.Data
 {
@@ -46,7 +47,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
         }
         public void ExtendEquipment(List<string> cleanBlkName, double scale)
         {
-            var priorityExtend = ThFaAreaLayoutParamterCalculationService.GetPriorityExtendValue(cleanBlkName, scale);
+            var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, scale);
             var equipment = QueryCategory(BuiltInCategory.Equipment.ToString());
             for (int i = 0; i < equipment.Count; i++)
             {

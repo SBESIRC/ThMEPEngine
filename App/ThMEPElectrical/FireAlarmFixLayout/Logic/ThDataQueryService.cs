@@ -20,7 +20,9 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
 using ThMEPElectrical.Service;
 
-using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.FireAlarmFixLayout.Service;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
@@ -98,7 +100,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             Avoidence.AddRange(FireProofs);
             Avoidence.AddRange(AvoidEquipments);
             floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
-            roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(roomConfigUrl);
+            roomTableConfig = ThAFASUtils.ReadRoomConfigTable(roomConfigUrl);
             GetFireLinkageRooms();
         }
 

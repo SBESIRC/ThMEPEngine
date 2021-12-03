@@ -13,9 +13,9 @@ using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 
+using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
-using ThMEPElectrical.FireAlarm.Service;
-
+using ThMEPElectrical.FireAlarmFixLayout.Service;
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDisplayDeviceFixedPointLayoutService : ThFixedPointLayoutService

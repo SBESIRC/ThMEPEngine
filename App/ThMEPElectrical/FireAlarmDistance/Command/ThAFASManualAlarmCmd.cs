@@ -22,12 +22,11 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Command;
 
-using ThMEPElectrical.FireAlarm;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarm.ViewModels;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmDistance.Service;
-
 
 namespace ThMEPElectrical.FireAlarmDistance
 {
@@ -75,7 +74,7 @@ namespace ThMEPElectrical.FireAlarmDistance
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
 
-                var framePts = ThFireAlarmUtils.GetFrameBlk();
+                var framePts = ThAFASUtils.GetFrameBlk();
                 if (framePts.Count == 0)
                 {
                     return;
@@ -96,7 +95,7 @@ namespace ThMEPElectrical.FireAlarmDistance
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //取数据
-                var geos = ThFireAlarmUtils.GetDistLayoutData(framePts, extractBlkList, false, false);
+                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, false, false);
                 var data = new ThAFASDistanceDataSet(geos);
                 data.ExtendEquipment(cleanBlkName, _scale);
                 data.FilterBeam();

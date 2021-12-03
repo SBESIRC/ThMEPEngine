@@ -18,8 +18,7 @@ using AcHelper;
 using AcHelper.Commands;
 using Linq2Acad;
 
-using ThMEPElectrical.FireAlarm.ViewModels;
-using ThMEPElectrical.FireAlarm;
+using ThMEPElectrical.AFAS.ViewModel;
 
 namespace TianHua.Electrical.UI.FireAlarm
 {
@@ -28,8 +27,8 @@ namespace TianHua.Electrical.UI.FireAlarm
     /// </summary>
     public partial class UIThFireAlarmSetting : Window
     {
-        private FireAlarmNewViewModel vm = null;
-        public UIThFireAlarmSetting(FireAlarmNewViewModel viewModel)
+        private FireAlarmViewModel vm = null;
+        public UIThFireAlarmSetting(FireAlarmViewModel viewModel)
         {
             InitializeComponent();
             this.vm = viewModel;
@@ -51,7 +50,7 @@ namespace TianHua.Electrical.UI.FireAlarm
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            UIThFireAlarmNew.Save(vm);
+            UIThFireAlarm.Save(vm);
             MessageBox.Show("保存成功！");
             this.Close();
         }

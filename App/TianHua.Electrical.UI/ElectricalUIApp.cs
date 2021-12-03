@@ -123,15 +123,7 @@ namespace TianHua.Electrical.UI
         [CommandMethod("TIANHUACAD", "THHZBJ", CommandFlags.Modal)]
         public void THHZBJUI()
         {
-            var ui = new uiThFireAlarm();
-            AcadApp.ShowModelessWindow(ui);
-        }
-
-        //火灾报警
-        [CommandMethod("TIANHUACAD", "THHZBJ2", CommandFlags.Modal)]
-        public void THHZBJUI2()
-        {
-            var ui = new FireAlarm.UIThFireAlarmNew();
+            var ui = new FireAlarm.UIThFireAlarm();
             AcadApp.ShowModelessWindow(ui);
         }
 

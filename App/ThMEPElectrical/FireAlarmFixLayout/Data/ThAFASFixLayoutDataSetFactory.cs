@@ -19,7 +19,6 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Interface;
 using ThMEPElectrical.AFAS.Service;
-using ThMEPElectrical.FireAlarm.Service;
 using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data

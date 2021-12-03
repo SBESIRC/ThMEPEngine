@@ -11,8 +11,7 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Model;
-
-using ThMEPElectrical.FireAlarm.Service;
+using ThMEPElectrical.FireAlarmFixLayout.Service;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
