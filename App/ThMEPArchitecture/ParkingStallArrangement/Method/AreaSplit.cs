@@ -53,9 +53,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
             GaParameter gaParameter)
         {
+            double simplifyFactor = 1.0;
             var segLine = gaParameter.SegLine[i];//分割线
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
+                areas[k] = areas[k].TPSimplify(simplifyFactor);
                 var area = areas[k];
                 var segAreas = segLine.Split(area);
 

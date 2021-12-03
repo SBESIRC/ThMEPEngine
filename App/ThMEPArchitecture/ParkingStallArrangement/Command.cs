@@ -61,6 +61,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
 
+
+
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
@@ -74,15 +76,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
             var rst = new List<Chromosome>();
-            //try
-            //{
+            try
+            {
                 rst = geneAlgorithm.Run();
-                
-            //}
-            //catch(Exception ex)
-            //{
 
-            //}
+            }
+            catch (Exception ex)
+            {
+                ;
+
+            }
 
             var solution = rst.First();
             layoutPara.Set(solution.Genome);

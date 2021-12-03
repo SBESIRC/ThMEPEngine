@@ -39,7 +39,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     SegLines.Add(new Line(spt, ept));
                 }
                 BuildingLines.Cast<Entity>()
-                    .ForEach(e => BuildLines.Add(e as Polyline));
+                    .ForEach(e => BuildLines.Add((e as Polyline).DPSimplify(10.0)));
+                foreach(var l in BuildLines)
+                {
+                    acadDatabase.CurrentSpace.Add(l);
+                }
             }
         }
 

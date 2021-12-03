@@ -162,11 +162,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int MaxTime;
         int IterationCount = 10;
         int PopulationSize;
-        int SelectionSize = 6;
+        double SelectionRate;
+        int SelectionSize;
         int ChromoLen = 2;
         double CrossRate;
         double MutationRate;
         double GeneMutationRate;
+        int MultiplierFactor;
+        int FirstPopulationSize;
 
         //Inputs
         GaParameter GaPara;
@@ -190,6 +193,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             CrossRate = 0.8;//交叉因子
             MutationRate = 0.2;//变异因子
             GeneMutationRate = 0.3;//基因变异因子
+            MultiplierFactor = 2;//乘数因子
+            SelectionRate = 0.6;//保留因子
+            SelectionSize = (int)SelectionRate * popSize;
+            FirstPopulationSize = PopulationSize * MultiplierFactor;//初始种群数
             //InputsF
             GaPara = gaPara;
             LayoutPara = layoutPara;
@@ -202,7 +209,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 var line = GaPara.SegLine[i]; 
                 var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                var valueWithIndex = value + (GaPara.MaxValues[i] - GaPara.MinValues[i]) / PopulationSize * index + GaPara.MinValues[i];
+                var valueWithIndex = value + (GaPara.MaxValues[i] - GaPara.MinValues[i]) / FirstPopulationSize * index + GaPara.MinValues[i];
                 Gene gene = new Gene(valueWithIndex, dir, GaPara.MaxValues[i], GaPara.MinValues[i], startVal, endVal);
                 genome.Add(gene);
             }
@@ -302,7 +309,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             List<Chromosome> solutions = new List<Chromosome>();
 
-            for (int i = 0; i < PopulationSize; ++i)//
+            for (int i = 0; i < FirstPopulationSize; ++i)//
             {
                 var solution = new Chromosome();
                 var genome = ConvertLineToGene(i);//创建初始基因序列
