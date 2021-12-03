@@ -3,7 +3,7 @@ using ThMEPLighting.Command;
 
 namespace ThMEPLighting
 {
-    public class ThLightingWiringCmds
+    public class ThMEPWiringCmds
     {
         [CommandMethod("TIANHUACAD", "THZMLX", CommandFlags.Modal)]
         public void ThLightingRoute()

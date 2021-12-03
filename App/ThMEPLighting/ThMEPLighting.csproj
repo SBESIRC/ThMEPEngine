@@ -335,7 +335,7 @@
     <Compile Include="ServiceModels\ThParkingStallService.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThFEICmds.cs" />
-    <Compile Include="ThLightingWiringCmds.cs" />
+    <Compile Include="ThMEPWiringCmds.cs" />
     <Compile Include="ThMEPLightingService.cs" />
     <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
