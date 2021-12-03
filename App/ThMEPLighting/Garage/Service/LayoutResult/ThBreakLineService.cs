@@ -7,6 +7,7 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -108,11 +109,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         private bool IsCloseToPorts(Point3d intersPt,List<Point3d> portPts)
         {
-            return portPts.Where(p => intersPt.DistanceTo(p) <= 1.0).Any();
+            return portPts.Where(p => intersPt.DistanceTo(p) <= ThGarageLightCommon.RepeatedPointDistance).Any();
         }
         private DBObjectCollection Query(Line line, ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var rec = ThDrawTool.ToRectangle(line.StartPoint, line.EndPoint, 1.0);
+            var rec = ThDrawTool.ToRectangle(line.StartPoint, line.EndPoint, ThGarageLightCommon.RepeatedPointDistance);
             var objs = spatialIndex.SelectCrossingPolygon(rec);
             return objs
                 .OfType<Line>()

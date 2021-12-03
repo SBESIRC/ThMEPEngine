@@ -110,12 +110,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             if(isStart)
             {
                 var newStartPt = line.StartPoint + vec.MultiplyBy(tolterance);
-                return CreatePolyline(newStartPt, vec.Negate(), BreakLength);
+                return CreatePolyline(newStartPt, vec.Negate(), BreakLength+ ThGarageLightCommon.RepeatedPointDistance);
             }
             else
             {
                 var newEndPt = line.EndPoint - vec.MultiplyBy(tolterance);
-                return CreatePolyline(newEndPt, vec, BreakLength);
+                return CreatePolyline(newEndPt, vec, BreakLength + ThGarageLightCommon.RepeatedPointDistance);
             }
         }
         
@@ -150,7 +150,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return LightSpatialIndex.SelectCrossingPolygon(frame);
         }
 
-        private Polyline CreatePolyline(Point3d pt,Vector3d vec,double length,double width=1.0)
+        private Polyline CreatePolyline(Point3d pt,Vector3d vec,double length,double width=2.5)
         {
             var extendPt = pt+vec.GetNormal().MultiplyBy(length);
             return ThDrawTool.ToRectangle(pt, extendPt, width);
