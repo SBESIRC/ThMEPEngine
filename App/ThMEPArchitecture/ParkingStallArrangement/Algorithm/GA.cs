@@ -72,6 +72,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Group of genes
         public List<Gene> Genome = new List<Gene>();
 
+        public Serilog.Core.Logger Logger = null;
+
         public int Count { get; set; }
         public int GenomeCount()
         {
@@ -120,14 +122,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
 
-                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs1);
-                sw.WriteLine(w);
-                sw.WriteLine(l);
-                sw.Close();
-                fs1.Close();
+                //FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+                //StreamWriter sw = new StreamWriter(fs1);
+                //sw.WriteLine(w);
+                //sw.WriteLine(l);
+                //sw.Close();
+                //fs1.Close();
 
                 ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+                //p.Logger = Logger;
                 //bool valid = p.Validate();
                 if (true)
                 {
@@ -140,7 +143,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     catch(Exception ex)
                     {
-                        
+                        Logger.Error(ex.Message);
                     }
 
                 }
@@ -162,14 +165,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int MaxTime;
         int IterationCount = 10;
         int PopulationSize;
+
+        int FirstPopulationSize;
         double SelectionRate;
-        int SelectionSize;
+        int FirstPopulationSizeMultiplyFactor = 2;
+        int SelectionSize=6;
+
         int ChromoLen = 2;
         double CrossRate;
         double MutationRate;
         double GeneMutationRate;
-        int MultiplierFactor;
-        int FirstPopulationSize;
 
         //Inputs
         GaParameter GaPara;
@@ -189,14 +194,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             IterationCount = iterationCnt;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = popSize;//种群数量
+            FirstPopulationSizeMultiplyFactor = 2;
+            FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MaxTime = 300;
             CrossRate = 0.8;//交叉因子
             MutationRate = 0.2;//变异因子
             GeneMutationRate = 0.3;//基因变异因子
-            MultiplierFactor = 2;//乘数因子
+
             SelectionRate = 0.6;//保留因子
             SelectionSize = (int)(SelectionRate * popSize);
-            FirstPopulationSize = PopulationSize * MultiplierFactor;//初始种群数
+
             //InputsF
             GaPara = gaPara;
             LayoutPara = layoutPara;
@@ -217,11 +224,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         public List<Chromosome> Run()
         {
+            Logger.Information($"Iteration count: {IterationCount}");
+            Logger.Information($"Population count: {PopulationSize}");
+            Logger.Information($"Max minutes: {MaxTime}");
+
             List<Chromosome> selected = new List<Chromosome>();
             try
             {
                 var pop = CreateFirstPopulation();//创建第一代
-                var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
+                var strFirstPopCnt = $"\n  First poplulation size: {pop.Count}";
                 Active.Editor.WriteMessage(strFirstPopCnt);
                 Logger.Information(strFirstPopCnt);
                 var curIteration = 0;
@@ -233,10 +244,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
                 {
                     var strCurIterIndex = $"\n iteration index：     {curIteration}";
-                    Active.Editor.WriteMessage(strCurIterIndex);
+                    //Active.Editor.WriteMessage(strCurIterIndex);
                     Logger.Information(strCurIterIndex);
                     selected = Selection(pop, out int curNums);
-                    pop = CreateNextGeneration(selected);
                     if (maxNums == curNums)
                     {
                         maxCount++;
@@ -245,15 +255,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     {
                         maxNums = curNums;
                     }
+                    pop = CreateNextGeneration(selected);
                     Mutation(pop);
+                    
+                    stopWatch.Stop();
                 }
-                stopWatch.Stop();
-                
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
+            
             return selected;
         }
 
@@ -319,6 +331,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             for (int i = 0; i < FirstPopulationSize; ++i)//
             {
                 var solution = new Chromosome();
+                solution.Logger = this.Logger;
                 var genome = ConvertLineToGene(i);//创建初始基因序列
                 solution.Genome = genome;
                 //Draw.DrawSeg(solution);
@@ -337,6 +350,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 int rd1 = RandInt(solutions.Count);
                 int rd2 = RandInt(solutions.Count);
                 var s = Crossover(solutions[rd1], solutions[rd2]);
+                s.Logger = this.Logger;
                 rst.Add(s);
             }
 
@@ -366,10 +380,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
         {
-            var sorted = inputSolution.OrderByDescending(s => s.GetMaximumNumber(LayoutPara, GaPara)).ToList();
-            maxNums = sorted.First().GetMaximumNumber(LayoutPara, GaPara);
+            Logger.Information("Doing Selection");
+
+            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+
+            var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
+            maxNums = sorted.First().Count;
             var strBestCnt = $"\n Current best： {sorted.First().Count}";
-            Active.Editor.WriteMessage(strBestCnt);
+            //Active.Editor.WriteMessage(strBestCnt);
             Logger.Information(strBestCnt);
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)

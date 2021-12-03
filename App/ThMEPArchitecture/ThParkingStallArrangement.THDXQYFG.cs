@@ -12,7 +12,7 @@ namespace ThMEPArchitecture
         public partial class ThParkingStallArrangement
     {
             [CommandMethod("TIANHUACAD", "-THDXQYFG", CommandFlags.Modal)]
-            public void ThTestFireHydrant()
+            public void ThArrangeParkingStall()
             {
                 using (var cmd = new ThParkingStallArrangementCmd())
                 {

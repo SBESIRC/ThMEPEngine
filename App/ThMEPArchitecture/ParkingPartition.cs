@@ -157,7 +157,7 @@ namespace ThMEPArchitecture
         {
             GenerateLanes();
 
-            
+            //IniLanes.AddToCurrentSpace();
 
             GenerateParkingSpots();
 
@@ -338,6 +338,7 @@ namespace ThMEPArchitecture
                             pm.Lanes = new Line[] { k, li };
                             pm.LayoutMode = ((int)LayoutMode.SingleVert);
                             Modules.Add(pm);
+
 
                             IniLanes.Add(k);
                             SequenceLanes.Add(k);
@@ -523,121 +524,142 @@ namespace ThMEPArchitecture
         {
             var cplys = new List<Polyline>(Obstacles);
             cplys.ForEach(e => e.Closed = true);
-            IniLanes.ForEach(e => AddToSpatialIndex(e, ref ObstaclesSpatialIndex));
+            //IniLanes.ForEach(e => AddToSpatialIndex(e, ref ObstaclesSpatialIndex));
+            DBObjectCollection lanesobj = new DBObjectCollection();
+            IniLanes.ForEach(e => lanesobj.Add(e));
+            AddToSpatialIndex(lanesobj, ref ObstaclesSpatialIndex);
+
             SortLinesByLength(IniLanes, false);
             List<Polyline> laneBoxes = new List<Polyline>();
+            DBObjectCollection objslanebox = new DBObjectCollection();
             foreach (var l in IniLanes)
             {
                 var a = OffsetLine(l, DisLaneWidth / 2)[0];
                 var b = OffsetLine(l, DisLaneWidth / 2)[1];
                 var pl = PolyFromPoints(new List<Point3d>() {
                     a.StartPoint,a.EndPoint,b.EndPoint,b.StartPoint,a.StartPoint});
-                AddToSpatialIndex(pl, ref ObstaclesSpatialIndex);
+                //AddToSpatialIndex(pl, ref ObstaclesSpatialIndex);
+                objslanebox.Add(pl);
                 laneBoxes.Add(pl);
             }
+            AddToSpatialIndex(objslanebox, ref ObstaclesSpatialIndex);
             List<Polyline> pcars = new List<Polyline>();
             var mtwo = Modules.Where(e => e.LayoutMode == ((int)LayoutMode.DoubleVert)).ToList();
             var mone = Modules.Where(e => e.LayoutMode == ((int)LayoutMode.SingleVert)).ToList();
-            foreach (var pm in mtwo)
-            {
-                var la = pm.Lanes[0];
-                //la.AddToCurrentSpace();
-                var lb = pm.Lanes[1];
-                var lanesclonea = IniLanes.Clone().ToList();
-                var lanescloneb = IniLanes.Clone().ToList();
-                lanesclonea.Remove(la);
-                lanescloneb.Remove(lb);
-                var ase = Vector(la.StartPoint, la.EndPoint).GetNormal() * DisLaneWidth / 2;
-                var bse = Vector(lb.StartPoint, lb.EndPoint).GetNormal() * DisLaneWidth / 2;
-                if (ClosestPointInCurves(la.StartPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
-                    la = new Line(la.StartPoint.TransformBy(Matrix3d.Displacement(ase)), la.EndPoint);
-                if (ClosestPointInCurves(la.EndPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
-                    la = new Line(la.StartPoint, la.EndPoint.TransformBy(Matrix3d.Displacement(-ase)));
-                if (ClosestPointInCurves(lb.StartPoint, lanescloneb.Cast<Curve>().ToList()) < 10)
-                    lb = new Line(lb.StartPoint.TransformBy(Matrix3d.Displacement(bse)), lb.EndPoint);
-                if (ClosestPointInCurves(lb.EndPoint, lanescloneb.Cast<Curve>().ToList()) < 10)
-                    lb = new Line(lb.StartPoint, lb.EndPoint.TransformBy(Matrix3d.Displacement(-bse)));
+            //foreach (var pm in mtwo)
+            //{
+            //    var la = pm.Lanes[0];
+            //    //la.AddToCurrentSpace();
+            //    var lb = pm.Lanes[1];
+            //    var lanesclonea = IniLanes.Clone().ToList();
+            //    var lanescloneb = IniLanes.Clone().ToList();
+            //    lanesclonea.Remove(la);
+            //    lanescloneb.Remove(lb);
+            //    var ase = Vector(la.StartPoint, la.EndPoint).GetNormal() * DisLaneWidth / 2;
+            //    var bse = Vector(lb.StartPoint, lb.EndPoint).GetNormal() * DisLaneWidth / 2;
+            //    if (ClosestPointInCurves(la.StartPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
+            //        la = new Line(la.StartPoint.TransformBy(Matrix3d.Displacement(ase)), la.EndPoint);
+            //    if (ClosestPointInCurves(la.EndPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
+            //        la = new Line(la.StartPoint, la.EndPoint.TransformBy(Matrix3d.Displacement(-ase)));
+            //    if (ClosestPointInCurves(lb.StartPoint, lanescloneb.Cast<Curve>().ToList()) < 10)
+            //        lb = new Line(lb.StartPoint.TransformBy(Matrix3d.Displacement(bse)), lb.EndPoint);
+            //    if (ClosestPointInCurves(lb.EndPoint, lanescloneb.Cast<Curve>().ToList()) < 10)
+            //        lb = new Line(lb.StartPoint, lb.EndPoint.TransformBy(Matrix3d.Displacement(-bse)));
 
-                var vec_ab = Vector(la.GetClosestPointTo(lb.GetCenter(), true), lb.GetCenter()).GetNormal();
+            //    var vec_ab = Vector(la.GetClosestPointTo(lb.GetCenter(), true), lb.GetCenter()).GetNormal();
 
-                var labottom = new Line(la.StartPoint, la.EndPoint);
-                var latop = new Line(la.StartPoint, la.EndPoint);
-                labottom.TransformBy(Matrix3d.Displacement(vec_ab * DisLaneWidth / 2));
-                latop.TransformBy(Matrix3d.Displacement(vec_ab * DisModulus / 2));
+            //    var labottom = new Line(la.StartPoint, la.EndPoint);
+            //    var latop = new Line(la.StartPoint, la.EndPoint);
+            //    labottom.TransformBy(Matrix3d.Displacement(vec_ab * DisLaneWidth / 2));
+            //    latop.TransformBy(Matrix3d.Displacement(vec_ab * DisModulus / 2));
 
-                var lbbottom = new Line(lb.StartPoint, lb.EndPoint);
-                var lbtop = new Line(lb.StartPoint, lb.EndPoint);
-                lbbottom.TransformBy(Matrix3d.Displacement(-vec_ab * DisLaneWidth / 2));
-                lbtop.TransformBy(Matrix3d.Displacement(-vec_ab * DisModulus / 2));
+            //    var lbbottom = new Line(lb.StartPoint, lb.EndPoint);
+            //    var lbtop = new Line(lb.StartPoint, lb.EndPoint);
+            //    lbbottom.TransformBy(Matrix3d.Displacement(-vec_ab * DisLaneWidth / 2));
+            //    lbtop.TransformBy(Matrix3d.Displacement(-vec_ab * DisModulus / 2));
 
-                List<Line> edges = new List<Line>() { latop, labottom, lbtop, lbbottom };
-                List<List<Line>> segs = new List<List<Line>>();
-                foreach (var e in edges)
-                {
-                    List<Line> seg = new List<Line>();
-                    DBObjectCollection segobjs = new DBObjectCollection();
+            //    List<Line> edges = new List<Line>() { latop, labottom, lbtop, lbbottom };
+            //    List<List<Line>> segs = new List<List<Line>>();
+            //    foreach (var e in edges)
+            //    {
+            //        List<Line> seg = new List<Line>();
+            //        DBObjectCollection segobjs = new DBObjectCollection();
 
-                    try
-                    {
-                        DivideCurveByLength(e, DisCarWidth, ref segobjs);
-                    }
-                    catch
-                    {
-                        ;
-                    }
-                    seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
-                    segs.Add(seg);
-                }
-                for (int j = 0; j < segs[0].Count; j++)
-                {
-                    var pla = PolyFromPoints(new List<Point3d>() {
-                        segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
-                    pla.Closed = true;
-                    var a = pla.Clone() as Polyline;
-                    a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
-                    var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
-                    if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
-                        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
-                        && (!IsInAnyPolys(pla.GetCenter(), cplys)))
-                    {
-                        pcars.Add(pla);
-                        CarSpots.Add(pla);
-                        AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
-                    }
-                }
-                for (int j = 0; j < segs[2].Count; j++)
-                {
+            //        try
+            //        {
+            //            DivideCurveByLength(e, DisCarWidth, ref segobjs);
+            //        }
+            //        catch
+            //        {
+            //            ;
+            //        }
+            //        seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
+            //        segs.Add(seg);
+            //    }
+            //    for (int j = 0; j < segs[0].Count; j++)
+            //    {
+            //        var pla = PolyFromPoints(new List<Point3d>() {
+            //            segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
+            //        pla.Closed = true;
+            //        var a = pla.Clone() as Polyline;
+            //        a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
+            //        var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
+            //        if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
+            //            && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
+            //            && (!IsInAnyPolys(pla.GetCenter(), cplys)))
+            //        {
+            //            pcars.Add(pla);
+            //            CarSpots.Add(pla);
+            //            AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
+            //        }
+            //    }
+            //    for (int j = 0; j < segs[2].Count; j++)
+            //    {
 
-                    var plb = PolyFromPoints(new List<Point3d>() {
-                        segs[2][j].StartPoint,segs[2][j].EndPoint,segs[3][j].EndPoint,segs[3][j].StartPoint});
-                    plb.Closed = true;
+            //        var plb = PolyFromPoints(new List<Point3d>() {
+            //            segs[2][j].StartPoint,segs[2][j].EndPoint,segs[3][j].EndPoint,segs[3][j].StartPoint});
+            //        plb.Closed = true;
 
-                    var b = plb.Clone() as Polyline;
-                    b.TransformBy(Matrix3d.Scaling(0.9, b.GetCenter()));
+            //        var b = plb.Clone() as Polyline;
+            //        b.TransformBy(Matrix3d.Scaling(0.9, b.GetCenter()));
 
-                    var crossedb = ObstaclesSpatialIndex.SelectCrossingPolygon(b);
-                    if (crossedb.Count == 0 && Boundary.IsPointIn(plb.GetCenter())
-                        && (!IsInAnyPolys(plb.GetCenter(), laneBoxes))
-                         && (!IsInAnyPolys(plb.GetCenter(), cplys)))
-                    {
-                        pcars.Add(plb);
-                        //CarSpots.Add(plb);
-                        AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
-                    }
-                }
-            }
+            //        var crossedb = ObstaclesSpatialIndex.SelectCrossingPolygon(b);
+            //        if (crossedb.Count == 0 && Boundary.IsPointIn(plb.GetCenter())
+            //            && (!IsInAnyPolys(plb.GetCenter(), laneBoxes))
+            //             && (!IsInAnyPolys(plb.GetCenter(), cplys)))
+            //        {
+            //            pcars.Add(plb);
+            //            //CarSpots.Add(plb);
+            //            AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
+            //        }
+            //    }
+            //}
+
+            //foreach (var pm in mone)
+            //{
+            //    var a = new Line(pm.Lanes[1].GetClosestPointTo(pm.Lanes[0].StartPoint, false),
+            //        pm.Lanes[1].GetClosestPointTo(pm.Lanes[0].EndPoint, false));
+            //    var pl = PolyFromPoints(new List<Point3d>() { pm.Lanes[0].StartPoint, pm.Lanes[0].EndPoint, a.EndPoint, a.StartPoint, pm.Lanes[0].StartPoint });
+            //    pl.AddToCurrentSpace();
+            //}
+
             foreach (var pm in mone)
             {
                 var la = pm.Lanes[0];
-                //la.AddToCurrentSpace();
+                
                 var lb = pm.Lanes[1];
-                var lanesclonea = IniLanes.Clone().ToList();
-                lanesclonea.Remove(la);
+                var lanesclonea = IniLanes.Clone().Distinct()
+                    .Where(e => !(e.GetClosestPointTo(la.StartPoint, true).DistanceTo(la.StartPoint) < 1
+                    && e.GetClosestPointTo(la.EndPoint, true).DistanceTo(la.EndPoint) < 1
+                    && Math.Abs(e.Length - la.Length) < 1)).ToList();
+
                 var ase = Vector(la.StartPoint, la.EndPoint).GetNormal() * DisLaneWidth / 2;
                 if (ClosestPointInCurves(la.StartPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
                     la = new Line(la.StartPoint.TransformBy(Matrix3d.Displacement(ase)), la.EndPoint);
                 if (ClosestPointInCurves(la.EndPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
                     la = new Line(la.StartPoint, la.EndPoint.TransformBy(Matrix3d.Displacement(-ase)));
+
+                
 
                 var vec_ab = Vector(la.GetClosestPointTo(lb.GetCenter(), true), lb.GetCenter()).GetNormal();
 
@@ -647,105 +669,158 @@ namespace ThMEPArchitecture
                 latop.TransformBy(Matrix3d.Displacement(vec_ab * DisModulus / 2));
 
 
-                List<Line> edges = new List<Line>() { latop, labottom };
-                List<List<Line>> segs = new List<List<Line>>();
-                foreach (var e in edges)
-                {
-                    List<Line> seg = new List<Line>();
-                    DBObjectCollection segobjs = new DBObjectCollection();
-                    //DivideCurveByLength(e, DisCarWidth, ref segobjs);
+                var pls=GenerateCars(la, Vector(la.GetCenter(),latop.GetCenter()));
 
-                    try
-                    {
-                        DivideCurveByLength(e, DisCarWidth, ref segobjs);
-                    }
-                    catch
-                    {
-                        ;
-                    }
-
-                    seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
-                    segs.Add(seg);
-                   
-                }
-                //segs.ForEach(e => e.AddToCurrentSpace());
-                for (int j = 0; j < segs[0].Count; j++)
+                //DBObjectCollection objspcars = new DBObjectCollection();
+               
+                foreach (var pl in pls)
                 {
-                    var pla = PolyFromPoints(new List<Point3d>() {
-                        segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
-                    pla.Closed = true;
-                    var a = pla.Clone() as Polyline;
-                    a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
-                    var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
-                    if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
-                        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
-                        && (!IsInAnyPolys(pla.GetCenter(), cplys)))
-                    {               
-                        pcars.Add(pla);
-                        CarSpots.Add(pla);
-                        AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
+                    var p = pl.Clone() as Polyline;
+                    p.TransformBy(Matrix3d.Scaling(0.99, p.GetCenter()));
+                    if (!(ObstaclesSpatialIndex.Intersects(p, true)) && (!IsInAnyPolys(p.GetCenter(), laneBoxes))
+                        && Boundary.IsPointIn(p.Centroid()) && (!IsInCar(p.GetCenter(), pcars)))
+                    {
+                        CarSpots.Add(pl);
+                        pcars.Add(pl);
+                        AddToSpatialIndex(pl, ref ObstaclesSpatialIndex);
+                        //objspcars.Add(pl);
                     }
                 }
+                //AddToSpatialIndex(objspcars, ref ObstaclesSpatialIndex);
+                //List<Line> edges = new List<Line>() { latop, labottom };
+                //List<List<Line>> segs = new List<List<Line>>();
+                //foreach (var e in edges)
+                //{
+                //    List<Line> seg = new List<Line>();
+                //    DBObjectCollection segobjs = new DBObjectCollection();
+                //    //DivideCurveByLength(e, DisCarWidth, ref segobjs);
+
+                //    try
+                //    {
+                //        DivideCurveByLength(e, DisCarWidth, ref segobjs);
+                //    }
+                //    catch
+                //    {
+                //        ;
+                //    }
+
+                //    seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
+                //    segs.Add(seg);
+
+                //}
+                ////segs.ForEach(e => e.AddToCurrentSpace());
+                //for (int j = 0; j < segs[0].Count; j++)
+                //{
+                //    var pla = PolyFromPoints(new List<Point3d>() {
+                //        segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
+                //    pla.Closed = true;
+                //    var a = pla.Clone() as Polyline;
+                //    a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
+                //    var cond = ObstaclesSpatialIndex.Intersects(a) && Boundary.IsPointIn(pla.GetCenter())
+                //        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes));
+                //    //var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
+                //    //if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
+                //    //    && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
+                //    //    && (!IsInAnyPolys(pla.GetCenter(), cplys)))
+                //    if(cond)
+                //    {               
+                //        pcars.Add(pla);
+                //        CarSpots.Add(pla);
+                //        AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
+                //    }
+                //}
 
             }
             //pcars.AddToCurrentSpace();
             cplys.AddRange(pcars);
 
+            //for (int i = 0; i < IniLanes.Count; i++)
+            //{
+            //    var l = IniLanes[i];
+            //    var ltops = OffsetLine(l, DisLaneWidth / 2);
+            //    var lbottoms = OffsetLine(l, DisCarLength + DisLaneWidth / 2);
+            //    List<Line> edges = new List<Line>() { ltops[0], lbottoms[0], ltops[1], lbottoms[1] };
+            //    List<List<Line>> segs = new List<List<Line>>();
+            //    foreach (var e in edges)
+            //    {
+            //        List<Line> seg = new List<Line>();
+            //        DBObjectCollection segobjs = new DBObjectCollection();
+            //        //DivideCurveByLength(e, DisCarWidth, ref segobjs);
+
+            //        try
+            //        {
+            //            DivideCurveByLength(e, DisCarWidth, ref segobjs);
+            //        }
+            //        catch
+            //        {
+            //            ;
+            //        }
+
+            //        seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
+            //        segs.Add(seg);
+            //    }
+            //    for (int j = 0; j < segs[0].Count; j++)
+            //    {
+            //        var pla = PolyFromPoints(new List<Point3d>() {
+            //            segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
+            //        pla.Closed = true;
+            //        var plb = PolyFromPoints(new List<Point3d>() {
+            //            segs[2][j].StartPoint,segs[2][j].EndPoint,segs[3][j].EndPoint,segs[3][j].StartPoint});
+            //        plb.Closed = true;
+            //        var a = pla.Clone() as Polyline;
+            //        a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
+            //        var b = plb.Clone() as Polyline;
+            //        b.TransformBy(Matrix3d.Scaling(0.9, b.GetCenter()));
+            //        var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
+            //        if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
+            //            && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
+            //            && (!IsInAnyPolys(pla.GetCenter(), cplys)))
+            //        {
+            //            CarSpots.Add(pla);
+            //            AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
+            //        }
+            //        var crossedb = ObstaclesSpatialIndex.SelectCrossingPolygon(b);
+            //        if (crossedb.Count == 0 && Boundary.IsPointIn(plb.GetCenter())
+            //            && (!IsInAnyPolys(plb.GetCenter(), laneBoxes))
+            //             && (!IsInAnyPolys(plb.GetCenter(), cplys)))
+            //        {
+            //            CarSpots.Add(plb);
+            //            AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
+            //        }
+            //    }
+            //}
+
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var l = IniLanes[i];
+
+    
+
                 var ltops = OffsetLine(l, DisLaneWidth / 2);
                 var lbottoms = OffsetLine(l, DisCarLength + DisLaneWidth / 2);
-                List<Line> edges = new List<Line>() { ltops[0], lbottoms[0], ltops[1], lbottoms[1] };
-                List<List<Line>> segs = new List<List<Line>>();
-                foreach (var e in edges)
-                {
-                    List<Line> seg = new List<Line>();
-                    DBObjectCollection segobjs = new DBObjectCollection();
-                    //DivideCurveByLength(e, DisCarWidth, ref segobjs);
+                var pls = new List<Polyline>();
+                pls.AddRange(GenerateCars(l, Vector(l.GetCenter(), lbottoms[0].GetCenter())));
+                pls.AddRange(GenerateCars(l, Vector(l.GetCenter(), lbottoms[1].GetCenter())));
 
-                    try
-                    {
-                        DivideCurveByLength(e, DisCarWidth, ref segobjs);
-                    }
-                    catch
-                    {
-                        ;
-                    }
-
-                    seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1).ToList());
-                    segs.Add(seg);
-                }
-                for (int j = 0; j < segs[0].Count; j++)
+                //DBObjectCollection objscars = new DBObjectCollection();
+                foreach (var pl in pls)
                 {
-                    var pla = PolyFromPoints(new List<Point3d>() {
-                        segs[0][j].StartPoint,segs[0][j].EndPoint,segs[1][j].EndPoint,segs[1][j].StartPoint});
-                    pla.Closed = true;
-                    var plb = PolyFromPoints(new List<Point3d>() {
-                        segs[2][j].StartPoint,segs[2][j].EndPoint,segs[3][j].EndPoint,segs[3][j].StartPoint});
-                    plb.Closed = true;
-                    var a = pla.Clone() as Polyline;
-                    a.TransformBy(Matrix3d.Scaling(0.9, a.GetCenter()));
-                    var b = plb.Clone() as Polyline;
-                    b.TransformBy(Matrix3d.Scaling(0.9, b.GetCenter()));
-                    var crosseda = ObstaclesSpatialIndex.SelectCrossingPolygon(a);
-                    if (crosseda.Count == 0 && Boundary.IsPointIn(pla.GetCenter())
-                        && (!IsInAnyPolys(pla.GetCenter(), laneBoxes))
-                        && (!IsInAnyPolys(pla.GetCenter(), cplys)))
+                    var p = pl.Clone() as Polyline;
+                    p.TransformBy(Matrix3d.Scaling(0.99, p.GetCenter()));
+                    if (!(ObstaclesSpatialIndex.Intersects(p, true)) && (!IsInAnyPolys(p.GetCenter(), laneBoxes))
+                        && Boundary.IsPointIn(p.Centroid()) && (!IsInCar(p.GetCenter(), pcars)))
                     {
-                        CarSpots.Add(pla);
-                        AddToSpatialIndex(pla, ref ObstaclesSpatialIndex);
-                    }
-                    var crossedb = ObstaclesSpatialIndex.SelectCrossingPolygon(b);
-                    if (crossedb.Count == 0 && Boundary.IsPointIn(plb.GetCenter())
-                        && (!IsInAnyPolys(plb.GetCenter(), laneBoxes))
-                         && (!IsInAnyPolys(plb.GetCenter(), cplys)))
-                    {
-                        CarSpots.Add(plb);
-                        AddToSpatialIndex(plb, ref ObstaclesSpatialIndex);
+                        CarSpots.Add(pl);
+                        AddToSpatialIndex(pl, ref ObstaclesSpatialIndex);
+                        //objscars.Add(pl);
                     }
                 }
+                //AddToSpatialIndex(objscars, ref ObstaclesSpatialIndex);
             }
+
+
+
+
             cplys.Clear();
             laneBoxes.Clear();
             pcars.Clear();
@@ -1065,7 +1140,9 @@ namespace ThMEPArchitecture
                 //var pls = crossed.Cast<Polyline>().ToArray();
                 foreach (var pl in crossed.Cast<Entity>())
                 {
+
                     pts.AddRange(lanebox.Intersect(pl, Intersect.OnBothOperands));
+
                     if (pl is Polyline)
                     {
                         pts.AddRange(((Polyline)pl).Vertices().Cast<Point3d>()
@@ -1076,10 +1153,17 @@ namespace ThMEPArchitecture
 
                 pts = pts.Select(e => lane.GetClosestPointTo(e, false)).Distinct().ToList();
 
-                //pts.ForEach(p => p.CreateSquare(500).AddToCurrentSpace());
+                if (pts.Count == 0)
+                {
+                    results.Add(lane);
+                    return results;
+                }
 
+                //pts.ForEach(p => p.CreateSquare(500).AddToCurrentSpace());
+                var res = new List<Line>();
                 SortAlongCurve(pts, lane);
-                var res = lane.GetSplitCurves(pts).Cast<Line>().ToList();
+
+                res = lane.GetSplitCurves(pts).Cast<Line>().ToList();
 
                 //res.AddToCurrentSpace();
 
@@ -1107,7 +1191,7 @@ namespace ThMEPArchitecture
                 resa = resa.Where(e => e.Length >= 10).ToList();
                 if (resa.Count == 1)
                 {
-                    ParkModule module= new ParkModule();
+                    ParkModule module = new ParkModule();
                     module.Lanes = new Line[] { la, lal };
                     module.LayoutMode = ((int)LayoutMode.SingleVert);
                     pmdts.Add(module);
@@ -1135,7 +1219,7 @@ namespace ThMEPArchitecture
                 ;
                 if (resb.Count == 1)
                 {
-                    
+
                     ParkModule module = new ParkModule();
                     module.Lanes = new Line[] { lb, lbl };
                     module.LayoutMode = ((int)LayoutMode.SingleVert);
@@ -1164,9 +1248,14 @@ namespace ThMEPArchitecture
             {
                 var la = mone[i].Lanes[0];
                 var lb = mone[i].Lanes[1];
+
                 var res = SplitLaneWithNearObstacles(la);
                 res = res.Where(e => e.Length >= 10).ToList();
-                if (res.Count <= 1) continue;
+                if (res.Count <= 1)
+                {
+                    pmdts.Add(mone[i]);
+                    continue;
+                }
                 mone.RemoveAt(i);
                 i--;
                 foreach (var r in res)
@@ -1184,6 +1273,8 @@ namespace ThMEPArchitecture
                     }
                 }
             }
+
+
 
             Modules.Clear();
             Modules.AddRange(pmdts);
@@ -1213,6 +1304,31 @@ namespace ThMEPArchitecture
             }
             //IniLanes.AddToCurrentSpace();
 
+        }
+
+        private List<Polyline> GenerateCars(Line lane, Vector3d vec)
+        {
+            var l = new Line(lane.StartPoint, lane.EndPoint);
+            l.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisCarAndHalfLane));
+            var ls = SplitCurve(l, Cutters).Cast<Line>().Where(e => e.Length > DisCarWidth)
+                .Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles));
+            List<Line> seg = new List<Line>();
+            foreach (var sls in ls)
+            {
+                DBObjectCollection segobjs = new DBObjectCollection();
+                DivideCurveByLength(sls, DisCarWidth, ref segobjs);
+                seg.AddRange(segobjs.Cast<Line>().Where(f => Math.Abs(f.GetLength() - DisCarWidth) < 1));
+            }
+            List<Polyline> pls = new List<Polyline>();
+            foreach (var s in seg)
+            {
+                var lb = new Line(lane.StartPoint, lane.EndPoint);
+                lb.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisLaneWidth / 2));
+                var edge = new Line(lb.GetClosestPointTo(s.StartPoint, true), lb.GetClosestPointTo(s.EndPoint, true));
+                var pl = PolyFromPoints(new List<Point3d>() { edge.StartPoint, edge.EndPoint, s.EndPoint, s.StartPoint, edge.StartPoint });
+                pls.Add(pl);
+            }
+            return pls;
         }
 
 
@@ -1465,6 +1581,13 @@ namespace ThMEPArchitecture
             return false;
         }
 
+        public static bool IsInCar(Point3d pt, List<Polyline> pls)
+        {
+            if (pls.Count == 0) return false;
+            var bContains = pls.Any(pl => pl.GeometricExtents.IsPointIn(pt));
+            return bContains;
+        }
+
         public static void ClosestPointInCurves(Point3d pt, List<Curve> crvs,
             ref Point3d result, ref double dis, ref int index)
         {
@@ -1533,6 +1656,12 @@ namespace ThMEPArchitecture
             add.Add(e);
             spatialIndex.Update(add, new DBObjectCollection());
             
+            return;
+        }
+
+        public static void AddToSpatialIndex(DBObjectCollection objs, ref ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            spatialIndex.Update(objs, new DBObjectCollection());
             return;
         }
 
