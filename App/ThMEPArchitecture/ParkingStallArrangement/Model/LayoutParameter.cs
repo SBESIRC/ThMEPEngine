@@ -52,10 +52,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var areas = new List<Polyline>();
             areas.Add(OuterBoundary);
             SegLines.Clear();
-            if(genome.Count > 3)
-            {
-                ;
-            }
+
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
@@ -81,8 +78,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLineDic.Add(i, GetSegLines(areas[i]));
                 AreaSegs.Add(i, GetAreaSegs(areas[i], SegLineDic[i], out List<Polyline> areaWall));
                 AreaWalls.Add(i, areaWall);
-
-                ;
             }
         }
 
@@ -126,26 +121,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         private List<Line> GetSegLines(Polyline area)
         {
             var segLines = new List<Line>();
-            var newArea = area.Buffer(1.0).OfType<Polyline>().OrderByDescending(p => p.Area).First();
-            var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
-            dbObjs.Cast<Entity>()
-                .ForEach(e => segLines.Add(e as Line));
-            if(segLines.Count == 0)
+            try
             {
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                var newArea = area.Buffer(1.0).OfType<Polyline>().OrderByDescending(p => p.Area).First();
+                var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
+                dbObjs.Cast<Entity>()
+                    .ForEach(e => segLines.Add(e as Line));
+                if (segLines.Count == 0)
                 {
-                    acadDatabase.CurrentSpace.Add(area);
+                    //using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                    //{
+                    //    acadDatabase.CurrentSpace.Add(area);
+                    //}
                 }
+                
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
             return segLines;
         }
 
-        private List<Polyline> GetWallLines(Polyline area)
-        {
-            var wallLines = new List<Polyline>();
-
-            return wallLines;
-        }
 
         private List<Line> GetAreaSegs(Polyline area, List<Line> allSegs, out List<Polyline> areaWalls)
         {
@@ -221,73 +218,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 plines.Add(pts);
             }
 
-            //for(int i = 0; i < lines.Count; i++)
-            //{
-            //    if(i==0)
-            //    {
-            //        var pts = new List<Point2d>();
-            //        pts.Add(lines[i].StartPoint.ToPoint2D());
-            //        pts.Add(lines[i].EndPoint.ToPoint2D());
-            //        plines.Add(pts);
-            //        continue;
-            //    }
-            //    var line = lines[i];
-            //    var spt = line.StartPoint.ToPoint2D();
-            //    var ept = line.EndPoint.ToPoint2D();
-            //    foreach(var pts in plines)
-            //    {
-            //        var pt1 = pts[0];
-            //        var pt2 = pts[pts.Count - 1];
-            //        if(spt.GetDistanceTo(pt1) < 1)
-            //        {
-            //            var temp = new List<Point2d>();
-            //            temp.Add(ept);
-            //            temp.AddRange(pts);
-            //            pts.Clear();
-            //            pts.AddRange(temp);
-            //            break;
-            //        }
-            //        if (spt.GetDistanceTo(pt1) < 1)
-            //        {
-            //            var temp = new List<Point2d>();
-            //            temp.Add(spt);
-            //            temp.AddRange(pts);
-            //            pts.Clear();
-            //            pts.AddRange(temp);
-            //            break;
-            //        }
-            //        if (spt.GetDistanceTo(pt2) < 1)
-            //        {
-            //            pts.Add(ept);
-            //            break;
-            //        }
-            //        if (ept.GetDistanceTo(pt2) < 1)
-            //        {
-            //            pts.Add(spt);
-            //            break;
-            //        }
-            //    }
-            //    var pts2 = new List<Point2d>();
-            //    pts2.Add(spt);
-            //    pts2.Add(ept);
-            //    plines.Add(pts2);
-            //}
-            //if(plines.Count >= 2)//多段线数目大于2，尝试合并
-            //{
-            //    for (int i = 0; i < plines.Count - 1; i++)
-            //    {
-            //        for(int j = i+1; j < plines.Count; j++)
-            //        {
-
-            //        }
-            //    }
-            //}
             areaWalls = new List<Polyline>();
             foreach (var pts in plines)
             {
                 var pline = new Polyline();
                 pline.CreatePolyline(pts.ToCollection());
-;               areaWalls.Add(pline);
+                areaWalls.Add(pline);
             }
             return segLines;
         }

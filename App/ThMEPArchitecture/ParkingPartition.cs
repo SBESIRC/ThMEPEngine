@@ -162,7 +162,7 @@ namespace ThMEPArchitecture
             GenerateParkingSpots();
 
             //IniLanes.AddToCurrentSpace();
-            CarSpots.ForEach(e => e.ColorIndex = 250);
+            //CarSpots.ForEach(e => e.ColorIndex = 250);
             //CarSpots.AddToCurrentSpace();
         }
 

@@ -61,8 +61,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
 
-
-
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
@@ -79,18 +77,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             try
             {
                 rst = geneAlgorithm.Run();
-
             }
             catch (Exception ex)
             {
-                ;
 
             }
 
             var solution = rst.First();
             layoutPara.Set(solution.Genome);
 
-            //
+            
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 int index = layoutPara.AreaNumber[j];
@@ -108,7 +104,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 }
             }
             Draw.DrawSeg(solution);
-            ;
         }
 
         private static Point3dCollection SelectAreas()

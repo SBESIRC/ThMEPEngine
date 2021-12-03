@@ -140,7 +140,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     catch(Exception ex)
                     {
-                        ;
+                        
                     }
 
                 }
@@ -195,7 +195,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GeneMutationRate = 0.3;//基因变异因子
             MultiplierFactor = 2;//乘数因子
             SelectionRate = 0.6;//保留因子
-            SelectionSize = (int)SelectionRate * popSize;
+            SelectionSize = (int)(SelectionRate * popSize);
             FirstPopulationSize = PopulationSize * MultiplierFactor;//初始种群数
             //InputsF
             GaPara = gaPara;
@@ -218,35 +218,42 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<Chromosome> Run()
         {
             List<Chromosome> selected = new List<Chromosome>();
-
-            var pop = CreateFirstPopulation();//创建第一代
-            var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
-            Active.Editor.WriteMessage(strFirstPopCnt);
-            Logger.Information(strFirstPopCnt);
-            var curIteration = 0;
-            int maxCount = 0;
-            int maxNums = 0;
-
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
+            try
             {
-                var strCurIterIndex = $"\n iteration index：     {curIteration}";
-                Active.Editor.WriteMessage(strCurIterIndex);
-                Logger.Information(strCurIterIndex);
-                selected = Selection(pop, out int curNums);
-                pop = CreateNextGeneration(selected);
-                if(maxNums == curNums)
+                var pop = CreateFirstPopulation();//创建第一代
+                var strFirstPopCnt = $"\n init pop cnt {pop.Count}";
+                Active.Editor.WriteMessage(strFirstPopCnt);
+                Logger.Information(strFirstPopCnt);
+                var curIteration = 0;
+                int maxCount = 0;
+                int maxNums = 0;
+
+                var stopWatch = new Stopwatch();
+                stopWatch.Start();
+                while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
                 {
-                    maxCount++;
+                    var strCurIterIndex = $"\n iteration index：     {curIteration}";
+                    Active.Editor.WriteMessage(strCurIterIndex);
+                    Logger.Information(strCurIterIndex);
+                    selected = Selection(pop, out int curNums);
+                    pop = CreateNextGeneration(selected);
+                    if (maxNums == curNums)
+                    {
+                        maxCount++;
+                    }
+                    else
+                    {
+                        maxNums = curNums;
+                    }
+                    Mutation(pop);
                 }
-                else
-                {
-                    maxNums = curNums;
-                }
-                Mutation(pop);
+                stopWatch.Stop();
+                
             }
-            stopWatch.Stop();
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
             return selected;
         }
 
