@@ -17,6 +17,7 @@ using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 using ThMEPLighting.IlluminationLighting.Common;
+using ThMEPEngineCore.Extension;
 
 namespace ThMEPLighting.IlluminationLighting.Data
 {
@@ -54,7 +55,7 @@ namespace ThMEPLighting.IlluminationLighting.Data
                 }
             });
 
-            ThIlluminationUtils.MoveToXYPlane(Geos);
+            Geos.ProjectOntoXYPlane();
         }
 
         protected override ThMEPDataSet BuildDataSet()

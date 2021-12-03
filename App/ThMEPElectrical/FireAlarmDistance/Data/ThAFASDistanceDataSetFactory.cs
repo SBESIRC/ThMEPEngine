@@ -2,13 +2,13 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-using ThMEPEngineCore.Model;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Interface;
@@ -205,7 +205,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                 }
             });
 
-            Geos.MoveToXYPlane();
+            Geos.ProjectOntoXYPlane();
         }
 
         private ThBuildingElementVisitorManager Extract(Database database)

@@ -79,11 +79,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         results.AddRange(DoExtract(entity, visitor));
                     }
                 }
-                catch (System.Exception ex)
+                catch
                 {
                     //自定义元素可能会无法炸开，这里不进行处理
                 }
-
             }
             //正常元素
             else

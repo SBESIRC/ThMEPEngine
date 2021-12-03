@@ -1,25 +1,18 @@
-﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Linq;
 using Autodesk.AutoCAD.Geometry;
-
-using NFox.Cad;
-using Linq2Acad;
-
-using ThCADExtension;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Interface;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Utils;
+using ThMEPEngineCore.Extension;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
@@ -184,7 +177,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                 }
             });
 
-            Geos.MoveToXYPlane();
+            Geos.ProjectOntoXYPlane();
         }
 
         private ThBuildingElementVisitorManager Extract(Database database)

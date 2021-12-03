@@ -1,14 +1,13 @@
 ﻿using System.Linq;
-
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.GeojsonExtractor;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
-
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Utils;
@@ -104,7 +103,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
                 }
             });
 
-            Geos.MoveToXYPlane();
+            Geos.ProjectOntoXYPlane();
         }
 
         private ThAFASDetectionRegionExtractor BuildDetectionRegion(List<ThExtractorBase> extractors, double wallThick)

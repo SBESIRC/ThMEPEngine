@@ -16,6 +16,7 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 using ThMEPLighting.IlluminationLighting.Common;
 using ThMEPElectrical.AFAS.Data;
+using ThMEPEngineCore.Extension;
 
 namespace ThMEPLighting.IlluminationLighting.Data
 {
@@ -91,7 +92,7 @@ namespace ThMEPLighting.IlluminationLighting.Data
                 }
             });
 
-            ThIlluminationUtils.MoveToXYPlane(Geos);
+            Geos.ProjectOntoXYPlane();
         }
 
         private ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, bool referBeam)

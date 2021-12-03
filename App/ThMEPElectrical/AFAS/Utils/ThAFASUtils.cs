@@ -1,28 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
-
 using AcHelper;
 using Linq2Acad;
-using NFox.Cad;
-
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.Config;
-
-using ThMEPElectrical.FireAlarmFixLayout.Data;
-using ThMEPElectrical.FireAlarmDistance.Data;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Extension;
+using ThMEPEngineCore.IO.ExcelService;
 using ThMEPElectrical.FireAlarmArea.Data;
+using ThMEPElectrical.FireAlarmDistance.Data;
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.AFAS.Utils
 {
@@ -49,50 +44,6 @@ namespace ThMEPElectrical.AFAS.Utils
             vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
         }
 
-        public static void MoveToXYPlane(this List<ThGeometry> geos)
-        {
-            geos.ForEach(g =>
-            {
-                if (g.Boundary != null)
-                {
-                    if (g.Boundary is Polyline polyline)
-                    {
-                        if (polyline.NumberOfVertices == 0)
-                        {
-                            var a = 0;
-                        }
-                        else
-                        {
-
-
-                            var vec = new Vector3d(0, 0, -polyline.GetPoint3dAt(0).Z);
-                            var mt = Matrix3d.Displacement(vec);
-                            g.Boundary.TransformBy(mt);
-                        }
-                    }
-                    else if (g.Boundary is MPolygon mPolygon)
-                    {
-                        if (mPolygon.Shell().NumberOfVertices == 0)
-                        {
-                            var a = 0;
-                        }
-                        else
-                        {
-
-                            var vec = new Vector3d(0, 0, -1.0 * mPolygon.Shell().GetPoint3dAt(0).Z);
-                            var mt = Matrix3d.Displacement(vec);
-                            g.Boundary.TransformBy(mt);
-                        }
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-                }
-            });
-        }
-
-
         public static Point3dCollection GetFrame()
         {
             Point3dCollection pts = new Point3dCollection();
@@ -113,29 +64,29 @@ namespace ThMEPElectrical.AFAS.Utils
 
         public static Point3dCollection GetFrameBlk()
         {
-            Point3dCollection pts = new Point3dCollection();
-
-            // 获取框线
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
-            };
-            //var filter = ThSelectionFilterTool.Build(dxfNames, new string[] { ThMEPCommon.FRAME_LAYER_NAME });
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
-            {
-                return pts;
-            }
-
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                Point3dCollection pts = new Point3dCollection();
+
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return pts;
+                }
+
+
                 List<BlockReference> frameLst = new List<BlockReference>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
@@ -163,9 +114,9 @@ namespace ThMEPElectrical.AFAS.Utils
                 {
                     pts = frameL.Vertices();
                 }
-            }
 
-            return pts;
+                return pts;
+            }
         }
 
         private static List<Entity> GetBlockInfo(BlockReference blockReference)
@@ -265,7 +216,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 }
             }
 
-            geos.MoveToXYPlane();
+            geos.ProjectOntoXYPlane();
 
             return transformer;
         }
@@ -387,21 +338,15 @@ namespace ThMEPElectrical.AFAS.Utils
         private static Polyline ProcessFrame(Polyline frame)
         {
             Polyline nFrame = null;
-            var tol = 1000;
-
             Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
-            // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
             if (nFrameNormal.Area > 10)
             {
                 nFrameNormal = nFrameNormal.DPSimplify(1);
                 nFrame = nFrameNormal;
             }
-
             return nFrame;
-
         }
 
         #endregion
-
     }
 }
