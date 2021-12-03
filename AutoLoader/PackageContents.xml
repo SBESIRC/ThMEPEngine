@@ -425,6 +425,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -450,6 +451,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -475,6 +477,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
     </Components>
