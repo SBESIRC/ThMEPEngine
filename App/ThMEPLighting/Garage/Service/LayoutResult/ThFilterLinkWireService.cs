@@ -61,7 +61,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void Find(Point3d pt,List<Line> lines)
         {
             var line = lines.Last();
-            var envelop = CreatePolyline(line,pt);
+            var envelop = CreatePolyline(line,pt,ThGarageLightCommon.RepeatedPointDistance);
             var lights = QueryLights(envelop);
             if(lights.Count>0)
             {
@@ -83,11 +83,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<Tuple<Line, Point3d>>();
             Wires.OfType<Line>().ForEach(l =>
             {
-                var startFrame = CreatePolyline(l, l.StartPoint);
+                var startFrame = CreatePolyline(l, l.StartPoint,ThGarageLightCommon.RepeatedPointDistance);
                 var startObjs = Query(startFrame);
                 Remove(startObjs, l);
 
-                var endFrame = CreatePolyline(l, l.EndPoint);
+                var endFrame = CreatePolyline(l, l.EndPoint, ThGarageLightCommon.RepeatedPointDistance);
                 var endObjs = Query(endFrame);
                 Remove(endObjs, l);
 
@@ -103,17 +103,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
-        private Polyline CreatePolyline(Line line,Point3d pt)
+        private Polyline CreatePolyline(Line line,Point3d pt,double tolterance=0.0)
         {
             var vec = line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
             bool isStart = pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint);
             if(isStart)
             {
-                return CreatePolyline(line.StartPoint, vec.Negate(), BreakLength);
+                var newStartPt = line.StartPoint + vec.MultiplyBy(tolterance);
+                return CreatePolyline(newStartPt, vec.Negate(), BreakLength);
             }
             else
             {
-                return CreatePolyline(line.EndPoint, vec, BreakLength);
+                var newEndPt = line.EndPoint - vec.MultiplyBy(tolterance);
+                return CreatePolyline(newEndPt, vec, BreakLength);
             }
         }
         

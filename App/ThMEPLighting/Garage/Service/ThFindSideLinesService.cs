@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.Garage.Model;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -41,18 +43,59 @@ namespace ThMEPLighting.Garage.Service
         }
         public Dictionary<Line, Tuple<List<Line>, List<Line>>> FindSides()
         {
+            // 第一次分配
             var results = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
             FindParameter.CenterLines.ForEach(o =>
             {
                 var dir = o.LineDirection();
                 var upDir = dir.GetPerpendicularVector();
                 var downDir = upDir.Negate();
-                var upLines = FilterSides(o, upDir).Where(u=>!IsIn(u, results)).ToList();
-                var downLines = FilterSides(o, downDir).Where(d => !IsIn(d, results)).ToList();
+                var upLines = FilterSides(SideSpatialIndex,o, upDir).Where(u=>!IsIn(u, results)).ToList();
+                var downLines = FilterSides(SideSpatialIndex,o, downDir).Where(d => !IsIn(d, results)).ToList();
                 results.Add(o, Tuple.Create(upLines, downLines));
+            });
+
+            // 继续分配未分配的线
+            var assignedLines = GetAssignedSideLines(results);
+            var unAssignedLines = GetUnAssignedSideLines(assignedLines);
+            var unAssignedSpatialIndex = new ThCADCoreNTSSpatialIndex(unAssignedLines.ToCollection());
+            FindParameter.CenterLines.ForEach(o =>
+            {
+                var dir = o.LineDirection();
+                var upDir = dir.GetPerpendicularVector();
+                var downDir = upDir.Negate();
+                var extendLine = Extend(o, FindParameter.HalfWidth);
+                var upLines = FilterSides(unAssignedSpatialIndex, extendLine, upDir).Where(u => !IsIn(u, results)).ToList();
+                var downLines = FilterSides(unAssignedSpatialIndex, extendLine, downDir).Where(d => !IsIn(d, results)).ToList();
+                results[o].Item1.AddRange(upLines);
+                results[o].Item2.AddRange(downLines);
             });
             return results;
         }
+
+        private Line Extend(Line old,double dis)
+        {
+            return old.ExtendLine(dis);
+        }
+
+        private List<Line> GetAssignedSideLines(Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSides)
+        {
+            var results = new List<Line>();
+            centerSides.ForEach(o =>
+            {
+                results.AddRange(o.Value.Item1);
+                results.AddRange(o.Value.Item2);
+            });
+            return results;
+        }
+
+        private List<Line> GetUnAssignedSideLines(List<Line> assignedLines)
+        {
+            return FindParameter.SideLines
+                .Where(o => !assignedLines.Contains(o))
+                .ToList();
+        }
+
         private bool IsIn(Line line, Dictionary<Line, Tuple<List<Line>, List<Line>>> dict)
         {
             return dict.SelectMany(o =>
@@ -65,14 +108,22 @@ namespace ThMEPLighting.Garage.Service
         }
         private void FindSide()
         {
-            FindParameter.CenterLines.ForEach(o =>
-                {
-                    var lines = FilterSide(o);
-                    if(lines.Count>=2)
-                    {
-                        SideLinesDic.Add(o, lines);
-                    }
-                });
+            var sides = FindSides();
+            sides.ForEach(o =>
+            {
+                var lines = new List<Line>();
+                lines.AddRange(o.Value.Item1);
+                lines.AddRange(o.Value.Item2);
+                SideLinesDic.Add(o.Key, lines);
+            });
+            //FindParameter.CenterLines.ForEach(o =>
+            //    {
+            //        var lines = FilterSide(o);
+            //        if(lines.Count>=2)
+            //        {
+            //            SideLinesDic.Add(o, lines);
+            //        }
+            //    });
         }
         private void FindPort()
         {
@@ -102,12 +153,12 @@ namespace ThMEPLighting.Garage.Service
                 .Where(o=>!IsUsed(o))
                 .ToList();
         }
-        private List<Line> FilterSides(Line center,Vector3d vec)
+        private List<Line> FilterSides(ThCADCoreNTSSpatialIndex sideSpatialIndex, Line center,Vector3d vec)
         {
             var sp = center.StartPoint + vec.GetNormal().MultiplyBy(FindParameter.HalfWidth);
             var ep = center.EndPoint + vec.GetNormal().MultiplyBy(FindParameter.HalfWidth);
             var outline = ThDrawTool.ToRectangle(sp, ep, SideTolerance);
-            var objs = SideSpatialIndex.SelectCrossingPolygon(outline);
+            var objs = sideSpatialIndex.SelectCrossingPolygon(outline);
             return objs.Cast<Line>()
                 .Where(o => o.Length > 0.0)
                 .Where(o => center.HasCommon(o,LineCommonLowerLimitedValue))  //平行且有公共区域的线
