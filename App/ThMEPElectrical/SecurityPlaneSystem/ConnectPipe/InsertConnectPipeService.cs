@@ -1,12 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Linq2Acad;
 using ThCADExtension;
-using ThMEPElectrical.CAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
@@ -16,9 +11,10 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         {
             List<Line> reLines = new List<Line>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalSecurityPlaneDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(ThCADCommon.ElectricalSecurityPlaneDwgPath(), layerName);
-                acadDatabase.Database.ImportLinetype(ThCADCommon.ElectricalSecurityPlaneDwgPath(), lineType);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), true);
+                acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(lineType), true);
 
                 foreach (var poly in polylines)
                 {

@@ -1,12 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using Linq2Acad;
-using System;
+﻿using Linq2Acad;
+using ThCADExtension;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.CAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.ConnectPipe
 {
@@ -15,9 +10,12 @@ namespace ThMEPElectrical.ConnectPipe
         public static void InsertConnectPipe(List<Polyline> polylines)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(ThMEPCommon.ConnectPipeLayerName);
-                acadDatabase.Database.ImportLinetype(ThMEPCommon.ConnectPipeLineType);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPCommon.ConnectPipeLayerName), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPCommon.ConnectPipeLineType), false);
 
                 foreach (var poly in polylines)
                 {
@@ -31,7 +29,6 @@ namespace ThMEPElectrical.ConnectPipe
                     }
                 }
             }
-            
         }
     }
 }

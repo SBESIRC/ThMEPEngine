@@ -21,9 +21,10 @@ namespace ThMEPElectrical.AFAS.Utils
         public static void InsertBlock(List<KeyValuePair<Point3d, Vector3d>> insertPtInfo, double scale, string blkName, string layserName, bool needMove)
         {
             using (var db = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                db.Database.ImportBlock(blkName);
-                db.Database.ImportLayer(layserName);
+                db.Blocks.Import(blockDb.Blocks.ElementOrDefault(blkName), true);
+                db.Layers.Import(blockDb.Layers.ElementOrDefault(layserName), true);
 
                 foreach (var ptInfo in insertPtInfo)
                 {
@@ -50,9 +51,10 @@ namespace ThMEPElectrical.AFAS.Utils
         public static void InsertBlock(Dictionary<Point3d, double> insertPtInfo, double scale, string blkName, string layserName)
         {
             using (var db = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                db.Database.ImportBlock(blkName);
-                db.Database.ImportLayer(layserName);
+                db.Blocks.Import(blockDb.Blocks.ElementOrDefault(blkName), true);
+                db.Layers.Import(blockDb.Layers.ElementOrDefault(layserName), true);
 
                 foreach (var ptInfo in insertPtInfo)
                 {
@@ -74,9 +76,16 @@ namespace ThMEPElectrical.AFAS.Utils
         public static void prepareInsert(List<string> blkName, List<string> layerName)
         {
             using (var db = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                blkName.ForEach(x => db.Database.ImportBlock(x));
-                layerName.ForEach(x => db.Database.ImportLayer(x));
+                blkName.ForEach(x =>
+                {
+                    db.Blocks.Import(blockDb.Blocks.ElementOrDefault(x), true);
+                });
+                layerName.ForEach(x =>
+                {
+                    db.Layers.Import(blockDb.Layers.ElementOrDefault(x), true);
+                });
             }
         }
 
@@ -125,46 +134,4 @@ namespace ThMEPElectrical.AFAS.Utils
         }
 
     }
-
-
-    public static class InsertService
-    {
-        public static void ImportBlock(this Database database, string name)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-            }
-        }
-
-        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
-
-        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
-
-                LayerTableRecord layer = currentDb.Layers.Element(name, true);
-                if (layer != null)
-                {
-                    layer.UpgradeOpen();
-                    layer.IsOff = false;
-                    layer.IsFrozen = false;
-                    layer.IsLocked = false;
-                    layer.DowngradeOpen();
-                }
-            }
-        }
-    }
-
 }
