@@ -131,7 +131,6 @@
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\ShowInfo.cs" />
-    <Compile Include="AreaLayout\GridLayout\Command\THALGLTest.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\SmallDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\LargeDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />

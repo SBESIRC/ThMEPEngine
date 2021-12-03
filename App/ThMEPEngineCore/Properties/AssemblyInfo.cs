@@ -45,4 +45,3 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreExtractCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.ThMEPEngineCoreInternalCmds))]
 [assembly: CommandClass(typeof(ThMEPEngineCore.AFASRegion.ThAFASCmd))]
-[assembly: CommandClass(typeof(ThMEPEngineCore.AlarmSensorLayout.Test.TestCmd))]

@@ -33,7 +33,6 @@
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
-    <Compile Include="AlarmLayout\Test\TestCmd.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertCommon.cs" />
