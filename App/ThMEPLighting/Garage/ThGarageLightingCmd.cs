@@ -17,7 +17,7 @@ namespace ThMEPLighting.Garage
         public ThGarageLightingCmd(LightingViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
-            CommandName = "THCDZM";
+            CommandName = "THZM";
             ActionName = "地库车道照明";
         }
         public void Dispose()
