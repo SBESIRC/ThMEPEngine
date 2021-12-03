@@ -144,6 +144,7 @@
     <Compile Include="Garage\Engine\ThGarageLightingEngine.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
     <Compile Include="Garage\Service\ThDxLineDirectionTransfer.cs" />
+    <Compile Include="Garage\Service\ThLightSideLineHandler.cs" />
     <Compile Include="Garage\Service\ThMergeLightLineService.cs" />
     <Compile Include="Garage\Service\ThQueryLightWireService.cs" />
     <Compile Include="Garage\Service\ThCableTrayBuilder.cs" />

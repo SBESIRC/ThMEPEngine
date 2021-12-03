@@ -147,14 +147,7 @@ namespace ThMEPLighting.Garage
             {
                 var lines = curves.ToCollection();
                 var cleanInstance = new ThLaneLineCleanService();
-                lines = cleanInstance.Clean(lines);
-                var extendLines = new DBObjectCollection();
-                foreach (Line line in lines)
-                {
-                    extendLines.Add(line.ExtendLine(1.0));
-                }
-                lines = ThLaneLineEngine.Noding(extendLines);
-                lines = ThLaneLineEngine.CleanZeroCurves(lines);
+                lines = cleanInstance.CleanNoding(lines);
                 return lines.Cast<Line>().ToList();
             }
         }

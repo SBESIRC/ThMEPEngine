@@ -19,6 +19,7 @@ namespace ThMEPLighting.Garage.Engine
         private Tolerance AccuracyTolerance; // 精确判断精度
         private Tolerance ApproximateTolerance; // 粗略判断精度
         private double TTypeAngleTolerance = 10.0; // T型连接时，分支与主线的的夹角和90度相减的容差
+        private double ShortLinkLineLength = 100.0;
         
         /// <summary>
         /// 记录边线是1号线，还是2号线
@@ -263,13 +264,16 @@ namespace ThMEPLighting.Garage.Engine
         {
             // 创建边线
             var sideLines = ThLightSideLineCreator.Create(lines,width);
-
             //sideLines.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 5);
+
+            var handler = new ThLightSideLineHandler(ShortLinkLineLength);
+            var newSideLines = handler.Handle(sideLines.ToCollection()).OfType<Line>().ToList();
+            //newSideLines.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 5);
 
             var sideParameter = new ThFindSideLinesParameter
             {
                 CenterLines = lines,
-                SideLines = sideLines,
+                SideLines = newSideLines,
                 HalfWidth = width / 2.0
             };
 
@@ -277,7 +281,6 @@ namespace ThMEPLighting.Garage.Engine
             var instane = new ThFindSideLinesService(sideParameter);
             return instane.FindSides();
         }
-
 
         private void HandleCenterSideDict(double width)
         {
