@@ -103,7 +103,6 @@
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
-                        <Button Grid.Column="2" Name="btnRouting" Width="100" Height="25" Click="btnRouting_Click" Margin="5,5,10,5">连线</Button>
                     </StackPanel>
                 </Grid>
             </StackPanel>

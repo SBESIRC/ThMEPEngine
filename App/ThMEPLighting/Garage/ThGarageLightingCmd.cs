@@ -18,7 +18,7 @@ namespace ThMEPLighting.Garage
         {
             _UiConfigs = uiConfigs;
             CommandName = "THZM";
-            ActionName = "地库车道照明";
+            ActionName = "车道照明布置";
         }
         public void Dispose()
         {

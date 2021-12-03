@@ -134,13 +134,6 @@ namespace TianHua.Lighting.UI
             Active.Document.Window.Focus();
 #endif
         }
-        private void btnRouting_Click(object sender, RoutedEventArgs e)
-        {
-            using (var cmd = new LightingRouteCableCommand(UIConfigs))
-            {
-                cmd.Execute();
-            }
-        }      
 
         private void btnReGen(object sender, RoutedEventArgs e)
         {
