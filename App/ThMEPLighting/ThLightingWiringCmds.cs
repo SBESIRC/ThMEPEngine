@@ -8,7 +8,7 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THZMLX", CommandFlags.Modal)]
         public void ThLightingRoute()
         {
-            using (var cmd = new ThLigtingRouteComand())
+            using (var cmd = new ThLightingRouteComand())
             {
                 cmd.Execute();
             }
@@ -17,7 +17,7 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THHZLX", CommandFlags.Modal)]
         public void ThAFASRoute()
         {
-            using (var cmd = new ThFireAlarmRouteCommand())
+            using (var cmd = new ThAFASRouteCommand())
             {
                 cmd.Execute();
             }

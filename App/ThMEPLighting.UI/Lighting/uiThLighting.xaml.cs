@@ -1,25 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using AcHelper;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using AcHelper;
-using ThControlLibraryWPF.CustomControl;
-using ThMEPLighting.Lighting.ViewModels;
-using ThMEPLighting.Lighting.Commands;
-using ThMEPEngineCore.Command;
-using System.Threading;
-using ThMEPLighting.Garage;
 using AcHelper.Commands;
+using System.Windows.Controls;
+using ThControlLibraryWPF.CustomControl;
+using ThMEPLighting.Garage;
+using ThMEPLighting.Command;
+using ThMEPLighting.Lighting.ViewModels;
 
 namespace TianHua.Lighting.UI
 {
@@ -109,9 +96,9 @@ namespace TianHua.Lighting.UI
         {
             #region ---------- 后期根据UI调整再删除 ----------
             var button = sender as Button;
-            if(button.Name == "btnLayout")
+            if (button.Name == "btnLayout")
             {
-                UIConfigs.LightingLayoutType = LightingLayoutTypeEnum.IlluminationLighting; 
+                UIConfigs.LightingLayoutType = LightingLayoutTypeEnum.IlluminationLighting;
             }
             else if (button.Name == "btnCdzmLayout")
             {
@@ -119,7 +106,7 @@ namespace TianHua.Lighting.UI
             }
             #endregion
 
-            using (var cmd = new LightingLayoutCommand(UIConfigs))
+            using (var cmd = new ThLightingLayoutCommand(UIConfigs))
             {
                 FocusToCAD();
                 cmd.Execute();

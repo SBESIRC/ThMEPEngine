@@ -2,12 +2,12 @@
 using ThMEPEngineCore.Command;
 using ThMEPLighting.Lighting.ViewModels;
 
-namespace ThMEPLighting.Lighting.Commands
+namespace ThMEPLighting.Command
 {
-    public class LightingLayoutCommand : ThMEPBaseCommand, IDisposable
+    public class ThLightingLayoutCommand : ThMEPBaseCommand, IDisposable
     {
         readonly LightingViewModel _UiConfigs = null;
-        public LightingLayoutCommand(LightingViewModel uiConfigs)
+        public ThLightingLayoutCommand(LightingViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
             CommandName = "THZM";
@@ -16,7 +16,7 @@ namespace ThMEPLighting.Lighting.Commands
 
         public void Dispose()
         {
-
+            //
         }
 
         public override void SubExecute()

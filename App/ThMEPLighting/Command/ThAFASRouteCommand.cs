@@ -5,16 +5,24 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPLighting.Command
 {
-    public class ThFireAlarmRouteCommand : IAcadCommand, IDisposable
+    public class ThAFASRouteCommand : ThMEPBaseCommand, IDisposable
     {
-        public void Dispose()
+        public ThAFASRouteCommand()
         {
+            CommandName = "THHZLX";
+            ActionName = "火灾报警连线";
         }
 
-        public void Execute()
+        public void Dispose()
+        {
+            //
+        }
+
+        public override void SubExecute()
         {
 #if (ACAD2016 || ACAD2018)
             BlockConfigSrervice configSrervice = new BlockConfigSrervice();

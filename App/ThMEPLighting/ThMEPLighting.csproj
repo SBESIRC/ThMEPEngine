@@ -25,8 +25,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command\ThFireAlarmRouteCommand.cs" />
-    <Compile Include="Command\ThLigtingRouteComand.cs" />
+    <Compile Include="Command\ThAFASRouteCommand.cs" />
+    <Compile Include="Command\ThLightingRouteComand.cs" />
     <Compile Include="Common\EnumParkingSource.cs" />
     <Compile Include="Common\ThEnumBlockScale.cs" />
     <Compile Include="DSFEL\DSFELConfigCommon.cs" />
@@ -250,7 +250,7 @@
     <Compile Include="Common\ThGarageLightCommon.cs" />
     <Compile Include="Common\ThGarageLightUtils.cs" />
     <Compile Include="IlluminationLighting\ThIlluminationCommon.cs" />
-    <Compile Include="Lighting\LightingCommand.cs" />
+    <Compile Include="Command\ThLightingLayoutCommand.cs" />
     <Compile Include="Lighting\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />

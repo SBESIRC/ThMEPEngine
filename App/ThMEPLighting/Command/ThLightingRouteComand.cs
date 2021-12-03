@@ -5,16 +5,25 @@ using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.ConnectWiring;
 using ThMEPEngineCore.ConnectWiring.Service;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPLighting.Command
 {
-    public class ThLigtingRouteComand : IAcadCommand, IDisposable
+    public class ThLightingRouteComand : ThMEPBaseCommand, IDisposable
     {
-        public void Dispose()
+        public ThLightingRouteComand()
         {
+            CommandName = "THZMLX";
+            ActionName = "照明连线";
         }
 
-        public void Execute()
+
+        public void Dispose()
+        {
+            //
+        }
+
+        public override void SubExecute()
         {
 #if (ACAD2016 || ACAD2018)
             BlockConfigSrervice configSrervice = new BlockConfigSrervice();
