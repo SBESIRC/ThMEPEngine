@@ -69,16 +69,16 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 }
 
                 // 提取车位外包框
-                //var parkingStallService = new ThSprinklerConnectParkingStallService();
-                //parkingStallService.BlockNameDict = BlockNameDict;
-                //var doubleStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
-                //if(doubleStall.Count==0)
-                //{
-                //    return;
-                //}
-                //StallPresent(doubleStall);
+                var parkingStallService = new ThSprinklerConnectParkingStallService();
+                parkingStallService.BlockNameDict = BlockNameDict;
+                var doubleStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
+                if (doubleStall.Count == 0)
+                {
+                    return;
+                }
+                StallPresent(doubleStall);
 
-                var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
+                //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
 
                 // 打印车位外包框
                 //parkingStall.ForEach(o =>
