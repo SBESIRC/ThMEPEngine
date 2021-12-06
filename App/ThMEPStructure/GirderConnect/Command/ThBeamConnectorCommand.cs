@@ -1,26 +1,20 @@
 ﻿using System;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using NFox.Cad;
+using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using AcHelper;
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using ThMEPEngineCore.Service;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
-using NetTopologySuite.Operation.OverlayNG;
-using NetTopologySuite.Geometries;
-using ThMEPEngineCore.Command;
-using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -39,6 +33,7 @@ namespace ThMEPStructure.GirderConnect.Command
 
         public override void SubExecute()
         {
+#if (ACAD2016 || ACAD2018)
             using (var acdb = AcadDatabase.Active())
             using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
@@ -65,13 +60,13 @@ namespace ThMEPStructure.GirderConnect.Command
                 var shearwallGroupService = new ThGroupService(mainBuildings, shearwalls);
                 var shearwallGroupDict = shearwallGroupService.Groups;
                 var outsideShearwall = shearwallGroupService.OutsideObjs;
-                
+
                 Point3dCollection clumnPts = new Point3dCollection();
                 var outlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
 
                 //处理算法输入
-                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, 
+                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
                     outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
 
                 //计算
@@ -80,6 +75,9 @@ namespace ThMEPStructure.GirderConnect.Command
                 //处理算法输出
                 MainBeamPostProcess.MPostProcess(dicTuples);
             }
+#else
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
+#endif
         }
 
         /// <summary>

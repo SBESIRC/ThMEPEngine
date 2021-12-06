@@ -331,6 +331,36 @@
             </Commands>
         </ComponentEntry>
     </Components>
+    <!--Assembly App, ThMEPStructure, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THSCZL" Global="THSCZL" />
+                <Command Local="THSCCL" Global="THSCCL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THSCZL" Global="THSCZL" />
+                <Command Local="THSCCL" Global="THSCCL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THSCZL" Global="THSCZL" />
+                <Command Local="THSCCL" Global="THSCCL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
     <!--Assembly App, Electrical.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
