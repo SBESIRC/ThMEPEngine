@@ -14,9 +14,8 @@ namespace ThMEPElectrical.ConnectPipe
             {
                 acadDatabase.Layers.Import(
                     blockDb.Layers.ElementOrDefault(ThMEPCommon.ConnectPipeLayerName), false);
-                acadDatabase.Layers.Import(
-                    blockDb.Layers.ElementOrDefault(ThMEPCommon.ConnectPipeLineType), false);
-
+                acadDatabase.Linetypes.Import(
+                    blockDb.Linetypes.ElementOrDefault(ThMEPCommon.ConnectPipeLineType), false);
                 foreach (var poly in polylines)
                 {
                     for (int i = 0; i < poly.NumberOfVertices - 1; i++)
