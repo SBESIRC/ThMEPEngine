@@ -67,7 +67,7 @@ namespace ThMEPLighting.Garage.Service
             var main = new Line(StartPt, EndPt);
             branchLines.ForEach(o =>
             {
-                var inters = ThGeometryTool.IntersectPts(main, o, Intersect.ExtendBoth, 5.0);
+                var inters = main.IntersectPts(o, Intersect.ExtendBoth, 5.0);
                 if (inters.Count > 0)
                 {
                     splitPoints.Add(inters[0]);

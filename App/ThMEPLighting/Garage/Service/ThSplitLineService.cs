@@ -1,52 +1,64 @@
-﻿using System;
-using System.Linq;
-using ThCADCore.NTS;
+﻿using System.Linq;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service
 {
-    public class ThSplitLineService
+    /// <summary>
+    /// 分割线
+    /// </summary>
+    public static class ThSplitLineService
     {
-        private List<Line> SplitLines { get; set; }
-        private Line Current { get; set; }
-        private List<Line> Lines { get; set; }
-        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private ThSplitLineService(List<Line> lines,Line current)
+        public static Dictionary<Line, List<Line>> Split(this List<Line> originLines)
         {
-            Current = current;
-            Lines = lines;
-            SplitLines = new List<Line>();
-            SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(lines);
+            var results = new Dictionary<Line, List<Line>>();
+            originLines.ForEach(o =>
+            {
+                var splitLines = o.Split(originLines);
+                if (splitLines.Count == 0)
+                {
+                    var lines = new List<Line>();
+                    lines.Add(new Line(o.StartPoint, o.EndPoint));
+                    results.Add(o, lines);
+                }
+                else
+                {
+                    results.Add(o, splitLines);
+                }
+            });
+            return results;
         }
-        public static List<Line> Split(List<Line> lines, Line current)
+
+        /// <summary>
+        /// 求当前线被传入的线段分割线段
+        /// </summary>
+        /// <param name="current"></param>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static List<Line> Split(this Line current,List<Line> lines)
         {
-            var instance = new ThSplitLineService(lines, current);
-            instance.Split();
-            return instance.SplitLines;
-        }
-        private void Split()
-        {
-            Polyline outline = ThDrawTool.ToOutline(Current.StartPoint,Current.EndPoint,
-             ThGarageLightCommon.BranchPortToMainDistance * 2);
-            var objs = SpatialIndex.SelectCrossingPolygon(outline);
-            objs.Remove(Current);
+            var splitLines = new List<Line>();
+            var spatialIndex = ThGarageLightUtils.BuildSpatialIndex(lines);
+            Polyline outline = ThDrawTool.ToOutline(current.StartPoint, current.EndPoint,
+            ThGarageLightCommon.BranchPortToMainDistance * 2);
+            var objs = spatialIndex.SelectCrossingPolygon(outline);
+            objs.Remove(current);
             var filterLines =
-                Lines
+                lines
                 .Where(o => objs.Contains(o))
                 .Where(o => !ThGeometryTool.IsCollinearEx(
-                    Current.StartPoint, Current.EndPoint,
+                    current.StartPoint, current.EndPoint,
                     o.StartPoint, o.EndPoint))
-                .Where(o => !Current.IsLink(o, ThGarageLightCommon.RepeatedPointDistance))
+                .Where(o => !current.IsLink(o, ThGarageLightCommon.RepeatedPointDistance))
                 .ToList();
             var branchPts = new List<Point3d>();
             filterLines.ForEach(o =>
             {
-                var pts = BuildBranchPt(Current, o);
+                var pts = BuildBranchPt(current, o);
                 if (pts.Count > 0)
                 {
                     branchPts.Add(pts[0]);
@@ -54,11 +66,18 @@ namespace ThMEPLighting.Garage.Service
             });            
             if (branchPts.Count > 0)
             {
-                SplitLines = SplitLine(Current, branchPts);
+                splitLines = Split(current, branchPts);
             }
+            return splitLines;
         }
-
-        private List<Line> SplitLine(Line origin, List<Point3d> splitPts, double closeDis = 10.0)
+        /// <summary>
+        /// 一根线被多个点分割
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="splitPts"></param>
+        /// <param name="closeDis"></param>
+        /// <returns></returns>
+        public static List<Line> Split(this Line origin, List<Point3d> splitPts, double closeDis = 10.0)
         {
             var splitLines = new List<Line>();
             splitPts = splitPts
@@ -86,13 +105,11 @@ namespace ThMEPLighting.Garage.Service
             }
             return splitLines.Where(o=>o.Length>1.0).ToList();
         }
-        private Point3dCollection BuildBranchPt(Line mainEdge, Line secondaryEdge)
+        private static Point3dCollection BuildBranchPt(Line mainEdge, Line secondaryEdge)
         {
-            var pts = new Point3dCollection();
             var mainLine = mainEdge.ExtendLine(1.0);
             var secondaryLine = secondaryEdge.ExtendLine(1.0);
-            mainLine.IntersectWith(secondaryLine, Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
-            return pts;
+            return mainLine.IntersectWithEx(secondaryLine, Intersect.ExtendBoth);
         }
     }
 }

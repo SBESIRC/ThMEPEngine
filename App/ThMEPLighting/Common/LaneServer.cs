@@ -95,27 +95,27 @@ namespace ThMEPLighting.Common
                 List<Line> tempLine = new List<Line>();
                 OrderedMergedLane.Add(tempLine);
 
-                for (int j = 0; j < LightEdgeService.Links[i].Path.Count; j++)
+                for (int j = 0; j < LightEdgeService.Links[i].Edges.Count; j++)
                 {
                     if (j == 0)
                     {
-                        if (LightEdgeService.Links[i].Path[j].Edge.StartPoint != LightEdgeService.Links[i].Start)
+                        if (LightEdgeService.Links[i].Edges[j].Edge.StartPoint != LightEdgeService.Links[i].Start)
                         {
-                            LightEdgeService.Links[i].Path[j].Edge.ReverseCurve();
+                            LightEdgeService.Links[i].Edges[j].Edge.ReverseCurve();
 
 
                         }
-                        tempLine.Add(LightEdgeService.Links[i].Path[j].Edge);
+                        tempLine.Add(LightEdgeService.Links[i].Edges[j].Edge);
 
                     }
                     else
                     {
-                        if (LightEdgeService.Links[i].Path[j].Edge.StartPoint != LightEdgeService.Links[i].Path[j - 1].Edge.EndPoint)
+                        if (LightEdgeService.Links[i].Edges[j].Edge.StartPoint != LightEdgeService.Links[i].Edges[j - 1].Edge.EndPoint)
                         {
-                            LightEdgeService.Links[i].Path[j].Edge.ReverseCurve();
+                            LightEdgeService.Links[i].Edges[j].Edge.ReverseCurve();
                         }
-                        var nowEdge = (LightEdgeService.Links[i].Path[j].Edge.EndPoint - LightEdgeService.Links[i].Path[j].Edge.StartPoint).GetNormal();
-                        var PreEdge = (LightEdgeService.Links[i].Path[j - 1].Edge.EndPoint - LightEdgeService.Links[i].Path[j - 1].Edge.StartPoint).GetNormal();
+                        var nowEdge = (LightEdgeService.Links[i].Edges[j].Edge.EndPoint - LightEdgeService.Links[i].Edges[j].Edge.StartPoint).GetNormal();
+                        var PreEdge = (LightEdgeService.Links[i].Edges[j - 1].Edge.EndPoint - LightEdgeService.Links[i].Edges[j - 1].Edge.StartPoint).GetNormal();
                         bool bAngle = Math.Abs(nowEdge.DotProduct(PreEdge)) / (nowEdge.Length * PreEdge.Length) < Math.Abs(Math.Cos(45 * Math.PI / 180));
                         if (bAngle)
                         {
@@ -124,7 +124,7 @@ namespace ThMEPLighting.Common
                             OrderedMergedLane.Add(tempLine);
                         }
 
-                        tempLine.Add(LightEdgeService.Links[i].Path[j].Edge);
+                        tempLine.Add(LightEdgeService.Links[i].Edges[j].Edge);
                     }
                 }
             }

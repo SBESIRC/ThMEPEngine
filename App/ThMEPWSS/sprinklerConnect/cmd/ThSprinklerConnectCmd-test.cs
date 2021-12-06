@@ -72,7 +72,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var parkingStallService = new ThSprinklerConnectParkingStallService();
                 parkingStallService.BlockNameDict = BlockNameDict;
                 var doubleStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
-                if(doubleStall.Count==0)
+                if (doubleStall.Count == 0)
                 {
                     return;
                 }

@@ -3,7 +3,6 @@ using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
@@ -44,14 +43,16 @@ namespace ThMEPLighting.Common
 
             return newPoly;
         }
-        public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
+        public static DBObjectCollection SpatialFilter(this Entity border, DBObjectCollection dbObjs,double tesslateLength=10.0)
         {
-            var pts = border.Vertices();
+            var oldLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
+            ThCADCoreNTSService.Instance.ArcTessellationLength = tesslateLength;
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs)
             {
                 AllowDuplicate = true,
             };
-            return spatialIndex.SelectCrossingPolygon(pts);
+            ThCADCoreNTSService.Instance.ArcTessellationLength = oldLength;
+            return spatialIndex.SelectCrossingPolygon(border);
         }
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)
         {
@@ -133,38 +134,37 @@ namespace ThMEPLighting.Common
         {
             return pts.Where(o => pt.DistanceTo(o) <= tolerance).Any();
         }
-        public static bool HasCommon(this Line first, Line second, double tolerance = 1.0)
+        public static bool HasCommon(this Line first, Line second, double lowerLimit = 1.0)
         {
             if (first.Length == 0.0 || second.Length == 0.0)
             {
                 return false;
             }
-            if (ThGeometryTool.IsParallelToEx(
-                first.StartPoint.GetVectorTo(first.EndPoint),
-                second.StartPoint.GetVectorTo(second.EndPoint)))
+            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint);
+            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint);
+            if (firstVec.IsParallelToEx(secondVec))
             {
-                var newSp = ThGeometryTool.GetProjectPtOnLine(first.StartPoint, second.StartPoint, second.EndPoint);
-                var newEp = ThGeometryTool.GetProjectPtOnLine(first.EndPoint, second.StartPoint, second.EndPoint);
-                var pts = new List<Point3d>() { newSp, newEp, second.StartPoint, second.EndPoint };
-                var maxItem = pts.GetCollinearMaxPts();
-                var sum = first.Length + second.Length;
-                if (Math.Abs(maxItem.Item1.DistanceTo(maxItem.Item2) - sum) <= tolerance)
-                {
-                    return false;
-                }
-                else if (maxItem.Item1.DistanceTo(maxItem.Item2) < sum)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                var overlapDis = first.OverlapDis(second);
+                return overlapDis >= lowerLimit;
             }
             else
             {
                 return false;
             }
+        }
+        public static double OverlapDis(this Line first, Line second)
+        {
+            if (first.Length == 0.0 || second.Length == 0.0)
+            {
+                return 0.0;
+            }
+            var newSp = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var newEp = first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+            var pts = new List<Point3d> { newSp, newEp, second.StartPoint, second.EndPoint };
+            var maxPair =  pts.GetCollinearMaxPts();
+            var maxLength = maxPair.Item1.DistanceTo(maxPair.Item2);
+            var sum = newSp.DistanceTo(newEp)+ second.Length;
+            return maxLength >= sum ? 0.0 : sum - maxLength;
         }
         /// <summary>
         /// 获取灯编号的文字角度
@@ -216,31 +216,20 @@ namespace ThMEPLighting.Common
                     first.StartPoint, first.EndPoint,
                     second.StartPoint, second.EndPoint);
         }
-        public static Point3d GetNextLinkPt(Line line, Point3d start)
-        {
-            Point3d lineSp = line.StartPoint;
-            Point3d lineEp = line.EndPoint;
-            return start.DistanceTo(lineSp) < start.DistanceTo(lineEp) ?
-                lineEp : lineSp;
-        }
-        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
 
-        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="start">start和lineSp或lineEp是想等或相近的</param>
+        /// <param name="lineSp"></param>
+        /// <param name="lineEp"></param>
+        /// <returns>返回较远的点</returns>
+        public static Point3d GetNextLinkPt(this Point3d start, Point3d lineSp, Point3d lineEp)
         {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
-            }
+            bool closeToStart = start.DistanceTo(lineSp) < start.DistanceTo(lineEp);
+            return closeToStart ? lineEp : lineSp;
         }
-
+        
         public static List<Line> DistinctLines(List<Line> lines)
         {
             List<Line> resLines = new List<Line>();
@@ -260,16 +249,16 @@ namespace ThMEPLighting.Common
 
             return resLines;
         }
-        public static bool IsPointOnLines(Point3d pt, Line line, double tol = 5)
+        public static bool IsPointOnCurve(this Point3d pt, Curve curve, double tol = 1e-6)
         {
-            var closet = line.GetClosestPointTo(pt, false);
+            var closet = curve.GetClosestPointTo(pt, false);
             if (closet.DistanceTo(pt) < tol)
             {
                 return true;
             }
             return false;
         }
-        public static Line NormalizeLaneLine(Line line, double tolerance = 1.0)
+        public static Line NormalizeLaneLine(this Line line, double tolerance = 1.0)
         {
             var newLine = new Line(line.StartPoint, line.EndPoint);
             if (Math.Abs(line.StartPoint.Y - line.EndPoint.Y) <= tolerance)
@@ -317,19 +306,33 @@ namespace ThMEPLighting.Common
             sb.Append(@"\d+$");
             return Regex.IsMatch(text, sb.ToString());
         }
-        public static bool IsGarageLight(Entity e)
+
+        public static int GetNumberIndex(this string number)
         {
-            return (e is BlockReference) && (e.Layer == "E-LITE-LITE");
+            var match = Regex.Match(number, @"\d*$");
+            return string.IsNullOrEmpty(match.Value) ? -1 : int.Parse(match.Value);
         }
-        public static bool IsLightCableCarrierCenterline(Entity e)
+
+        public static bool IsLightCableCarrierCenterline(Entity e,List<string> layers)
         {
-            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.DxCenterLineLayerName);
+            return (e is Line || e is Polyline) && layers.Contains(e.Layer);
+        }
+
+        public static bool IsLightBlockName(this string blkName)
+        {
+            return blkName.ToUpper() == ThGarageLightCommon.LaneLineLightBlockName;
         }
 
         public static bool IsNonLightCableCarrierCenterline(Entity e)
         {
             return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.FdxCenterLineLayerName);
         }
+
+        public static bool IsSingleRowCabelTrunkingCenterline(Entity e)
+        {
+            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.SingleRowCenterLineLayerName);
+        }
+
         public static List<Line> FilterDistributedEdges(List<Line> edges, List<Line> dxLines)
         {
             var results = new List<Line>();

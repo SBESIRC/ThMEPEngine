@@ -5,105 +5,31 @@ using System.IO;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
-using ThMEPElectrical.FireAlarm;
-using ThMEPElectrical.FireAlarm.Service;
-using ThMEPElectrical.FireAlarmFixLayout.Data;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
-using ThMEPElectrical.FireAlarmSmokeHeat;
-using ThMEPElectrical.FireAlarmSmokeHeat.Data;
-using ThMEPElectrical.FireAlarmSmokeHeat.Service;
-using ThMEPElectrical.FireAlarmCombustibleGas;
-
+using ThMEPElectrical.FireAlarmArea;
+using ThMEPElectrical.FireAlarmArea.Command;
+using ThMEPElectrical.FireAlarmArea.Service;
+using ThMEPElectrical.FireAlarmArea.Data;
 
 #if (ACAD2016 || ACAD2018)
 using ThMEPElectrical.FireAlarmDistance;
 using ThMEPElectrical.FireAlarmDistance.Data;
 #endif
 
-namespace ThMEPElectrical.FireAlarm
+namespace ThMEPElectrical.AFAS
 {
     public class ThAFASCmds
     {
-        //[CommandMethod("TIANHUACAD", "THAFAS", CommandFlags.Modal)]
-        //public void THAFAS()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        var result = Active.Editor.GetEntity("\n请选择对象");
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-
-        //        var frame = acadDatabase.Element<Polyline>(result.ObjectId);
-        //        var factory = new ThAFASDistanceDataSetFactory();
-        //        var ds = factory.Create(acadDatabase.Database, frame.Vertices());
-
-        //        //
-        //        var partId = ds.Container.Where(o => o.Properties["Category"].ToString() == "FireApart").First().Properties["Id"].ToString();
-        //        ds.Container.RemoveAll(o =>
-        //        {
-        //            if (o.Properties.ContainsKey("ParentId"))
-        //            {
-        //                if (o.Properties["ParentId"] == null)
-        //                {
-        //                    return true;
-        //                }
-        //                if (o.Properties["ParentId"].ToString() != partId && o.Properties["Category"].ToString() != "FireApart")
-        //                {
-        //                    return true;
-        //                }
-        //            }
-        //            return false;
-        //        });
-
-        //        ThGeoOutput.Output(ds.Container, Active.DocumentDirectory, Active.DocumentName);
-        //        var geojson = ThGeoOutput.Output(ds.Container);
-
-        //        ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
-        //        ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
-        //        {
-        //            StepDistance = 20000,
-        //            MountMode = ThAFASPlacementMountModeMgd.Wall,
-        //        };
-
-        //        var features = Export2NTSFeatures(engine.Place(geojson, context));
-
-        //        var dxfNames = new string[]
-        //        {
-        //            RXClass.GetClass(typeof(Polyline)).DxfName,
-        //        };
-        //        var filter = ThSelectionFilterTool.Build(dxfNames);
-        //        var psr = Active.Editor.GetSelection(filter);
-        //        if (psr.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-
-        //        var objs = new DBObjectCollection();
-        //        foreach (var obj in psr.Value.GetObjectIds())
-        //        {
-        //            objs.Add(acadDatabase.Element<Polyline>(obj));
-        //        }
-        //        objs = objs.BuildArea();
-
-        //        var geos = objs
-        //            .OfType<Entity>()
-        //            .Select(o => new ThGeometry() { Boundary = o })
-        //            .ToList();
-        //        ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
-        //    }
-        //}
-
         [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Modal)]
         public void THFASmokeNoUI()
         {
-            using (var cmd = new ThFireAlarmSmokeHeatCmd(false))
+            using (var cmd = new ThAFASSmokeCmd(false))
             {
                 cmd.Execute();
             }
@@ -113,7 +39,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFASmoke", CommandFlags.Modal)]
         public void THFASmoke()
         {
-            using (var cmd = new ThFireAlarmSmokeHeatCmd(true))
+            using (var cmd = new ThAFASSmokeCmd(true))
             {
                 cmd.Execute();
             }
@@ -123,7 +49,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFADisplayNoUI", CommandFlags.Modal)]
         public void THFADisplayNoUI()
         {
-            using (var cmd = new ThFireAlarmDisplayDeviceLayoutCmd(false))
+            using (var cmd = new ThAFASDisplayDeviceLayoutCmd(false))
             {
                 cmd.Execute();
             }
@@ -132,7 +58,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFADisplay", CommandFlags.Modal)]
         public void THFADisplay()
         {
-            using (var cmd = new ThFireAlarmDisplayDeviceLayoutCmd(true))
+            using (var cmd = new ThAFASDisplayDeviceLayoutCmd(true))
             {
                 cmd.Execute();
             }
@@ -141,7 +67,7 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFAMonitorNoUI", CommandFlags.Modal)]
         public void THFAMonitorNoUI()
         {
-            using (var cmd = new ThFireAlarmFireProofMonitorLayoutCmd(false))
+            using (var cmd = new ThAFASFireProofMonitorLayoutCmd(false))
             {
                 cmd.Execute();
             }
@@ -150,66 +76,53 @@ namespace ThMEPElectrical.FireAlarm
         [CommandMethod("TIANHUACAD", "THFAMonitor", CommandFlags.Modal)]
         public void THFAMonitor()
         {
-            using (var cmd = new ThFireAlarmFireProofMonitorLayoutCmd(true))
+            using (var cmd = new ThAFASFireProofMonitorLayoutCmd(true))
             {
                 cmd.Execute();
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThFATelNoUI", CommandFlags.Modal)]
-        public void ThFATelNoUI()
+        [CommandMethod("TIANHUACAD", "THFATelNoUI", CommandFlags.Modal)]
+        public void THFATelNoUI()
         {
-            using (var cmd = new ThFireAlarmFireTelLayoutCmd(false))
+            using (var cmd = new ThAFASFireTelLayoutCmd(false))
             {
                 cmd.Execute();
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThFATel", CommandFlags.Modal)]
-        public void ThFATel()
+        [CommandMethod("TIANHUACAD", "THFATel", CommandFlags.Modal)]
+        public void THFATel()
         {
-            using (var cmd = new ThFireAlarmFireTelLayoutCmd(true))
+            using (var cmd = new ThAFASFireTelLayoutCmd(true))
             {
                 cmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THFAGasNoUI", CommandFlags.Modal)]
-        public void ThFAGasNoUI()
+        public void THFAGasNoUI()
         {
-            using (var cmd = new ThFireAlarmGasCmd(false))
+            using (var cmd = new ThAFASGasCmd(false))
             {
                 cmd.Execute();
             }
         }
 
         [CommandMethod("TIANHUACAD", "THFAGas", CommandFlags.Modal)]
-        public void ThFAGas()
+        public void THFAGas()
         {
-            using (var cmd = new ThFireAlarmGasCmd(true))
+            using (var cmd = new ThAFASGasCmd(true))
             {
                 cmd.Execute();
             }
 
         }
 
-        [CommandMethod("TIANHUACAD", "ThFABroadcastNoUI", CommandFlags.Modal)]
-        public void ThFABroadcastNoUI()
+        [CommandMethod("TIANHUACAD", "THFABroadcastNoUI", CommandFlags.Modal)]
+        public void THFABroadcastNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaBroadcastCmd(false))
-            {
-                cmd.Execute();
-            }
-#else
-
-#endif
-        }
-
-        [CommandMethod("TIANHUACAD", "ThFABroadcast", CommandFlags.Modal)]
-        public void ThFABroadcast()
-        {
-#if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaBroadcastCmd(true))
+            using (var cmd = new ThAFASBroadcastCmd(false))
             {
                 cmd.Execute();
             }
@@ -218,11 +131,11 @@ namespace ThMEPElectrical.FireAlarm
 #endif
         }
 
-        [CommandMethod("TIANHUACAD", "ThFAManualAlarmNoUI", CommandFlags.Modal)]
-        public void ThFAManualAlarmNoUI()
+        [CommandMethod("TIANHUACAD", "THFABroadcast", CommandFlags.Modal)]
+        public void THFABroadcast()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaManualAlarmCmd (false))
+            using (var cmd = new ThAFASBroadcastCmd(true))
             {
                 cmd.Execute();
             }
@@ -231,11 +144,24 @@ namespace ThMEPElectrical.FireAlarm
 #endif
         }
 
-        [CommandMethod("TIANHUACAD", "ThFAManualAlarm", CommandFlags.Modal)]
-        public void ThFAManualAlarm()
+        [CommandMethod("TIANHUACAD", "THFAManualAlarmNoUI", CommandFlags.Modal)]
+        public void THFAManualAlarmNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThFaManualAlarmCmd(true))
+            using (var cmd = new ThAFASManualAlarmCmd(false))
+            {
+                cmd.Execute();
+            }
+#else
+
+#endif
+        }
+
+        [CommandMethod("TIANHUACAD", "THFAManualAlarm", CommandFlags.Modal)]
+        public void THFAManualAlarm()
+        {
+#if (ACAD2016 || ACAD2018)
+            using (var cmd = new ThAFASManualAlarmCmd(true))
             {
                 cmd.Execute();
             }
@@ -254,39 +180,48 @@ namespace ThMEPElectrical.FireAlarm
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var scale = 100;
+                var referBeam = true;
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Broadcast_Ceiling, ThFaCommon.BlkName_Broadcast_Wall };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
                 //画框，提数据，转数据
-                var framePts = ThFireAlarmUtils.GetFrame();
+                var framePts = ThAFASUtils.GetFrame();
                 if (framePts.Count == 0)
                 {
                     return;
                 }
-                var factory = new ThAFASDistanceDataSetFactory();
-                var ds = factory.Create(acadDatabase.Database, framePts);
 
-                var data = new ThAFASDistanceDataSet(ds.Container);
+                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, referBeam, true);
+
+                var data = new ThAFASDistanceDataSet(geos);
+                data.ExtendEquipment(cleanBlkName, scale);
+                data.FilterBeam();
+                data.print();
+
                 var room = data.GetRoom();
 
-                ///debug
-                var roomLable = data.GetRoomGeom();
-                for (int i = 0; i < roomLable.Count; i++)
-                {
-                    var pl = roomLable[i].Boundary as Polyline;
-                    var pt = pl.GetCentroidPoint();
-                    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
-                }
-                ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
+                /////debug
+                //var roomLable = data.GetRoomGeom();
+                //for (int i = 0; i < roomLable.Count; i++)
+                //{
+                //    var pl = roomLable[i].Boundary as Polyline;
+                //    var pt = pl.GetCentroidPoint();
+                //    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
+                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
+                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
+                //}
+
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
 #endif
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThFaAreaData", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFaAreaData", CommandFlags.Modal)]
         public void ThFaAreaData()
         {
             var extractBlkList = ThFaCommon.BlkNameList;
@@ -294,24 +229,27 @@ namespace ThMEPElectrical.FireAlarm
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var pts = ThFireAlarmUtils.GetFrame();
+            var pts = ThAFASUtils.GetFrame();
             if (pts.Count == 0)
             {
                 return;
             }
-            var bBean = true;
+            var referBeam = true;
             var wallThick = 100;
+            var needDetective = true;
+
             var theta = 0;
             var floorHight = 2;
             var layoutType = ThFaSmokeCommon.layoutType.smoke;
 
-            var geos = ThFireAlarmUtils.WriteSmokeData(pts, extractBlkList, bBean, wallThick, true);
-            if (geos.Count == 0)
-            {
-                return;
-            }
+            var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, referBeam, wallThick, needDetective);
 
-            var dataQuery = new ThSmokeDataQueryService(geos, cleanBlkName, avoidBlkName);
+            var fileInfo = new FileInfo(Active.Document.Name);
+            var path = fileInfo.Directory.FullName;
+            ThGeoOutput.Output(geos, path, fileInfo.Name);
+
+
+            var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
 
             DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
             DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
@@ -319,9 +257,10 @@ namespace ThMEPElectrical.FireAlarm
             DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
             DrawUtils.ShowGeometry(dataQuery.Holes.Select(x => x.Boundary).ToList(), "l0hole", 140);
             DrawUtils.ShowGeometry(dataQuery.DetectArea.Select(x => x.Boundary).ToList(), "l0DetectArea", 96);
+
             //洞,必须先做找到框线
             dataQuery.AnalysisHoles();
-            var roomType = ThFaAreaLayoutRoomTypeService.GetAreaSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
+            var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
             foreach (var frame in dataQuery.FrameList)
             {
@@ -336,78 +275,78 @@ namespace ThMEPElectrical.FireAlarm
                 DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 1, 0), string.Format("r:{0}", radius), "l0radius", 25, 25, 200);
                 DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 2, 0), string.Format("bIsAisleArea:{0}", bIsAisleArea), "l0Area", 25, 25, 200);
             }
-
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "THFAFixData", CommandFlags.Modal)]
         public void THFAFixData()
         {
+            var extractBlkList = ThFaCommon.BlkNameList;
+
             //把Cad图纸数据写出到Geojson File中
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var frame = ThFireAlarmUtils.GetFrame();
-                if (frame.Count == 0)
+                var pts = ThAFASUtils.GetFrame();
+                if (pts.Count == 0)
                 {
                     return;
                 }
 
-                var datasetFactory = new ThFaFixLayoutDataSetFactory();
-                var dataset = datasetFactory.Create(acadDatabase.Database, frame);
+                var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
+
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
-                ThGeoOutput.Output(dataset.Container, path, fileInfo.Name + DateTime.Now.ToShortTimeString().Replace(':', '-'));
+                ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
         }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        public void ThCleanDebugLayer()
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                ThMEPElectrical.ThFaCleanService.ClearDrawing();
-            }
-        }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
+        //public void ThCleanDebugLayer()
+        //{
+        //    // 调试按钮关闭且图层不是保护半径有效图层
+        //    var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
+        //    if (debugSwitch)
+        //    {
+        //        ThFaCleanService.ClearDrawing();
+        //    }
+        //}
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThFaBuffer", CommandFlags.Modal)]
-        public void ThFaBuffer()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
-                var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
-                var a = bufferService.Buffer(obj, 1000);
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "THFaBuffer", CommandFlags.Modal)]
+        //public void ThFaBuffer()
+        //{
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        var result = Active.Editor.GetEntity("\n请选择对象");
+        //        if (result.Status != PromptStatus.OK)
+        //        {
+        //            return;
+        //        }
+        //        var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
+        //        var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
+        //        var a = bufferService.Buffer(obj, 1000);
 
-                DrawUtils.ShowGeometry(a, "l0buffer");
+        //        DrawUtils.ShowGeometry(a, "l0buffer");
 
-            }
+        //    }
 
 
 
-        }
+        //}
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "ThGetOffsetCurveTest", CommandFlags.Modal)]
-        public void ThGetOffsetCurveTest()
-        {
-            var frame = ThFireAlarmUtils.SelectFrame();
-            var dir = 1;
-            if (frame.IsCCW() == false)
-            {
-                dir = -1;
-            }
-            var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
-            DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
-        }
-
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "THGetOffsetCurveTest", CommandFlags.Modal)]
+        //public void ThGetOffsetCurveTest()
+        //{
+        //    var frame = ThAFASUtils.SelectFrame();
+        //    var dir = 1;
+        //    if (frame.IsCCW() == false)
+        //    {
+        //        dir = -1;
+        //    }
+        //    var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
+        //    DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
+        //}
     }
 }

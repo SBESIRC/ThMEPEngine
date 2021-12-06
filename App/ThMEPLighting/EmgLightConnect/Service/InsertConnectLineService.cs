@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Colors;
 using Linq2Acad;
 using ThMEPLighting.EmgLight.Common;
+using ThCADExtension;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
@@ -15,10 +16,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
         public static void InsertConnectLine(List<Polyline> polylines)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.EmgLightConnectLayerName);
-                acadDatabase.Database.ImportLinetype(ThMEPLightingCommon.EmgLightConnectLineType);
-
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.EmgLightConnectLayerName), true);
+                acadDatabase.Linetypes.Import(
+                    blockDb.Linetypes.ElementOrDefault(ThMEPLightingCommon.EmgLightConnectLineType), true);
                 if (polylines != null && polylines.Count > 0)
                 {
                     foreach (var poly in polylines)

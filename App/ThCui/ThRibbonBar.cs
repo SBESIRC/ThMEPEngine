@@ -200,7 +200,7 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("火灾报警",
                     "天华火灾报警",
-                    "THHZBJ2",
+                    "THHZBJ",
                     "天华火灾报警",
                     "IDI_THCAD_THHZBJ_SMALL",
                     "IDI_THCAD_THHZBJ_LARGE",
@@ -293,13 +293,13 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("ELIGHTING", "照明系统");
             var row = panel.AddNewRibbonRow();
 
-            // 地库车道照明
-            row.AddNewButton("地库车道照明",
-            "天华车道照明",
-            "THCDZM",
-            "基于提取出的车道中心线，一键布置车道线槽灯",
-            "IDI_THCAD_THCDZM_SMALL",
-            "IDI_THCAD_THCDZM_LARGE",
+            // 照明
+            row.AddNewButton("照明",
+            "天华照明",
+            "THZM",
+            "天华照明",
+            "IDI_THCAD_THZM_SMALL",
+            "IDI_THCAD_THZM_LARGE",
             RibbonButtonStyle.LargeWithText);
 
             // 地库车位照明

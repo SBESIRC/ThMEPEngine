@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
@@ -8,7 +9,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
 
-namespace ThMEPLighting.Garage.Service
+
+namespace ThMEPLighting.Garage.Service.Print
 {
     /// <summary>
     /// for print
@@ -28,7 +30,7 @@ namespace ThMEPLighting.Garage.Service
                     circle.ColorIndex = colorIndex;
                     objIds.Add(acadDatabase.ModelSpace.Add(circle));
 
-                    o.Path.ForEach(p =>
+                    o.Edges.ForEach(p =>
                     {
                         var edge = new Line(p.Edge.StartPoint, p.Edge.EndPoint);
                         edge.ColorIndex = colorIndex;
@@ -110,6 +112,25 @@ namespace ThMEPLighting.Garage.Service
                 var groupName = Guid.NewGuid().ToString();
                 GroupTools.CreateGroup(db.Database, groupName, objIds);
             }
+        }
+        public static void Print(this List<ThLightEdge> edges, short colorindex)
+        {
+            edges.Select(o => o.Edge).Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, colorindex);
+        }
+        public static void Print(List<Entity> ents, short colorindex)
+        {
+            ents.CreateGroup(AcHelper.Active.Database, colorindex);
+        }
+        public static void Print(this ThLightEdge edge,short colorIndex)
+        {
+            var curves = new List<Curve>();
+            curves.Add(edge.Edge.Clone() as Line);
+            edge.LightNodes.ForEach(e =>
+            {
+                var circle = new Circle(e.Position,Vector3d.ZAxis,50);
+                curves.Add(circle);
+            });
+            CreateGroup(curves, colorIndex);
         }
     }
 }

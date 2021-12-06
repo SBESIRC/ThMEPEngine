@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThMEPElectrical.CAD;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
@@ -31,11 +32,16 @@ namespace ThMEPLighting.FEI.PrintEntity
         public void InsertConnectPipe(EvacuationPathModel pathModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingFEIDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
-                acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME), false);
+                acadDatabase.Layers.Import(
+                    blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME), false);
 
                 var path = SetPathInfo(pathModel.line);
                 path.ColorIndex = 256;

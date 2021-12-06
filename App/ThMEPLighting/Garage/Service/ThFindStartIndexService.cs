@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPLighting.Garage.Worker;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Service.Number;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -17,8 +17,10 @@ namespace ThMEPLighting.Garage.Service
         private ThLightGraphService LightGraph { get; set; }
         private ThLinkPath SinglePath { get; set; }
         private int LoopNumber { get; set; }
+        private int DefaultNumber { get; set; }
         private bool IsSingleRowNumber { get; set; }
-        private ThFindStartIndexService(ThLightGraphService lightGraph, ThLinkPath singlePath,int loopNumber,bool isSingleRowNumber)
+        private ThFindStartIndexService(ThLightGraphService lightGraph, ThLinkPath singlePath,
+            int loopNumber,bool isSingleRowNumber,int defaultNumber)
         {
             LightGraph = lightGraph;
             SinglePath = singlePath;
@@ -26,6 +28,7 @@ namespace ThMEPLighting.Garage.Service
             FindIndex = -1;
             IsPreFind = null;
             LoopNumber = loopNumber;
+            DefaultNumber = defaultNumber;
             IsSingleRowNumber = isSingleRowNumber;
         }
         public bool IsFind
@@ -36,9 +39,9 @@ namespace ThMEPLighting.Garage.Service
             }
         }
         public static ThFindStartIndexService Find(ThLightGraphService lightGraph, 
-            ThLinkPath singlePath, int loopNumber, bool isSingleRowNumber)
+            ThLinkPath singlePath, int loopNumber, bool isSingleRowNumber,int defaultNumber)
         {
-            var instance = new ThFindStartIndexService(lightGraph, singlePath, loopNumber, isSingleRowNumber);
+            var instance = new ThFindStartIndexService(lightGraph, singlePath, loopNumber, isSingleRowNumber, defaultNumber);
             instance.Find();
             return instance;
         }
@@ -46,7 +49,7 @@ namespace ThMEPLighting.Garage.Service
         {
             if(SinglePath.IsMain)
             {
-                StartIndex = 1;
+                StartIndex = DefaultNumber;
             }
             else
             {
@@ -57,7 +60,7 @@ namespace ThMEPLighting.Garage.Service
         {
             var results = LightGraph.Links.Where(m =>
             {
-                return m.Path.Where(n => n.Id == SinglePath.PreEdge.Id).Any();
+                return m.Edges.Where(n => n.Id == SinglePath.PreEdge.Id).Any();
             });
             if (results.Count() > 0)
             {
@@ -67,11 +70,11 @@ namespace ThMEPLighting.Garage.Service
         }
         private void FindPreLinkPath(ThLinkPath preLinkPath, ThLightEdge preEdge,Point3d originPt)
         {
-            int i = preLinkPath.Path.IndexOf(preEdge);          
+            int i = preLinkPath.Edges.IndexOf(preEdge);          
             Point3d endPt = originPt;
             while (i>=0)
             {
-                ThLightEdge currentEdge = preLinkPath.Path[i--];
+                ThLightEdge currentEdge = preLinkPath.Edges[i--];
                 int preIndex = FindPreIndex(currentEdge, endPt);
                 if (preIndex != -1)
                 {
@@ -79,11 +82,11 @@ namespace ThMEPLighting.Garage.Service
                     IsPreFind = true;
                     if (IsSingleRowNumber)
                     {
-                        StartIndex = ThSingleRowLightNumber.NextIndex(LoopNumber, preIndex);
+                        StartIndex = ThSingleRowLightNumber.NextIndex(LoopNumber, preIndex, DefaultNumber);
                     }
                     else
                     {
-                        StartIndex = ThDoubleRowLightNumber.NextIndex(LoopNumber, preIndex);
+                        StartIndex = ThDoubleRowLightNumber.NextIndex(LoopNumber, preIndex, DefaultNumber);
                     }
                     return;
                 }
@@ -95,12 +98,12 @@ namespace ThMEPLighting.Garage.Service
         }
         private void FindNextLinkPath(ThLinkPath preLinkPath, ThLightEdge preEdge, Point3d originPt)
         {
-            int index = preLinkPath.Path.IndexOf(preEdge);
+            int index = preLinkPath.Edges.IndexOf(preEdge);
             int j = index + 1;
             Point3d startPt = originPt;
-            while (j < preLinkPath.Path.Count)
+            while (j < preLinkPath.Edges.Count)
             {
-                ThLightEdge currentEdge = preLinkPath.Path[j++];
+                ThLightEdge currentEdge = preLinkPath.Edges[j++];
                 int nextIndex = FindNextIndex(currentEdge, startPt);
                 if (nextIndex != -1)
                 {
@@ -110,11 +113,11 @@ namespace ThMEPLighting.Garage.Service
                     {
                         if (IsSingleRowNumber)
                         {
-                            StartIndex = ThSingleRowLightNumber.PreIndex(LoopNumber, nextIndex);
+                            StartIndex = ThSingleRowLightNumber.PreIndex(LoopNumber, nextIndex, StartIndex);
                         }
                         else
                         {
-                            StartIndex = ThDoubleRowLightNumber.PreIndex(LoopNumber, nextIndex);
+                            StartIndex = ThDoubleRowLightNumber.PreIndex(LoopNumber, nextIndex, StartIndex);
                         }
                     }
                     else

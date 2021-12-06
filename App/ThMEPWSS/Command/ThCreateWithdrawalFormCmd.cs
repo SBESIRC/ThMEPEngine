@@ -14,6 +14,7 @@ using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe;
@@ -32,7 +33,7 @@ namespace ThMEPWSS.Command
         public string StrPumpSum;//泵总数
         public string StrPumpConfig;//水泵配置
     }
-    public class ThCreateWithdrawalFormCmd : IAcadCommand, IDisposable
+    public class ThCreateWithdrawalFormCmd : ThMEPBaseCommand, IDisposable
     {
         WaterWellPumpConfigInfo configInfo;//配置信息
         public void Dispose()
@@ -51,6 +52,8 @@ namespace ThMEPWSS.Command
         public ThCreateWithdrawalFormCmd(WaterwellPumpParamsViewModel vm)
         {
             _vm = vm;
+            CommandName = "THSJSB";
+            ActionName = "生成提资表";
             configInfo = vm.GetConfigInfo();
         }
         public void ImportBlockFile()
@@ -106,7 +109,7 @@ namespace ThMEPWSS.Command
             }
             return deepWellPump;
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {

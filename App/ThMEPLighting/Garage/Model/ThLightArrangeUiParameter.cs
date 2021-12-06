@@ -19,7 +19,7 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 线槽间距
         /// </summary>
-        public double RacywaySpace { get; set; }
+        public double DoubleRowOffsetDis { get; set; }
         /// <summary>
         /// 灯间距
         /// </summary>

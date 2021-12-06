@@ -38,6 +38,16 @@ namespace ThMEPLighting.Garage.Service
                 return searchObjs.Cast<Line>().ToList();
             }
         }
+        public List<Line> Query(Point3d pt, double envelop)
+        {
+            if(envelop<=1e-6)
+            {
+                envelop = 1.0;
+            }
+            Polyline envelope = ThDrawTool.CreateSquare(pt, envelop);
+            var searchObjs = SpatialIndex.SelectCrossingPolygon(envelope);
+            return searchObjs.Cast<Line>().ToList();
+        }
         public List<Line> QueryUnparallellines(Point3d startPt,Point3d endPt,double width=1.0)
         {
             var outline = ThDrawTool.ToOutline(startPt, endPt, width);
@@ -53,6 +63,27 @@ namespace ThMEPLighting.Garage.Service
                 .Where(o => o.Length > 0.0)
                 .Where(o => ThGeometryTool.IsCollinearEx(startPt, endPt, o.StartPoint, o.EndPoint))
                 .ToList();
+        }
+        public List<Point3d> QueryZeroDegreePorts(double envelop)
+        {
+            var results = new List<Point3d>();
+            Lines.ForEach(l =>
+            {
+                var startLinks = Query(l.StartPoint, envelop);
+                startLinks.Remove(l);
+                if(startLinks.Count==0)
+                {
+                    results.Add(l.StartPoint);
+                }
+
+                var endLinks = Query(l.EndPoint, envelop);
+                endLinks.Remove(l);
+                if (endLinks.Count == 0)
+                {
+                    results.Add(l.EndPoint);
+                }
+            });
+            return results;
         }
     }
 }

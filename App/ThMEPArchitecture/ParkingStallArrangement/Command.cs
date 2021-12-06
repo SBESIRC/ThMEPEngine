@@ -14,6 +14,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 
@@ -74,38 +75,69 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
             var rst = new List<Chromosome>();
-            //try
-            //{
-                rst = geneAlgorithm.Run();
-                
-            //}
-            //catch(Exception ex)
-            //{
+            var histories = new List<Chromosome>();
+            try
+            {
+                rst = geneAlgorithm.Run(histories);
+            }
+            catch (Exception ex)
+            {
 
-            //}
+            }
 
             var solution = rst.First();
-            layoutPara.Set(solution.Genome);
-
-            //
-            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            histories.Add(rst.First());
+            for (int k = 0; k < histories.Count; k++)
             {
-                int index = layoutPara.AreaNumber[j];
-                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
-                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
-                bool valid = p.Validate();
-                if (valid)
+                layoutPara.Set(histories[k].Genome);
+                var layerNames = "solutions" + k.ToString();
+                using (AcadDatabase adb = AcadDatabase.Active())
                 {
-                    p.Initialize();
-                    p.Display();
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                    }
+                    catch { }
+                }
+
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                {
+                    int index = layoutPara.AreaNumber[j];
+                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
+                    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+                    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                    ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+                    bool valid = p.Validate();
+                    if (valid)
+                    {
+                        p.Initialize();
+                        p.Display(layerNames, 30);
+                    }
                 }
             }
-            Draw.DrawSeg(solution);
-            ;
+
+            //layoutPara.Set(solution.Genome);
+
+
+            //for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            //{
+            //    int index = layoutPara.AreaNumber[j];
+            //    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+            //    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
+            //    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+            //    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+            //    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+            //    ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+            //    bool valid = p.Validate();
+            //    if (valid)
+            //    {
+            //        p.Initialize();
+            //        p.Display();
+            //    }
+            //}
+            //Draw.DrawSeg(solution);
         }
 
         private static Point3dCollection SelectAreas()

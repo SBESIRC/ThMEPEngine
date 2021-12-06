@@ -18,13 +18,27 @@ namespace ThCADCore.NTS
             Clipper = polygon.ToNTSPolygon();
         }
 
+        public ThCADCoreNTSGeometryClipper(MPolygon mPolygon)
+        {
+            Clipper = mPolygon.ToNTSPolygon();
+        }
+
         public static DBObjectCollection Clip(AcPolygon polygon, Curve curve, bool inverted = false)
         {
             var clipper = new ThCADCoreNTSGeometryClipper(polygon);
             return clipper.Clip(curve, inverted);
         }
-
+        public static DBObjectCollection Clip(MPolygon polygon, Curve curve, bool inverted = false)
+        {
+            var clipper = new ThCADCoreNTSGeometryClipper(polygon);
+            return clipper.Clip(curve, inverted);
+        }
         public static DBObjectCollection Clip(AcPolygon polygon, DBObjectCollection curves, bool inverted = false)
+        {
+            var clipper = new ThCADCoreNTSGeometryClipper(polygon);
+            return clipper.Clip(curves, inverted);
+        }
+        public static DBObjectCollection Clip(MPolygon polygon, DBObjectCollection curves, bool inverted = false)
         {
             var clipper = new ThCADCoreNTSGeometryClipper(polygon);
             return clipper.Clip(curves, inverted);

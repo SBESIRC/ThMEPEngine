@@ -196,7 +196,7 @@ panels:
     name: "ELIGHTING"
     title: "照明系统"
     items:
-        - text: "地库车道照明"
+        - text: "照明"
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "地库车位照明"
           attributes: { "IsVisible": true, "IsEnabled": true }

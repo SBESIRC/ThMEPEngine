@@ -131,11 +131,9 @@
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\ShowInfo.cs" />
-    <Compile Include="AreaLayout\GridLayout\Command\THALGLTest.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\SmallDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\LargeDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />
-    <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
@@ -165,6 +163,7 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
+    <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
@@ -703,7 +702,6 @@
     <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="Temp\ThWindowExtractor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
-    <Compile Include="ThMEPEngineCoreCGALCmds.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreExtractCmds.cs" />
     <Compile Include="ThMEPEngineCoreGeCmds.cs" />

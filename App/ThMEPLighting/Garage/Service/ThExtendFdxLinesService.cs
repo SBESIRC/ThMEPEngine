@@ -5,7 +5,6 @@ using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
@@ -15,37 +14,39 @@ namespace ThMEPLighting.Garage.Service
     /// </summary>
     public class ThExtendFdxLinesService
     {
-        private List<Line> Results { get; set; }
-        private List<Line> FdxLines { get; set; }
-        private List<ThWireOffsetData> WireOffsetDatas { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private ThExtendFdxLinesService(
-            List<Line> fdxLines, 
-            List<ThWireOffsetData> wireOffsetDatas)
+        private ThCADCoreNTSSpatialIndex SideSpatialIndex { get; set; }
+        private Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; }
+        public ThExtendFdxLinesService(Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts)
         {
-            FdxLines = fdxLines;
-            WireOffsetDatas = wireOffsetDatas;
-            Results = new List<Line>();
-            //过滤掉中心线中含非灯线的集合
-            var centerDxLines = WireOffsetDatas.Where(o => !FdxLines.IsContains(o.Center)).ToList(); 
+            CenterSideDicts = centerSideDicts;
             SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(
-                WireOffsetDatas.Select(o => o.Center).ToList());
+                CenterSideDicts.Select(o => o.Key).ToList());
         }
-        public static List<Line> Extend(List<Line> fdxLines,List<ThWireOffsetData> wireOffsetDatas)
+        public List<Line> Extend(List<Line> fdxLines)
         {
-            var instance = new ThExtendFdxLinesService(fdxLines, wireOffsetDatas);
-            instance.Extend();
-            return instance.Results;
-        }
-        private void Extend()
-        {
-            FdxLines.ForEach(o =>
+            var results = new List<Line>();
+            fdxLines.ForEach(o =>
             {
                 var fdxLine = new Line(o.StartPoint,o.EndPoint);
                 Extend(fdxLine);
-                Results.Add(new Line(fdxLine.StartPoint, fdxLine.EndPoint));
+                results.Add(new Line(fdxLine.StartPoint, fdxLine.EndPoint));
             });
+            return results;
         }
+
+        public List<Line> Shorten(List<Line> fdxLines)
+        {
+            var results = new List<Line>();
+            fdxLines.ForEach(o =>
+            {
+                var fdxLine = new Line(o.StartPoint, o.EndPoint);
+                Shorten(fdxLine);
+                results.Add(new Line(fdxLine.StartPoint, fdxLine.EndPoint));
+            });
+            return results;
+        }
+
         private void Extend(Line fdxLine)
         {
             Point3d sp = fdxLine.StartPoint;
@@ -65,31 +66,116 @@ namespace ThMEPLighting.Garage.Service
             {
                 return;
             }
-            var wires = WireOffsetDatas.Where(o => linkLines.Contains(o.Center)).ToList();
-            if (wires.Count == 1)
+            if (linkLines.Count == 1)
             {
-                ThLinkElbowService.Extend(fdxLine, wires[0].First, wires[0].Second);
+                if(IsCenterHasBothSides(linkLines[0]))
+                {
+                    Extend(fdxLine, linkLines[0]);
+                }
             }
-            else if (wires.Count == 2)
+            else if (linkLines.Count == 2)
             {
                 if (ThGeometryTool.IsCollinearEx(
-                    wires[0].Center.StartPoint,
-                    wires[0].Center.EndPoint,
-                    wires[1].Center.StartPoint,
-                    wires[1].Center.EndPoint))
+                    linkLines[0].StartPoint,
+                    linkLines[0].EndPoint,
+                    linkLines[1].StartPoint,
+                    linkLines[1].EndPoint))
                 {
-                    ThLinkElbowService.Extend(fdxLine, wires[0].First, wires[0].Second);
+                    if(IsCenterHasBothSides(linkLines[0]))
+                    {
+                        Extend(fdxLine, linkLines[0]);
+                    }
+                    else if(IsCenterHasBothSides(linkLines[1]))
+                    {
+                        Extend(fdxLine, linkLines[1]);
+                    }
                 }
                 else
                 {
                     throw new NotSupportedException();
                 }
             }
-            else if (wires.Count() > 2)
+            else if (linkLines.Count > 2)
             {
                 throw new NotSupportedException();
             }
         }
+
+        private void Shorten(Line fdxLine)
+        {
+            Point3d sp = fdxLine.StartPoint;
+            Point3d ep = fdxLine.EndPoint;
+            Shorten(fdxLine, sp);
+            Shorten(fdxLine, ep);
+        }
+        private void Shorten(Line fdxLine, Point3d pt)
+        {
+            var linkLines = SearchLines(pt, 5.0);
+            linkLines = linkLines
+                .Where(o => !ThGeometryTool.IsCollinearEx(
+                  fdxLine.StartPoint, fdxLine.EndPoint, o.StartPoint, o.EndPoint))
+                .Where(o => IsClosed(fdxLine, o))
+                .ToList();
+            if (linkLines.Count == 0)
+            {
+                return;
+            }
+            if (linkLines.Count == 1)
+            {
+                if (IsCenterHasBothSides(linkLines[0]))
+                {
+                    Shorten(fdxLine, linkLines[0]);
+                }
+            }
+            else if (linkLines.Count == 2)
+            {
+                if (ThGeometryTool.IsCollinearEx(
+                    linkLines[0].StartPoint,
+                    linkLines[0].EndPoint,
+                    linkLines[1].StartPoint,
+                    linkLines[1].EndPoint))
+                {
+                    if (IsCenterHasBothSides(linkLines[0]))
+                    {
+                        Shorten(fdxLine, linkLines[0]);
+                    }
+                    else if (IsCenterHasBothSides(linkLines[1]))
+                    {
+                        Shorten(fdxLine, linkLines[1]);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            else if (linkLines.Count > 2)
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+
+        private void Extend(Line fdx, Line center)
+        {
+            var firstSides = CenterSideDicts[center].Item1;
+            var secondSides = CenterSideDicts[center].Item2;
+            ThLinkElbowService.Extend(fdx, firstSides[0], secondSides[0]);
+        }
+
+        private void Shorten(Line fdx, Line center)
+        {
+            var firstSides = CenterSideDicts[center].Item1;
+            var secondSides = CenterSideDicts[center].Item2;
+            ThLinkElbowService.Shorten(fdx, firstSides[0], secondSides[0]);
+        }
+
+        private bool IsCenterHasBothSides(Line center)
+        {
+            return CenterSideDicts[center].Item1.Count > 0 &&
+                   CenterSideDicts[center].Item2.Count > 0;
+        }
+
         private List<Line> SearchLines(Point3d portPt, double length)
         {
             Polyline envelope = ThDrawTool.CreateSquare(portPt, length);

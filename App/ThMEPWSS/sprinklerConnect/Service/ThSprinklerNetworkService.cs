@@ -177,8 +177,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="groupList"></param>
         /// <param name="pts"></param>
         /// <param name="lengthTol"></param>
-        public static void AddSinglePTToGroup(List<Line> dtSeg, List<KeyValuePair<double, List<Line>>> groupList, List<Point3d> pts, double lengthTol)
+        public static void AddSinglePTToGroup(List<KeyValuePair<double, List<Line>>> groupList, List<Point3d> pts, double lengthTol)
         {
+            var lineList = new List<Line>();
+            groupList.ForEach(o => lineList.AddRange(o.Value));
+
             var angleTol = 1;
             var newAddedline = new List<Line>();
             for (int i = 0; i < pts.Count; i++)
@@ -191,43 +194,45 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var newLine = new Line(pt, nearPts[j]);
 
                     var n = 0;
-                    for (; n < dtSeg.Count; n++)
+                    for (; n < lineList.Count; n++)
                     {
-                        var angleChecker = Math.Abs(dtSeg[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
+                        var angleChecker = Math.Abs(lineList[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
                         // 如果存在两条线段overlap，则退出循环
                         if(angleChecker 
-                            && newLine.DistanceTo(dtSeg[n].StartPoint, false) < 1.0 
-                            && newLine.DistanceTo(dtSeg[n].EndPoint, false) < 1.0)
+                            && newLine.DistanceTo(lineList[n].StartPoint, false) < 1.0 
+                            && newLine.DistanceTo(lineList[n].EndPoint, false) < 1.0)
                         {
                             break;
                         }
                     }
 
                     // 当dtLines中没有重合线时
-                    if (n == dtSeg.Count)
+                    if (n == lineList.Count)
                     {
-                        var m = 0;
-                        for (; m < newAddedline.Count; m++)
-                        {
-                            var angleChecker = Math.Abs(newAddedline[m].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
-                            // 如果存在两条线段overlap，且新线短于旧线，则进行替换
-                            if (angleChecker
-                                && newAddedline[m].DistanceTo(newLine.StartPoint, false) < 1.0
-                                && newAddedline[m].DistanceTo(newLine.EndPoint, false) < 1.0)
-                            {
-                                // 新生成的线短于原线，则进行替换
-                                if(newAddedline[m].Length - newLine.Length > 1.0)
-                                {
-                                    newAddedline[m] = newLine;
-                                }
-                                break;
-                            }
-                        }
+                        //var m = 0;
+                        //for (; m < newAddedline.Count; m++)
+                        //{
+                        //    var angleChecker = Math.Abs(newAddedline[m].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
+                        //    // 如果存在两条线段overlap，且新线短于旧线，则进行替换
+                        //    if (angleChecker
+                        //        && newAddedline[m].DistanceTo(newLine.StartPoint, false) < 1.0
+                        //        && newAddedline[m].DistanceTo(newLine.EndPoint, false) < 1.0)
+                        //    {
+                        //        // 新生成的线短于原线，则进行替换
+                        //        if(newAddedline[m].Length - newLine.Length > 1.0)
+                        //        {
+                        //            newAddedline[m] = newLine;
+                        //        }
+                        //        break;
+                        //    }
+                        //}
 
                         // 添加新线
-                        if (m == newAddedline.Count && AddLineToGroup(newLine, ref groupList, angleTol))
-                        {
+                        //if (m == newAddedline.Count && AddLineToGroup(newLine, ref groupList, angleTol))
+                        if (AddLineToGroup(newLine, ref groupList, angleTol))
+                            {
                             newAddedline.Add(newLine);
+                            lineList.Add(newLine);
                         }
                     }
                 }
@@ -240,13 +245,16 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="dtSeg"></param>
         /// <param name="groupList"></param>
         /// <param name="lengthTol"></param>
-        public static void AddShortLineToGroup(List<Line> dtSeg, List<KeyValuePair<double, List<Line>>> groupList, 
+        public static void AddShortLineToGroup(List<KeyValuePair<double, List<Line>>> groupList, 
             List<Point3d> pts, List<Line> subMainPipe, double lengthTol)
         {
             if (subMainPipe.Count == 0)
             {
                 return;
             }
+
+            var lineList = new List<Line>();
+            groupList.ForEach(o => lineList.AddRange(o.Value));
 
             var angleTol = 1;
             for (int i = 0; i < pts.Count; i++)
@@ -258,22 +266,23 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var newLine = new Line(pts[i], closePt);
                         var reduceLine = newLine.ExtendLine(-10.0);
                         var n = 0;
-                        for (; n < dtSeg.Count; n++)
+                        for (; n < lineList.Count; n++)
                         {
-                            var angleChecker = Math.Abs(dtSeg[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
+                            var angleChecker = Math.Abs(lineList[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
                             // 如果存在两条线段overlap，则退出循环
                             if (angleChecker
-                                && (dtSeg[n].DistanceTo(reduceLine.StartPoint, false) < 1.0
-                                || dtSeg[n].DistanceTo(reduceLine.EndPoint, false) < 1.0))
+                                && (lineList[n].DistanceTo(reduceLine.StartPoint, false) < 1.0
+                                || lineList[n].DistanceTo(reduceLine.EndPoint, false) < 1.0))
                             {
                                 break;
                             }
                         }
 
                         // 当dtLines中没有重合线时
-                        if (n == dtSeg.Count)
+                        if (n == lineList.Count)
                         {
                             AddLineToGroup(LineExtend(newLine), ref groupList, angleTol);
+                            lineList.Add(newLine);
                         }
                     });
                 }
@@ -597,7 +606,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="tol"></param>
         /// <param name="closePt"></param>
         /// <returns></returns>
-        private static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList)
+        public  static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList)
         {
             ptList = new List<Point3d>();
             for (int i = 0; i < subMainPipe.Count; i++)
@@ -614,6 +623,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
             }
 
+            ptList = ptList.OrderBy(closePt => closePt.DistanceTo(pt)).ToList();
             if (ptList.Count > 0)
             {
                 return true;

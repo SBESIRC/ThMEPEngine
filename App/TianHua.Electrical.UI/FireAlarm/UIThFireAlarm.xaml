@@ -1,0 +1,169 @@
+﻿<Window x:Class="TianHua.Electrical.UI.FireAlarm.UIThFireAlarm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Electrical.UI.FireAlarm"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+             SizeToContent="Height"
+             ResizeMode="NoResize"
+             mc:Ignorable="d"
+             WindowStyle="None"
+             Width="270">
+    <Window.Resources>
+        <ResourceDictionary>
+            <local:BeamConverter x:Key="BeamConverter"/>
+            <local:LayoutConverter x:Key="LayoutConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <!--标题栏-->
+        <Grid Grid.Row=" 0" x:Name="TitleBar" MouseMove="TitleBar_MouseMove" Background="#FF555555" Height="30">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="8*"></ColumnDefinition>
+                <ColumnDefinition Width="2*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal" Grid.Column="0">
+                <Image Source="pack://application:,,,/ThControlLibraryWPF;Component/Images/CADIcon.png" Margin="10,5,5,5"/>
+                <TextBlock Text="火灾报警平面布置" Foreground="#FFF1F1F1" FontSize="15" Margin="5"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Grid.Column="1" HorizontalAlignment="Right" >
+                <cus:ImageButton IsTabStop="True" Focusable="True" 
+                             TabIndex="0"
+                             x:Name="Setting" Width="20" Height="20"
+                             Margin="0,0,5,0" 
+                             ImageTextLocation="ImageOnly"
+                             Background="Transparent"
+                             NormalImage="pack://application:,,,/ThControlLibraryWPF;Component/Images/SettingIcon.png"
+                             ImageHeight="20" ImageWidth="20"
+                             BorderThickness="0"
+                             MouseOverBackground="Red"
+                             Click="Setting_Click">
+                </cus:ImageButton>
+                <Button x:Name="btnClose" Width="20" Height="20" Focusable="False" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="关闭窗体" Click="btnClose_Click">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Grid x:Name="grid" Background="Transparent" Focusable="False">
+                                <Path x:Name="path1" Width="12" Height="12" Fill="#fff" Data="M1,0 L6,5 L11,0 L12,1 L7,6 L12,11 L11,12 L6,7 L1,12 L0,11 L5,6 L0,1 z" VerticalAlignment="Center" HorizontalAlignment="Center" ></Path>
+                            </Grid>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="true">
+                                    <Setter TargetName="grid" Property="Background" Value="Red"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
+        <!---->
+        <Grid Grid.Row="1" x:Name="ContentGird" Margin=" 10 10 10 10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+
+            <!--比例行-->
+            <StackPanel Grid.Row="0"  Grid.Column="0">
+                <Label  Content ="绘图比例"  />
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="1">
+                <ComboBox  SelectedItem="{Binding ScaleItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding ScaleListItems,Mode=OneWay,NotifyOnSourceUpdated=True}">
+
+                </ComboBox>
+            </StackPanel>
+            <!---->
+
+            <!--应用场景-->
+            <!--<StackPanel Grid.Row="1" Grid.ColumnSpan="2">
+                <Label Content="选择应用场景"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <RadioButton GroupName="rbScene" Content="单体场景" />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <RadioButton GroupName="rbScene" Content="车库场景" />
+            </StackPanel>-->
+            <!---->
+
+            <!--布置要求-->
+            <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
+                <Label Content="布置要求"/>
+            </StackPanel>
+            <StackPanel Grid.Row="4" Grid.Column="0">
+                <RadioButton GroupName="rbBeam" Content="考虑梁" 
+                             IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=1}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="4" Grid.Column="1">
+                <RadioButton GroupName="rbBeam" Content="不考虑梁" 
+                             IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=0}"/>
+            </StackPanel>
+            <!---->
+
+            <!--布置内容-->
+            <StackPanel Grid.Row="5" Grid.ColumnSpan="2">
+                <Label Content="请选择需要布置内容"/>
+            </StackPanel>
+            <StackPanel Grid.Row="6" Grid.Column="0">
+                <RadioButton GroupName="rbFunction" Content="烟感温感" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=0}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="6" Grid.Column="1">
+                <RadioButton GroupName="rbFunction" Content="可燃气体" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=4}"/>
+
+            </StackPanel>
+            <StackPanel Grid.Row="7" Grid.Column="0">
+                <RadioButton GroupName="rbFunction" Content="消防广播"
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=1}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="7" Grid.Column="1">
+                <RadioButton GroupName="rbFunction" Content="手报声光" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=5}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="8" Grid.Column="0">
+                <RadioButton GroupName="rbFunction" Content="楼层显示" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=2}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="8" Grid.Column="1">
+                <RadioButton GroupName="rbFunction" Content="防火门监控" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=6}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="9" Grid.Column="0">
+                <RadioButton GroupName="rbFunction" Content="消防电话" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=3}"/>
+            </StackPanel>
+            <!---->
+
+            <!--布置按钮-->
+            <StackPanel Grid.Row="10" Grid.Column="1"  Grid.ColumnSpan="2">
+                <cus:ImageButton IsTabStop="True" Focusable="True" 
+                             TabIndex="0" Content="布置" 
+                             x:Name="btnLayout" 
+                             ImageTextLocation="TextOnly"
+                             Click="btnLayout_Click">
+                </cus:ImageButton>
+            </StackPanel>
+            <!---->
+        </Grid>
+
+    </Grid>
+</Window>

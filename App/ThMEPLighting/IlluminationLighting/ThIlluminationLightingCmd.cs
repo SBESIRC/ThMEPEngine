@@ -40,8 +40,8 @@ namespace ThMEPLighting.IlluminationLighting
         public IlluminationLightingCmd(LightingViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
-            CommandName = "IlluminationLightingLayout";
-            ActionName = "布置";
+            CommandName = "THZM";
+            ActionName = "照明灯具布置";
             setInfo();
         }
 

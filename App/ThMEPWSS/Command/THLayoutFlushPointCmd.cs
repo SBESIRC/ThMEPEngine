@@ -1,11 +1,11 @@
 ﻿using System;
-using NFox.Cad;
 using AcHelper;
-using AcHelper.Commands;
+using NFox.Cad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPWSS.ViewModel;
@@ -23,28 +23,35 @@ using ThMEPWSS.FlushPoint.Service;
 
 namespace ThMEPWSS.Command
 {
-    public class THLayoutFlushPointCmd : IAcadCommand, IDisposable
+    public class THLayoutFlushPointCmd : ThMEPBaseCommand, IDisposable
     {
         public static ThFlushPointVM FlushPointVM { get; set; }
         private ThMEPOriginTransformer Transfomer { get; set; } = new ThMEPOriginTransformer(Point3d.Origin);
-        private short colorIndex { get; set; }  = 1;
-        private List<ThIfcRoom>  rooms = new List<ThIfcRoom>(); // 房间
-        private List<Polyline>  columns = new List<Polyline>(); // 柱
-        private List<Polyline>  parkingStalls = new List<Polyline>(); //停车位
-        private List<Entity>  walls = new List<Entity>(); //墙：剪力墙 + 建筑墙
-        private List<Entity>  obstacles = new List<Entity>(); //障碍物
+        private short colorIndex { get; set; } = 1;
+        private List<ThIfcRoom> rooms = new List<ThIfcRoom>(); // 房间
+        private List<Polyline> columns = new List<Polyline>(); // 柱
+        private List<Polyline> parkingStalls = new List<Polyline>(); //停车位
+        private List<Entity> walls = new List<Entity>(); //墙：剪力墙 + 建筑墙
+        private List<Entity> obstacles = new List<Entity>(); //障碍物
+
+        public THLayoutFlushPointCmd()
+        {
+            ActionName = "布置";
+            CommandName = "THDXCX";
+        }
+
         public void Dispose()
         {
         }
 
 #if (ACAD2016 || ACAD2018)
-        public void Execute()
+        public override void SubExecute()
         {
             using (var lockDoc = Active.Document.LockDocument())
             using (var acadDb = AcadDatabase.Active())
             {
                 var pts = GetRange(); //获取布置范围
-                if(pts.Count<3)
+                if (pts.Count < 3)
                 {
                     return;
                 }
@@ -55,9 +62,9 @@ namespace ThMEPWSS.Command
                 var extractors = GetExtractors(acadDb.Database, pts, rooms);
 
                 //收集数据
-                columns = extractors.Where(o=>o is ThColumnExtractor).Select(o=> o as ThColumnExtractor).First().Columns;
-                walls.AddRange(extractors.Where(o=>o is ThShearwallExtractor).Select(o=>o as ThShearwallExtractor).First().Walls);
-                walls.AddRange(extractors.Where(o => o is ThArchitectureExtractor).Select(o=>o as ThArchitectureExtractor).First().Walls);
+                columns = extractors.Where(o => o is ThColumnExtractor).Select(o => o as ThColumnExtractor).First().Columns;
+                walls.AddRange(extractors.Where(o => o is ThShearwallExtractor).Select(o => o as ThShearwallExtractor).First().Walls);
+                walls.AddRange(extractors.Where(o => o is ThArchitectureExtractor).Select(o => o as ThArchitectureExtractor).First().Walls);
                 obstacles.AddRange(extractors.Where(o => o is ThObstacleExtractor).Select(o => o as ThObstacleExtractor).First()
                     .ObstacleDic.SelectMany(o => o.Value).ToList());
                 var drainFacilityExtractor = extractors.Where(o => o is ThDrainFacilityExtractor).First() as ThDrainFacilityExtractor;
@@ -67,7 +74,7 @@ namespace ThMEPWSS.Command
                 var geos = GetGeos(extractors);
                 var washPoints = Calculate(geos);
 
-                LayOut(acadDb.Database,washPoints, drainFacilityExtractor);
+                LayOut(acadDb.Database, washPoints, drainFacilityExtractor);
             }
         }
         /// <summary>
@@ -76,7 +83,7 @@ namespace ThMEPWSS.Command
         /// <param name="db"></param>
         /// <param name="washPoints">计算的冲洗点位</param>
         /// <param name="drainFacilityExtractor">集水井设施(集水井、排水沟、地漏)</param>
-        private void LayOut(Database db, List<Point3d> washPoints, 
+        private void LayOut(Database db, List<Point3d> washPoints,
             ThDrainFacilityExtractor drainFacilityExtractor)
         {
             // 进来的数据都是原位置的，这儿要移动到原点
@@ -90,9 +97,9 @@ namespace ThMEPWSS.Command
             parkingStalls.ForEach(p => Transfomer.Transform(p));
             obstacles.ForEach(p => Transfomer.Transform(p));
 
-            var filterService = new ThFilterWashPointsService(FlushPointVM.Parameter.NearbyDistance*1000)
+            var filterService = new ThFilterWashPointsService(FlushPointVM.Parameter.NearbyDistance * 1000)
             {
-                Rooms = rooms.Select(o=>o.Boundary).ToList(),
+                Rooms = rooms.Select(o => o.Boundary).ToList(),
                 DrainFacilityExtractor = drainFacilityExtractor,
             };
             // 过滤哪些点位靠近排水设施，哪些远离排水设施
@@ -109,7 +116,7 @@ namespace ThMEPWSS.Command
                 columns, parkingStalls, walls, rooms.Select(o => o.Boundary).ToList(), obstacles);
             adjustService.Adjust(layOutPts);
 
-             ThFlushPointUtils.SortWashPoints(layOutPts); //排序
+            ThFlushPointUtils.SortWashPoints(layOutPts); //排序
 
             var layoutData = new WashPointLayoutData()
             {
@@ -150,7 +157,7 @@ namespace ThMEPWSS.Command
                 layoutInfo.NearbyPoints = layoutInfo.NearbyPoints.Select(p => Transfomer.Reset(p)).ToList();
                 layoutInfo.FarawayPoints = layoutInfo.FarawayPoints.Select(p => Transfomer.Reset(p)).ToList();
                 var newLayoutBlock = new Dictionary<Point3d, BlockReference>();
-                foreach(var item in layoutInfo.LayoutBlock)
+                foreach (var item in layoutInfo.LayoutBlock)
                 {
                     item.Value.UpgradeOpen();
                     Transfomer.Reset(item.Value);
@@ -188,13 +195,13 @@ namespace ThMEPWSS.Command
             }
         }
 
-        private ThRoomExtractor GetRoomExtractor(Database db,Point3dCollection pts,
-            ref List<ThIfcRoom> rooms,ref List<Polyline> parkingStalls)
+        private ThRoomExtractor GetRoomExtractor(Database db, Point3dCollection pts,
+            ref List<ThIfcRoom> rooms, ref List<Polyline> parkingStalls)
         {
             //提取房间
-            var roomExtractor = new ThRoomExtractor() 
-            { 
-                ColorIndex = colorIndex++, 
+            var roomExtractor = new ThRoomExtractor()
+            {
+                ColorIndex = colorIndex++,
             };
             roomExtractor.Extract(db, pts);
             rooms = roomExtractor.Rooms;
@@ -213,7 +220,7 @@ namespace ThMEPWSS.Command
             rooms.ForEach(r => Transfomer.Transform(r.Boundary));
             parkingStalls.ForEach(p => Transfomer.Transform(p));
 
-            var resetService = new ThRoomNameResetService(rooms,parkingStalls.ToCollection());
+            var resetService = new ThRoomNameResetService(rooms, parkingStalls.ToCollection());
             resetService.Reset();
 
             rooms.ForEach(r => Transfomer.Reset(r.Boundary));
@@ -280,7 +287,7 @@ namespace ThMEPWSS.Command
             washPara.extend_park = FlushPointVM.Parameter.ParkingAreaPointsOfArrangeStrategy;
 
             // 设置点位布置的位置
-            if(FlushPointVM.Parameter.OnlyLayoutOnColumn)
+            if (FlushPointVM.Parameter.OnlyLayoutOnColumn)
             {
                 washPara.locate_mode = ThWashLocateMode.Interal;
             }
@@ -304,7 +311,7 @@ namespace ThMEPWSS.Command
             return ThWashPointResultParseService.Parse(result);
         }
 #else
-        public void Execute()
+        public override void SubExecute()
         {
         }
 #endif

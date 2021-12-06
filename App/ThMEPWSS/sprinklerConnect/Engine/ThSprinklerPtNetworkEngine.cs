@@ -86,20 +86,25 @@ namespace ThMEPWSS.SprinklerConnect.Engine
 
             // 往组里添加线
             ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);
-            ThSprinklerNetworkService.AddSinglePTToGroup(dtSeg, groupList, pts, DTTol * 1.5);
-            ThSprinklerNetworkService.AddShortLineToGroup(dtSeg, groupList, pts, subMainPipe, DTTol * 0.8);
-
+            ThSprinklerNetworkService.AddSinglePTToGroup(groupList, pts, DTTol * 1.5);
+            ThSprinklerNetworkService.AddShortLineToGroup(groupList, pts, subMainPipe, DTTol * 0.8);
+            for (int i = 0; i < groupList.Count; i++)
+            {
+                //DrawUtils.ShowGeometry(groupList.ElementAt(i).Value, string.Format("l2filterGroup{0}-{1}", i, groupList.ElementAt(i).Value.Count), i % 7);
+            }
             // 删除穿墙的线
             groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
 
+            
+
             var netList = ConvertToNet(groupList);
-            //for (int i = 0; i < netlist.count; i++)
+            //for (int i = 0; i < netList.Count; i++)
             //{
-            //    var net = netlist[i];
-            //    for (int j = 0; j < net.ptsgraph.count; j++)
+            //    var net = netList[i];
+            //    for (int j = 0; j < net.ptsGraph.Count; j++)
             //    {
-            //        var lines = net.ptsgraph[j].print(net.pts);
-            //        drawutils.showgeometry(lines, string.format("l3graph{0}-{1}", i, j), i % 7);
+            //        var lines = net.ptsGraph[j].print(net.pts);
+            //        DrawUtils.ShowGeometry(lines, string.Format("l3graph{0}-{1}", i, j), i % 7);
             //    }
             //}
 

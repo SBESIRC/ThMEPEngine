@@ -12,6 +12,7 @@ using ThMEPWSS.SprinklerConnect.Model;
 using NFox.Cad;
 using Dreambuild.AutoCAD;
 using DotNetARX;
+using ThMEPWSS.SprinklerConnect.Service;
 
 namespace ThMEPWSS.SprinklerConnect.Engine
 {
@@ -20,6 +21,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
         private static double DTTol { get; set; }
         private static ThSprinklerParameter SprinklerParameter { get; set; }
         private static List<Point3d> SprinklerSearched { get; set; } = new List<Point3d>();
+        private static List<Point3d> SecondSprinklerSearched { get; set; } = new List<Point3d>();
 
 
         public ThSprinklerConnectEngine(ThSprinklerParameter sprinklerParameter)
@@ -37,6 +39,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             {
                 var rowSeparation = new List<List<List<Point3d>>>();
                 var rowConnection = new List<ThSprinklerRowConnect>();
+                var secRowConnection = new List<ThSprinklerRowConnect>();
                 SprinklerSearched = new List<Point3d>();
                 // < netList.Count
                 for (int i = 0; i < netList.Count; i++)
@@ -44,14 +47,18 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                     // < netList[i].ptsGraph.Count
                     for (int j = 0; j < netList[i].ptsGraph.Count; j++)
                     {
-                        rowConnection.AddRange(GraphPtsConnect(netList[i], j, laneLine));
+                        rowConnection.AddRange(GraphPtsConnect(netList[i], j, laneLine, secRowConnection));
                     }
                 }
 
+                // 次方向连线处理
+                HandleSecondRow(rowConnection, secRowConnection);
                 // 散点处理
-                HandleScatter(rowConnection);
+                HandleScatter(rowConnection, geometry);
                 // 列分割
                 rowSeparation.AddRange(RowSeparation(rowConnection, laneLine));
+                // 散点直接连管
+                ConnScatterToPipe(rowSeparation, geometry);
 
                 rowSeparation.ForEach(row =>
                 {
@@ -71,6 +78,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                     }
                     lines.OfType<Line>().ForEach(l => acadDatabase.ModelSpace.Add(l));
                 });
+                //acadDatabase.ModelSpace.Add(CreateSquare(SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList()[256], 2 * DTTol));
             }
         }
 
@@ -88,17 +96,19 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                         var ptList = new List<Point3d>();
                         for (int n = 0; n < o.OrderDict[i].Count; n++)
                         {
-                            ptList.Add(o.OrderDict[i][n]);
-                            num++;
                             if (num >= 9)
                             {
-                                break;
+                                SprinklerSearched.Remove(o.OrderDict[i][n]);
+                            }
+                            else
+                            {
+                                ptList.Add(o.OrderDict[i][n]);
+                                num++;
                             }
                         }
-                        row.Add(ptList);
-                        if (num >= 9)
+                        if (num <= 9 && ptList.Count>0)
                         {
-                            break;
+                            row.Add(ptList);
                         }
                     }
                     results.Add(row);
@@ -151,29 +161,31 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                         {
                             o.OrderDict[0],
                         };
-                        var firstNum = 0;
+                        var firstNum = 1;
                         var second = new List<List<Point3d>>
                         {
                             o.OrderDict[-1],
                         };
-                        var secondNum = 0;
+                        var secondNum = 1;
 
                         for (int j = 1; j < index; j++)
                         {
                             var ptList = new List<Point3d>();
                             for (int n = 0; n < o.OrderDict[j].Count; n++)
                             {
-                                ptList.Add(o.OrderDict[j][n]);
-                                firstNum++;
                                 if (firstNum >= 9)
                                 {
-                                    break;
+                                    SprinklerSearched.Remove(o.OrderDict[j][n]);
+                                }
+                                else
+                                {
+                                    ptList.Add(o.OrderDict[j][n]);
+                                    firstNum++;
                                 }
                             }
-                            first.Add(o.OrderDict[j]);
-                            if (firstNum >= 9)
+                            if (firstNum <= 9 && ptList.Count > 0)
                             {
-                                break;
+                                first.Add(ptList);
                             }
                         }
                         for (int j = o.OrderDict.Count - 2; j >= index; j--)
@@ -181,17 +193,19 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                             var ptList = new List<Point3d>();
                             for (int n = 0; n < o.OrderDict[j].Count; n++)
                             {
-                                ptList.Add(o.OrderDict[j][n]);
-                                secondNum++;
-                                if (secondNum > 9)
+                                if (secondNum >= 9)
                                 {
-                                    break;
+                                    SprinklerSearched.Remove(o.OrderDict[j][n]);
+                                }
+                                else
+                                {
+                                    ptList.Add(o.OrderDict[j][n]);
+                                    secondNum++;
                                 }
                             }
-                            second.Add(o.OrderDict[j]);
-                            if (secondNum > 9)
+                            if (secondNum <= 9 && ptList.Count > 0)
                             {
-                                break;
+                                second.Add(ptList);
                             }
                         }
 
@@ -210,7 +224,8 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             return results;
         }
 
-        private static List<ThSprinklerRowConnect> GraphPtsConnect(ThSprinklerNetGroup net, int graphIdx, List<Line> laneLine)
+        private static List<ThSprinklerRowConnect> GraphPtsConnect(ThSprinklerNetGroup net, int graphIdx, List<Line> laneLine, 
+            List<ThSprinklerRowConnect> secRowConnection)
         {
             // 给定索引所对应的图
             var graph = net.ptsGraph[graphIdx];
@@ -392,7 +407,8 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                     var edgeNode = virtualNode.FirstEdge;
                     while (edgeNode != null)
                     {
-                        if (SprinklerSearched.Contains(net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex]))
+                        if (SprinklerSearched.Contains(net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex])
+                            && SecondSprinklerSearched.Contains(net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex]))
                         {
                             edgeNode = edgeNode.Next;
                             continue;
@@ -441,8 +457,8 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                         if (order > 2)
                         {
                             virtualPtsSearched.Add(i);
-                            SprinklerSearched.AddRange(realPtsSearchedTemp);
-                            connection.Add(rowConnect);
+                            SecondSprinklerSearched.AddRange(realPtsSearchedTemp);
+                            secRowConnection.Add(rowConnect);
                         }
 
                         edgeNode = edgeNode.Next;
@@ -453,94 +469,162 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             return connection;
         }
 
-        private static void HandleScatter(List<ThSprinklerRowConnect> rowConnection)
+        private static void HandleSecondRow(List<ThSprinklerRowConnect> rowConnection, List<ThSprinklerRowConnect> secRowConnection)
         {
-            var objs = rowConnection.Select(row => row.Base).ToCollection();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var lines = rowConnection.Select(row => row.Base).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines);
+
+            secRowConnection.ForEach(row =>
+            {
+                var filter = spatialIndex.SelectCrossingPolygon(row.Base.ExtendLine(-10.0).Buffer(1.0));
+                if(filter.Count == 0)
+                {
+                    rowConnection.Add(row);
+                    row.OrderDict.Values.ForEach(o => SprinklerSearched.AddRange(o));
+
+                    // 更新索引
+                    spatialIndex.Update(new DBObjectCollection { row.Base }, new DBObjectCollection());
+                }
+            });
+        }
+
+        private static void HandleScatter(List<ThSprinklerRowConnect> rowConnection, List<Polyline> geometry)
+        {
             var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
-            var temp = SprinklerSearched.OrderBy(pt => pt.X).ToList();
+            for (int time = 0; time < 2; time++)
+            {
+                var objs = rowConnection.Select(row => row.Base).ToCollection();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                for (int i = 0; i < ptList.Count; i++)
+                {
+                    if (SprinklerSearched.Contains(ptList[i]))
+                    {
+                        continue;
+                    }
+
+                    if (rowConnection.Count > 0)
+                    {
+                        var filter = spatialIndex.SelectCrossingPolygon(CreateSquare(ptList[i], 2 * DTTol)).OfType<Line>().ToList();
+                        if (filter.Count == 0)
+                        {
+                            continue;
+                        }
+
+                        var closeDistToRow = 2 * filter[0].DistanceTo(ptList[i], true) + filter[0].DistanceTo(ptList[i], false);
+                        var closeIndex = -1;
+                        var startPoints = filter.Select(l => l.StartPoint).ToList();
+                        var endPoints = filter.Select(l => l.EndPoint).ToList();
+                        for (int n = 0; n < rowConnection.Count; n++)
+                        {
+                            if (!startPoints.Contains(rowConnection[n].Base.StartPoint) || !endPoints.Contains(rowConnection[n].Base.EndPoint))
+                            {
+                                continue;
+                            }
+
+                            var realClosePt = rowConnection[n].Base.GetClosestPointTo(ptList[i], false);
+                            var realLine = new Line(realClosePt, ptList[i]);
+
+                            // 判断线是否与管线相交
+                            if (IsIntersects(realLine, SprinklerParameter.SubMainPipe))
+                            {
+                                continue;
+                            }
+
+                            // 判断线是否与墙线相交
+                            if (IsLineInWall(realLine, geometry))
+                            {
+                                continue;
+                            }
+
+                            // 避免多余线添加至列
+                            if (time == 1)
+                            {
+                                if (ThSprinklerNetworkService.SearchClosePt(ptList[i], SprinklerParameter.SubMainPipe, 1.2 * DTTol, out var virtualPtList))
+                                {
+                                    continue;
+                                }
+                            }
+
+                            var distance = 2 * rowConnection[n].Base.DistanceTo(ptList[i], true) + rowConnection[n].Base.DistanceTo(ptList[i], false);
+                            if (closeDistToRow + 1.0 > distance)
+                            {
+                                closeDistToRow = distance;
+                                closeIndex = n;
+                            }
+                        }
+
+                        if (closeIndex == -1)
+                        {
+                            continue;
+                        }
+
+                        if (closeDistToRow < 1.8 * DTTol)
+                        {
+                            var rowPts = rowConnection[closeIndex].OrderDict;
+                            if (rowPts.TryGetValue(1, out var first))
+                            {
+                                var closeDistToPoint = ptList[i].DistanceTo(first[0]);
+                                var ptIndex = 1;
+                                for (int m = 2; m < rowPts.Count - 1; m++)
+                                {
+                                    var distance = ptList[i].DistanceTo(rowPts[m][0]);
+                                    if (closeDistToPoint > distance)
+                                    {
+                                        closeDistToPoint = distance;
+                                        ptIndex = m;
+                                    }
+                                }
+                                if (rowPts.TryGetValue(rowPts.Count - 1, out var end))
+                                {
+                                    var distance = ptList[i].DistanceTo(end[0]);
+                                    if (closeDistToPoint > distance)
+                                    {
+                                        closeDistToPoint = distance;
+                                        ptIndex = rowPts.Count - 1;
+                                    }
+                                }
+
+                                rowPts[ptIndex].Add(ptList[i]);
+                                SprinklerSearched.Add(ptList[i]);
+                                rowConnection[closeIndex].Count++;
+
+                                var newLine = GetLongLine(rowConnection[closeIndex].Base, ptList[i]);
+                                rowConnection[closeIndex].StartPoint = newLine.StartPoint;
+                                rowConnection[closeIndex].EndPoint = newLine.EndPoint;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void ConnScatterToPipe(List<List<List<Point3d>>> rowSeparation, List<Polyline> geometry)
+        {
+            var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(ptList.Select(pt => new DBPoint(pt)).ToCollection());
             for (int i = 0; i < ptList.Count; i++)
             {
-                if(i == 243)
-                {
-                    var tag = true;
-                }
                 if (SprinklerSearched.Contains(ptList[i]))
                 {
                     continue;
                 }
 
-                if (rowConnection.Count > 0)
+                if (ThSprinklerNetworkService.SearchClosePt(ptList[i], SprinklerParameter.SubMainPipe, 1.2 * DTTol, out var virtualPtList))
                 {
-                    var filter = spatialIndex.SelectCrossingPolygon(CreateSquare(ptList[i], 2 * DTTol)).OfType<Line>().ToList();
-                    if(filter.Count ==0)
+                    foreach (var closePt in virtualPtList)
                     {
-                        continue;
-                    }
-
-                    var closeDistToRow = 2 * filter[0].DistanceTo(ptList[i], true) + filter[0].DistanceTo(ptList[i], false);
-                    var closeIndex = -1;
-                    var startPoints = filter.Select(l => l.StartPoint).ToList();
-                    var endPoints = filter.Select(l => l.EndPoint).ToList();
-                    for (int n = 0; n < rowConnection.Count; n++)
-                    {
-                        if(!startPoints.Contains(rowConnection[n].Base.StartPoint) || !endPoints.Contains(rowConnection[n].Base.EndPoint))
+                        var newLine = new Line(closePt, ptList[i]).ExtendLine(-10.0);
+                        var filter = spatialIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
+                        if (filter.Count == 0 && !IsLineInWall(newLine, geometry))
                         {
-                            continue;
-                        }
-
-                        var realClosePt = rowConnection[n].Base.GetClosestPointTo(ptList[i], false);
-                        var realLine = new Line(realClosePt, ptList[i]);
-                        if(IsIntersects(realLine, SprinklerParameter.SubMainPipe))
-                        {
-                            continue;
-                        }
-
-                        var distance = 2 * rowConnection[n].Base.DistanceTo(ptList[i], true) + rowConnection[n].Base.DistanceTo(ptList[i], false);
-                        if (closeDistToRow + 1.0 > distance)
-                        {
-                            closeDistToRow = distance;
-                            closeIndex = n;
-                        }
-                    }
-
-                    if(closeIndex == -1)
-                    {
-                        continue;
-                    }
-
-                    if (closeDistToRow < 1.8 * DTTol)
-                    {
-                        var rowPts = rowConnection[closeIndex].OrderDict;
-                        if (rowPts.TryGetValue(1, out var first))
-                        {
-                            var closeDistToPoint = ptList[i].DistanceTo(first[0]);
-                            var ptIndex = 1;
-                            for (int m = 2; m < rowPts.Count - 1; m++)
+                            var row = new List<List<Point3d>>
                             {
-                                var distance = ptList[i].DistanceTo(rowPts[m][0]);
-                                if (closeDistToPoint > distance)
-                                {
-                                    closeDistToPoint = distance;
-                                    ptIndex = m;
-                                }
-                            }
-                            if (rowPts.TryGetValue(rowPts.Count - 1, out var end))
-                            {
-                                var distance = ptList[i].DistanceTo(end[0]);
-                                if (closeDistToPoint > distance)
-                                {
-                                    closeDistToPoint = distance;
-                                    ptIndex = rowPts.Count - 1;
-                                }
-                            }
-
-                            if (closeDistToPoint < 2.0 * DTTol)
-                            {
-                                rowPts[ptIndex].Add(ptList[i]);
-                                rowConnection[closeIndex].Count++;
-                                SprinklerSearched.Add(ptList[i]);
-                            }
+                                new List<Point3d> { closePt },
+                                new List<Point3d>{ ptList[i]},
+                            };
+                            rowSeparation.Add(row);
+                            SprinklerSearched.Add(ptList[i]);
+                            break;
                         }
                     }
                 }
@@ -937,7 +1021,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                 int j = 0;
                 for (; j < orderList.Count; j++)
                 {
-                    if (Math.Abs(angle - orderList[j].Item1) < 1.0 * 180.0 * Math.PI)
+                    if (Math.Abs(angle - orderList[j].Item1) < Math.PI / 180.0)
                     {
                         var lengthTotal = orderList[j].Item2 + length;
                         var tuple = new Tuple<double, double, Vector3d>(orderList[j].Item1, lengthTotal, orderList[j].Item3);
@@ -990,6 +1074,47 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             };
             pline.CreatePolyline(pts);
             return pline;
+        }
+
+        /// <summary>
+        /// 判断线是否和墙线相交，若相交则返回true
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="geometry"></param>
+        /// <returns></returns>
+        private static bool IsLineInWall(Line line, List<Polyline> geometry)
+        {
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(geometry.ToCollection());
+            var filter = spatialIndex.SelectFence(line.Buffer(1.0));
+
+            if (filter.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 根据新增点，获得最长的线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
+        private static Line GetLongLine(Line line, Point3d pt)
+        {
+            var closePtOnLine = line.GetClosestPointTo(pt, true);
+            var first = new Line(line.StartPoint, closePtOnLine);
+            var second = new Line(closePtOnLine, line.EndPoint);
+            var list = new List<Line>
+            {
+                first,
+                second,
+                line
+            };
+            return list.OrderByDescending(l => l.Length).First();
         }
     }
 }

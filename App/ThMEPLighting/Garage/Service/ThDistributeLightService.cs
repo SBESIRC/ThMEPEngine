@@ -1,49 +1,79 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
 {
-    public class ThDistributeLightService
+    public static class ThDistributeLightService
     {
-        public List<Point3d> SplitPoints { get; private set; }
-        private ThLineSplitParameter SplitParameter { get; set; }
-
-        private ThDistributeLightService(ThLineSplitParameter splitParameter)
+        public static List<Point3d> Distribute(this ThLineSplitParameter splitParameter)
         {
-            SplitParameter = splitParameter;
-            SplitPoints = new List<Point3d>();
-            if(SplitParameter.Margin < 0)
+            var results = new List<Point3d>();
+            if (!splitParameter.IsValid)
             {
-                SplitParameter.Margin = 0;
+                return results;
             }
-        }
-        public static List<Point3d> Distribute(ThLineSplitParameter splitParameter)
-        {
-            var instance = new ThDistributeLightService(splitParameter);
-            instance.Distribute();
-            return instance.SplitPoints;
-        }
-        private void Distribute()
-        {
-            if(!IsValid())
-            {
-                return;
-            }
-            double totalTength = SplitParameter.Length; //总长
-            double restLength = totalTength % SplitParameter.Interval; //剩余
-            if (restLength / 2.0 < SplitParameter.Margin)
+            double totalTength = splitParameter.Length; //总长
+            double restLength = totalTength % splitParameter.Interval; //剩余
+            if (restLength / 2.0 < splitParameter.Margin)
             {
                 //修正
-                restLength += SplitParameter.Interval;
+                restLength += splitParameter.Interval;
             }
             var forwardLength = restLength / 2.0;
             while (forwardLength < totalTength)
             {
-                SplitPoints.Add(GetDistributePoint(forwardLength).Value);
-                forwardLength += SplitParameter.Interval;
+                results.Add(GetDistributePoint(forwardLength, splitParameter.Segment).Value);
+                forwardLength += splitParameter.Interval;
             }
+            return results;
         }
-        private Point3d? GetDistributePoint(double length)
+        /// <summary>
+        /// 只能对直线段分割
+        /// </summary>
+        /// <param name="splitParameter"></param>
+        /// <returns></returns>
+        public static List<Point3d> DistributeLinearSegment(this ThLineSplitParameter splitParameter)
+        {
+            // L->灯线长度
+            // D->灯具间距
+            // N盏灯所需的最小长度 :Lmin = D*(N-1)+1600
+            // 取N（自然数）的最大值使之满足:Lmin<=L
+            var results = new List<Point3d>();
+            if (!splitParameter.IsValid && splitParameter.Segment.Count!=2)
+            {
+                return results;
+            }
+            var L = splitParameter.Length;
+            var D = splitParameter.Interval;
+            var N = CalculateN(L, D, splitParameter.Margin);
+
+            var dir = splitParameter.Segment[0].GetVectorTo(splitParameter.Segment[1]).GetNormal();
+            var midPt = splitParameter.Segment[0] + dir.MultiplyBy(L/2.0);
+            double step = 0.0;
+            if (N%2==1)
+            {
+                //奇数盏灯
+                step = D;                
+                results.Add(midPt);                
+            }
+            else
+            {
+                //偶数盏灯
+                step = D / 2.0;
+            }
+            for (int i = 1; i <= N / 2; i++)
+            {
+                var leftPt = midPt + dir.Negate().MultiplyBy(step);
+                var rightPt = midPt + dir.MultiplyBy(step);
+                results.Insert(0, leftPt);
+                results.Add(rightPt);
+                step += D;
+            }
+            return results;
+        }
+
+        private static Point3d? GetDistributePoint(double length,List<Point3d> segment)
         {
             Point3d? result = null;
             if (length<0)
@@ -52,15 +82,15 @@ namespace ThMEPLighting.Garage.Service
             }
             if(length<1e-6)
             {
-                return SplitParameter.Segment[0];
+                return segment[0];
             }
             var sum = 0.0;
-            for(int i=0;i< SplitParameter.Segment.Count-1;i++)
+            for(int i=0;i< segment.Count-1;i++)
             {
-                var vec = SplitParameter.Segment[i].GetVectorTo(SplitParameter.Segment[i + 1]);
+                var vec = segment[i].GetVectorTo(segment[i + 1]);
                 if (length<= (sum+ vec.Length))
                 {
-                    return SplitParameter.Segment[i] + vec.GetNormal().MultiplyBy(length - sum);
+                    return segment[i] + vec.GetNormal().MultiplyBy(length - sum);
                 }
                 else
                 {
@@ -69,49 +99,32 @@ namespace ThMEPLighting.Garage.Service
             }
             return result;
         }
-
-        private bool IsValid()
-        {
-            if(this.SplitParameter==null)
+        /// <summary>
+        /// 获取此段上可以布置多少盏灯
+        /// </summary>
+        /// <param name="l">线段长</param>
+        /// <param name="d">灯间距</param>
+        /// <param name="margin"></param>
+        /// <returns></returns>
+        private static int CalculateN(double l,double d,double margin)
+        {            
+            int n = 0;
+            while(CalculateLMin(n,d,margin)<= l)
             {
-                return false;
-            }            
-            if (SplitParameter.Interval <= 0.0)
-            {
-                return false;
+                n++;
             }
-            if (SplitParameter.Segment.Count<2)
-            {
-                //表示出入起终点是重复点
-                return false;
-            }
-            if (SplitParameter.Segment[0].DistanceTo(SplitParameter.Segment[SplitParameter.Segment.Count-1]) < SplitParameter.Margin*2)
-            {
-                return false;
-            }
-            return true;
+            return n-1;
         }
-    }
-    public class ThLineSplitParameter
-    {
-        public List<Point3d> Segment { get; set; }
-        public double Margin { get; set; }
-        public double Interval { get; set; }
-        public ThLineSplitParameter()
+        /// <summary>
+        /// 计算N盏灯使用的最小长度
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="d"></param>
+        /// <param name="margin"></param>
+        /// <returns></returns>
+        private static double CalculateLMin(int n,double d,double margin)
         {
-            Segment = new List<Point3d>();
+            return (n - 1) * d + 2 * margin;
         }
-        public double Length
-        {
-            get
-            {
-                double length = 0.0;
-                for(int i=0;i< Segment.Count-1;i++)
-                {
-                    length += Segment[i].DistanceTo(Segment[i+1]);
-                }
-                return length;
-            }
-        }
-    }
+    }    
 }

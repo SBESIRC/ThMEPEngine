@@ -53,9 +53,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
             GaParameter gaParameter)
         {
+            double simplifyFactor = 1.0;
             var segLine = gaParameter.SegLine[i];//分割线
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
+                areas[k] = areas[k].TPSimplify(simplifyFactor);
                 var area = areas[k];
                 var segAreas = segLine.Split(area);
 
@@ -85,6 +87,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static bool IsCorrectSegLines(Line line, ref List<Polyline> areas)
         {
             var segLine = line;//分割线
+            var breakFlag = false;
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
                 var area = areas[k];
@@ -92,12 +95,44 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
                 if (segAreas.Count == 2)
                 {
+                    foreach(var a in segAreas)
+                    {
+                        if(a.Area < 100)
+                        {
+                            breakFlag = true;
+                            return false;
+                        }
+                    }
+                    if (breakFlag)
+                        continue;
                     areas.RemoveAt(k);
                     areas.AddRange(segAreas);
                     return true;
                 }
+                else if(segAreas.Count >2)
+                {
+                    try
+                    {
+                        var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
+                        for (int i = 0; i < 2; i++)
+                        {
+                            var a = sortedAreas[i];
+                            if (a.Area < 100)
+                            {
+                                return false;
+                            }
+                        }
+                        areas.RemoveAt(k);
+                        areas.Add(sortedAreas[0]);
+                        areas.Add(sortedAreas[1]);
+                        return true;
+                    }
+                    catch(Exception ex)
+                    {
+                        ;
+                    }
+                }
             }
-            ;
             return false;
         }
 
@@ -105,22 +140,57 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var segLine = line;//分割线
             var middlePt = segLine.GetMiddlePt();
+            
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
+                var breakFlag = false;
                 var area = areas[k];
                 if(area.Contains(middlePt))
                 {
                     var segAreas = segLine.Split2(area);
                     if (segAreas.Count == 2)
                     {
+                        foreach (var a in segAreas)
+                        {
+                            if (a.Area < 100)
+                            {
+                                breakFlag = true; 
+                                break;
+                            }
+                        }
+                        if (breakFlag)
+                            continue;
                         areas.RemoveAt(k);
                         areas.AddRange(segAreas);
                         return true;
                     }
+                    else if (segAreas.Count > 2)
+                    {
+                        try
+                        {
+                            var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
+                            for (int i = 0; i < 2; i++)
+                            {
+                                var a = sortedAreas[i];
+                                if (a.Area < 100)
+                                {
+                                    breakFlag = true;
+                                    continue ;
+                                }
+                            }
+                            areas.RemoveAt(k);
+                            areas.Add(sortedAreas[0]);
+                            areas.Add(sortedAreas[1]);
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                    }
                     return false;
                 }
             }
-            ;
             return false;
         }
 

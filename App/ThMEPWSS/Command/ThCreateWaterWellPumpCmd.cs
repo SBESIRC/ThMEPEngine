@@ -21,17 +21,20 @@ using ThMEPEngineCore.CAD;
 using ThMEPWSS.WaterWellPumpLayout.Interface;
 using ThMEPWSS.WaterWellPumpLayout.Service;
 using DotNetARX;
+using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.Command
 {
 
-    public class ThCreateWaterWellPumpCmd : IAcadCommand, IDisposable
+    public class ThCreateWaterWellPumpCmd : ThMEPBaseCommand, IDisposable
     {
         WaterWellPumpConfigInfo configInfo;//配置信息
         WaterwellPumpParamsViewModel _vm;
         public ThCreateWaterWellPumpCmd(WaterwellPumpParamsViewModel vm)
         {
             _vm = vm;
+            ActionName = "布置";
+            CommandName = "THSJSB";
             configInfo = vm.GetConfigInfo();
         }
         public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
@@ -183,7 +186,7 @@ namespace ThMEPWSS.Command
                 }
             }
         }
-        public void Execute()
+        public override void SubExecute()
         {
             try
             {

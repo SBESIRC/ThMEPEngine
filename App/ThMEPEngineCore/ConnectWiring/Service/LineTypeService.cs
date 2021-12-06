@@ -1,12 +1,7 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System;
+﻿using Linq2Acad;
+using ThCADExtension;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.ConnectWiring.Service
 {
@@ -14,11 +9,10 @@ namespace ThMEPEngineCore.ConnectWiring.Service
     {
         public static void InsertConnectPipe(List<Polyline> polylines, string layerName)
         {
-            using (Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Database.ImportLayer(layerName);
-
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), true);
                 foreach (var poly in polylines)
                 {
                     poly.Layer = layerName;

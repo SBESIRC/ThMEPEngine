@@ -15,7 +15,7 @@ namespace ThMEPLighting.Garage.Service
         public ThSingleRowDistributeService(
             ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter,
-            ThQueryLightBlockService queryLightBlockService)
+            ThQueryPointService queryLightBlockService)
             :base(lightGraph, arrangeParameter, queryLightBlockService)
         {
         }
@@ -29,14 +29,14 @@ namespace ThMEPLighting.Garage.Service
         private void Distribute(ThLinkPath singleLinkPath)
         {
             Point3d startPt = singleLinkPath.Start;            
-            for (int i=0;i< singleLinkPath.Path.Count; i++)
+            for (int i=0;i< singleLinkPath.Edges.Count; i++)
             {
-                var edges = new List<ThLightEdge> { singleLinkPath.Path[i] };
+                var edges = new List<ThLightEdge> { singleLinkPath.Edges[i] };
                 int j = i + 1;
-                for(;j< singleLinkPath.Path.Count;j++)
+                for(;j< singleLinkPath.Edges.Count;j++)
                 {
                     var preEdge = edges.Last();
-                    var nextEdge = singleLinkPath.Path[j];
+                    var nextEdge = singleLinkPath.Edges[j];
                     if (ThGarageUtils.IsLessThan45Degree(preEdge.Edge.StartPoint, preEdge.Edge.EndPoint,
                                                          nextEdge.Edge.StartPoint, nextEdge.Edge.EndPoint))
                     {
@@ -50,10 +50,10 @@ namespace ThMEPLighting.Garage.Service
                 i = j - 1;
                 //建造路线上的灯(计算或从图纸获取)
                 var lines = edges.Select(o => o.Edge).ToList();
-                RepairLineDir(lines, startPt);
+                lines.RepairLineDir(startPt);
                 var segments = GetCanLayoutSegments(lines);//可以布置的区域
                 startPt = lines[lines.Count - 1].EndPoint;//调整起点到末端
-                var buildSingleRowService = new ThBuildSingleRowPosService(
+                var buildSingleRowService = new ThBuildLightPosService(
                     edges, segments, ArrangeParameter, QueryLightBlockService);
                 buildSingleRowService.Build();
                 DistributedEdges.AddRange(edges);

@@ -147,6 +147,11 @@ namespace ThMEPLighting.Garage.Service
             {
                 return;
             }
+            if (ThGeometryTool.IsProjectionPtInLine(firstInters[0], secondInters[0], current.StartPoint) &&
+                ThGeometryTool.IsProjectionPtInLine(firstInters[0], secondInters[0], current.EndPoint))
+            {
+                return;
+            }
             var ptPairs = new List<Tuple<Point3d, Point3d>>();
             ptPairs.Add(Tuple.Create(current.StartPoint, firstInters[0]));
             ptPairs.Add(Tuple.Create(current.StartPoint, secondInters[0]));
@@ -155,6 +160,46 @@ namespace ThMEPLighting.Garage.Service
             var ptItem=ptPairs.OrderByDescending(o => o.Item1.DistanceTo(o.Item2)).First();
             current.StartPoint = ptItem.Item1;
             current.EndPoint = ptItem.Item2;
+        }
+
+        public static void Shorten(Line current, Line first, Line second)
+        {
+            var firstInters = new Point3dCollection();
+            var secondInters = new Point3dCollection();
+            current.IntersectWith(first, Intersect.ExtendBoth, firstInters, IntPtr.Zero, IntPtr.Zero);
+            current.IntersectWith(second, Intersect.ExtendBoth, secondInters, IntPtr.Zero, IntPtr.Zero);
+            if (firstInters.Count == 0 || secondInters.Count == 0)
+            {
+                return;
+            }
+            bool isStartIn = ThGeometryTool.IsProjectionPtInLine(firstInters[0], secondInters[0], current.StartPoint);
+            bool isEndIn = ThGeometryTool.IsProjectionPtInLine(firstInters[0], secondInters[0], current.EndPoint);
+            if (isStartIn && isEndIn)
+            {
+                return;
+            }
+            if(isStartIn) // 调整起点
+            {
+                if(current.EndPoint.DistanceTo(firstInters[0])< current.EndPoint.DistanceTo(secondInters[0]))
+                {
+                    current.StartPoint = firstInters[0];
+                }
+                else
+                {
+                    current.StartPoint = secondInters[0];
+                }
+            }
+            else
+            {
+                if (current.StartPoint.DistanceTo(firstInters[0]) < current.StartPoint.DistanceTo(secondInters[0]))
+                {
+                    current.EndPoint = firstInters[0];
+                }
+                else
+                {
+                    current.EndPoint = secondInters[0];
+                }
+            }
         }
     }
 }

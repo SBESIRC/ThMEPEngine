@@ -216,7 +216,7 @@ namespace ThMEPEngineCore.Service
             for (int i = 1; i <= Edges.Count; i++)
             {
                 int index = i % Edges.Count;
-                if (Edges[index].IsVertical(Edges[i - 1]))
+                if (Edges[index].LineDirection().IsVertical(Edges[i - 1].LineDirection()))
                 {
                     pairIndexes.Add(Tuple.Create(i - 1, index));
                 }

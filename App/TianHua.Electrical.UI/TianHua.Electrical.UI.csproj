@@ -18,6 +18,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-NET45|AnyCPU'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -71,20 +74,11 @@
     <Compile Include="CapitalConverter\CapitalOpsBooleanConverter.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
-    <Compile Include="FireAlarm\uiThFireAlarm.xaml.cs">
-      <DependentUpon>uiThFireAlarm.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="FireAlarm\UIThFireAlarmNew.xaml.cs">
-      <DependentUpon>UIThFireAlarmNew.xaml</DependentUpon>
+    <Compile Include="FireAlarm\UIThFireAlarm.xaml.cs">
+      <DependentUpon>UIThFireAlarm.xaml</DependentUpon>
     </Compile>
     <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
       <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="fmBasementLighting.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmBasementLighting.Designer.cs">
-      <DependentUpon>fmBasementLighting.cs</DependentUpon>
     </Compile>
     <Compile Include="fmBlockConvert.cs">
       <SubType>Form</SubType>
@@ -108,9 +102,6 @@
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="fmBasementLighting.resx">
-      <DependentUpon>fmBasementLighting.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmBlockConvert.resx">
       <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
@@ -162,10 +153,6 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
-      <Project>{6eb17675-61ba-4669-a2ed-da7a8a4af715}</Project>
-      <Name>ThMEPLighting</Name>
     </ProjectReference>
     <ProjectReference Include="..\TianHua.Electrical\TianHua.Electrical.csproj">
       <Project>{c74a25a1-1991-4eb7-bd43-808cd8df4b32}</Project>
@@ -258,11 +245,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="FireAlarm\uiThFireAlarm.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="FireAlarm\UIThFireAlarmNew.xaml">
+    <Page Include="FireAlarm\UIThFireAlarm.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

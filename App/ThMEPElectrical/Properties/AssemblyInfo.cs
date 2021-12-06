@@ -32,8 +32,8 @@ using System.Runtime.InteropServices;
 // 可以指定所有值，也可以使用以下所示的 "*" 预置版本号和修订号
 //通过使用 "*"，如下所示:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.6.8.0")]
-[assembly: AssemblyFileVersion("1.6.8.0")]
+[assembly: AssemblyVersion("1.6.9.0")]
+[assembly: AssemblyFileVersion("1.6.9.0")]
 
 
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
@@ -44,8 +44,7 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.AlarmLayout.Test.TestCmd))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.ThAFASCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.FireAlarm.THAFASDebugCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.AFAS.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.AFAS.THAFASDebugCmds))]
 
 

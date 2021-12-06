@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-
-using DotNetARX;
+﻿using DotNetARX;
 using Linq2Acad;
-
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using ThMEPLighting.IlluminationLighting.Model;
 
 namespace ThMEPLighting.IlluminationLighting.Service
@@ -20,9 +12,16 @@ namespace ThMEPLighting.IlluminationLighting.Service
         public static void prepareInsert(List<string> blkName, List<string> layerName)
         {
             using (var db = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                blkName.ForEach(x => db.Database.ImportBlock(x));
-                layerName.ForEach(x => db.Database.ImportLayer(x));
+                blkName.ForEach(x =>
+                {
+                    db.Blocks.Import(blockDb.Blocks.ElementOrDefault(x), true);
+                });
+                layerName.ForEach(x =>
+                {
+                    db.Layers.Import(blockDb.Layers.ElementOrDefault(x), true);
+                });
             }
         }
         public static void InsertBlock(List<ThLayoutPt> insertPtInfo, double scale)
@@ -32,8 +31,8 @@ namespace ThMEPLighting.IlluminationLighting.Service
                 foreach (var ptInfo in insertPtInfo)
                 {
                     var blkName = ptInfo.BlkName;
-                   // var size = ThIlluminationCommon.blk_size[blkName].Item2 / 2;
-                   // var pt = ptInfo.Pt + ptInfo.Dir * scale * size;
+                    // var size = ThIlluminationCommon.blk_size[blkName].Item2 / 2;
+                    // var pt = ptInfo.Pt + ptInfo.Dir * scale * size;
                     var pt = ptInfo.Pt;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
                     var attNameValues = new Dictionary<string, string>() { };
@@ -70,48 +69,5 @@ namespace ThMEPLighting.IlluminationLighting.Service
                 }
             }
         }
-
-
     }
-    public static class InsertService
-    {
-        public static void ImportBlock(this Database database, string name)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-            }
-        }
-
-        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
-
-        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
-
-                LayerTableRecord layer = currentDb.Layers.Element(name, true);
-                if (layer != null)
-                {
-                    layer.UpgradeOpen();
-                    layer.IsOff = false;
-                    layer.IsFrozen = false;
-                    layer.IsLocked = false;
-                    layer.DowngradeOpen();
-                }
-            }
-        }
-    }
-
-
 }

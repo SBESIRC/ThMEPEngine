@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Linq;
-using ThMEPLighting.Common;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
@@ -10,112 +8,29 @@ namespace ThMEPLighting.Garage.Engine
 {
     public class ThInnerOuterCirclesEngine : IDisposable
     {
-        /// <summary>
-        /// 创建内外圈
-        /// </summary>
-        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }
-        private Polyline Border { get; set; }
-        public List<Curve> MergeCurves { get; set; }
-        /// <summary>
-        /// 线槽宽度
-        /// </summary>
-        public double Width { get; set; } 
-        public ThInnerOuterCirclesEngine(Polyline border)
+        public ThInnerOuterCirclesEngine()
         {            
-            Border = border;
-            MergeCurves = new List<Curve>();
-            WireOffsetDatas = new List<ThWireOffsetData>();
         } 
         public void Dispose()
         {           
         }
-        public void Reconize(List<Line> dxLines,List<Line> fdxLines, double offsetDistance)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mergeCurves">合并之后的车道中心线</param>
+        /// <param name="halfCableTraySpace">双排间距(如:2700)的一半</param>
+        /// <returns></returns>
+        public List<ThWireOffsetData> Reconize(List<Curve> mergeCurves, double halfCableTraySpace)
         {
-            //var splitLineTuple = Split(dxLines, fdxLines);           
-            //单位化
-            var dxNomalLines = new List<Line>();
-            var fdxNomalLines = new List<Line>();
+            //通过中心线往两侧偏移            
+            var offsetCurves = mergeCurves.Offset(halfCableTraySpace);
 
-            //修正方向
-            dxLines.ForEach(o => dxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
-            fdxLines.ForEach(o => fdxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
-
-            //创建非灯线的偏移
-            fdxNomalLines.ForEach(o =>
-            {
-                var offsetLines = ThOffsetLineService.Offset(o, false ? offsetDistance : 0.0);
-                var offsetData = new ThWireOffsetData
-                {
-                    Center = o,
-                    First = offsetLines.First as Line,
-                    Second = offsetLines.Second as Line,
-                    IsDX = false
-                };
-                WireOffsetDatas.Add(offsetData);
-            });
-            
-            //通过中心线往两侧偏移
-            var offsetCurves = Offset(MergeCurves.Cast<Curve>().ToList(), offsetDistance);            
             //让1号线、2号线连接
-            offsetCurves =ThExtendService.Extend(offsetCurves, Width);
-            
+            offsetCurves = ThExtendService.Extend(offsetCurves, halfCableTraySpace);            
+
             //为中心线找到对应的1号线和2号线
-            var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
-            WireOffsetDatas.AddRange(dxWireOffsetDatas);
+            var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, halfCableTraySpace);
+            return dxWireOffsetDatas;
         }  
-
-        private Tuple<List<Line>,List<Line>> Split(List<Line> dxLines, List<Line> fdxLines)
-        {
-            //在T型、十字型处分割线
-            var totalLines = new List<Line>();
-            dxLines.ForEach(o => totalLines.Add(new Line(o.StartPoint, o.EndPoint)));
-            fdxLines.ForEach(o => totalLines.Add(new Line(o.StartPoint, o.EndPoint)));
-
-            var splitDxLines = new List<Line>();
-            var splitFdxLines = new List<Line>();
-            using (var splitEngine = new ThSplitLineEngine(totalLines))
-            {
-                splitEngine.Split();
-                foreach (var item in splitEngine.Results)
-                {
-                    if (dxLines.IsContains(item.Key))
-                    {
-                        if (item.Value.Count > 0)
-                        {
-                            splitDxLines.AddRange(item.Value);
-                        }
-                        else
-                        {
-                            splitDxLines.Add(new Line(item.Key.StartPoint, item.Key.EndPoint));
-                        }
-                    }
-                    else if (fdxLines.IsContains(item.Key))
-                    {
-                        if (item.Value.Count > 0)
-                        {
-                            splitFdxLines.AddRange(item.Value);
-                        }
-                        else
-                        {
-                            splitFdxLines.Add(new Line(item.Key.StartPoint, item.Key.EndPoint));
-                        }
-                    }
-                }
-            }
-            return Tuple.Create(splitDxLines, splitFdxLines);
-        }
-        private List<Tuple<Curve, Curve, Curve>> Offset(List<Curve> curves, double offsetDis)
-        {
-            var results = new List<Tuple<Curve, Curve, Curve>>();
-            curves.ForEach(o =>
-            {
-                if (o.GetLength() >= 10)
-                {
-                    var instance = ThOffsetLineService.Offset(o, offsetDis);
-                    results.Add(Tuple.Create(o, instance.First, instance.Second));
-                }
-            });
-            return results;
-        }
     }
 }

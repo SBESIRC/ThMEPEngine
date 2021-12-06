@@ -4,6 +4,7 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage;
 
 namespace ThMEPLighting.Common
 {
@@ -14,21 +15,22 @@ namespace ThMEPLighting.Common
         public List<ThLightNode> LightNodes { get; set; }
         public List<Tuple<Point3d, ThLightEdge>> MultiBranch { get; set; }
         public bool IsTraversed { get; set; } 
+        /// <summary>
+        /// 遍历的前进方向
+        /// </summary>
         public Vector3d Direction { get; set; }
         public bool IsDX { get; set; }
-        public EdgePattern Pattern { get; set; }
         public ThLightEdge()
         {
-            Id = "";
             LightNodes = new List<ThLightNode>();
             MultiBranch = new List<Tuple<Point3d, ThLightEdge>>();
             IsDX = true;
-            Pattern = EdgePattern.Unknown;
         }
         public ThLightEdge(Line line):this()
         {
             Edge = line;
             Id = Guid.NewGuid().ToString();
+            Direction = line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
         }
         public void Update(Point3d portPt)
         {
@@ -48,6 +50,7 @@ namespace ThMEPLighting.Common
         }
         private void Sort()
         {
+            //灯上的点要根据遍历的方向保持一致
             LightNodes = LightNodes.OrderBy(o => Edge.StartPoint.DistanceTo(o.Position)).ToList();
             //当前边的向量与直线向量相反
             if(Direction.Negate().IsCodirectionalTo(Edge.StartPoint.GetVectorTo(Edge.EndPoint)))
@@ -128,6 +131,37 @@ namespace ThMEPLighting.Common
                     break;
             }
             return pattern;
+        }
+        public Point3d StartPoint
+        {
+            get
+            {
+                return IsSameDirection ? Edge.StartPoint : Edge.EndPoint;
+            }
+        }
+
+        public Point3d EndPoint
+        {
+            get
+            {
+                return IsSameDirection ? Edge.EndPoint : Edge.StartPoint;
+            }
+        }
+        public ThLightNode GetRecentNode(Point3d pt)
+        {
+            var sorts = LightNodes.OrderBy(o => o.Position.DistanceTo(pt));
+            return sorts.Count() > 0 ? sorts.First() : new ThLightNode();
+        }
+        /// <summary>
+        /// 线的方向和边的遍历方向是否一致
+        /// </summary>
+        public bool IsSameDirection
+        {
+            get
+            {
+                var vec = Edge.StartPoint.GetVectorTo(Edge.EndPoint);
+                return vec.IsSameDirection(Direction);
+            }
         }
     }
     public enum EdgePattern
