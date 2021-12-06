@@ -7,7 +7,14 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 
+using ThCADExtension;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Config;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Stair;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
+using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmArea.Model;
 
 namespace ThMEPElectrical.FireAlarmArea.Service
@@ -53,6 +60,75 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 
                 return resultPts;
             }
+        }
+
+        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> GetSmokeSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
+        {
+            var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
+            string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+            var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
+            var stairName = ThFaCommon.stairName;
+            var smokeTag = ThFaSmokeCommon.smokeTag;
+            var heatTag = ThFaSmokeCommon.heatTag;
+            var prfTag = ThFaSmokeCommon.expPrfTag;
+            var nonLayoutTag = ThFaSmokeCommon.nonLayoutTag;
+
+            foreach (var room in Room)
+            {
+                var typeInt = ThFaSmokeCommon.layoutType.noName;
+                var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
+
+                if (ThAFASRoomUtils.IsRoom(roomTableTree, roomName, stairName))
+                {
+                    typeInt = ThFaSmokeCommon.layoutType.stair;
+                }
+                else if (roomName != "")
+                {
+                    var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
+                    if (tagList.Contains(smokeTag) && tagList.Contains(heatTag) && tagList.Contains(prfTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.smokeHeatPrf;
+                    }
+                    else if (tagList.Contains(smokeTag) && tagList.Contains(heatTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.smokeHeat;
+                    }
+                    else if (tagList.Contains(smokeTag) && tagList.Contains(prfTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.smokePrf;
+                    }
+                    else if (tagList.Contains(smokeTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.smoke;
+                    }
+                    else if (tagList.Contains(heatTag) && tagList.Contains(prfTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.heatPrf;
+                    }
+                    else if (tagList.Contains(heatTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.heat;
+                    }
+                    else if (tagList.Contains(nonLayoutTag))
+                    {
+                        typeInt = ThFaSmokeCommon.layoutType.nonLayout;
+                    }
+                }
+
+                //如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
+                if (typeInt == ThFaSmokeCommon.layoutType.noName)
+                {
+                    typeInt = ThFaSmokeCommon.layoutType.smoke;
+                }
+
+
+                frameSensorType.Add(roomFrameDict[room], typeInt);
+                DrawUtils.ShowGeometry(roomFrameDict[room].GetPoint3dAt(0), string.Format("roomName:{0}", roomName), "l0roomName", 121, 25, 200);
+
+            }
+
+            return frameSensorType;
+
         }
     }
 }

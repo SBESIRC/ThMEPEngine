@@ -32,6 +32,7 @@
     <Compile Include="AFAS\Command\ThAFASCommand.cs" />
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
+    <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
@@ -136,7 +137,9 @@
     <Compile Include="FireAlarmDistance\Command\ThAFASManualAlarmCmd.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSet.cs" />
+    <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
     <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
+    <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
@@ -145,7 +148,7 @@
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
-    <Compile Include="FireAlarmArea\Model\ThLayoutPt.cs" />
+    <Compile Include="AFAS\Model\ThLayoutPt.cs" />
     <Compile Include="FireAlarmArea\Service\ThStairService.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutParamterCalculationService.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaSmokeRoomTypeService.cs" />
@@ -391,7 +394,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AFAS\Model\" />
     <Folder Include="DCL\Engine\" />
     <Folder Include="DCL\Model\" />
   </ItemGroup>

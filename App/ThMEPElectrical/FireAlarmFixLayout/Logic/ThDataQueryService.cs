@@ -100,7 +100,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             Avoidence.AddRange(FireProofs);
             Avoidence.AddRange(AvoidEquipments);
             floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
-            roomTableConfig = ThAFASUtils.ReadRoomConfigTable(roomConfigUrl);
+            roomTableConfig = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
             GetFireLinkageRooms();
         }
 

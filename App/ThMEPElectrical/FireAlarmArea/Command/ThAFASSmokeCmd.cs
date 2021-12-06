@@ -15,6 +15,7 @@ using ThMEPEngineCore.Command;
 using ThMEPEngineCore.IO;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
 

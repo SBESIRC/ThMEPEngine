@@ -36,6 +36,8 @@ namespace ThMEPElectrical.FireAlarmDistance
         double _scale = 100;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
         double _stepLength = 25000;
+        bool _referBeam = false;
+
         public ThAFASManualAlarmCmd(bool UI)
         {
             UseUI = UI;
@@ -95,25 +97,15 @@ namespace ThMEPElectrical.FireAlarmDistance
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //取数据
-                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, false, false);
-                var data = new ThAFASDistanceDataSet(geos);
+                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
+                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
+                var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
+                data.ClassifyData();
+                data.CleanData();
                 data.ExtendEquipment(cleanBlkName, _scale);
                 data.FilterBeam();
-                var room = data.GetRoom();
 
-                ///debug
-                var roomLable = data.GetRoomGeom();
-                for (int i = 0; i < roomLable.Count; i++)
-                {
-                    var pl = roomLable[i].Boundary as Polyline;
-                    var pt = pl.GetCentroidPoint();
-                    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
-                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
-                }
-                ThGeoOutput.Output(data.Data, Active.DocumentDirectory, Active.DocumentName);
-                ///
-
+                //布置手动报警
                 var geojson = ThGeoOutput.Output(data.Data);
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
@@ -124,19 +116,21 @@ namespace ThMEPElectrical.FireAlarmDistance
 
                 var outJson = engine.Place(geojson, context);
                 var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
-
+#if DEBUG
                 string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
                 File.WriteAllText(path, outJson);
-
+#endif
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
 
-                var ptDirList = ThAFASDistanceLayoutService.FindOutputPtsDir(ptsOutput, room);
+
+                var roomBoundary = data.GetRoomBoundary();
+                var ptDirList = ThAFASDistanceLayoutService.FindOutputPtsDir(ptsOutput, roomBoundary);
                 var ptDirListTop = ThAFASDistanceLayoutService.FindOutputPtsOnTop(ptDirList, layoutBlkNameTop, _scale);
                 ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
 
                 ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop , ThFaCommon.blk_layer[layoutBlkNameTop], true);
-                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameBottom , ThFaCommon.blk_layer[layoutBlkNameBottom], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirListTop, _scale, layoutBlkNameBottom , ThFaCommon.blk_layer[layoutBlkNameBottom], true);
             }
         }
 

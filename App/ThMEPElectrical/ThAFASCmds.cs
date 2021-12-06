@@ -4,6 +4,7 @@ using System.Linq;
 using System.IO;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcHelper;
 using Linq2Acad;
@@ -195,23 +196,23 @@ namespace ThMEPElectrical.AFAS
 
                 var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, referBeam, true);
 
-                var data = new ThAFASDistanceDataSet(geos);
+                var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
+                data.ClassifyData();
+                data.CleanData();
                 data.ExtendEquipment(cleanBlkName, scale);
                 data.FilterBeam();
                 data.print();
 
-                var room = data.GetRoom();
-
-                /////debug
-                //var roomLable = data.GetRoomGeom();
-                //for (int i = 0; i < roomLable.Count; i++)
-                //{
-                //    var pl = roomLable[i].Boundary as Polyline;
-                //    var pt = pl.GetCentroidPoint();
-                //    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", roomLable[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
-                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", roomLable[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
-                //    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", roomLable[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
-                //}
+                ///debug
+                var room = data.Room;
+                for (int i = 0; i < room.Count; i++)
+                {
+                    var pl = room[i].Boundary as Polyline;
+                    var pt = pl.GetCentroidPoint();
+                    DrawUtils.ShowGeometry(pt, String.Format("placement：{0}", room[i].Properties["Placement"]), "l0RoomPlacement", 3, 25, 200);
+                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 1, 0), String.Format("name：{0}", room[i].Properties["Name"]), "l0RoomName", 3, 25, 200);
+                    DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 300 * 2, 0), String.Format("Privacy：{0}", room[i].Properties["Privacy"]), "l0RoomPrivacy", 3, 25, 200);
+                }
 
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;

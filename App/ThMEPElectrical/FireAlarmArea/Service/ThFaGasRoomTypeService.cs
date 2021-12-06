@@ -31,7 +31,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-            var roomTableTree = ThAFASUtils.ReadRoomConfigTable(roomConfigUrl);
+            var roomTableTree = ThAFASRoomUtils .ReadRoomConfigTable(roomConfigUrl);
             var gasTag = ThFaSmokeCommon.gasTag;
             var expPrfTag = ThFaSmokeCommon.expPrfTag;
             var nonLayoutTag = ThFaSmokeCommon.nonLayoutTag;

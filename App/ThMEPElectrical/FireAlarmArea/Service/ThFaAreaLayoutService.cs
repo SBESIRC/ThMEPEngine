@@ -15,7 +15,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
-
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Model;
 
