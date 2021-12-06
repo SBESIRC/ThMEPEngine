@@ -100,7 +100,7 @@ namespace ThMEPEngineCore.Engine
                             }
                             else
                             {
-                                visitor.DoExtract(results, dbObj, matrix);
+                                 visitor.DoExtract(results, dbObj, matrix);
                             }
                         }
 

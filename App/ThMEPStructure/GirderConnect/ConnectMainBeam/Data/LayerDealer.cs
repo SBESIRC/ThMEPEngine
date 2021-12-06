@@ -12,31 +12,12 @@ using ThCADExtension;
 using AcHelper;
 using DotNetARX;
 using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using ThMEPEngineCore.Service;
-using ThMEPStructure.GirderConnect.Data;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
-using NetTopologySuite.Operation.OverlayNG;
-using NetTopologySuite.Geometries;
 using NFox.Cad;
 
-namespace ThMEPStructure.GirderConnect.Data
+namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
 {
-    class MainBeamPostProcess
+    class LayerDealer
     {
-        /// <summary>
-        /// 对主梁连接算法结果的后续处理
-        /// </summary>
-        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
-        {
-            string beamLayer = "TH_AI_BEAM";
-            AddLayer(beamLayer, 4);
-
-            var unifiedTyples = UnifyTuples(dicTuples);
-            Output(unifiedTyples, beamLayer);
-        }
-
         /// <summary>
         /// 输出结果，转换结果作为次梁输入
         /// </summary>
@@ -50,11 +31,11 @@ namespace ThMEPStructure.GirderConnect.Data
                 {
                     var line = new Line(o.Item1, o.Item2);
                     line.Layer = layerName;
-                    if (line.Length > 9000)
-                    {
-                        line.ColorIndex = 7;
-                    }
-                    else
+                    //if (line.Length > 9000)
+                    //{
+                    //    line.ColorIndex = 3;
+                    //}
+                    //else
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
                     }
@@ -62,28 +43,25 @@ namespace ThMEPStructure.GirderConnect.Data
                 });
             }
         }
-
-        /// <summary>
-        /// DCEL的双向线转换为单线
-        /// </summary>
-        /// <param name="tuples"></param>
-        /// <returns></returns>
-        public static HashSet<Tuple<Point3d, Point3d>> UnifyTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void Output(Dictionary<Point3d, Point3d> tuples, string layerName)
         {
-            var ansTuples = new HashSet<Tuple<Point3d, Point3d>>();
-            foreach (var dicTuple in dicTuples)
+            using (var acdb = AcadDatabase.Active())
             {
-                foreach(var pt in dicTuple.Value)
+                tuples.ForEach(o =>
                 {
-                    var tuple = new Tuple<Point3d, Point3d>(dicTuple.Key, pt);
-                    var converseTuple = new Tuple<Point3d, Point3d>(pt, dicTuple.Key);
-                    if (!ansTuples.Contains(converseTuple))
+                    var line = new Line(o.Key, o.Value);
+                    line.Layer = layerName;
+                    //if (line.Length > 9000)
+                    //{
+                    //    line.ColorIndex = 6;
+                    //}
+                    //else
                     {
-                        ansTuples.Add(tuple);
+                        line.ColorIndex = (int)ColorIndex.BYLAYER;
                     }
-                }
+                    HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                });
             }
-            return ansTuples;
         }
 
         /// <summary>

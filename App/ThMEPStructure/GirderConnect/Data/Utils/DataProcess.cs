@@ -15,6 +15,7 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.Service;
 using NFox.Cad;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
 {
@@ -66,6 +67,24 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 var inners = newObjs.OfType<Polyline>().ToHashSet();
                 result.Add(o.Key, inners);
             });
+            return result;
+        }
+
+        /// <summary>
+        /// 合并重叠，保留大的（去毛边）
+        /// </summary>
+        /// <param name="outlineWalls"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, HashSet<Polyline>> MergeWithSimplifyWalls(Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        {
+            var outlineWallLists = outlineWalls.ToList();
+            var result = new Dictionary<Polyline, HashSet<Polyline>>();
+            foreach(var outlineWallList in outlineWallLists)
+            {
+                HandleOverlap polies = new HandleOverlap(outlineWallList.Value.ToList(), 40);
+                var inners  = polies.Handle().ToHashSet();
+                result.Add(outlineWallList.Key, inners);
+            }
             return result;
         }
 

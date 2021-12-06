@@ -69,52 +69,10 @@ namespace ThMEPStructure.GirderConnect.Command
                     outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
 
                 //计算
-                var tuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
+                var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
 
                 //处理算法输出
-                MainBeamPostProcess.MPostProcess(tuples);
-
-                #region pretest
-                ////获取柱点
-                //var clumnPts = GetObject.GetCenters(acdb);
-                //Dictionary<Polyline, List<Polyline>> outlineWalls = new Dictionary<Polyline, List<Polyline>>();
-                //Dictionary<Polyline, HashSet<Point3d>> outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
-                //for (int i = 0; i < 6; ++i)
-                //{
-                //    //获取某个墙外边框
-                //    Polyline outline = GetObject.GetPolyline(acdb);
-                //    if (outline == null)
-                //    {
-                //        return;
-                //    }
-                //    if (!outlineClumns.ContainsKey(outline))
-                //    {
-                //        outlineClumns.Add(outline, new HashSet<Point3d>());
-                //    }
-                //    //获取此多边形包含的墙
-                //    List<Polyline> walls = GetObject.GetPolylines(acdb);
-                //    if (walls == null)
-                //    {
-                //        return;
-                //    }
-                //    outlineWalls.Add(outline, walls);
-                //}
-                //GetObject.FindPointsInOutline(clumnPts, outlineClumns);
-
-                ////预处理
-                //Point3dCollection ptsInOutline = new Point3dCollection();
-                //foreach (var sets in outlineClumns.Values)
-                //{
-                //    foreach (Point3d pt in sets)
-                //    {
-                //        ptsInOutline.Add(pt);
-                //    }
-                //}
-                //Point3dCollection newClumnPts = PointsDealer.RemoveSimmilerPoint(clumnPts, ptsInOutline);
-
-                ////计算
-                //Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
-                #endregion
+                MainBeamPostProcess.MPostProcess(dicTuples);
             }
         }
 

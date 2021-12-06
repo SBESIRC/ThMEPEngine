@@ -230,8 +230,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlineClumns">某轮廓和它包含的柱点</param>
         /// <param name="outline2BorderNearPts">Input and Output</param>
         public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
-            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
         {
+            List<Point3d> fstPtsS = new List<Point3d>();
             List<Point3d> fstPts = new List<Point3d>();
             List<Point3d> thdPts = new List<Point3d>();
             List<Point3d> tmpFstPts = new List<Point3d>();
@@ -246,7 +247,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     outline2BorderNearPts.Add(curOutline, new Dictionary<Point3d, HashSet<Point3d>>());
                 }
-
+                if (!outline2ZeroPts.ContainsKey(curOutline))
+                {
+                    outline2ZeroPts.Add(curOutline, new List<Point3d>());
+                }
                 Point3dCollection tmpNearPts = new Point3dCollection();
                 foreach (Point3d pt in outlineNearPt.Value)
                 {
@@ -293,9 +297,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     tmpFstPts.Clear();
                     tmpThdPts.Clear();
                     //CenterLine.WallEdgePoint(wall.ToNTSPolygon(), 100, ref tmpFstPts, ref tmpThdPts);
-                    PointsDealer.WallCrossPoint(wall.ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);
+                    PointsDealer.WallCrossPoint(wall.ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
+                    fstPtsS.AddRange(tmpFstPts);
+                    outline2ZeroPts[curOutline].AddRange(tmpFstPts);
                 }
                 outPts = PointsDealer.OutPoints(curOutline);
                 PointsDealer.RemovePointsFarFromOutline(fstPts, curOutline);
@@ -312,12 +318,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         Vector3d aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis);
                         double toleranceDegree = Math.PI / 15;
                         //Get VerticalPoint
-                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, 9000, curOutline);
-                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > 9000) 
+                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, 9300, curOutline);
+                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > 9300) 
                         {
                             continue;
                         }
-                        //ShowInfo.ShowPointAsO(verticalPt, 1, 300);
 
                         //Get the line who contains the point will be connect
                         //Line closetLine = GetObject.GetClosetLineOfPolyline(curOutline, nearPt, aimDirection);
@@ -329,12 +334,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         //ShowInfo.DrawLine(closetLine.StartPoint, closetLine.EndPoint, 50);
                         if (i == 0)
                         {
-                            toleranceDegree = Math.PI / 4;
+                            toleranceDegree = Math.PI / 4; /////////////////////4
                         }
 
                         //找到近点nearPt最佳的边界连接点
-                        Point3d borderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, toleranceDegree);
-                        if(borderPt.DistanceTo(nearPt) > 9000)
+                        Point3d borderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, toleranceDegree);//, zeroPts) ;
+                        if(borderPt.DistanceTo(nearPt) > 9300)
                         {
                             continue;
                         }
@@ -348,9 +353,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             //Merge very close points to one whithout change structure
-            LineDealer.SimplifyLineConnect(outline2BorderNearPts, outPts);
             //LineDealer.SimplifyLineConnect(borderPt2NearPts, thdPts);
-            //LineDealer.SimplifyLineConnect(borderPt2NearPts, fstPts);
+            LineDealer.SimplifyLineConnect(outline2BorderNearPts, fstPtsS);
         }
 
         /// <summary>
@@ -419,11 +423,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 findPolylineFromLines.Add(tmpLine, tmpLines);
                             }
                         }
-                        //Polyline polyline = LineDealer.Tuples2Polyline(tmpLines);
-                        //if (polyline.Closed)
-                        //{
-                        //    ShowInfo.ShowGeometry(polyline.ToNTSGeometry(), acdb, 90);
-                        //}
                     }
                 }
             }
@@ -619,6 +618,18 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return cnt;
+        }
+
+        public static void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
+        {
+            //连接不同的边界
+            //点上的连接至少为1
+
+            //连接相同的边界
+            //连接逻辑：
+            //保留连接线中点不在这个边界内的线
+            //连接线两端的点不在同一条直线上
+            //同线判定：(（a到lineA<500 && b到lineA<500）||（b到lineB<500 && a到lineB<500）)  lineA\lineB分别为a\b最近的线
         }
     }
 }

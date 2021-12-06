@@ -366,10 +366,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
 
                 //计算
                 DataProcess.MergeWall(outlineWalls);
-                var tuples = Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
+                var dicTuples = Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
                 
                 // 输出
-                MainBeamPostProcess.MPostProcess(tuples);
+                MainBeamPostProcess.MPostProcess(dicTuples);
             }
             //{
             //    //DBObjectCollection objs = new DBObjectCollection();

@@ -27,7 +27,9 @@
   <ItemGroup>
     <Compile Include="GirderConnect\Command\BeamConnectCommand.cs" />
     <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\BuildMainBeam\BuildMainBeam.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Data\LayerDealer.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Test\TestCmds.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
@@ -47,6 +49,7 @@
     <Compile Include="GirderConnect\Data\ThMainBuildingHatchExtractionVisitor.cs" />
     <Compile Include="GirderConnect\Data\Utils\DataClassify.cs" />
     <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
+    <Compile Include="GirderConnect\Data\Utils\HandleOverlap.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\SecondaryBeamConnectCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Command\ThSecondaryBeamSystemCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
@@ -95,7 +98,6 @@
     <Folder Include="bin\Release-NET45\" />
     <Folder Include="bin\Release-NET46\" />
     <Folder Include="bin\Release\" />
-    <Folder Include="GirderConnect\ConnectMainBeam\Data\" />
     <Folder Include="GirderConnect\Test\" />
     <Folder Include="GirderConnect\Utils\" />
   </ItemGroup>

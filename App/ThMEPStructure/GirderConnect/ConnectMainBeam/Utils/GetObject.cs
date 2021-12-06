@@ -391,18 +391,27 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             double angelAB = vecA.GetAngleTo(vecB, Vector3d.ZAxis);
             double angelCA = vecC.GetAngleTo(vecA, Vector3d.ZAxis);
             double angelBC = vecB.GetAngleTo(vecC, Vector3d.ZAxis);
+            double angelAC = vecA.GetAngleTo(vecC, Vector3d.ZAxis);
+            if (angelAB > angelAC)
+            {
+                vecB = ptC - basePt;
+                vecC = ptB - basePt;
+                angelAB = vecA.GetAngleTo(vecB, Vector3d.ZAxis);
+                angelBC = vecB.GetAngleTo(vecC, Vector3d.ZAxis);
+                angelCA = vecC.GetAngleTo(vecA, Vector3d.ZAxis);
+            }
             double absAB90 = Math.Abs(angelAB - Math.PI / 2);
             double absCA90 = Math.Abs(angelCA - Math.PI / 2);
             double absBC90 = Math.Abs(angelBC - Math.PI / 2);
             double absAB180 = Math.Abs(angelAB - Math.PI);
             double absCA180 = Math.Abs(angelCA - Math.PI);
             double absBC180 = Math.Abs(angelBC - Math.PI);
-            double min90 = double.MaxValue;
-            double min180 = double.MaxValue;
+            double min90;// = double.MaxValue;
+            double min180;// = double.MaxValue;
             //Point3d pt9X, pt9Y, pt9Z;
             //Point3d pt18X, pt18Y, pt18Z;
             Vector3d vec9X, vec9Y, vec9Z;
-            Vector3d vec18X, vec18Y, vec18Z;
+            Vector3d vec18X, vec18Y;//, vec18Z;
             if (absAB90 <= absCA90 && absAB90 <= absBC90)
             {
                 min90 = absAB90;
@@ -429,21 +438,21 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 min180 = absAB180;
                 vec18X = vecA;
                 vec18Y = vecB;
-                vec18Z = vecC;
+                //vec18Z = vecC;
             }
             else if (absCA180 <= absBC180)
             {
                 min180 = absCA180;
                 vec18X = vecC;
                 vec18Y = vecA;
-                vec18Z = vecB;
+                //vec18Z = vecB;
             }
             else
             {
                 min180 = absBC180;
                 vec18X = vecB;
                 vec18Y = vecC;
-                vec18Z = vecA;
+                //vec18Z = vecA;
             }
             if(min90 < min180)
             {

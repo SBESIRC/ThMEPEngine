@@ -51,8 +51,7 @@ namespace ThMEPStructure.GirderConnect.Data
             DataProcess.PolylineAddToOutlineWalls(shearwallGroupDict, outlineWalls);
 
             //1.1、内部墙合并+去毛边
-            //DataProcess.;
-            outlineWalls = DataProcess.MergeWall(outlineWalls);//temporary replace/////////////////////////////////////////
+            outlineWalls = DataProcess.MergeWithSimplifyWalls(outlineWalls);
 
             //1.2、将outlinePlColumns加入outlineWalls
             DataProcess.DicHashAdd(newOutlinePlColumns, outlineWalls);
