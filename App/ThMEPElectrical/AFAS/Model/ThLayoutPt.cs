@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 
-namespace ThMEPElectrical.FireAlarmArea.Model
+namespace ThMEPElectrical.AFAS.Model
 {
     public class ThLayoutPt
     {

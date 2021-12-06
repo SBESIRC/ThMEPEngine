@@ -14,7 +14,7 @@ namespace ThMEPElectrical.FireAlarmArea
                                                             {4400,4900,5500},
                                                             {3600,4900,6300}};
 
-        public static string stairName = "楼梯间";
+
         public static string smokeTag = "感烟火灾探测器";
         public static string heatTag = "感温火灾探测器";
         public static string gasTag = "可燃气体探测器";

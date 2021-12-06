@@ -11,8 +11,8 @@ using DotNetARX;
 using Linq2Acad;
 
 using ThCADExtension;
-using ThMEPElectrical.FireAlarmArea.Model;
-using ThMEPElectrical.AFAS;
+
+using ThMEPElectrical.AFAS.Model;
 
 namespace ThMEPElectrical.AFAS.Utils
 {

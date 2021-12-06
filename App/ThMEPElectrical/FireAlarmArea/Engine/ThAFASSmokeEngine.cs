@@ -18,6 +18,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Model;

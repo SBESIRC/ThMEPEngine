@@ -12,6 +12,7 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Config;
 
 using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS;
 
 namespace ThMEPElectrical.FireAlarmArea.Service
 {
@@ -26,8 +27,8 @@ namespace ThMEPElectrical.FireAlarmArea.Service
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
             string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-            var roomTableTree = ThAFASUtils.ReadRoomConfigTable(roomConfigUrl);
-            var stairName = ThFaSmokeCommon.stairName;
+            var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
+            var stairName = ThFaCommon.stairName;
             var smokeTag = ThFaSmokeCommon.smokeTag;
             var heatTag = ThFaSmokeCommon.heatTag;
             var prfTag = ThFaSmokeCommon.expPrfTag;
@@ -38,7 +39,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                 var typeInt = ThFaSmokeCommon.layoutType.noName;
                 var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
 
-                if (IsRoom(roomTableTree, roomName, stairName))
+                if (ThAFASRoomUtils.IsRoom(roomTableTree, roomName, stairName))
                 {
                     typeInt = ThFaSmokeCommon.layoutType.stair;
                 }
@@ -91,17 +92,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 
         }
 
-        private static bool IsRoom(List<RoomTableTree> roomTableTree, string name, string standardName)
-        {
-            var bReturn = false;
-            var nameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);
 
-            if (nameList.Contains(name))
-            {
-                bReturn = true;
-            }
-            return bReturn;
-        }
 
     }
 }

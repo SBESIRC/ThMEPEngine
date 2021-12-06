@@ -176,16 +176,26 @@ namespace ThMEPEngineCore
         {
             using (var acadDb = AcadDatabase.Active())
             {               
-                //交互+获取房间
-                // 输出房间
                 var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
-                roomOutlines.Cast<Entity>().ForEach(e =>
+                roomOutlines.Cast<Entity>().ForEach(o =>
                 {
-                    acadDb.ModelSpace.Add(e);
-                    e.LayerId = layerId;
-                    e.ColorIndex = (int)ColorIndex.BYLAYER;
-                    e.LineWeight = LineWeight.ByLayer;
-                    e.Linetype = "ByLayer";
+                    var objs = new DBObjectCollection();
+                    if (o is MPolygon mPolygon)
+                    {
+                        mPolygon.Explode(objs);
+                    }
+                    else
+                    {
+                        objs.Add(o);
+                    }
+                    objs.OfType<Entity>().ForEach(e =>
+                    {
+                        acadDb.ModelSpace.Add(e);
+                        e.LayerId = layerId;
+                        e.ColorIndex = (int)ColorIndex.BYLAYER;
+                        e.LineWeight = LineWeight.ByLayer;
+                        e.Linetype = "ByLayer";
+                    });
                 });
             }
         }

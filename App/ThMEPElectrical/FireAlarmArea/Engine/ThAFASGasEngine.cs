@@ -11,7 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 
 using ThMEPElectrical.AFAS.Utils;
-
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Model;
 using ThMEPElectrical.FireAlarmArea.Service;

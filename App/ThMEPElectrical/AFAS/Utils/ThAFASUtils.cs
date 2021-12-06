@@ -221,23 +221,6 @@ namespace ThMEPElectrical.AFAS.Utils
             return transformer;
         }
 
-        /// <summary>
-        /// 读取房间配置表
-        /// </summary>
-        public static List<RoomTableTree> ReadRoomConfigTable(string roomConfigUrl)
-        {
-            var roomTableConfig = new List<RoomTableTree>();
-            ReadExcelService excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(roomConfigUrl, true);
-            var roomNameControl = "房间名称处理";
-            var table = dataSet.Tables[roomNameControl];
-            if (table != null)
-            {
-                roomTableConfig = RoomConfigTreeService.CreateRoomTree(table);
-            }
-
-            return roomTableConfig;
-        }
 
         /// <summary>
         /// 计算blk外扩距离
@@ -256,6 +239,7 @@ namespace ThMEPElectrical.AFAS.Utils
             extend = extend * scale / 2;
             return extend;
         }
+
 
         #region DebugFunction
         ///// <summary>

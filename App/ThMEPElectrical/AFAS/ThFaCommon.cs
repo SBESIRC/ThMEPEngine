@@ -45,6 +45,9 @@ namespace ThMEPElectrical.AFAS
         public static string BlkName_Broadcast_Wall = "E-BFAS410-4";
         #endregion
 
+        #region 其他
+        public static string stairName = "楼梯间";
+        #endregion
 
         public static List<string> BlkNameList = new List<string>() {
                                                                       BlkName_Display_District,
