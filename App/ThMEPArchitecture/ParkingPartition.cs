@@ -136,10 +136,16 @@ namespace ThMEPArchitecture
         /// <summary>
         /// 显示车位排布结果
         /// </summary>
-        public void Display()
+        public void Display(string layer, int colorIndex)
         {
             GenerateParkingSpaces();
-            CarSpots.AddToCurrentSpace();
+            foreach (var p in CarSpots)
+            {
+                p.Layer = layer;
+                p.ColorIndex = colorIndex;
+                p.AddToCurrentSpace();
+            }
+            //CarSpots.AddToCurrentSpace();
             //foreach (var e in CarSpots)
             //{
             //    try
@@ -271,7 +277,20 @@ namespace ThMEPArchitecture
                     var l = IniLanes[i];
 
                     var lines = GenerateLanesFromExistingLaneEndpoint(l, Boundary);
-                   
+
+                    //foreach (var po in lines)
+                    //{
+                    //    try
+                    //    {
+                    //        po.AddToCurrentSpace();
+                    //    }
+                    //    catch { }
+                    //}
+                    //Boundary.AddToCurrentSpace();
+                    //lines.AddToCurrentSpace();
+
+                    //lines.AddToCurrentSpace();
+
                     var newlane = new List<Line>();
                     for (int j = 0; j < lines.Count; j++)
                     {
@@ -339,6 +358,7 @@ namespace ThMEPArchitecture
                             pm.LayoutMode = ((int)LayoutMode.SingleVert);
                             Modules.Add(pm);
 
+                            //k.AddToCurrentSpace();
 
                             IniLanes.Add(k);
                             SequenceLanes.Add(k);
@@ -847,6 +867,9 @@ namespace ThMEPArchitecture
             var pts = new List<Point3d>() { pe };
             if (bothsides) pts.Insert(0, ps);
             List<Line> lines = new List<Line>();
+
+
+
             foreach (var pt in pts)
             {
                 var linestmp = new List<Line>();
@@ -856,7 +879,11 @@ namespace ThMEPArchitecture
                 linestmp.AddRange(OffsetLine(b, DisCarAndHalfLane));
                 var center = box.GetCenter();
                 SortLinesByDistanceToPoint(linestmp, center);
-                lines.Add(linestmp[0]);
+                var l = linestmp[0];
+                DBObjectCollection objsbound = new DBObjectCollection();
+                objsbound.Add(box);
+                l = (Line)SplitCurve(l, objsbound)[0];
+                lines.Add(l);
                 linestmp.Clear();
             }
 
@@ -884,6 +911,7 @@ namespace ThMEPArchitecture
             edges.Clear();
             pts.Clear();
 
+            
 
             return lines;
         }
@@ -1519,7 +1547,7 @@ namespace ThMEPArchitecture
             pts = RemoveDuplicatePts(pts, 1);
             for (int i = 0; i < pts.Count; i++)
             {
-                if (curve.GetClosestPointTo(pts[i], false).DistanceTo(pts[i]) > 0)
+                if (curve.GetClosestPointTo(pts[i], false).DistanceTo(pts[i]) > 1)
                 {
                     pts.RemoveAt(i);
                     i--;
@@ -1528,8 +1556,16 @@ namespace ThMEPArchitecture
             if (pts.Count > 0)
             {
                 SortAlongCurve(pts, curve);
-                Point3dCollection ps = new Point3dCollection(pts.ToArray());
-                var splited = curve.GetSplitCurves(ps);
+                Point3dCollection ps = new Point3dCollection(pts.Select(e => curve.GetClosestPointTo(e,false)).ToArray());
+                var splited = new DBObjectCollection();
+                try
+                {
+                    splited = curve.GetSplitCurves(ps);
+                }
+                catch
+                {
+                    ;
+                }
                 return splited.Cast<Curve>().ToArray().ToList();
             }
             else return new List<Curve>() { curve };
@@ -1686,7 +1722,7 @@ namespace ThMEPArchitecture
             var e = a.Vertices().Cast<Point3d>().ToList();
             for (int i = 0; i < e.Count; i++)
             {
-                s += e[i].X.ToString() + e[i].Y.ToString() + ",";
+                s += e[i].X.ToString() + "," + e[i].Y.ToString() + ",";
             }
             return s;
         }
