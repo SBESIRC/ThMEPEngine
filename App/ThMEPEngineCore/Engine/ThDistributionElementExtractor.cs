@@ -95,12 +95,16 @@ namespace ThMEPEngineCore.Engine
                         {
                             foreach (var objId in blockTableRecord)
                             {
-                                objs.Add(objId);
+                                var dbObj = acadDatabase.Element<Entity>(objId);
+                                if (dbObj.Visible)
+                                {
+                                    objs.Add(objId);
+                                }
                             }
                         }
                         foreach (ObjectId objId in objs)
                         {
-                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            var dbObj = acadDatabase.Element<Entity>(objId);  
                             if (dbObj is BlockReference blockObj)
                             {
                                 if (blockObj.BlockTableRecord.IsNull)
