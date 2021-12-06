@@ -24,8 +24,14 @@ using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
-    internal class ThBeamConnectorCommand : ThMEPBaseCommand, IDisposable
+    public class ThBeamConnectorCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThBeamConnectorCommand()
+        {
+            ActionName = "生成主梁";
+            CommandName = "THSCZL";
+        }
+
         public void Dispose()
         {
 

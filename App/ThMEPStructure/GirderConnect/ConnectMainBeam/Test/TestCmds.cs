@@ -315,15 +315,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THBorderPoint", CommandFlags.Modal)]
-        public void THBorderPoint()
-        {
-            using (var cmd = new ThBeamConnectorCommand())
-            {
-                cmd.SubExecute();
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THCntNear2Wall", CommandFlags.Modal)]
         public void THCntNear2Wall()
         {
