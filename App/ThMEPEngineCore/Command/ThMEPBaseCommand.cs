@@ -1,11 +1,5 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using System;
-using System.Collections.Generic;
+﻿using AcHelper.Commands;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThAnalytics;
 
 namespace ThMEPEngineCore.Command
@@ -14,16 +8,16 @@ namespace ThMEPEngineCore.Command
     {
         protected Stopwatch _stopwatch = new Stopwatch();
 
-        public string CommandName { get; set; }
-        public string ActionName { get; set; } = "Execute";
+        public string CommandName { get; set; } = "";
+        public string ActionName { get; set; } = "";
 
         public void Execute()
         {
             //try
             //{
-                BeforeExecute();
-                SubExecute();
-                AfterExecute();
+            BeforeExecute();
+            SubExecute();
+            AfterExecute();
             //}
             //catch (Exception ex)
             //{
