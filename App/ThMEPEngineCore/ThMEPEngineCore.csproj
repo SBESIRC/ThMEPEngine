@@ -164,6 +164,8 @@
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
+    <Compile Include="GridOperation\GridLineCleanService.cs" />
+    <Compile Include="GridOperation\GridService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
@@ -518,7 +520,6 @@
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Model\ThIfcWindow.cs" />
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
-    <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationService.cs" />
@@ -715,6 +716,7 @@
     <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\LayoutPointDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />
+    <Compile Include="UCSDivisionService\Utils\GeoUtils.cs" />
     <Compile Include="UCSDivisionService\Utils\StructPolyService.cs" />
     <Compile Include="UCSDivisionService\Utils\StructUtils.cs" />
     <Compile Include="UCSDivisionService\Utils\UcsByPointsDivider.cs" />
