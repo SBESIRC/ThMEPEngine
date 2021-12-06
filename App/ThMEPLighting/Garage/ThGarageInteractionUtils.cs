@@ -334,23 +334,6 @@ namespace ThMEPLighting.Garage
             arrangeParameter.MinimumEdgeLength = 2500;
             return arrangeParameter;
         }
-        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
-
-        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
-            }
-        }
         public static void SetDatabaseDefaults(this ThCableTrayParameter cableTrayParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

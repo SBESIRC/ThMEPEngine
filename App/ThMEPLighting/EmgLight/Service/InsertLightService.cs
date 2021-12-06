@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore;
 using ThMEPLighting.EmgLight.Common;
+using ThCADExtension;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -17,10 +18,10 @@ namespace ThMEPLighting.EmgLight.Service
         public static void InsertSprayBlock(Dictionary<Polyline, (Point3d, Vector3d)> insertPtInfo, double scale, string blkName)
         {
             using (var db = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                db.Database.ImportBlock(blkName);
-                db.Database.ImportLayer(ThMEPLightingCommon.EmgLightLayerName);
-
+                db.Blocks.Import(blockDb.Blocks.ElementOrDefault(blkName), true);
+                db.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.EmgLightLayerName), true);
                 foreach (var ptInfo in insertPtInfo)
                 {
                     var size = EmgLightCommon.blk_move_length[blkName];

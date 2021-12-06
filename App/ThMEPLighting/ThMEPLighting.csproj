@@ -79,7 +79,6 @@
     <Compile Include="EmgLightConnect\Service\orderSingleSideLaneService.cs" />
     <Compile Include="EmgLightConnect\Service\MergeSideService.cs" />
     <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
-    <Compile Include="EmgLight\Common\InsertService.cs" />
     <Compile Include="EmgLight\EmgLightCommon.cs" />
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
     <Compile Include="EmgLight\Model\ThLane.cs" />

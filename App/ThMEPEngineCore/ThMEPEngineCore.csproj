@@ -134,7 +134,6 @@
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\SmallDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\LargeDetectUCSOpt.cs" />
     <Compile Include="AreaLayout\GridLayout\Sensorlayout\NormalUCSOpt.cs" />
-    <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="CAD\NameValueString.cs" />
     <Compile Include="CAD\ThMEPDB3ComponentUtils.cs" />
     <Compile Include="CAD\ThMEPDbExtension.cs" />
