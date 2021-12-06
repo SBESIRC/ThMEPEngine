@@ -53,7 +53,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         public List<string> FireApartMap { get; set; } = new List<string>();
 
         //房间配置表属性
-        public string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+        public string roomConfigUrl = ThCADCommon.RoomConfigPath();
         public List<RoomTableTree> roomTableConfig = new List<RoomTableTree>();  //房间配置表
         //public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       //
 
@@ -64,7 +64,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             AvoidBlkNameList = avoidBlkNameList;
 
             PrepareData();
-            CleanData();
+            CleanPreviousEquipment();
 
             GeometryMap = new Dictionary<Entity, ThGeometry>();
             data.ForEach(o =>
@@ -104,7 +104,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             GetFireLinkageRooms();
         }
 
-        private void CleanData()
+        private void CleanPreviousEquipment()
         {
             CleanEquipments.ForEach(x =>
             {
@@ -152,8 +152,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         {
             //List<string> FireLinkageNames = new List<string> { "消防水泵房", "发电机房", "配变电室", "计算机网络机房",
             //    "主要通风和空调机房", "防排烟机房", "灭火控制系统操作装置处或控制室", "企业消防站", "消防值班室", "总调度室", "消防电梯机房" };
-            List<string> FireLinkageNames = new List<string> { "消防水泵房", "电气机房", "网络通信机房", "计算机机房", "通风机房",
-                                                                "空调机房", "防排烟机房", "控制室", "电梯机房" };
+            //List<string> FireLinkageNames = new List<string> { "消防水泵房", "电气机房", "网络通信机房", "计算机机房", "通风机房",
+            //                                                    "空调机房", "防排烟机房", "控制室", "电梯机房" };
+
+            var FireLinkageNames = ThFaFixCommon.FireLinkageNames;
             List<string> NameCollection = new List<string>();
             foreach (string a in FireLinkageNames)
             {

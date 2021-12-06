@@ -20,6 +20,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Config;
 using NetTopologySuite.Geometries;
 
 using ThMEPElectrical.AFAS;
@@ -35,7 +36,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
         public List<ThGeometry> Data { get; private set; }
         private List<string> CleanBlkName { get; set; } = new List<string>();
         private List<string> AvoidBlkNameList { get; set; } = new List<string>();
-
+        private List<RoomTableTree> RoomConfigTree;
         //output
         public List<ThGeometry> Room { get; private set; }
         public List<ThGeometry> AvoidEquipments { get; private set; }
@@ -45,6 +46,9 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 
         public ThAFASDistanceDataSet(List<ThGeometry> geom, List<string> cleanBlkName, List<string> avoidBlkNameList)
         {
+            string roomConfigUrl = ThCADCommon.RoomConfigPath();
+            RoomConfigTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
+
             this.Data = geom;
             CleanBlkName = cleanBlkName;
             AvoidBlkNameList = avoidBlkNameList;
@@ -64,7 +68,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             return roomPl;
         }
 
-        public void CleanData()
+        public void CleanPreviousEquipment()
         {
             CleanEquipments.ForEach(x =>
             {
@@ -83,6 +87,58 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 
 
         }
+
+        public void ProcessRoomPlacementLabel(string layoutType)
+        {
+            AddRoomPlacementLabel(layoutType);
+            RemoveRoom();
+        }
+
+        private void RemoveRoom()
+        {
+            var roomClean = new List<ThGeometry>();
+            for (int i = 0; i < Room.Count; i++)
+            {
+                if (Room[i].Properties.TryGetValue(ThExtractorPropertyNameManager.PlacementPropertyName, out var placementLable))
+                {
+                    if (placementLable != null && placementLable.ToString() == ThFaDistCommon.LayoutTagDict[ThFaDistCommon.LayoutTagRemove])
+                    {
+                        roomClean.Add(Room[i]);
+                    }
+                }
+            }
+
+            Data.RemoveAll (x=>roomClean.Contains (x));
+            Room.RemoveAll (x=>roomClean.Contains (x));
+
+        }
+        private void AddRoomPlacementLabel(string layoutType)
+        {
+            foreach (var room in Room)
+            {
+                var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
+                var roomTag = RoomConfigTreeService.getRoomTag(RoomConfigTree, roomName);
+                var layoutTag = roomTag.Where(x => x.Contains(layoutType)).FirstOrDefault();
+                var added = false;
+
+                if (layoutTag != null)
+                {
+                    layoutTag = layoutTag.Replace(layoutType, "");
+
+                    if (layoutTag != null && layoutTag != "" && ThFaDistCommon.LayoutTagDict.TryGetValue(layoutTag, out var labelInGeom))
+                    {
+                        added = true;
+                        room.Properties.Add(ThExtractorPropertyNameManager.PlacementPropertyName, labelInGeom);
+                    }
+                }
+                if (added == false)
+                {
+                    var labelInGeom = ThFaDistCommon.LayoutTagDict[ThFaDistCommon.LayoutTagRemove];
+                    room.Properties.Add(ThExtractorPropertyNameManager.PlacementPropertyName, labelInGeom);
+                }
+            }
+        }
+
 
 
         public void ExtendEquipment(List<string> cleanBlkName, double scale)
@@ -127,7 +183,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var StoreyBorder = QueryCategory(BuiltInCategory.StoreyBorder.ToString());
             var FireApart = QueryCategory(BuiltInCategory.FireApart.ToString());
             var PlaceCoverage = QueryCategory("PlaceCoverage");
-         
+
             archWall.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0archWall", 3));
             shearWall.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 0));
             Column.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
@@ -141,6 +197,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 
         }
 
-      
+
     }
 }

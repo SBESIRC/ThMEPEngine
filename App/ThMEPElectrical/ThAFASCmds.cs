@@ -198,9 +198,11 @@ namespace ThMEPElectrical.AFAS
 
                 var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
                 data.ClassifyData();
-                data.CleanData();
+                data.CleanPreviousEquipment();
                 data.ExtendEquipment(cleanBlkName, scale);
                 data.FilterBeam();
+                data.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
+
                 data.print();
 
                 ///debug

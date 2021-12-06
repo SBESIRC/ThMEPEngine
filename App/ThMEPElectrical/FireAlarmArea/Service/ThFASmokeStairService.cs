@@ -19,7 +19,7 @@ using ThMEPElectrical.FireAlarmArea.Model;
 
 namespace ThMEPElectrical.FireAlarmArea.Service
 {
-    class ThStairService
+    class ThFASmokeStairService
     {
         /// <summary>
         /// 楼梯部分布置
@@ -65,7 +65,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
         public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> GetSmokeSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
             var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
-            string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+            string roomConfigUrl = ThCADCommon.RoomConfigPath();
             var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
             var stairName = ThFaCommon.stairName;
             var smokeTag = ThFaSmokeCommon.smokeTag;

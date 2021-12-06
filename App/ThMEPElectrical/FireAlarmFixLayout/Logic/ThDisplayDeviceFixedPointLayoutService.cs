@@ -387,7 +387,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             int fireApartNum = DataQueryWorker.FireAparts.Count;
             var roomsArranged = DataQueryWorker.ClassifyByFireApart(DataQueryWorker.Rooms);
             var doorsArranged = DataQueryWorker.ClassifyByFireApart(DataQueryWorker.DoorOpenings);
-            List<string> selectOrder = new List<string> { "消防电梯前室", "前室", "走道", "门厅", "中庭" };
+            var selectOrder = ThFaFixCommon.DisplayPublicBuildingOrder;
             List<List<string>> selectOrderMap = new List<List<string>>();
             //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
             selectOrderMap.AddRange(selectOrder.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.roomTableConfig, o)));

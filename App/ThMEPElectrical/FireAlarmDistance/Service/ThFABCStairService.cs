@@ -59,7 +59,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
 
         private static List<Polyline> FindStairRoomBoundary(List<ThGeometry> Room)
         {
-            string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+            string roomConfigUrl = ThCADCommon.RoomConfigPath();
             var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
             var stairName = ThFaCommon.stairName;
             var stairBoundary = new List<Polyline>();

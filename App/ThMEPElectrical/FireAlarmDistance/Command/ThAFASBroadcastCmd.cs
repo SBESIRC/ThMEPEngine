@@ -103,9 +103,10 @@ namespace ThMEPElectrical.FireAlarmDistance
                 var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
                 data.ClassifyData();
-                data.CleanData();
+                data.CleanPreviousEquipment();
                 data.ExtendEquipment(cleanBlkName, _scale);
                 data.FilterBeam();
+                data.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
 
                 //布置广播
                 var geojson = ThGeoOutput.Output(data.Data);

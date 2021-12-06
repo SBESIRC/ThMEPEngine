@@ -141,7 +141,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 layoutParameter.priorityExtend = priorityExtend;
 
                 //接入楼梯
-                var stairBlkResult = ThStairService.LayoutStair(layoutParameter);
+                var stairBlkResult = ThFASmokeStairService.LayoutStair(layoutParameter);
                 ////
 
                 ThAFASSmokeEngine.ThFaSmokeHeatLayoutEngine(dataQuery, layoutParameter, out var layoutResult, out var blindsResult);

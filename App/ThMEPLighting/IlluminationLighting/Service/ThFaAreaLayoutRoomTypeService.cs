@@ -44,7 +44,7 @@ namespace ThMEPLighting.IlluminationLighting.Service
         public static Dictionary<Polyline, ThIlluminationCommon.layoutType> getAreaLightType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
             var frameLightType = new Dictionary<Polyline, ThIlluminationCommon.layoutType>();
-            string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+            string roomConfigUrl = ThCADCommon.RoomConfigPath();
             var roomTableTree = ThIlluminationUtils.ReadRoomConfigTable(roomConfigUrl);
             var stairName = ThIlluminationCommon.stairName;
             var evacuationTag = ThIlluminationCommon.evacuationTag;

@@ -61,10 +61,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void FireAlarmDisplayDeviceLayoutExecute()
         {
-            if (_buildingType == BuildingType.None)
-            {
-                return;
-            }
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -79,7 +75,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 {
                     SettingNoUI();
                 }
-
+                if (_buildingType == BuildingType.None)
+                {
+                    return;
+                }
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_District, ThFaCommon.BlkName_Display_Floor };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();

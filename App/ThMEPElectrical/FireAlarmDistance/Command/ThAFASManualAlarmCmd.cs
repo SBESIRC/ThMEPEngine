@@ -101,9 +101,10 @@ namespace ThMEPElectrical.FireAlarmDistance
                 var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
                 data.ClassifyData();
-                data.CleanData();
+                data.CleanPreviousEquipment();
                 data.ExtendEquipment(cleanBlkName, _scale);
                 data.FilterBeam();
+                data.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
 
                 //布置手动报警
                 var geojson = ThGeoOutput.Output(data.Data);
@@ -129,8 +130,8 @@ namespace ThMEPElectrical.FireAlarmDistance
                 var ptDirListTop = ThAFASDistanceLayoutService.FindOutputPtsOnTop(ptDirList, layoutBlkNameTop, _scale);
                 ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
 
-                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop , ThFaCommon.blk_layer[layoutBlkNameTop], true);
-                ThFireAlarmInsertBlk.InsertBlock(ptDirListTop, _scale, layoutBlkNameBottom , ThFaCommon.blk_layer[layoutBlkNameBottom], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop, ThFaCommon.blk_layer[layoutBlkNameTop], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirListTop, _scale, layoutBlkNameBottom, ThFaCommon.blk_layer[layoutBlkNameBottom], true);
             }
         }
 

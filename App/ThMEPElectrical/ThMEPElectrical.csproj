@@ -140,6 +140,7 @@
     <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
     <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
     <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />
+    <Compile Include="FireAlarmDistance\ThFaDistCommon.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASDisplayDeviceLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
@@ -149,7 +150,7 @@
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
     <Compile Include="AFAS\Model\ThLayoutPt.cs" />
-    <Compile Include="FireAlarmArea\Service\ThStairService.cs" />
+    <Compile Include="FireAlarmArea\Service\ThFASmokeStairService.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutParamterCalculationService.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaSmokeRoomTypeService.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaAreaLayoutService.cs" />

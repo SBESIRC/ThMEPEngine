@@ -57,7 +57,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
 
             PrepareData();
             SetAvoidEquipment();
-            CleanData();
+            CleanPreviousEquipment();
         }
 
         protected void PrepareData()
@@ -81,7 +81,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
 
         }
 
-        public void CleanData()
+        public void CleanPreviousEquipment()
         {
             if (CleanBlkName != null)
             {
