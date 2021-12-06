@@ -173,6 +173,7 @@
     <Compile Include="AFAS\Service\ThQueryHoleTextInfoService.cs" />
     <Compile Include="AFAS\ViewModel\FireAlarmViewModel.cs" />
     <Compile Include="AFAS\ThFaCommon.cs" />
+    <Compile Include="FireAlarmFixLayout\ThFaFixCommon.cs" />
     <Compile Include="GroundingGrid\Data\ThGroundStoreyExtractor.cs" />
     <Compile Include="DCL\Data\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="DCL\Data\ThOuterOtherColumnExtractor.cs" />
