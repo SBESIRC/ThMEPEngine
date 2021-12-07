@@ -7,6 +7,9 @@ using ThMEPEngineCore.IO.IOService;
 using ThMEPEngineCore.IO.ExcelService;
 using ThMEPLighting.ServiceModels;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Linq;
+using Dreambuild.AutoCAD;
+using System.Windows.Input;
 
 namespace ThMEPLighting.ViewModel
 {
@@ -44,6 +47,34 @@ namespace ThMEPLighting.ViewModel
             {
                 _configLst = value;
                 this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 全选
+        /// </summary>
+        private bool? allCheck;
+        public bool? AllCheck
+        {
+            get
+            {
+                if (configLst.All(x=>x.configModels.All(y => y.isCheck)))
+                {
+                    allCheck = true;
+                }
+                return allCheck;
+            }
+            set
+            {
+                allCheck = value;
+                if (value  == false)
+                {
+                    configLst.ForEach(x => x.configModels.ForEach(y => y.isCheck = false));
+                }
+                else if(value == true)
+                {
+                    configLst.ForEach(x => x.configModels.ForEach(y => y.isCheck = true));
+                }
             }
         }
 

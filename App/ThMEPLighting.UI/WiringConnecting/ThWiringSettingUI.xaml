@@ -8,7 +8,7 @@
              mc:Ignorable="d"
              WindowStyle="None"
              Width="550"
-             Height="370">
+             Height="375">
     <Window.Resources>
         <CollectionViewSource x:Key="LstKey" Source="{Binding configLst}">
             <CollectionViewSource.GroupDescriptions>
@@ -22,8 +22,12 @@
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
         <!--标题栏-->
-        <Grid Grid.Row="0" x:Name="TitleBar" MouseMove="TitleBar_MouseMove" Background="#FF555555" Grid.ColumnSpan="2" Height="30">
+        <Grid Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" x:Name="TitleBar" MouseMove="TitleBar_MouseMove" Background="#FF555555"  Height="30">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="8*"></ColumnDefinition>
                 <ColumnDefinition Width="2*"></ColumnDefinition>
@@ -49,7 +53,7 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <DataGrid x:Name="dg" Grid.Row="1" Height="300" VerticalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding configLst}">
+        <DataGrid x:Name="dg" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Height="300" VerticalAlignment="Center" AutoGenerateColumns="False" CanUserAddRows="False" ItemsSource="{Binding configLst}">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="30" Binding="{Binding systemType}" IsReadOnly="True">
                     <DataGridTextColumn.ElementStyle>
@@ -68,7 +72,7 @@
                                     <DataGridTemplateColumn Width="30">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <CheckBox IsChecked ="{Binding Path=isCheck, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+                                                <CheckBox IsChecked ="{Binding Path=isCheck, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}" Click="CheckBox_Click"></CheckBox>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
@@ -108,7 +112,11 @@
                 </DataGridTemplateColumn>
             </DataGrid.Columns>
         </DataGrid>
-        <StackPanel Grid.Row="2" Grid.ColumnSpan="2" HorizontalAlignment="Right">
+        <!--<StackPanel Grid.Row="2" Grid.Column="0" HorizontalAlignment="Left" Orientation="Horizontal">
+            <CheckBox Name="AllCheck" Margin="15,15,0,10" IsChecked ="{Binding Path=AllCheck, Mode=TwoWay,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}"></CheckBox>
+            <Label Grid.Row="1" Grid.Column="0" Content="全选" Margin="0,10,10,10"></Label>
+        </StackPanel>-->
+        <StackPanel Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right">
             <cus:ImageButton IsTabStop="True" Focusable="True" 
                              TabIndex="0" Content="保存" 
                              x:Name="btnSave" Height="24" 

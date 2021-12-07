@@ -55,9 +55,16 @@ namespace ThMEPLighting.ServiceModels
         /// <summary>
         /// 是否选中
         /// </summary>
+        private bool check = true;
         public bool isCheck
         {
-            get; set;
+            get {
+                return check;
+            }
+            set
+            {
+                check = value;
+            }
         }
     }
 }
