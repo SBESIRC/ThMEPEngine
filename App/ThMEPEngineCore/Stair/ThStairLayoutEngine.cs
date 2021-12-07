@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Stair
 {
     public class ThStairLayoutEngine
     {
-        public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, Point3dCollection points, double scale, string equimentName, bool platOnly)
+        public Dictionary<Point3d, double> Layout(Database database, List<Polyline> rooms, List<Polyline> obstacle, Point3dCollection points, double scale, string equimentName, bool platOnly)
         {
             // 提取楼梯块
             var engine = new ThDB3StairRecognitionEngine { Rooms = rooms };
@@ -21,16 +21,16 @@ namespace ThMEPEngineCore.Stair
             var stairs = engine.Elements.Cast<ThIfcStair>().ToList();
 
             // 计算布置位置
-            return Calculate(stairs, scale, equimentName, platOnly);
+            return Calculate(stairs, obstacle, scale, equimentName, platOnly);
         }
 
-        private Dictionary<Point3d, double> Calculate(List<ThIfcStair> stairs, double scale, string equimentName, bool platOnly)
+        private Dictionary<Point3d, double> Calculate(List<ThIfcStair> stairs, List<Polyline> obstacle, double scale, string equimentName, bool platOnly)
         {
             var dictionary = new Dictionary<Point3d, double>();
             stairs.ForEach(stair =>
             {
                 var doorsEngine = new ThStairDoorService();
-                var doors = doorsEngine.GetDoorList(stair.SrcBlock);
+                var doors = doorsEngine.GetDoorList(stair.SrcBlock, obstacle);
                 var layoutEngine = new ThStairLayoutEngine();
                 var angle = 0.0;
                 if (equimentName == "E-BFAS110")

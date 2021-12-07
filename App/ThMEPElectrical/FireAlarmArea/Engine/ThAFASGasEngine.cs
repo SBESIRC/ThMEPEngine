@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
-
+using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.FireAlarmArea.Data;
@@ -52,6 +52,7 @@ namespace ThMEPElectrical.FireAlarmArea
 
         private static void LayoutProcess(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThAFASGasLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
+            var blindType = BlindType.CoverArea;
             var radius = layoutParameter.ProtectRadius;
 
             DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
@@ -60,13 +61,13 @@ namespace ThMEPElectrical.FireAlarmArea
             if (bIsAisleArea == false)
             {
                 DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius, out localPts, out blines);
+                ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius, blindType,out localPts, out blines);
                 DebugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
             else
             {
                 DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
-                ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius, out localPts, out blines);
+                ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius, blindType, out localPts, out blines);
                 DebugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
         }

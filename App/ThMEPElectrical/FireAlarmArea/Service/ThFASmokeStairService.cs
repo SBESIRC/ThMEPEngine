@@ -37,14 +37,21 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             var stairNormalPts = new List<Point3d>();
             var stairEmgPts = new List<Point3d>();
             var resultPts = new List<ThLayoutPt>();
+            var obstacle = new List<Polyline>();
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //boundary 到原位置
+                //obstacle
+                obstacle.AddRange(layoutParameter.DoorOpenings.Select(x => x.Boundary as Polyline).ToList());
+                obstacle.AddRange(layoutParameter.Windows.Select(x => x.Boundary as Polyline).ToList());
+
+                //boundary obstacle 到原位置
                 var stairBoundary = layoutParameter.RoomType.Where(x => x.Value == ThFaSmokeCommon.layoutType.stair).Select(x => x.Key).ToList();
                 stairBoundary.ForEach(x => transformer.Reset(x));
+                obstacle.ForEach(x=>transformer.Reset(x));
+
                 var stairEngine = new ThStairEquimentLayout();
-                var stairFireDetector = stairEngine.StairFireDetector(acadDatabase.Database, stairBoundary, pts, scale);
+                var stairFireDetector = stairEngine.StairFireDetector(acadDatabase.Database, stairBoundary, obstacle, pts, scale);
                 var stairFirePts = stairFireDetector.Select(x => x.Key).ToList();
                 foreach (var r in stairFireDetector)
                 {
@@ -53,6 +60,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 
                 //楼梯间结果，楼梯房间框线转到原点位置
                 stairBoundary.ForEach(x => transformer.Transform(x));
+                obstacle.ForEach(x => transformer.Transform(x));
                 stairFirePts = stairFirePts.Select(x => transformer.Transform(x)).ToList();
 
                 layoutParameter.StairPartResult.AddRange(stairFirePts);
@@ -60,75 +68,6 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 
                 return resultPts;
             }
-        }
-
-        public static Dictionary<Polyline, ThFaSmokeCommon.layoutType> GetSmokeSensorType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
-        {
-            var frameSensorType = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
-            string roomConfigUrl = ThCADCommon.RoomConfigPath();
-            var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
-            var stairName = ThFaCommon.stairName;
-            var smokeTag = ThFaSmokeCommon.smokeTag;
-            var heatTag = ThFaSmokeCommon.heatTag;
-            var prfTag = ThFaSmokeCommon.expPrfTag;
-            var nonLayoutTag = ThFaSmokeCommon.nonLayoutTag;
-
-            foreach (var room in Room)
-            {
-                var typeInt = ThFaSmokeCommon.layoutType.noName;
-                var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
-
-                if (ThAFASRoomUtils.IsRoom(roomTableTree, roomName, stairName))
-                {
-                    typeInt = ThFaSmokeCommon.layoutType.stair;
-                }
-                else if (roomName != "")
-                {
-                    var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
-                    if (tagList.Contains(smokeTag) && tagList.Contains(heatTag) && tagList.Contains(prfTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.smokeHeatPrf;
-                    }
-                    else if (tagList.Contains(smokeTag) && tagList.Contains(heatTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.smokeHeat;
-                    }
-                    else if (tagList.Contains(smokeTag) && tagList.Contains(prfTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.smokePrf;
-                    }
-                    else if (tagList.Contains(smokeTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.smoke;
-                    }
-                    else if (tagList.Contains(heatTag) && tagList.Contains(prfTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.heatPrf;
-                    }
-                    else if (tagList.Contains(heatTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.heat;
-                    }
-                    else if (tagList.Contains(nonLayoutTag))
-                    {
-                        typeInt = ThFaSmokeCommon.layoutType.nonLayout;
-                    }
-                }
-
-                //如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
-                if (typeInt == ThFaSmokeCommon.layoutType.noName)
-                {
-                    typeInt = ThFaSmokeCommon.layoutType.smoke;
-                }
-
-
-                frameSensorType.Add(roomFrameDict[room], typeInt);
-                DrawUtils.ShowGeometry(roomFrameDict[room].GetPoint3dAt(0), string.Format("roomName:{0}", roomName), "l0roomName", 121, 25, 200);
-
-            }
-
-            return frameSensorType;
-
         }
     }
 }

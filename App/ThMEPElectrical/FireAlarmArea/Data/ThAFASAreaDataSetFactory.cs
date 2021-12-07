@@ -71,6 +71,18 @@ namespace ThMEPElectrical.FireAlarmArea.Data
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3BeamVisitor.Results,
                     },
+                      new ThAFASWindowExtractor()
+                    {
+                        ElementLayer="AI-窗",
+                        Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3WindowVisitor.Results,
+                    },
+                          new ThAFASDoorOpeningExtractor()
+                    {
+                        ElementLayer = "AI-门",
+                        Transformer = Transformer,
+                        VisitorManager = vm,
+                    },
                       new ThFireAlarmBlkExtractor ()
                     {
                         Transformer = Transformer ,
@@ -81,15 +93,24 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             extractors.ForEach(o => o.Extract(database, collection));
 
             //提取可布区域
-            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors,Transformer , ReferBeam);
+            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam);
             extractors.Add(placeConverage);
 
             //提取探测区域
-            if (NeedDetective ==true)
+            if (NeedDetective == true)
             {
                 var detectiveConverage = BuildDetectionRegion(extractors, WallThick);
                 extractors.Add(detectiveConverage);
             }
+
+            // 把房间传给门提取器
+            var faDoorExtractor = extractors.Where(o => o is ThAFASDoorOpeningExtractor).First() as ThAFASDoorOpeningExtractor;
+            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
+            faDoorExtractor.SetRooms(roomExtractor.Rooms);
+            //把洞传给门提取器
+            var holeExtractor = extractors.Where(o => o is ThAFASHoleExtractor).First() as ThAFASHoleExtractor;
+            faDoorExtractor.SetHoles(holeExtractor.HoleDic.Keys.ToList());
+
 
             //收集数据
             extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
@@ -141,6 +162,9 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             extractor.Accept(visitors.ColumnVisitor);
             extractor.Accept(visitors.ShearWallVisitor);
             extractor.Accept(visitors.DB3BeamVisitor);
+            extractor.Accept(visitors.DB3WindowVisitor);
+            extractor.Accept(visitors.DB3DoorMarkVisitor);
+            extractor.Accept(visitors.DB3DoorStoneVisitor);
             extractor.Extract(database);
             return visitors;
         }

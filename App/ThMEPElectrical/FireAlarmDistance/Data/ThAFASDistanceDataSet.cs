@@ -43,6 +43,9 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 
         private List<ThGeometry> CleanEquipments { get; set; }
 
+        public List<ThGeometry> DoorOpenings { get; set; } = new List<ThGeometry>();
+        public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
+
 
         public ThAFASDistanceDataSet(List<ThGeometry> geom, List<string> cleanBlkName, List<string> avoidBlkNameList)
         {
@@ -61,6 +64,9 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var AllEquipment = QueryCategory(BuiltInCategory.Equipment.ToString());
             CleanEquipments = AllEquipment.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
             AvoidEquipments = AllEquipment.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
+            DoorOpenings = QueryCategory(BuiltInCategory.DoorOpening.ToString());
+            Windows = QueryCategory(BuiltInCategory.Window.ToString());
+
         }
         public List<Polyline> GetRoomBoundary()
         {
@@ -178,7 +184,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var archWall = QueryCategory(BuiltInCategory.ArchitectureWall.ToString());
             var shearWall = QueryCategory(BuiltInCategory.ShearWall.ToString());
             var Column = QueryCategory(BuiltInCategory.Column.ToString());
-            var DoorOpening = QueryCategory(BuiltInCategory.DoorOpening.ToString());
             var Hole = QueryCategory(BuiltInCategory.Hole.ToString());
             var StoreyBorder = QueryCategory(BuiltInCategory.StoreyBorder.ToString());
             var FireApart = QueryCategory(BuiltInCategory.FireApart.ToString());
@@ -188,13 +193,13 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             shearWall.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 0));
             Column.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
             Room.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0room", 2));
-            DoorOpening.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
+            DoorOpenings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
             Hole.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Hole", 5));
             StoreyBorder.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0StoreyBorder", 6));
             FireApart.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireApart", 112));
             PlaceCoverage.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0PlaceCoverage", 6));
             AvoidEquipments.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Equipment", 152));
-
+            Windows.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Window", 4));
         }
 
 

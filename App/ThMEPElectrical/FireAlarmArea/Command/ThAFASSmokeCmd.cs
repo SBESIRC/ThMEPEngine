@@ -139,6 +139,8 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 layoutParameter.framePts = pts;
                 layoutParameter.transformer = transformer;
                 layoutParameter.priorityExtend = priorityExtend;
+                layoutParameter.DoorOpenings = dataQuery.DoorOpenings;
+                layoutParameter.Windows = dataQuery.Windows;
 
                 //接入楼梯
                 var stairBlkResult = ThFASmokeStairService.LayoutStair(layoutParameter);
@@ -169,7 +171,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
             _referBeam = beam.Value == 1 ? true : false;
 
 
-            var wallThick = Active.Editor.GetDouble("\n板厚：");
+            var wallThick = Active.Editor.GetDouble("\n板厚");
             if (wallThick.Status != PromptStatus.OK)
             {
                 return;

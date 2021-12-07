@@ -29,51 +29,51 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 
-using ThMEPLighting.IlluminationLighting.Common;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS;
 
 
 namespace ThMEPLighting.IlluminationLighting.Service
 {
-    class ThFaAreaLayoutRoomTypeService
+    class ThFaIlluminationRoomTypeService
     {
         /// <summary>
         /// 读配置表.
         /// </summary>
         /// <param name="frameList"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, ThIlluminationCommon.layoutType> getAreaLightType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
+        public static Dictionary<Polyline, ThIlluminationCommon.LayoutType> GetIllunimationType(List<ThGeometry> Room, Dictionary<ThGeometry, Polyline> roomFrameDict)
         {
-            var frameLightType = new Dictionary<Polyline, ThIlluminationCommon.layoutType>();
+            var frameLightType = new Dictionary<Polyline, ThIlluminationCommon.LayoutType>();
             string roomConfigUrl = ThCADCommon.RoomConfigPath();
-            var roomTableTree = ThIlluminationUtils.ReadRoomConfigTable(roomConfigUrl);
-            var stairName = ThIlluminationCommon.stairName;
-            var evacuationTag = ThIlluminationCommon.evacuationTag;
-            var normalTag = ThIlluminationCommon.normalTag;
-
+            var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
+            var stairName = ThFaCommon.stairName;
+            var evacuationTag = ThIlluminationCommon.EvacuationTag;
+            var normalTag = ThIlluminationCommon.NormalTag;
 
             foreach (var room in Room)
             {
-                var typeInt = ThIlluminationCommon.layoutType.noName;
+                var typeInt = ThIlluminationCommon.LayoutType.noName;
                 var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
 
-                if (isRoom(roomTableTree, roomName, stairName))
+                if (ThAFASRoomUtils.IsRoom(roomTableTree, roomName, stairName))
                 {
-                    typeInt = ThIlluminationCommon.layoutType.stair;
+                    typeInt = ThIlluminationCommon.LayoutType.stair;
                 }
                 else if (roomName != "")
                 {
                     var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
                     if (tagList.Contains(normalTag) && tagList.Contains(evacuationTag))
                     {
-                        typeInt = ThIlluminationCommon.layoutType.normalEvac;
+                        typeInt = ThIlluminationCommon.LayoutType.normalEvac;
                     }
                     else if (tagList.Contains(normalTag))
                     {
-                        typeInt = ThIlluminationCommon.layoutType.normal;
+                        typeInt = ThIlluminationCommon.LayoutType.normal;
                     }
                     else if (tagList.Contains(evacuationTag))
                     {
-                        typeInt = ThIlluminationCommon.layoutType.evacuation;
+                        typeInt = ThIlluminationCommon.LayoutType.evacuation;
                     }
                 }
 
@@ -90,18 +90,5 @@ namespace ThMEPLighting.IlluminationLighting.Service
             return frameLightType;
 
         }
-
-        private static bool isRoom(List<RoomTableTree> roomTableTree, string name, string standardName)
-        {
-            var bReturn = false;
-            var nameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);
-
-            if (nameList.Contains(name))
-            {
-                bReturn = true;
-            }
-            return bReturn;
-        }
-
     }
 }

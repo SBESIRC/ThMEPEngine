@@ -13,11 +13,11 @@ namespace ThMEPEngineCore.Service
 {
     public class ThStairDoorService
     {
-        public List<List<Point3d>> GetDoorList(BlockReference stair)
+        public List<List<Point3d>> GetDoorList(BlockReference stair, List<Polyline> obstacle)
         {
-            var points = GetClosePointToPline(stair);
+            var points = GetClosePointToPline(stair, obstacle);
             var doorList = new List<List<Point3d>>();
-            for (int row = 0; row < points.Count; row++) 
+            for (int row = 0; row < points.Count; row++)
             {
                 var maxDistance = 0.0;
                 var door = new List<Point3d>();
@@ -47,45 +47,40 @@ namespace ThMEPEngineCore.Service
             return doorList;
         }
 
-        private List<List<Point3d>> GetClosePointToPline(BlockReference stair)
+        private List<List<Point3d>> GetClosePointToPline(BlockReference stair, List<Polyline> obstacle)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            var frame = ToOBB(stair);
+            var closePointToPline = new List<List<Point3d>>();
+            var blocksSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacle.ToCollection());
+            foreach (Polyline filterObj in blocksSpatialIndex.SelectCrossingPolygon(frame))
             {
-                var frame = ToOBB(stair);
-                var buffer = GetBuffer(frame);
-                var closePointToPline = new List<List<Point3d>>();
-                var doors = GetDoors(stair, buffer);
-                var blocksSpatialIndex = new ThCADCoreNTSSpatialIndex(doors);
-                foreach (Polyline filterObj in blocksSpatialIndex.SelectCrossingPolygon(buffer))
+                var verticesMap = new List<Point3d>();
+                foreach (Point3d vertice in filterObj.Vertices())
                 {
-                    var verticesMap = new List<Point3d>();
-                    foreach (Point3d vertice in filterObj.Vertices())
-                    {
-                        verticesMap.Add(frame.GetClosePoint(vertice));
-                    }
-                    closePointToPline.Add(verticesMap);
+                    verticesMap.Add(frame.GetClosePoint(vertice));
                 }
-                return closePointToPline;
+                closePointToPline.Add(verticesMap);
             }
+            return closePointToPline;
         }
 
-        private Polyline GetBuffer(Polyline frame)
-        {
-            var bufferCollection = frame.Buffer(100);
-            var buffer = new Polyline();
-            foreach (Polyline pline in bufferCollection)
-            {
-                buffer = pline;
-            }
-            return buffer;
-        }
+        //private Polyline GetBuffer(Polyline frame)
+        //{
+        //    var bufferCollection = frame.Buffer(100);
+        //    var buffer = new Polyline();
+        //    foreach (Polyline pline in bufferCollection)
+        //    {
+        //        buffer = pline;
+        //    }
+        //    return buffer;
+        //}
 
-        private DBObjectCollection GetDoors(BlockReference stair, Polyline buffer)
-        {
-            var engine = new ThDB3DoorRecognitionEngine();
-            engine.Recognize(stair.BlockTableRecord.Database, buffer.Vertices());
-            return engine.Elements.Select(o => o.Outline).ToCollection();
-        }
+        //private DBObjectCollection GetDoors(BlockReference stair, Polyline buffer)
+        //{
+        //    var engine = new ThDB3DoorRecognitionEngine();
+        //    engine.Recognize(stair.BlockTableRecord.Database, buffer.Vertices());
+        //    return engine.Elements.Select(o => o.Outline).ToCollection();
+        //}
 
         private Polyline ToOBB(BlockReference br)
         {
