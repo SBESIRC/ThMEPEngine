@@ -5,7 +5,7 @@ using DotNetARX;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Model;
 
-namespace ThMEPHVAC.DrawService
+namespace ThMEPHVAC.Service
 {
     public class ThMEPHVACDrawService
     {
