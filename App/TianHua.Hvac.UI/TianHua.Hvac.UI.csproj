@@ -63,22 +63,14 @@
     <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
-    <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacFpmCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
     <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
-    <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="Command\ThHvacSpmCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
-    <Compile Include="fmBypass.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmBypass.Designer.cs">
-      <DependentUpon>fmBypass.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,12 +82,6 @@
     </Compile>
     <Compile Include="fmDuctPorts.Designer.cs">
       <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="fmDuctSpec.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmDuctSpec.Designer.cs">
-      <DependentUpon>fmDuctSpec.cs</DependentUpon>
     </Compile>
     <Compile Include="fmFjfFpm.cs">
       <SubType>Form</SubType>
@@ -255,17 +241,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="fmBypass.resx">
-      <DependentUpon>fmBypass.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmDuctModify.resx">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmDuctPorts.resx">
       <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmDuctSpec.resx">
-      <DependentUpon>fmDuctSpec.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmFjfFpm.resx">
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
