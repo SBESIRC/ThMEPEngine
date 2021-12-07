@@ -15,11 +15,12 @@ using AcHelper;
 using Linq2Acad;
 
 using ThMEPEngineCore.Command;
-using ThMEPLighting.EmgLight.Assistant;
+
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.FireAlarmArea.Data;
 
 using ThMEPLighting.Lighting.ViewModels;
-using ThMEPLighting.IlluminationLighting.Common;
-using ThMEPLighting.IlluminationLighting.Data;
 using ThMEPLighting.IlluminationLighting.Model;
 using ThMEPLighting.IlluminationLighting.Service;
 
@@ -36,26 +37,26 @@ namespace ThMEPLighting.IlluminationLighting
         private double _radiusE = 6000;
         private bool _ifLayoutEmg = true;
         private bool _ifEmgAsNormal = false;
+        private double _wallThick = 0;
 
         public IlluminationLightingCmd(LightingViewModel uiConfigs)
         {
             _UiConfigs = uiConfigs;
-            CommandName = "THZM";
-            ActionName = "照明灯具布置";
-            setInfo();
+            InitialCmdInfo();
+            InitialSetting();
         }
 
         public IlluminationLightingCmd()
         {
 
         }
-
-        public override void SubExecute()
+        private void InitialCmdInfo()
         {
-            ThIlluminationLightingLayoutExecute();
+            CommandName = "THZM";
+            ActionName = "照明灯具布置";
         }
 
-        private void setInfo()
+        private void InitialSetting()
         {
             if (_UiConfigs != null)
             {
@@ -68,7 +69,10 @@ namespace ThMEPLighting.IlluminationLighting
                 _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
             }
         }
-
+        public override void SubExecute()
+        {
+            ThIlluminationLightingLayoutExecute();
+        }
         public void Dispose()
         {
         }
@@ -78,48 +82,53 @@ namespace ThMEPLighting.IlluminationLighting
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var extractBlkList = ThIlluminationCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThIlluminationCommon.BlkName_CircleCeiling,
-                                                        ThIlluminationCommon.BlkName_DomeCeiling,
-                                                        ThIlluminationCommon.BlkName_InductionCeiling,
-                                                        ThIlluminationCommon.BlkName_Downlight,
-                                                       };
-                if (_ifLayoutEmg)
-                {
-                    cleanBlkName.Add(ThIlluminationCommon.BlkName_EmergencyLight);
-                }
-
-                var avoidBlkName = ThIlluminationCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-                var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
-                var layoutBlkNameE = ThIlluminationCommon.BlkName_EmergencyLight;
-
-                //导入块图层。free图层
-                ThInsertBlk.prepareInsert(extractBlkList, ThIlluminationCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
                 //画框，提数据，转数据
-                var pts = ThIlluminationUtils.getFrame();
+                var pts = ThAFASUtils.GetFrameBlk();
                 if (pts.Count == 0)
                 {
                     return;
                 }
+                if (_UiConfigs == null)
+                {
+                    SettingNoUI();
+                }
 
-                var geos = ThIlluminationUtils.getIlluminationData(pts, extractBlkList, _referBeam);
+
+                var extractBlkList = ThFaCommon .BlkNameList;
+                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_CircleCeiling,
+                                                        ThFaCommon.BlkName_DomeCeiling,
+                                                        ThFaCommon.BlkName_InductionCeiling,
+                                                        ThFaCommon.BlkName_Downlight,
+                                                       };
+                if (_ifLayoutEmg)
+                {
+                    cleanBlkName.Add(ThFaCommon.BlkName_EmergencyLight);
+                }
+
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
+                var layoutBlkNameE = ThFaCommon.BlkName_EmergencyLight;
+
+                //导入块图层。free图层
+                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
+
+                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, true);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //转回原点
-                var transformer = ThIlluminationUtils.transformToOrig(pts, geos);
+                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
 
-                var dataQuery = new ThIlluminationDataQueryService(geos, cleanBlkName, avoidBlkName);
+                var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线
-                dataQuery.analysisHoles();
+                dataQuery.AnalysisHoles();
                 //墙，柱，可布区域，避让
                 dataQuery.ClassifyData();
-                var priorityExtend = ThParamterCalculationService.getPriorityExtendValue(cleanBlkName, _scale);
-                dataQuery.extendPriority(priorityExtend);
-                var roomType = ThFaAreaLayoutRoomTypeService.getAreaLightType(dataQuery.Rooms, dataQuery.roomFrameDict);
+                var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, _scale);
+                dataQuery.ExtendPriority(priorityExtend);
+                var roomType = ThFaIlluminationRoomTypeService.GetIllunimationType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
                 foreach (var frame in dataQuery.FrameList)
                 {
@@ -129,7 +138,7 @@ namespace ThMEPLighting.IlluminationLighting
                 }
 
 
-                var layoutParameter = new ThLayoutParameter();
+                var layoutParameter = new ThAFASIlluminationLayoutParameter();
                 layoutParameter.Scale = _scale;
                 layoutParameter.AisleAreaThreshold = 0.025;
                 layoutParameter.BlkNameN = layoutBlkNameN;
@@ -141,21 +150,62 @@ namespace ThMEPLighting.IlluminationLighting
                 layoutParameter.transformer = transformer;
                 layoutParameter.roomType = roomType;
                 layoutParameter.priorityExtend = priorityExtend;
+                layoutParameter.DoorOpenings = dataQuery.DoorOpenings;
+                layoutParameter.Windows = dataQuery.Windows;
+
 
                 //接入楼梯
-                var stairBlkResult = ThStairService.layoutStair(layoutParameter);
+                var stairBlkResult = ThIlluminationStairService.LayoutStair(layoutParameter);
                 ////
 
-                ThIlluminationEngine.thIlluminationLayoutEngine(dataQuery, layoutParameter, out var lightResult, out var blindsResult);
+                ThAFASIlluminationEngine.ThFaIlluminationLayoutEngine(dataQuery, layoutParameter, out var lightResult, out var blindsResult);
 
                 //转回到原始位置
-                lightResult.ForEach(x => x.transformBack(transformer));
+                lightResult.ForEach(x => x.TransformBack(transformer));
 
                 //打印
-                ThInsertBlk.InsertBlock(lightResult, _scale);
-                ThInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
+                ThFireAlarmInsertBlk.InsertBlock(lightResult, _scale);
+                ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
 
             }
         }
+
+        private void SettingNoUI()
+        {
+            _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
+            _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
+
+          
+
+            var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
+            if (beam.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _referBeam = beam.Value == 1 ? true : false;
+
+            var radiusN = Active.Editor.GetInteger("\n正常照明灯具布置半径(mm)");
+            if (radiusN.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _radiusN = radiusN.Value;
+
+            var radiusE = Active.Editor.GetInteger("\n应急照明灯具布置半径(mm)");
+            if (radiusE.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _radiusE = radiusE.Value;
+
+            var layoutEmg = Active.Editor.GetInteger("\n布置应急照明灯 否（0）是（1）");
+            if (layoutEmg.Status != PromptStatus.OK)
+            {
+                return;
+            }
+            _ifLayoutEmg = layoutEmg.Value == 1 ? true : false;
+
+        }
+
     }
 }

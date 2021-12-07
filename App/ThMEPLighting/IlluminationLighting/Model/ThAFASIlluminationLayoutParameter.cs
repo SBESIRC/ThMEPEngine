@@ -7,10 +7,11 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPLighting.IlluminationLighting.Model
 {
-    class ThLayoutParameter
+    class ThAFASIlluminationLayoutParameter
     {
         public Point3dCollection framePts;
         public ThMEPOriginTransformer transformer;
@@ -24,6 +25,9 @@ namespace ThMEPLighting.IlluminationLighting.Model
         public bool ifLayoutEmg = true;
         public double priorityExtend = 0;
         public List<Point3d> stairPartResult { get; set; } = new List<Point3d>();
-        public Dictionary<Polyline, ThIlluminationCommon.layoutType> roomType { get; set; } = new Dictionary<Polyline, ThIlluminationCommon.layoutType>();
+        public List<ThGeometry> DoorOpenings { get; set; } = new List<ThGeometry>();
+        public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
+
+        public Dictionary<Polyline, ThIlluminationCommon.LayoutType> roomType { get; set; } = new Dictionary<Polyline, ThIlluminationCommon.LayoutType>();
     }
 }

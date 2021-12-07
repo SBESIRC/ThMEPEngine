@@ -110,7 +110,6 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Command\ThSecurityPlaneSystemPipeCommand.cs" />
-    <Compile Include="Command\ThStairCommand.cs" />
     <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />

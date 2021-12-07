@@ -21,9 +21,9 @@ using ThMEPElectrical.FireAlarmArea.Model;
 
 namespace ThMEPElectrical.FireAlarmArea.Service
 {
-    class ThFaAreaLayoutService
+    public class ThFaAreaLayoutService
     {
-        public static void ThFaAreaLayoutGrid(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
+        public static void ThFaAreaLayoutGrid(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, BlindType blindType , out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
             localPts = new Dictionary<Point3d, Vector3d>();
             blines = new List<Polyline>();
@@ -40,7 +40,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             layoutCmd.prioritys = dataQuery.FramePriorityList[frame];
             layoutCmd.detectArea = dataQuery.FrameDetectAreaList[frame];
             layoutCmd.protectRadius = radius;
-            layoutCmd.equipmentType = BlindType.CoverArea;
+            layoutCmd.equipmentType = blindType;
 
             layoutCmd.Execute();
 
@@ -63,7 +63,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             blines.AddRange(layoutCmd.blinds);
         }
 
-        public static void ThFaAreaLayoutCenterline(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
+        public static void ThFaAreaLayoutCenterline(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, BlindType blindType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
             localPts = new Dictionary<Point3d, Vector3d>();
             blines = new List<Polyline>();
@@ -78,7 +78,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             layoutCmd.prioritys = dataQuery.FramePriorityList[frame];
             layoutCmd.detectArea = dataQuery.FrameDetectAreaList[frame];
             layoutCmd.radius = radius;
-            layoutCmd.equipmentType = BlindType.CoverArea;
+            layoutCmd.equipmentType = blindType;
 
             layoutCmd.Execute();
 
