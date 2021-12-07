@@ -60,7 +60,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             Button btn = (Button)sender;
             var layerName = btn.Tag.ToString().Trim();
-            setViewModel.Frames.Remove(layerName);
             foreach (var config in setViewModel.ConfigList)
             {
                 if(config.layerName.Equals(layerName))

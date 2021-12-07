@@ -33,6 +33,7 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="AcMPolygonMGD, Version=16.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
