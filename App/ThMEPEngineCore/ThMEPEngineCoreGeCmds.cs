@@ -3,15 +3,15 @@ using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
-using ThCADExtension;
-using System.Collections.Generic;
-using ThMEPEngineCore.UCSDivisionService;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.UCSDivisionService;
 
 namespace ThMEPEngineCore
 {
@@ -148,80 +148,6 @@ namespace ThMEPEngineCore
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
-        }
-
-        /// <summary>
-        /// ucs分区
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THUCSDIV", CommandFlags.Modal)]
-        public void ThUcsDisivision()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                List<Polyline> frameLst = new List<Polyline>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acadDatabase.Element<Polyline>(obj);
-                    frameLst.Add(frame.Clone() as Polyline);
-                }
-
-                foreach (var frame in frameLst)
-                {   
-                    GetStructureInfo(frame, out List<Polyline> columns);
-
-                    //区域分割
-                    UCSService uCSService = new UCSService();
-                    var ucsInfo = uCSService.UcsDivision(columns, frame);
-                    foreach (var item in ucsInfo)
-                    {
-                        //acadDatabase.ModelSpace.Add(item.Key);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 获取构建
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="columns"></param>
-        /// <param name="walls"></param>
-        private void GetStructureInfo(Polyline polyline, out List<Polyline> columns)
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                ////获取柱
-                var ColumnExtractEngine = new ThColumnExtractionEngine();
-                ColumnExtractEngine.Extract(acdb.Database);
-                //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var ColumnEngine = new ThColumnRecognitionEngine();
-                ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
-                
-                columns = new List<Polyline>();
-                columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-                var objs = new DBObjectCollection();
-                columns.ForEach(x => objs.Add(x));
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
-            }
         }
     }
 }
