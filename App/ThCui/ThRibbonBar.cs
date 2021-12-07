@@ -92,33 +92,19 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            {
-                var subPanel = row.AddNewPanel();
+            //{
+            //    var subPanel = row.AddNewPanel();
 
-                // 机房平面
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("机房平面",
-                    "天华机房平面",
-                    "THFJF",
-                    "基于风机图块与风管中心线，自动生成风管、风阀、开洞等元素。",
-                    "IDI_THCAD_THFJF_SMALL",
-                    "IDI_THCAD_THFJF_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
-
-            {
-                var subPanel = row.AddNewPanel();
-
-                // 地库风平面
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("地库风平面",
-                    "天华地库风平面",
-                    "THDKFPM",
-                    "天华地库风平面",
-                    "IDI_THCAD_THDKFPM_SMALL",
-                    "IDI_THCAD_THDKFPM_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            //    // 地库风平面
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    subRow.AddNewButton("地库风平面",
+            //        "天华地库风平面",
+            //        "THDKFPM",
+            //        "天华地库风平面",
+            //        "IDI_THCAD_THDKFPM_SMALL",
+            //        "IDI_THCAD_THDKFPM_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
 
             {
                 var subPanel = row.AddNewPanel();
@@ -131,16 +117,6 @@ namespace TianHua.AutoCAD.ThCui
                     "天华风管修改",
                     "IDI_THCAD_THDKFPMFG_SMALL",
                     "IDI_THCAD_THDKFPMFG_SMALL",
-                    RibbonButtonStyle.SmallWithText);
-
-                // 整体修改
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("整体修改",
-                    "天华整体修改",
-                    "THDKFPMXG",
-                    "天华整体修改",
-                    "IDI_THCAD_THDKFPMXG_SMALL",
-                    "IDI_THCAD_THDKFPMXG_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 风管留洞

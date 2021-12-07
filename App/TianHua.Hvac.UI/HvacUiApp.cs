@@ -31,8 +31,8 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "THFPMS", CommandFlags.Modal)]
-        public void THFPMSuper()
+        [CommandMethod("TIANHUACAD", "THFPM", CommandFlags.Modal)]
+        public void THFPM()
         {
             using (var cmd = new ThHvacFpmCmd())
             {
