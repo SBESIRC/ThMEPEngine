@@ -112,7 +112,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MvvmLightLibs">
+    <PackageReference Include="MvvmLight">
       <Version>5.4.1.1</Version>
     </PackageReference>
   </ItemGroup>

@@ -1,465 +1,464 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0"
-    xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{089CB9EF-4DE3-4714-9046-C600461DB655}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>TianHua.Plumbing.WPF.UI</RootNamespace>
-        <AssemblyName>TianHua.Plumbing.WPF.UI</AssemblyName>
-        <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-        <LangVersion>preview</LangVersion>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-    <ItemGroup>
-        <Reference Include="PresentationCore" />
-        <Reference Include="PresentationFramework" />
-        <Reference Include="System" />
-        <Reference Include="System.Core" />
-        <Reference Include="System.Windows" />
-        <Reference Include="System.Windows.Forms" />
-        <Reference Include="System.Xaml" />
-        <Reference Include="System.Xml.Linq" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Net.Http" />
-        <Reference Include="System.Xml" />
-        <Reference Include="WindowsBase" />
-    </ItemGroup>
-    <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="ManagedLibrary.v16">
-                    <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
-    <ItemGroup>
-        <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="MvvmLight">
-            <Version>5.4.1</Version>
-        </PackageReference>
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Include="Converter\SprinklerRangeBooleanConverter.cs" />
-        <Compile Include="Converter\CheckSprinklerTypeBooleanConverter.cs" />
-        <Compile Include="Converter\RadioUiValueConverter.cs" />
-        <Compile Include="Converter\WaterColumnAngleBooleanConverter.cs" />
-        <Compile Include="Converter\ReductionFactorBooleanConverter.cs" />
-        <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
-        <Compile Include="Converter\ProtectStrengthOpsBooleanConverter.cs" />
-        <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />
-        <Compile Include="Converter\CheckObjectOpsBooleanConverter.cs" />
-        <Compile Include="Converter\ArrangePositionBooleanConverter.cs" />
-        <Compile Include="PlumbingWPFUIApp.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
-            <DependentUpon>DrainageSystemSupplyAxonometricUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\SprinklerCheckersUI.xaml.cs">
-            <DependentUpon>SprinklerCheckersUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\FireHydrant.xaml.cs">
-            <DependentUpon>FireHydrant.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\FlushPointUI.xaml.cs">
-            <DependentUpon>FlushPointUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\ThTipDialog.xaml.cs">
-            <DependentUpon>ThTipDialog.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiBlockNameConfig.xaml.cs">
-            <DependentUpon>uiBlockNameConfig.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiBlockNameConfigSet.xaml.cs">
-            <DependentUpon>uiBlockNameConfigSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
-            <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiDrainageSystem.xaml.cs">
-            <DependentUpon>uiDrainageSystem.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
-            <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml.cs">
-            <DependentUpon>SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiFireHydrantSystem.xaml.cs">
-            <DependentUpon>uiFireHydrantSystem.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiFireHydrantSystemSet.xaml.cs">
-            <DependentUpon>uiFireHydrantSystemSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiPipeDrawControl.xaml.cs">
-            <DependentUpon>uiPipeDrawControl.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\RoomOutlineUI.xaml.cs">
-            <DependentUpon>RoomOutlineUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
-            <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiUNDPDrainageSystemSet.xaml.cs">
-            <DependentUpon>uiUNDPDrainageSystemSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
-            <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiFireControlSystem.xaml.cs">
-            <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
-        <Compile Include="UI\DrainageSystemUI.xaml.cs">
-            <DependentUpon>DrainageSystemUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiHydrantConnectPipe.xaml.cs">
-            <DependentUpon>uiHydrantConnectPipe.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiRainSystem.xaml.cs">
-            <DependentUpon>uiRainSystem.xaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
-        <Compile Include="UI\DrainageSystemParamsUI.xaml.cs">
-            <DependentUpon>DrainageSystemParamsUI.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiRainSystemParams.xaml.cs">
-            <DependentUpon>uiRainSystemParams.xaml</DependentUpon>
-            <SubType>Code</SubType>
-        </Compile>
-        <Compile Include="UI\uiUNDPressureDrainageSystem.xaml.cs">
-            <DependentUpon>uiUNDPressureDrainageSystem.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiUNDSpraySystem.xaml.cs">
-            <DependentUpon>uiUNDSpraySystem.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiUNDSpraySystemSet.xaml.cs">
-            <DependentUpon>uiUNDSpraySystemSet.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiWaterWellPump.xaml.cs">
-            <DependentUpon>uiWaterWellPump.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
-            <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="UI\FloorHeightSetting.xaml.cs">
-            <DependentUpon>FloorHeightSetting.xaml</DependentUpon>
-        </Compile>
-        <Compile Include="Validations\AboveBeamRule.cs" />
-        <Compile Include="Validations\AreaDensityRule.cs" />
-        <Compile Include="Validations\NearbyDistanceRule.cs" />
-        <Compile Include="Validations\SelfLengthRule.cs" />
-        <Compile Include="Validations\HoseLengthRule.cs" />
-        <Compile Include="Validations\NumberRangeInfo.cs" />
-        <Compile Include="Validations\NumberRangeRule.cs" />
-        <Compile Include="Validations\ProtectRadiusRule.cs" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\CADExtension\CADExtension.csproj">
-            <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
-            <Name>CADExtension</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
-            <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
-            <Name>ThCADCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
-            <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
-            <Name>ThControlLibraryWPF</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPArchitecture\ThMEPArchitecture.csproj">
-            <Project>{65557B89-67B5-4776-A2D5-68DA51D5296A}</Project>
-            <Name>ThMEPArchitecture</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-            <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
-            <Name>ThMEPEngineCore</Name>
-        </ProjectReference>
-        <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
-            <Project>{b9bb0f36-dfa2-446a-a676-049304c38fd9}</Project>
-            <Name>ThMEPWSS</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <ItemGroup>
-        <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\SprinklerCheckersUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\FireHydrant.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\FlushPointUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\ThTipDialog.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiBlockNameConfig.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiBlockNameConfigSet.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiDrainageSystem.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiDrainageSysAboveGround.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiFireHydrantSystem.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiFireHydrantSystemSet.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiPipeDrawControl.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\RoomOutlineUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiUNDPDrainageSystemInfoCheck.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiUNDPDrainageSystemSet.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiDrainageSystemSet.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiFireControlSystem.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\DrainageSystemUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiHydrantConnectPipe.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiRainSystem.xaml">
-            <SubType>Designer</SubType>
-            <Generator>XamlIntelliSenseFileGenerator</Generator>
-        </Page>
-        <Page Include="UI\DrainageSystemParamsUI.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiRainSystemParams.xaml">
-            <SubType>Designer</SubType>
-            <Generator>XamlIntelliSenseFileGenerator</Generator>
-        </Page>
-        <Page Include="UI\uiUNDPressureDrainageSystem.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiUNDSpraySystem.xaml">
-            <Generator>MSBuild:Compile</Generator>
-            <SubType>Designer</SubType>
-        </Page>
-        <Page Include="UI\uiUNDSpraySystemSet.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiWaterWellPump.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\uiWaterWellPumpFilter.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-        <Page Include="UI\FloorHeightSetting.xaml">
-            <SubType>Designer</SubType>
-            <Generator>MSBuild:Compile</Generator>
-        </Page>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="bin\Debug-NET45\acad.err" />
-        <None Include="bin\Debug-NET45\Drawing1.dwg.Info.geojson" />
-        <None Include="obj\project.assets.json" />
-        <None Include="obj\project.nuget.cache" />
-        <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.dgspec.json" />
-        <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.g.props" />
-        <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.g.targets" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="bin\Debug-NET45\AcCoreMgd.dll" />
-        <Content Include="bin\Debug-NET45\AcCui.dll" />
-        <Content Include="bin\Debug-NET45\AcDbMgd.dll" />
-        <Content Include="bin\Debug-NET45\acdbmgdbrep.dll" />
-        <Content Include="bin\Debug-NET45\AcDx.dll" />
-        <Content Include="bin\Debug-NET45\AcMgd.dll" />
-        <Content Include="bin\Debug-NET45\AcMPolygonMGD.dll" />
-        <Content Include="bin\Debug-NET45\AcMr.dll" />
-        <Content Include="bin\Debug-NET45\AcsCommon.dll" />
-        <Content Include="bin\Debug-NET45\AcsConnector.exe" />
-        <Content Include="bin\Debug-NET45\AcTcMgd.dll" />
-        <Content Include="bin\Debug-NET45\AcWindows.dll" />
-        <Content Include="bin\Debug-NET45\AdWindows.dll" />
-        <Content Include="bin\Debug-NET45\Autodesk.AutoCAD.Interop.Common.dll" />
-        <Content Include="bin\Debug-NET45\Autodesk.AutoCAD.Interop.dll" />
-        <Content Include="bin\Debug-NET45\BouncyCastle.Crypto.dll" />
-        <Content Include="bin\Debug-NET45\CADExtension.dll" />
-        <Content Include="bin\Debug-NET45\CADExtension.pdb" />
-        <Content Include="bin\Debug-NET45\Catel.Core.dll" />
-        <Content Include="bin\Debug-NET45\Catel.Core.pdb" />
-        <Content Include="bin\Debug-NET45\CommonServiceLocator.dll" />
-        <Content Include="bin\Debug-NET45\DotNetARX.dll" />
-        <Content Include="bin\Debug-NET45\DotNetARX.pdb" />
-        <Content Include="bin\Debug-NET45\EPPlus.dll" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.dll" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Extras.dll" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Extras.pdb" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.pdb" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Platform.dll" />
-        <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Platform.pdb" />
-        <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.dll" />
-        <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.pdb" />
-        <Content Include="bin\Debug-NET45\ManagedLibrary.v16.dll" />
-        <Content Include="bin\Debug-NET45\NetTopologySuite.dll" />
-        <Content Include="bin\Debug-NET45\NetTopologySuite.Features.dll" />
-        <Content Include="bin\Debug-NET45\NetTopologySuite.IO.GeoJSON.dll" />
-        <Content Include="bin\Debug-NET45\Newtonsoft.Json.dll" />
-        <Content Include="bin\Debug-NET45\NPOI.dll" />
-        <Content Include="bin\Debug-NET45\NPOI.OOXML.dll" />
-        <Content Include="bin\Debug-NET45\NPOI.OpenXml4Net.dll" />
-        <Content Include="bin\Debug-NET45\NPOI.OpenXmlFormats.dll" />
-        <Content Include="bin\Debug-NET45\RestSharp.dll" />
-        <Content Include="bin\Debug-NET45\System.Buffers.dll" />
-        <Content Include="bin\Debug-NET45\System.Collections.Immutable.dll" />
-        <Content Include="bin\Debug-NET45\System.ComponentModel.Annotations.dll" />
-        <Content Include="bin\Debug-NET45\System.Configuration.ConfigurationManager.dll" />
-        <Content Include="bin\Debug-NET45\System.Memory.dll" />
-        <Content Include="bin\Debug-NET45\System.Numerics.Vectors.dll" />
-        <Content Include="bin\Debug-NET45\System.Runtime.CompilerServices.Unsafe.dll" />
-        <Content Include="bin\Debug-NET45\System.Security.AccessControl.dll" />
-        <Content Include="bin\Debug-NET45\System.Security.Permissions.dll" />
-        <Content Include="bin\Debug-NET45\System.Security.Principal.Windows.dll" />
-        <Content Include="bin\Debug-NET45\System.Windows.Interactivity.dll" />
-        <Content Include="bin\Debug-NET45\ThCADCore.dll" />
-        <Content Include="bin\Debug-NET45\ThCADCore.pdb" />
-        <Content Include="bin\Debug-NET45\ThCADExtension.dll" />
-        <Content Include="bin\Debug-NET45\ThCADExtension.pdb" />
-        <Content Include="bin\Debug-NET45\ThControlLibraryWPF.dll" />
-        <Content Include="bin\Debug-NET45\ThControlLibraryWPF.pdb" />
-        <Content Include="bin\Debug-NET45\ThMEPAnalytics.dll" />
-        <Content Include="bin\Debug-NET45\ThMEPAnalytics.pdb" />
-        <Content Include="bin\Debug-NET45\ThMEPEngineCore.dll" />
-        <Content Include="bin\Debug-NET45\ThMEPEngineCore.pdb" />
-        <Content Include="bin\Debug-NET45\ThMEPIdentity.dll" />
-        <Content Include="bin\Debug-NET45\ThMEPIdentity.pdb" />
-        <Content Include="bin\Debug-NET45\ThMEPWSS.dll" />
-        <Content Include="bin\Debug-NET45\ThMEPWSS.pdb" />
-        <Content Include="bin\Debug-NET45\TianHua.Plumbing.WPF.UI.dll" />
-        <Content Include="bin\Debug-NET45\TianHua.Plumbing.WPF.UI.pdb" />
-        <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="bin\Debug-NET40\" />
-        <Folder Include="bin\Debug-NET46\" />
-        <Folder Include="bin\Debug\" />
-        <Folder Include="bin\Release-NET40\" />
-        <Folder Include="bin\Release-NET45\" />
-        <Folder Include="bin\Release-NET46\" />
-        <Folder Include="bin\Release\" />
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{089CB9EF-4DE3-4714-9046-C600461DB655}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TianHua.Plumbing.WPF.UI</RootNamespace>
+    <AssemblyName>TianHua.Plumbing.WPF.UI</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <LangVersion>preview</LangVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xaml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v120\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\v140\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="MvvmLight">
+      <Version>5.4.1.1</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Converter\SprinklerRangeBooleanConverter.cs" />
+    <Compile Include="Converter\CheckSprinklerTypeBooleanConverter.cs" />
+    <Compile Include="Converter\RadioUiValueConverter.cs" />
+    <Compile Include="Converter\WaterColumnAngleBooleanConverter.cs" />
+    <Compile Include="Converter\ReductionFactorBooleanConverter.cs" />
+    <Compile Include="Converter\WaterColumnLengthOpsBooleanConverter.cs" />
+    <Compile Include="Converter\ProtectStrengthOpsBooleanConverter.cs" />
+    <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />
+    <Compile Include="Converter\CheckObjectOpsBooleanConverter.cs" />
+    <Compile Include="Converter\ArrangePositionBooleanConverter.cs" />
+    <Compile Include="PlumbingWPFUIApp.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
+      <DependentUpon>DrainageSystemSupplyAxonometricUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SprinklerCheckersUI.xaml.cs">
+      <DependentUpon>SprinklerCheckersUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FireHydrant.xaml.cs">
+      <DependentUpon>FireHydrant.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FlushPointUI.xaml.cs">
+      <DependentUpon>FlushPointUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\ThTipDialog.xaml.cs">
+      <DependentUpon>ThTipDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiBlockNameConfig.xaml.cs">
+      <DependentUpon>uiBlockNameConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiBlockNameConfigSet.xaml.cs">
+      <DependentUpon>uiBlockNameConfigSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiDrainageSysAboveGroundSet.xaml.cs">
+      <DependentUpon>uiDrainageSysAboveGroundSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiDrainageSystem.xaml.cs">
+      <DependentUpon>uiDrainageSystem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiDrainageSysAboveGround.xaml.cs">
+      <DependentUpon>uiDrainageSysAboveGround.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml.cs">
+      <DependentUpon>SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFireHydrantSystem.xaml.cs">
+      <DependentUpon>uiFireHydrantSystem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFireHydrantSystemSet.xaml.cs">
+      <DependentUpon>uiFireHydrantSystemSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiPipeDrawControl.xaml.cs">
+      <DependentUpon>uiPipeDrawControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\RoomOutlineUI.xaml.cs">
+      <DependentUpon>RoomOutlineUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDPDrainageSystemInfoCheck.xaml.cs">
+      <DependentUpon>uiUNDPDrainageSystemInfoCheck.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDPDrainageSystemSet.xaml.cs">
+      <DependentUpon>uiUNDPDrainageSystemSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
+      <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFireControlSystem.xaml.cs">
+      <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\DrainageSystemUI.xaml.cs">
+      <DependentUpon>DrainageSystemUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiHydrantConnectPipe.xaml.cs">
+      <DependentUpon>uiHydrantConnectPipe.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiRainSystem.xaml.cs">
+      <DependentUpon>uiRainSystem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\DrainageSystemParamsUI.xaml.cs">
+      <DependentUpon>DrainageSystemParamsUI.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiRainSystemParams.xaml.cs">
+      <DependentUpon>uiRainSystemParams.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="UI\uiUNDPressureDrainageSystem.xaml.cs">
+      <DependentUpon>uiUNDPressureDrainageSystem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDSpraySystem.xaml.cs">
+      <DependentUpon>uiUNDSpraySystem.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiUNDSpraySystemSet.xaml.cs">
+      <DependentUpon>uiUNDSpraySystemSet.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiWaterWellPump.xaml.cs">
+      <DependentUpon>uiWaterWellPump.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
+      <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\FloorHeightSetting.xaml.cs">
+      <DependentUpon>FloorHeightSetting.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Validations\AboveBeamRule.cs" />
+    <Compile Include="Validations\AreaDensityRule.cs" />
+    <Compile Include="Validations\NearbyDistanceRule.cs" />
+    <Compile Include="Validations\SelfLengthRule.cs" />
+    <Compile Include="Validations\HoseLengthRule.cs" />
+    <Compile Include="Validations\NumberRangeInfo.cs" />
+    <Compile Include="Validations\NumberRangeRule.cs" />
+    <Compile Include="Validations\ProtectRadiusRule.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>
+      <Name>ThCADCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
+      <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
+      <Name>ThControlLibraryWPF</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPArchitecture\ThMEPArchitecture.csproj">
+      <Project>{65557B89-67B5-4776-A2D5-68DA51D5296A}</Project>
+      <Name>ThMEPArchitecture</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
+      <Project>{b9bb0f36-dfa2-446a-a676-049304c38fd9}</Project>
+      <Name>ThMEPWSS</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\SprinklerCheckersUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\FireHydrant.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\FlushPointUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\ThTipDialog.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiBlockNameConfig.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiBlockNameConfigSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiDrainageSysAboveGroundSet.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiDrainageSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiDrainageSysAboveGround.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\SetHighlevelNozzleAndSemiPlatformNozzleUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiFireHydrantSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFireHydrantSystemSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiPipeDrawControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\RoomOutlineUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiUNDPDrainageSystemInfoCheck.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiUNDPDrainageSystemSet.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiDrainageSystemSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFireControlSystem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\DrainageSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiHydrantConnectPipe.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiRainSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="UI\DrainageSystemParamsUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiRainSystemParams.xaml">
+      <SubType>Designer</SubType>
+      <Generator>XamlIntelliSenseFileGenerator</Generator>
+    </Page>
+    <Page Include="UI\uiUNDPressureDrainageSystem.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiUNDSpraySystem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiUNDSpraySystemSet.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiWaterWellPump.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiWaterWellPumpFilter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\FloorHeightSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bin\Debug-NET45\acad.err" />
+    <None Include="bin\Debug-NET45\Drawing1.dwg.Info.geojson" />
+    <None Include="obj\project.assets.json" />
+    <None Include="obj\project.nuget.cache" />
+    <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.dgspec.json" />
+    <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.g.props" />
+    <None Include="obj\TianHua.Plumbing.WPF.UI.csproj.nuget.g.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="bin\Debug-NET45\AcCoreMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcCui.dll" />
+    <Content Include="bin\Debug-NET45\AcDbMgd.dll" />
+    <Content Include="bin\Debug-NET45\acdbmgdbrep.dll" />
+    <Content Include="bin\Debug-NET45\AcDx.dll" />
+    <Content Include="bin\Debug-NET45\AcMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcMPolygonMGD.dll" />
+    <Content Include="bin\Debug-NET45\AcMr.dll" />
+    <Content Include="bin\Debug-NET45\AcsCommon.dll" />
+    <Content Include="bin\Debug-NET45\AcsConnector.exe" />
+    <Content Include="bin\Debug-NET45\AcTcMgd.dll" />
+    <Content Include="bin\Debug-NET45\AcWindows.dll" />
+    <Content Include="bin\Debug-NET45\AdWindows.dll" />
+    <Content Include="bin\Debug-NET45\Autodesk.AutoCAD.Interop.Common.dll" />
+    <Content Include="bin\Debug-NET45\Autodesk.AutoCAD.Interop.dll" />
+    <Content Include="bin\Debug-NET45\BouncyCastle.Crypto.dll" />
+    <Content Include="bin\Debug-NET45\CADExtension.dll" />
+    <Content Include="bin\Debug-NET45\CADExtension.pdb" />
+    <Content Include="bin\Debug-NET45\Catel.Core.dll" />
+    <Content Include="bin\Debug-NET45\Catel.Core.pdb" />
+    <Content Include="bin\Debug-NET45\CommonServiceLocator.dll" />
+    <Content Include="bin\Debug-NET45\DotNetARX.dll" />
+    <Content Include="bin\Debug-NET45\DotNetARX.pdb" />
+    <Content Include="bin\Debug-NET45\EPPlus.dll" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.dll" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Extras.dll" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Extras.pdb" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.pdb" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Platform.dll" />
+    <Content Include="bin\Debug-NET45\GalaSoft.MvvmLight.Platform.pdb" />
+    <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.dll" />
+    <Content Include="bin\Debug-NET45\ICSharpCode.SharpZipLib.pdb" />
+    <Content Include="bin\Debug-NET45\ManagedLibrary.v16.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.Features.dll" />
+    <Content Include="bin\Debug-NET45\NetTopologySuite.IO.GeoJSON.dll" />
+    <Content Include="bin\Debug-NET45\Newtonsoft.Json.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OOXML.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OpenXml4Net.dll" />
+    <Content Include="bin\Debug-NET45\NPOI.OpenXmlFormats.dll" />
+    <Content Include="bin\Debug-NET45\RestSharp.dll" />
+    <Content Include="bin\Debug-NET45\System.Buffers.dll" />
+    <Content Include="bin\Debug-NET45\System.Collections.Immutable.dll" />
+    <Content Include="bin\Debug-NET45\System.ComponentModel.Annotations.dll" />
+    <Content Include="bin\Debug-NET45\System.Configuration.ConfigurationManager.dll" />
+    <Content Include="bin\Debug-NET45\System.Memory.dll" />
+    <Content Include="bin\Debug-NET45\System.Numerics.Vectors.dll" />
+    <Content Include="bin\Debug-NET45\System.Runtime.CompilerServices.Unsafe.dll" />
+    <Content Include="bin\Debug-NET45\System.Security.AccessControl.dll" />
+    <Content Include="bin\Debug-NET45\System.Security.Permissions.dll" />
+    <Content Include="bin\Debug-NET45\System.Security.Principal.Windows.dll" />
+    <Content Include="bin\Debug-NET45\System.Windows.Interactivity.dll" />
+    <Content Include="bin\Debug-NET45\ThCADCore.dll" />
+    <Content Include="bin\Debug-NET45\ThCADCore.pdb" />
+    <Content Include="bin\Debug-NET45\ThCADExtension.dll" />
+    <Content Include="bin\Debug-NET45\ThCADExtension.pdb" />
+    <Content Include="bin\Debug-NET45\ThControlLibraryWPF.dll" />
+    <Content Include="bin\Debug-NET45\ThControlLibraryWPF.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPAnalytics.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPAnalytics.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPEngineCore.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPEngineCore.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPIdentity.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPIdentity.pdb" />
+    <Content Include="bin\Debug-NET45\ThMEPWSS.dll" />
+    <Content Include="bin\Debug-NET45\ThMEPWSS.pdb" />
+    <Content Include="bin\Debug-NET45\TianHua.Plumbing.WPF.UI.dll" />
+    <Content Include="bin\Debug-NET45\TianHua.Plumbing.WPF.UI.pdb" />
+    <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="bin\Debug-NET40\" />
+    <Folder Include="bin\Debug-NET46\" />
+    <Folder Include="bin\Debug\" />
+    <Folder Include="bin\Release-NET40\" />
+    <Folder Include="bin\Release-NET45\" />
+    <Folder Include="bin\Release-NET46\" />
+    <Folder Include="bin\Release\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
