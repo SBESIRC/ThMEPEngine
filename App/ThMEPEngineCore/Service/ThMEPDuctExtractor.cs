@@ -39,12 +39,12 @@ namespace ThMEPEngineCore.Service
 
             dictionary.Where(o => filter.Contains(o.Key)).ForEach(o =>
             {
-                var strs = o.Value.duct_size.Split('x');
+                var strs = o.Value.ductSize.Split('x');
                 var parameter = new ThIfcDuctSegmentParameters
                 {
                     Width = Convert.ToDouble(strs[0]),
                     Height = Convert.ToDouble(strs[1]),
-                    Length = o.Value.sp.GetDistanceTo(o.Value.ep),
+                    Length = o.Value.sp.DistanceTo(o.Value.ep),
                     MarkHeight = o.Value.elevation
                 };
                 parameter.Outline = o.Key.Buffer(parameter.Width / 2);

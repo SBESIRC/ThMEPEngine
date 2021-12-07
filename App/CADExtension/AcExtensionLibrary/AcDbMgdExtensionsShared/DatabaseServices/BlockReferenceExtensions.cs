@@ -42,7 +42,7 @@ namespace Autodesk.AutoCAD.DatabaseServices
         /// <returns></returns>
         public static string GetEffectiveName(this BlockReference blockref, Transaction trx)
         {
-            if (blockref.IsDynamicBlock)
+            if (blockref.DynamicBlockTableRecord.IsValid)
             {
                 return blockref.DynamicBlockTableRecord.GetDBObject<BlockTableRecord>(trx, OpenMode.ForRead, false).Name;
             }

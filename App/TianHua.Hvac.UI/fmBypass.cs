@@ -7,7 +7,7 @@ namespace TianHua.Hvac.UI
 {
     public partial class fmBypass : Form
     {
-        public double air_vloume;
+        public double airVloume;
         public string valve_width;
         public string bypass_size;
         public string o_valve_width;
@@ -18,7 +18,7 @@ namespace TianHua.Hvac.UI
             InitializeComponent();
             AcceptButton = buttonOK;
             splitContainer2.Panel2Collapsed = true;
-            air_vloume = air_volume * 0.5;
+            airVloume = air_volume * 0.5;
         }
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
@@ -116,7 +116,7 @@ namespace TianHua.Hvac.UI
         {
             if (!string.IsNullOrEmpty(textBox2.Text) && !string.IsNullOrEmpty(textBox3.Text))
             {
-                double air_speed = air_vloume / 3600 / 
+                double air_speed = airVloume / 3600 / 
                                   (Double.Parse(textBox2.Text) *
                                    Double.Parse(textBox3.Text) / 1000000);
                 label2.Text = air_speed.ToString("0.00");
@@ -129,7 +129,7 @@ namespace TianHua.Hvac.UI
             if (!string.IsNullOrEmpty(textBox2.Text) &&
                 !string.IsNullOrEmpty(textBox3.Text))
             {
-                double air_speed = air_vloume / 3600 /
+                double air_speed = airVloume / 3600 /
                                   (Double.Parse(textBox2.Text) *
                                    Double.Parse(textBox3.Text) / 1000000);
                 label2.Text = air_speed.ToString("0.00");
@@ -177,10 +177,10 @@ namespace TianHua.Hvac.UI
             if (air_speed < fan_model.MinAirSpeed)
                 air_speed = fan_model.MinAirSpeed;
             
-            ThDuctParameter Duct = new ThDuctParameter(air_vloume, air_speed, true);
-            listBox1.Items.Clear();
-            listBox1.Items.Add(Duct.DuctSizeInfor.RecommendInnerDuctSize);
-            listBox1.SelectedItem = Duct.DuctSizeInfor.RecommendInnerDuctSize;
+            //var Duct = new ThDuctParameter(airVloume, "");
+            //listBox1.Items.Clear();
+            //listBox1.Items.Add(Duct.DuctSizeInfor.RecommendInnerDuctSize);
+            //listBox1.SelectedItem = Duct.DuctSizeInfor.RecommendInnerDuctSize;
         }
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {

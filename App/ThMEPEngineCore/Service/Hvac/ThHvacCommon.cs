@@ -129,16 +129,60 @@
         public const string BLOCK_VALVE_VISIBILITY_SILENCER_100 = "ZP100";
         public const string BLOCK_VALVE_VISIBILITY_SILENCER_200 = "ZP200";
         public const string BLOCK_VALVE_VISIBILITY_ELECTRIC = "电动多叶调节风阀";
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_MEC = "电/手动排烟阀（电磁、手动、常闭）MEC";
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_MECH_280 = "280度电/手动防火阀（电磁，反馈，常闭）MECH";
+        
 
         //风口动态块属性名
-        public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "宽度或直径";
-        public const string BLOCK_DYNAMIC_PORT_HEIGHT = "高度";
-        public const string BLOCK_DYNAMIC_PORT_RANGE = "种类";
+        public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "风口长度";
+        public const string BLOCK_DYNAMIC_PORT_HEIGHT = "风口宽度";
+        public const string BLOCK_DYNAMIC_PORT_RANGE = "风口类型";
+
+        //风管立管动态块属性名
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_LEN = "风管长度";
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH = "风管宽度";
+
+        //风管断线动态块属性名
+        public const string BLOCK_DYNAMIC_BROKEN_LEN = "风管宽度";
+
+        //45°下翻动态块属性名
+        public const string BLOCK_DYNAMIC_FLIP_DOWN_45_WIDTH = "风管宽度";
+        public const string BLOCK_DYNAMIC_FLIP_DOWN_45_HEIGHT = "风管高度";
 
         //风口标注动态块属性名
         public const string BLOCK_DYNAMIC_PORT_NAME = "风口名称";
         public const string BLOCK_DYNAMIC_PORT_SIZE = "尺寸";
         public const string BLOCK_DYNAMIC_PORT_NUM = "数量";
         public const string BLOCK_DYNAMIC_PORT_AIRVOLUME = "风量";
+
+        //组成连接件的个数 在ThDuctPortsFactory.cs
+        public const int R_TEE_GEO_NUM = 8;
+        public const int R_TEE_FLG_NUM = 3;
+        public const int R_TEE_CENTERLINE_NUM = 3;
+        public const int R_TEE_ALL_NUM = (R_TEE_GEO_NUM + R_TEE_FLG_NUM + R_TEE_CENTERLINE_NUM);
+        public const int V_TEE_GEO_NUM = 10;// 11或10个
+        public const int V_TEE_FLG_NUM = 3;
+        public const int V_TEE_CENTERLINE_NUM = 3;
+        public const int V_TEE_ALL_NUM = (V_TEE_GEO_NUM + V_TEE_FLG_NUM + V_TEE_CENTERLINE_NUM);
+        public const int ELBOW_GEO_NUM = 6;
+        public const int ELBOW_FLG_NUM = 2;
+        public const int ELBOW_CENTERLINE_NUM = 3;
+        public const int ELBOW_ALL_NUM = (ELBOW_GEO_NUM + ELBOW_FLG_NUM + ELBOW_CENTERLINE_NUM);
+        public const int CROSS_GEO_NUM = 12;
+        public const int CROSS_FLG_NUM = 4;
+        public const int CROSS_CENTERLINE_NUM = 4;
+        public const int CROSS_ALL_NUM = (CROSS_GEO_NUM + CROSS_FLG_NUM + CROSS_CENTERLINE_NUM);
+        public const int REDUCING_GEO_NUM = 2;
+        public const int REDUCING_FLG_NUM = 2;
+        public const int REDUCING_CENTERLINE_NUM = 1;
+        public const int REDUCING_ALL_NUM = (REDUCING_GEO_NUM + REDUCING_FLG_NUM + REDUCING_CENTERLINE_NUM);
+        public const int AXIS_REDUCING_GEO_NUM = 4;
+        public const int AXIS_REDUCING_FLG_NUM = 2;
+        public const int AXIS_REDUCING_CENTERLINE_NUM = 1;
+        public const int AXIS_REDUCING_ALL_NUM = (AXIS_REDUCING_GEO_NUM + AXIS_REDUCING_FLG_NUM + AXIS_REDUCING_CENTERLINE_NUM);
+
+        public const string AI_PORT = "AI-风口";
+        public const string AI_BROKEN_LINE = "AI-风管断线";
+        public const string AI_VERTICAL_PIPE = "AI-风管立管";
     }
 }

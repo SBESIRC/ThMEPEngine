@@ -174,20 +174,20 @@ namespace TianHua.Hvac.UI
 
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
-            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed), true);
+            //ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text));
 
-            Model.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            Model.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            Model.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
-            Model.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
+            //Model.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            //Model.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            //Model.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
+            //Model.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
 
-            ListBoxOuterTube.DataSource = Model.ListOuterTube;
+            //ListBoxOuterTube.DataSource = Model.ListOuterTube;
 
-            ListBoxInnerTube.DataSource = Model.ListInnerTube;
+            //ListBoxInnerTube.DataSource = Model.ListInnerTube;
 
-            ListBoxOuterTube.SelectedItem = Model.OuterTube;
+            //ListBoxOuterTube.SelectedItem = Model.OuterTube;
 
-            ListBoxInnerTube.SelectedItem = Model.InnerTube;
+            //ListBoxInnerTube.SelectedItem = Model.InnerTube;
         }
 
         private void TxtOuterTube1_EditValueChanged(object sender, EventArgs e)

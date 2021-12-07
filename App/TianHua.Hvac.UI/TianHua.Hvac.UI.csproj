@@ -65,6 +65,7 @@
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacFpmCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
     <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
@@ -101,6 +102,12 @@
     </Compile>
     <Compile Include="fmFjfFpm.Designer.cs">
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fmFpm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFpm.Designer.cs">
+      <DependentUpon>fmFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="HvacUiApp.cs" />
     <Compile Include="LoadCalculation\DoubleConvert.cs" />
@@ -262,6 +269,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="fmFjfFpm.resx">
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmFpm.resx">
+      <DependentUpon>fmFpm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>

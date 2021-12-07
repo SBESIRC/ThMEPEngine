@@ -167,7 +167,6 @@
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
-    <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
     <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
@@ -291,6 +290,7 @@
     <Compile Include="Service\ThEntityContainerBuilder.cs" />
     <Compile Include="Service\ThFireCompartmentCleanService.cs" />
     <Compile Include="Service\ThLineUnionService.cs" />
+    <Compile Include="Service\ThMEPFittingExtractor.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />

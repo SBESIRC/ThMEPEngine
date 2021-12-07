@@ -7,51 +7,55 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPort
     {
-        public string port_name;
-        public string port_layer;
-        public ThDuctPortsDrawPort(string port_layer, string port_name)
+        public string portName;
+        public string portLayer;
+        public ThDuctPortsDrawPort(string portLayer, string portName)
         {
-            this.port_name = port_name;
-            this.port_layer = port_layer;
+            this.portName = portName;
+            this.portLayer = portLayer;
         }
-        public void Draw_ports(Duct_ports_Info info, 
-                               ThMEPHVACParam in_param, 
-                               Vector3d org_dis_vec,
-                               double port_width,
-                               double port_height)
+        public void DrawPorts(EndlineSegInfo info, string portRange, Vector3d orgDisVec, double portWidth, double portHeight, double avgAirVolume)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var dir_vec = ThMEPHVACService.Get_edge_direction(info.l);
-                double angle = ThMEPHVACService.Get_port_rotate_angle(dir_vec);
-                foreach (var pos in info.ports_info)
+                var dirVec = ThMEPHVACService.GetEdgeDirection(info.seg.l);
+                double angle = ThMEPHVACService.GetPortRotateAngle(dirVec);
+                foreach (var pos in info.portsInfo)
                 {
-                    if (in_param.port_range.Contains("下"))
+                    if (portRange.Contains("下"))
                     {
-                        var p = ThMEPHVACService.Get_down_port_insert_pos(dir_vec, pos.position, port_width, port_height);
-                        p += org_dis_vec;
-                        Insert_port(p, angle, port_width, port_height, in_param.port_range);
+                        var p = pos.position + orgDisVec;
+                        InsertPort(p, angle + (Math.PI * 0.5), portWidth, portHeight, portRange, avgAirVolume);
                     }
                     else
                     {
-                        ThMEPHVACService.Get_side_port_insert_pos(dir_vec, pos.position, info.width, port_width, out Point3d pL, out Point3d pR);
-                        pL += org_dis_vec;
-                        pR += org_dis_vec;
-                        if (pos.have_r)
-                            Insert_port(pR, angle - Math.PI * 0.5, port_width, port_height, in_param.port_range);
-                        if (pos.have_l)
-                            Insert_port(pL, angle + Math.PI * 0.5, port_width, port_height, in_param.port_range);
+                        var curDuctW = ThMEPHVACService.GetWidth(pos.ductSize);
+                        GetSidePortInsertPos(dirVec, pos.position, curDuctW, out Point3d pL, out Point3d pR);
+                        pL += orgDisVec;
+                        pR += orgDisVec;
+                        if (pos.haveRight)
+                            InsertPort(pR, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume);
+                        if (pos.haveLeft)
+                            InsertPort(pL, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume);
                     }
                 }
             }
         }
-        public void Insert_port(Point3d pos, double angle, double port_width, double port_height, string port_range)
+        public void InsertPort(Point3d pos, double angle, double portWidth, double portHeight, string portRange, double portAirVolume)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(port_layer, port_name, pos, new Scale3d(), angle);
-                ThDuctPortsDrawService.Set_port_dyn_block_properity(obj, port_width, port_height, port_range);
+                var attNameValues = new Dictionary<string, string> { { "风量", portAirVolume.ToString() + "m3/h" } };
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attNameValues);
+                ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange);
             }
+        }
+        public static void GetSidePortInsertPos(Vector3d dirVec, Point3d pos, double ductWidth, out Point3d pL, out Point3d pR)
+        {
+            var verticalLeft = ThMEPHVACService.GetLeftVerticalVec(dirVec);
+            pL = pos + verticalLeft * (ductWidth * 0.5 + 100);
+            var verticalRight = ThMEPHVACService.GetRightVerticalVec(dirVec);
+            pR = pos + verticalRight * (ductWidth * 0.5 + 100);
         }
     }
 }

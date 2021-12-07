@@ -5,18 +5,18 @@ using ThMEPHVAC.CAD;
 
 namespace TianHua.Hvac.UI
 {
-    class ThHvacUIService
+    public class ThHvacUIService
     {
-        public static void Limit_air_speed_range(string scenario, ref double air_speed, ref double air_speed_min, ref double air_speed_max)
+        public static void LimitAirSpeedRange(string scenario, ref double airSpeed, ref double airSpeedMin, ref double airSpeedMax)
         {
             switch (scenario)
             {
                 case "消防排烟":
                 case "消防补风":
                 case "消防加压送风":
-                    air_speed = 15;
-                    air_speed_min = 5;
-                    air_speed_max = 20;
+                    airSpeed = 15;
+                    airSpeedMin = 5;
+                    airSpeedMax = 20;
                     break;
                 case "厨房排油烟":
                 case "厨房排油烟补风":
@@ -28,15 +28,15 @@ namespace TianHua.Hvac.UI
                 case "消防补风兼平时送风":
                 case "平时送风兼事故补风":
                 case "平时排风兼事故排风":
-                    air_speed = 8;
-                    air_speed_min = 5;
-                    air_speed_max = 10;
+                    airSpeed = 8;
+                    airSpeedMin = 5;
+                    airSpeedMax = 10;
                     break;
                 default:
                     throw new NotImplementedException("Check scenario!!!");
             }
         }
-        public static void Port_init(string scenario, out string down_port_name, out string side_port_name)
+        public static void PortInit(string scenario, out string downPortName, out string sidePortName)
         {
             switch (scenario)
             {
@@ -46,8 +46,8 @@ namespace TianHua.Hvac.UI
                 case "消防排烟兼平时排风":
                 case "事故排风":
                 case "平时排风兼事故排风":
-                    down_port_name = "下回单层百叶";
-                    side_port_name = "侧回单层百叶";
+                    downPortName = "下回单层百叶";
+                    sidePortName = "侧回单层百叶";
                     break;
                 case "消防补风":
                 case "消防加压送风":
@@ -56,71 +56,61 @@ namespace TianHua.Hvac.UI
                 case "消防补风兼平时送风":
                 case "事故补风":
                 case "平时送风兼事故补风":
-                    down_port_name = "下送单层百叶";
-                    side_port_name = "侧送单层百叶";
+                    downPortName = "下送单层百叶";
+                    sidePortName = "侧送单层百叶";
                     break;
                 default:
                     throw new NotImplementedException("Check scenario!!!");
             }
         }
-        public static double Calc_air_speed(double air_volume, double duct_width, double duct_height)
+        public static double CalcAirSpeed(double airVolume, double ductWidth, double ductHeight)
         {
-            return air_volume / 3600 / (duct_width * duct_height / 1000000);
+            return airVolume / 3600 / (ductWidth * ductHeight / 1000000);
         }
-        public static void Update_recommend_duct_size_list(ListBox listBox, double air_volume, double air_speed)
-        {
-            if (Math.Abs(air_speed) < 1e-3 || Math.Abs(air_volume) < 1e-3)
-                return;
-            var Duct = new ThDuctParameter(air_volume, air_speed, true);
-            listBox.Items.Clear();
-            foreach (var duct_size in Duct.DuctSizeInfor.DefaultDuctsSizeString)
-                listBox.Items.Add(duct_size);
-            listBox.SelectedItem = Duct.DuctSizeInfor.RecommendOuterDuctSize;
-        }
-        public static void Limit_air_speed(double ceiling,
+        public static void LimitAirSpeed(double ceiling,
                                            double floor,
-                                           out bool is_high,
-                                           ref double air_speed)
+                                           out bool isHigh,
+                                           ref double airSpeed)
         {
-            is_high = false;
-            if (Math.Abs(air_speed) < 1e-3)
+            isHigh = false;
+            if (Math.Abs(airSpeed) < 1e-3)
                 return;
-            if (air_speed > ceiling)
+            if (airSpeed > ceiling)
             {
-                is_high = true;
-                air_speed = ceiling;
+                isHigh = true;
+                airSpeed = ceiling;
             }
-            if (air_speed < floor)
-                air_speed = floor;
+            if (airSpeed < floor)
+                airSpeed = floor;
         }
-        public static void Limit_air_volume(out bool is_high, ref double air_volume)
+        public static void LimitAirVolume(out bool isHigh, ref double airVolume)
         {
-            is_high = false;
-            if (Math.Abs(air_volume) < 1e-3)
+            isHigh = false;
+            if (Math.Abs(airVolume) < 1e-3)
                 return;
-            double air_volume_floor = 1500;
-            double air_volume_ceiling = 60000;
-            if (air_volume > air_volume_ceiling)
+            double airVolumeFloor = 1500;
+            double airVolumeCeiling = 60000;
+            if (airVolume > airVolumeCeiling)
             {
-                is_high = true;
-                air_volume = air_volume_ceiling;
+                isHigh = true;
+                airVolume = airVolumeCeiling;
             }
-            if (air_volume < air_volume_floor)
-                air_volume = air_volume_floor;
+            if (airVolume < airVolumeFloor)
+                airVolume = airVolumeFloor;
         }
-        public static bool Is_float_2_decimal(string text)
+        public static bool IsFloat2Decimal(string text)
         {
             string reg = "^[0-9]*[.]?[0-9]{0,2}$";
             return Regex.Match(text, reg).Success;
         }
-        public static bool Is_integer_str(string text)
+        public static bool IsIntegerStr(string text)
         {
             string reg = "^[0-9]*$";
             return Regex.Match(text, reg).Success;
         }
-        public static bool Is_double_volume(string str_volume)
+        public static bool IsDoubleVolume(string strVolume)
         {
-            return str_volume.Contains("/");
+            return strVolume.Contains("/");
         }
     }
 }

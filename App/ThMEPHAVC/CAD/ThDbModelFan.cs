@@ -13,50 +13,53 @@ namespace ThMEPHVAC.CAD
 {
     public class FanOpening
     {
+        public double Angle { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
         public bool IsCircleOpening { get; set; }
-        public double Angle { get; set; }
     }
     public class ThDbModelFan
     {
         public string Name { get; set; }
         public ObjectId Model { get; set; }
         public ThBlockReferenceData Data { get; set; }
-        public string IntakeForm;
+        
         public FanOpening FanInlet;
         public FanOpening FanOutlet;
-        public double fan_in_width;
-        public double fan_out_width;
-        public double air_volume;
-        public string str_air_volume;
-        public double low_air_volume;
+        public double airVolume;
+        public double fanInWidth;
+        public double fanOutWidth;
+        public double lowAirVolume;
+        public Point3d FanBasePoint;
         public Point3d FanInletBasePoint;
         public Point3d FanOutletBasePoint;
         public string scenario;
-        public bool is_exhaust;
+        public string IntakeForm;
+        public string strAirVolume;
+        public bool isExhaust;
         public ThDbModelFan(ObjectId FanObjectId)
         {
             using (var db = AcadDatabase.Active())// 立即显示重绘效果
             {
                 Model = FanObjectId;
                 Data = new ThBlockReferenceData(FanObjectId);
-                air_volume = GetFanVolume();
-                if (air_volume < 0)
+                airVolume = GetFanVolume();
+                if (airVolume < 0)
                     return;
-                low_air_volume = GetLowFanVolume();
+                lowAirVolume = GetLowFanVolume();
                 var obj = FanObjectId.GetDBObject();
                 if (obj is BlockReference reference)
                     Name = reference.GetEffectiveName();
+                FanBasePoint = GetFanBasePoint();
                 FanInletBasePoint = GetFanInletBasePoint();
                 FanOutletBasePoint = GetFanOutletBasePoint();
                 scenario = GetFanScenario();
                 IntakeForm = GetIntakeForm();
                 FanOutlet = GetFanOutlet();
                 FanInlet = GetFanInlet();
-                is_exhaust = !(scenario.Contains("补") || scenario.Contains("送"));
+                isExhaust = !(scenario.Contains("补") || scenario.Contains("送"));
                 var is_axis = (Name.Contains("轴流风机"));
-                ThDuctPortsDrawService.Get_fan_dyn_block_properity(Data, is_axis, out fan_in_width, out fan_out_width);
+                ThDuctPortsDrawService.GetFanDynBlockProperity(Data, is_axis, out fanInWidth, out fanOutWidth);
             } 
         }
         private string GetIntakeForm()
@@ -77,12 +80,12 @@ namespace ThMEPHVAC.CAD
             var volums = service.CalcAirVolume(Data.ObjId);
             if (volums.Count == 1)
             {
-                str_air_volume = volums[0].ToString();
+                strAirVolume = volums[0].ToString();
                 return volums[0];
             }
             else if (volums.Count == 2)
             {
-                str_air_volume = volums[0].ToString() + "/" + volums[1].ToString();
+                strAirVolume = volums[0].ToString() + "/" + volums[1].ToString();
                 return volums[1];
             }
             else
@@ -234,6 +237,14 @@ namespace ThMEPHVAC.CAD
                     };
                 }
             }
+        }
+        private Point3d GetFanBasePoint()
+        {
+            Matrix3d ocs2Wcs = Data.BlockTransform;
+            Point3d axialinletposition = CreatePointFromProperty(
+                        ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
+                        ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+            return axialinletposition.TransformBy(ocs2Wcs);
         }
         private Point3d GetFanInletBasePoint()
         {

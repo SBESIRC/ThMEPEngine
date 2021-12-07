@@ -42,7 +42,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
         {
             var width = 1200.0;
             var objs = Check(entity, width);
-            if(objs.Count > 0)
+            if (objs.Count > 0)
             {
                 Present(objs);
             }
@@ -121,7 +121,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             AIDuctEngine.Recognize(database, pline.Vertices());
             Ducts.AddRange(AIDuctEngine.Elements.OfType<ThIfcDuctSegment>());
 
-            var list = new List<string> {"Elbow", "Tee", "Cross", "Reducing" };
+            var list = new List<string> { "Elbow", "Tee", "Cross", "Reducing" };
             list.ForEach(o =>
             {
                 var thFittingEngine = new ThMEPFittingExtractor

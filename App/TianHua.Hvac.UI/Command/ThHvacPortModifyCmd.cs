@@ -5,7 +5,6 @@ using AcHelper;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.Model;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -17,50 +16,45 @@ namespace TianHua.Hvac.UI.Command
         public void Dispose() { }
         public void Execute()
         {
-            var id = Get_start_node("选择起始节点", out double ro_angle);
-            if (id == null)
-                return;
-            var modifyer = new ThDuctPortsModifyPort(id, ro_angle, ref in_param);
-            if (!Get_duct_port_info())
-                return;
-            modifyer.Construct();
-            if (modifyer.status != ModifyerStatus.OK)
-            {
-                Prompt_error(modifyer.status);
-                Modify_port_num();
-                return;
-            }
-            var graph_res = new ThDuctPortsAnalysis(modifyer.center_line, modifyer.exclude_line, Point3d.Origin, in_param);
-            graph_res.Do_anay(in_param.port_num, modifyer, modifyer.center_line);
-            if (graph_res.merged_endlines.Count == 0)
-            {
-                ThMEPHVACService.Prompt_msg("选择错误起始点");
-                return;
-            }
-            var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
-            adjust_graph.Update_side_port(in_param.port_range, modifyer.port_2_handle_dic);
-            var judger = new ThDuctPortsJudger(modifyer.start_p, graph_res.is_recreate, graph_res.merged_endlines, adjust_graph.endline_segs);
-            var painter = new ThDuctPortsDraw(modifyer.start_p, in_param, judger.dir_align_points, judger.ver_align_points);
-            painter.Draw(graph_res, adjust_graph);
-            Modify_port_num();
+            //var id = Get_start_node("选择起始节点", out double ro_angle);
+            //if (id == null)
+            //    return;
+            //var modifyer = new ThDuctPortsModifyPort(id, ro_angle, ref in_param);
+            //if (!Get_duct_port_info())
+            //    return;
+            //modifyer.Construct();
+            //if (modifyer.status != ModifyerStatus.OK)
+            //{
+            //    Prompt_error(modifyer.status);
+            //    Modify_port_num();
+            //    return;
+            //}
+            //var graph_res = new ThDuctPortsAnalysis(modifyer.center_line, modifyer.exclude_line, Point3d.Origin, in_param);
+            
+            //var adjust_graph = new ThDuctPortsConstructor(graph_res, in_param);
+            //adjust_graph.Update_side_port(in_param.port_range, modifyer.port_2_handle_dic);
+            //var judger = new ThDuctPortsJudger(modifyer.start_p, graph_res.is_recreate, graph_res.merged_endlines, adjust_graph.endline_segs);
+            //var painter = new ThDuctPortsDraw(modifyer.start_p, in_param, judger.dir_align_points, judger.ver_align_points);
+            //painter.Draw(graph_res, adjust_graph);
+            //Modify_port_num();
         }
         private void Modify_port_num()
         {
-            if (in_param.port_range.Contains("侧"))
-                in_param.port_num *= 2;
+            if (in_param.portRange.Contains("侧"))
+                in_param.portNum *= 2;
         }
         private void Prompt_error(ModifyerStatus status)
         {
             switch (status)
             {
                 case ModifyerStatus.NO_PORT:
-                    ThMEPHVACService.Prompt_msg("没有与中心管道相交的风口");
+                    ThMEPHVACService.PromptMsg("没有与中心管道相交的风口");
                     break;
                 case ModifyerStatus.MULTI_PORT_RANGE:
-                    ThMEPHVACService.Prompt_msg("有多种类型的风口与中心管道相交");
+                    ThMEPHVACService.PromptMsg("有多种类型的风口与中心管道相交");
                     break;
                 case ModifyerStatus.PORT_CROSS_MULTI_ENTITY:
-                    ThMEPHVACService.Prompt_msg("风口与多个组相交(风口处于弯头三通四通附近)");
+                    ThMEPHVACService.PromptMsg("风口与多个组相交(风口处于弯头三通四通附近)");
                     break;
             }
         }
@@ -83,7 +77,7 @@ namespace TianHua.Hvac.UI.Command
                 var id = result.Value.GetObjectIds();
                 if (id.Length > 1)
                 {
-                    ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
+                    ThMEPHVACService.PromptMsg("请选择AI-风管起点");
                     return null;
                 }
                 if (id[0].GetEntity() is BlockReference)
@@ -92,13 +86,13 @@ namespace TianHua.Hvac.UI.Command
                     ro_angle = blk.Rotation;
                     if (blk.Name != "AI-风管起点")
                     {
-                        ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
+                        ThMEPHVACService.PromptMsg("请选择AI-风管起点");
                         return null;
                     }
                 }
                 else
                 {
-                    ThMEPHVACService.Prompt_msg("请选择AI-风管起点");
+                    ThMEPHVACService.PromptMsg("请选择AI-风管起点");
                     return null;
                 }
                 return (result.Status == PromptStatus.OK) ? result.Value.GetObjectIds() : null;
@@ -106,25 +100,23 @@ namespace TianHua.Hvac.UI.Command
         }
         private bool Get_duct_port_info()
         {
-            in_param.is_redraw = true;
             var dlg = new fmDuctPorts(in_param);
             if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
             {
-                in_param.port_num = dlg.port_num;
+                in_param.portNum = dlg.port_num;
                 in_param.scenario = dlg.scenario;
                 in_param.scale = dlg.graph_scale;
                 in_param.elevation = dlg.elevation;
-                in_param.port_size = dlg.port_size;
-                in_param.port_name = dlg.port_name;
-                in_param.air_volume = dlg.air_volume;
-                in_param.port_range = dlg.port_range;
-                in_param.in_duct_size = dlg.duct_size;
-                in_param.air_speed = dlg.air_speed;
+                in_param.portSize = dlg.port_size;
+                in_param.portName = dlg.port_name;
+                in_param.airVolume = dlg.air_volume;
+                in_param.portRange = dlg.port_range;
+                in_param.inDuctSize = dlg.duct_size;
+                in_param.airSpeed = dlg.air_speed;
                 if (in_param.scale == null)
                     return false;
-                if (in_param.port_range.Contains("侧"))
-                    in_param.port_num = (int)Math.Ceiling(in_param.port_num * 0.5);
-                in_param.is_redraw = dlg.is_redraw;
+                if (in_param.portRange.Contains("侧"))
+                    in_param.portNum = (int)Math.Ceiling(in_param.portNum * 0.5);
                 return true;
             }
             return false;

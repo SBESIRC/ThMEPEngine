@@ -50,7 +50,7 @@ namespace ThMEPEngineCore.Service
                                     {
                                         //暂不考虑数据的相对顺序
                                         Outline = o.Key,
-                                        PipeOpenWidth = o.Value.port_widths[0],
+                                        PipeOpenWidth = o.Value.portWidths.Values.ToList().FirstOrDefault(),
                                     };
                                     Elements.Add(new ThIfcDuctElbow(parameter));
                                 }
@@ -61,9 +61,9 @@ namespace ThMEPEngineCore.Service
                                     {
                                         //暂不考虑数据的相对顺序
                                         Outline = o.Key,
-                                        BranchDiameter = o.Value.port_widths[0],
-                                        MainBigDiameter = o.Value.port_widths[1],
-                                        MainSmallDiameter = o.Value.port_widths[2],
+                                        BranchDiameter = o.Value.portWidths.Values.ToList()[1],
+                                        MainBigDiameter = o.Value.portWidths.Values.ToList()[0],
+                                        MainSmallDiameter = o.Value.portWidths.Values.ToList()[2],
                                     };
                                     Elements.Add(new ThIfcDuctTee(parameter));
                                 }
@@ -74,10 +74,10 @@ namespace ThMEPEngineCore.Service
                                     {
                                         //暂不考虑数据的相对顺序
                                         Outline = o.Key,
-                                        BigEndWidth = o.Value.port_widths[0],
-                                        MainSmallEndWidth = o.Value.port_widths[1],
-                                        SideBigEndWidth = o.Value.port_widths[2],
-                                        SideSmallEndWidth = o.Value.port_widths[3],
+                                        BigEndWidth = o.Value.portWidths.Values.ToList()[0],
+                                        MainSmallEndWidth = o.Value.portWidths.Values.ToList()[1],
+                                        SideBigEndWidth = o.Value.portWidths.Values.ToList()[2],
+                                        SideSmallEndWidth = o.Value.portWidths.Values.ToList()[3],
                                     };
                                     Elements.Add(new ThIfcDuctCross(parameter));
                                 }
@@ -88,8 +88,8 @@ namespace ThMEPEngineCore.Service
                                     {
                                         //暂不考虑数据的相对顺序
                                         Outline = o.Key,
-                                        BigEndWidth = o.Value.port_widths[0],
-                                        SmallEndWidth = o.Value.port_widths[1],
+                                        BigEndWidth = o.Value.portWidths.Values.ToList()[0],
+                                        SmallEndWidth = o.Value.portWidths.Values.ToList()[1],
                                     };
                                     Elements.Add(new ThIfcDuctReducing(parameter));
                                 }

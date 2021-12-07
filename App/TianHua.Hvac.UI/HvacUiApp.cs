@@ -21,7 +21,7 @@ namespace TianHua.Hvac.UI
         {
             using (var cmd = new ThHvacFjfCmd())
             {
-                cmd.Execute();
+                //cmd.Execute();
             }
         }
 
@@ -48,13 +48,21 @@ namespace TianHua.Hvac.UI
         {
             using (var cmd = new ThHvacPortModifyCmd())
             {
-                cmd.Execute();
+                //cmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THFPM", CommandFlags.Modal)]
         public void THFPM()
         {
             using (var cmd = new ThHvacFjfCmd(true))
+            {
+                //cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THFPMS", CommandFlags.Modal)]
+        public void THFPMSuper()
+        {
+            using (var cmd = new ThHvacFpmCmd())
             {
                 cmd.Execute();
             }

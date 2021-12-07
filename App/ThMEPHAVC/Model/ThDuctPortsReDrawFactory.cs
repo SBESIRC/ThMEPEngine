@@ -1,76 +1,54 @@
-﻿using System;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Linq;
+using DotNetARX;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
-    public class ThDuctPortsReDrawFactory
+    public class ThDuctPortsReDrawFactory : ThDuctPortsDrawService
     {
-        public static Line_Info Create_reducing(EntityModifyParam reducing, int port_idx, string modify_size, bool is_axis)
+        private Matrix3d toOrgMat;
+        public ThDuctPortsReDrawFactory(string scenario, string scale, Point3d srtP) : base(scenario, scale)
         {
-            var modify_width = ThMEPHVACService.Get_width(modify_size);
-            reducing.port_widths[port_idx] = modify_width;
-            var sp = new Point3d(reducing.pos[0].X, reducing.pos[0].Y, 0);
-            var ep = new Point3d(reducing.pos[1].X, reducing.pos[1].Y, 0);
-            var line = new Line(sp, ep);
-            return Create_reducing(line, reducing.port_widths[0], reducing.port_widths[1], is_axis);
+            toOrgMat = Matrix3d.Displacement(srtP.GetAsVector());
         }
-        public static Line_Info Create_reducing(Point2d sp, Point2d ep, double big_width, double small_width)
+        public void DrawElbowByElbow(EntityModifyParam elbow)
         {
-            var start_p = new Point3d(sp.X, sp.Y, 0);
-            var end_p = new Point3d(ep.X, ep.Y, 0);
-            var l = new Line(start_p, end_p);
-            return Create_reducing(l, big_width, small_width, false);
+            var elbowGeo = CreateElbow(elbow);
+            DrawShape(elbowGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
+            ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Elbow");
         }
-        public static Line_Info Create_reducing(Line l, double big_width, double small_width, bool is_axis)
+        public void DrawReducingByReducing(EntityModifyParam reducing)
         {
-            var geo = ThDuctPortsFactory.Create_reducing_geo(l, big_width, small_width, is_axis);
-            var flg = ThDuctPortsFactory.Create_reducing_flg(geo);
-            var center_line = ThDuctPortsFactory.Create_reducing_center(l);
-            ThMEPHVACService.Get_duct_ports(l, out List<Point3d> ports, out List<Point3d> ports_ext);
-            return new Line_Info(geo, flg, center_line, ports, ports_ext);
+            var reducingGeo = CreateReducing(reducing);
+            DrawShape(reducingGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
+            ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, reducing.type);
         }
-        public static Line_Info Create_tee(EntityModifyParam tee, int port_idx, double modify_width)
+        public void DrawDuctByDuct(DuctModifyParam curDuctParam)
         {
-            var branch_vec = tee.pos[0] - tee.pos_ext[0];
-            var main_small_vec = tee.pos[2] - tee.pos_ext[2];
-            var type = ThMEPHVACService.Is_collinear(branch_vec, main_small_vec) ?
-                       Tee_Type.BRANCH_COLLINEAR_WITH_OTTER : Tee_Type.BRANCH_VERTICAL_WITH_OTTER;
-            tee.port_widths[port_idx] = modify_width;
-            return ThDuctPortsFactory.Create_tee(tee.port_widths[1], tee.port_widths[0], tee.port_widths[2], type);
+            var w = ThMEPHVACService.GetWidth(curDuctParam.ductSize);
+            var DuctGeo = ThDuctPortsFactory.CreateDuct(curDuctParam.sp, curDuctParam.ep, w);
+            DrawDuct(DuctGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
+            ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Duct");
         }
-        public static Line_Info Create_cross(EntityModifyParam cross, string modify_duct_size, int port_idx)
+        
+        public static LineGeoInfo CreateReducing(EntityModifyParam reducing)
         {
-            var modify_width = ThMEPHVACService.Get_width(modify_duct_size);
-            var org_width = cross.port_widths[port_idx];
-            cross.port_widths[port_idx] = modify_width;
-            var big = Math.Max(cross.port_widths[2], cross.port_widths[3]);
-            var small = Math.Min(cross.port_widths[2], cross.port_widths[3]);
-            var in_2vec = cross.pos[0] - cross.pos_ext[0];
-            var modify_2vec = cross.pos[port_idx] - cross.pos_ext[port_idx];
-            var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
-            var modify_vec = new Vector3d(modify_2vec.X, modify_2vec.Y, 0);
-            if (port_idx == 2 || port_idx == 3)
-            {
-                var z = in_vec.CrossProduct(modify_vec).Z;
-                if (modify_width > org_width)
-                {
-                    return z < 0 ? ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big) :
-                                   ThDuctPortsFactory.Create_cross(cross.port_widths[0], big, cross.port_widths[1], small);
-                }
-                else
-                {
-                    return z < 0 ? ThDuctPortsFactory.Create_cross(cross.port_widths[0], big, cross.port_widths[1], small) :
-                                   ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big);
-                }
-            }
-            else
-            {
-                // 主路管段修改
-                return ThDuctPortsFactory.Create_cross(cross.port_widths[0], small, cross.port_widths[1], big);
-            }
+            var isAxis = (reducing.type == "Reducing");
+            var ports = reducing.portWidths;
+            var points = ports.Keys.ToList();
+            var l = new Line(points[0], points[1]);
+            return ThDuctPortsFactory.CreateReducing(l, ports[points[0]], ports[points[1]], isAxis);
+        }
+        public static LineGeoInfo CreateElbow(EntityModifyParam elbow)
+        {
+            var endPoints = elbow.portWidths.Keys.ToList();
+            var vec1 = endPoints[0] - elbow.centerP;
+            var vec2 = endPoints[1] - elbow.centerP;
+            var angle = vec1.GetAngleTo(vec2);
+            var w = elbow.portWidths.Values.ToList().FirstOrDefault();
+            return ThDuctPortsFactory.CreateElbow(angle, w);
         }
     }
 }
