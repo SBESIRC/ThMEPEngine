@@ -516,13 +516,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-                <Command Local="THFPMS" Global="THFPMS" />
                 <Command Local="THXFJ" Global="THXFJ" />
-                <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
-                <Command Local="THDKFPMXG" Global="THDKFPMXG" />
                 <Command Local="THFHJS" Global="THFHJS" />
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
@@ -535,13 +531,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-                <Command Local="THFPMS" Global="THFPMS" />
                 <Command Local="THXFJ" Global="THXFJ" />
-                <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
-                <Command Local="THDKFPMXG" Global="THDKFPMXG" />
                 <Command Local="THFHJS" Global="THFHJS" />
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
@@ -554,13 +546,9 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFJF" Global="THFJF" />
                 <Command Local="THFPM" Global="THFPM" />
-                <Command Local="THFPMS" Global="THFPMS" />
                 <Command Local="THXFJ" Global="THXFJ" />
-                <Command Local="THDKFPM" Global="THDKFPM" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
-                <Command Local="THDKFPMXG" Global="THDKFPMXG" />
                 <Command Local="THFHJS" Global="THFHJS" />
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
