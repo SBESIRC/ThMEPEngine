@@ -53,7 +53,9 @@
     <Compile Include="FanConnect\Service\ThEquipElementExtractServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtendBaseServiece.cs" />
     <Compile Include="FanConnect\Service\ThPipeExtractServiece.cs" />
+    <Compile Include="FanConnect\Service\ThQueryDNServiece.cs" />
     <Compile Include="FanConnect\Service\ThWaterPipeExtendServiece.cs" />
+    <Compile Include="FanConnect\Service\ThWaterPipeMarkServiece.cs" />
     <Compile Include="FanConnect\ViewModel\ThAirPipeConfigInfo.cs" />
     <Compile Include="FanConnect\ViewModel\ThWaterPipeConfigInfo.cs" />
     <Compile Include="FanConnect\ViewModel\ThWaterPipeViewModel.cs" />
@@ -227,8 +229,6 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LoadCalculation\Engine\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
