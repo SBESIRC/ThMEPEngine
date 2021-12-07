@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />

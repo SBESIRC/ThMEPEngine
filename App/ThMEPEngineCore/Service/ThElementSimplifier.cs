@@ -1,11 +1,12 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
+using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
@@ -21,15 +22,30 @@ namespace ThMEPEngineCore.Service
             DISTANCE_TOLERANCE = 1.0;
             TESSELLATE_ARC_LENGTH = 10.0;
         }
-
+        
         public override DBObjectCollection Simplify(DBObjectCollection objs)
         {
             var results = new DBObjectCollection();
-            objs.Cast<AcPolygon>().ForEach(o =>
+            objs.OfType<Entity>().ForEach(o =>
             {
                 // 由于投影误差，DB3切出来的墙线中有非常短的线段（长度<1mm)
                 // 这里使用简化算法，剔除掉这些非常短的线段
-                results.Add(o.DPSimplify(DISTANCE_TOLERANCE));
+                if(o is Polyline polyline)
+                {
+                    results.Add(polyline.DPSimplify(DISTANCE_TOLERANCE));
+                }
+                else if(o is MPolygon mPolygon)
+                {
+                    var shell = mPolygon.Shell().DPSimplify(DISTANCE_TOLERANCE);
+                    var holes = mPolygon.Holes()
+                    .Select(h=>h.DPSimplify(DISTANCE_TOLERANCE))
+                    .Where(h=>h.Area>1e-6).OfType<Curve>().ToList();
+                    results.Add(ThMPolygonTool.CreateMPolygon(shell, holes));
+                }
+                else
+                {
+                    results.Add(o);
+                }
             });
             return results;
         }
@@ -37,19 +53,66 @@ namespace ThMEPEngineCore.Service
         public override DBObjectCollection Normalize(DBObjectCollection objs)
         {
             var results = new DBObjectCollection();
-            foreach (AcPolygon obj in objs)
+            objs.OfType<Entity>().ForEach(o =>
             {
-                obj.Buffer(-OFFSET_DISTANCE)
-                    .Cast<AcPolygon>()
-                    .ForEach(o =>
+                if(o is Polyline polyline)
+                {
+                    polyline
+                    .Buffer(-OFFSET_DISTANCE)
+                    .OfType<AcPolygon>()
+                    .ForEach(p =>
                     {
-                        o.Buffer(OFFSET_DISTANCE)
+                        p.Buffer(OFFSET_DISTANCE)
                         .Cast<AcPolygon>()
                         .ForEach(e => results.Add(e));
                     });
-            }
+                }
+                else if(o is MPolygon mPolygon)
+                {
+                    mPolygon
+                    .Buffer(-OFFSET_DISTANCE,true)
+                    .OfType<Entity>()
+                    .Where(m=> m is MPolygon && m.GetArea()>1e-6)
+                    .OfType<MPolygon>()
+                    .ForEach(m=>
+                    {
+                        m.Buffer(OFFSET_DISTANCE,true)
+                       .OfType<Entity>()
+                       .Where(n=>n.GetArea()>1e-6)
+                       .ForEach(e => results.Add(e));
+                    });
+                }
+                else
+                {
+                    results.Add(o);
+                }
+            });
             return results;
         }
+
+        public override DBObjectCollection MakeValid(DBObjectCollection curves)
+        {
+            var results = new DBObjectCollection();
+            curves.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    var res = polyline.MakeValid();
+                    res.Cast<Entity>().ForEach(e => results.Add(e));
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    var res = mPolygon.MakeValid(true);
+                    res.Cast<Entity>().ForEach(e => results.Add(e));
+                }
+                else
+                {
+                    results.Add(o);
+                }
+            });
+            return results;
+        }
+
         public override DBObjectCollection Tessellate(DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
