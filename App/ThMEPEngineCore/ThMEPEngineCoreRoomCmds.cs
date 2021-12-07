@@ -209,14 +209,17 @@ namespace ThMEPEngineCore
                 //提取数据+封面
                 Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
                 //Roomdata构造函数非常慢，可能是其他元素提取导致的
-                data.Deburring();
+                data.Transform(); // 移到原点处
+                data.Preprocess();
+               
                 var totaldata = data.MergeData();
-
-                selectPts = selectPts.Where(o => !data.ContatinPoint3d(o)).ToList();
                 var builder = new ThRoomOutlineBuilderEngine(totaldata);
                 builder.CloseAndFilter();
 
-                selectPts.ForEach(p =>
+                var newPts = selectPts
+                    .Select(p=>data.Transformer.Transform(p))
+                    .Where(o => !data.ContatinPoint3d(o)).ToList();
+                newPts.ForEach(p =>
                 {
                     var roomOutline = builder.Query(p);
                     if (roomOutline!=null)
@@ -225,6 +228,9 @@ namespace ThMEPEngineCore
                     }
                 });
 
+                // 还原
+                data.Transformer.Reset(results);
+                data.Reset();
                 return results;
             }
         }
