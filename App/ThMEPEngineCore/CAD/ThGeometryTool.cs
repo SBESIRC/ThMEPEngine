@@ -138,8 +138,9 @@ namespace ThMEPEngineCore.CAD
                 obb.TransformBy(counterClockwiseMat);
                 return obb;
             }
-            catch (Exception ex)
+            catch
             {
+                //
             }
 
             return new Polyline();
