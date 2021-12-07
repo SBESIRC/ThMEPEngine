@@ -263,7 +263,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     foreach (Point3d borderPt in outlineClumns[curOutline])
                     {
                         //outlineNearPt.Value 有可能这些点并不是最好的，有可能需要加入的是所有其他柱点
-                        Point3d cntNearPt = GetObject.GetPointByDirection(borderPt, curOutline.GetClosePoint(borderPt), outlineNearPt.Value, Math.PI / 6, 10000);//可能需要重写这个算法
+                        Point3d cntNearPt = GetObject.GetPointByDirection(borderPt, curOutline.GetClosePoint(borderPt), outlineNearPt.Value, Math.PI / 6, 13000);//可能需要重写这个算法
                         if (cntNearPt == borderPt)
                         {
                             continue;//说明从这个边框内柱点找不到外部相连的近点
@@ -318,8 +318,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         Vector3d aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis);
                         double toleranceDegree = Math.PI / 15;
                         //Get VerticalPoint
-                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, 9300, curOutline);
-                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > 9300) 
+                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, 13000, curOutline);
+                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > 13000) 
                         {
                             continue;
                         }
@@ -339,7 +339,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
                         //找到近点nearPt最佳的边界连接点
                         Point3d borderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, toleranceDegree);//, zeroPts) ;
-                        if(borderPt.DistanceTo(nearPt) > 9300)
+                        if(borderPt.DistanceTo(nearPt) > 13000)
                         {
                             continue;
                         }
