@@ -1,26 +1,22 @@
 ﻿using Linq2Acad;
 using System.Linq;
-using ThMEPWSS.Command;
-using ThMEPWSS.ViewModel;
-using ThMEPEngineCore.CAD;
-using ThMEPWSS.FlushPoint.Data;
 using Autodesk.AutoCAD.Runtime;
 using System.Collections.Generic;
-using ThMEPWSS.UndergroundFireHydrantSystem.UI;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using ThMEPWSS.Diagram.ViewModel;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Sprinkler.Analysis;
-using ThMEPWSS.SprinklerConnect.Cmd;
 using Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.CAD;
+using ThMEPWSS.Command;
+using ThMEPWSS.ViewModel;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.FlushPoint.Data;
+using ThMEPWSS.SprinklerConnect.Cmd;
+using ThMEPWSS.UndergroundFireHydrantSystem.UI;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
     public class PlumbingWPFUIApp : IExtensionApplication
     {
-
-        uiDrainageSystemSet uiSet;
         FireHydrant uiFireHydrant;
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
