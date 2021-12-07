@@ -3,19 +3,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThRoomOutlineSimplifier:ThElementSimplifier
+    public class ThRoomOutlineSimplifier:ThPolygonalElementSimplifier
     {
-        public double ClOSED_DISTANC_TOLERANCE
-        {
-            get;
-            set;
-        }
+        private double ClOSED_DISTANC_TOLERANCE;
 
         public ThRoomOutlineSimplifier()
         {
-            OFFSET_DISTANCE = 20.0;
-            DISTANCE_TOLERANCE = 1.0;
-            TESSELLATE_ARC_LENGTH = 100.0;
+            OFFSETDISTANCE = 20.0;
+            DISTANCETOLERANCE = 1.0;
+            TESSELLATEARCLENGTH = 100.0;
             ClOSED_DISTANC_TOLERANCE = 1000.0; // 待定
             AREATOLERANCE = 100.0; //过滤房间面积
         }

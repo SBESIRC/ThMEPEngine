@@ -161,7 +161,7 @@ namespace ThMEPStructure.GirderConnect.Data
 
         private DBObjectCollection Clean(DBObjectCollection objs)
         {
-            var simplifier = new ThElementSimplifier();
+            var simplifier = new ThPolygonalElementSimplifier();
             var results = simplifier.Simplify(objs);
             results = simplifier.Normalize(results);
             return results;

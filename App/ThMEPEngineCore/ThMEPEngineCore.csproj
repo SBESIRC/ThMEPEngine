@@ -276,7 +276,6 @@
     <Compile Include="Model\ThFireCompartment.cs" />
     <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Model\ThSprinkler.cs" />
-    <Compile Include="Service\ThAcPolygonSimplifier.cs" />
     <Compile Include="Service\ThArchitectureOutlineBuilder.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDbLayerManager.cs" />
@@ -536,7 +535,7 @@
     <Compile Include="Service\ThStairDoorService.cs" />
     <Compile Include="Service\ThTesslateService.cs" />
     <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
-    <Compile Include="Service\ThElementSimplifier.cs" />
+    <Compile Include="Service\ThPolygonalElementSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
     <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
@@ -627,10 +626,8 @@
     <Compile Include="Temp\IRead.cs" />
     <Compile Include="Temp\ISetStorey.cs" />
     <Compile Include="Temp\IShearWallData.cs" />
-    <Compile Include="Temp\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="Temp\ThArchitectureOutlineInfo.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
-    <Compile Include="Temp\ThBeamExtractor.cs" />
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
     <Compile Include="Temp\ThColumnExtractor.cs" />
     <Compile Include="Temp\ThConnectPortExtractor.cs" />
@@ -682,8 +679,6 @@
     <Compile Include="Temp\ThExtractService.cs" />
     <Compile Include="Temp\ThExtractSpaceRecognitionEngine.cs" />
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
-    <Compile Include="Temp\ThOuterOtherShearWallExtractor.cs" />
-    <Compile Include="Temp\ThOuterOtherColumnExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFireHydrantResultParseService.cs" />

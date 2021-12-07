@@ -39,27 +39,27 @@ namespace ThMEPEngineCore.Service
         }
         private static Polyline Tesslate(Polyline polyline, double length)
         {
-            var simplifier = new ThElementSimplifier()
+            var simplifier = new ThPolygonalElementSimplifier()
             {
-                TESSELLATE_ARC_LENGTH = length,
+                TESSELLATEARCLENGTH = length,
             };
             var objs = simplifier.Tessellate(new DBObjectCollection() { polyline });
             return objs.Count > 0 ? objs[0] as Polyline : polyline.Clone() as Polyline;
         }
         private static Polyline Tesslate(Arc arc, double length)
         {
-            var simplifier = new ThElementSimplifier()
+            var simplifier = new ThPolygonalElementSimplifier()
             {
-                TESSELLATE_ARC_LENGTH = length,
+                TESSELLATEARCLENGTH = length,
             };
             var objs = simplifier.Tessellate(new DBObjectCollection() { arc });
             return objs.Count > 0 ? objs[0] as Polyline : arc.TessellateArcWithArc(arc.Length / 10.0);
         }
         private static Polyline Tesslate(Circle circle, double length)
         {
-            var simplifier = new ThElementSimplifier()
+            var simplifier = new ThPolygonalElementSimplifier()
             {
-                TESSELLATE_ARC_LENGTH = length,
+                TESSELLATEARCLENGTH = length,
             };
             var objs = simplifier.Tessellate(new DBObjectCollection() { circle });
             return objs.Count > 0 ? objs[0] as Polyline : circle.Tessellate(circle.Radius * Math.PI * 2 / 10.0);

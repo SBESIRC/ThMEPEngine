@@ -15,10 +15,10 @@ namespace ThMEPWSS.Hydrant.Service
 
         public static DBObjectCollection Clean(this DBObjectCollection objs)
         {
-            var simplifer = new ThElementSimplifier()
+            var simplifer = new ThPolygonalElementSimplifier()
             {
-                OFFSET_DISTANCE = BUFFERLENGTH,
-                TESSELLATE_ARC_LENGTH = TESSELLATE_ARC_LENGTH,
+                OFFSETDISTANCE = BUFFERLENGTH,
+                TESSELLATEARCLENGTH = TESSELLATE_ARC_LENGTH,
             };
             var results = simplifer.Normalize(objs);
             results = simplifer.Simplify(results);
@@ -37,10 +37,10 @@ namespace ThMEPWSS.Hydrant.Service
 
         public static DBObjectCollection MakeValid(this DBObjectCollection polygons)
         {
-            var simplifer = new ThElementSimplifier()
+            var simplifer = new ThPolygonalElementSimplifier()
             {
-                OFFSET_DISTANCE = BUFFERLENGTH,
-                TESSELLATE_ARC_LENGTH = TESSELLATE_ARC_LENGTH,
+                OFFSETDISTANCE = BUFFERLENGTH,
+                TESSELLATEARCLENGTH = TESSELLATE_ARC_LENGTH,
             };
             var results = simplifer.MakeValid(polygons);
             return ClearZeroPolygon(results);
