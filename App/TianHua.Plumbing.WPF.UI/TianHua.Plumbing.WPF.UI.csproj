@@ -102,6 +102,9 @@
     <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
       <DependentUpon>DrainageSystemSupplyAxonometricUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\FireHydrantSystemUI.xaml.cs">
+      <DependentUpon>FireHydrantSystemUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\SprinklerCheckersUI.xaml.cs">
       <DependentUpon>SprinklerCheckersUI.xaml</DependentUpon>
     </Compile>
@@ -231,6 +234,10 @@
     <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\FireHydrantSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\SprinklerCheckersUI.xaml">
       <Generator>MSBuild:Compile</Generator>

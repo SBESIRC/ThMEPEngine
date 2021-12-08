@@ -88,7 +88,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new UiWaterWellPump();
             AcadApp.ShowModelessWindow(ui);
         }
-
+        /// <summary>
+        /// 消火栓编号
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THXHSBH", CommandFlags.Modal)]
+        public void THXHSBH()
+        {
+            var ui = new ThMEPWSS.UndergroundFireHydrantSystem.UI.FireHydrantSystemUI(ThMEPWSS.UndergroundFireHydrantSystem.Model.FireHydrantSystemUIViewModel.Singleton);
+            AcadApp.ShowModelessWindow(ui);
+        }
         /// <summary>
         /// 地上雨水系统图
         /// </summary>

@@ -12,7 +12,7 @@ using ThMEPWSS.UndergroundSpraySystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class GetInput
+    public class GetInput
     {
         public static void GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
             Point3dCollection selectArea, Point3d startPt)

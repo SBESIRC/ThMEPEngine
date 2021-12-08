@@ -761,6 +761,27 @@ namespace ThMEPWSS.Uitl
             return new GLine(B, -A, A * point.Y - B * point.X);
         }
     }
+    public struct GArc
+    {
+        public double X;
+        public double Y;
+        public Point2d Center => new(X, Y);
+        public double Radius;
+        public double StartAngle;
+        public double EndAngle;
+        public bool IsClockWise;
+        public GArc(double x, double y, double radius, double startAngle, double endAngle,bool isClockWise)
+        {
+            X = x;
+            Y = y;
+            Radius = radius;
+            StartAngle = startAngle;
+            EndAngle = endAngle;
+            IsClockWise = isClockWise;
+        }
+
+        public GCircle ToGCircle() => new(X, Y, Radius);
+    }
     public struct GCircle
     {
         public double X;

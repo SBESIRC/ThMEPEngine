@@ -75,6 +75,23 @@ namespace ThMEPWSS.Assistant
             if (geo is GeometryCollection colle) return colle.Offset(dx, dy);
             throw new NotSupportedException();
         }
+
+        public static Coordinate TransformBy(this Coordinate c, Matrix3d m) => c.ToPoint3d().TransformBy(m).ToNTSCoordinate();
+        public static Point TransformBy(this Point pt, Matrix3d m) => pt.ToPoint3d().TransformBy(m).ToNTSPoint();
+        public static LineString TransformBy(this LineString ls, Matrix3d m) => new(ls.Coordinates.Select(c => c.TransformBy(m)).ToArray());
+        public static LinearRing TransformBy(this LinearRing lr, Matrix3d m) => new(lr.Coordinates.Select(c => c.TransformBy(m)).ToArray());
+        public static Polygon TransformBy(this Polygon pl, Matrix3d m) => new(pl.Shell.TransformBy(m));
+        public static GeometryCollection TransformBy(this GeometryCollection colle, Matrix3d m) => new(colle.Geometries.Select(x => x.TransformBy(m)).ToArray());
+        public static Geometry TransformBy(this Geometry geo, Matrix3d m)
+        {
+            if (geo is null) throw new ArgumentNullException();
+            if (geo is Point point) return point.TransformBy(m);
+            if (geo is LinearRing lr) return lr.TransformBy(m);
+            if (geo is LineString ls) return ls.TransformBy(m);
+            if (geo is Polygon pl) return pl.TransformBy(m);
+            if (geo is GeometryCollection colle) return colle.TransformBy(m);
+            throw new NotSupportedException();
+        }
     }
     public static class GeoNTSConvertion
     {
@@ -915,6 +932,12 @@ namespace ThMEPWSS.Assistant
         public static Geometry CreateGeometryEx<T>(List<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx<T>(T[] geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
+        public static Geometry CreateGeometry(object tag, params Geometry[] geos)
+        {
+            var geo = CreateGeometry(geos);
+            geo.UserData = tag;
+            return geo;
+        }
         public static Geometry CreateGeometry(params Geometry[] geos)
         {
             return DefaultGeometryFactory.BuildGeometry(geos);
@@ -1232,6 +1255,46 @@ namespace ThMEPWSS.Assistant
                 }
             }
         }
+        public static double FixAngle(double angle)
+        {
+            if (angle < -Math.PI * 2) angle += Math.PI * 2 * Math.Ceiling(angle);
+            if (angle > Math.PI * 2) angle -= Math.PI * 2 * Math.Floor(angle);
+            while (angle < 0) angle += Math.PI * 2;
+            while (angle >= Math.PI * 2) angle -= Math.PI * 2;
+            return angle;
+        }
+        public static IEnumerable<GLineSegment> YieldGLineSegments(IEnumerable<Point2d> pts)
+        {
+            if (pts is null) yield break;
+            int c = 0;
+            Point2d last = default;
+            foreach (var pt in pts)
+            {
+                if (c != 0)
+                {
+                    var seg = new GLineSegment(pt, last);
+                    if (seg.IsValid) yield return seg;
+                }
+                last = pt;
+                ++c;
+            }
+        }
+        public static IEnumerable<GLineSegment> YieldGLineSegments(IEnumerable<Point3d> pts)
+        {
+            if (pts is null) yield break;
+            int c = 0;
+            Point3d last = default;
+            foreach (var pt in pts)
+            {
+                if (c != 0)
+                {
+                    var seg = new GLineSegment(pt, last);
+                    if (seg.IsValid) yield return seg;
+                }
+                last = pt;
+                ++c;
+            }
+        }
     }
     public static class CadJsonExtension
     {
@@ -1291,6 +1354,7 @@ namespace ThMEPWSS.Assistant
                 types.Add(typeof(GRect));
                 types.Add(typeof(GLineSegment));
                 types.Add(typeof(GVector));
+                types.Add(typeof(GArc));
                 types.Add(typeof(Point2d));
                 types.Add(typeof(Point3d));
                 types.Add(typeof(Vector2d));
@@ -1300,6 +1364,7 @@ namespace ThMEPWSS.Assistant
                 types.Add(typeof(System.Windows.Vector));
                 types.Add(typeof(System.Windows.Rect));
                 types.Add(typeof(System.Windows.Media.LineGeometry));
+                types.Add(typeof(Action));
             }
             public override bool CanConvert(Type objectType)
             {
@@ -1326,6 +1391,12 @@ namespace ThMEPWSS.Assistant
                     var jo = serializer.Deserialize<JObject>(reader);
                     var ja = (JArray)jo["values"];
                     return new GVector(new Point2d(ja[0].ToObject<double>(), ja[1].ToObject<double>()), new Vector2d(ja[2].ToObject<double>(), ja[3].ToObject<double>()));
+                }
+                if (typeof(GArc) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    var ja = (JArray)jo["values"];
+                    return new GArc(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>(), ja[3].ToObject<double>(), ja[4].ToObject<double>(), ja[5].ToObject<bool>());
                 }
                 if (typeof(Point2d) == objectType)
                 {
@@ -1382,6 +1453,11 @@ namespace ThMEPWSS.Assistant
                     return new System.Windows.Media.LineGeometry(new System.Windows.Point(ja[0].ToObject<double>(), ja[1].ToObject<double>()),
                         new System.Windows.Point(ja[2].ToObject<double>(), ja[3].ToObject<double>()));
                 }
+                if (typeof(Action) == objectType)
+                {
+                    var jo = serializer.Deserialize<JObject>(reader);
+                    return null;
+                }
                 throw new NotSupportedException();
             }
             public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -1398,6 +1474,14 @@ namespace ThMEPWSS.Assistant
                     if (value is GLineSegment seg)
                     {
                         var json = (new Dictionary<string, object>() { { "type", nameof(GLineSegment) }, { "values", new double[] { seg.StartPoint.X, seg.StartPoint.Y, seg.EndPoint.X, seg.EndPoint.Y } } }).ToJson();
+                        writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is GArc arc)
+                    {
+                        var json = (new Dictionary<string, object>() { { "type", nameof(GArc) }, { "values", new double[] { arc.X, arc.Y, arc.Radius, arc.StartAngle, arc.EndAngle } } }).ToJson();
                         writer.WriteRawValue(json);
                         return;
                     }
@@ -1479,6 +1563,13 @@ namespace ThMEPWSS.Assistant
                     {
                         var json = (new Dictionary<string, object>() { { "type", nameof(System.Windows.Media.LineGeometry) }, { "values", new double[] { seg.StartPoint.X, seg.StartPoint.Y, seg.EndPoint.X, seg.EndPoint.Y } } }).ToJson();
                         writer.WriteRawValue(json);
+                        return;
+                    }
+                }
+                {
+                    if (value is Action)
+                    {
+                        writer.WriteRawValue("null");
                         return;
                     }
                 }
@@ -2013,9 +2104,9 @@ namespace ThMEPWSS.Assistant
             }
         }
 
-        public static bool TrySelectPoint(out Point3d pt)
+        public static bool TrySelectPoint(out Point3d pt, string prompt = "\n选择图纸基点")
         {
-            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+            var basePtOptions = new PromptPointOptions(prompt);
             var rst = Active.Editor.GetPoint(basePtOptions);
             if (rst.Status != PromptStatus.OK)
             {
@@ -2259,7 +2350,7 @@ namespace ThMEPWSS.Assistant
             foreach (var ent in ents)
             {
                 ent.Layer = layer;
-                DrawUtils.ByLayer(ent);
+                ByLayer(ent);
             }
         }
         public static Circle DrawGeometryLazy(GCircle circle)
@@ -2283,28 +2374,44 @@ namespace ThMEPWSS.Assistant
         {
             DrawingQueue.Enqueue(adb => ents.ForEach(ent => adb.ModelSpace.Add(ent)));
         }
-        public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle)
-        {
-            if (layer == null)
-            {
-                layer = ((LayerTableRecord)spaceId.Database.Clayer.GetObject(OpenMode.ForRead)).Name;
-            }
-            return spaceId.InsertBlockReference(layer, blockName, position, scale, rotateAngle);
-        }
-        public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
-        {
-            if (layer == null)
-            {
-                layer = ((LayerTableRecord)spaceId.Database.Clayer.GetObject(OpenMode.ForRead)).Name;
-            }
-            if (attNameValues == null)
-            {
-                attNameValues = new Dictionary<string, string>();
-            }
-            return spaceId.InsertBlockReference(layer, blockName, position, scale, rotateAngle, attNameValues);
-        }
+
         public static void DrawBlockReference(string blkName, Point3d basePt, Action<BlockReference> cb = null, Dictionary<string, string> props = null, string layer = null, double scale = 1, double rotateDegree = 0)
         {
+            static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
+            {
+                var db = spaceId.Database;
+                var bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+                if (!bt.Has(blockName)) return ObjectId.Null;
+                var space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+                var btrId = bt[blockName];
+                var record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+                var br = new BlockReference(position, bt[blockName]) { ScaleFactors = scale };
+                if (layer != null) br.Layer = layer;
+                br.Rotation = rotateAngle;
+                space.AppendEntity(br);
+                if (attNameValues != null && record.HasAttributeDefinitions)
+                {
+                    foreach (ObjectId id in record)
+                    {
+                        if (id.GetObject(OpenMode.ForRead) is AttributeDefinition attDef)
+                        {
+                            var attribute = new AttributeReference();
+                            attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
+                            attribute.Position = attDef.Position.TransformBy(br.BlockTransform);
+                            attribute.Rotation = attDef.Rotation;
+                            attribute.AdjustAlignment(db);
+                            if (attNameValues.ContainsKey(attDef.Tag.ToUpper()))
+                            {
+                                attribute.TextString = attNameValues[attDef.Tag.ToUpper()].ToString();
+                            }
+                            br.AttributeCollection.AppendAttribute(attribute);
+                            db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
+                        }
+                    }
+                }
+                db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                return br.ObjectId;
+            }
             DrawingQueue.Enqueue(adb =>
             {
                 var id = InsertBlockReference(adb.ModelSpace.ObjectId, layer, blkName, basePt, new Scale3d(scale), GeoAlgorithm.AngleFromDegree(rotateDegree), props);
@@ -2318,6 +2425,27 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawBlockReference(string blkName, Point3d basePt, Action<BlockReference> cb)
         {
+            static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle)
+            {
+                var db = spaceId.Database;
+                var bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+                if (!bt.Has(blockName)) return ObjectId.Null;
+                var space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+                var br = new BlockReference(position, bt[blockName]) { ScaleFactors = scale };
+                if (layer != null) br.Layer = layer;
+                br.Rotation = rotateAngle;
+                var btrId = bt[blockName];
+                var record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+                if (record.Annotative == AnnotativeStates.True)
+                {
+                    ObjectContextCollection contextCollection = db.ObjectContextManager.GetContextCollection("ACDB_ANNOTATIONSCALES");
+                    ObjectContexts.AddContext(br, contextCollection.GetContext("1:1"));
+                }
+                var blockRefId = space.AppendEntity(br);
+                db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+                space.DowngradeOpen();
+                return blockRefId;
+            }
             DrawingQueue.Enqueue(adb =>
             {
                 var id = InsertBlockReference(adb.ModelSpace.ObjectId, null, blkName, basePt, new Scale3d(1), 0);
@@ -2327,15 +2455,6 @@ namespace ThMEPWSS.Assistant
                     var br = adb.Element<BlockReference>(id);
                     cb(br);
                 }
-            });
-        }
-        public static void DrawBlockReference(string blkName, Point3d basePt, string layerName)
-        {
-            DrawingQueue.Enqueue(adb =>
-            {
-                var id = adb.ModelSpace.ObjectId;
-                if (!id.IsValid) return;
-                id.InsertBlockReference(layerName, blkName, basePt, new Scale3d(1), 0);
             });
         }
         public static Polyline DrawBoundaryLazy(Entity[] ents, double thickness)
