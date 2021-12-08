@@ -36,6 +36,7 @@ namespace TianHua.Hvac.UI
             this.label1 = new System.Windows.Forms.Label();
             this.listBox1 = new System.Windows.Forms.ListBox();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.btnTotalAirVolume = new System.Windows.Forms.Button();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
@@ -130,7 +131,6 @@ namespace TianHua.Hvac.UI
             this.labelBypassNum = new System.Windows.Forms.Label();
             this.label41 = new System.Windows.Forms.Label();
             this.label40 = new System.Windows.Forms.Label();
-            this.btnTotalAirVolume = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -275,6 +275,16 @@ namespace TianHua.Hvac.UI
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 18;
             // 
+            // btnTotalAirVolume
+            // 
+            this.btnTotalAirVolume.Location = new System.Drawing.Point(200, 9);
+            this.btnTotalAirVolume.Name = "btnTotalAirVolume";
+            this.btnTotalAirVolume.Size = new System.Drawing.Size(56, 23);
+            this.btnTotalAirVolume.TabIndex = 26;
+            this.btnTotalAirVolume.Text = "总风量:";
+            this.btnTotalAirVolume.UseVisualStyleBackColor = true;
+            this.btnTotalAirVolume.Click += new System.EventHandler(this.btnTotalAirVolume_Click);
+            // 
             // radioButton4
             // 
             this.radioButton4.AutoSize = true;
@@ -398,7 +408,10 @@ namespace TianHua.Hvac.UI
             "事故排风",
             "事故补风",
             "平时送风兼事故补风",
-            "平时排风兼事故排风"});
+            "平时排风兼事故排风",
+            "空调送风",
+            "空调回风",
+            "空调新风"});
             this.scenarioCombox.Location = new System.Drawing.Point(72, 12);
             this.scenarioCombox.Name = "scenarioCombox";
             this.scenarioCombox.Size = new System.Drawing.Size(119, 20);
@@ -1315,16 +1328,6 @@ namespace TianHua.Hvac.UI
             this.label40.Size = new System.Drawing.Size(65, 12);
             this.label40.TabIndex = 63;
             this.label40.Text = "旁通指定：";
-            // 
-            // btnTotalAirVolume
-            // 
-            this.btnTotalAirVolume.Location = new System.Drawing.Point(200, 9);
-            this.btnTotalAirVolume.Name = "btnTotalAirVolume";
-            this.btnTotalAirVolume.Size = new System.Drawing.Size(56, 23);
-            this.btnTotalAirVolume.TabIndex = 26;
-            this.btnTotalAirVolume.Text = "总风量:";
-            this.btnTotalAirVolume.UseVisualStyleBackColor = true;
-            this.btnTotalAirVolume.Click += new System.EventHandler(this.btnTotalAirVolume_Click);
             // 
             // fmFpm
             // 

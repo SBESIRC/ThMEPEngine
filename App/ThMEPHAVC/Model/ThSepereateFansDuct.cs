@@ -217,8 +217,9 @@ namespace ThMEPHVAC.Model
             double maxH = 0.0;
             string maxElevation = string.Empty;
             var firstFan = fans.FirstOrDefault();
-            var selectMaxFlag = firstFan.scenario.Contains("排烟") || firstFan.scenario.Contains("消防加压送风");
-            double airVolume = selectMaxFlag ? firstFan.airVolume : 0 ;
+            var selectMaxFlag = (firstFan.scenario.Contains("排烟") && !firstFan.scenario.Contains("兼")) ||
+                                 firstFan.scenario.Contains("消防加压送风");
+            double airVolume = selectMaxFlag ? firstFan.airVolume : 0;
             foreach (var fan in fans)
             {
                 if (selectMaxFlag && fan.airVolume > airVolume)

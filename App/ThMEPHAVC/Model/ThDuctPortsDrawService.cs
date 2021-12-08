@@ -119,6 +119,18 @@ namespace ThMEPHVAC.Model
                     dimensionLayer = "H-DIMS-DUCT";
                     portMarkLayer = "H-DIMS-DUCT";
                     break;
+                case "空调送风":
+                case "空调回风":
+                case "空调新风":
+                    geoLayer = "H-DUCT-ACON";
+                    flgLayer = "H-DAPP-AAPP";
+                    portLayer = "H-DAPP-GRIL";
+                    centerLayer = "H-DUCT-ACON-MID";
+                    airValveLayer = "H-DAPP-DAMP";
+                    ductSizeLayer = "H-DIMS-DUCT";
+                    dimensionLayer = "H-DIMS-DUCT";
+                    portMarkLayer = "H-DIMS-DUCT";
+                    break;
                 default:throw new NotImplementedException("No such scenior!");
             }
             startLayer = "AI-风管起点";

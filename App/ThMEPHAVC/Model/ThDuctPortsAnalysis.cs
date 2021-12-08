@@ -71,7 +71,18 @@ namespace ThMEPHVAC.Model
             // 用于UI上读带风量的风口
             Init(portParam, new DBObjectCollection());
             GetMainLineAndEndLine();
-            return CountWithPortAirVolume();
+            CountWithPortAirVolume();
+            AccumMainDuctAirVolume();
+            if (mainLinesInfos.Count > 0)
+            {
+                var firstDuct = mainLinesInfos.Values.LastOrDefault();
+                return firstDuct.airVolume;
+            }
+            else
+            {
+                var firstDuct = endLinesInfos.FirstOrDefault();
+                return firstDuct.totalAirVolume;
+            }
         }
         private void DeleteOrgGraph()
         {
@@ -391,7 +402,7 @@ namespace ThMEPHVAC.Model
             {
                 var lines = CreateEndlineIndex(out Dictionary<int, double> dicLineToParam);
                 var index = new ThCADCoreNTSSpatialIndex(lines);
-                var selectMaxFlag = portParam.param.scenario.Contains("排烟") ||
+                var selectMaxFlag = (portParam.param.scenario.Contains("排烟") && !portParam.param.scenario.Contains("兼")) ||
                                     portParam.param.scenario.Contains("消防加压送风");
                 foreach (Line l in mainLines)
                 {
