@@ -1,13 +1,13 @@
 ﻿using System.Linq;
+using System.Collections.Generic;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -183,9 +183,34 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
             var startPt = startEndPt.Item1;
             var endPt = startEndPt.Item2;
+            var shortRes = Shorten(startPt, endPt, LightLinkShortenDis);
             var lines = new List<Line>();
-            lines.Add(new Line(startPt, endPt));
+            if(CheckLightLinkConflictedSideLines(shortRes.Item1, shortRes.Item2, 1.0) == false)
+            {
+                lines.Add(new Line(startPt, endPt));
+            }
+            else
+            {
+                if(lightNodeLink.CrossIntersectionPt.HasValue)
+                {
+                    lines = DrawLinkLines(startPt, endPt, lightNodeLink.CrossIntersectionPt.Value);
+                }
+                else
+                {
+                    lines.Add(new Line(startPt, endPt));
+                }
+            }
             lightNodeLink.JumpWires = lines.Cast<Curve>().ToList();
+        }
+
+        private List<Line> DrawLinkLines(Point3d start,Point3d end,Point3d initBrigePt)
+        {
+            var results = new List<Line>();
+            var brigePt = FindBrigePt(start, initBrigePt);
+            results.Add(new Line(start, brigePt));
+            results.Add(new Line(brigePt, end));
+            CrossInstallPoints.Add(brigePt);
+            return results;
         }
 
         private List<Line> DrawSpecialCornerJumpWire(Polyline path)

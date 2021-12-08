@@ -82,14 +82,63 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             pts = pts.RemoveNeibourDuplicatedPoints();
             var path = pts.CreatePolyline(false);
+
+            // 获取跳接线的偏移方向
+            var offsetDir = GetJumpWireDirection(lightNodeLink);
+            if (!offsetDir.HasValue)
+            {
+                return;
+            }
             var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
             var startPt = startEndPt.Item1;
             var endPt = startEndPt.Item2;
-            lightNodeLink.JumpWires = DrawInnerCornerArcs(path, startPt, endPt);
+
+            // 获取Buffer后的轮廓线，从First到Second的路径
+            var innerOutline = GetInnerOutline(path, OffsetDistance1);
+            var innerDir = GetOffsetDir(path, innerOutline);
+            if(offsetDir.Value.IsSameDirection(innerDir))
+            {
+                lightNodeLink.JumpWires = DrawInnerCornerArcs(path, startPt, endPt);
+            }
+            else
+            {
+                lightNodeLink.JumpWires = DrawOuterCornerArcs(path, startPt, endPt);
+            }
         }
-        private List<Curve> DrawOutterCornerArcs(Polyline path)
+        private List<Curve> DrawOuterCornerArcs(Polyline path, Point3d wireSp, Point3d wireEp)
         {
-            throw new NotSupportedException();
+            // 获取Buffer后的轮廓线，从First到Second的路径
+            var outerOutline = GetOuterOutline(path, OffsetDistance1);
+            var outerDir = GetOffsetDir(path, outerOutline);
+            var lines = FindLinkPath(outerOutline, path.StartPoint, path.EndPoint, outerDir);
+            if (lines.Count > 0)
+            {
+                lines.RemoveAt(0);
+            }
+            if (lines.Count > 0)
+            {
+                lines.RemoveAt(lines.Count - 1);
+            }
+            var cornerPts = GetCornerPoints(lines);
+            cornerPts.Insert(0, wireSp);
+            cornerPts.Add(wireEp);
+
+            var results = new List<Curve>();
+            for (int i = 0; i < cornerPts.Count - 1; i++)
+            {
+                var arcSp = cornerPts[i];
+                var arcEp = cornerPts[i + 1];
+                var midPt = arcSp.GetMidPt(arcEp);
+                var toPathDir = FindCloseDiretion(path, midPt);
+                var arcTopVec = toPathDir.Negate();
+                var radius = ThArcDrawTool.CalculateRadiusByAngle(arcSp.DistanceTo(arcEp), ArcAngle);
+                var wire = ThArcDrawTool.DrawArc(arcSp, arcEp, radius, arcTopVec);
+                if (wire != null)
+                {
+                    results.Add(wire);
+                }
+            }
+            return results;
         }
         private List<Curve> DrawInnerCornerArcs(Polyline path,Point3d wireSp,Point3d wireEp)
         {
@@ -163,7 +212,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return outline1.Area < outline2.Area ? outline1 : outline2;
         }
 
-        private Polyline GetOutterOutline(Polyline path, double distance)
+        private Polyline GetOuterOutline(Polyline path, double distance)
         {
             var outline1 = path.BufferPath(distance);
             var outline2 = path.BufferPath(-distance);
@@ -199,17 +248,58 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
             var startPt = startEndPt.Item1;
             var endPt = startEndPt.Item2;
-            var offsetDir = startPt.GetVectorTo(endPt).GetPerpendicularVector();
-            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, offsetDir);
-            //var radius = CalculateRadius(startPt.DistanceTo(endPt));
-            var radius = ThArcDrawTool.CalculateRadiusByAngle(startPt.DistanceTo(endPt), ArcAngle);
-            var wire = ThArcDrawTool.DrawArc(startPt, endPt, radius, arcTopVec);
-            if (wire != null)
+            var initOffsetDir = startPt.GetVectorTo(endPt).GetPerpendicularVector();
+            var shortRes = Shorten(startPt, endPt, LightLinkShortenDis);
+            if(CheckLightLinkConflictedSideLines(shortRes.Item1, shortRes.Item2, 1.0) == false)
             {
-                lightNodeLink.JumpWires.Add(wire);
+                lightNodeLink.JumpWires.Add(DrawArc(startPt,endPt, initOffsetDir));
+            }
+            else 
+            {
+                if(lightNodeLink.CrossIntersectionPt.HasValue)
+                {
+                    lightNodeLink.JumpWires.AddRange(DrawLinkArcs(startPt, endPt, lightNodeLink.CrossIntersectionPt.Value));
+                }
+                else
+                {
+                    lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir));
+                }
             }
         }
 
+        private List<Arc> DrawLinkArcs(Point3d start, Point3d end, Point3d initBrigePt)
+        {
+            var results = new List<Arc>();
+            var projectionPt = initBrigePt.GetProjectPtOnLine(start,end);
+            var firstOffsetVec = GetOffsetVector(start, initBrigePt, end);
+            var secondOffsetVec = GetOffsetVector(end, initBrigePt, start);
+            var brigePt = FindBrigePt(start, initBrigePt);
+            results.Add(DrawArc(start, brigePt, firstOffsetVec));
+            results.Add(DrawArc(brigePt, end, secondOffsetVec));
+            CrossInstallPoints.Add(brigePt);
+            return results;
+        }
+
+        private Vector3d GetOffsetVector(Point3d startPt,Point3d brigePt,Point3d endPt)
+        {
+            if(ThGeometryTool.IsCollinearEx(startPt, brigePt, endPt))
+            {
+                return ThGarageUtils.GetAlignedDimensionTextDir(startPt.GetVectorTo(endPt));
+            }
+            else
+            {
+                var projectionPt = endPt.GetProjectPtOnLine(startPt, brigePt);
+                return projectionPt.GetVectorTo(endPt).GetNormal();
+            }
+        }
+
+        private Arc DrawArc(Point3d startPt,Point3d endPt,Vector3d topRefVec)
+        {
+            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, topRefVec);
+            var radius = ThArcDrawTool.CalculateRadiusByGap(startPt.DistanceTo(endPt), Gap);
+            return ThArcDrawTool.DrawArc(startPt, endPt, radius, arcTopVec);
+        }
+        
         private double CalculateRadius(double lightDis)
         {
             if (CalculateArcRadius.Method.Name == "CalculateRadiusByAngle")
