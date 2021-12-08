@@ -1,5 +1,6 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
@@ -10,6 +11,8 @@ using GeometryExtensions;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -170,6 +173,57 @@ namespace ThMEPEngineCore
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.ROOMSPLITLINE);
                 Active.Document.SendStringToExecute("_Polyline ", true, false, true);
             }
+        }
+
+        /// <summary>
+        /// 空间中心线
+        /// </summary>
+
+        [CommandMethod("TIANHUACAD", "THKJZX", CommandFlags.Modal)]
+        public void THKJZX()
+        {
+#if (ACAD2016 || ACAD2018)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                // 获取空间框线
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                // 简化空间框线
+                var simplifer = new ThRoomOutlineSimplifier();
+                objs = simplifer.Simplify(objs);
+                objs = simplifer.MakeValid(objs);
+                objs = simplifer.Simplify(objs);
+
+                // 提取中心线
+                ThMEPEngineCoreLayerUtils.CreateAICenterLineLayer(acadDatabase.Database);
+                objs.BuildArea()
+                    .OfType<Entity>()
+                    .ForEach(e =>
+                    {
+                        ThMEPPolygonService.CenterLine(e)
+                        .ToCollection()
+                        .LineMerge()
+                        .OfType<Entity>()
+                        .ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.Layer = ThMEPEngineCoreLayerUtils.CENTERLINE;
+                        });
+                    });
+            }
+#else
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
+#endif
         }
 
         private void PrintRoom(DBObjectCollection roomOutlines)
