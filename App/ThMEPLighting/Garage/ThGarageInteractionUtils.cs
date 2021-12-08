@@ -58,8 +58,8 @@ namespace ThMEPLighting.Garage
                 borders.ForEach(o =>
                 {
                     var newBorder = o.Clone() as Entity;
-                    transformer.Transform(newBorder);
                     var borderTransformer = new ThMEPOriginTransformer(newBorder.GetBorderBasePt());
+                    transformer.Transform(newBorder);
                     var regionBorder = new ThRegionBorder
                     {
                         RegionBorder = o,

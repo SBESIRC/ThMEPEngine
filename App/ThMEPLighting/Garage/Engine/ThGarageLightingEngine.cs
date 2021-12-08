@@ -44,10 +44,6 @@ namespace ThMEPLighting.Garage.Engine
             {
                 var singleRowRegionBorder = GetSubRegionBorder(singRowRegionBorders, r.Id);
 
-                // for test
-                r.Transformer = new ThMEPOriginTransformer(Point3d.Origin);
-                singleRowRegionBorder.Transformer = new ThMEPOriginTransformer(Point3d.Origin);
-
                 // begin
                 r.Transform();
                 singleRowRegionBorder.Transform();
