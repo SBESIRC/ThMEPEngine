@@ -47,8 +47,8 @@ namespace ThMEPEngineCore.ConnectWiring
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
-            //BranchConnectingService branchConnecting = new BranchConnectingService();
-            BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
+            BranchConnectingService branchConnecting = new BranchConnectingService();
+            //BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, wall, column);
             foreach (var info in configInfo)
@@ -74,8 +74,8 @@ namespace ThMEPEngineCore.ConnectWiring
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
-                    allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
-                    allDatas.AddRange(GetUCSPolylines(objs));
+                    //allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
+                    //allDatas.AddRange(GetUCSPolylines(objs));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
                     if (!res.Contains("error"))
@@ -105,7 +105,8 @@ namespace ThMEPEngineCore.ConnectWiring
                             List<Polyline> resLines = new List<Polyline>();
                             foreach (var line in loop.Value)
                             {
-                                var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
+                                var wiring = branchConnecting.CreateBranch(line, resBlocks);
+                                //var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
                                 resLines.Add(wiring);
                             }
                             //插入线

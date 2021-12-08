@@ -25,6 +25,7 @@
             <ComponentGroupRef Id="ProductComponentsLightingWin64" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
+            <ComponentGroupRef Id="ProductComponentsStructureWin64" />
         </Feature>
         <UIRef Id="WixUI_Minimal"/>
         <WixVariable Id="WixUILicenseRtf" Value="License_zh-CN.rtf" />

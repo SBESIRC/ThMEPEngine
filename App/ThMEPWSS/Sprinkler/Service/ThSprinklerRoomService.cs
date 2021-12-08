@@ -12,7 +12,7 @@ namespace ThMEPWSS.Sprinkler.Service
         /// </summary>
         /// <param name="labels"></param>
         /// <returns></returns>
-        public override bool CannotLayoutArea(ThIfcRoom room)
+        public bool CannotLayoutArea(ThIfcRoom room)
         {
             var cannotLayoutArea = new List<string> { 
                 "楼梯间", 

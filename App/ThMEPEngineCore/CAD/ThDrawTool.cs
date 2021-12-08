@@ -203,7 +203,7 @@ namespace ThMEPEngineCore.CAD
                     }
                 }
             }
-            catch (Exception ex) 
+            catch
             {
                 //当块为空块，或块定义为空，或块内部设置了不能炸开 会出现报错问题,这里进行简便处理，拦截错误。
             }

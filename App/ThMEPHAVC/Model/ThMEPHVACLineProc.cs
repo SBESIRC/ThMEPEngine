@@ -13,7 +13,7 @@ namespace ThMEPHVAC.Model
         {
             return ThLaneLineEngine.Explode(lines);
         }
-        public static DBObjectCollection Pre_proc(DBObjectCollection lines)
+        public static DBObjectCollection PreProc(DBObjectCollection lines)
         {
             if (lines.Count == 0)
                 return new DBObjectCollection();
@@ -32,19 +32,19 @@ namespace ThMEPHVAC.Model
             {
                 foreach (Line o_l in lines)
                 {
-                    if (!ThMEPHVACService.Is_same_line(l, o_l, tor))
+                    if (!ThMEPHVACService.IsSameLine(l, o_l, tor))
                     {
-                        var v1 = ThMEPHVACService.Get_edge_direction(l);
-                        var v2 = ThMEPHVACService.Get_edge_direction(o_l);
-                        if (ThMEPHVACService.Is_collinear(v1, v2))
+                        var v1 = ThMEPHVACService.GetEdgeDirection(l);
+                        var v2 = ThMEPHVACService.GetEdgeDirection(o_l);
+                        if (ThMEPHVACService.IsCollinear(v1, v2))
                         {
-                            var dis = ThMEPHVACService.Get_line_dis(l.StartPoint, l.EndPoint, o_l.StartPoint, o_l.EndPoint);
+                            var dis = ThMEPHVACService.GetLineDis(l.StartPoint, l.EndPoint, o_l.StartPoint, o_l.EndPoint);
                             if (Math.Abs(dis) < gap_tor)
                             {
                                 line_set.Remove(l);
                                 line_set.Remove(o_l);
-                                ThMEPHVACService.Get_longest_dis(l.StartPoint, l.EndPoint, o_l.StartPoint, o_l.EndPoint, out Point3d p1, out Point3d p2);
-                                var s = (ThMEPHVACService.Round_point(p1, 6) + ThMEPHVACService.Round_point(p2, 6).GetAsVector()).ToString();
+                                ThMEPHVACService.GetLongestDis(l.StartPoint, l.EndPoint, o_l.StartPoint, o_l.EndPoint, out Point3d p1, out Point3d p2);
+                                var s = (ThMEPHVACService.RoundPoint(p1, 6) + ThMEPHVACService.RoundPoint(p2, 6).GetAsVector()).ToString();
                                 if (set.Add(s))
                                     line_set.Add(new Line(p1, p2));
                             }
@@ -52,7 +52,7 @@ namespace ThMEPHVAC.Model
                     }
                 }
             }
-            line_set = Pre_proc(line_set);
+            line_set = PreProc(line_set);
         }
     }
 }

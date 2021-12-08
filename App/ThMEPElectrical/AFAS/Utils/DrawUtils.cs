@@ -162,7 +162,7 @@ namespace ThMEPElectrical.AFAS.Utils
             text.TextString = s;
             text.Rotation = 0;
             text.Height = hight;
-            text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
+            text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
 
             DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);
         }

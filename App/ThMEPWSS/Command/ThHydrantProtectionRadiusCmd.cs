@@ -16,6 +16,7 @@ using ThMEPWSS.ViewModel;
 using ThMEPEngineCore.Diagnostics;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 
 namespace ThMEPWSS.Command
 {
@@ -60,9 +61,14 @@ namespace ThMEPWSS.Command
 
                 // 校核
                 ThStopWatchService.Start();
+                var covers = ThHydrantPolygonCleanService.Clean(
+                    checkService.Covers
+                    .SelectMany(o => o.Item3)
+                    .Where(o=>o.GetArea()>1e-6)
+                    .ToCollection());
                 var regionCheckService = new ThCheckRegionService()
                 {
-                    Covers = checkService.Covers.SelectMany(o => o.Item3).ToList(),
+                    Covers = covers.OfType<Entity>().ToList(),
                     Rooms = checkService.Rooms,
                     IsSingleStrands = FireHydrantVM.Parameter.GetProtectStrength,
                 };

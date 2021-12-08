@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Linq;
 using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
 using Linq2Acad;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
@@ -13,96 +11,50 @@ namespace ThMEPHVAC.Model
 {
     public class ThFanDraw
     {
-        public ObjectId start_id;
         public ThDbModelFan fan;
-        private Matrix3d dis_mat;
-        public Duct_InParam param;
-        public Tolerance point_tor;
+        public FanParam fanParam;
         public DBObjectCollection bypass;
+        private Matrix3d disMat;
         private ThDuctPortsDrawService service;
-        public ThFanDraw(ThFanAnalysis anay_res)
+        public ThFanDraw(ThFanAnalysis anayRes, bool roomEnable, bool notRoomEnable)
         {
-            Init(anay_res);
-            Draw_center_line(anay_res);
-            service.Draw_special_shape(anay_res.special_shapes_info, dis_mat);
-            Draw_duct(anay_res.center_lines);
-            Draw_reducing(anay_res.reducings);
-            Draw_duct_text(anay_res.text_alignment, anay_res.move_srt_p);
-            Draw_hose();
+            Init(anayRes);
+            DrawCenterLine(anayRes);
+            service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
+            service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
+            service.DrawReducing(anayRes.reducings, disMat);
+            service.DrawSideDuctText(anayRes, anayRes.moveSrtP, fanParam);
+            DrawHose(roomEnable, notRoomEnable);
         }
-        private void Init(ThFanAnalysis anay_res)
+        private void Init(ThFanAnalysis anayRes)
         {
-            dis_mat = Matrix3d.Displacement(anay_res.move_srt_p.GetAsVector());
-            fan = anay_res.fan;
-            param = anay_res.param;
-            bypass = anay_res.bypass;
-            point_tor = anay_res.point_tor;
-            service = new ThDuctPortsDrawService(fan.scenario, param.scale);
-            var angle = ThMEPHVACService.Get_srt_flag_rotation(anay_res.start_dir_vec);
-            start_id = service.Insert_start_flag(anay_res.fan_break_p, angle);
-            var par = new ThMEPHVACParam() { scenario = fan.scenario, scale = param.scale };
-            ThDuctPortsRecoder.Attach_start_param(start_id, par);
+            disMat = Matrix3d.Displacement(anayRes.moveSrtP.GetAsVector());
+            fan = anayRes.fan;
+            fanParam = anayRes.fanParam;
+            bypass = anayRes.bypass;
+            service = new ThDuctPortsDrawService(fan.scenario, fanParam.scale);
         }
-        private void Draw_center_line(ThFanAnalysis anay_res)
+        private void DrawCenterLine(ThFanAnalysis anayRes)
         {
             using (var db = AcadDatabase.Active())// 立即显示重绘效果
             {
                 var lines = new DBObjectCollection();
-                var dis_mat = Matrix3d.Displacement(anay_res.move_srt_p.GetAsVector());
-                foreach (var l in anay_res.not_room_lines)
+                var disMat = Matrix3d.Displacement(anayRes.moveSrtP.GetAsVector());
+                foreach (var l in anayRes.notRoomLines)
                     lines.Add(l);
-                foreach (var l in anay_res.room_lines)
+                foreach (var l in anayRes.roomLines)
                     lines.Add(l);
-                foreach (var l in anay_res.aux_lines)
+                foreach (var l in anayRes.auxLines)
                     lines.Add(l);
-                ThDuctPortsDrawService.Draw_lines(lines, dis_mat, "0", out _);
+                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out _);
                 lines.Clear();
-                dis_mat = Matrix3d.Displacement(anay_res.fan_break_p.GetAsVector());
-                foreach (Line l in anay_res.out_center_line)
+                disMat = Matrix3d.Displacement(anayRes.fanBreakP.GetAsVector());
+                foreach (Line l in anayRes.outCenterLine)
                     lines.Add(l);
-                ThDuctPortsDrawService.Draw_lines(lines, dis_mat, "0", out _);
+                ThDuctPortsDrawService.DrawLines(lines, disMat, "0", out _);
             }   
         }
-        private void Draw_duct_text(List<TextAlignLine> text_alignment, Point3d srt_p)
-        {
-            var room_elevation = Double.Parse(param.room_elevation);
-            var other_elevation = Double.Parse(param.other_elevation);
-            var mat = Matrix3d.Displacement(srt_p.GetAsVector());
-            for (int i = 0; i < text_alignment.Count; ++i)
-            {
-                var t = text_alignment[i];
-                t.l.TransformBy(mat);
-            }
-            service.text_service.Get_fjf_duct_info(param.scale, room_elevation, other_elevation, text_alignment, out List<DBText> duct_size_info);
-            service.text_service.Draw_duct_size_info(duct_size_info);
-        }
-        public void Draw_duct(List<Fan_duct_Info> center_lines)
-        {
-            foreach (var l in center_lines)
-            {
-                var dir_vec = (l.ep - l.sp).GetNormal();
-                var sp = (l.sp + dir_vec * l.src_shrink).ToPoint2D();
-                var ep = (l.ep - dir_vec * l.dst_shrink).ToPoint2D();
-                var duct = ThDuctPortsFactory.Create_duct(sp, ep, ThMEPHVACService.Get_width(l.size));
-                service.Draw_duct(duct, dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
-                                                 out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
-                var duct_param = ThMEPHVACService.Create_duct_modify_param(duct.center_line, l.size, param.room_elevation, 
-                                                                           fan.air_volume, start_id.Handle);
-                ThDuctPortsRecoder.Create_duct_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, duct_param);
-            }
-        }
-        private void Draw_reducing(List<Line_Info> reducings)
-        {
-            foreach (var red in reducings)
-            {
-                var param = ThMEPHVACService.Create_reducing_modify_param(red, start_id.Handle);
-                service.Draw_shape(red, dis_mat, out ObjectIdList geo_ids, out ObjectIdList flg_ids, out ObjectIdList center_ids,
-                                                 out ObjectIdList ports_ids, out ObjectIdList ext_ports_ids);
-                ThDuctPortsRecoder.Create_group(geo_ids, flg_ids, center_ids, ports_ids, ext_ports_ids, param);
-            }
-        }
-        
-        public ObjectId Insert_electric_valve(Vector3d fan_cp_vec, double valvewidth, double angle)
+        public ObjectId InsertElectricValve(Vector3d fan_cp_vec, double valvewidth, double angle)
         {
             var e = new ThValve()
             {
@@ -134,9 +86,9 @@ namespace ThMEPHVAC.Model
                 return objId;
             }
         }
-        private void Draw_hose()
+        private void DrawHose(bool roomEnable, bool notRoomEnable)
         {
-            _ = new ThInletOutletDuctDrawEngine(fan);
+            _ = new ThInletOutletDuctDrawEngine(fan, roomEnable, notRoomEnable);
         }
     }
 }

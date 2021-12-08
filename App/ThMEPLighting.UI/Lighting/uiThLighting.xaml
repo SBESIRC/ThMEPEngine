@@ -17,7 +17,7 @@
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:s="clr-namespace:System;assembly=mscorlib"
                          xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
-                                         Title="照明" SizeToContent="Manual" Height="650"
+                                         Title="电气照明" SizeToContent="Manual" Height="650"
                                         Width="485" MaxWidth="600" MaxHeight="1000"
                          mc:Ignorable="d" >
     <Window.Resources>

@@ -93,7 +93,7 @@ namespace ThMEPEngineCore.Engine
         }
         private DBObjectCollection Preprocess(DBObjectCollection columns)
         {
-            var simplifier = new ThElementSimplifier();
+            var simplifier = new ThPolygonalElementSimplifier();
             var results = columns.FilterSmallArea(AREATOLERANCE);
             results = simplifier.Tessellate(columns);
             results = results.UnionPolygons();

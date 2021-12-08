@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPElectrical.AFAS
 {
-    class ThFaCommon
+    public class ThFaCommon
     {
         #region  固定布点。显示器监视器电话
         public static string BlkName_Display_District = "E-BFAS030";

@@ -22,6 +22,13 @@ namespace ThMEPHVAC.FanLayout.Command
     class ThFanHoleExtractCmd : ThMEPBaseCommand, IDisposable
     {
         static public string StrMapScale = "1:100";
+
+        public ThFanHoleExtractCmd()
+        {
+            CommandName = "THFGLD";
+            ActionName = "风机留洞";
+        }
+
         public void Dispose()
         {
         }
@@ -92,45 +99,38 @@ namespace ThMEPHVAC.FanLayout.Command
         }
         public override void SubExecute()
         {
-            try
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var database = AcadDatabase.Active())
             {
-                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var database = AcadDatabase.Active())
+                ImportBlockFile();
+                Tuple<Point3d, Point3d> tuplePts1;
+                if (!GetTuplePoints(out tuplePts1, "\n请选择洞口插入的基点位置", "\n请选择洞口插入的第二点（方向）："))
                 {
-                    ImportBlockFile();
-                    Tuple<Point3d, Point3d> tuplePts1;
-                    if (!GetTuplePoints(out tuplePts1, "\n请选择洞口插入的基点位置", "\n请选择洞口插入的第二点（方向）："))
-                    {
-                        return;
-                    }
-
-                    double fontHeight = ThFanLayoutDealService.GetFontHeight(0, StrMapScale);
-                    var point1 = tuplePts1.Item1;
-                    var point2 = tuplePts1.Item2;
-
-                    Vector3d basVector = new Vector3d(1, 0, 0);
-                    Vector3d refVector = new Vector3d(0, 0, 1);
-                    Vector3d vector = point2.GetVectorTo(point1).GetNormal();
-                    double holeAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
-                    //通过，point1和point2构造一条直线，然后进行buffer，得到一个很小的范围，再在这个范围没，提取风管
-                    var tmpLine = new Line(point1, point2);
-                    var tmpAre = tmpLine.Buffer(10);
-                    //提取到风管，然后进行数据提取
-                    ThDuctInfo info;
-                    var ductEngine = new ThFanDuctRecognitionEngine();
-                    if (ductEngine.GetDuctInfo(tmpAre.Vertices(),out info))
-                    {
-                        info.fontHeight = fontHeight;
-                        //插入风管
-                        string strSize = ThFanLayoutDealService.GetFanHoleSize(info.width, info.height, 100);
-                        string strMark = ThFanLayoutDealService.GetFanHoleMark(1, info.markHeight - 0.05);
-                        InsertFanHole(database, point1, holeAngle, info.fontHeight, info.width + 100, strSize, strMark);
-                    }
+                    return;
                 }
-            }
-            catch (Exception ex)
-            {
-                Active.Editor.WriteMessage(ex.Message);
+
+                double fontHeight = ThFanLayoutDealService.GetFontHeight(0, StrMapScale);
+                var point1 = tuplePts1.Item1;
+                var point2 = tuplePts1.Item2;
+
+                Vector3d basVector = new Vector3d(1, 0, 0);
+                Vector3d refVector = new Vector3d(0, 0, 1);
+                Vector3d vector = point2.GetVectorTo(point1).GetNormal();
+                double holeAngle = basVector.GetAngleTo(vector, refVector) - Math.PI / 2.0;
+                //通过，point1和point2构造一条直线，然后进行buffer，得到一个很小的范围，再在这个范围没，提取风管
+                var tmpLine = new Line(point1, point2);
+                var tmpAre = tmpLine.Buffer(10);
+                //提取到风管，然后进行数据提取
+                ThDuctInfo info;
+                var ductEngine = new ThFanDuctRecognitionEngine();
+                if (ductEngine.GetDuctInfo(tmpAre.Vertices(),out info))
+                {
+                    info.fontHeight = fontHeight;
+                    //插入风管
+                    string strSize = ThFanLayoutDealService.GetFanHoleSize(info.width, info.height, 100);
+                    string strMark = ThFanLayoutDealService.GetFanHoleMark(1, info.markHeight - 0.05);
+                    InsertFanHole(database, point1, holeAngle, info.fontHeight, info.width + 100, strSize, strMark);
+                }
             }
         }
 

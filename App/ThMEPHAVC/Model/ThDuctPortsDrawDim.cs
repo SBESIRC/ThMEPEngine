@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
@@ -9,51 +10,69 @@ namespace ThMEPHVAC.Model
     public class ThDuctPortsDrawDim
     {
         public string scale;
-        public string dimension_layer;
-        public ThDuctPortsDrawDim(string dimension_layer_, string scale_)
+        public string dimensionLayer;
+        public ThDuctPortsDrawDim(string dimensionLayer, string scale)
         {
-            scale = scale_;
-            dimension_layer = dimension_layer_;
+            this.scale = scale;
+            this.dimensionLayer = dimensionLayer;
         }
-        public void Draw_dimension(List<Duct_ports_Info> infos, Point2d dir_wall_point, Point2d ver_wall_point, Point3d start_pos)
+        public void DrawDimension(List<EndlineInfo> infos, Point3d startPos)
         {
-            //var l = infos[0].l;
-            //if (!ThMEPHVACService.Is_vertical(l) && !ThMEPHVACService.Is_horizontal(l))
-            //    return;
-            Insert_ver_dimension(infos, ver_wall_point, start_pos);
-            Insert_dir_dimension(infos, dir_wall_point, start_pos);
+            foreach (var endline in infos)
+            {
+                InsertVerDimension(endline, startPos);
+                foreach (var seg in endline.endlines.Values)
+                    InsertDirDimension(seg, startPos);
+            }
         }
-        private void Insert_ver_dimension(List<Duct_ports_Info> infos, Point2d ver_wall_point, Point3d start_pos)
+        private void InsertVerDimension(EndlineInfo seg, Point3d startPos)
         {
             using (var db = AcadDatabase.Active())
             {
-                if (infos.Count > 0 && ver_wall_point.GetDistanceTo(Point2d.Origin) > 1e-3)
+                if (seg.verAlignPoint.IsEqualTo(Point3d.Origin, new Tolerance(1e-3, 1e-3)))
+                    return;
+                // 最后一根管段上一定有风口
+                var endSeg = seg.endlines.Values.LastOrDefault();
+                if (endSeg.portNum != 0)
                 {
-                    Point3d wall_point = new Point3d(ver_wall_point.X, ver_wall_point.Y, 0) + start_pos.GetAsVector();
-                    var port_info = infos[infos.Count - 1].ports_info;
-                    if (port_info.Count > 0)
-                    {
-                        var p = port_info[port_info.Count - 1].position + start_pos.GetAsVector();
-                        var layerId = db.Layers.ElementOrDefault(dimension_layer).ObjectId;
-                        if (infos.Count > 0)
-                        {
-                            var info = infos[0];
-                            Vector3d dir_vec = ThMEPHVACService.Get_edge_direction(info.l);
-                            var positions = info.ports_info;
-                            if (positions.Count > 0)
-                            {
-                                var dim = Create_align_dim(wall_point, p, dir_vec, layerId);
-                                db.ModelSpace.Add(dim);
-                                dim.SetDatabaseDefaults();
-                            }
-                        }
-                    }
+                    var dirVec = ThMEPHVACService.GetEdgeDirection(endSeg.seg.l);
+                    var lastPort = endSeg.portsInfo.First();
+                    var p = lastPort.position + startPos.GetAsVector();
+                    var layerId = db.Layers.ElementOrDefault(dimensionLayer).ObjectId;
+                    var dim = CreateAlignDim(seg.verAlignPoint, p, dirVec, layerId);
+                    db.ModelSpace.Add(dim);
+                    dim.SetDatabaseDefaults();
+                }
+                else
+                    throw new NotImplementedException("[CheckError]: 最末端管一定有风口");
+            }
+        }
+        // 在一条endline上插dimision
+        private void InsertDirDimension(EndlineSegInfo seg, Point3d startPos)
+        {
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                if (seg.dirAlignPoint.IsEqualTo(Point3d.Origin, new Tolerance(1e-3, 1e-3)))
+                    return;
+                var layerId = db.Layers.ElementOrDefault(dimensionLayer).ObjectId;
+                InsertDirWallPoint(seg);
+                var disVec = startPos.GetAsVector();
+                var dirVec = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
+                var verticalVec = GetDimensionVerticalVec(dirVec);
+                for (int i = 1; i < seg.portsInfo.Count(); ++i)
+                {
+                    var portsInfo = seg.portsInfo;
+                    var srtP = portsInfo[i - 1].position + disVec;
+                    var endP = portsInfo[i].position + disVec;
+                    var dim = CreateAlignDim(srtP, endP, verticalVec, layerId);
+                    db.ModelSpace.Add(dim);
+                    dim.SetDatabaseDefaults();
                 }
             }
         }
-        private AlignedDimension Create_align_dim(Point3d p1, Point3d p2, Vector3d vertical_vec, ObjectId layerId)
+        private AlignedDimension CreateAlignDim(Point3d p1, Point3d p2, Vector3d verticalVec, ObjectId layerId)
         {
-            string style = ThMEPHVACService.Get_dim_style(scale);
+            string style = ThMEPHVACService.GetDimStyle(scale);
             using (var adb = AcadDatabase.Active())
             {
                 var id = Dreambuild.AutoCAD.DbHelper.GetDimstyleId(style, adb.Database);
@@ -62,7 +81,7 @@ namespace ThMEPHVAC.Model
                     XLine1Point = p1,
                     XLine2Point = p2,
                     DimensionText = "",
-                    DimLinePoint = ThMEPHVACService.Get_mid_point(p1, p2) + vertical_vec * 2000,
+                    DimLinePoint = ThMEPHVACService.GetMidPoint(p1, p2) + verticalVec * 2000,
                     ColorIndex = 256,
                     DimensionStyle = id,
                     LayerId = layerId,
@@ -70,176 +89,63 @@ namespace ThMEPHVAC.Model
                 };
             }
         }
-        private void Insert_dir_dimension(List<Duct_ports_Info> infos, Point2d dir_wall_point, Point3d start_pos)
+        private void InsertDirWallPoint(EndlineSegInfo seg)
         {
-            using (AcadDatabase db = AcadDatabase.Active())
+            if (!ThMEPHVACService.IsVertical(seg.seg.l))
             {
-                var layerId = db.Layers.ElementOrDefault(dimension_layer).ObjectId;
-                Insert_wall_point(infos, dir_wall_point);
-                var dis_vec = start_pos.GetAsVector();
-                for (int i = 0; i < infos.Count; ++i)
-                {
-                    var info = infos[i];
-                    Vector3d dir_vec = ThMEPHVACService.Get_edge_direction(info.l);
-                    Vector3d vertical_vec = Get_dimension_vertical_vec(dir_vec);
-                    for (int j = 0; j < info.ports_info.Count - 1; ++j)
-                    {
-                        if (info.ports_info[j].air_volume > 0 && info.ports_info[j + 1].air_volume > 0)
-                        {
-                            var dim = Create_align_dim(info.ports_info[j].position + dis_vec, 
-                                                       info.ports_info[j + 1].position + dis_vec, 
-                                                       vertical_vec, 
-                                                       layerId);
-                            db.ModelSpace.Add(dim);
-                            dim.SetDatabaseDefaults();
-                        }
-                    }
-                    Draw_gap_dimension(i, infos, dis_vec, vertical_vec, dir_wall_point, layerId, db);
-                }
+                //非垂直的按X排序
+                InsertWallPointByX(seg, seg.dirAlignPoint);
             }
-        }
-        private void Insert_wall_point(List<Duct_ports_Info> infos, Point2d wall_point)
-        {
-            if (wall_point.IsEqualTo(Point2d.Origin, new Tolerance (1e-3, 1e-3)))
-                return;
-            Point3d wall_p = new Point3d(wall_point.X, wall_point.Y, 0);
-            if (Insert_wall_point_not_in_line(infos, wall_p))
-                return;
-            foreach (var info in infos)
-            {
-                if (info.ports_info.Count > 0)
-                {
-                    Point3d srt_port_p = info.ports_info[0].position;
-                    Point3d end_port_p = info.ports_info[info.ports_info.Count - 1].position;
-                    Point3d srt_p = info.l.StartPoint;
-                    Point3d end_p = info.l.EndPoint;
-                    if (ThMEPHVACService.Is_between_points(wall_p, srt_port_p, end_port_p) ||
-                        ThMEPHVACService.Is_between_points(wall_p, srt_p, end_p))
-                    {
-                        Search_nearest_point(info, wall_p, out int min_idx);
-                        Do_insert_wall_point(info, wall_p, min_idx);
-                        return;
-                    }
-                }
-            }
-            if (Insert_wall_point_in_reducing(infos, wall_p))
-                return;
-            throw new NotImplementedException();
-        }
-        private bool Insert_wall_point_not_in_line(List<Duct_ports_Info> infos, Point3d wall_p)
-        {
-            var first_info = infos[0];
-            var last_info = infos[infos.Count - 1];
-            Point3d total_srt_p = (first_info.ports_info.Count > 0) ? first_info.ports_info[0].position : first_info.l.StartPoint;
-            var info = last_info.ports_info;
-            Point3d total_end_p = (info.Count > 0) ? info[info.Count - 1].position : last_info.l.EndPoint;
-            if (!ThMEPHVACService.Is_between_points(wall_p, total_srt_p, total_end_p))
-            {
-                if (wall_p.DistanceTo(total_srt_p) < wall_p.DistanceTo(total_end_p))
-                    first_info.ports_info.Insert(0, new Port_Info(1, wall_p));
-                else
-                    last_info.ports_info.Insert(last_info.ports_info.Count, new Port_Info(1, wall_p));
-                return true;
-            }
-            return false;
-        }
-        private void Search_nearest_point(Duct_ports_Info info, Point3d wall_p, out int min_idx)
-        {
-            min_idx = 0;
-            double min_dis = Double.MaxValue;
-            for (int i = 0; i < info.ports_info.Count; ++i)
-            {
-                double cur_dis = wall_p.DistanceTo(info.ports_info[i].position);
-                if (cur_dis < min_dis)
-                {
-                    min_dis = cur_dis;
-                    min_idx = i;
-                }
-            }
-        }
-        private void Do_insert_wall_point(Duct_ports_Info info, Point3d wall_p, int min_idx)
-        {
-            if (info.ports_info.Count > 0)
-            {
-                Point3d min_p = info.ports_info[min_idx].position;
-                Vector3d dir1 = (wall_p - min_p).GetNormal();
-                Vector3d dir2 = ThMEPHVACService.Get_edge_direction(info.l);
-                // 插入的墙点的风量设为1与变径处的0风量做区分
-                if (dir1 != dir2)
-                    info.ports_info.Insert(min_idx, new Port_Info(1, wall_p));
-                else
-                    info.ports_info.Insert(min_idx + 1, new Port_Info(1, wall_p));
-            }
-        }
-        private bool Insert_wall_point_in_reducing(List<Duct_ports_Info> infos, Point3d wall_p)
-        {
-            Point3d pre_srt_p = Point3d.Origin;
-            for (int i = 0; i < infos.Count; ++i)
-            {
-                Point3d srt_p = infos[i].l.StartPoint;
-                Point3d end_p = infos[i].l.EndPoint;
-                if (i == 0)
-                {
-                    pre_srt_p = end_p;
-                    continue;
-                }
-                if (ThMEPHVACService.Is_between_points(wall_p, pre_srt_p, srt_p))
-                {
-                    infos[i].ports_info.Insert(0, new Port_Info(1, wall_p));
-                    return true;
-                }
-                pre_srt_p = end_p;
-            }
-            return false;
-        }
-        private Vector3d Get_dimension_vertical_vec(Vector3d dir_vec)
-        {
-            Vector3d vertical_vec;
-            if (Math.Abs(dir_vec.X) < 1e-3)
-            {
-                vertical_vec = (dir_vec.Y > 0) ? ThMEPHVACService.Get_right_vertical_vec(dir_vec) :
-                                                 ThMEPHVACService.Get_left_vertical_vec(dir_vec);
-            }
-            else if (dir_vec.X > 0)
-                vertical_vec = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
             else
-                vertical_vec = ThMEPHVACService.Get_left_vertical_vec(dir_vec);
-            return vertical_vec;
-        }
-        private void Draw_gap_dimension(int idx, 
-                                        List<Duct_ports_Info> infos,
-                                        Vector3d dis_vec,
-                                        Vector3d vertical_vec,
-                                        Point2d dir_wall_point,
-                                        ObjectId layerId,
-                                        AcadDatabase db)
-        {
-            if (idx < infos.Count - 1)
             {
-                var info = infos[idx];
-                var next_info = infos[idx + 1];
-                if (next_info.ports_info.Count > 0)
-                {
-                    Point3d nearest_p = Search_nearest_point(info, next_info, dir_wall_point, out Point3d next_p);
-                    var dim = Create_align_dim(nearest_p + dis_vec, next_p + dis_vec, vertical_vec, layerId);
-                    db.ModelSpace.Add(dim);
-                    dim.SetDatabaseDefaults();
-                }
+                //按Y排序
+                InsertWallPointByY(seg, seg.dirAlignPoint);
             }
         }
-        private Point3d Search_nearest_point(Duct_ports_Info info, 
-                                             Duct_ports_Info next_info, 
-                                             Point2d dir_wall_point, 
-                                             out Point3d next_p)
+
+        private void InsertWallPointByY(EndlineSegInfo endline, Point3d wallP)
         {
-            next_p = next_info.ports_info[0].position;
-            Point3d wall_point = new Point3d(dir_wall_point.X, dir_wall_point.Y, 0);
-            Point3d last_p = info.ports_info[info.ports_info.Count - 1].position;
-            if (ThMEPHVACService.Is_between_points(wall_point, next_p, last_p) && 
-                wall_point.DistanceTo(Point3d.Origin) > 1e-3)
-                return wall_point;
+            var Ys = new List<double>();
+            foreach (var port in endline.portsInfo)
+                Ys.Add(port.position.Y);
+            var ascending = Ys[0] < Ys[Ys.Count - 1];
+            var falgY = wallP.Y;
+            Ys.Add(falgY);
+            if (ascending)
+                Ys.Sort();
             else
-                return last_p;
+                Ys.Sort((x, y) => -x.CompareTo(y));
+            var idx = Ys.IndexOf(falgY);
+            endline.portsInfo.Insert(idx, new PortInfo() { position = wallP, portAirVolume = -1 });
+        }
+        private void InsertWallPointByX(EndlineSegInfo endline, Point3d wallP)
+        {
+            var Xs = new List<double>();
+            foreach (var port in endline.portsInfo)
+                Xs.Add(port.position.X);
+            var ascending = Xs[0] < Xs[Xs.Count - 1];
+            var falgX = wallP.X;
+            Xs.Add(falgX);
+            if (ascending)
+                Xs.Sort();
+            else
+                Xs.Sort((x, y) => -x.CompareTo(y));
+            var idx = Xs.IndexOf(falgX);
+            endline.portsInfo.Insert(idx, new PortInfo() { position = wallP, portAirVolume = -1 });
+        }
+        private Vector3d GetDimensionVerticalVec(Vector3d dirVec)
+        {
+            Vector3d verticalVec;
+            if (Math.Abs(dirVec.X) < 1e-3)
+            {
+                verticalVec = (dirVec.Y > 0) ? ThMEPHVACService.GetRightVerticalVec(dirVec) :
+                                               ThMEPHVACService.GetLeftVerticalVec(dirVec);
+            }
+            else if (dirVec.X > 0)
+                verticalVec = ThMEPHVACService.GetRightVerticalVec(dirVec);
+            else
+                verticalVec = ThMEPHVACService.GetLeftVerticalVec(dirVec);
+            return verticalVec;
         }
     }
 }

@@ -1,14 +1,13 @@
-﻿using System.IO;
+﻿using AcHelper;
+using Linq2Acad;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
+using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.ViewModel;
-using System.Collections.Generic;
-using ThControlLibraryWPF.CustomControl;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using AcHelper;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -39,15 +38,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 viewModel.SetViewModel.BlockName = blockName;
                 viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
 
-                if (viewModel.BlockNestedEntityFrames.ContainsKey(blockName))
-                {
-                    viewModel.SetViewModel.Frames = viewModel.BlockNestedEntityFrames[blockName];
-                }
-                else
-                {
-                    viewModel.SetViewModel.Frames = new Dictionary<string, DBObjectCollection>();
-                }
-
                 var oldViewModel = viewModel.SetViewModel?.Clone();
 
                 uiBlockNameConfigSet systemSet = new uiBlockNameConfigSet(viewModel.SetViewModel);
@@ -57,15 +47,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     viewModel.SetViewModel = oldViewModel;
                     viewModel.BlockNameList[blockName] = viewModel.SetViewModel.ConfigList;
-                }
-
-                if (!viewModel.BlockNestedEntityFrames.ContainsKey(blockName))
-                {
-                    viewModel.BlockNestedEntityFrames.Add(blockName, viewModel.SetViewModel.Frames);
-                }
-                else
-                {
-                    viewModel.BlockNestedEntityFrames[blockName] = viewModel.SetViewModel.Frames;
                 }
             }
         }
@@ -152,15 +133,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                viewModel.ClearTransientGraphics();
                 System.Windows.Controls.Button btn = sender as System.Windows.Controls.Button;
                 var blockName = btn.Tag.ToString();
-
-                viewModel.SetViewModel.BlockName = blockName;
-                viewModel.SetViewModel.ConfigList = viewModel.BlockNameList[blockName];
-
-                viewModel.ClearTransientGraphics();
+                viewModel.Show(blockName, acadDatabase.Database);
                 viewModel.AddToTransient(blockName);
-                
                 SetFocusToDwgView();
             }
         }
@@ -179,6 +156,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             using (var acadDatabase = AcadDatabase.Active())
             {
                 viewModel.ClearTransientGraphics();
+                SetFocusToDwgView();
             }
         }
     }

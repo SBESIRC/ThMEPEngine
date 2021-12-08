@@ -100,7 +100,7 @@ namespace ThMEPHVAC.CAD
                         str = $"{parameters.Width}x{parameters.Height} (h"+ num.ToString("0.00") + "m)";
 
                 }
-                double h = ThMEPHVACService.Get_text_height(scale);
+                double h = ThMEPHVACService.GetTextHeight(scale);
                 DBText infortext = new DBText()
                 {
                     TextString = str,

@@ -28,20 +28,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\ThFanCenterLineDetector.cs" />
     <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
-    <Compile Include="DrawService\ThMEPHVACDrawService.cs" />
+    <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeAdjustPath.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd.cs" />
-    <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd_Temp.cs" />
     <Compile Include="FanConnect\Engine\ThFanCURecognitionEngine.cs" />
     <Compile Include="FanConnect\Model\ThFanColumnModel.cs" />
     <Compile Include="FanConnect\Model\ThFanCUModel.cs" />
-    <Compile Include="FanConnect\Model\ThFanPipeModel.cs" />
     <Compile Include="FanConnect\Model\ThFanMainLineModel.cs" />
+    <Compile Include="FanConnect\Model\ThFanPipeModel.cs" />
     <Compile Include="FanConnect\Model\ThFanRoomModel.cs" />
     <Compile Include="FanConnect\Model\ThFanShearWallModel.cs" />
     <Compile Include="FanConnect\Model\ThFanTreeModel.cs" />
@@ -97,12 +98,10 @@
     <Compile Include="LoadCalculation\Service\ModelDataDbSourceService.cs" />
     <Compile Include="LoadCalculation\Service\ThLoadCalculationUIService.cs" />
     <Compile Include="Model\ThDrawVBypass.cs" />
-    <Compile Include="Model\ThDuctPortsCheckCircle.cs" />
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
-    <Compile Include="Model\ThDuctPortsConstructor.cs" />
-    <Compile Include="Model\ThDuctPortsDistribute.cs" />
     <Compile Include="Model\ThDuctPortsDraw.cs" />
     <Compile Include="Model\ThDuctPortsDrawDim.cs" />
+    <Compile Include="Model\ThDuctPortsDrawEndComp.cs" />
     <Compile Include="Model\ThDuctPortsDrawPort.cs" />
     <Compile Include="Model\ThDuctPortsDrawPortMark.cs" />
     <Compile Include="Model\ThDuctPortsDrawService.cs" />
@@ -110,7 +109,8 @@
     <Compile Include="Model\ThDuctPortsDrawValve.cs" />
     <Compile Include="Model\ThDuctPortsFactory.cs" />
     <Compile Include="Model\ThDuctPortsInterpreter.cs" />
-    <Compile Include="Model\ThDuctPortsJudger.cs" />
+    <Compile Include="Model\ThNotRoomStartComp.cs" />
+    <Compile Include="Model\ThPortsDistribute.cs" />
     <Compile Include="Model\ThDuctPortsReadComponent.cs" />
     <Compile Include="Model\ThDuctPortsRecoder.cs" />
     <Compile Include="Model\ThDuctPortsModifyDuct.cs" />
@@ -120,11 +120,13 @@
     <Compile Include="Model\ThFanAnalysis.cs" />
     <Compile Include="Model\ThFanDraw.cs" />
     <Compile Include="Model\ThFanModifyVBypass.cs" />
+    <Compile Include="Model\ThFansMainDuctAnalysis.cs" />
     <Compile Include="Model\ThMEPHVACLineProc.cs" />
     <Compile Include="Model\ThMEPHVACParam.cs" />
     <Compile Include="Model\ThMEPHVACService.cs" />
-    <Compile Include="Model\ThModifyDuctConnComponent.cs" />
-    <Compile Include="Model\ThServiceTee.cs" />
+    <Compile Include="Model\ThModifyFanConnComponent.cs" />
+    <Compile Include="Model\ThSepereateFansDuct.cs" />
+    <Compile Include="Model\ThShrinkDuct.cs" />
     <Compile Include="Model\ThVerticalBypassFactory.cs" />
     <Compile Include="Model\ThVTee.cs" />
     <Compile Include="CAD\ThDuctParameter.cs" />
@@ -227,8 +229,6 @@
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="LoadCalculation\Engine\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

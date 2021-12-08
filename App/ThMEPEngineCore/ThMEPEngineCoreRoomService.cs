@@ -242,45 +242,46 @@ namespace ThMEPEngineCore
         /// </summary>
         /// <param name="labels"></param>
         /// <returns></returns>
-        public virtual bool MustLayoutArea(ThIfcRoom room)
-        {
-            var names = new List<string> { 
-                "楼梯间", 
-                "前室",
-            };
-            foreach (var roomName in room.Tags)
-            {
-                if (JudgeRoomType(Tree, roomName, names))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        //public virtual bool MustLayoutArea(ThIfcRoom room)
+        //{
+        //    var names = new List<string> { 
+        //        "楼梯间", 
+        //        "前室",
+        //    };
+        //    foreach (var roomName in room.Tags)
+        //    {
+        //        if (JudgeRoomType(Tree, roomName, names))
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
 
         /// <summary>
         /// 判断房间是否为不可布区域
         /// </summary>
         /// <param name="labels"></param>
         /// <returns></returns>
-        public virtual bool CannotLayoutArea(ThIfcRoom room)
-        {
-            var names = new List<string> {
-                "井道",
-                "存储房间",
-                "设备机房",
-                "无障碍套型",
-                "居住套型"
-            };
-            foreach (var roomName in room.Tags)
-            {
-                if (JudgeRoomType(Tree, roomName, names))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        //public virtual bool CannotLayoutArea(ThIfcRoom room)
+        //{
+        //    var names = new List<string> {
+        //        "井道",
+        //        "存储房间",
+        //        "设备机房",
+        //        "无障碍套型",
+        //        "居住套型"
+        //    };
+        //    foreach (var roomName in room.Tags)
+        //    {
+        //        if (JudgeRoomType(Tree, roomName, names))
+        //        {
+        //            return true;
+        //        }
+        //    }
+        //    return false;
+        //}
+
 
         private void ReadRoomConfigTable(string roomConfigUrl)
         {

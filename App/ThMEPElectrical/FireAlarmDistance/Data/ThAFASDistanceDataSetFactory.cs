@@ -88,12 +88,12 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                         Db3ExtractResults = vm.DB3ColumnVisitor.Results,
                         NonDb3ExtractResults = vm.ColumnVisitor.Results,
                     },
-                    //new ThAFASWindowExtractor()
-                    //{
-                    //    ElementLayer="AI-窗",
-                    //    Transformer = Transformer,
-                    //    Db3ExtractResults = vm.DB3WindowVisitor.Results,
-                    //},
+                    new ThAFASWindowExtractor()
+                    {
+                        ElementLayer="AI-窗",
+                        Transformer = Transformer,
+                        Db3ExtractResults = vm.DB3WindowVisitor.Results,
+                    },
                     new ThAFASRoomExtractor()
                     {
                         UseDb3Engine=true,
@@ -215,7 +215,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             extractor.Accept(visitors.DB3ArchWallVisitor);
             extractor.Accept(visitors.DB3ShearWallVisitor);
             extractor.Accept(visitors.DB3ColumnVisitor);
-            //extractor.Accept(visitors.DB3WindowVisitor);
+            extractor.Accept(visitors.DB3WindowVisitor);
             extractor.Accept(visitors.DB3BeamVisitor);
             //extractor.Accept(visitors.DB3RailingVisitor);
             extractor.Accept(visitors.ColumnVisitor);

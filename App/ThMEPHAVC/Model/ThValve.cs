@@ -8,12 +8,6 @@ using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
-    public enum ValveGroupPosionType
-    {
-        Inlet = 1,
-        Outlet = 2
-    }
-
     public class ThValve
     {
         public Point3d ValvePosition { get; set; }
@@ -30,7 +24,7 @@ namespace ThMEPHVAC.Model
         /// </summary>
         public double RotationAngle { get; set; }
         public double ValveOffsetFromCenter { get; set; }
-        public ValveGroupPosionType ValvePosionType { get; set; }
+        public bool IsInlet;
         public double TextRotateAngle 
         {
             get
@@ -88,7 +82,7 @@ namespace ThMEPHVAC.Model
                     rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
                 }
             }
-            else if (ValveVisibility == ThDuctUtils.CheckValveModelName() && ValvePosionType == ValveGroupPosionType.Inlet)
+            else if (ValveVisibility == ThDuctUtils.CheckValveModelName() && IsInlet)
             {
                 rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
             }
@@ -116,108 +110,124 @@ namespace ThMEPHVAC.Model
         public double DuctWidth { get; set; }
         public double ValveToFanSpacing { get; set; }
         public Point3d GroupInsertPoint { get; set; }
-        public ValveGroupPosionType ValveGroupPosion { get; set; }
     }
 
     public class ThValveGroup
     {
         public List<ThValve> ValvesInGroup { get; set; }
         public ThValveGroupParameters Parameters { get; set; }
-        private bool is_exhaust;
-        public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool is_exhaust)
+        private bool isExhaust;
+        private bool CheckValveFlag;
+        public ThValveGroup(ThValveGroupParameters parameters, bool isExhaust, bool CheckValveFlag)
         {
             Parameters = parameters;
-            this.is_exhaust = is_exhaust;
+            this.isExhaust = isExhaust;
+            this.CheckValveFlag = CheckValveFlag;
+            ValvesInGroup = new List<ThValve>(); ;
+        }
+        public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool isExhaust, bool CheckValveFlag)
+        {
+            Parameters = parameters;
+            this.isExhaust = isExhaust;
+            this.CheckValveFlag = CheckValveFlag;
             ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
-        }
-
-        //设置机房内管段阀组
-        private List<ThValve> SetInnerValveGroup(string fanlayer)
-        {
-            // 进风口不布置止回阀
-            List<ThValve> valves = new List<ThValve>();
-            var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
-            var silencer = CreateSilencer(fanlayer);// 如果是非送风场景，进风口和room相连需要布置消声器
-            var have_silencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
-            if (!is_exhaust || !have_silencer)
-                silencer.Length = 0;
-            if (Parameters.ValveToFanSpacing > silencer.Length + firevalve.Length)
-            {
-                firevalve.ValveOffsetFromCenter = 0;
-                hole.ValveOffsetFromCenter = -hole.Length;
-                silencer.ValveOffsetFromCenter = firevalve.Length;
-            }
-            //若空间不够，防火阀移至洞外
-            else
-            {
-                hole.ValveOffsetFromCenter = -hole.Length;
-                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                silencer.ValveOffsetFromCenter = firevalve.ValveOffsetFromCenter - silencer.Length;
-            }
-            if (is_exhaust && have_silencer)
-                valves.AddRange(new List<ThValve> { firevalve, hole, silencer });
-            else
-                valves.AddRange(new List<ThValve> { firevalve, hole});
-            return valves;
-        }
-        
-        //设置机房外管段阀组
-        private List<ThValve> SetOuterValveGroup(string fanlayer, ValveGroupPosionType valveposiontype)
-        {
-            List<ThValve> valves = new List<ThValve>();
-
-            var silencer = CreateSilencer(fanlayer);
-            var checkvalve = CreateCheckValve(fanlayer, valveposiontype);
-            var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
-            var have_silencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
-            if (is_exhaust || !have_silencer)// 如果是非送风场景，出风口不布置消声器
-                silencer.Length = 0;
-            //正常情况下，空间足够
-            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
-            {
-                hole.ValveOffsetFromCenter = -hole.Length;
-                firevalve.ValveOffsetFromCenter = 0;
-                silencer.ValveOffsetFromCenter = firevalve.Length;
-                checkvalve.ValveOffsetFromCenter = firevalve.Length + silencer.Length;
-            }
-            //机房外空间放不下防火阀加止回阀加消音器
-            else
-            {
-                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
-                if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
-                {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
-                    hole.ValveOffsetFromCenter = -hole.Length;
-                    firevalve.ValveOffsetFromCenter = 0;
-                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                }
-                //放不下止回阀加防火阀
-                //把防火阀移至洞外
-                else
-                {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
-                    firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                    hole.ValveOffsetFromCenter = -hole.Length;
-                    checkvalve.ValveOffsetFromCenter = silencer.ValveOffsetFromCenter - checkvalve.Length;
-                }
-            }
-            valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
-            if (!is_exhaust && have_silencer)
-                valves.Add(silencer);
-            return valves;
         }
         private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
         {
             List<ThValve> valves = new List<ThValve>();
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == Parameters.FanScenario).InnerRoomDuctType;
-            if (Parameters.ValveGroupPosion == ValveGroupPosionType.Inlet)
+            if (isExhaust)
                 return SetInnerValveGroup(fanlayer);
             else
-                return SetOuterValveGroup(fanlayer, ValveGroupPosionType.Outlet);
+                return SetOuterValveGroup(fanlayer);
         }
+        public void SetFireHoleGroup(string fanlayer)
+        {
+            // 进风口不布置止回阀
+            List<ThValve> valves = new List<ThValve>();
+            var hole = CreateHole();
+            var firevalve = CreateFireValve(fanlayer);
+            if (Parameters.ValveToFanSpacing >  firevalve.Length)
+            {
+                firevalve.ValveOffsetFromCenter = 0;
+                hole.ValveOffsetFromCenter = -hole.Length;
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                hole.ValveOffsetFromCenter = -hole.Length;
+                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+            }
+            valves.AddRange(new List<ThValve> { firevalve, hole });
+            ValvesInGroup = valves;
+        }
+        //设置机房内管段阀组
+        private List<ThValve> SetInnerValveGroup(string fanlayer)
+        {
+            // 进风口不布置止回阀
+            List<ThValve> valves = new List<ThValve>();
+            var silencer = CreateSilencer(fanlayer);// 如果是非送风场景，进风口和room相连需要布置消声器
+            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || 
+                                 Parameters.FanScenario == "消防加压送风");
+            if (!isExhaust || !haveSilencer)
+                silencer.Length = 0;
+            if (Parameters.ValveToFanSpacing > silencer.Length)
+            {
+                silencer.ValveOffsetFromCenter = 0;
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                silencer.ValveOffsetFromCenter = silencer.Length;
+            }
+            if (isExhaust && haveSilencer)
+                valves.AddRange(new List<ThValve> { silencer });
+            else
+                valves.AddRange(new List<ThValve> { });
+            return valves;
+        }
+        
+        //设置机房外管段阀组
+        private List<ThValve> SetOuterValveGroup(string fanlayer)
+        {
+            List<ThValve> valves = new List<ThValve>();
+
+            var silencer = CreateSilencer(fanlayer);
+            var checkvalve = CreateCheckValve(fanlayer);
+            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
+            if (isExhaust || !haveSilencer)// 如果是非送风场景，出风口不布置消声器
+                silencer.Length = 0;
+            //正常情况下，空间足够
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + silencer.Length)
+            {
+                silencer.ValveOffsetFromCenter = 0;
+                checkvalve.ValveOffsetFromCenter = (CheckValveFlag) ? (silencer.Length) : 
+                                                   (-(checkvalve.Length + silencer.Length));// 翻转180°
+            }
+            //机房外空间放不下防火阀加止回阀加消音器
+            else
+            {
+                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
+                if (Parameters.ValveToFanSpacing > checkvalve.Length)
+                {
+                    silencer.ValveOffsetFromCenter = -silencer.Length;
+                    checkvalve.ValveOffsetFromCenter = 0;
+                }
+                //放不下止回阀加防火阀
+                //把防火阀移至洞外
+                else
+                {
+                    silencer.ValveOffsetFromCenter = -silencer.Length;
+                    checkvalve.ValveOffsetFromCenter = silencer.ValveOffsetFromCenter - checkvalve.Length;
+                }
+            }
+            valves.AddRange(new List<ThValve> { checkvalve});
+            if (!isExhaust && haveSilencer)
+                valves.Add(silencer);
+            return valves;
+        }
+        
         private ThValve CreateSilencer(string fanlayer)
         {
             return new ThValve()
@@ -269,14 +279,14 @@ namespace ThMEPHVAC.Model
             };
         }
 
-        private ThValve CreateCheckValve(string fanlayer, ValveGroupPosionType valveposiontype)
+        private ThValve CreateCheckValve(string fanlayer)
         {
             var angle = Parameters.RotationAngle;
             return new ThValve()
             {
                 Length = 200,
                 Width = Parameters.DuctWidth,
-                RotationAngle = angle,
+                RotationAngle = CheckValveFlag ? angle : angle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
                 ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),
@@ -284,7 +294,6 @@ namespace ThMEPHVAC.Model
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_CHECK_VALVE_HEIGHT,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
-                ValvePosionType = valveposiontype,
             };
         }
     }

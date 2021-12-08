@@ -13,8 +13,22 @@ namespace ThCADCore.NTS
     {
         private static Geometry ToNTSGeometry(this Hatch hatch)
         {
-            return hatch.Boundaries().ToCollection().BuildAreaGeometry();
+            return Simplify(hatch.Boundaries().ToCollection()).BuildAreaGeometry();
         }
+
+        private static DBObjectCollection Simplify(DBObjectCollection boundaries)
+        {
+            var objs = new DBObjectCollection();
+            boundaries.OfType<Polyline>().ForEach(o =>
+            {
+                // 假定边界都是封闭的
+                o.Closed = true;
+                // 剔除重复点
+                objs.Add(o.DPSimplify(1.0));
+            });
+            return objs;
+        }
+
         private static MultiPolygon ToNTSMultiPolygon(this Hatch hatch)
         {
             var geometry = hatch.ToNTSGeometry();
@@ -42,6 +56,10 @@ namespace ThCADCore.NTS
             hatch.ToNTSMultiPolygon().Geometries
                 .Cast<Polygon>()
                 .ForEach(o => objs.Add(o));
+            if(objs.Count==0)
+            {
+
+            }
             return objs;
         }
     }

@@ -17,11 +17,10 @@ namespace ThMEPHVAC.CAD
     public class ThDuctParameter
     {
         public ThDuctSizeInfor DuctSizeInfor { get; set; }
-        public ThDuctParameter(double air_volume, double air_speed, bool is_first)
+        public ThDuctParameter(double airVolume, string scenario)
         {
-            Get_air_speed_range(air_volume, out double ceiling, out double floor);
-            var candidate = (is_first) ? Get_candidate_ducts(air_volume, air_speed):
-                                         Get_candidate_ducts(air_volume, ceiling, floor);
+            GetAirSpeedRange(airVolume, scenario, out double ceiling, out double floor);
+            var candidate = GetCandidateDucts(airVolume, ceiling, floor);
             if (candidate.Count > 0)
             {
                 var recommendOuterDuct = candidate.First(d => d.AspectRatio == candidate.Max(f => f.AspectRatio));
@@ -37,24 +36,7 @@ namespace ThMEPHVAC.CAD
             else
                 DuctSizeInfor = new ThDuctSizeInfor();
         }
-        private List<DuctSizeParameter> Get_candidate_ducts(double fanvolume, double airspeed)
-        {
-            double calculateDuctArea = fanvolume / 3600.0 / airspeed;
-            var jsonReader = new ThDuctParameterJsonReader();
-            var biggerDucts = jsonReader.Parameters.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
-            var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea< 1.3 * calculateDuctArea).ToList();
-
-            if (satisfiedDucts.Count == 0)
-            {
-                if (biggerDucts.Count() == 0)
-                {
-                    return new List<DuctSizeParameter>();
-                }
-                return new List<DuctSizeParameter>() { biggerDucts.First() };
-            }
-            return satisfiedDucts.OrderByDescending(d => d.DuctHeight).OrderBy(d => d.DuctWidth).ToList();
-        }
-        private List<DuctSizeParameter> Get_candidate_ducts(double air_volume, double air_speed_ceiling, double air_speed_floor)
+        private List<DuctSizeParameter> GetCandidateDucts(double air_volume, double air_speed_ceiling, double air_speed_floor)
         {
             double duct_area_floor = air_volume / 3600.0 / air_speed_floor;
             double duct_area_ceiling = air_volume / 3600.0 / air_speed_ceiling;
@@ -81,44 +63,31 @@ namespace ThMEPHVAC.CAD
             defaultcandidateducts.ForEach(d=> DuctsSizeString.Add($"{d.DuctWidth}x{d.DuctHeight}"));
             return DuctsSizeString;
         }
-        private static void Get_air_speed_range(double air_vloume, out double ceiling, out double floor)
+        private static void GetAirSpeedRange(double airVolume, string scenario, out double ceiling, out double floor)
         {
-            
-            if (air_vloume >= 26000)
+            if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")
             {
-                ceiling = 10;
-                floor = 8;
+                if (airVolume >= 15000) { ceiling = 20; floor = 12; }
+                else if (airVolume >= 10000) { ceiling = 20; floor = 10; }
+                else if (airVolume >= 3000) { ceiling = 20; floor = 9; }
+                else { ceiling = 20; floor = 9; }
             }
-            else if (air_vloume >= 12000)
+            else if (scenario == "厨房排油烟")
             {
-                ceiling = 8;
-                floor = 6;
-            }
-            else if (air_vloume >= 8000)
-            {
-                ceiling = 6;
-                floor = 4.5;
-            }
-            else if (air_vloume >= 4000)
-            {
-                ceiling = 4.5;
-                floor = 3.5;
-            }
-            else if (air_vloume >= 3000)
-            {
-                ceiling = 7.5;
-                floor = 5.14;
-            }
-            else if (air_vloume >= 2800)
-            {
-                ceiling = 7;
-                floor = 4.8;
+                if (airVolume >= 15000) { ceiling = 12; floor = 8; }
+                else if (airVolume >= 10000) { ceiling = 12; floor = 7; }
+                else if (airVolume >= 3000) { ceiling = 12; floor = 6; }
+                else { ceiling = 12; floor = 6; }
             }
             else
             {
-                ceiling = 10;
-                floor = 8;
-                //throw new NotImplementedException();
+                if (airVolume >= 26000) { ceiling = 8.9; floor = 5; }
+                else if (airVolume >= 12000) { ceiling = 8; floor = 4.5; }
+                else if (airVolume >= 8000) { ceiling = 7; floor = 4.5; }
+                else if (airVolume >= 4000) { ceiling = 6; floor = 4.5; }
+                else if (airVolume >= 3000) { ceiling = 6; floor = 3.5; }
+                else if (airVolume >= 2800) { ceiling = 5; floor = 2.5; }
+                else { ceiling = 4; floor = 2; }//throw new NotImplementedException();
             }
         }
         private void Round_2_float(ref double f)

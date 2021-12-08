@@ -98,8 +98,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 else if (area.Intersects(detect))
                 {
                     var inLayout = detect.Intersection(area).Buffer(-1);
-                    if (inLayout.Area < 1) ;
-                    else if (inLayout is Polygon)
+                    if (inLayout.Area < 1) continue;
+                    if (inLayout is Polygon)
                     {
                         var dblayout = (inLayout as Polygon).ToDbMPolygon();
                         dblayout.Rotate(center, -angle);

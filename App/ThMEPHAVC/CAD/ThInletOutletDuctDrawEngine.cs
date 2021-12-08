@@ -1,17 +1,9 @@
 ﻿using System;
-using Linq2Acad;
-using DotNetARX;
-using QuickGraph;
-using System.Linq;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Duct;
-using TianHua.Publics.BaseCode;
-using ThMEPEngineCore.Service.Hvac;
-using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {
@@ -23,17 +15,6 @@ namespace ThMEPHVAC.CAD
         public Point3d OpingBasePoint { get; set; }
 
     }
-    public struct Duct_InParam
-    {
-        public string bypass_size;
-        public string bypass_pattern;
-        public string room_duct_size;
-        public string other_duct_size;
-        public string scale;
-        public string room_elevation;
-        public string other_elevation;
-        public bool is_io_reverse;
-    }
     public class ThInletOutletDuctDrawEngine
     {
         public FanOpeningInfo InletOpening { get; set; }
@@ -41,13 +22,39 @@ namespace ThMEPHVAC.CAD
         public string FanInOutType { get; set; }
         public List<ThIfcDistributionElement> InletDuctHoses { get; set; }
         public List<ThIfcDistributionElement> OutletDuctHoses { get; set; }
-        public ThInletOutletDuctDrawEngine(ThDbModelFan fan)
+        public ThInletOutletDuctDrawEngine(ThDbModelFan fan, bool roomEnable, bool notRoomEnable)
         {
             Init(fan);
             SetInOutHoses(fan.scenario);
+            InsertHose(fan, roomEnable, notRoomEnable);
+        }
+        private void InsertHose(ThDbModelFan fan, bool roomEnable, bool notRoomEnable)
+        {
             string modelLayer = fan.Data.BlockLayer;
-            DrawHoseInDWG(InletDuctHoses, modelLayer); 
-            DrawHoseInDWG(OutletDuctHoses, modelLayer);
+            if (fan.isExhaust)
+            {
+                if (roomEnable && !notRoomEnable)
+                    DrawHoseInDWG(InletDuctHoses, modelLayer);
+                else if (!roomEnable && notRoomEnable)
+                    DrawHoseInDWG(OutletDuctHoses, modelLayer);
+                else
+                {
+                    DrawHoseInDWG(InletDuctHoses, modelLayer);
+                    DrawHoseInDWG(OutletDuctHoses, modelLayer);
+                }
+            }
+            else
+            {
+                if (roomEnable && !notRoomEnable)
+                    DrawHoseInDWG(OutletDuctHoses, modelLayer);
+                else if (!roomEnable && notRoomEnable)
+                    DrawHoseInDWG(InletDuctHoses, modelLayer);
+                else
+                {
+                    DrawHoseInDWG(InletDuctHoses, modelLayer);
+                    DrawHoseInDWG(OutletDuctHoses, modelLayer);
+                }
+            }
         }
         private void Init(ThDbModelFan fanmodel)
         {

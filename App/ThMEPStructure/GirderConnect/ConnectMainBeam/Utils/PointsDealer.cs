@@ -352,7 +352,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="polygon"></param>
         /// <param name="fstPts"></param>
         /// <param name="SndPts"></param>
-        public static void WallCrossPoint(Polygon polygon, ref List<Point3d> fstPts, ref List<Point3d> SndPts)
+        public static void WallCrossPoint(Polygon polygon, ref List<Point3d> fstPts, ref List<Point3d> SndPts)//, ref HashSet<Point3d> zeroPts)
         {
             fstPts.Clear();
             SndPts.Clear();
@@ -364,8 +364,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var walls = new DBObjectCollection();
             var columns = new DBObjectCollection();
             ThVStructuralElementSimplifier.Classify(polygon.ToDbCollection(), columns, walls);
-
-            var zeroPts = new List<Point3d>();
+            List<Point3d> zeroPts = new List<Point3d>();
             foreach (var ent in columns)
             {
                 if (ent is Polyline polyline)
@@ -476,7 +475,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static HashSet<Point3d> FindIntersectNearPt(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        public static HashSet<Point3d> FindIntersectNearPt(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
+            ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             var ansPts = new HashSet<Point3d>();
             foreach(Polyline polyline in outlineWalls.Keys)
@@ -486,15 +486,45 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     if (pl.ContainsOrOnBoundary(pt) && !ansPts.Contains(pt))
                     {
+                        if (outline2BorderNearPts.ContainsKey(polyline))
+                        {
+                            if (!outline2BorderNearPts[polyline].ContainsKey(pt))
+                            {
+                                outline2BorderNearPts[polyline].Add(pt, new HashSet<Point3d>());
+                            }
+                        }
                         ansPts.Add(pt);
                     }
                 }
             }
-            foreach(Point3d pt in clumnPts)
-            {
-
-            }
             return ansPts;
+        }
+
+        /// <summary>
+        /// Update structure Outline2BorderNearPts
+        /// </summary>
+        /// <param name="outline2BorderNearPts"></param>
+        /// <param name="allConnects"></param>
+        public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> allConnects)
+        {
+            foreach(var outline2BorderNearPt in outline2BorderNearPts)
+            {
+                var outline = outline2BorderNearPt.Key;
+                foreach(var border2NearPts in outline2BorderNearPt.Value)
+                {
+                    var borderPt = border2NearPts.Key;
+                    if (allConnects.ContainsKey(borderPt))
+                    {
+                        foreach(var pt in allConnects[borderPt])
+                        {
+                            if (!outline2BorderNearPt.Value.ContainsKey(pt) && !border2NearPts.Value.Contains(pt))
+                            {
+                                border2NearPts.Value.Add(pt);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

@@ -99,13 +99,6 @@ namespace TianHua.Electrical.UI
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
         }
 
-        [CommandMethod("TIANHUACAD", "THLTSBBZ", CommandFlags.Modal)]
-        public void THLTSBBZ()
-        {
-            var cmd = new ThStairCommand();
-            cmd.Execute();
-        }
-
         //火灾报警
         [CommandMethod("TIANHUACAD", "THHZBJ", CommandFlags.Modal)]
         public void THHZBJUI()

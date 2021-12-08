@@ -110,9 +110,9 @@ namespace ThMEPEngineCore.GeojsonExtractor
         {
             using (var instance = new ThCADCoreNTSArcTessellationLength(TESSELLATE_ARC_LENGTH))
             {
-                var simplifier = new ThElementSimplifier()
+                var simplifier = new ThPolygonalElementSimplifier()
                 {
-                    TESSELLATE_ARC_LENGTH = TESSELLATE_ARC_LENGTH,
+                    TESSELLATEARCLENGTH = TESSELLATE_ARC_LENGTH,
                 };
                 for (int i = 0; i < Rooms.Count; i++)
                 {

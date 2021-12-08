@@ -28,12 +28,12 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <summary>
         /// 对主梁连接算法结果的后续处理
         /// </summary>
-        public static void MPostProcess(HashSet<Tuple<Point3d, Point3d>> tuples)
+        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             string beamLayer = "TH_AI_BEAM";
             AddLayer(beamLayer, 4);
 
-            var unifiedTyples = UnifyTuples(tuples);
+            var unifiedTyples = UnifyTuples(dicTuples);
             Output(unifiedTyples, beamLayer);
         }
 
@@ -42,7 +42,7 @@ namespace ThMEPStructure.GirderConnect.Data
         /// </summary>
         /// <param name="tuples"></param>
         /// <param name="layerName"></param>
-        public static void Output(List<Tuple<Point3d, Point3d>> tuples, string layerName)
+        public static void Output(HashSet<Tuple<Point3d, Point3d>> tuples, string layerName)
         {
             using (var acdb = AcadDatabase.Active())
             {
@@ -52,7 +52,7 @@ namespace ThMEPStructure.GirderConnect.Data
                     line.Layer = layerName;
                     if (line.Length > 9000)
                     {
-                        line.ColorIndex = 3;
+                        line.ColorIndex = 7;
                     }
                     else
                     {
@@ -68,18 +68,22 @@ namespace ThMEPStructure.GirderConnect.Data
         /// </summary>
         /// <param name="tuples"></param>
         /// <returns></returns>
-        public static List<Tuple<Point3d, Point3d>> UnifyTuples(HashSet<Tuple<Point3d, Point3d>> tuples)
+        public static HashSet<Tuple<Point3d, Point3d>> UnifyTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
-            var tmpTuples = tuples.ToList();
-            foreach (var tuple in tmpTuples)
+            var ansTuples = new HashSet<Tuple<Point3d, Point3d>>();
+            foreach (var dicTuple in dicTuples)
             {
-                var converseTuple = new Tuple<Point3d, Point3d>(tuple.Item2, tuple.Item1);
-                if (tuples.Contains(tuple) && tuples.Contains(converseTuple))
+                foreach(var pt in dicTuple.Value)
                 {
-                    tuples.Remove(converseTuple);
+                    var tuple = new Tuple<Point3d, Point3d>(dicTuple.Key, pt);
+                    var converseTuple = new Tuple<Point3d, Point3d>(pt, dicTuple.Key);
+                    if (!ansTuples.Contains(converseTuple))
+                    {
+                        ansTuples.Add(tuple);
+                    }
                 }
             }
-            return tuples.ToList();
+            return ansTuples;
         }
 
         /// <summary>

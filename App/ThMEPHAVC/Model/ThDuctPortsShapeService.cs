@@ -1,300 +1,309 @@
 ﻿using System;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
     class ThDuctPortsShapeService
     {
-        public static Matrix3d Create_cross_trans_mat(EntityModifyParam cross, string modify_duct_size, int port_idx)
+        public static double GetCrossRotateAngle(Vector3d inVec)
         {
-            // 用原数据用于恢复角度
-            var in_2vec = cross.pos[0] - cross.pos_ext[0];
-            double inner_width = cross.port_widths[2];
-            double outter_width = cross.port_widths[3];
-            int idx = inner_width > outter_width ? 2 : 3;
-            var in_2big = cross.pos[idx] - cross.pos_ext[idx];
-            var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
-            var big_vec = new Vector3d(in_2big.X, in_2big.Y, 0);
-            double rotate_angle = Get_cross_trans_info(inner_width, outter_width, in_vec, big_vec, out bool is_flip);
-
-            var center_point = Get_cross_center_p(cross);
-            return ThMEPHVACService.Get_trans_mat(false, rotate_angle, center_point);
-        }
-        public static Matrix3d Create_tee_trans_mat(EntityModifyParam tee)
-        {
-            var branch_2vec = tee.pos[0] - tee.pos_ext[0];
-            var in_2vec = tee.pos[1] - tee.pos_ext[1];
-            var branch_vec = new Vector3d(branch_2vec.X, branch_2vec.Y, 0);
-            var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
-            double rotate_angle = Get_tee_trans_info(in_vec, branch_vec, out bool is_flip);
-            var center_point = Get_tee_center_p(tee);
-            return ThMEPHVACService.Get_trans_mat(is_flip, rotate_angle, center_point);
-        }
-        public static Matrix3d Create_elbow_trans_mat(EntityModifyParam elbow)
-        {
-            var in_2vec = elbow.pos[0] - elbow.pos_ext[0];
-            var out_2vec = elbow.pos[1] - elbow.pos_ext[1];
-            double open_angle = in_2vec.GetAngleTo(out_2vec);
-            var in_vec = new Vector3d(in_2vec.X, in_2vec.Y, 0);
-            var out_vec = new Vector3d(out_2vec.X, out_2vec.Y, 0);
-            var center_point = Get_elbow_center_p(elbow);
-            double rotate_angle = Get_elbow_trans_info(open_angle, in_vec, out_vec, out bool is_flip);
-            return ThMEPHVACService.Get_trans_mat(is_flip, rotate_angle, center_point);
-        }
-        public static Point2d Get_entity_center_p(EntityModifyParam entity)
-        {
-            if (entity.type == "Elbow")
-                return Get_elbow_center_p(entity);
-            else if (entity.type == "Tee")
-                return Get_tee_center_p(entity);
-            else if (entity.type == "Cross")
-                return Get_cross_center_p(entity);
-            else
-                throw new NotImplementedException();
-        }
-        public static Point2d Get_cross_center_p(EntityModifyParam cross)
-        {
-            // 四通的两条中心线求交
-            var in_p = new Point3d(cross.pos[0].X, cross.pos[0].Y, 0);
-            var out_p = new Point3d(cross.pos[1].X, cross.pos[1].Y, 0);
-            var inner_p = new Point3d(cross.pos[2].X, cross.pos[2].Y, 0);
-            var outter_p = new Point3d(cross.pos[3].X, cross.pos[3].Y, 0);
-            var l1 = new Line(in_p, out_p);
-            var l2 = new Line(inner_p, outter_p);
-            var inter_p = ThMEPHVACService.Intersect_point(l1, l2).ToPoint2D();
-            if (inter_p.IsEqualTo(Point2d.Origin))
-                throw new NotImplementedException("四通中心线无交点");
-            return inter_p;
-        }
-        public static Point2d Get_tee_center_p(EntityModifyParam tee)
-        {
-            var in_2vec = tee.pos[1] - tee.pos_ext[1];
-            var shrink_len = Get_tee_main_shrink(tee);
-            return tee.pos[1] - in_2vec * shrink_len;
-        }
-        public static Point2d Get_elbow_center_p(EntityModifyParam elbow)
-        {
-            var in_2vec = elbow.pos[0] - elbow.pos_ext[0];
-            var open_angle = Get_elbow_open_angle(elbow);
-            var shrink_len = Get_elbow_shrink(open_angle, elbow.port_widths[0], 0, 0.7);
-            return elbow.pos[0] - in_2vec * shrink_len;
-        }
-        public static double Get_cross_trans_info(double inner_width,
-                                                  double outter_width,
-                                                  Vector3d in_vec,
-                                                  Vector3d big_vec,
-                                                  out bool is_flip)
-        {
-            is_flip = false;
-            double rotate_angle = in_vec.GetAngleTo(-Vector3d.YAxis);
-            double z = in_vec.CrossProduct(-Vector3d.YAxis).Z;
-            if (Math.Abs(z) < 1e-3)
-                z = 0;
-            if (z < 0)
-                rotate_angle = 2 * Math.PI - rotate_angle;
-            if (!ThMEPHVACService.Is_equal(inner_width, outter_width))
-            {
-                if (ThMEPHVACService.Is_outter(in_vec, big_vec))
-                    is_flip = true;
-            }
-            return rotate_angle;
-        }
-        public static double Get_tee_trans_info(Vector3d in_vec, Vector3d branch_vec, out bool is_flip)
-        {
-            double rotate_angle;
-            if (ThMEPHVACService.Is_outter(in_vec, branch_vec))
-            {
-                is_flip = false;
-                rotate_angle = branch_vec.GetAngleTo(Vector3d.XAxis);
-                if (branch_vec.CrossProduct(Vector3d.XAxis).Z < 0)
-                    rotate_angle = -rotate_angle;
-            }
-            else
-            {
-                is_flip = true;
-                rotate_angle = branch_vec.GetAngleTo(-Vector3d.XAxis);
-                if (branch_vec.CrossProduct(-Vector3d.XAxis).Z < 0)
-                    rotate_angle = -rotate_angle;
-            }
-            return rotate_angle;
-        }
-        private static double Get_tee_main_shrink(EntityModifyParam tee)
-        {
-            var branch_vec = tee.pos[0] - tee.pos_ext[0];
-            var other_vec = tee.pos[2] - tee.pos_ext[2];
-            var shrink = tee.port_widths[0] + 50;
-            if (ThMEPHVACService.Is_collinear(branch_vec, other_vec))
-            {
-                if (tee.port_widths[0] < tee.port_widths[2])
-                    shrink = tee.port_widths[2] + 50;
-            }
-            return shrink;
-        }
-        public static double Get_elbow_trans_info(double open_angle, Vector3d in_vec, Vector3d out_vec, out bool is_flip)
-        {
-            if (in_vec.CrossProduct(out_vec).Z < 0)
-            {
-                is_flip = true;
-                return Get_elbow_rotate_angle(in_vec, Vector3d.XAxis, open_angle, ref is_flip);
-            }
-            else
-            {
-                is_flip = false;
-                return Get_elbow_rotate_angle(in_vec, -Vector3d.XAxis, open_angle, ref is_flip);
-            }
-        }
-        public static void Get_cross_shrink(Special_graph_Info info,
-                                            out int o_outter_idx, 
-                                            out int o_inner_idx, 
-                                            out int o_collinear_idx,
-                                            out double in_shrink, 
-                                            out double o_inner_shrink, 
-                                            out double o_outter_shrink, 
-                                            out double o_collinear_shrink)
-        {
-            Seperate_cross_outter(info, out o_outter_idx, out o_inner_idx, out o_collinear_idx);
-            Get_cross_port_shrink(info, o_outter_idx, o_inner_idx,
-                                  out in_shrink, out o_inner_shrink, out o_outter_shrink, out o_collinear_shrink);
-        }
-        private static void Seperate_cross_outter(Special_graph_Info info, out int o_outter_idx, out int o_inner_idx, out int o_collinear_idx)
-        {
-            Line in_line = info.lines[0];
-            o_outter_idx = o_inner_idx = o_collinear_idx = 0;
-            Vector3d in_line_vec = ThMEPHVACService.Get_edge_direction(in_line);
-            for (int i = 1; i < info.lines.Count; ++i)
-            {
-                Line outter = info.lines[i];
-                Vector3d out_line_vec = ThMEPHVACService.Get_edge_direction(outter);
-                if (ThMEPHVACService.Is_vertical(in_line_vec, out_line_vec))
-                {
-                    if (in_line_vec.CrossProduct(out_line_vec).Z > 0)
-                        o_outter_idx = i;
-                    else
-                        o_inner_idx = i;
-                }
-                else
-                    o_collinear_idx = i;
-            }
-        }
-        private static void Get_cross_port_shrink(Special_graph_Info info,
-                                           int o_outter_idx, int o_inner_idx,
-                                           out double in_shrink, out double o_inner_shrink, out double o_outter_shrink, out double o_collinear_shrink)
-        {
-            double in_width = info.every_port_width[0];
-            double o_inner_width = info.every_port_width[o_inner_idx];
-            double o_outter_width = info.every_port_width[o_outter_idx];
-            double small_width = o_inner_width > o_outter_width ? o_inner_width : o_outter_width;
-            in_shrink = small_width + 50;
-            o_collinear_shrink = small_width * 0.5 + 100;
-            o_inner_shrink = (in_width + o_inner_width) * 0.5 + 50;
-            o_outter_shrink = (in_width + o_outter_width) * 0.5 + 50;
-        }
-        public static void Get_tee_shrink(Special_graph_Info info, 
-                                          out int branch_idx, 
-                                          out int other_idx,
-                                          out double in_shrink, 
-                                          out double branch_shrink, 
-                                          out double other_shrink)
-        {
-            var type = Get_tee_type(info.lines[1], info.lines[2]);
-            Seperate_tee_outter(info, type, out branch_idx, out other_idx);
-            Get_tee_port_shrink(info, type, branch_idx, other_idx,
-                                out in_shrink, out branch_shrink, out other_shrink);
-        }
-        private static Tee_Type Get_tee_type(Line outter1, Line outter2)
-        {
-            var v1 = ThMEPHVACService.Get_edge_direction(outter1);
-            var v2 = ThMEPHVACService.Get_edge_direction(outter2);
-            if (ThMEPHVACService.Is_vertical(v1, v2))
-                return Tee_Type.BRANCH_VERTICAL_WITH_OTTER;
-            else
-                return Tee_Type.BRANCH_COLLINEAR_WITH_OTTER;
-        }
-        private static void Seperate_tee_outter(Special_graph_Info info, Tee_Type type, out int branch_idx, out int other_idx)
-        {
-            var i_line = info.lines[0];
-            var o1_line = info.lines[1];
-            var o1_vec = ThMEPHVACService.Get_edge_direction(o1_line);
-            var in_vec = ThMEPHVACService.Get_edge_direction(i_line);
-            if (type == Tee_Type.BRANCH_VERTICAL_WITH_OTTER)
-            {
-                if (ThMEPHVACService.Is_vertical(o1_vec, in_vec))
-                {
-                    branch_idx = 1; other_idx = 2;
-                }
-                else
-                {
-                    branch_idx = 2; other_idx = 1;
-                }
-            }
-            else
-            {
-                if (Math.Abs(in_vec.CrossProduct(o1_vec).Z) > 0)
-                {
-                    branch_idx = 1; other_idx = 2;
-                }
-                else
-                {
-                    branch_idx = 2; other_idx = 1;
-                }
-            }
-        }
-        private static void Get_tee_port_shrink(Special_graph_Info info, Tee_Type type, int branch_idx, int other_idx,
-                                                out double in_shrink, out double branch_shrink, out double other_shrink)
-        {
-            var in_width = info.every_port_width[0];
-            var branch_width = info.every_port_width[branch_idx];
-            var other_width = info.every_port_width[other_idx];
-
-            if (type == Tee_Type.BRANCH_VERTICAL_WITH_OTTER)
-            {
-                in_shrink = branch_width + 50;
-                other_shrink = branch_width * 0.5 + 100;
-                branch_shrink = (in_width + branch_width) * 0.5 + 50;
-            }
-            else
-            {
-                double max_branch = (branch_width > other_width) ? branch_width : other_width;
-                in_shrink = max_branch + 50;
-                other_shrink = (in_width - other_width) * 0.5 + other_width + 50;
-                branch_shrink = (in_width - branch_width) * 0.5 + branch_width + 50;
-            }
-        }
-        public static double Get_elbow_shrink(double open_angle, double width, double reducing_len, double K)
-        {
-            if (open_angle > 0.5 * Math.PI)
-            {
-                Point2d center_point = new Point2d(-0.7 * width, -Math.Abs(0.7 * width * Math.Tan(0.5 * (Math.PI - open_angle))));
-                return Math.Abs(center_point.Y) + reducing_len + 50;
-            }
-            else if (Math.Abs(open_angle - (0.5 * Math.PI)) <= 1e-2)
-                return K * (width + reducing_len) + 50;
-            else if (open_angle > 0 && open_angle < 0.5 * Math.PI)
-                throw new NotImplementedException();
-            else
+            var tor = new Tolerance(1e-3, 1e-3);
+            var judger = -Vector3d.YAxis;
+            if (inVec.IsEqualTo(judger, tor))
                 return 0;
-        }
-        public static double Get_elbow_rotate_angle(Vector3d in_vec, Vector3d judger_vec, double open_angle, ref bool is_flip)
-        {
-            if (Math.Abs(open_angle - Math.PI * 0.5) < 1e-3)
+            else if (inVec.IsEqualTo(-judger, tor))
+                return Math.PI;
+            else
             {
-                double rotate_angle = in_vec.GetAngleTo(judger_vec);
-                return (in_vec.CrossProduct(judger_vec).Z < 0) ? -rotate_angle : rotate_angle;
+                var z = judger.CrossProduct(inVec).Z;
+                if (z < 0)
+                {
+                    return inVec.GetAngleTo(judger);
+                }
+                else
+                {
+                    return Math.PI * 2 - inVec.GetAngleTo(judger);
+                }
+            }
+        }
+        public static double GetTeeRotateAngle(Vector3d inVec)
+        {
+            var tor = new Tolerance(1e-3, 1e-3);
+            var judger = -Vector3d.YAxis;
+            if (inVec.IsEqualTo(judger, tor))
+                return 0;
+            else if (inVec.IsEqualTo(-judger, tor))
+                return Math.PI;
+            else
+            {
+                var z = judger.CrossProduct(inVec).Z;
+                if (z < 0)
+                {
+                    return inVec.GetAngleTo(judger);
+                }
+                else
+                {
+                    return Math.PI * 2 - inVec.GetAngleTo(judger);
+                }
+            }
+        }
+        public static double GetElbowRotateAngle(Vector3d inVec)
+        {
+            var tor = new Tolerance(1e-3, 1e-3);
+            var judger = -Vector3d.YAxis;
+            if (inVec.IsEqualTo(judger, tor))
+                return 0;
+            else if (inVec.IsEqualTo(-judger, tor))
+                return Math.PI;
+            else
+            {
+                var z = judger.CrossProduct(inVec).Z;
+                if (z < 0)
+                {
+                    return inVec.GetAngleTo(judger);
+                }
+                else
+                {
+                    return Math.PI * 2 - inVec.GetAngleTo(judger);
+                }
+            }
+        }
+        public static TeeType GetTeeType(Line branch1, Line branch2)
+        {
+            var v1 = ThMEPHVACService.GetEdgeDirection(branch1);
+            var v2 = ThMEPHVACService.GetEdgeDirection(branch2);
+            if (ThMEPHVACService.IsVertical(v1, v2))
+                return TeeType.BRANCH_VERTICAL_WITH_OTTER;
+            else
+                return TeeType.BRANCH_COLLINEAR_WITH_OTTER;
+        }
+        public static TeeType GetTeeType(Point3d cp, Point3d p1, Point3d p2)
+        {
+            var v1 = (p1 - cp).GetNormal();
+            var v2 = (p2 - cp).GetNormal();
+            if (ThMEPHVACService.IsVertical(v1, v2))
+                return TeeType.BRANCH_VERTICAL_WITH_OTTER;
+            else
+                return TeeType.BRANCH_COLLINEAR_WITH_OTTER;
+        }
+        public static double GetElbowOpenAngle(Point3d centerP, Line l1, Line l2)
+        {
+            var tor = new Tolerance(1.5, 1.5);
+            var otherP1 = ThMEPHVACService.GetOtherPoint(l1, centerP, tor);
+            var otherP2 = ThMEPHVACService.GetOtherPoint(l2, centerP, tor);
+            var dirVec1 = (otherP1 - centerP).GetNormal();
+            var dirVec2 = (otherP2 - centerP).GetNormal();
+            return dirVec1.GetAngleTo(dirVec2);
+        }
+        public static double GetElbowShrink(double openAngle, double width)
+        {
+            const double K = 0.7;
+            const double PI = 3.15;//Math.PI + 0.01
+            const double HALFPI = 1.56;//0.5 * Math.PI - 0.01 
+            if (openAngle > 0 && openAngle <= HALFPI) //不处理锐角
+                throw new NotImplementedException("[CheckError]: Elbow open angle is less than PI/2 !");
+            else if (openAngle > PI)
+                throw new NotImplementedException("[CheckError]: Elbow open angle is large than PI !");
+            else
+                return Math.Abs(K * width * Math.Tan(0.5 * (Math.PI - openAngle))) + 50;
+        }
+        public static Dictionary<int, double> GetCrossShrink(Line curLine,
+                                                             Line otherLine1,
+                                                             Line otherLine2,
+                                                             Line otherLine3,
+                                                             Tuple<double, string> curParam,
+                                                             Tuple<double, string> param1,
+                                                             Tuple<double, string> param2,
+                                                             Tuple<double, string> param3)
+        {
+            var curW = ThMEPHVACService.GetWidth(curParam.Item2);
+            var w1 = ThMEPHVACService.GetWidth(param1.Item2);
+            var w2 = ThMEPHVACService.GetWidth(param2.Item2);
+            var w3 = ThMEPHVACService.GetWidth(param3.Item2);
+            var curAirVolume = curParam.Item1;
+            var airVolume1 = param1.Item1;
+            var airVolume2 = param2.Item1;
+            var airVolume3 = param3.Item1;
+            if (curAirVolume >= airVolume1 && curAirVolume >= airVolume2 && curAirVolume >= airVolume3)
+                return GetCrossShrink(curLine, otherLine1, otherLine2, otherLine3, curW, w1, w2, w3);// l是进风口
+            if (airVolume1 > curAirVolume && airVolume1 > airVolume2 && airVolume1 > airVolume3)
+                return GetCrossShrink(otherLine1, curLine, otherLine2, otherLine3, w1, curW, w2, w3);// otherLine1是进风口
+            if (airVolume2 > curAirVolume && airVolume2 > airVolume1 && airVolume2 > airVolume3)
+                return GetCrossShrink(otherLine2, curLine, otherLine1, otherLine3, w2, curW, w1, w3);// otherLine2是进风口
+            if (airVolume3 > curAirVolume && airVolume3 > airVolume1 && airVolume3 > airVolume2)
+                return GetCrossShrink(otherLine3, curLine, otherLine1, otherLine2, w3, curW, w1, w2);// otherLine3是进风口
+            throw new NotImplementedException("不可能跑这, 四通风量一定有一个最大");
+        }
+        private static Dictionary<int, double> GetCrossShrink(Line inLine, Line branch1, Line branch2, Line collinearLine,
+                                                              double inW, double branchW1, double branchW2, Vector3d inVec, Vector3d branch1Vec)
+        {
+            var dic = new Dictionary<int, double>();
+            GetCrossShrink(inW, branchW1, branchW2, out double inShrink, out double oInnerShrink, out double oOutterShrink, out double oCollinearShrink);
+            dic.Add(inLine.GetHashCode(), inShrink);
+            dic.Add(collinearLine.GetHashCode(), oCollinearShrink);
+            if (ThMEPHVACService.IsOutter(inVec, branch1Vec))
+            {
+                dic.Add(branch1.GetHashCode(), oOutterShrink);
+                dic.Add(branch2.GetHashCode(), oInnerShrink);
             }
             else
             {
-                double rotate_angle = in_vec.GetAngleTo(-Vector3d.YAxis);
-                is_flip = !is_flip;
-                return (in_vec.CrossProduct(-Vector3d.YAxis).Z < 0) ? -rotate_angle : rotate_angle;
+                dic.Add(branch1.GetHashCode(), oInnerShrink);
+                dic.Add(branch2.GetHashCode(), oOutterShrink);
+            }
+            return dic;
+        }
+        private static Dictionary<int, double> GetCrossShrink(Line inLine, Line otherLine1, Line otherLine2, Line otherLine3, double inW, double w1, double w2, double w3)
+        {
+            // 根据Tee类型设置不同的管段缩的长度
+            var directions = GetConnectorDirection(inLine, new DBObjectCollection() { otherLine1, otherLine2, otherLine3 });
+            var inVec = directions[0];
+            var vec1 = directions[1];
+            var vec2 = directions[2];
+            var vec3 = directions[3];
+            if (ThMEPHVACService.IsCollinear(inVec, vec1))
+            {
+                return GetCrossShrink(inLine, otherLine2, otherLine3, otherLine1, inW, w2, w3, inVec, vec2);
+            }
+            if (ThMEPHVACService.IsCollinear(inVec, vec2))
+            {
+                return GetCrossShrink(inLine, otherLine1, otherLine3, otherLine2, inW, w1, w3, inVec, vec1);
+            }
+            if (ThMEPHVACService.IsCollinear(inVec, vec3))
+            {
+                return GetCrossShrink(inLine, otherLine1, otherLine2, otherLine3, inW, w1, w2, inVec, vec1);
+            }
+            throw new NotImplementedException("不可能跑这，四通必定有一个出口和入风口共线");
+        }
+        public static void GetCrossShrink(double inW, double innerW, double outterW,
+                                          out double inShrink, out double oInnerShrink, out double oOutterShrink, out double oCollinearShrink)
+        {
+            double maxW = Math.Max(innerW, outterW);
+            double minW = Math.Min(innerW, outterW);
+            inShrink = maxW + 50;
+            oCollinearShrink = maxW * 0.5 + 100;
+            // ThDuctPortsFactory.cs Line:138
+            oInnerShrink = (inW + minW) * 0.5 + 50;//和主路叉积z值<0共线的支路，用大的值
+            oOutterShrink = (inW + maxW) * 0.5 + 50;//和主路叉积z值>0共线的支路，用小的值
+        }
+        public static Dictionary<int, double> GetTeeShrink(Line curLine, Line otherLine1, Line otherLine2, 
+                                                           FanParam curParam, FanParam param1, FanParam param2)
+        {
+            var curPara = new Tuple<double, string>(curParam.airVolume, curParam.notRoomDuctSize);
+            var para1 = new Tuple<double, string>(param1.airVolume, param1.notRoomDuctSize);
+            var para2 = new Tuple<double, string>(param2.airVolume, param2.notRoomDuctSize);
+            return GetTeeShrink(curLine, otherLine1, otherLine2, curPara, para1, para2);
+        }
+        public static Dictionary<int, double> GetTeeShrink(Line curLine, 
+                                                           Line otherLine1, 
+                                                           Line otherLine2, 
+                                                           Tuple<double, string> curParam, 
+                                                           Tuple<double, string> param1,
+                                                           Tuple<double, string> param2)
+        {
+            var curW = ThMEPHVACService.GetWidth(curParam.Item2);
+            var w1 = ThMEPHVACService.GetWidth(param1.Item2);
+            var w2 = ThMEPHVACService.GetWidth(param2.Item2);
+            var curAirVolume = curParam.Item1;
+            var airVolume1 = param1.Item1;
+            var airVolume2 = param2.Item1;
+            // 保证主管段风量一定大于直管段风量
+            // ThDuctPortsAnalysis.cs Line:364
+            // ThSepereateFansDuct.cs Line:219
+            if (curAirVolume >= airVolume1 && curAirVolume >= airVolume2)
+                return GetTeeShrink(curLine, otherLine1, otherLine2, curW, w1, w2);// l是进风口
+            if (airVolume1 >= curAirVolume && airVolume1 >= airVolume2)
+                return GetTeeShrink(otherLine1, otherLine2, curLine, w1, w2, curW);// otherLine1是进风口
+            if (airVolume2 >= curAirVolume && airVolume2 >= airVolume1)
+                return GetTeeShrink(otherLine2, otherLine1, curLine, w2, w1, curW);// otherLine2是进风口
+            throw new NotImplementedException("不可能跑这，三通风量一定有一个最大");
+        }
+        public static Dictionary<int, double> GetTeeShrink(Line inLine, Line otherLine, Line curLine, double inW, double otherW, double curW)
+        {
+            // 根据Tee类型设置不同的管段缩的长度
+            double inShrink;
+            double branchShrink;
+            double otherShrink;
+            var tor = new Tolerance(1.5, 1.5);
+            var type = GetTeeType(otherLine, curLine);
+            var centerP = ThMEPHVACService.FindSamePoint(inLine, curLine);
+            var inOtherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
+            var inCurP = ThMEPHVACService.GetOtherPoint(curLine, centerP, tor);
+            var inVec = (inOtherP - centerP).GetNormal();
+            var curVec = (inCurP - centerP).GetNormal();
+            var dic = new Dictionary<int, double>();
+            if (type == TeeType.BRANCH_VERTICAL_WITH_OTTER)
+            {
+                if (ThMEPHVACService.IsCollinear(inVec, curVec))
+                {
+                    GetTeeShrink(inW, otherW, curW, type, out inShrink, out branchShrink, out otherShrink);
+                    dic.Add(inLine.GetHashCode(), inShrink);
+                    dic.Add(curLine.GetHashCode(), otherShrink);
+                    dic.Add(otherLine.GetHashCode(), branchShrink);
+                }
+                else
+                {
+                    GetTeeShrink(inW, curW, otherW, type, out inShrink, out branchShrink, out otherShrink);
+                    dic.Add(inLine.GetHashCode(), inShrink);
+                    dic.Add(curLine.GetHashCode(), branchShrink);
+                    dic.Add(otherLine.GetHashCode(), otherShrink);
+                }
+            }
+            else
+            {
+                if (ThMEPHVACService.IsOutter(inVec, curVec))
+                {
+                    GetTeeShrink(inW, curW, otherW, type, out inShrink, out branchShrink, out otherShrink);
+                    dic.Add(inLine.GetHashCode(), inShrink);
+                    dic.Add(curLine.GetHashCode(), branchShrink);
+                    dic.Add(otherLine.GetHashCode(), otherShrink);
+                }
+                else
+                {
+                    GetTeeShrink(inW, otherW, curW, type, out inShrink, out branchShrink, out otherShrink);
+                    dic.Add(inLine.GetHashCode(), inShrink);
+                    dic.Add(curLine.GetHashCode(), otherShrink);
+                    dic.Add(otherLine.GetHashCode(), branchShrink);
+                }
+            }
+            return dic;
+        }
+        public static void GetTeeShrink(double inW, double branchW, double otherW, TeeType type,
+                                        out double inShrink, out double branchShrink, out double otherShrink)
+        {
+            if (type == TeeType.BRANCH_VERTICAL_WITH_OTTER)
+            {
+                inShrink = branchW + 50;
+                otherShrink = branchW * 0.5 + 100;//和主路共线的支路
+                branchShrink = (inW + branchW) * 0.5 + 50;//和主路垂直的支路
+            }
+            else
+            {
+                double maxBranch = Math.Max(branchW, otherW);
+                inShrink = maxBranch + 50;
+                otherShrink = (inW + otherW) * 0.5 + 50;//和主路叉积z值<0共线的支路
+                branchShrink = (inW + branchW) * 0.5 + 50;//和主路叉积z值>0共线的支路
             }
         }
-        public static double Get_elbow_open_angle(EntityModifyParam param)
+        private static List<Vector3d> GetConnectorDirection(Line inLine, DBObjectCollection otherLines)
         {
-            var dir_vec1 = param.pos[0] - param.pos_ext[0];
-            var dir_vec2 = param.pos[1] - param.pos_ext[1];
-            return dir_vec1.GetAngleTo(dir_vec2);
+            // 连接件的每一个出口的指向(In 放在第一个)
+            var tor = new Tolerance(1.5, 1.5);
+            var directions = new List<Vector3d>();
+            var testLine = otherLines[0] as Line;
+            var centerP = ThMEPHVACService.FindSamePoint(inLine, testLine);
+            var inOtherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
+            var inVec = (inOtherP - centerP).GetNormal();
+            directions.Add(inVec);
+            foreach (Line l in otherLines)
+            {
+                var otherP = ThMEPHVACService.GetOtherPoint(l, centerP, tor);
+                var dirVec = (otherP - centerP).GetNormal();
+                directions.Add(dirVec);
+            }
+            return directions;
         }
     }
 }

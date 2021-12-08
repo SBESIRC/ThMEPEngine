@@ -1,31 +1,31 @@
 ﻿using System;
-using System.Text;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Collections.Generic;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using AcHelper;
+using NFox.Cad;
+using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using AcHelper;
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using ThMEPEngineCore.Service;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
-using NetTopologySuite.Operation.OverlayNG;
-using NetTopologySuite.Geometries;
-using ThMEPEngineCore.Command;
-using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
-    internal class ThBeamConnectorCommand : ThMEPBaseCommand, IDisposable
+    public class ThBeamConnectorCommand : ThMEPBaseCommand, IDisposable
     {
+        public ThBeamConnectorCommand()
+        {
+            ActionName = "生成主梁";
+            CommandName = "THSCZL";
+        }
+
         public void Dispose()
         {
 
@@ -33,6 +33,7 @@ namespace ThMEPStructure.GirderConnect.Command
 
         public override void SubExecute()
         {
+#if (ACAD2016 || ACAD2018)
             using (var acdb = AcadDatabase.Active())
             using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
@@ -59,63 +60,24 @@ namespace ThMEPStructure.GirderConnect.Command
                 var shearwallGroupService = new ThGroupService(mainBuildings, shearwalls);
                 var shearwallGroupDict = shearwallGroupService.Groups;
                 var outsideShearwall = shearwallGroupService.OutsideObjs;
-                
+
                 Point3dCollection clumnPts = new Point3dCollection();
                 var outlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
 
                 //处理算法输入
-                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, 
+                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
                     outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
 
                 //计算
-                var tuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
+                var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
 
                 //处理算法输出
-                MainBeamPostProcess.MPostProcess(tuples);
-
-                #region pretest
-                ////获取柱点
-                //var clumnPts = GetObject.GetCenters(acdb);
-                //Dictionary<Polyline, List<Polyline>> outlineWalls = new Dictionary<Polyline, List<Polyline>>();
-                //Dictionary<Polyline, HashSet<Point3d>> outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
-                //for (int i = 0; i < 6; ++i)
-                //{
-                //    //获取某个墙外边框
-                //    Polyline outline = GetObject.GetPolyline(acdb);
-                //    if (outline == null)
-                //    {
-                //        return;
-                //    }
-                //    if (!outlineClumns.ContainsKey(outline))
-                //    {
-                //        outlineClumns.Add(outline, new HashSet<Point3d>());
-                //    }
-                //    //获取此多边形包含的墙
-                //    List<Polyline> walls = GetObject.GetPolylines(acdb);
-                //    if (walls == null)
-                //    {
-                //        return;
-                //    }
-                //    outlineWalls.Add(outline, walls);
-                //}
-                //GetObject.FindPointsInOutline(clumnPts, outlineClumns);
-
-                ////预处理
-                //Point3dCollection ptsInOutline = new Point3dCollection();
-                //foreach (var sets in outlineClumns.Values)
-                //{
-                //    foreach (Point3d pt in sets)
-                //    {
-                //        ptsInOutline.Add(pt);
-                //    }
-                //}
-                //Point3dCollection newClumnPts = PointsDealer.RemoveSimmilerPoint(clumnPts, ptsInOutline);
-
-                ////计算
-                //Connect.Calculate(newClumnPts, outlineWalls, outlineClumns, acdb);
-                #endregion
+                MainBeamPostProcess.MPostProcess(dicTuples);
             }
+#else
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
+#endif
         }
 
         /// <summary>

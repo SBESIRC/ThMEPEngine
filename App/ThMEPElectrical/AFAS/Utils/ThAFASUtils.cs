@@ -21,7 +21,7 @@ using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.AFAS.Utils
 {
-    internal static class ThAFASUtils
+    public static class ThAFASUtils
     {
         public static void MoveToOrigin(this ThBuildingElementVisitorManager vm, ThMEPOriginTransformer transformer)
         {

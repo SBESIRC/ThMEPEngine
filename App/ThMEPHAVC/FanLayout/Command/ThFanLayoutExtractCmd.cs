@@ -13,11 +13,11 @@ using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Model.Hvac;
-using ThMEPHVAC.DrawService;
 using ThMEPHVAC.FanLayout.Model;
 using ThMEPHVAC.FanLayout.Service;
 using ThMEPHVAC.FanLayout.ViewModel;
 using ThMEPHVAC.Model;
+using ThMEPHVAC.Service;
 
 namespace ThMEPHVAC.FanLayout.Command
 {
@@ -405,15 +405,15 @@ FocusToCAD();
                 Point3d pt2 = point2 + (vector * (200 + 320 + 150));
                 Point3d pt3 = point2 + (vector * (200 + 320));
                 string pipeSize = ThFanLayoutDealService.GetAirPortMarkSize(info.AirPipeConfigInfo.AirPipeLength, info.AirPipeConfigInfo.AirPipeHeight);
-                ThMEPHVACDrawService drawService = new ThMEPHVACDrawService("平时排风", mapScale, pt1, -vector);
-                DuctModifyParam param = new DuctModifyParam(pipeSize, 100, info.AirPipeConfigInfo.AirPipeMarkHeight, pt1.ToPoint2D(), pt2.ToPoint2D());
-                drawService.Draw_duct(param, Matrix3d.Identity);
+                ThMEPHVACDrawService drawService = new ThMEPHVACDrawService("平时排风", mapScale, pt1);
+                DuctModifyParam param = new DuctModifyParam(pipeSize, 100, info.AirPipeConfigInfo.AirPipeMarkHeight, pt1, pt2);
+                drawService.DrawDuct(param, Matrix3d.Identity);
                 //
                 Line centerLine1 = new Line(pt0, pt1);
-                drawService.Draw_reducing(centerLine1,150, info.AirPipeConfigInfo.AirPipeLength, true, Matrix3d.Identity);
+                drawService.DrawReducing(centerLine1,150, info.AirPipeConfigInfo.AirPipeLength, true, Matrix3d.Identity);
                 //
                 Line centerLine2 = new Line(pt2, pt3);
-                drawService.Draw_reducing(centerLine2, info.AirPipeConfigInfo.AirPipeLength, info.AirPipeConfigInfo.AirPortLength, false, Matrix3d.Identity);
+                drawService.DrawReducing(centerLine2, info.AirPipeConfigInfo.AirPipeLength, info.AirPipeConfigInfo.AirPortLength, false, Matrix3d.Identity);
             }
 
             if (!info.AirPortSideConfigInfo.IsInsertAirPort)

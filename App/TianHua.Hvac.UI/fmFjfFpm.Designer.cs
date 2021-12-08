@@ -36,6 +36,7 @@ namespace TianHua.Hvac.UI
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
             this.splitContainer3 = new System.Windows.Forms.SplitContainer();
+            this.label34 = new System.Windows.Forms.Label();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.label11 = new System.Windows.Forms.Label();
@@ -58,6 +59,7 @@ namespace TianHua.Hvac.UI
             this.label13 = new System.Windows.Forms.Label();
             this.textBox6 = new System.Windows.Forms.TextBox();
             this.splitContainer7 = new System.Windows.Forms.SplitContainer();
+            this.label35 = new System.Windows.Forms.Label();
             this.label32 = new System.Windows.Forms.Label();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.textBox12 = new System.Windows.Forms.TextBox();
@@ -93,8 +95,6 @@ namespace TianHua.Hvac.UI
             this.textBox7 = new System.Windows.Forms.TextBox();
             this.label20 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
-            this.label34 = new System.Windows.Forms.Label();
-            this.label35 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
@@ -190,7 +190,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer2.Panel2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer2.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.splitContainer2.Size = new System.Drawing.Size(192, 344);
-            this.splitContainer2.SplitterDistance = 87;
+            this.splitContainer2.SplitterDistance = 90;
             this.splitContainer2.SplitterWidth = 1;
             this.splitContainer2.TabIndex = 1;
             // 
@@ -265,10 +265,18 @@ namespace TianHua.Hvac.UI
             // splitContainer3.Panel2
             // 
             this.splitContainer3.Panel2.Controls.Add(this.splitContainer5);
-            this.splitContainer3.Size = new System.Drawing.Size(192, 256);
-            this.splitContainer3.SplitterDistance = 162;
+            this.splitContainer3.Size = new System.Drawing.Size(192, 253);
+            this.splitContainer3.SplitterDistance = 160;
             this.splitContainer3.SplitterWidth = 1;
             this.splitContainer3.TabIndex = 5;
+            // 
+            // label34
+            // 
+            this.label34.Location = new System.Drawing.Point(6, 93);
+            this.label34.Name = "label34";
+            this.label34.Size = new System.Drawing.Size(100, 15);
+            this.label34.TabIndex = 18;
+            this.label34.Text = "管底";
             // 
             // radioButton2
             // 
@@ -418,7 +426,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer5.Panel2.Controls.Add(this.label13);
             this.splitContainer5.Panel2.Controls.Add(this.textBox6);
             this.splitContainer5.Panel2Collapsed = true;
-            this.splitContainer5.Size = new System.Drawing.Size(192, 93);
+            this.splitContainer5.Size = new System.Drawing.Size(192, 92);
             this.splitContainer5.SplitterDistance = 28;
             this.splitContainer5.SplitterWidth = 1;
             this.splitContainer5.TabIndex = 0;
@@ -430,7 +438,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.ItemHeight = 12;
             this.listBox1.Location = new System.Drawing.Point(0, 0);
             this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(192, 93);
+            this.listBox1.Size = new System.Drawing.Size(192, 92);
             this.listBox1.TabIndex = 0;
             // 
             // label15
@@ -511,6 +519,14 @@ namespace TianHua.Hvac.UI
             this.splitContainer7.SplitterDistance = 107;
             this.splitContainer7.SplitterWidth = 1;
             this.splitContainer7.TabIndex = 0;
+            // 
+            // label35
+            // 
+            this.label35.Location = new System.Drawing.Point(8, 35);
+            this.label35.Name = "label35";
+            this.label35.Size = new System.Drawing.Size(100, 15);
+            this.label35.TabIndex = 19;
+            this.label35.Text = "管底";
             // 
             // label32
             // 
@@ -886,22 +902,6 @@ namespace TianHua.Hvac.UI
             this.label1.Size = new System.Drawing.Size(65, 12);
             this.label1.TabIndex = 0;
             this.label1.Text = "出图比例：";
-            // 
-            // label34
-            // 
-            this.label34.Location = new System.Drawing.Point(6, 93);
-            this.label34.Name = "label34";
-            this.label34.Size = new System.Drawing.Size(100, 15);
-            this.label34.TabIndex = 18;
-            this.label34.Text = "管底";
-            // 
-            // label35
-            // 
-            this.label35.Location = new System.Drawing.Point(8, 35);
-            this.label35.Name = "label35";
-            this.label35.Size = new System.Drawing.Size(100, 15);
-            this.label35.TabIndex = 19;
-            this.label35.Text = "管底";
             // 
             // fmFjfFpm
             // 

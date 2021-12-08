@@ -1,10 +1,9 @@
-﻿using NFox.Cad;
-using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+﻿using System.Linq;
 using System.Collections.Generic;
+using NFox.Cad;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.Hydrant.Service
 {
@@ -18,7 +17,6 @@ namespace ThMEPWSS.Hydrant.Service
         public List<Entity> UnProtectAreas { get; set; }
         public List<Entity> ProtectAreas { get; set; }
         private double PolygonBufferLength = 5.0;
-        private double AreaTolerance = 1.0;
         private double RoomOffsetLength = -1.0; //房间内缩的长度，防止房间的边与保护区域的边重合
         private double SplitAreaOffsetLength = -0.5; //房间分割区域内缩的长度，防止分割区域的边重复
         public ThDivideRoomService(Entity room,List<Entity> coverAreas)
@@ -48,6 +46,13 @@ namespace ThMEPWSS.Hydrant.Service
             var bufferDic = ThHydrantUtils.BufferPolygon(intersectAreas, SplitAreaOffsetLength);//防止生成的面有边重复
             intersectAreas = bufferDic.Select(o => o.Value).ToList();
             ProtectAreas = Split(intersectAreas); // 分割相交的区域(如一个相交区域中有其它相交区域，需要分割)            
+
+            // 再做一步清洗
+            var protectAreaObjs = ProtectAreas.ToCollection().Clean();
+            ProtectAreas = protectAreaObjs.OfType<Entity>().ToList();
+
+            var unProtectAreaObjs = UnProtectAreas.ToCollection().Clean();
+            UnProtectAreas = unProtectAreaObjs.OfType<Entity>().ToList();
         }
 
         private List<Entity> Intersect()
@@ -63,9 +68,9 @@ namespace ThMEPWSS.Hydrant.Service
         private List<Entity> Split(List<Entity> areas)
         {
             var results = new List<Entity>();
-            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
-            areas = MakeValid(areas.ToCollection()).Cast<Entity>().ToList();
-            areas = ClearZeroPolygon(areas.ToCollection()).Cast<Entity>().ToList();
+            areas = areas.ToCollection().ClearZeroPolygon().Cast<Entity>().ToList();
+            areas = areas.ToCollection().MakeValid().Cast<Entity>().ToList();
+            areas = areas.ToCollection().ClearZeroPolygon().Cast<Entity>().ToList();
             var spatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(areas.ToCollection());
             var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
             areas.ForEach(o =>
@@ -85,66 +90,33 @@ namespace ThMEPWSS.Hydrant.Service
             });
             return results;
         }
+
         private DBObjectCollection Intersection(Entity first, Entity other)
         {
             var results = ThCADCoreNTSEntityExtension.Intersection(first, other,true);
-            results = ClearZeroPolygon(results); //清除面积为零
-            results = MakeValid(results); //解决自交的Case
-            results = ClearZeroPolygon(results); //清除面积为零
+            results = results.ClearZeroPolygon(); //清除面积为零
+            results = results.MakeValid(); //解决自交的Case
+            results = results.ClearZeroPolygon(); //清除面积为零
             results = DuplicatedRemove(results); //去重
             var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
             return bufferDic.Where(o => first.IsContains(o.Value) && other.IsContains(o.Value)).Select(o => o.Key).ToCollection();
         }
+
         private DBObjectCollection Subtraction(Entity entity,DBObjectCollection objs)
         {
             //减去不在Entity里面的东西
             var results = ThCADCoreNTSEntityExtension.Difference(entity, objs,true);
-            results = ClearZeroPolygon(results); //清除面积为零
-            results = MakeValid(results); //解决自交的Case
-            results = ClearZeroPolygon(results); //清除面积为零
+            results = results.ClearZeroPolygon(); //清除面积为零
+            results = results.MakeValid(); //解决自交的Case
+            results = results.ClearZeroPolygon(); //清除面积为零
             results = DuplicatedRemove(results); //去重
             var bufferDic = ThHydrantUtils.BufferPolygon(results.Cast<Entity>().ToList(), -1.0 * PolygonBufferLength);
             return bufferDic.Where(o => entity.IsContains(o.Value)).Select(o => o.Key).ToCollection();
         }
+
         private DBObjectCollection DuplicatedRemove(DBObjectCollection objs)
         {
             return ThCADCoreNTSGeometryFilter.GeometryEquality(objs);
         }     
-        private DBObjectCollection ClearZeroPolygon(DBObjectCollection objs)
-        {
-            return objs.Cast<Entity>().Where(o =>
-            {
-                if(o is Polyline polyline)
-                {
-                    return polyline.Area > AreaTolerance;
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    return mPolygon.Area > AreaTolerance;
-                }
-                else
-                {
-                    return false;
-                }
-            }).ToCollection();
-        }
-        private DBObjectCollection MakeValid(DBObjectCollection polygons)
-        {
-            var results = new DBObjectCollection();
-            polygons.Cast<Entity>().ForEach(o =>
-            {
-                if (o is Polyline polyline)
-                {
-                    var res = polyline.MakeValid();
-                    res.Cast<Entity>().ForEach(e => results.Add(e));
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    var res = mPolygon.MakeValid(true);
-                    res.Cast<Entity>().ForEach(e => results.Add(e));
-                }
-            });
-            return results;
-        }
     }
 }

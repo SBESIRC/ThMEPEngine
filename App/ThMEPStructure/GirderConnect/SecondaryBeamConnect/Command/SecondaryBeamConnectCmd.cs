@@ -12,6 +12,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command
 {
     public class SecondaryBeamConnectCmd : ThMEPBaseCommand, IDisposable
     {
+        public SecondaryBeamConnectCmd()
+        {
+            ActionName = "生成次梁";
+            CommandName = "THSCCL";
+        }
+
         public void Dispose()
         {
             //

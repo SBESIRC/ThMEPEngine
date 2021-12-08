@@ -14,8 +14,20 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
 {
     public class StructPolyService
     {
-        public static List<Polyline> StructPointToPolygon(Point3dCollection points)
+        public static List<Polyline> StructPointToPolygon(Point3dCollection points, Polyline frame)
         {
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                var triangles = GetDelaunayTriangle(points, frame);
+                foreach (Polyline item in triangles)
+                {
+                    //db.ModelSpace.Add(item);
+                }
+
+                var outBox = GeoUtils.GetLinesOutBox(triangles);
+                db.ModelSpace.Add(outBox);
+            }
+
             var ptSets = VoronoiDiagramConnect(points);
             DBObjectCollection lines = new DBObjectCollection();
             ptSets.ForEach(x =>
@@ -23,6 +35,25 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
                 lines.Add(new Line(x.Item1, x.Item2));
             });
             return lines.PolygonsEx().Cast<Polyline>().ToList();
+        }
+
+        public static List<Polyline> GetDelaunayTriangle(Point3dCollection points, Polyline frame)
+        {
+            var triangles = points.DelaunayTriangulation().Cast<Polyline>().ToList();
+            var polyTriangles = triangles.Where(x => !frame.LineIntersects(x)).ToList();
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (Polyline item in triangles)
+                {
+                    db.ModelSpace.Add(item);
+                }
+            }
+            return polyTriangles;
+        }
+
+        public void CutRegion(List<Polyline> triangles)
+        {
+
         }
 
         /// <summary>
@@ -38,42 +69,45 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
             voronoiDiagram.SetSites(points.ToNTSGeometry());
 
             //foreach (Polygon polygon in voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory).Geometries) //Same use as fallow
-            foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             {
-                if (polygon.IsEmpty)
+                foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
                 {
-                    continue;
-                }
-                var polyline = polygon.ToDbPolylines().First();
-                foreach (Point3d pt in points)
-                {
-                    if (polyline.Contains(pt) && !pt2lines.ContainsKey(pt))
+                    if (polygon.IsEmpty)
                     {
-                        if (poly2points != null)
+                        continue;
+                    }
+                    var polyline = polygon.ToDbPolylines().First();
+                    foreach (Point3d pt in points)
+                    {
+                        if (polyline.Contains(pt) && !pt2lines.ContainsKey(pt))
                         {
-                            foreach (var houseBorder in poly2points.Keys)
+                            if (poly2points != null)
                             {
-                                if (houseBorder.Intersects(polyline))
+                                foreach (var houseBorder in poly2points.Keys)
                                 {
-                                    poly2points[houseBorder].Add(pt);
-                                    break;
+                                    if (houseBorder.Intersects(polyline))
+                                    {
+                                        poly2points[houseBorder].Add(pt);
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        List<Tuple<Point3d, Point3d>> aroundLines = new List<Tuple<Point3d, Point3d>>();
-                        for (int i = 0; i < polyline.NumberOfVertices - 1; ++i)
-                        {
-                            Tuple<Point3d, Point3d> border = new Tuple<Point3d, Point3d>(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt(i + 1));
-                            if (line2pt.ContainsKey(border))
+                            List<Tuple<Point3d, Point3d>> aroundLines = new List<Tuple<Point3d, Point3d>>();
+                            for (int i = 0; i < polyline.NumberOfVertices - 1; ++i)
                             {
-                                continue;//line2pt.Add(border, new Point3d());
+                                Tuple<Point3d, Point3d> border = new Tuple<Point3d, Point3d>(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt(i + 1));
+                                if (line2pt.ContainsKey(border))
+                                {
+                                    continue;//line2pt.Add(border, new Point3d());
+                                }
+                                line2pt.Add(border, pt);
+                                aroundLines.Add(border);
                             }
-                            line2pt.Add(border, pt);
-                            aroundLines.Add(border);
+                            pt2lines.Add(pt, aroundLines.OrderByDescending(l => l.Item1.DistanceTo(l.Item2)).ToList());
+                            break;
                         }
-                        pt2lines.Add(pt, aroundLines.OrderByDescending(l => l.Item1.DistanceTo(l.Item2)).ToList());
-                        break;
                     }
                 }
             }

@@ -56,7 +56,7 @@ namespace ThMEPElectrical.SystemDiagram.Extension
                 {
                     DBText dBText = TextCollection[0] as DBText;
                     string multipleValue = dBText.TextString;
-                    string result = System.Text.RegularExpressions.Regex.Replace(multipleValue, @"[^0-9]+", "");
+                    string result = multipleValue.Replace("x","").Replace("X", "").Replace("*", "");
                     if (int.TryParse(result, out int quantity))
                         return quantity;
                 }

@@ -25,7 +25,7 @@ namespace TianHua.Hvac.UI
             InitializeComponent();
             AcceptButton = button1;
             this.param = param;
-            checkBox1.Enabled = param.is_redraw;
+            //checkBox1.Enabled = param.is_redraw;
             Init_scenario();
             Duct_size_init();
             Set_duct_variables();
@@ -36,32 +36,32 @@ namespace TianHua.Hvac.UI
         }
         private void Init_scenario()
         {
-            if (Math.Abs(param.air_volume) > 1e-3)
+            if (Math.Abs(param.airVolume) > 1e-3)
                 Init_by_pre_param();
             else
             {
                 comboBox1.Text = "1:100";
                 comboBox2.Text = "消防排烟兼平时排风";
             }
-            ThHvacUIService.Limit_air_speed_range(comboBox2.Text, ref air_speed, ref air_speed_min, ref air_speed_max);
+            ThHvacUIService.LimitAirSpeedRange(comboBox2.Text, ref air_speed, ref air_speed_min, ref air_speed_max);
         }
         private void Update_port_name()
         {
-            ThHvacUIService.Port_init(comboBox2.Text, out string down_port_name, out string side_port_name);
+            ThHvacUIService.PortInit(comboBox2.Text, out string down_port_name, out string side_port_name);
             radioButton3.Text = down_port_name;
             radioButton4.Text = side_port_name;
         }
         private void Update_air_speed()
         {
             // 高于风速上限立即在面板更新
-            ThHvacUIService.Limit_air_speed(air_speed_max, air_speed_min, out bool is_high, ref air_speed);
+            ThHvacUIService.LimitAirSpeed(air_speed_max, air_speed_min, out bool is_high, ref air_speed);
             if (is_high)
                 textBox3.Text = air_speed_max.ToString();
         }
         private void Update_air_volume()
         {
             // 高于风量上限立即在面板更新
-            ThHvacUIService.Limit_air_volume(out bool is_high, ref air_volume);
+            ThHvacUIService.LimitAirVolume(out bool is_high, ref air_volume);
             double max = 60000;
             if (is_high)
                 textBox2.Text = max.ToString();
@@ -70,15 +70,15 @@ namespace TianHua.Hvac.UI
         {
             comboBox1.Text = param.scale;
             comboBox2.Text = param.scenario;
-            textBox2.Text = param.air_volume.ToString();
-            textBox3.Text = param.air_speed.ToString();
+            textBox2.Text = param.airVolume.ToString();
+            textBox3.Text = param.airSpeed.ToString();
             textBox4.Text = param.elevation.ToString();
-            textBox7.Text = param.port_num.ToString();
-            string []s = param.port_size.Split('x');
+            textBox7.Text = param.portNum.ToString();
+            string []s = param.portSize.Split('x');
             textBox8.Text = s[0];
             textBox1.Text = s[1];
-            textBox9.Text = param.port_name;
-            if (param.port_range.Contains("下"))
+            textBox9.Text = param.portName;
+            if (param.portRange.Contains("下"))
             {
                 radioButton3.Checked = true;
                 radioButton4.Checked = false;
@@ -88,7 +88,7 @@ namespace TianHua.Hvac.UI
                 radioButton3.Checked = false;
                 radioButton4.Checked = true;
             }
-            checkBox1.Enabled = param.is_redraw;
+            //checkBox1.Enabled = param.is_redraw;
         }
         private void buttonOK_Click(object sender, EventArgs e)
         {
@@ -119,7 +119,7 @@ namespace TianHua.Hvac.UI
             port_num = (int)Double.Parse(textBox7.Text);
             double avg_air_volume = air_volume / port_num;
             port_size = textBox8.Text + "x" + textBox1.Text;
-            double speed = ThHvacUIService.Calc_air_speed(avg_air_volume, Double.Parse(textBox8.Text), Double.Parse(textBox1.Text));
+            double speed = ThHvacUIService.CalcAirSpeed(avg_air_volume, Double.Parse(textBox8.Text), Double.Parse(textBox1.Text));
             label22.Text = speed.ToString("0.00");
         }
         private void Duct_size_init()
@@ -130,7 +130,7 @@ namespace TianHua.Hvac.UI
             Update_air_volume();
             air_speed = Double.Parse(textBox3.Text);
             Update_air_speed();
-            ThHvacUIService.Update_recommend_duct_size_list(listBox1, air_volume, air_speed);
+            //ThHvacUIService.UpdateRecommendDuctSizeList(listBox1, air_volume, air_speed);
             if (listBox1.SelectedItem != null)
                 duct_size = listBox1.SelectedItem.ToString();
         }
@@ -171,7 +171,7 @@ namespace TianHua.Hvac.UI
                 textBox5.Text = str[1];
                 return;
             }
-            double air_speed = ThHvacUIService.Calc_air_speed(air_volume, Double.Parse(textBox5.Text), Double.Parse(textBox6.Text));
+            double air_speed = ThHvacUIService.CalcAirSpeed(air_volume, Double.Parse(textBox5.Text), Double.Parse(textBox6.Text));
             label13.Text = air_speed.ToString("0.00");
             duct_size = textBox6.Text + "x" + textBox5.Text;
         }
@@ -198,21 +198,21 @@ namespace TianHua.Hvac.UI
         }
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            if (!ThHvacUIService.Is_integer_str(textBox1.Text))
+            if (!ThHvacUIService.IsIntegerStr(textBox1.Text))
                 textBox1.Text = "";
             else
                 Set_port_speed();
         }
         private void textBox2_TextChanged(object sender, EventArgs e)
         {
-            if (ThHvacUIService.Is_integer_str(textBox2.Text))
+            if (ThHvacUIService.IsIntegerStr(textBox2.Text))
             {
                 if (!String.IsNullOrEmpty(textBox2.Text))
                 {
                     air_volume = Double.Parse(textBox2.Text);
                     Update_air_volume();
                     Set_port_speed();
-                    ThHvacUIService.Update_recommend_duct_size_list(listBox1, air_volume, air_speed);
+                    //ThHvacUIService.UpdateRecommendDuctSizeList(listBox1, air_volume, air_speed);
                 }
             }
             else
@@ -220,13 +220,13 @@ namespace TianHua.Hvac.UI
         }
         private void textBox3_TextChanged(object sender, EventArgs e)
         { 
-            if (ThHvacUIService.Is_float_2_decimal(textBox3.Text))
+            if (ThHvacUIService.IsFloat2Decimal(textBox3.Text))
             {
                 if (!String.IsNullOrEmpty(textBox3.Text))
                 {
                     air_speed = Double.Parse(textBox3.Text);
                     Update_air_speed();
-                    ThHvacUIService.Update_recommend_duct_size_list(listBox1, air_volume, air_speed);
+                    //ThHvacUIService.UpdateRecommendDuctSizeList(listBox1, air_volume, air_speed);
                 }
             }
             else
@@ -234,7 +234,7 @@ namespace TianHua.Hvac.UI
         }
         private void textBox4_TextChanged(object sender, EventArgs e)
         {
-            if (ThHvacUIService.Is_float_2_decimal(textBox4.Text))
+            if (ThHvacUIService.IsFloat2Decimal(textBox4.Text))
             {
                 if (!String.IsNullOrEmpty(textBox4.Text))
                     elevation = Double.Parse(textBox4.Text);
@@ -250,21 +250,21 @@ namespace TianHua.Hvac.UI
 
         private void textBox5_TextChanged(object sender, EventArgs e)
         {
-            if (!ThHvacUIService.Is_integer_str(textBox5.Text))
+            if (!ThHvacUIService.IsIntegerStr(textBox5.Text))
                 textBox5.Text = "";
             else
                 Update_duct_size();
         }
         private void textBox6_TextChanged(object sender, EventArgs e)
         {
-            if (!ThHvacUIService.Is_integer_str(textBox6.Text))
+            if (!ThHvacUIService.IsIntegerStr(textBox6.Text))
                 textBox6.Text = "";
             else
                 Update_duct_size();
         }
         private void textBox7_TextChanged(object sender, EventArgs e)
         {
-            if (ThHvacUIService.Is_integer_str(textBox7.Text))
+            if (ThHvacUIService.IsIntegerStr(textBox7.Text))
             {
                 if (!String.IsNullOrEmpty(textBox7.Text))
                     Set_port_speed();
@@ -274,7 +274,7 @@ namespace TianHua.Hvac.UI
         }
         private void textBox8_TextChanged(object sender, EventArgs e)
         {
-            if (!ThHvacUIService.Is_integer_str(textBox8.Text))
+            if (!ThHvacUIService.IsIntegerStr(textBox8.Text))
                 textBox8.Text = "";
             else
                 Set_port_speed();
@@ -289,7 +289,7 @@ namespace TianHua.Hvac.UI
         }
         private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ThHvacUIService.Limit_air_speed_range(comboBox2.Text, ref air_speed, ref air_speed_min, ref air_speed_max);
+            ThHvacUIService.LimitAirSpeedRange(comboBox2.Text, ref air_speed, ref air_speed_min, ref air_speed_max);
             Update_port_name();
             scenario = comboBox2.Text;
             Set_port_range();
@@ -303,7 +303,7 @@ namespace TianHua.Hvac.UI
             if (checkBox1.Checked)
             {
                 splitContainer1.Panel1.Enabled = false;
-                if (param.port_range.Contains("下"))
+                if (param.portRange.Contains("下"))
                 {
                     radioButton3.Checked = true;
                     radioButton4.Checked = false;
@@ -315,7 +315,7 @@ namespace TianHua.Hvac.UI
                 }
                 radioButton3.Enabled = false;
                 radioButton4.Enabled = false;
-                textBox7.Text = param.port_num.ToString();
+                textBox7.Text = param.portNum.ToString();
                 
                 textBox7.Enabled = false;
                 label22.Enabled = false;

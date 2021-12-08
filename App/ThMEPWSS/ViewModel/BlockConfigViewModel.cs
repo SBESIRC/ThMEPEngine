@@ -8,6 +8,15 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThControlLibraryWPF.ControlUtils;
 using cadGraph = Autodesk.AutoCAD.GraphicsInterface;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Colors;
+using ThMEPEngineCore.CAD;
+using NFox.Cad;
+using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
+using ThCADExtension;
+using System;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -34,12 +43,12 @@ namespace ThMEPWSS.ViewModel
     {
         public Dictionary<string, List<List<string>>> BlockNameConfigList { get; set; }
         public Dictionary<string, ObservableCollection<BlockNameConfigViewModel>> BlockNameList { get; set; }
-        public Dictionary<string, Dictionary<string,DBObjectCollection>> BlockNestedEntityFrames { get; set; }
+        public Dictionary<string, List<Polyline>> BlockNestedEntityFrames { get; set; }
         private List<string> Blocks { get; set; }
 
         public BlockConfigViewModel()
         {
-            BlockNestedEntityFrames = new Dictionary<string, Dictionary<string, DBObjectCollection>>();
+            BlockNestedEntityFrames = new Dictionary<string, List<Polyline>>();
             BlockNameConfigList = new Dictionary<string, List<List<string>>>();
             CreateBlockList();
 
@@ -156,12 +165,9 @@ namespace ThMEPWSS.ViewModel
                 IntegerCollection intCol = new IntegerCollection();
                 if (BlockNestedEntityFrames.ContainsKey(blkConfigName))
                 {
-                    BlockNestedEntityFrames[blkConfigName].ForEach(o =>
+                    BlockNestedEntityFrames[blkConfigName].OfType<Curve>().ForEach(o =>
                     {
-                        o.Value.OfType<Curve>().ForEach(o =>
-                        {
-                            tm.AddTransient(o, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
-                        });
+                        tm.AddTransient(o, cadGraph.TransientDrawingMode.Highlight, 1, intCol);
                     });
                 }
             }
@@ -174,16 +180,186 @@ namespace ThMEPWSS.ViewModel
                 IntegerCollection intCol = new IntegerCollection();
                 BlockNestedEntityFrames.Values.ForEach(o =>
                 {
-                    o.ForEach(o =>
+                    o.OfType<Curve>().ForEach(o =>
                     {
-                        o.Value.OfType<Curve>().ForEach(o =>
-                        {
-                            tm.EraseTransient(o, intCol);
-                            //o.Dispose();
-                        });
+                        tm.EraseTransient(o, intCol);
                     });
                 });
             }
+        }
+        public void Show(string blockName, Database db)
+        {
+            if(BlockNestedEntityFrames.ContainsKey(blockName))
+            {
+                BlockNestedEntityFrames[blockName].Clear();
+                BlockNestedEntityFrames.Remove(blockName);
+            }
+            List<string> blockNames = new List<string>();
+            BlockNameList[blockName].ForEach(o =>
+            {
+                blockNames.Add(o.layerName);
+            });
+            var blks = ExtractBlocks(db, blockNames);
+            var bufferService = new ThNTSBufferService();
+            List<Polyline> newFrames = new List<Polyline>();
+            foreach (BlockReference blk in blks)
+            {
+                var obb = CreateFrame(blk);
+                var newFrame = bufferService.Buffer(obb, 100.0) as Polyline;
+                newFrame.Color = Color.FromRgb(255, 0, 0);
+                newFrame.LineWeight = LineWeight.LineWeight100;
+                newFrames.Add(newFrame);
+            }
+            BlockNestedEntityFrames.Add(blockName, newFrames);
+        }
+        public Polyline CreateFrame(BlockReference br)
+        {
+            var objs = ThDrawTool.Explode(br);
+            var curves = objs.OfType<Entity>()
+                .Where(e => e is Curve).ToCollection();
+            curves = Tesslate(curves);
+            curves = curves.OfType<Curve>().Where(o => o != null && o.GetLength() > 1e-6).ToCollection();
+            var transformer = new ThMEPOriginTransformer(curves);
+            transformer.Transform(curves);
+            var obb = curves.GetMinimumRectangle();
+            transformer.Reset(obb);
+            return obb;
+        }
+
+        private DBObjectCollection Tesslate(DBObjectCollection curves,
+            double arcLength = 50.0, double chordHeight = 50.0)
+        {
+            var results = new DBObjectCollection();
+            curves.OfType<Curve>().ToList().ForEach(o =>
+            {
+                if (o is Line)
+                {
+                    results.Add(o);
+                }
+                else if (o is Arc arc)
+                {
+                    results.Add(arc.TessellateArcWithArc(arcLength));
+                }
+                else if (o is Circle circle)
+                {
+                    results.Add(circle.TessellateCircleWithArc(arcLength));
+                }
+                else if (o is Polyline polyline)
+                {
+                    results.Add(polyline.TessellatePolylineWithArc(arcLength));
+                }
+                else if (o is Ellipse ellipse)
+                {
+                    results.Add(ellipse.Tessellate(chordHeight));
+                }
+                else if (o is Spline spline)
+                {
+                    results.Add(spline.Tessellate(chordHeight));
+                }
+            });
+            return results;
+        }
+        private DBObjectCollection ExtractBlocks(Database db, List<string> blockNames)
+        {
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+            {
+                if (e is BlockReference br)
+                {
+                    var blkName = br.GetEffectiveName().ToUpper();
+                    return blockNames.Where(o => blkName.EndsWith(o.ToUpper())).Any();
+                }
+                return false;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            extractor.ExtractFromMS(db);
+            extractor.Extract(db);
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
+        }
+    }
+    public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
+    {
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        public ThBlockReferenceExtractionVisitor()
+        {
+            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedBlockName = (Entity entity) => true;
+        }
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        {
+            if (dbObj is BlockReference br)
+            {
+                elements.AddRange(Handle(br, matrix));
+            }
+        }
+
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements,
+            BlockReference blockReference, Matrix3d matrix)
+        {
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
+        }
+
+        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcDistributionElementData>();
+            if (IsDistributionElement(br) && CheckLayerValid(br))
+            {
+                var clone = br.Clone() as BlockReference;
+                if (clone != null)
+                {
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = clone,
+                    });
+                }
+            }
+            return results;
+        }
+        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is BlockReference br)
+            {
+                return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public override bool IsDistributionElement(Entity entity)
+        {
+            return CheckQualifiedBlockName(entity);
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return CheckQualifiedLayer(curve);
+        }
+
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }

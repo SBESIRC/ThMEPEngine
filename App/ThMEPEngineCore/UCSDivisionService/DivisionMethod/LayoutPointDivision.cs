@@ -17,11 +17,19 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         public Dictionary<Polyline, Vector3d> Division(List<Polyline> columns, Polyline polyline)
         {
             //将柱转化为点
-            var columnPts = columns.Select(x => StructUtils.GetColumnPoint(x)).ToCollection();
+            var columnDics = columns.ToDictionary(x => x, y => StructUtils.GetColumnPoint(y))
+                .Where(x => polyline.Contains(x.Value))
+                .ToDictionary(x => x, y => y.Value);
 
             //将柱点转为柱网
-            var columnsPolygon = StructPolyService.StructPointToPolygon(columnPts);
-
+            var columnsPolygon = StructPolyService.StructPointToPolygon(columnDics.Values.ToCollection(), polyline);
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var item in columnsPolygon)
+                {
+                    //db.ModelSpace.Add(item);
+                }
+            }
             //根据柱网进行分区
             UcsByPointsDivider byPointsDivider = new UcsByPointsDivider();
             byPointsDivider.Compute(polyline, columns);

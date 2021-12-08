@@ -8,7 +8,6 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPHVAC.FanLayout.Service;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPHVAC.FanLayout.Engine
 {
@@ -25,7 +24,7 @@ namespace ThMEPHVAC.FanLayout.Engine
         {
             using (var acadDb= Linq2Acad.AcadDatabase.Active())
             {
-                var ductIds = ThDuctPortsReadComponent.Read_group_ids_by_type("Duct");
+                var ductIds = ThDuctPortsReadComponent.ReadGroupIdsByType("Duct");
                 var groups = ductIds.Select(o => acadDb.Element<Group>(o)).ToList();
                 var entIds = groups.SelectMany(g => g.GetAllEntityIds().ToList());
 
@@ -33,7 +32,6 @@ namespace ThMEPHVAC.FanLayout.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(ents);
                 var dbObjects = spatialIndex.SelectCrossingPolygon(polygon);
                 return groups.Where(g => dbObjects.OfType<Entity>().Where(e => g.Has(e)).Any()).Select(g => g.ObjectId).FirstOrDefault();
-
             }
         }
 
@@ -44,19 +42,28 @@ namespace ThMEPHVAC.FanLayout.Engine
                 info = new ThDuctInfo();
 
                 double fontHeight = 300;
+                double holeWidth;
+                double holeHeight;
 
                 var engine = new ThTCHDuctRecognitionEngine();
-                engine.RecognizeEditor(polygon);
+                engine.Recognize(database.Database, polygon);
+                engine.RecognizeMS(database.Database, polygon);
                 var ductSeg = engine.Elements.OfType<ThIfcDuctSegment>().ToList();
                 if(ductSeg.Count() == 0)
                 {
-                    ThMEPDuctExtractor AIDuctEngine = new ThMEPDuctExtractor();
-                    AIDuctEngine.Recognize(database.Database, polygon);
-                    ductSeg.AddRange(AIDuctEngine.Elements.OfType<ThIfcDuctSegment>());
-                }
-                if (ductSeg.Count() == 0)
-                {
-                    return false;
+                    var ductEngine = new ThFanDuctRecognitionEngine();
+                    var ductObjId = ductEngine.GetFanDuctObjectId(polygon);
+                    if (!ductObjId.IsValid)
+                    {
+                        return false;
+                    }
+                    var ductParam = ThHvacAnalysisComponent.GetDuctParamById(ductObjId);
+                    ThFanLayoutDealService.GetDuctWidthAndHeight(ductParam.ductSize, out holeWidth, out holeHeight);
+                    info.width = holeWidth;
+                    info.height = holeHeight;
+                    info.fontHeight = fontHeight;
+                    info.markHeight = ductParam.elevation;
+                    return true;
                 }
                 var param = ductSeg[0].Parameters;
                 info.width = param.Width;

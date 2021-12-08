@@ -33,6 +33,8 @@ namespace ThMEPElectrical.FireAlarmArea.Data
         public List<ThGeometry> AvoidEquipments { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> CleanEquipments { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> Equipments { get; set; } = new List<ThGeometry>();
+        public List<ThGeometry> DoorOpenings { get; set; } = new List<ThGeometry>();
+        public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
 
 
         //output
@@ -57,7 +59,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
 
             PrepareData();
             SetAvoidEquipment();
-            CleanData();
+            CleanPreviousEquipment();
         }
 
         protected void PrepareData()
@@ -70,6 +72,8 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             LayoutArea = QueryC("PlaceCoverage");
             Equipments = QueryC(BuiltInCategory.Equipment.ToString());
             DetectArea = QueryC("DetectionRegion");
+            DoorOpenings = QueryC(BuiltInCategory.DoorOpening.ToString());
+            Windows = QueryC(BuiltInCategory.Window.ToString());
         }
 
         public void SetAvoidEquipment()
@@ -81,7 +85,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
 
         }
 
-        public void CleanData()
+        public void CleanPreviousEquipment()
         {
             if (CleanBlkName != null)
             {

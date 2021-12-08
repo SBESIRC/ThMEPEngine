@@ -18,30 +18,6 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
-    <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.Charts.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Data.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.DataAccess.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.DataAccess.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Images.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Office.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Printing.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.RichEdit.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Sparkline.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.Spreadsheet.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.Utils.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.Utils.v17.2.UI, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.XtraBars.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraCharts.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.XtraEditors.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.XtraGrid.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraLayout.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraNavBar.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraPrinting.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.XtraRichEdit.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
-    <Reference Include="DevExpress.XtraSpreadsheet.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="DevExpress.XtraTreeList.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
-    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,21 +39,14 @@
     <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
-    <Compile Include="Command\ThHvacFjfCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacFpmCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
     <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
-    <Compile Include="Command\ThHvacPortModifyCmd.cs" />
     <Compile Include="Command\ThHvacSpmCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
-    <Compile Include="fmBypass.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmBypass.Designer.cs">
-      <DependentUpon>fmBypass.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -90,17 +59,17 @@
     <Compile Include="fmDuctPorts.Designer.cs">
       <DependentUpon>fmDuctPorts.cs</DependentUpon>
     </Compile>
-    <Compile Include="fmDuctSpec.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmDuctSpec.Designer.cs">
-      <DependentUpon>fmDuctSpec.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmFjfFpm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="fmFjfFpm.Designer.cs">
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fmFpm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFpm.Designer.cs">
+      <DependentUpon>fmFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="HvacUiApp.cs" />
     <Compile Include="LoadCalculation\DoubleConvert.cs" />
@@ -208,12 +177,6 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
@@ -248,22 +211,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="fmBypass.resx">
-      <DependentUpon>fmBypass.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmDuctModify.resx">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmDuctPorts.resx">
       <DependentUpon>fmDuctPorts.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="fmDuctSpec.resx">
-      <DependentUpon>fmDuctSpec.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmFjfFpm.resx">
       <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="fmFpm.resx">
+      <DependentUpon>fmFpm.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Page Include="LoadCalculation\UI\ExtractRoomFunction.xaml">

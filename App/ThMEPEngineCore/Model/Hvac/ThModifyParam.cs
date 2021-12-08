@@ -6,152 +6,96 @@ namespace ThMEPEngineCore.Model.Hvac
 {
     public class FanModifyParam
     {
-        public string fan_name;
-        public FanModifyParam(string fan_name) 
-        {
-            this.fan_name = fan_name;
-        }
+        public string fanName;
     }
     public class PortModifyParam
     {
         public Point2d pos;
         public Handle handle;
-        public string port_range;
-        public double port_width;
-        public double port_height;
-        public double rotate_angle;
-        public PortModifyParam() { }
+        public string portRange;
+        public double portWidth;
+        public double portHeight;
+        public double rotateAngle;
     }
     public class TextModifyParam
     {
         public Point3d pos;
         public Handle handle;
-        public Point2d center_point;
-        public string text_string;
-        public double rotate_angle;
-        public TextModifyParam(Handle handle, Point2d center_point, string text_string,
-                                 double rotate_angle, Point3d pos)
-        {
-            this.pos = pos;
-            this.handle = handle;
-            this.text_string = text_string;
-            this.center_point = center_point;
-            this.rotate_angle = rotate_angle;
-        }
+        public double height;
+        public string textString;
+        public double rotateAngle;
     }
     public class HoleModifyParam
     {
         public Handle handle;
-        public string hole_name;
-        public string hole_layer;
-        public Point2d insert_p;
-        public double rotate_angle;
+        public string holeName;
+        public string holeLayer;
+        public Point2d insertP;
+        public double rotateAngle;
         public double len;
         public double width;
-        public HoleModifyParam() { }
     }
     public class MufflerModifyParam
     {
         public Handle handle;
         public string name;
-        public string muffler_layer;
-        public Point2d insert_p;
-        public string muffler_visibility;
+        public string mufflerLayer;
+        public Point2d insertP;
+        public string mufflerVisibility;
         public double len;
         public double width;
         public double height;
-        public double text_height;
-        public double rotate_angle;
+        public double textHeight;
+        public double rotateAngle;
     }
     public class ValveModifyParam
     {
         public Handle handle;
-        public string valve_name;
-        public string valve_layer;
-        public string valve_visibility;
-        public Point2d insert_p;
-        public double rotate_angle;
+        public string valveName;
+        public string valveLayer;
+        public string valveVisibility;
+        public Point2d insertP;
+        public double rotateAngle;
         public double width;
         public double height;
-        public double text_angle;
-        public double text_height;
-        public ValveModifyParam() { }
+        public double textAngle;
+        public double textHeight;
     }
     public class EntityModifyParam
     {
-        public string type;
-        public Handle handle;
-        public Handle start_id;
-        public List<Point2d> pos;
-        public List<Point2d> pos_ext;
-        public List<double> port_widths;
-        public EntityModifyParam()
-        {
-            type = string.Empty;
-            pos = new List<Point2d>();
-            handle = ObjectId.Null.Handle;
-            pos_ext = new List<Point2d>();
-            start_id = ObjectId.Null.Handle;
-            port_widths = new List<double>();
-        }
-        public EntityModifyParam(string type,
-                                   Handle start_id,
-                                   List<Point2d> pos,
-                                   List<Point2d> pos_ext,
-                                   List<double> port_widths)
-        {
-            this.pos = pos;
-            this.type = type;
-            this.pos_ext = pos_ext;
-            this.start_id = start_id;
-            this.port_widths = port_widths;
-            handle = ObjectId.Null.Handle;
-        }
+        public string type;                           //写进去的XData
+        public Handle handle;                         //读图时解析
+        public Point3d centerP;                       //读图时解析
+        // 端点到端口宽度的映射
+        public Dictionary<Point3d, double> portWidths;//读图时解析
     }
     public class DuctModifyParam
     {
-        public Point2d sp;          // 管段起点
-        public Point2d ep;          // 管段终点
+        public Point3d sp;          // 管段起点
+        public Point3d ep;          // 管段终点
         public Handle handle;       // 管段组handle
-        public Handle start_handle; // 总管段起始点handle
         public string type;
-        public string duct_size;
-        public double air_volume;
+        public string ductSize;
+        public double airVolume;
         public double elevation;
         public DuctModifyParam() { }
-        public DuctModifyParam(string duct_size,
-                                 double air_volume,
-                                 double elevation,
-                                 Point2d sp,
-                                 Point2d ep)
+        public DuctModifyParam(string ductSize,
+                               double airVolume,
+                               double elevation,
+                               Point3d sp,
+                               Point3d ep)
         {
             type = "Duct";
             this.sp = sp;
             this.ep = ep;
             this.elevation = elevation;
-            this.duct_size = duct_size;
-            this.air_volume = air_volume;
-        }
-        public DuctModifyParam(string duct_size, 
-                                 double air_volume,
-                                 double elevation,
-                                 Point2d sp,
-                                 Point2d ep,
-                                 Handle start_handle)
-        {
-            type = "Duct";
-            this.sp = sp;
-            this.ep = ep;
-            this.elevation = elevation;
-            this.duct_size = duct_size;
-            this.air_volume = air_volume;
-            this.start_handle = start_handle;
+            this.ductSize = ductSize;
+            this.airVolume = airVolume;
         }
     }
     public class VTElbowModifyParam
     {
         public Handle handle;
-        public Point2d detect_p;
-        public VTElbowModifyParam() { }
+        public Point3d detectP;
     }
 }

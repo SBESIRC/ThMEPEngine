@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Model.Hvac;
@@ -7,65 +9,63 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawValve
     {
-        public string valve_name;
-        public string valve_layer;
-        public string valve_visibility;
-        public ThDuctPortsDrawValve(string valve_visibility, string valve_name, string valve_layer)
+        public string valveName;
+        public string valveLayer;
+        public string valveVisibility;
+        public ThDuctPortsDrawValve(string valveVisibility, string valveName, string valveLayer)
         {
-            this.valve_name = valve_name;
-            this.valve_layer = valve_layer;
-            this.valve_visibility = valve_visibility;
+            this.valveName = valveName;
+            this.valveLayer = valveLayer;
+            this.valveVisibility = valveVisibility;
         }
-        public void Insert_valve(int count, Point3d start_point, ThDuctPortsConstructor endlines)
+        public void InsertValve(Point3d srtPoint, List<EndlineInfo> endlines)
         {
-            if (count == 1)
-                return ;
+            if (endlines.Count == 1)// 只有一条endline的情况不插阀
+                return;
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                foreach (var endline in endlines.endline_segs)
+                foreach (var endline in endlines)
                 {
-                    if (endline.is_in)
-                    {
-                        double width = endline.segs[0].width;
-                        var dir_vec = ThMEPHVACService.Get_edge_direction(endline.segs[0].l);
-                        var vertical_r = ThMEPHVACService.Get_right_vertical_vec(dir_vec);
-                        double angle = dir_vec.GetAngleTo(Vector3d.XAxis);
-                        if (Vector3d.XAxis.CrossProduct(dir_vec).Z < 0)
-                            angle = 2 * Math.PI - angle;
-                        angle += 0.5 * Math.PI;
-                        double text_angle = (angle >= Math.PI * 0.5) ? Math.PI * 0.5 : 0;
-                        var p = endline.segs[0].start_point;
-                        var insert_p = p + vertical_r * width * 0.5 + start_point.GetAsVector();
-                        Insert_valve(insert_p.ToPoint2D(), width, angle, text_angle);
-                    }
+                    var rootSeg = endline.endlines.Values.LastOrDefault();
+                    var width = ThMEPHVACService.GetWidth(rootSeg.seg.ductSize);
+                    var dirVec = ThMEPHVACService.GetEdgeDirection(rootSeg.seg.l);
+                    var verticalR = ThMEPHVACService.GetRightVerticalVec(dirVec);
+                    var angle = dirVec.GetAngleTo(Vector3d.XAxis);
+                    if (Vector3d.XAxis.CrossProduct(dirVec).Z < 0)
+                        angle = 2 * Math.PI - angle;
+                    angle += 0.5 * Math.PI;
+                    var textAngle = (angle >= Math.PI * 0.5) ? Math.PI * 0.5 : 0;
+                    var p = rootSeg.seg.l.StartPoint + (dirVec * rootSeg.seg.srcShrink);
+                    var insertP = p + verticalR * width * 0.5 + srtPoint.GetAsVector();
+                    InsertValve(insertP.ToPoint2D(), width, angle, textAngle);
                 }
             }
         }
-        public void Insert_valve(Point2d insert_p, double width, double angle, double text_angle)
+        public void InsertValve(Point2d insertP, double width, double angle, double textAngle)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insert_p_3 = new Point3d(insert_p.X, insert_p.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valve_layer, valve_name, insert_p_3, new Scale3d(), angle);
-                ThDuctPortsDrawService.Set_valve_dyn_block_properity(obj, width, 250, text_angle, valve_visibility);
+                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), angle);
+                ThDuctPortsDrawService.SetValveDynBlockProperity(obj, width, 250, textAngle, valveVisibility);
             }
         }
-        public void Insert_hole(Point2d insert_p, double width, double len, double angle)
+        public void InsertHole(Point2d insertP, double width, double len, double angle)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insert_p_3 = new Point3d(insert_p.X, insert_p.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valve_layer, valve_name, insert_p_3, new Scale3d(), angle);
-                ThDuctPortsDrawService.Set_hole_dyn_block_properity(obj, width, len);
+                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), angle);
+                ThDuctPortsDrawService.SetHoleDynBlockProperity(obj, width, len);
             }
         }
-        public void Insert_muffler(Point2d insert_p, MufflerModifyParam muffler)
+        public void InsertMuffler(Point2d insertP, MufflerModifyParam muffler)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insert_p_3 = new Point3d(insert_p.X, insert_p.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valve_layer, valve_name, insert_p_3, new Scale3d(), muffler.rotate_angle);
-                ThDuctPortsDrawService.Set_muffler_dyn_block_properity(obj, muffler);
+                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), muffler.rotateAngle);
+                ThDuctPortsDrawService.SetMufflerDynBlockProperity(obj, muffler);
             }
         }
     }

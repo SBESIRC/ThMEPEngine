@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.FireAlarmArea.Model
 {
@@ -25,6 +26,8 @@ namespace ThMEPElectrical.FireAlarmArea.Model
         public string BlkNameSmokePrf = "";
         public double priorityExtend = 0;
         public List<Point3d> StairPartResult { get; set; } = new List<Point3d>();
+        public List<ThGeometry> DoorOpenings { get; set; } = new List<ThGeometry>();
+        public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
         public Dictionary<Polyline, ThFaSmokeCommon.layoutType> RoomType { get; set; } = new Dictionary<Polyline, ThFaSmokeCommon.layoutType>();
     }
 }

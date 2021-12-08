@@ -110,8 +110,9 @@ namespace ThMEPEngineCore.Engine
                         results.Add(bufferEntity);
                     }
                 }
-                catch (System.Exception ex)
-                {                   
+                catch
+                {    
+                    //
                 }
             });
             return results;

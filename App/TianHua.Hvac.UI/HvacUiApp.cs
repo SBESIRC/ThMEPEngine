@@ -5,7 +5,6 @@ namespace TianHua.Hvac.UI
 {
     public class HvacUiApp : IExtensionApplication
     {
-
         public void Initialize()
         {
 
@@ -16,15 +15,6 @@ namespace TianHua.Hvac.UI
 
         }
 
-        [CommandMethod("TIANHUACAD", "THFJF", CommandFlags.Modal)]
-        public void Thfjf()
-        {
-            using (var cmd = new ThHvacFjfCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THDKFPM", CommandFlags.Modal)]
         public void THDKFPM()
         {
@@ -33,7 +23,6 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
         [CommandMethod("TIANHUACAD", "THDKFPMFG", CommandFlags.Modal)]
         public void THDKFPMFG()
         {
@@ -42,19 +31,10 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
-        [CommandMethod("TIANHUACAD", "THDKFPMXG", CommandFlags.Modal)]
-        public void THDKFPMXG()
-        {
-            using (var cmd = new ThHvacPortModifyCmd())
-            {
-                cmd.Execute();
-            }
-        }
         [CommandMethod("TIANHUACAD", "THFPM", CommandFlags.Modal)]
         public void THFPM()
         {
-            using (var cmd = new ThHvacFjfCmd(true))
+            using (var cmd = new ThHvacFpmCmd())
             {
                 cmd.Execute();
             }
@@ -83,7 +63,6 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
         [CommandMethod("TIANHUACAD", "THSWSZ", CommandFlags.Modal)]
         public void THSWSZ()
         {
@@ -92,7 +71,6 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
         [CommandMethod("TIANHUACAD", "THFJBH", CommandFlags.Modal)]
         public void THFJBH()
         {
@@ -101,9 +79,7 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
-
         [CommandMethod("TIANHUACAD", "THFJGN", CommandFlags.Modal)]
-        //天华提取房间功能
         public void THFJGN()
         {
             using (var cmd = new ThHvacExtractRoomFunctionCmd())

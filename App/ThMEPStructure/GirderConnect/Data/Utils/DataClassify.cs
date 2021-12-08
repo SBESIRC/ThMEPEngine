@@ -86,11 +86,24 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 }
             }
         }
-        public static void OuterClassify(List<Entity> entities, Point3dCollection points, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
+
+        /// <summary>
+        /// 对于房间外的事物（wall & column）outsideColumns & outsideShearwall -> clumnPts & outlineWalls
+        /// </summary>
+        /// <param name="outsideColumns"></param>
+        /// <param name="clumnPts"></param>
+        /// <param name="outlineWalls"></param>
+        /// <param name="outsideShearwall"></param>
+        public static void OuterClassify(List<Entity> outsideColumns, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
         {
+            //先合并柱子和墙
+            List<Entity> mixEntity = new List<Entity>();
+            mixEntity.AddRange(outsideColumns);
+            mixEntity.AddRange(outsideShearwall);
+            var newObjs = mixEntity.ToCollection().UnionPolygons().OfType<Polyline>().ToHashSet();
+            //分类
             HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
-            //outsideColumns -> clumnPts
-            foreach (var entity in entities)
+            foreach (var entity in newObjs)
             {
                 if (entity is Polyline polyline)
                 {
@@ -105,19 +118,10 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                     }
                 }
             }
-            //outsideShearwall -> outlineWalls
-            foreach (var shearwall in outsideShearwall)
-            {
-                if (shearwall is Polyline houseOutline)
-                {
-                    houseOutline.Closed = true;
-                    DataProcess.AddOutline(houseOutline, ref outlineWalls);
-                }
-            }
             polylineColumns = DataProcess.DeleteOverlap(polylineColumns);
             foreach (var polylineColumn in polylineColumns)
             {
-                points.Add(polylineColumn.GetCentroidPoint());
+                clumnPts.Add(polylineColumn.GetCentroidPoint());
             }
         }
         public static void InnerColumnTypeClassify(Dictionary<Entity, HashSet<Entity>> columnGroupDict,
@@ -159,7 +163,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <returns></returns>
         private static bool IsColumns(Polyline polygon)
         {
-            return IsRectangle(polygon) && AspectRatio(polygon);
+            return IsRectangle(polygon) && AspectRatio(polygon) && polygon.Area < 2000000;
         }
 
         private static bool AspectRatio(Polyline polygon)

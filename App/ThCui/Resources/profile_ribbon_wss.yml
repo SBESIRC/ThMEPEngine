@@ -134,17 +134,7 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
-          - text: "机房平面"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "地库风平面"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
           - text: "风管修改"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "整体修改"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "风管留洞"
             attributes: { "IsVisible": true, "IsEnabled": true }

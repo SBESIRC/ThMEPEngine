@@ -159,7 +159,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 uiPipeDraw.Closed += ChildWindowClosed;
                 uiPipeDraw.Show();
             }
-            catch (Exception ex) 
+            catch
             {
                 this.Show();
             }

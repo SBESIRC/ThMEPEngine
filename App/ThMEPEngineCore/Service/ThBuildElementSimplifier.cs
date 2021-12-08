@@ -12,10 +12,10 @@ namespace ThMEPEngineCore.Service
 {
     public abstract class ThBuildElementSimplifier
     {
-        protected double OFFSETDISTANCE = 30.0;
-        protected double DISTANCETOLERANCE = 1.0;
-        protected double TESSELLATEARCLENGTH = 10.0;
-        protected double AREATOLERANCE = 1.0;
+        public double AREATOLERANCE = 1.0;
+        public double OFFSETDISTANCE = 30.0;
+        public double DISTANCETOLERANCE = 1.0;
+        public double TESSELLATEARCLENGTH = 10.0;
 
         public virtual DBObjectCollection Simplify(DBObjectCollection curves)
         {
@@ -46,7 +46,6 @@ namespace ThMEPEngineCore.Service
         public virtual DBObjectCollection Normalize(DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
-            //double OFFSETDISTANCE = OffsetDistance();
             foreach (AcPolygon curve in curves)
             {
                 curve.Buffer(-OFFSETDISTANCE)

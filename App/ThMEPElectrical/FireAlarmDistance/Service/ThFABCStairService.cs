@@ -37,13 +37,18 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
             var pts = layoutParameter.framePts;
             var scale = layoutParameter.Scale;
             var resultPts = new List<ThLayoutPt>();
+            var obstacle = new List<Polyline>();
 
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                //obstacle
+                obstacle.AddRange(layoutParameter.Data.DoorOpenings.Select(x => x.Boundary as Polyline).ToList());
+                obstacle.AddRange(layoutParameter.Data.Windows.Select(x => x.Boundary as Polyline).ToList());
 
                 var stairBoundary = FindStairRoomBoundary(layoutParameter.Data.Room);
+               
                 var stairEngine = new ThStairEquimentLayout();
-                var stairFireDetector = stairEngine.StairBroadcast(acadDatabase.Database, stairBoundary, pts, scale);
+                var stairFireDetector = stairEngine.StairBroadcast(acadDatabase.Database, stairBoundary, obstacle, pts, scale);
                 var stairFirePts = stairFireDetector.Select(x => x.Key).ToList();
                 foreach (var r in stairFireDetector)
                 {
@@ -59,7 +64,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
 
         private static List<Polyline> FindStairRoomBoundary(List<ThGeometry> Room)
         {
-            string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
+            string roomConfigUrl = ThCADCommon.RoomConfigPath();
             var roomTableTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
             var stairName = ThFaCommon.stairName;
             var stairBoundary = new List<Polyline>();
