@@ -133,8 +133,30 @@ namespace ThMEPHVAC.Model
             {
                 return db.ModelSpace
                     .OfType<BlockReference>()
-                    .Where(b => !b.BlockTableRecord.IsNull)
-                    .Where(b => b.GetEffectiveName().Contains(blkName)).ToList();
+                    .Where(b => IsBlkByName(b, blkName)).ToList();
+            }
+        }
+
+        private static bool IsBlkByName(BlockReference blockReference, string blkName)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                if (blockReference.BlockTableRecord.IsNull)
+                {
+                    return false;
+                }
+
+                string name;
+                if (blockReference.DynamicBlockTableRecord.IsValid)
+                {
+                    name = db.Element<BlockTableRecord>(blockReference.DynamicBlockTableRecord).Name;
+                }
+                else
+                {
+                    name = blockReference.Name;
+                }
+
+                return name.Contains(blkName);
             }
         }
 
