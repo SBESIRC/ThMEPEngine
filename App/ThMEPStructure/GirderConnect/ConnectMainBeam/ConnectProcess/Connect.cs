@@ -160,7 +160,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //add to four constrained
             foreach(var tup in mainBeam)
             {
-                AddTupleToDicTuple(tup, dicTuples);
+                //AddTupleToDicTuple(tup, dicTuples);
                 StructureDealer.AddLineTodicTuples(tup.Item1, tup.Item2, ref dicTuples);
                 StructureDealer.AddLineTodicTuples(tup.Item2, tup.Item1, ref dicTuples);
             }

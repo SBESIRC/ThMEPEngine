@@ -48,9 +48,9 @@ namespace ThMEPStructure.GirderConnect.Command
                 var mainBuildings = dataFactory.MainBuildings.OfType<Entity>().ToList();
 
                 // print extract data
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(columns.OfType<Entity>().ToList(), acdb.Database, 5);
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(shearwalls.OfType<Entity>().ToList(), acdb.Database, 6);
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(mainBuildings, acdb.Database, 7);
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(columns.OfType<Entity>().ToList(), acdb.Database, 5);
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(shearwalls.OfType<Entity>().ToList(), acdb.Database, 6);
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(mainBuildings, acdb.Database, 7);
 
                 // 分组 
                 var columnGroupService = new ThGroupService(mainBuildings, columns);
@@ -68,6 +68,8 @@ namespace ThMEPStructure.GirderConnect.Command
                 //处理算法输入
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
                     outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
+
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 1);
 
                 //计算
                 var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);

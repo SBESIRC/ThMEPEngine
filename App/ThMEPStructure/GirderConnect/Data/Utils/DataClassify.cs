@@ -96,34 +96,95 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <param name="outsideShearwall"></param>
         public static void OuterClassify(List<Entity> outsideColumns, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
         {
-            //先合并柱子和墙
-            List<Entity> mixEntity = new List<Entity>();
-            mixEntity.AddRange(outsideColumns);
-            mixEntity.AddRange(outsideShearwall);
-            var newObjs = mixEntity.ToCollection().UnionPolygons().OfType<Polyline>().ToHashSet();
-            //分类
-            HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
-            foreach (var entity in newObjs)
+            ////先合并柱子和墙
+            //List<Entity> mixEntity = new List<Entity>();
+            //mixEntity.AddRange(outsideColumns);
+            //mixEntity.AddRange(outsideShearwall);
+            //var newObjs = mixEntity.ToCollection().UnionPolygons().OfType<Polyline>().ToHashSet();
+            ////分类
+            //HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
+            //foreach (var entity in newObjs)
+            //{
+            //    if (entity is Polyline polyline)
+            //    {
+            //        polyline.Closed = true;
+            //        if (IsColumns(polyline))
+            //        {
+            //            polylineColumns.Add(polyline);
+            //        }
+            //        else
+            //        {
+            //            DataProcess.AddOutline(polyline, ref outlineWalls);
+            //        }
+            //    }
+            //}
+
+            //HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
+            //foreach (var outsideColumn in outsideColumns)
+            //{
+            //    if (outsideColumn is Polyline pl)
+            //    {
+            //        if (!polylineColumns.Contains(pl))
+            //        {
+            //            polylineColumns.Add(pl);
+            //        }
+            //    }
+            //}
+            Dictionary<Polyline, bool> plColumnVisted = new Dictionary<Polyline, bool>();
+            foreach (var outsideColumn in outsideColumns)
+            {
+                if (outsideColumn is Polyline pl)
+                {
+                    if (!plColumnVisted.ContainsKey(pl))
+                    {
+                        plColumnVisted.Add(pl, false);
+                    }
+                }
+            }
+            HashSet<Polyline> polylineColumns = plColumnVisted.Keys.ToHashSet();
+            foreach (var entity in outsideShearwall)
             {
                 if (entity is Polyline polyline)
                 {
                     polyline.Closed = true;
-                    if (IsColumns(polyline))
+                    var mergedPolyline = polyline;
+
+                    DBObjectCollection mergeCollection = new DBObjectCollection();
+                    mergeCollection.Add(polyline);
+                    foreach (var polylineColumn in polylineColumns)
                     {
-                        polylineColumns.Add(polyline);
+                        if(plColumnVisted[polylineColumn] == false && mergedPolyline.Intersects(polylineColumn))
+                        {
+                            mergeCollection.Add(polylineColumn);
+                            plColumnVisted[polylineColumn] = true;
+                        }
                     }
-                    else
+                    //mergedPolyline = mergeCollection.Fix().UnionPolygons().OfType<Polyline>().FirstOrDefault();
+                    mergedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault();
+                    if (mergedPolyline != null)
                     {
-                        DataProcess.AddOutline(polyline, ref outlineWalls);
+                        DataProcess.AddOutline(mergedPolyline, ref outlineWalls);
                     }
                 }
             }
+
+            polylineColumns.Clear();
+            foreach (var plColumnVist in plColumnVisted)
+            {
+                if(plColumnVist.Value == false)
+                {
+                    polylineColumns.Add(plColumnVist.Key);
+                }
+            }
             polylineColumns = DataProcess.DeleteOverlap(polylineColumns);
+
+
             foreach (var polylineColumn in polylineColumns)
             {
                 clumnPts.Add(polylineColumn.GetCentroidPoint());
             }
         }
+
         public static void InnerColumnTypeClassify(Dictionary<Entity, HashSet<Entity>> columnGroupDict,
             Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns)
         {

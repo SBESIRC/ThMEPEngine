@@ -46,9 +46,7 @@ namespace ThMEPStructure.GirderConnect.Data
 
             var mainBuildings = ExtractMainBuildings(database);
 
-            
-            // for test
-            Transformer = new ThMEPOriginTransformer(Point3d.Origin);
+            Transformer = new ThMEPOriginTransformer(Point3d.Origin); // for test(正式发布的时候删除)`
 
             // 移动到原点
             Move(mainBuildings, Transformer);

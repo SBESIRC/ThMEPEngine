@@ -39,10 +39,10 @@ namespace ThMEPStructure.GirderConnect.Data
             if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
-                if(clone!=null)
+                if(clone!=null && clone is Polyline poly)
                 {
                     clone.TransformBy(matrix);
-                    results.Add(CreateBuildingElementData(clone as Polyline));
+                    results.Add(CreateBuildingElementData(poly));
                 }
             }
             return results;

@@ -17,6 +17,10 @@ namespace ThMEPStructure.GirderConnect.Data
             {
                 elements.AddRange(Handle(hatch, matrix));
             }
+            else if(dbObj is Polyline polyline)
+            {
+                elements.AddRange(Handle(polyline, matrix));
+            }
         }
 
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj)
@@ -48,6 +52,21 @@ namespace ThMEPStructure.GirderConnect.Data
             return results;
         }
 
+        private List<ThRawIfcSpatialElementData> Handle(Polyline polyline, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcSpatialElementData>();
+            if (IsSpatialElement(polyline) && CheckLayerValid(polyline))
+            {
+                var clone = polyline.GetTransformedCopy(matrix) as Polyline;
+                results.Add(new ThRawIfcSpatialElementData()
+                {
+                    Geometry = clone,
+                });
+            }
+            return results;
+        }
+
+
         private List<ThRawIfcSpatialElementData> Handle(Hatch hatch)
         {
             var results = new List<ThRawIfcSpatialElementData>();
@@ -75,7 +94,7 @@ namespace ThMEPStructure.GirderConnect.Data
 
         public override bool IsSpatialElement(Entity entity)
         {
-            return entity is Hatch;
+            return entity is Hatch || entity is Polyline;
         }
         private List<Entity> HatchToPolygons(Hatch hatch)
         {

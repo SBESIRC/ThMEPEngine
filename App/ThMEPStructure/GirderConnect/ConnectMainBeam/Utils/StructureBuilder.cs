@@ -294,6 +294,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 foreach (var wall in outlineWalls[curOutline])
                 {
+
+                    if (wall.Closed == false || wall.Area < 10000)
+                    {
+                        continue;
+                    }
                     tmpFstPts.Clear();
                     tmpThdPts.Clear();
                     //CenterLine.WallEdgePoint(wall.ToNTSPolygon(), 100, ref tmpFstPts, ref tmpThdPts);
@@ -301,7 +306,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
                     fstPtsS.AddRange(tmpFstPts);
-                    outline2ZeroPts[curOutline].AddRange(tmpFstPts);
+                    outline2ZeroPts[curOutline].AddRange(tmpFstPts); /////////////////////这里可能重复添加了，可能需要进行单一化那个函数
                 }
                 outPts = PointsDealer.OutPoints(curOutline);
                 PointsDealer.RemovePointsFarFromOutline(fstPts, curOutline);

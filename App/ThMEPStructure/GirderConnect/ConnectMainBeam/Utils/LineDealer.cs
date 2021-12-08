@@ -295,7 +295,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         ++cnt;
                     }
                 }
-                if (cnt >= 2)
+                if (cnt >= 2 && dicTuples.ContainsKey(tuple.Item1) && dicTuples[tuple.Item1].Contains(tuple.Item2))
                 {
                     dicTuples[tuple.Item1].Remove(tuple.Item2);
                     if (dicTuples[tuple.Item1].Count == 0)
