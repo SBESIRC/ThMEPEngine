@@ -36,6 +36,7 @@
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeAdjustPath.cs" />
+    <Compile Include="FanConnect\Command\ThUpdateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThWaterPipeConnectExtractCmd_Temp.cs" />
     <Compile Include="FanConnect\Engine\ThFanCURecognitionEngine.cs" />

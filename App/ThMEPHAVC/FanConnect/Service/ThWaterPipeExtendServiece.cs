@@ -270,20 +270,46 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             if(node.Item.WayCount == 2)
                             {
-                                foreach (var pt in node.Item.ExPoint)
+                                if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                 {
-                                    var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                    DrawCircle(circle, "H-PIPE-DIMS");
+                                    for(int i = 0; i < node.Item.ExPoint.Count - 1;i++)
+                                    {
+                                        var pt = node.Item.ExPoint[i];
+                                        var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                    }
+                                }
+                                if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                {
+                                    if(node.Item.ExPoint.Count > 0)
+                                    {
+                                        var pt = node.Item.ExPoint.Last();
+                                        var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                    }
                                 }
                             }
                             else if(node.Item.WayCount == 3 || node.Item.WayCount == 4)
                             {
                                 if(!node.Item.BrotherItem.IsContacted)
                                 {
-                                    foreach (var pt in node.Item.ExPoint)
+                                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                     {
-                                        var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                        for (int i = 0; i < node.Item.ExPoint.Count - 1; i++)
+                                        {
+                                            var pt = node.Item.ExPoint[i];
+                                            var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                        }
+                                    }
+                                    if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                    {
+                                        if (node.Item.ExPoint.Count > 0)
+                                        {
+                                            var pt = node.Item.ExPoint.Last();
+                                            var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
+                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                        }
                                     }
                                 }
                             }
@@ -300,23 +326,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                 var toDbServiece = new ThFanToDBServiece();
                                 if (node.Item.WayCount == 2)
                                 {
-                                    var angle = node.Parent.Item.PLine.Angle + Math.PI / 2.0;
-                                    var direction = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
-                                    var tmpPt = node.Item.ExPoint[0] + direction * 100;
-                                    var scale = new Scale3d(1.0, 1.0, 1.0);
-                                    if(node.Item.CroVector.IsEqualTo(new Vector3d(0.0,0.0,-1.0)))
-                                    {
-                                        scale = new Scale3d(-1.0, 1.0, 1.0);
-                                        tmpPt = node.Item.ExPoint[0] - direction * 100;
-                                    }
-                                    node.Item.ExPline[0].StartPoint = tmpPt;
-                                    toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
-                                    var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
-                                    DrawCircle(circle, "H-PIPE-DIMS");
-                                }
-                                else if(node.Item.WayCount == 3)
-                                {
-                                    if(!node.Item.BrotherItem.IsContacted)
+                                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                     {
                                         var angle = node.Parent.Item.PLine.Angle + Math.PI / 2.0;
                                         var direction = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
@@ -329,11 +339,39 @@ namespace ThMEPHVAC.FanConnect.Service
                                         }
                                         node.Item.ExPline[0].StartPoint = tmpPt;
                                         toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
+                                    }
+                                    if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                    {
                                         var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
                                         DrawCircle(circle, "H-PIPE-DIMS");
-                                        node.Item.IsContacted = true;
                                     }
                                 }
+                                else if(node.Item.WayCount == 3)
+                                {
+                                    if(!node.Item.BrotherItem.IsContacted)
+                                    {
+                                        if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                                        {
+                                            var angle = node.Parent.Item.PLine.Angle + Math.PI / 2.0;
+                                            var direction = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
+                                            var tmpPt = node.Item.ExPoint[0] + direction * 100;
+                                            var scale = new Scale3d(1.0, 1.0, 1.0);
+                                            if (node.Item.CroVector.IsEqualTo(new Vector3d(0.0, 0.0, -1.0)))
+                                            {
+                                                scale = new Scale3d(-1.0, 1.0, 1.0);
+                                                tmpPt = node.Item.ExPoint[0] - direction * 100;
+                                            }
+                                            node.Item.ExPline[0].StartPoint = tmpPt;
+                                            toDbServiece.InsertBlockReference("H-PIPE-DIMS", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
+                                        }
+                                        if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                        {
+                                            var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
+                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                        }
+                                    }
+                                }
+                                node.Item.IsContacted = true;
                             }
                         }
                     }
@@ -352,9 +390,15 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             case 0://两管制
                                 {
-                                    DrawLine(node.Item.ExPline[0], "H-PIPE-CHS");
-                                    DrawLine(node.Item.ExPline[1], "H-PIPE-CHR");
-                                    DrawLine(node.Item.ExPline[2], "H-PIPE-C");
+                                    if(ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                                    {
+                                        DrawLine(node.Item.ExPline[0], "H-PIPE-CHS");
+                                        DrawLine(node.Item.ExPline[1], "H-PIPE-CHR");
+                                    }
+                                    if(ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                    {
+                                        DrawLine(node.Item.ExPline[2], "H-PIPE-C");
+                                    }
                                 }
                                 break;
                             case 1://四管制
@@ -365,18 +409,31 @@ namespace ThMEPHVAC.FanConnect.Service
                                         case PIPELEVEL.LEVEL1:
                                         case PIPELEVEL.LEVEL2:
                                             {
-                                                DrawLine(node.Item.ExPline[0], "H-PIPE-CS");
-                                                DrawLine(node.Item.ExPline[1], "H-PIPE-CR");
-                                                DrawLine(node.Item.ExPline[2], "H-PIPE-HS");
-                                                DrawLine(node.Item.ExPline[3], "H-PIPE-HR");
-                                                DrawLine(node.Item.ExPline[4], "H-PIPE-C");
+                                                if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                                                {
+                                                    DrawLine(node.Item.ExPline[0], "H-PIPE-CS");
+                                                    DrawLine(node.Item.ExPline[1], "H-PIPE-CR");
+                                                    DrawLine(node.Item.ExPline[2], "H-PIPE-HS");
+                                                    DrawLine(node.Item.ExPline[3], "H-PIPE-HR");
+                                                }
+                                                if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                                {
+                                                    DrawLine(node.Item.ExPline[4], "H-PIPE-C");
+                                                }
                                             }
                                             break;
                                         case PIPELEVEL.LEVEL3:
                                             {
-                                                DrawLine(node.Item.ExPline[0], "H-PIPE-CHS");
-                                                DrawLine(node.Item.ExPline[1], "H-PIPE-CHR");
-                                                DrawLine(node.Item.ExPline[2], "H-PIPE-C");
+                                                if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                                                {
+                                                    DrawLine(node.Item.ExPline[0], "H-PIPE-CHS");
+                                                    DrawLine(node.Item.ExPline[1], "H-PIPE-CHR");
+                                                }
+                                                if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                                                {
+                                                    DrawLine(node.Item.ExPline[2], "H-PIPE-C");
+                                                }
+                                                    
                                             }
                                             break;
                                         default:
@@ -391,8 +448,14 @@ namespace ThMEPHVAC.FanConnect.Service
                     break;
                 case 1://冷媒系统
                     {
-                        DrawLine(node.Item.ExPline[0], "H-PIPE-R");
-                        DrawLine(node.Item.ExPline[1], "H-PIPE-C");
+                        if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                        {
+                            DrawLine(node.Item.ExPline[0], "H-PIPE-R");
+                        }
+                        if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                        {
+                            DrawLine(node.Item.ExPline[1], "H-PIPE-C");
+                        }
                     }
                     break;
                 default:

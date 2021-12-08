@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FanConnect.Model
         {
             RootNode = GetRootNode(startPt,lines, space);
         }
-        ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines, double space)
+        private ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines, double space)
         {
             var line = FindStartLine(startPt, lines);
             if(line == null)
@@ -73,8 +73,7 @@ namespace ThMEPHVAC.FanConnect.Model
             InsertNodeFromLines(rootNode, lines, space);
             return rootNode;
         }
-
-        Line FindStartLine(Point3d startPt,List<Line> lines)
+        private Line FindStartLine(Point3d startPt,List<Line> lines)
         {
             foreach(var l in lines)
             {
@@ -94,8 +93,7 @@ namespace ThMEPHVAC.FanConnect.Model
             }
             return null;
         }
-
-        List<Line> FindConnectLine(Point3d pt,ref List<Line> lines)
+        private List<Line> FindConnectLine(Point3d pt,ref List<Line> lines)
         {
             var remLines = new List<Line>();
             var retLines = new List<Line>();
@@ -133,7 +131,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             return retLines;
         }
-        List<Line> FindNearLine(Line line ,ref List<Line> lines)
+        private List<Line> FindNearLine(Line line ,ref List<Line> lines)
         {
             var remLines = new List<Line>();
             var retLines = new List<Line>();
@@ -175,7 +173,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             return retLines;
         }
-        void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines, double space)
+        private void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines, double space)
         {
             //取当前结点的末端点
             var endPt = node.Item.PLine.EndPoint;
