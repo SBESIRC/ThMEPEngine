@@ -103,46 +103,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
         }
 
-        //public static int direction(Point3d a, Point3d b, Point3d c)
-        //{
-        //    return (int)((a.X - c.X) * (a.Y - b.Y) - (a.X -b.X) * (a.Y - c.Y));
-        //}
-        //public static bool onSegment(Point3d pi, Point3d pj, Point3d pk)
-        //{
-        //    if (Math.Min(pi.X, pj.Y) <= pk.X && pk.X <= Math.Max(pi.X, pj.X) && Math.Min(pi.Y, pj.Y) <= pk.Y && pk.Y <= Math.Max(pi.Y, pj.Y))
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        //}
-
-        ///// <summary>
-        ///// 计算两条直线是否相交
-        ///// </summary>
-        ///// <param name="aSt">第一条线起点</param>
-        ///// <param name="aEd">第一条线终点</param>
-        ///// <param name="bSt">第二条线起点</param>
-        ///// <param name="bEd">第二条线终点</param>
-        ///// <returns></returns>
-        //public static bool IsIntersect(Point3d aSt, Point3d aEd, Point3d bSt, Point3d bEd)
-        //{
-        //    int d1 = direction(bSt, bEd, aSt);
-        //    int d2 = direction(bSt, bEd, aEd);
-        //    int d3 = direction(aSt, aEd, bSt);
-        //    int d4 = direction(aSt, aEd, bEd);
-        //    if (((d1 > 0 && d2 < 0) || (d1 < 0 && d2 > 0)) && ((d3 > 0 && d4 < 0) || (d3 < 0 && d4 > 0)))
-        //    {
-        //        return true;
-        //    }
-        //    else
-        //    {
-        //        return false;
-        //    }
-        //}
-
         /// <summary>
         /// Judge whether two lines are cross
         /// </summary>

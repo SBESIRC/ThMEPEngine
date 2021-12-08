@@ -55,8 +55,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     else
                     {
                         //ShowInfo.ShowPointAsO(curPoint, 210); // debug
-                        //ShowInfo.DrawLine(prePoint, curPoint, 130);
-                        //ShowInfo.DrawLine(curPoint, nxtPoint, 130);
                         PointClass.Add(curPoint, 2);
                     }
                 }

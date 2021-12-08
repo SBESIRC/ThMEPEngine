@@ -121,13 +121,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //3.0 Split & Merge
             LineDealer.DicTuplesStandardize(dicTuples, allPts);
             Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines, acdb);
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
             //3.1、splic polyline
-            StructureBuilder.SplitBlock(findPolylineFromLines, acdb, closeBorderLines);
+            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
 
             //ShowHash(findPolylineFromLines.Keys.ToList());
             //3.2、merge fragments and split if possible
-            StructureBuilder.MergeFragments(findPolylineFromLines, acdb, closeBorderLines);
+            StructureBuilder.MergeFragments(findPolylineFromLines, closeBorderLines);
             var mainBeam = findPolylineFromLines.Keys.ToHashSet();
             foreach (var borderLine in closeBorderLines)
             {

@@ -56,14 +56,15 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             {
                 if (curve is Polyline polyline)
                 {
-                    polyline.Closed = true;
-                    if (IsColumns(polyline))
+                    var newPolyline = polyline.DPSimplify(1);
+                    newPolyline.Closed = true;
+                    if (IsColumns(newPolyline))
                     {
-                        columns.Add(polyline.GetCentroidPoint());
+                        columns.Add(newPolyline.GetCentroidPoint());
                     }
                     else
                     {
-                        walls.Add(polyline);
+                        walls.Add(newPolyline);
                     }
                 }
             }
@@ -96,48 +97,16 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <param name="outsideShearwall"></param>
         public static void OuterClassify(List<Entity> outsideColumns, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
         {
-            ////先合并柱子和墙
-            //List<Entity> mixEntity = new List<Entity>();
-            //mixEntity.AddRange(outsideColumns);
-            //mixEntity.AddRange(outsideShearwall);
-            //var newObjs = mixEntity.ToCollection().UnionPolygons().OfType<Polyline>().ToHashSet();
-            ////分类
-            //HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
-            //foreach (var entity in newObjs)
-            //{
-            //    if (entity is Polyline polyline)
-            //    {
-            //        polyline.Closed = true;
-            //        if (IsColumns(polyline))
-            //        {
-            //            polylineColumns.Add(polyline);
-            //        }
-            //        else
-            //        {
-            //            DataProcess.AddOutline(polyline, ref outlineWalls);
-            //        }
-            //    }
-            //}
-
-            //HashSet<Polyline> polylineColumns = new HashSet<Polyline>();
-            //foreach (var outsideColumn in outsideColumns)
-            //{
-            //    if (outsideColumn is Polyline pl)
-            //    {
-            //        if (!polylineColumns.Contains(pl))
-            //        {
-            //            polylineColumns.Add(pl);
-            //        }
-            //    }
-            //}
             Dictionary<Polyline, bool> plColumnVisted = new Dictionary<Polyline, bool>();
             foreach (var outsideColumn in outsideColumns)
             {
                 if (outsideColumn is Polyline pl)
                 {
-                    if (!plColumnVisted.ContainsKey(pl))
+                    var newPl = pl.DPSimplify(1);
+                    if (!plColumnVisted.ContainsKey(newPl))
                     {
-                        plColumnVisted.Add(pl, false);
+
+                        plColumnVisted.Add(newPl, false);
                     }
                 }
             }
@@ -147,23 +116,23 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 if (entity is Polyline polyline)
                 {
                     polyline.Closed = true;
-                    var mergedPolyline = polyline;
+                    //var mergedPolyline = polyline;
 
                     DBObjectCollection mergeCollection = new DBObjectCollection();
                     mergeCollection.Add(polyline);
                     foreach (var polylineColumn in polylineColumns)
                     {
-                        if(plColumnVisted[polylineColumn] == false && mergedPolyline.Intersects(polylineColumn))
+                        if(plColumnVisted[polylineColumn] == false && polyline.Intersects(polylineColumn))
                         {
                             mergeCollection.Add(polylineColumn);
                             plColumnVisted[polylineColumn] = true;
                         }
                     }
                     //mergedPolyline = mergeCollection.Fix().UnionPolygons().OfType<Polyline>().FirstOrDefault();
-                    mergedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault();
-                    if (mergedPolyline != null)
+                    var simplifiedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault().DPSimplify(1);
+                    if (simplifiedPolyline != null)
                     {
-                        DataProcess.AddOutline(mergedPolyline, ref outlineWalls);
+                        DataProcess.AddOutline(simplifiedPolyline, ref outlineWalls);
                     }
                 }
             }
@@ -193,15 +162,16 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 var columnGroupKey = columnGroup.Key;
                 if (columnGroupKey is Polyline outline)
                 {
-                    if (!outlineWalls.ContainsKey(outline))
+                    var newOutline = outline.DPSimplify(1);
+                    if (!outlineWalls.ContainsKey(newOutline))
                     {
-                        outlineWalls.Add(outline, new HashSet<Polyline>());
+                        outlineWalls.Add(newOutline, new HashSet<Polyline>());
                     }
-                    if (!outlinePlColumns.ContainsKey(outline))
+                    if (!outlinePlColumns.ContainsKey(newOutline))
                     {
-                        outlinePlColumns.Add(outline, new HashSet<Polyline>());
+                        outlinePlColumns.Add(newOutline, new HashSet<Polyline>());
                     }
-                    Classify(columnGroup.Value, outlinePlColumns[outline], outlineWalls[outline]);
+                    Classify(columnGroup.Value, outlinePlColumns[newOutline], outlineWalls[newOutline]);
                 }
             }
         }

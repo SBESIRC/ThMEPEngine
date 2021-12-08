@@ -69,8 +69,6 @@ namespace ThMEPStructure.GirderConnect.Command
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
                     outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
 
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 1);
-
                 //计算
                 var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
 

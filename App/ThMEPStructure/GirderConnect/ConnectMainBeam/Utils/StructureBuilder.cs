@@ -213,7 +213,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
-            //foreach (var line in linesType.Keys)///////////////////////////////////////////
+            //foreach (var line in linesType.Keys)
             //{
             //    //if (linesType[line] == 0 )//&& linesType.ContainsKey(new Tuple<Point3d, Point3d>(line.Item2, line.Item1)) && linesType[new Tuple<Point3d, Point3d>(line.Item2, line.Item1)] == 0)
             //    {
@@ -292,9 +292,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     continue;
                 }
+                //var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
                 foreach (var wall in outlineWalls[curOutline])
                 {
-
                     if (wall.Closed == false || wall.Area < 10000)
                     {
                         continue;
@@ -368,9 +368,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="findPolylineFromLines"></param>
-        /// <param name="acdb"></param>
         public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Tuple<Point3d, Point3d>,
-            List<Tuple<Point3d, Point3d>>> findPolylineFromLines, AcadDatabase acdb = null)
+            List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
             foreach (var dicTuple in dicTuples)
@@ -465,8 +464,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="findPolylineFromLines"></param>
         /// <param name="closeBorderLines"></param>
         /// <param name="acdb"></param>
-        public static void SplitBlock(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, 
-            AcadDatabase acdb = null, Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void SplitBlock(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Dictionary<Point3d, Point3d> closeBorderLines = null)
         {
             //Remove closeBorder Lines
             if (closeBorderLines != null)
@@ -517,7 +515,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             // change structure
-            AddPolylinesToDic(splitedPolylines, findPolylineFromLines, acdb);
+            AddPolylinesToDic(splitedPolylines, findPolylineFromLines);
         }
 
         /// <summary>
@@ -525,8 +523,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 缺乏当一个三角形有多个可用时选择哪个的策略
         /// </summary>
         /// <param name="findPolylineFromLines"></param>
-        public static void MergeFragments(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            AcadDatabase acdb = null, Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void MergeFragments(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Dictionary<Point3d, Point3d> closeBorderLines = null)
         {
             //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
             Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
@@ -576,14 +573,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             findPolylineFromLines.Remove(converseLine);
                         }
                         // change structure
-                        AddPolylinesToDic(mergedPolylines, findPolylineFromLines, acdb);
+                        AddPolylinesToDic(mergedPolylines, findPolylineFromLines);
                     }
                 }
             }
         }
 
         public static void AddPolylinesToDic(List<List<Tuple<Point3d, Point3d>>> splitedPolylines, 
-            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, AcadDatabase acdb = null)
+            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             foreach (var splitedPolyline in splitedPolylines)
             {
@@ -602,12 +599,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             findPolylineFromLines.Remove(reverseL);
                         }
                     }
-                    //if(acdb != null)
-                    //{
-                    //    Polyline polyline = LineDealer.Tuples2Polyline(splitedPolyline);
-                    //    polyline.ColorIndex = 210;
-                    //    acdb.ModelSpace.Add(polyline);
-                    //}
                 }
             }
         }
