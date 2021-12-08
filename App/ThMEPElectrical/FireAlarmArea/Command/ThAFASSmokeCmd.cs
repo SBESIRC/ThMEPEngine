@@ -44,8 +44,8 @@ namespace ThMEPElectrical.FireAlarmArea.Command
         }
         private void InitialCmdInfo()
         {
-            CommandName = "THFireAlarmSmokeLayout";
             ActionName = "布置";
+            CommandName = "THFASMOKE";
         }
         private void InitialSetting()
         {

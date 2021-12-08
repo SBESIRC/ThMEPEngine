@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 using AcHelper.Commands;
 using ThMEPEngineCore.Command;
-using ThMEPEngineCore.ConnectWiring;
-
 using ThMEPElectrical.AFAS.ViewModel;
-using ThMEPElectrical.AFAS;
-
 
 namespace ThMEPElectrical.AFAS.Command
 {
@@ -18,8 +9,13 @@ namespace ThMEPElectrical.AFAS.Command
     {
         public ThAFASCommand()
         {
-            CommandName = "THFireAlarmLayout";
+            CommandName = "THHZBJ";
             ActionName = "布置";
+        }
+
+        public void Dispose()
+        {
+            //
         }
 
         public override void SubExecute()
@@ -42,20 +38,14 @@ namespace ThMEPElectrical.AFAS.Command
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THFAGas");
                     break;
                 case 5:
-                   CommandHandlerBase.ExecuteFromCommandLine(false, "THFAManualAlarm");
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFAManualAlarm");
                     break;
                 case 6:
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THFAMonitor");
                     break;
                 default:
                     break;
-
-
-
             }
         }
-
-        public void Dispose()
-        { }
     }
 }

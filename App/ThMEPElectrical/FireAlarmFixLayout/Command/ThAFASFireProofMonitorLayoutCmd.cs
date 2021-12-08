@@ -33,8 +33,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void InitialCmdInfo()
         {
-            CommandName = "ThFireAlarmFireProofMonitorLayout";
             ActionName = "布置";
+            CommandName = "THFAMONITOR";
         }
         private void InitialSetting()
         {

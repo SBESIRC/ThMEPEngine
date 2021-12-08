@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -10,7 +9,6 @@ using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.IO;
-using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 using ThMEPElectrical.FireAlarmArea;
@@ -100,6 +98,7 @@ namespace ThMEPElectrical.AFAS
                 cmd.Execute();
             }
         }
+
         [CommandMethod("TIANHUACAD", "THFAGasNoUI", CommandFlags.Modal)]
         public void THFAGasNoUI()
         {
@@ -128,7 +127,7 @@ namespace ThMEPElectrical.AFAS
                 cmd.Execute();
             }
 #else
-
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
 
@@ -141,7 +140,7 @@ namespace ThMEPElectrical.AFAS
                 cmd.Execute();
             }
 #else
-
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
 
@@ -154,7 +153,7 @@ namespace ThMEPElectrical.AFAS
                 cmd.Execute();
             }
 #else
-
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
 
@@ -167,7 +166,7 @@ namespace ThMEPElectrical.AFAS
                 cmd.Execute();
             }
 #else
-
+            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
         }
     }
@@ -302,54 +301,5 @@ namespace ThMEPElectrical.AFAS
                 ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
         }
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //[CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        //public void ThCleanDebugLayer()
-        //{
-        //    // 调试按钮关闭且图层不是保护半径有效图层
-        //    var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-        //    if (debugSwitch)
-        //    {
-        //        ThFaCleanService.ClearDrawing();
-        //    }
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //[CommandMethod("TIANHUACAD", "THFaBuffer", CommandFlags.Modal)]
-        //public void ThFaBuffer()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        var result = Active.Editor.GetEntity("\n请选择对象");
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-        //        var obj = acadDatabase.Element<Ellipse>(result.ObjectId);
-        //        var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
-        //        var a = bufferService.Buffer(obj, 1000);
-
-        //        DrawUtils.ShowGeometry(a, "l0buffer");
-
-        //    }
-
-
-
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //[CommandMethod("TIANHUACAD", "THGetOffsetCurveTest", CommandFlags.Modal)]
-        //public void ThGetOffsetCurveTest()
-        //{
-        //    var frame = ThAFASUtils.SelectFrame();
-        //    var dir = 1;
-        //    if (frame.IsCCW() == false)
-        //    {
-        //        dir = -1;
-        //    }
-        //    var newFrame = frame.GetOffsetCurves(dir * 15).Cast<Polyline>().OrderByDescending(y => y.Area).FirstOrDefault();
-        //    DrawUtils.ShowGeometry(newFrame, "l0buffer", 140);
-        //}
     }
 }

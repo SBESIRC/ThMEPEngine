@@ -47,8 +47,8 @@ namespace ThMEPElectrical.FireAlarmDistance
 
         private void InitialCmdInfo()
         {
-            CommandName = "ThFaManualAlarm";
-            ActionName = "生成";
+            ActionName = "布置";
+            CommandName = "THFAMANUALALARM";
         }
 
         private void InitialSetting()
