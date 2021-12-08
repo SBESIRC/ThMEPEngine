@@ -24,7 +24,11 @@ namespace ThMEPHVAC.FanConnect.Command
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public void Dispose()
         {
-            throw new NotImplementedException();
+        }
+        public ThWaterPipeConnectExtractCmd()
+        {
+            CommandName = "THSPM";
+            ActionName = "生成水管路由";
         }
         public void ImportBlockFile()
         {

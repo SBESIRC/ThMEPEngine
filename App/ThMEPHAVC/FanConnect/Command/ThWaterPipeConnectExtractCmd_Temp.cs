@@ -14,9 +14,12 @@ namespace ThMEPHVAC.FanConnect.Command
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
-
+        public ThWaterPipeConnectExtractCmd_Temp()
+        {
+            CommandName = "THLGTEMP";
+            ActionName = "生成水管路由";
+        }
         public override void SubExecute()
         {
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
