@@ -256,7 +256,13 @@ namespace ThControlLibraryWPF.CustomControl
         void win_SourceInitialized(object sender, EventArgs e)
         {
             System.IntPtr handle = (new WinInterop.WindowInteropHelper(this)).Handle;
-            WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
+            if (null == handle || handle == IntPtr.Zero)
+                return;
+            try
+            {
+                WinInterop.HwndSource.FromHwnd(handle).AddHook(new WinInterop.HwndSourceHook(WindowProc));
+            }
+            catch { }
         }
 
         #region 实现INotifyPropertyChanged接口
