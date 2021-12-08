@@ -299,11 +299,16 @@ namespace ThMEPLighting.Garage.Engine
         {
             var value = lightNumbers * 1.0 / lightNumberOfLoop;
             double number = Math.Ceiling(value);
-            if (number < 2)
+            int intNumber = (int)number;
+            if (intNumber < 4)
             {
-                number = 2;
+                intNumber = 4;
             }
-            return (int)number;
+            if (intNumber % 2 == 1)
+            {
+                intNumber += 1;
+            }
+            return intNumber / 2; // 计算单回路数量
         }
 
         private List<ThLightEdge> PassFirstNumberToSecond(
