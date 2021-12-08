@@ -6,25 +6,40 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSHatchExtension
     {
+        private const double OFFSET_DISTANCE = 20.0;
+        private const double DISTANCE_TOLERANCE = 1.0;
+
         private static Geometry ToNTSGeometry(this Hatch hatch)
         {
-            return Simplify(hatch.Boundaries().ToCollection()).BuildAreaGeometry();
+            var loops = hatch.Boundaries().ToCollection();
+            return Simplify(Normalize(loops)).BuildAreaGeometry();
         }
 
-        private static DBObjectCollection Simplify(DBObjectCollection boundaries)
+        private static DBObjectCollection Simplify(DBObjectCollection loops)
         {
             var objs = new DBObjectCollection();
-            boundaries.OfType<Polyline>().ForEach(o =>
+            loops.OfType<AcPolygon>().ForEach(l =>
             {
-                // 假定边界都是封闭的
-                o.Closed = true;
-                // 剔除重复点
-                objs.Add(o.DPSimplify(1.0));
+                l = l.DPSimplify(DISTANCE_TOLERANCE);
+                objs.Add(l);
+            });
+            return objs;
+        }
+
+        public static DBObjectCollection Normalize(DBObjectCollection loops)
+        {
+            var objs = new DBObjectCollection();
+            loops.OfType<AcPolygon>().ForEach(l =>
+            {
+                l = l.Buffer(-OFFSET_DISTANCE).OfType<AcPolygon>().OrderByDescending(o => o.Area).First();
+                l = l.Buffer(OFFSET_DISTANCE).OfType<AcPolygon>().OrderByDescending(o => o.Area).First();
+                objs.Add(l);
             });
             return objs;
         }
