@@ -924,6 +924,7 @@ namespace TianHua.Hvac.UI
                 portParam.centerLines = detector.connectLines;
                 var anay = new ThDuctPortsAnalysis();
                 var airVolume = anay.CalcAirVolume(portParam);
+                airVolume = (Math.Floor(airVolume / 10)) * 10;
                 textAirVolume.Text = airVolume.ToString();
             }
         }

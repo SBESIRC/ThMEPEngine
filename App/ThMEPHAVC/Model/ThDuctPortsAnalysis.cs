@@ -488,6 +488,7 @@ namespace ThMEPHVAC.Model
             var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
             int portNum = CountAirVolume(portIndex);
             double avgAirVolume = portParam.param.airVolume / portNum;
+            avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
             foreach (var port in dicPlToAirVolume.Values)
                 port.portAirVolume = avgAirVolume;
             foreach (DBObjectCollection lines in endLines)
@@ -611,7 +612,8 @@ namespace ThMEPHVAC.Model
             foreach (var port in portsBlk)
             {
                 // 使用侧回风口的OBB
-                if (port.GetEffectiveName() == "AI-风口")
+                var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(port);
+                if (blkName == ThHvacCommon.AI_PORT)
                 {
                     var portPl = new Polyline();
                     portPl.CreateRectangle(port.Bounds.Value.MinPoint.ToPoint2D(), port.Bounds.Value.MaxPoint.ToPoint2D());
@@ -636,7 +638,8 @@ namespace ThMEPHVAC.Model
         {
             foreach (var port in portsBlk)
             {
-                if (port.GetEffectiveName() == ThHvacCommon.AI_PORT)
+                var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(port);
+                if (blkName == ThHvacCommon.AI_PORT)
                 {
                     var centerP = ThMEPHAVCBounds.GetDownPortCenterPoint(port, portParam);
                     var portBound = new Polyline();
@@ -651,7 +654,7 @@ namespace ThMEPHVAC.Model
         }
         private void AddPortCompToDic(BlockReference blk, Dictionary<int, PortInfo> dicPlToAirVolume, DBObjectCollection portBounds)
         {
-            var blkName = blk.GetEffectiveName();
+            var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(blk);
             var bound = new Polyline();
             var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
             if (blkName == ThHvacCommon.AI_BROKEN_LINE || blkName == ThHvacCommon.AI_VERTICAL_PIPE)

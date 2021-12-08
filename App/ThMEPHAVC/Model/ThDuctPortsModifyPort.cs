@@ -289,7 +289,8 @@ namespace ThMEPHVAC.Model
                     pl.CreateRectangle(blk.Bounds.Value.MinPoint.ToPoint2D(), blk.Bounds.Value.MaxPoint.ToPoint2D());
                     pl.TransformBy(disMat);
                     var res = mpGroupIndex.SelectCrossingPolygon(pl);
-                    if (res.Count > 0 && blk.GetEffectiveName() == ThHvacCommon.AI_PORT)
+                    var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(blk);
+                    if (res.Count > 0 && blkName == ThHvacCommon.AI_PORT)
                     {
                         var id = db.Database.HandleToObjectId(blk.Handle.ToString());
                         var param = ThDuctPortsInterpreter.GetPortParam(id);

@@ -136,7 +136,28 @@ namespace ThMEPHVAC.Model
                     .Where(b => IsBlkByName(b, blkName)).ToList();
             }
         }
+        public static string GetEffectiveBlkByName(BlockReference blockReference)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                if (blockReference.BlockTableRecord.IsNull)
+                {
+                    return string.Empty;
+                }
 
+                string name;
+                if (blockReference.DynamicBlockTableRecord.IsValid)
+                {
+                    name = db.Element<BlockTableRecord>(blockReference.DynamicBlockTableRecord).Name;
+                }
+                else
+                {
+                    name = blockReference.Name;
+                }
+
+                return name;
+            }
+        }
         private static bool IsBlkByName(BlockReference blockReference, string blkName)
         {
             using (var db = AcadDatabase.Active())
