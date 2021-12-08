@@ -70,7 +70,7 @@ namespace ThMEPHVAC.Model
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        var type = (string)values.ElementAt(1).Value;
+                        var type = (string)values.ElementAt(0).Value;
                         if (type == "Tee" || type == "Cross" || type == "Reducing" || type == "Elbow")
                         {
                             var entitys = GetGroupEntitys(g);
@@ -109,7 +109,7 @@ namespace ThMEPHVAC.Model
                     if (list != null)
                     {
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        var type = (string)values.ElementAt(1).Value;
+                        var type = (string)values.ElementAt(0).Value;
                         if (type == range)
                             ids.Add(id);
                     }

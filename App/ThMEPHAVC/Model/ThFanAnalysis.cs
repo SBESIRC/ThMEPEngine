@@ -49,7 +49,8 @@ namespace ThMEPHVAC.CAD
         public HashSet<Line> notRoomLines;
         public Dictionary<int, SegInfo> centerLines;    // 不直接用Line是因为src和dst的shrink是不同时间获得的
         public List<LineGeoInfo> reducings;
-        public List<TextAlignLine> textAlignment;
+        public List<TextAlignLine> textRoomAlignment;
+        public List<TextAlignLine> textNotRoomAlignment;
         public List<EntityModifyParam> specialShapesInfo;
         public DBObjectCollection bypass;
         public DBObjectCollection outCenterLine;
@@ -77,11 +78,11 @@ namespace ThMEPHVAC.CAD
             auxLines = new List<Line>() { new Line(roomP, iRoomP) , new Line(notRoomP, iNotRoomP) };
             spatialIndex = new ThCADCoreNTSSpatialIndex(param.centerLines);
             PreSearchConnLines(iRoomP, roomLine, iNotRoomP, notRoomLine, param.roomEnable, param.notRoomEnable);
-            SeperateFanInsideAndOutSide(wallLines, iRoomP);
-            ReConstructCenterLine(ref roomLine, ref notRoomLine);
-            SearchRealConnLines(iRoomP, roomLine, iNotRoomP, notRoomLine, param.roomEnable, param.notRoomEnable);
-            if (bypass.Count == 0)
+            SeperateFanInsideAndOutSide(wallLines, iRoomP, roomP);
+            if (bypass.Count == 0 && wallLines.Count == 0)
+            {
                 roomLines.Clear();// 无旁通和墙线时风机房内服务侧的管段用风平面工具生成(否则风机房生成管段重叠)
+            }
             SearchConnectors(iRoomP, roomLine, iNotRoomP, notRoomLine, param.roomEnable, param.notRoomEnable);
             CollectLines();
             ShrinkDuct();
@@ -94,8 +95,29 @@ namespace ThMEPHVAC.CAD
             MoveToOrg();
             if (!haveMultiFan)
                 AddNotRoomEndComp();
+            AddTextAlignLine(haveMultiFan);
+            param.centerLines.Clear();
+            param.centerLines = outCenterLine;
+            portParam.srtPoint = fanBreakP;
         }
-
+        private void AddTextAlignLine(bool haveMultiFan)
+        {
+            foreach (Line l in roomLines)
+            {
+                if (IsBypass(l))
+                    continue;// 旁通单独标
+                textRoomAlignment.Add(new TextAlignLine() { l = l, ductSize = fanParam.roomDuctSize, isRoom = true });
+            }
+            if (outCenterLine.Count == 0 || !haveMultiFan)
+            {
+                foreach (Line l in notRoomLines)
+                {
+                    if (IsBypass(l))
+                        continue;// 旁通单独标
+                    textNotRoomAlignment.Add(new TextAlignLine() { l = l, ductSize = fanParam.notRoomDuctSize, isRoom = false });
+                }
+            }
+        }
         private void Init(double ioBypassSepDis, ThDbModelFan fan, FanParam param, DBObjectCollection bypass, PortParam portParam)
         {
             this.fan = fan;
@@ -110,7 +132,8 @@ namespace ThMEPHVAC.CAD
             var comp = new LineCompare(tor);
             roomLines = new HashSet<Line>(comp);
             notRoomLines = new HashSet<Line>(comp);
-            textAlignment = new List<TextAlignLine>();
+            textRoomAlignment = new List<TextAlignLine>();
+            textNotRoomAlignment = new List<TextAlignLine>();
             reducings = new List<LineGeoInfo>();
             centerLines = new Dictionary<int, SegInfo>();
             outCenterLine = new DBObjectCollection();
@@ -150,30 +173,6 @@ namespace ThMEPHVAC.CAD
                 throw new NotImplementedException("[Check Error]: Select generation side!");
         }
 
-        private void SearchRealConnLines(Point3d iRoomP,
-                                         Line roomLine,
-                                         Point3d iNotRoomP,
-                                         Line notRoomLine,
-                                         bool roomEnable,
-                                         bool notRoomEnable)
-        {
-            if (roomEnable && notRoomEnable)
-            {
-                GetDuctInfo(iRoomP, roomLine, roomLines);
-                GetDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
-            }
-            else if (roomEnable && !notRoomEnable)
-            {
-                GetDuctInfo(iRoomP, roomLine, roomLines);
-            }
-            else if (!roomEnable && notRoomEnable)
-            {
-                GetDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
-            }
-            else
-                throw new NotImplementedException("[Check Error]: Select generation side!");
-        }
-
         private void PreSearchConnLines(Point3d iRoomP, 
                                         Line roomLine, 
                                         Point3d iNotRoomP, 
@@ -198,12 +197,20 @@ namespace ThMEPHVAC.CAD
                 throw new NotImplementedException("[Check Error]: Select generation side!");
         }
 
-        private void SeperateFanInsideAndOutSide(DBObjectCollection wallLines, Point3d iRoomP)
+        private void SeperateFanInsideAndOutSide(DBObjectCollection wallLines, Point3d iRoomP, Point3d roomP)
         {
             if (wallLines.Count == 0)
-                SetRoomInfo(iRoomP);
+                SetRoomInfo(iRoomP, roomP);
             else
-                CutCenterLine(wallLines);
+            {
+                var index = new ThCADCoreNTSSpatialIndex(wallLines);
+                BreakByWall(wallLines, index);
+                if (fanBreakP.IsEqualTo(Point3d.Origin))
+                {
+                    // 有墙线但未相交
+                    SetRoomInfo(iRoomP, roomP);
+                }
+            }
         }
         private void MergeBypassCenterLine(ref DBObjectCollection centerLine, DBObjectCollection bypass)
         {
@@ -285,56 +292,15 @@ namespace ThMEPHVAC.CAD
             var l = new Line(sp, srtP);
             centerLines.Add(l.GetHashCode(), new SegInfo() {l = l, ductSize = ductSize });
         }
-        private void ReConstructCenterLine(ref Line inStartLine, ref Line outStartLine)
-        {
-            var lines = new DBObjectCollection();
-            foreach (var l in roomLines)
-                lines.Add(l);
-            foreach (var l in notRoomLines)
-                lines.Add(l);
-            lines = ThMEPHVACLineProc.PreProc(lines);
-            AdjustStartLine(inStartLine, outStartLine, lines);
-            spatialIndex = new ThCADCoreNTSSpatialIndex(lines);
-            // 将起始线更新为线集中的线，否则在空间索引中找不到
-            UpdateStartLine(ref inStartLine, lines);
-            UpdateStartLine(ref outStartLine, lines);
-            roomLines.Clear();
-            notRoomLines.Clear();
-        }
-        private void AdjustStartLine(Line inStartLine, Line outStartLine, DBObjectCollection lines)
-        {
-            var i_srt_l = new Line();
-            var o_srt_l = new Line();
-            var i_sp = inStartLine.StartPoint;
-            var o_sp = outStartLine.StartPoint;
-            foreach (Line l in lines)
-            {
-                if (i_sp.IsEqualTo(l.StartPoint, tor) || i_sp.IsEqualTo(l.EndPoint, tor))
-                {
-                    if (!(i_sp.IsEqualTo(l.StartPoint, tor) && i_sp.IsEqualTo(l.EndPoint, tor)))
-                        i_srt_l = l;
-                }
-                if (o_sp.IsEqualTo(l.StartPoint, tor) || o_sp.IsEqualTo(l.EndPoint, tor))
-                {
-                    if (!(o_sp.IsEqualTo(l.StartPoint, tor) && o_sp.IsEqualTo(l.EndPoint, tor)))
-                        o_srt_l = l;
-                }
-            }
-            if (i_srt_l.Length > 0)
-            {
-                lines.Remove(i_srt_l);
-                var p = i_sp.IsEqualTo(i_srt_l.StartPoint, tor) ? i_srt_l.EndPoint : i_srt_l.StartPoint;
-                lines.Add(new Line(i_sp, p));
-            }
-            if (o_srt_l.Length > 0)
-            {
-                lines.Remove(o_srt_l);
-                var p = o_sp.IsEqualTo(o_srt_l.StartPoint, tor) ? o_srt_l.EndPoint : o_srt_l.StartPoint;
-                lines.Add(new Line(o_sp, p));
-            }
-        }
         private void MoveToOrg()
         {
+            var lines = new DBObjectCollection();
+            foreach (Line l in outCenterLine)
+                if (l.Length > 10)
+                    lines.Add(l);
+            outCenterLine.Clear();
+            outCenterLine = lines;
+
             var disMat = Matrix3d.Displacement(moveSrtP.GetAsVector());
             foreach (Line l in outCenterLine)
                 l.TransformBy(disMat);
@@ -393,19 +359,25 @@ namespace ThMEPHVAC.CAD
         }
         private void CollectLines()
         {
+            // 越像末尾越接近风机入口
+            double inc = 0;
+            centerLines.Clear();
             foreach (var l in roomLines)
             {
                 if (IsBypass(l))
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc});
                 else
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.roomDuctSize, airVolume = fanParam.airVolume });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.roomDuctSize, airVolume = fanParam.airVolume + inc });
+                inc++;
             }
+            inc = 0;
             foreach (var l in notRoomLines)
             {
                 if (IsBypass(l))
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.bypassSize, airVolume = inc });
                 else
-                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.notRoomDuctSize, airVolume = fanParam.airVolume });
+                    centerLines.Add(l.GetHashCode(), new SegInfo() { l = l, ductSize = fanParam.notRoomDuctSize, airVolume = fanParam.airVolume + inc });
+                inc++;
             }
         }
         private void ShrinkDuct()
@@ -489,14 +461,16 @@ namespace ThMEPHVAC.CAD
             }
             specialShapesInfo.Add(new EntityModifyParam() { centerP = centerP, portWidths = portWidths});
         }
-        private void SetRoomInfo(Point3d iRoomP)
+        private void SetRoomInfo(Point3d iRoomP, Point3d roomP)
         {
             if (bypass.Count == 0)
             {
                 fanBreakP = iRoomP;
                 outCenterLine = new DBObjectCollection();
-                foreach (var l in roomLines)
-                    outCenterLine.Add(l);
+                foreach (var line in roomLines)
+                    outCenterLine.Add(line);
+                roomLines.Clear();
+                //roomLines.Add(new Line(roomP, iRoomP));
             }
             else
             {
@@ -535,45 +509,37 @@ namespace ThMEPHVAC.CAD
                 roomLines.Remove(l);
             }
         }
-        public void CutCenterLine(DBObjectCollection wallLines)
-        {
-            var index = new ThCADCoreNTSSpatialIndex(wallLines);
-            DoAdjust(wallLines, index);
-            // bypass不需要裁剪，直接加到中心线中
-            foreach (Line l in bypass)
-                roomLines.Add(l);
-        }
-        private void DoAdjust(DBObjectCollection wallLines, ThCADCoreNTSSpatialIndex index)
+        private void BreakByWall(DBObjectCollection wallLines, ThCADCoreNTSSpatialIndex wallIndex)
         {
             fanBreakP = Point3d.Origin;
             outCenterLine = new DBObjectCollection();
-            var cross_line = new Line();
+            var crossLine = new Line();
             foreach (var l in roomLines)
             {
-                if (!ThMEPHVACService.IsInPolyline(l.StartPoint, wallLines) && 
-                    !ThMEPHVACService.IsInPolyline(l.EndPoint, wallLines))
+                if (!ThMEPHVACService.IsInPolyline(l.StartPoint, wallLines) && !ThMEPHVACService.IsInPolyline(l.EndPoint, wallLines))
                     outCenterLine.Add(l);
                 else
                 {
                     var e_l = ThMEPHVACService.ExtendLine(l, 1);
                     var pl = ThMEPHVACService.GetLineExtend(e_l, 1);
-                    var res = index.SelectCrossingPolygon(pl);
+                    var res = wallIndex.SelectCrossingPolygon(pl);
                     if (res.Count > 0)
                     {
                         var line = res[0] as Line;
                         fanBreakP = ThMEPHVACService.IntersectPoint(e_l, line);
                         if (fanBreakP.IsEqualTo(Point3d.Origin))
                             continue;
-                        cross_line = l;
-                        break;
+                        if (!IsBypass(l))
+                        {
+                            crossLine = l;
+                            break;
+                        }
                     }
                 }
             }
             if (fanBreakP.IsEqualTo(Point3d.Origin))
                 return;
-            UpdateBreakPoint(wallLines);
-            if (!fanBreakP.IsEqualTo(Point3d.Origin))
-                UpdateCenterLine(cross_line, wallLines);
+            UpdateWallBreakPoint(wallLines, crossLine);
         }
         // p->出与旁通相交的三通后第一条线的末端点
         private void GetTeeInfo(BypassTee t, Point3d iRoomP, out TeeType teeType, out Point3d p)
@@ -609,40 +575,19 @@ namespace ThMEPHVAC.CAD
                       duct_width + 50 : bypass_width * 0.5 + 100;
             fanBreakP = t.crossP + (dir_vec * dis);
         }
-        private void UpdateBreakPoint(DBObjectCollection wallLines)
+        private void UpdateWallBreakPoint(DBObjectCollection wallLines, Line crossLine)
         {
-            if (ThMEPHVACService.IsOutPolyline(bypass, wallLines))
-            {
-                // type 2 更新打断点为旁通和中心线的交点
-                var lines = new DBObjectCollection();
-                foreach (var l in roomLines)
-                    lines.Add(l);
-                var p = ThMEPHVACService.LineSetWithOneIntersection(bypass, lines, out Line bypassCross, out Line centerCross);
-                if (!p.IsEqualTo(Point3d.Origin, tor))
-                    UpdateBreakPointByTee(bypassCross, centerCross, p);
-            }
-        }
-        private void UpdateBreakPointByTee(Line bypassCross, Line centerCross, Point3d breakP)
-        {
-            var duct_width = ThMEPHVACService.GetWidth(fanParam.roomDuctSize);
-            var bypass_width = ThMEPHVACService.GetWidth(fanParam.bypassSize);
-            var diVec = ThMEPHVACService.GetEdgeDirection(centerCross);
-            var dis = (ThMEPHVACService.IsConnected(bypassCross, centerCross, tor)) ?
-                duct_width + 50 : // bypass collinear with other
-                bypass_width * 0.5 + 100;// bypass vertical with other
-            fanBreakP = breakP + (diVec * dis);
-        }
-        private void UpdateCenterLine(Line crossLine, DBObjectCollection wallLines)
-        {
+            //fanBreakP -> 中心线和墙
+            var p = ThMEPHVACService.IsInPolyline(crossLine.StartPoint, wallLines) ? 
+                crossLine.StartPoint : crossLine.EndPoint;
             foreach (Line l in outCenterLine)
                 roomLines.Remove(l);
             roomLines.Remove(crossLine);
-            var p = ThMEPHVACService.IsInPolyline(crossLine.StartPoint, wallLines) ?
-                    crossLine.StartPoint : crossLine.EndPoint;
             roomLines.Add(new Line(p, fanBreakP));
-            var other_p = p.IsEqualTo(crossLine.StartPoint, tor) ?
-                    crossLine.EndPoint : crossLine.StartPoint;
-            outCenterLine.Add(new Line(fanBreakP, other_p));
+            var otherP = ThMEPHVACService.GetOtherPoint(crossLine, p, tor);
+            var line = new Line(fanBreakP, otherP);
+            if (line.Length > 0)
+                outCenterLine.Add(new Line(fanBreakP, otherP));
         }
         private void GetDuctInfo(Point3d startPoint, Line startLine, HashSet<Line> lines)
         {

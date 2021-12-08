@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPHVAC.CAD;
 
 namespace ThMEPHVAC.Model
 {
@@ -545,10 +546,12 @@ namespace ThMEPHVAC.Model
             textService.GetMainDuctInfo(param, textAlignment, mainHeight, out List <DBText> ductSizeInfo);
             textService.DrawDuctSizeInfo(ductSizeInfo);
         }
-        public void DrawSideDuctText(List<TextAlignLine> textAlignment, Point3d srtP, FanParam fanParam)
+        public void DrawSideDuctText(ThFanAnalysis anay, Point3d srtP, FanParam fanParam)
         {
-            var portParam = new ThMEPHVACParam() { scale = fanParam.scale, elevation = Double.Parse(fanParam.roomElevation), inDuctSize = fanParam.roomDuctSize };
-            DrawSideDuctText(textAlignment, srtP, portParam);
+            var roomParam = new ThMEPHVACParam() { scale = fanParam.scale, elevation = Double.Parse(fanParam.roomElevation), inDuctSize = fanParam.roomDuctSize };
+            DrawSideDuctText(anay.textRoomAlignment, srtP, roomParam);
+            var notRoomParam = new ThMEPHVACParam() { scale = fanParam.scale, elevation = Double.Parse(fanParam.notRoomElevation), inDuctSize = fanParam.notRoomDuctSize };
+            DrawSideDuctText(anay.textNotRoomAlignment, srtP, notRoomParam);
         }
         public void DrawSideDuctText(List<TextAlignLine> textAlignment, Point3d srtP, ThMEPHVACParam param)
         {

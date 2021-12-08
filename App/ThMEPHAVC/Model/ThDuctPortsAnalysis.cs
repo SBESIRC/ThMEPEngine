@@ -333,7 +333,7 @@ namespace ThMEPHVAC.Model
         }
         private void SetMainDuctSize()
         {
-            foreach (var info in mainLinesInfos.Values)
+            foreach (SegInfo info in mainLinesInfos.Values)
             {
                 if (!String.IsNullOrEmpty(info.ductSize))
                     continue;//根管段
@@ -342,7 +342,7 @@ namespace ThMEPHVAC.Model
         }
         private string SelectASize(double airVolume, string favorite)
         {
-            var inW = ThMEPHVACService.GetWidth(favorite);
+            ThMEPHVACService.GetWidthAndHeight(favorite, out double inW, out double inH);
             var ductInfo = new ThDuctParameter(airVolume, portParam.param.scenario);
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
                 if (size == favorite)
@@ -351,6 +351,12 @@ namespace ThMEPHVAC.Model
             {
                 var w = ThMEPHVACService.GetWidth(size);
                 if (Math.Abs(inW - w) < 1e-3)
+                    return size;
+            }
+            foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
+            {
+                ThMEPHVACService.GetWidthAndHeight(size, out double w, out double h);
+                if (h <= inH && w < inW)
                     return size;
             }
             return ductInfo.DuctSizeInfor.RecommendOuterDuctSize;

@@ -23,7 +23,7 @@ namespace ThMEPHVAC.Model
             service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
             service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
             service.DrawReducing(anayRes.reducings, disMat);
-            service.DrawSideDuctText(anayRes.textAlignment, anayRes.moveSrtP, fanParam);
+            service.DrawSideDuctText(anayRes, anayRes.moveSrtP, fanParam);
             DrawHose(roomEnable, notRoomEnable);
         }
         private void Init(ThFanAnalysis anayRes)

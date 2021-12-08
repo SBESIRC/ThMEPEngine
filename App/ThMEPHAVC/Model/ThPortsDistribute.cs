@@ -183,25 +183,36 @@ namespace ThMEPHVAC.Model
         {
             // 最末端的管段从末端-200处开始分配风口，其他管段居中分配风口
             // 注意末端管的最后一段管段一定有风口
-            var firstOftDis = 200 + ThMEPHVACService.GetHeight(portParam.param.portSize) * 0.5;
+            ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double w, out double h);
+            var x = Math.Max(w, h);
+            var firstOftDis = 200 + x * 0.5;
             foreach (var endline in endlines)
             {
                 var endEndline = endline.endlines.Values.First();// 最后一段管段
+                var firstEndline = endline.endlines.Values.LastOrDefault();// 最后一段管段
                 foreach (var seg in endline.endlines.Values)
                 {
-                    var shrinkedLine = seg.seg.GetShrinkedLine();
-                    var portStep = isAuto ? ThMEPHVACService.RoundToInteger(shrinkedLine.Length / (seg.portNum + 1), 100) : portParam.portInterval;
-                    var dirVec = ThMEPHVACService.GetEdgeDirection(shrinkedLine);
-                    //var firstOftDis = endEndline.Equals(seg) ? 200 : portStep;末端偏移200，中间端居中
-                    var p = shrinkedLine.EndPoint - firstOftDis * dirVec;
-                    seg.dirAlignPoint = (seg.portNum == 0) ? Point3d.Origin : p;//无轴网时之画水平的Dimension
-                    foreach (var port in seg.portsInfo)
+                    if (seg.portNum == 1)
                     {
-                        port.position = p;
-                        p -= (dirVec * portStep);
+                        seg.portsInfo.FirstOrDefault().position = ThMEPHVACService.GetMidPoint(seg.seg.l.StartPoint, seg.seg.l.EndPoint);
                     }
-                    var lastPosition = (p + (dirVec * portStep));// 恢复到前一个点
-                    AdjustLastPoint(seg.portsInfo, dirVec, lastPosition, shrinkedLine.StartPoint);
+                    else
+                    {
+                        var shrinkedLine = seg.seg.GetShrinkedLine();
+                        var len = firstEndline.Equals(seg) ? 1300 : 0;
+                        var portStep = isAuto ? ThMEPHVACService.RoundToInteger((shrinkedLine.Length - (x + 400 + 340 + len)) / (seg.portNum - 1), 100) : portParam.portInterval;
+                        var dirVec = ThMEPHVACService.GetEdgeDirection(shrinkedLine);
+                        //var firstOftDis = endEndline.Equals(seg) ? 200 : portStep;末端偏移200，中间端居中
+                        var p = shrinkedLine.EndPoint - firstOftDis * dirVec;
+                        seg.dirAlignPoint = (seg.portNum == 0) ? Point3d.Origin : p;//无轴网时之画水平的Dimension
+                        foreach (var port in seg.portsInfo)
+                        {
+                            port.position = p;
+                            p -= (dirVec * portStep);
+                        }
+                        var lastPosition = (p + (dirVec * portStep));// 恢复到前一个点
+                        AdjustLastPoint(seg.portsInfo, dirVec, lastPosition, shrinkedLine.StartPoint);
+                    }
                 }
             }
         }

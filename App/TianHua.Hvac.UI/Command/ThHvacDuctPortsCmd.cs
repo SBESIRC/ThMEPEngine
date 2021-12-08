@@ -22,6 +22,11 @@ namespace TianHua.Hvac.UI.Command
 
         public void Execute()
         {
+            if (portParam.centerLines.Count == 0)
+            {
+                ThMEPHVACService.PromptMsg("无用于布置风口的中心线");
+                return;
+            }
             var excludeLines = GetExcludeLine();            
             var anayRes = new ThDuctPortsAnalysis(portParam, excludeLines);
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);

@@ -59,6 +59,7 @@ namespace TianHua.Hvac.UI.Command
                     var model = dicModels[key];
                     var p = model.FanInletBasePoint.TransformBy(mat);
                     var wallLines = GetWalls(p, srtP, wallIndex);
+                    portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
                         cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag);
                     else

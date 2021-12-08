@@ -65,7 +65,7 @@ namespace ThMEPHVAC.CAD
         }
         private static void GetAirSpeedRange(double airVolume, string scenario, out double ceiling, out double floor)
         {
-            if (scenario.Contains("排烟") || scenario == "消防加压送风" || scenario == "消防补风")
+            if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")
             {
                 if (airVolume >= 15000) { ceiling = 20; floor = 12; }
                 else if (airVolume >= 10000) { ceiling = 20; floor = 10; }
@@ -81,13 +81,13 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
-                if (airVolume >= 26000) { ceiling = 10; floor = 8; }
-                else if (airVolume >= 12000) { ceiling = 8; floor = 6; }
-                else if (airVolume >= 8000) { ceiling = 6; floor = 4.5; }
-                else if (airVolume >= 4000) { ceiling = 4.5; floor = 3.5; }
-                else if (airVolume >= 3000) { ceiling = 7.5; floor = 5.14; }
-                else if (airVolume >= 2800) { ceiling = 7; floor = 4.8; }
-                else { ceiling = 10; floor = 8; }//throw new NotImplementedException();
+                if (airVolume >= 26000) { ceiling = 8.9; floor = 5; }
+                else if (airVolume >= 12000) { ceiling = 8; floor = 4.5; }
+                else if (airVolume >= 8000) { ceiling = 7; floor = 4.5; }
+                else if (airVolume >= 4000) { ceiling = 6; floor = 4.5; }
+                else if (airVolume >= 3000) { ceiling = 6; floor = 3.5; }
+                else if (airVolume >= 2800) { ceiling = 5; floor = 2.5; }
+                else { ceiling = 4; floor = 2; }//throw new NotImplementedException();
             }
         }
         private void Round_2_float(ref double f)

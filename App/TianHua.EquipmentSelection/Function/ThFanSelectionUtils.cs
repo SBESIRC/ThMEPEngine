@@ -79,7 +79,7 @@ namespace TianHua.FanSelection.Function
         /// <returns></returns>
         public static double GetDefaultAirSpeed(string scenario)
         {
-            if (scenario.Contains("排烟") || scenario == "消防加压送风" || scenario == "消防补风")
+            if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")
                 return 20;
             else if (scenario == "厨房排油烟")
                 return 12;

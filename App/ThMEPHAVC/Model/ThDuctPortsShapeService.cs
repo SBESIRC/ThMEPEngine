@@ -66,7 +66,7 @@ namespace ThMEPHVAC.Model
                 }
                 else
                 {
-                    return inVec.GetAngleTo(judger) + Math.PI;
+                    return Math.PI * 2 - inVec.GetAngleTo(judger);
                 }
             }
         }
@@ -214,9 +214,9 @@ namespace ThMEPHVAC.Model
             // ThSepereateFansDuct.cs Line:219
             if (curAirVolume >= airVolume1 && curAirVolume >= airVolume2)
                 return GetTeeShrink(curLine, otherLine1, otherLine2, curW, w1, w2);// l是进风口
-            if (airVolume1 > curAirVolume && airVolume1 > airVolume2)
+            if (airVolume1 >= curAirVolume && airVolume1 >= airVolume2)
                 return GetTeeShrink(otherLine1, otherLine2, curLine, w1, w2, curW);// otherLine1是进风口
-            if (airVolume2 > curAirVolume && airVolume2 > airVolume1)
+            if (airVolume2 >= curAirVolume && airVolume2 >= airVolume1)
                 return GetTeeShrink(otherLine2, otherLine1, curLine, w2, w1, curW);// otherLine2是进风口
             throw new NotImplementedException("不可能跑这，三通风量一定有一个最大");
         }

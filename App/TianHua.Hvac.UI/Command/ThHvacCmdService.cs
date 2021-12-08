@@ -145,11 +145,7 @@ namespace TianHua.Hvac.UI.Command
             }
             return true;
         }
-        public void NotPressurizedAirSupply(FanParam fanParam,
-                                            ThDbModelFan fan,
-                                            DBObjectCollection wallLines,
-                                            PortParam portParam,
-                                            bool haveMultiFan)
+        public void NotPressurizedAirSupply(FanParam fanParam, ThDbModelFan fan, DBObjectCollection wallLines, PortParam portParam, bool haveMultiFan)
         {
             var bypassLines = new DBObjectCollection();
             var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
@@ -157,12 +153,10 @@ namespace TianHua.Hvac.UI.Command
                 return;
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes.roomLines, anayRes.notRoomLines);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            using (var db = AcadDatabase.Active())
-                ThDuctPortsDrawService.RemoveIds(fanParam.centerLines);
             _ = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             if (isIntegrate)
             {
-                var srtP = fan.isExhaust ? fan.FanInletBasePoint : fan.FanOutletBasePoint;
+                var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
                 var ductPort = new ThHvacDuctPortsCmd(portParam);
                 ductPort.Execute();
@@ -186,13 +180,10 @@ namespace TianHua.Hvac.UI.Command
                 ThMEPHVACService.PromptMsg("未搜索到与风机相连的中心线");
                 return;
             }
-            RecordBypassAlignmentLine(maxBypass, fanParam, fan, bypassLines, anayRes.textAlignment, anayRes.moveSrtP);
-            MergeBypass(fanParam.bypassPattern, anayRes.centerLines.Values.ToList());
+            RecordBypassAlignmentLine(maxBypass, fanParam, fan, bypassLines, anayRes.textRoomAlignment, anayRes.moveSrtP);
             // 先画阀，pinter会移动中心线导致墙线与中心线交不上
             var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes.roomLines, anayRes.notRoomLines);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
-            using (var db = AcadDatabase.Active())
-                ThDuctPortsDrawService.RemoveIds(fanParam.centerLines);
             var pinter = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             InsertElectricValve(fanParam, fan, maxBypass, pinter);
             if (fanParam.bypassPattern == "RBType4" || fanParam.bypassPattern == "RBType5")
@@ -205,7 +196,7 @@ namespace TianHua.Hvac.UI.Command
             }
             if (isIntegrate)
             {
-                var srtP = fan.isExhaust ? fan.FanInletBasePoint : fan.FanOutletBasePoint;
+                var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
                 var ductPort = new ThHvacDuctPortsCmd(portParam);
                 ductPort.Execute();
@@ -296,7 +287,10 @@ namespace TianHua.Hvac.UI.Command
             }
             else
             {
-                max_bypass.TransformBy(dis_mat);
+                if (param.bypassPattern == "RBType3")
+                {
+                    max_bypass.TransformBy(dis_mat);
+                }
                 text_alignment.Add(new TextAlignLine() { l = max_bypass, ductSize = param.bypassSize , isRoom = true });
             }
         }
@@ -316,35 +310,6 @@ namespace TianHua.Hvac.UI.Command
             var insert_p = ThMEPHVACService.GetMidPoint(l);
             var width = ThMEPHVACService.GetWidth(param.bypassSize);
             pinter.InsertElectricValve(insert_p.GetAsVector(), width, angle + 0.5 * Math.PI);
-        }
-        private void MergeBypass(string bypassPattern, List<SegInfo> centerLines)
-        {
-            if (bypassPattern == "RBType3")
-            {
-                var detectDis = ioBypassSepDis - 2;
-                var bypass1 = new SegInfo();
-                var bypass2 = new SegInfo();
-                foreach (var formDuct in centerLines)
-                {
-                    foreach (var latDuct in centerLines)
-                    {
-                        var dis = ThMEPHVACService.GetLineDis(formDuct.l, latDuct.l);
-                        if (Math.Abs(dis - detectDis) < 1e-3)
-                        {
-                            bypass1 = formDuct;
-                            bypass2 = latDuct;
-                            break;
-                        }
-                    }
-                    if (bypass1.ductSize != null)
-                        break;
-                }
-                centerLines.Remove(bypass1);
-                centerLines.Remove(bypass2);
-                var l = new Line(bypass1.l.StartPoint, bypass2.l.StartPoint);
-                var merge_duct = new SegInfo() { l = l, ductSize = bypass1 .ductSize, srcShrink = bypass1.srcShrink, dstShrink = bypass2.srcShrink};
-                centerLines.Add(merge_duct);
-            }
         }
     }
 }

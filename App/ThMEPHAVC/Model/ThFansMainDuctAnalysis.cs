@@ -48,7 +48,7 @@ namespace ThMEPHVAC.Model
             }
             foreach (var duct in fanDucts)
             {
-                textAlignment.Add(new TextAlignLine() {l = duct.l, isRoom = false, ductSize = duct.ductSize });
+                textAlignment.Add(new TextAlignLine() { l = duct.l, isRoom = false, ductSize = duct.ductSize });
             }
             ducts.Clear();
         }

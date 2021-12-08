@@ -26,18 +26,14 @@ namespace ThMEPHVAC.CAD
             var p = fanmodel.isExhaust ? fanmodel.FanInletBasePoint : fanmodel.FanOutletBasePoint;
             disMat = Matrix3d.Displacement(p.GetAsVector());
             //非送风场景 room是入风口 (送，补) room是出风口
+            roomValves = GetRoomValveGroupWithoutWall(roomWidth, fanmodel);
+            notRoomValves = GetNotRoomValveGroupWithoutWall(notRoomWidth, fanmodel);
             if (wallobjects.Count > 0)
             {
-                roomValves = GetValveGroupWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, teeWidth, roomLines, true);
-                notRoomValves = GetValveGroupWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, teeWidth, notRoomLines, false);
-            }
-            else
-            {
-                roomValves = GetRoomValveGroupWithoutWall(roomWidth, fanmodel);
-                notRoomValves = GetNotRoomValveGroupWithoutWall(notRoomWidth, fanmodel);
+                roomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, teeWidth, roomLines, true));
+                notRoomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, teeWidth, notRoomLines, false));
             }
         }
-
         public void RunInletValvesInsertEngine()
         {
             foreach (var valvegroup in roomValves)
@@ -89,7 +85,7 @@ namespace ThMEPHVAC.CAD
             }
             return false;
         }
-        private List<ThValveGroup> GetValveGroupWithWall(ThDbModelFan fanmodel,
+        private List<ThValveGroup> GetFireAndHoleWithWall(ThDbModelFan fanmodel,
                                                          DBObjectCollection wallobjects,
                                                          DBObjectCollection bypassobjects,
                                                          double ductWidth,
@@ -110,7 +106,7 @@ namespace ThMEPHVAC.CAD
                     var ex_l = ThMEPHVACService.ExtendLine(l, 1.5);
                     ex_l.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
                     if (IntersectPoints.Count > 0)
-                    {
+                    {                        
                         var vec = new Vector2d(dirVec.X, dirVec.Y);
                         var holeAngle = vec.Angle >= 0.5 * Math.PI ? vec.Angle - 0.5 * Math.PI : vec.Angle + 1.5 * Math.PI;
                         var insertP = IntersectPoints[0].TransformBy(disMat);
@@ -120,10 +116,11 @@ namespace ThMEPHVAC.CAD
                             DuctWidth = width,
                             RotationAngle = holeAngle,
                             FanScenario = fanmodel.scenario,
-                            ValveToFanSpacing = IntersectPoints[0].DistanceTo(l.StartPoint),
+                            ValveToFanSpacing = 2000,
                         };
                         var fanFlag = isRoom ? fanmodel.isExhaust : !fanmodel.isExhaust;
-                        var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer, fanFlag, !fanFlag);
+                        var valvegroup = new ThValveGroup(groupparameters, fanFlag, !fanFlag);
+                        valvegroup.SetFireHoleGroup(fanmodel.Data.BlockLayer);
                         valveGroups.Add(valvegroup);
                     }
                 }

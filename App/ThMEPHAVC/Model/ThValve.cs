@@ -118,92 +118,19 @@ namespace ThMEPHVAC.Model
         public ThValveGroupParameters Parameters { get; set; }
         private bool isExhaust;
         private bool CheckValveFlag;
+        public ThValveGroup(ThValveGroupParameters parameters, bool isExhaust, bool CheckValveFlag)
+        {
+            Parameters = parameters;
+            this.isExhaust = isExhaust;
+            this.CheckValveFlag = CheckValveFlag;
+            ValvesInGroup = new List<ThValve>(); ;
+        }
         public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool isExhaust, bool CheckValveFlag)
         {
             Parameters = parameters;
             this.isExhaust = isExhaust;
             this.CheckValveFlag = CheckValveFlag;
             ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
-        }
-
-        //设置机房内管段阀组
-        private List<ThValve> SetInnerValveGroup(string fanlayer)
-        {
-            // 进风口不布置止回阀
-            List<ThValve> valves = new List<ThValve>();
-            var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
-            var silencer = CreateSilencer(fanlayer);// 如果是非送风场景，进风口和room相连需要布置消声器
-            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
-            if (!isExhaust || !haveSilencer)
-                silencer.Length = 0;
-            if (Parameters.ValveToFanSpacing > silencer.Length + firevalve.Length)
-            {
-                firevalve.ValveOffsetFromCenter = 0;
-                hole.ValveOffsetFromCenter = -hole.Length;
-                silencer.ValveOffsetFromCenter = firevalve.Length;
-            }
-            //若空间不够，防火阀移至洞外
-            else
-            {
-                hole.ValveOffsetFromCenter = -hole.Length;
-                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                silencer.ValveOffsetFromCenter = firevalve.ValveOffsetFromCenter - silencer.Length;
-            }
-            if (isExhaust && haveSilencer)
-                valves.AddRange(new List<ThValve> { firevalve, hole, silencer });
-            else
-                valves.AddRange(new List<ThValve> { firevalve, hole});
-            return valves;
-        }
-        
-        //设置机房外管段阀组
-        private List<ThValve> SetOuterValveGroup(string fanlayer)
-        {
-            List<ThValve> valves = new List<ThValve>();
-
-            var silencer = CreateSilencer(fanlayer);
-            var checkvalve = CreateCheckValve(fanlayer);
-            var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
-            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
-            if (isExhaust || !haveSilencer)// 如果是非送风场景，出风口不布置消声器
-                silencer.Length = 0;
-            //正常情况下，空间足够
-            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
-            {
-                hole.ValveOffsetFromCenter = -hole.Length;
-                firevalve.ValveOffsetFromCenter = 0;
-                silencer.ValveOffsetFromCenter = firevalve.Length;
-                checkvalve.ValveOffsetFromCenter = (CheckValveFlag) ? 
-                                                   (firevalve.Length + silencer.Length) : 
-                                                   (-(checkvalve.Length + firevalve.Length + silencer.Length));// 翻转180°
-            }
-            //机房外空间放不下防火阀加止回阀加消音器
-            else
-            {
-                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
-                if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
-                {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
-                    hole.ValveOffsetFromCenter = -hole.Length;
-                    firevalve.ValveOffsetFromCenter = 0;
-                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                }
-                //放不下止回阀加防火阀
-                //把防火阀移至洞外
-                else
-                {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
-                    firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                    hole.ValveOffsetFromCenter = -hole.Length;
-                    checkvalve.ValveOffsetFromCenter = silencer.ValveOffsetFromCenter - checkvalve.Length;
-                }
-            }
-            valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
-            if (!isExhaust && haveSilencer)
-                valves.Add(silencer);
-            return valves;
         }
         private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
         {
@@ -215,6 +142,92 @@ namespace ThMEPHVAC.Model
             else
                 return SetOuterValveGroup(fanlayer);
         }
+        public void SetFireHoleGroup(string fanlayer)
+        {
+            // 进风口不布置止回阀
+            List<ThValve> valves = new List<ThValve>();
+            var hole = CreateHole();
+            var firevalve = CreateFireValve(fanlayer);
+            if (Parameters.ValveToFanSpacing >  firevalve.Length)
+            {
+                firevalve.ValveOffsetFromCenter = 0;
+                hole.ValveOffsetFromCenter = -hole.Length;
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                hole.ValveOffsetFromCenter = -hole.Length;
+                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+            }
+            valves.AddRange(new List<ThValve> { firevalve, hole });
+            ValvesInGroup = valves;
+        }
+        //设置机房内管段阀组
+        private List<ThValve> SetInnerValveGroup(string fanlayer)
+        {
+            // 进风口不布置止回阀
+            List<ThValve> valves = new List<ThValve>();
+            var silencer = CreateSilencer(fanlayer);// 如果是非送风场景，进风口和room相连需要布置消声器
+            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || 
+                                 Parameters.FanScenario == "消防加压送风");
+            if (!isExhaust || !haveSilencer)
+                silencer.Length = 0;
+            if (Parameters.ValveToFanSpacing > silencer.Length)
+            {
+                silencer.ValveOffsetFromCenter = 0;
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                silencer.ValveOffsetFromCenter = silencer.Length;
+            }
+            if (isExhaust && haveSilencer)
+                valves.AddRange(new List<ThValve> { silencer });
+            else
+                valves.AddRange(new List<ThValve> { });
+            return valves;
+        }
+        
+        //设置机房外管段阀组
+        private List<ThValve> SetOuterValveGroup(string fanlayer)
+        {
+            List<ThValve> valves = new List<ThValve>();
+
+            var silencer = CreateSilencer(fanlayer);
+            var checkvalve = CreateCheckValve(fanlayer);
+            var haveSilencer = !(Parameters.FanScenario == "消防排烟" || Parameters.FanScenario == "消防补风" || Parameters.FanScenario == "消防加压送风");
+            if (isExhaust || !haveSilencer)// 如果是非送风场景，出风口不布置消声器
+                silencer.Length = 0;
+            //正常情况下，空间足够
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + silencer.Length)
+            {
+                silencer.ValveOffsetFromCenter = 0;
+                checkvalve.ValveOffsetFromCenter = (CheckValveFlag) ? (silencer.Length) : 
+                                                   (-(checkvalve.Length + silencer.Length));// 翻转180°
+            }
+            //机房外空间放不下防火阀加止回阀加消音器
+            else
+            {
+                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
+                if (Parameters.ValveToFanSpacing > checkvalve.Length)
+                {
+                    silencer.ValveOffsetFromCenter = -silencer.Length;
+                    checkvalve.ValveOffsetFromCenter = 0;
+                }
+                //放不下止回阀加防火阀
+                //把防火阀移至洞外
+                else
+                {
+                    silencer.ValveOffsetFromCenter = -silencer.Length;
+                    checkvalve.ValveOffsetFromCenter = silencer.ValveOffsetFromCenter - checkvalve.Length;
+                }
+            }
+            valves.AddRange(new List<ThValve> { checkvalve});
+            if (!isExhaust && haveSilencer)
+                valves.Add(silencer);
+            return valves;
+        }
+        
         private ThValve CreateSilencer(string fanlayer)
         {
             return new ThValve()
