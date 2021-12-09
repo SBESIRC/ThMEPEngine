@@ -86,18 +86,39 @@ namespace ThMEPHVAC.FanConnect.Service
                 var direct = new Vector3d(Math.Cos(markAg - Math.PI / 2.0), Math.Sin(markAg - Math.PI / 2.0), 0.0);
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
                 {
-                    if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
+                    if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)//两管制
                     {
-                        markPt = markPt + direct * (200 * 1 + 120);
+                        if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                        {
+                            markPt = markPt + direct * (200 * 1 + 120);
+                        }
+                        else
+                        {
+                            markPt = markPt + direct * 120;
+                        }
                     }
-                    else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
+                    else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)//四管制
                     {
-                        markPt = markPt + direct * (200 * 2 + 120);
+                        if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                        {
+                            markPt = markPt + direct * (200 * 2 + 120);
+                        }
+                        else
+                        {
+                            markPt = markPt + direct * 120;
+                        }
                     }
                 }
                 else if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
-                    markPt = markPt + direct * (200 * 1 + 120);
+                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                    {
+                        markPt = markPt + direct * (200 * 1 + 120);
+                    }
+                    else
+                    {
+                        markPt = markPt + direct * 120;
+                    }
                 }
                 var strText = "C " + condPipe;
                 toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);

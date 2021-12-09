@@ -30,7 +30,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 //获取风机设备
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 //水管干路和支干路
-                var pipes = ThEquipElementExtractServiece.GetFanPipes();
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
                 //获取房间框线
                 var rooms = ThBuildElementExtractServiece.GetBuildRooms();
                 ////AI洞口

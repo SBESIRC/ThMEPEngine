@@ -101,7 +101,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 //选择起点
                 var startPt = ThFanConnectUtils.SelectPoint();
                 //提取水管路由
-                var pipes = ThEquipElementExtractServiece.GetFanPipes();
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
                 //提取风机
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；

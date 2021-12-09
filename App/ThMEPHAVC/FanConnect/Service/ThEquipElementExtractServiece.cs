@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPHVAC.FanConnect.Engine;
 using ThMEPHVAC.FanConnect.Model;
@@ -23,12 +25,31 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retFcu;
             }
         }
-        public static List<Line> GetFanPipes()
+        public static List<Line> GetFanPipes(Point3d startPt)
         {
             using (var database = AcadDatabase.Active())
             {
+                string layer = "AI-水管路由";
+                var pt = new Point3d(0.0, 0.0, 0.0);
+                var box = ThDrawTool.CreateSquare(startPt, 30.0);
+                //以pt为中心，做一个矩形
+                //找到改矩形内所有的Entity
+                //遍历Entity找到目标层
+                var psr = AcHelper.Active.Editor.SelectCrossingPolygon(box.Vertices());
+                if (psr.Status == PromptStatus.OK)
+                {
+                    foreach(var id in psr.Value.GetObjectIds())
+                    {
+                        var entity = database.Element<Entity>(id);
+                        if(entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
+                        {
+                            layer = entity.Layer;
+                            break;
+                        }
+                    }
+                }
                 var retLines = new List<Line>();
-                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains("AI-水管路由")).ToList();
+                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains(layer)).ToList();
                 foreach(var l in tmpLines)
                 {
                     if(l is Line)

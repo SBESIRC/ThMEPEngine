@@ -18,6 +18,7 @@ namespace ThMEPHVAC.FanConnect.Command
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public void Dispose()
         {
+            //
         }
         public ThCreateSPMExtractCmd()
         {
@@ -101,7 +102,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 //选择起点
                 var startPt = ThFanConnectUtils.SelectPoint();
                 //提取水管路由
-                var pipes = ThEquipElementExtractServiece.GetFanPipes();
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
                 //提取水管连接点
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
@@ -128,6 +129,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;
                 pipeExtendServiece.PipeExtend(treeModel);
+
                 //计算流量
                 ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
                 if(pointTreeModel.RootNode == null)
