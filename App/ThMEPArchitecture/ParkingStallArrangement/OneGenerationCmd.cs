@@ -16,14 +16,15 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
+using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
-    public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
+    public class OneGenerationCmd : ThMEPBaseCommand, IDisposable
     {
-        public ThParkingStallArrangementCmd()
+        public OneGenerationCmd()
         {
-            CommandName = "-THDXQYFG";
+            CommandName = "-THDXQYFG2";
             ActionName = "生成";
         }
         public void Dispose()
@@ -66,23 +67,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildLines, sortSegLines);
 
-            var iterationCnt = Active.Editor.GetInteger("\n Input GA iteration count:");
-            if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
-
-            var popSize = Active.Editor.GetInteger("\n Input population size:");
-            if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
-
-            var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+           
+            var geneAlgorithm = new GA2(gaPara, layoutPara, 1, 1);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
-            try
-            {
-                rst = geneAlgorithm.Run(histories);
-            }
-            catch (Exception ex)
-            {
 
-            }
+            rst = geneAlgorithm.Run(histories);
 
             var solution = rst.First();
             histories.Add(rst.First());
@@ -136,7 +126,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //        p.Display();
             //    }
             //}
-            //Draw.DrawSeg(solution);
+            Draw.DrawSeg(solution);
         }
 
         private static Point3dCollection SelectAreas()
