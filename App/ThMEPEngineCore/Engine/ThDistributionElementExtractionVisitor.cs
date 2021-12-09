@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Engine
         }
         public virtual bool CheckLayerValid(Entity e)
         {
-            return LayerFilter.Contains(e.Layer);
+            return true;
         }
         public virtual bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {

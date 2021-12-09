@@ -176,17 +176,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     {
                         continue;//把一些短线直接跳过
                     }
-                    if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.HydrantPosition))
+                    if (flag1 && fireHydrantSysIn.PtDic[pt1].Count == 1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.VerticalPosition))
                     {
                         foreach (var l in lineList)
                         {
-                            if (l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < 150 && !l.Equals(line))
+                            if (l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < 10 && !l.Equals(line))
                             {
                                 var pts = new Point3dCollection();
                                 l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
                                 if (pts.Count > 0)
                                 {
-                                    if (pts[0].DistanceTo(pt1._pt) < 150 && pts[0].DistanceTo(pt1._pt) > 1)
+                                    if (pts[0].DistanceTo(pt1._pt) < 10 && pts[0].DistanceTo(pt1._pt) > 1)
                                     {
                                         connectLine.Add(new Line(pts[0], pt1._pt));
                                     }
@@ -195,17 +195,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                         }
                     }
-                    if (flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.HydrantPosition))
+                    if (flag2 && fireHydrantSysIn.PtDic[pt2].Count == 1 && !PtInPtList.PtIsTermPt(pt2, fireHydrantSysIn.VerticalPosition))
                     {
                         foreach (var l in lineList)
                         {
-                            if (l.GetClosestPointTo(pt2._pt, false).DistanceTo(pt2._pt) < 150 && !l.Equals(line))
+                            if (l.GetClosestPointTo(pt2._pt, false).DistanceTo(pt2._pt) < 10 && !l.Equals(line))
                             {
                                 var pts = new Point3dCollection();
                                 l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
                                 if (pts.Count > 0)
                                 {
-                                    if (pts[0].DistanceTo(pt2._pt) < 150 && pts[0].DistanceTo(pt2._pt) > 1)
+                                    if (pts[0].DistanceTo(pt2._pt) < 10 && pts[0].DistanceTo(pt2._pt) > 1)
                                     {
                                         connectLine.Add(new Line(pts[0], pt2._pt));
                                     }

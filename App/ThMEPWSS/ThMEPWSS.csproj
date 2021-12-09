@@ -517,7 +517,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractCasing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractFireHydrant.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractGateValveService.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractHydrant.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Extract\Vertical.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractHYDTPipeService.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractLabelLine.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractLabelText.cs" />

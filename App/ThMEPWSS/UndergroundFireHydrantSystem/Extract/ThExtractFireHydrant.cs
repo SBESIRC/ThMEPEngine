@@ -1,12 +1,16 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 //using ThMEPWSS.Pipe.Service;
@@ -22,75 +26,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
-                   .ModelSpace
-                   .OfType<Entity>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer))
-                   .ToList();
-
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-
-
-                DBobjs = new DBObjectCollection();
-                foreach (var db in dbObjs)
-                {
-                    if (db is DBPoint)
-                    {
-                        continue;
-                    }
-                    if (db is BlockReference)
-                    {
-                        if (IsFireHydrant((db as BlockReference).GetEffectiveName()))
-                        {
-                            DBobjs.Add((DBObject)db);
-                        }
-                        else
-                        {
-                            var objs = new DBObjectCollection();
-
-                            var blockRecordId = (db as BlockReference).BlockTableRecord;
-                            var btr = acadDatabase.Blocks.Element(blockRecordId);
-
-                            int indx = 0;
-                            var indxFlag = false;
-                            foreach (var entId in btr)
-                            {
-                                var dbObj = acadDatabase.Element<Entity>(entId);
-                                if (dbObj is BlockReference)
-                                {
-                                    if (IsFireHydrant((dbObj as BlockReference).GetEffectiveName()))
-                                    {
-                                        indxFlag = true;
-                                        break;
-                                    }
-                                }
-                                indx += 1;
-                            }
-
-                            (db as BlockReference).Explode(objs);
-                            if (indxFlag)
-                            {
-                                if (indx > objs.Count - 1)
-                                {
-                                    continue;
-                                }
-                                DBobjs.Add((DBObject)objs[indx]);
-                            }
-
-                        }
-                    }
-                }
+                DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面");
+                ;
+                //foreach(var db in DBobjs)
+                //{
+                //    var br = db as BlockReference;
+                //    using (AcadDatabase currentDb = AcadDatabase.Active())
+                //    {
+                //        var rect = GetRect(br);
+                //        rect.LayerId = DbHelper.GetLayerId("消火栓圆圈图层");
+                //        currentDb.CurrentSpace.Add(rect);
+                //    }
+                //}
             }
         }
-        private bool IsHYDTPipeLayer(string layer)
-        {
-            return layer.ToUpper() == "W-FRPT-HYDT" || layer.ToUpper() == "0";
-        }
 
-        private bool IsFireHydrant(string valve)
+        private Polyline GetRect(BlockReference br)
         {
-            return valve.ToUpper().Contains("室内消火栓平面");
+            var minPt = br.GeometricExtents.MinPoint;
+            var maxPt = br.GeometricExtents.MaxPoint;
+            var pline = new Polyline();
+            var point2dColl = new Point2dCollection();
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, maxPt.Y));
+            point2dColl.Add(new Point2d(maxPt.X, minPt.Y));
+            point2dColl.Add(new Point2d(minPt.X, minPt.Y));
+            pline.CreatePolyline(point2dColl);
+            return pline;
         }
 
         public void CreateVerticalHydrantDic(List<Point3dEx> verticals, FireHydrantSystemIn fireHydrantSysIn)
@@ -103,7 +66,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     var obj = dbObjs[i];
                     var pt = GetCenter((obj as BlockReference).GeometricExtents);
-                    var pline = CreatePolyline(pt, 1000);
+                    using (AcadDatabase currentDb = AcadDatabase.Active())
+                    {
+                        var c = new Circle(pt, new Vector3d(0,0,1), 200);
+                        c.LayerId = DbHelper.GetLayerId("消火栓圆圈图层");
+                        currentDb.CurrentSpace.Add(c);
+                    }
+                        var pline = CreatePolyline(pt, 1000);
                     var res = verticalSpatialIndex.SelectCrossingPolygon(pline).ToArray();
                     if (res.Count() == 0)
                     {
@@ -162,6 +131,109 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pl.CreatePolyline(pts);
             return pl;
         }
+
+
+        private DBObjectCollection ExtractBlocks(Database db, string blockName)
+        {
+            Func<Entity, bool> IsBlkNameQualified = (e) =>
+            {
+                if (e is BlockReference br)
+                {
+                    return br.GetEffectiveName().ToUpper().EndsWith(blockName.ToUpper());
+                }
+                return false;
+            };
+            var blkVisitor = new ThBlockReferenceExtractionVisitor();
+            blkVisitor.CheckQualifiedLayer = (e) => true;
+            blkVisitor.CheckQualifiedBlockName = IsBlkNameQualified;
+
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(blkVisitor);
+            //extractor.ExtractFromMS(db);
+            extractor.Extract(db);
+            return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
+        }
     }
 
+
+
+    public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
+    {
+        public Func<Entity, bool> CheckQualifiedLayer { get; set; }
+        public Func<Entity, bool> CheckQualifiedBlockName { get; set; }
+        public ThBlockReferenceExtractionVisitor()
+        {
+            CheckQualifiedLayer = base.CheckLayerValid;
+            CheckQualifiedBlockName = (Entity entity) => true;
+        }
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
+        {
+            if (dbObj is BlockReference br)
+            {
+                elements.AddRange(Handle(br, matrix));
+            }
+        }
+
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements,
+            BlockReference blockReference, Matrix3d matrix)
+        {
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
+            }
+        }
+
+        private List<ThRawIfcDistributionElementData> Handle(BlockReference br, Matrix3d matrix)
+        {
+            var results = new List<ThRawIfcDistributionElementData>();
+            if (IsDistributionElement(br) && CheckLayerValid(br))
+            {
+                var clone = br.Clone() as BlockReference;
+                if (clone != null)
+                {
+                    clone.TransformBy(matrix);
+                    results.Add(new ThRawIfcDistributionElementData()
+                    {
+                        Geometry = clone,
+                    });
+                }
+            }
+            return results;
+        }
+        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is BlockReference br)
+            {
+                return xclip.Contains(br.GeometricExtents.ToRectangle());
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public override bool IsDistributionElement(Entity entity)
+        {
+            return CheckQualifiedBlockName(entity);
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
+        }
+        public override bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
+        {
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout)
+            {
+                return false;
+            }
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
 }

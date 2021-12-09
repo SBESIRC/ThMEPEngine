@@ -185,7 +185,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                     GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                                 }
                             }
-
+                            var pttt = new Point3dEx(1439132.4, 683015.4,0);
                             if (fireHydrantSysIn.TermPointDic[branchDic[pt][0]].Type.Equals(2))//终点是类型2，其他区域
                             {
                                 GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
@@ -203,7 +203,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             ;
                             var vpt = new Point3dEx();
-                            foreach (var tpt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
+                            foreach (var tpt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
                             {
                                 if (tpt._pt.DistanceTo(branchDic[pt][0]._pt) < 150)
                                 {

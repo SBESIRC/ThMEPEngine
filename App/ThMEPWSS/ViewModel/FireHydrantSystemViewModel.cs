@@ -5,6 +5,7 @@ using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
+using ThCADExtension;
 
 namespace ThMEPWSS.ViewModel
 {
@@ -20,7 +21,15 @@ namespace ThMEPWSS.ViewModel
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             {
-                Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
+                using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
+                {
+                    if(!acadDatabase.Blocks.Contains("消火栓环管标记"))
+                    {
+                        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓环管标记"));
+                        acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-NOTE"));
+                    }
+                }
                 while (true)
                 {
                     var opt = new PromptPointOptions("请指定环管标记插入点: \n");
@@ -44,7 +53,15 @@ namespace ThMEPWSS.ViewModel
             Common.Utils.FocusMainWindow();
             using (Active.Document.LockDocument())
             {
-                Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
+                using (var acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
+                {
+                    if (!acadDatabase.Blocks.Contains("消火栓环管节点标记-2"))
+                    {
+                        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("消火栓环管节点标记-2"));
+                        acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault("W-FRPT-NOTE"));
+                    }
+                }
                 while (true)
                 {
                     var opt = new PromptPointOptions("请指定环管节点标记插入点: \n");
@@ -58,10 +75,6 @@ namespace ThMEPWSS.ViewModel
                         var valueDic = new Dictionary<string, string>();
                         acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记-2",
                                     pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0);
-                        //valueDic.Add("节点1", "A");
-                        //valueDic.Add("节点2", "A'");
-                        //var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-NOTE", "消火栓环管节点标记-2",
-                        //            pt.Value.Ucs2Wcs(), new Scale3d(1, 1, 1), 0, valueDic);
                     }
                 }
             }
