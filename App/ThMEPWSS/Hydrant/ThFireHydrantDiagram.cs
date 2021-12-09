@@ -250,7 +250,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             {
                 var mlGeosf = GeoFac.CreateIntersectsSelector(adb.ModelSpace.OfType<MLeader>().Where(x => x.Layer is MLeaderLayer).Select(GetGeometry).ToList());
                 var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
-                foreach (var ppt in ctx.FireHydrantSystemIn.HydrantPosition)
+                foreach (var ppt in ctx.FireHydrantSystemIn.VerticalPosition)
                 {
                     var pt = ppt._pt;
                     mlInfos.Add(MLeaderInfo.Create(pt, THESAURUSDEPLORE));
