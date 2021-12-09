@@ -117,14 +117,41 @@ namespace ThMEPLighting.Garage.Engine
                 {
                     continue;
                 }
-                if (PassLineNumber(center, link))
+                var sideLines = GetCenterSides(link);
+                if(sideLines.Count>0)
                 {
-                    SetLineNumer(link,spatialIndex);
+                    if (PassLineNumber(center, link))
+                    {
+                        SetLineNumer(link, spatialIndex);
+                    }
+                }
+                else
+                {
+                    UpdateCenterLineUsedRecordDict(link);
+                    var linkPtRes = center.FindLinkPt(link);
+                    if(linkPtRes.HasValue)
+                    {
+                        var nextPt = linkPtRes.Value.GetNextLinkPt(link.StartPoint,link.EndPoint);
+                        var objs1 = nextPt.Query(spatialIndex, ApproximateTolerance.EqualPoint);
+                        objs1.Remove(link);
+                        var links1 = objs1
+                            .OfType<Line>()
+                            .Where(o=>ThGarageUtils.IsLessThan45Degree(link.StartPoint,link.EndPoint,o.StartPoint,o.EndPoint))
+                            .OrderByDescending(o => ThGarageUtils.CalculateTwoLineOuterAngle(center.StartPoint, center.EndPoint, o.StartPoint, o.EndPoint))
+                            .ToList();
+                        if(links1.Count>0)
+                        {
+                            if(PassLineNumber(center, links1[0],true))
+                            {
+                                SetLineNumer(links1[0], spatialIndex);
+                            }
+                        }
+                    }
                 }
             }
         }        
 
-        private bool PassLineNumber(Line preCenterLine, Line nextCenterLine)
+        private bool PassLineNumber(Line preCenterLine, Line nextCenterLine,bool forcePass=false)
         {
             /*                   (second)  
              *                      .
@@ -135,7 +162,7 @@ namespace ThMEPLighting.Garage.Engine
              *         (pre)   
              */
             bool issuccessful = false;
-            var pts = CreateLinkPts(preCenterLine, nextCenterLine);
+            var pts = forcePass? CreatePassPts(preCenterLine, nextCenterLine):CreateLinkPts(preCenterLine, nextCenterLine);
             if(pts.Count==3)
             {
                 var preSideVec = pts[0].GetVectorTo(pts[1]).GetPerpendicularVector().GetNormal();
@@ -242,6 +269,17 @@ namespace ThMEPLighting.Garage.Engine
                 return CenterSideDict[center].Item2;
             }
             return new List<Line>();
+        }
+
+        private List<Line> GetCenterSides(Line center)
+        {
+            var results = new List<Line>();
+            if(CenterSideDict.ContainsKey(center))
+            {
+                results.AddRange(CenterSideDict[center].Item1);
+                results.AddRange(CenterSideDict[center].Item2);
+            }
+            return results;
         }
 
         private Line FindCenterFirst(Point3d start, List<Line> lines, double tolerance = 5.0)
@@ -515,6 +553,19 @@ namespace ThMEPLighting.Garage.Engine
                 result.Add(secondPt);
                 return result;
             }
+            return result;
+        }
+
+        private List<Point3d> CreatePassPts(Line first, Line second)
+        {
+            // 创建从first到second的路径点
+            var result = new List<Point3d>();
+            var firstPt = first.StartPoint.DistanceTo(second.StartPoint) > first.EndPoint.DistanceTo(second.StartPoint) ? 
+                first.StartPoint:first.EndPoint;
+            result.Add(firstPt);
+            result.Add(firstPt.GetNextLinkPt(first.StartPoint,first.EndPoint));
+            result.Add(second.EndPoint.DistanceTo(firstPt) > second.StartPoint.DistanceTo(firstPt) ?
+                second.EndPoint : second.StartPoint);
             return result;
         }
 
