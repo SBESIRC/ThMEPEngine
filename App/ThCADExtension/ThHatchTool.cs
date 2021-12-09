@@ -128,6 +128,10 @@ namespace ThCADExtension
                 //    throw new NotSupportedException();
                 //}
             }
+            // TODO:
+            //  存在一种“特殊”的Loop，为了用一个Loop来表达一个带洞的区域，
+            //  在带洞区域的外轮廓线和内轮廓线之间拉一根线，使其能被“一笔画”
+            //  需要将这种情况处理成正常的带洞区域
             segments.Join();
             var newPoly = segments.ToPolyline();
             if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint, new Tolerance(tolerance, tolerance)))
