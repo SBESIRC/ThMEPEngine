@@ -52,9 +52,11 @@ namespace ThCADCore.NTS
             loops.OfType<AcPolygon>().ForEach(l => l.TransformBy(transform));
             loops.OfType<AcPolygon>().ForEach(l =>
             {
-                l = Offset(l, -OFFSET_DISTANCE);
-                l = Offset(l, OFFSET_DISTANCE);
-                objs.Add(l);
+                var loop = RemoveSpikes(l);
+                if (loop != null)
+                {
+                    objs.Add(loop);
+                }
             });
             // 将结果恢复到原始位置
             var inverse = transform.Inverse();
@@ -62,9 +64,20 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        private static AcPolygon Offset(AcPolygon polygon, double distance)
+        private static AcPolygon RemoveSpikes(AcPolygon polygon)
         {
-            return polygon.Buffer(distance).OfType<AcPolygon>().OrderByDescending(o => o.Area).First();
+            var objs = polygon.Buffer(-OFFSET_DISTANCE);
+            if (objs.Count == 0)
+            {
+                return null;
+            }
+            var offset = objs.OfType<AcPolygon>().OrderByDescending(o => o.Area).First();
+            objs = offset.Buffer(OFFSET_DISTANCE);
+            if (objs.Count == 0)
+            {
+                return null;
+            }
+            return objs.OfType<AcPolygon>().OrderByDescending(o => o.Area).First();
         }
 
         private static Matrix3d GetToNearOriginMatrix(DBObjectCollection loops)
