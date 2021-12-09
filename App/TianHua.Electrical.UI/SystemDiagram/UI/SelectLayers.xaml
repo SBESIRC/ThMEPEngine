@@ -50,11 +50,18 @@
                     </Grid>
                 </RadioButton>
             </StackPanel>
-            <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
-                <ItemsControl x:Name="DrawingList" ItemsSource="{Binding DynamicOpenFiles}">
+            <StackPanel Orientation="Vertical" Margin="0,5,0,5"  Focusable="False">
+                <ItemsControl x:Name="DrawingList" MaxHeight="100" ItemsSource="{Binding DynamicOpenFiles}">
+                    <ItemsControl.Template>
+                        <ControlTemplate TargetType="ItemsControl">
+                            <ScrollViewer x:Name="ScrollViewer1" Padding="{TemplateBinding Padding}">
+                                <ItemsPresenter/>
+                            </ScrollViewer>
+                        </ControlTemplate>
+                    </ItemsControl.Template>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding ShowText}" IsChecked="{Binding IsChecked}" ToolTip="{Binding Content}"></CheckBox>
+                            <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="10,5,0,5" Padding="0" Content="{Binding ShowText}" IsChecked="{Binding IsChecked}" ToolTip="{Binding Content}"></CheckBox>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                     <ItemsControl.ItemsPanel>
@@ -202,7 +209,7 @@
         <StackPanel Grid.Row="7" Orientation="Vertical">
             <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
             <Label Content="请选择防火分区所在图层"></Label>
-            <ItemsControl x:Name="LayerList" ItemsSource="{Binding DynamicCheckBoxs}" MaxHeight="200">
+            <ItemsControl x:Name="LayerList" ItemsSource="{Binding DynamicCheckBoxs}" MaxHeight="100">
                 <ItemsControl.Template>
                     <ControlTemplate TargetType="ItemsControl">
                         <ScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}">
