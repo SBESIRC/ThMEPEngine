@@ -69,6 +69,10 @@ namespace ThMEPEngineCore.LaneLine
         protected static List<Line> NodingLines(DBObjectCollection curves)
         {
             var results = new List<Line>();
+            if(curves.Count==0)
+            {
+                return new List<Line>();
+            }
             var geometry = curves.ToNTSNodedLineStrings();
             if (geometry is LineString line)
             {
