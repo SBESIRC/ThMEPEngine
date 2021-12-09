@@ -16,6 +16,15 @@ namespace ThCADCore.NTS
         private const double OFFSET_DISTANCE = 20.0;
         private const double DISTANCE_TOLERANCE = 1.0;
 
+        public static List<Polygon> ToPolygons(this Hatch hatch)
+        {
+            var objs = new List<Polygon>();
+            hatch.ToNTSMultiPolygon().Geometries
+                .Cast<Polygon>()
+                .ForEach(o => objs.Add(o));
+            return objs;
+        }
+
         private static Geometry ToNTSGeometry(this Hatch hatch)
         {
             var loops = hatch.Boundaries().ToCollection();
@@ -33,7 +42,7 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static DBObjectCollection Normalize(DBObjectCollection loops)
+        private static DBObjectCollection Normalize(DBObjectCollection loops)
         {
             var objs = new DBObjectCollection();
             // NTS Buffer对于非常远的坐标（WCS下，>10E10)处理的不好
@@ -85,18 +94,6 @@ namespace ThCADCore.NTS
             {
                 throw new NotSupportedException();
             }
-        }
-        public static List<Polygon> ToPolygons(this Hatch hatch)
-        {
-            var objs = new List<Polygon>();
-            hatch.ToNTSMultiPolygon().Geometries
-                .Cast<Polygon>()
-                .ForEach(o => objs.Add(o));
-            if(objs.Count==0)
-            {
-
-            }
-            return objs;
         }
     }
 }

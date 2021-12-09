@@ -5,16 +5,16 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThCADExtension
+namespace ThCADCore.NTS
 {
-    public static class ThHatchTool
+    public static class ThCADCoreNTSHatchTool
     {
         // https://forums.autodesk.com/t5/net/restore-hatch-boundaries-if-they-have-been-lost-with-net/td-p/3779514
         // https://adndevblog.typepad.com/autocad/2012/04/perimeter-of-a-hatch-using-objectarx-and-autocad-net-api.html
-        public static List<Curve> Boundaries(this Hatch hatch,double tolerance=1e-4)
+        public static List<Curve> Boundaries(this Hatch hatch, double tolerance = 1e-4)
         {
             var curves = new List<Curve>();
-            if(hatch==null)
+            if (hatch == null)
             {
                 return curves;
             }
@@ -51,7 +51,7 @@ namespace ThCADExtension
                         var circle = ToCircle(hatchLoop.Curves);
                         if (circle.Area <= 1e-6)
                         {
-                            curves.Add(ToPolyline(hatchLoop.Curves,tolerance));
+                            curves.Add(ToPolyline(hatchLoop.Curves, tolerance));
                         }
                         else
                         {
@@ -70,14 +70,14 @@ namespace ThCADExtension
         {
             var first = curve2ds[0];
             var second = curve2ds[1];
-            if(first is CircularArc2d firstArc && second is CircularArc2d secondArc)
+            if (first is CircularArc2d firstArc && second is CircularArc2d secondArc)
             {
-                if(firstArc.StartPoint.GetDistanceTo(secondArc.StartPoint)<=1.0 &&
+                if (firstArc.StartPoint.GetDistanceTo(secondArc.StartPoint) <= 1.0 &&
                     firstArc.EndPoint.GetDistanceTo(secondArc.EndPoint) <= 1.0)
                 {
-                    return new Circle(new Point3d(firstArc.Center.X,firstArc.Center.Y,0),Vector3d.ZAxis,firstArc.Radius);
+                    return new Circle(new Point3d(firstArc.Center.X, firstArc.Center.Y, 0), Vector3d.ZAxis, firstArc.Radius);
                 }
-                else if(firstArc.StartPoint.GetDistanceTo(secondArc.EndPoint) <= 1.0 &&
+                else if (firstArc.StartPoint.GetDistanceTo(secondArc.EndPoint) <= 1.0 &&
                     firstArc.EndPoint.GetDistanceTo(secondArc.StartPoint) <= 1.0)
                 {
                     return new Circle(new Point3d(firstArc.Center.X, firstArc.Center.Y, 0), Vector3d.ZAxis, firstArc.Radius);

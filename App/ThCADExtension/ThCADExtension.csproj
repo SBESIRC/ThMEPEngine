@@ -49,7 +49,6 @@
     <Compile Include="ThDynamicBlockUtils.cs" />
     <Compile Include="ThEditorExtension.cs" />
     <Compile Include="ThExtents3dExtension.cs" />
-    <Compile Include="ThHatchTool.cs" />
     <Compile Include="ThBlockImageTool.cs" />
     <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThLinqExtension.cs" />

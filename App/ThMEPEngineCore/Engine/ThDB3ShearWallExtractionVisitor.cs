@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
-
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Engine
 {
