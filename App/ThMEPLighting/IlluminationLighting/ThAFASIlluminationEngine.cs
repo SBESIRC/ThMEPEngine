@@ -67,7 +67,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         private static void LayoutProcess(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThAFASIlluminationLayoutParameter layoutParameter, ThIlluminationCommon.LayoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
-            var blindType = BlindType.CoverArea;
+            var blindType = BlindType.VisibleArea;
             var radius = layoutParameter.radiusN;
             if (layoutType == ThIlluminationCommon.LayoutType.evacuation)
             {
