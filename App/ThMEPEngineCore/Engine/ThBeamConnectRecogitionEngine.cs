@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Engine
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
         public ThMEPOriginTransformer OriginTransformer { get; private set; }
         public ThColumnRecognitionEngine ColumnEngine { get; private set; } 
-        public ThDB3BeamRecognitionEngine BeamEngine { get; private set; }
+        public ThBeamBuilderEngine BeamEngine { get; private set; }
         public ThShearWallRecognitionEngine ShearWallEngine { get; private set; } 
 
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
@@ -71,8 +71,8 @@ namespace ThMEPEngineCore.Engine
             ShearWallEngine.Recognize(extractor2.Results, newPts);
 
             // 启动梁识别引擎
-            BeamEngine = new ThDB3BeamRecognitionEngine();
-            BeamEngine.Recognize(database, pts);
+            BeamEngine = new ThBeamBuilderEngine();
+            BeamEngine.Build(database, pts);
             BeamEngine.Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(OriginTransformer.Displacement));
         }
         private void Recognize()

@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -14,11 +15,22 @@ namespace ThMEPEngineCore.Engine
     {
         public ThBeamBuilderEngine()
         {
+            Elements = new List<ThIfcBuildingElement>();
         }
+
         public void Dispose()
         {
-        }    
-        
+
+        }
+
+        public DBObjectCollection Geometries
+        {
+            get
+            {
+                return Elements.Select(e => e.Outline).ToCollection();
+            }
+        }
+
         public override List<ThRawIfcBuildingElementData> Extract(Database db)
         {
             var res = new List<ThRawIfcBuildingElementData>();
@@ -86,6 +98,21 @@ namespace ThMEPEngineCore.Engine
             Elements = buildingElements
                 .OfType<ThIfcBuildingElement>()
                 .ToList();
+        }
+
+        public void ResetSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            spatialIndex.Reset(Geometries);
+        }
+
+        public IEnumerable<ThIfcBuildingElement> FilterByOutline(DBObjectCollection objs)
+        {
+            return Elements.Where(o => objs.Contains(o.Outline));
+        }
+
+        public ThIfcBuildingElement FilterByOutline(DBObject obj)
+        {
+            return Elements.Where(o => o.Outline.Equals(obj)).FirstOrDefault();
         }
     }
 }

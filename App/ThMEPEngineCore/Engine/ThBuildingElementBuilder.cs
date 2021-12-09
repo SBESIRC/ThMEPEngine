@@ -1,5 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 
@@ -9,7 +9,6 @@ namespace ThMEPEngineCore.Engine
     {
         protected const double AREATOLERANCE = 1.0;
         protected const double BUFFERTOLERANCE = 1.0;
-
         public List<ThIfcBuildingElement> Elements { get; set; }
 
         public abstract void Build(Database db, Point3dCollection pts);
