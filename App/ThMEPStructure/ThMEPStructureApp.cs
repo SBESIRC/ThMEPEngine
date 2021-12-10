@@ -9,7 +9,6 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command;
 
 namespace ThMEPStructure
 {

@@ -63,7 +63,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         public void Start()
         {
             int[] CurrentBoard = new int[Nodes.Count];
-            var scoreCache = new int[PlayerCount,4]; // Row:PlayerCount Cell:4
+            var scoreCache = new int[PlayerCount,5]; // Row:PlayerCount Cell:4
             PlayChess(CurrentBoard, scoreCache);
         }
 
@@ -74,16 +74,16 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 //有棋子还没有落子，游戏继续
                 for (int i = 0; i < PlayerCount; i++)
                 {
-                    if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3])
-                    {
-                        //连续三步都是'差'的操作，则剪枝，不再考虑后续的走动
-                        return;
-                    }
-                    //if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3] && scoreCache[i, 3] > scoreCache[i, 4])
+                    //if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3])
                     //{
-                    //    //连续四步都是'差'的操作，则剪枝，不再考虑后续的走动
+                    //    //连续三步都是'差'的操作，则剪枝，不再考虑后续的走动
                     //    return;
                     //}
+                    if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3] && scoreCache[i, 3] > scoreCache[i, 4])
+                    {
+                        //连续四步都是'差'的操作，则剪枝，不再考虑后续的走动
+                        return;
+                    }
                 }
                 for (int i = 0; i < PlayerCount; i++)
                 {
@@ -101,12 +101,33 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                                 //此棋盘已存在
                                 continue;
                             }
-                            CheckerboardCache.Add(NewcurrentBoard, 0);
+                            if(Array.IndexOf(NewcurrentBoard, 0) >= 0)
+                            {
+                                CheckerboardCache.Add(NewcurrentBoard, 0);
+                            }
+                            else
+                            {
+                                var NewFraction = Evaluation(NewcurrentBoard);
+                                CheckerboardCache.Add(NewcurrentBoard, NewFraction);
+                                continue;
+                            }
 
                             var NewcurrentBoardClone = new int[Nodes.Count];
                             NewcurrentBoard.CopyTo(NewcurrentBoardClone, 0);
                             NewcurrentBoardClone = EliminateDents(i + 1, NewcurrentBoardClone);
                             NewcurrentBoardClone = AdjustCurrentBoard(NewcurrentBoardClone);
+                            //if (!NewcurrentBoard.SequenceEqual(NewcurrentBoardClone))
+                            //{
+                            //    if (CheckerboardCache.Keys.Any(o => o.SequenceEqual(NewcurrentBoardClone)))
+                            //    {
+                            //        //此棋盘已存在
+                            //        continue;
+                            //    }
+                            //}
+                            //else
+                            //{
+                            //    CheckerboardCache.Remove(NewcurrentBoard);
+                            //}
                             if (CheckerboardCache.Keys.Any(o => o.SequenceEqual(NewcurrentBoardClone)))
                             {
                                 //此棋盘已存在
@@ -116,12 +137,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                             CheckerboardCache.Add(NewcurrentBoardClone, Fraction);
 
                             var NewScore = scoreCache.Clone() as int[,];
-                            NewScore[i, 0] = NewScore[i, 1];
-                            NewScore[i, 1] = NewScore[i, 2];
-                            NewScore[i, 2] = NewScore[i, 3];
-                            //NewScore[i, 3] = NewScore[i, 4];
-                            //NewScore[i, 4] = Fraction;
-                            NewScore[i, 3] = Fraction;
+                            NewScore[0, 0] = NewScore[0, 1];
+                            NewScore[0, 1] = NewScore[0, 2];
+                            NewScore[0, 2] = NewScore[0, 3];
+                            NewScore[0, 3] = NewScore[0, 4];
+                            NewScore[0, 4] = Fraction;
+                            //NewScore[i, 3] = Fraction;
                             PlayChess(NewcurrentBoardClone, NewScore);
                         }
                     }
@@ -233,15 +254,20 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 }
                 var unionPolygon = Pieces.UnionPolygon(UnionPolygonDic[index]);
                 var ConvexPolyline = unionPolygon.ConvexHullPL();
-                var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                var polyline = ConvexPolyline.Buffer(-2000)[0] as Polyline;
                 var objs = SpatialIndex.SelectFence(polyline);
                 foreach (Polyline obj in objs)
                 {
                     var nodeindex = Nodes.FindIndex(o => o.Boundary.Equals(obj));
                     if (nodeindex > -1 && currentBoard[nodeindex] == 0)
                     {
-                        Signal = true;
-                        currentBoard[nodeindex] = index;
+                        var NewUnionPolygon = Nodes[nodeindex].UnionPolygon(unionPolygon);
+                        var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                        if (NewUnionPolygon.Area / NewConvexPolyline.Area > unionPolygon.Area / ConvexPolyline.Area)
+                        {
+                            Signal = true;
+                            currentBoard[nodeindex] = index;
+                        }
                     }
                 }
             }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.CAD;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
@@ -45,7 +46,13 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
             }
             else
             {
-                throw new Exception("未正确识别出该梁隔区域!");
+                //throw new Exception("未正确识别出该梁隔区域!");
+                using(Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                {
+                    var a = Boundary.Buffer(-10)[0] as Polyline;
+                    a.ColorIndex = 2;
+                    acad.ModelSpace.Add(a);
+                }
             }
         }
 
@@ -56,6 +63,18 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 var layout = this.LayoutLines;
                 this.LayoutLines = this.SpareLayoutLines;
                 this.SpareLayoutLines = layout;
+            }
+        }
+
+        public void Upgrade()
+        {
+            if (this.HaveLayoutBackUp)
+            {
+                var layout = this.LayoutLines;
+                layout.SecondaryBeamLines = new List<Line>();
+                layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetOnethirdPt(), layout.edges[1].TrueSide.GetTwothirdPt()));
+                layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetTwothirdPt(), layout.edges[1].TrueSide.GetOnethirdPt()));
+                this.LayoutLines = layout;
             }
         }
 

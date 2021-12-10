@@ -18,7 +18,6 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
     public class ThBeamTopologyGraph
     {
         public List<ThBeamTopologyNode> Nodes;
-        private Dictionary<Vector3d, List<ThBeamTopologyNode>> groupNodes;
         /// <summary>
         /// 构图
         /// </summary>
@@ -39,6 +38,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
             foreach (var node in Nodes)
             {
                 node.MappingBeam();
+            }
+            Nodes = Nodes.Where(o => o.Edges.Count > 0).ToList();
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                var node = Nodes[i];
+                node.Neighbor.RemoveAll(o => o.Item2.Edges.Count == 0);
             }
         }
 
@@ -76,10 +81,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         public void AdjustmentDirection()
         {
             //分类，划分区隔
-            DrawGraph(Matrix3d.Displacement(new Vector3d(200000,0,0)));
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(200000,0,0)));
             CorrectWrongDir();
-            DrawGraph(Matrix3d.Displacement(new Vector3d(400000, 0, 0)));
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(400000, 0, 0)));
             GroupBeamNodes();
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(-200000, 0, 0)));
+            AdjustSingleBeam();
         }
 
         /// <summary>
@@ -106,8 +113,75 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         node.SwapLayout();
                         NextNodes.AddRange(node.Neighbor.Select(o => o.Item2));
                     }
+                    else if(JunctionCount == SpareJunctionCount)
+                    {
+                        JunctionCount = node.Neighbor.Count(o => o.Item2.CheckCurrentPixel(node));
+                        node.SwapLayout();
+                        SpareJunctionCount= node.Neighbor.Count(o => o.Item2.CheckCurrentPixel(node));
+                        if(JunctionCount >= SpareJunctionCount)
+                        {
+                            node.SwapLayout();
+                        }
+                        else
+                        {
+                            NextNodes.AddRange(node.Neighbor.Select(o => o.Item2));
+                        }
+                    }
                 }
                 nodes = NextNodes.Distinct().ToList();
+            }
+        }
+
+        /// <summary>
+        /// 调整部分单梁
+        /// </summary>
+        private void AdjustSingleBeam()
+        {
+            var nodes = this.Nodes;
+            var Checknodes = nodes.Where(o => o.LayoutLines.SecondaryBeamLines.Count == 1);
+            var node = Checknodes.FirstOrDefault();
+            while (!node.IsNull())
+            {
+                var leftNodeList = new List<ThBeamTopologyNode>();
+                var rightNodeList = new List<ThBeamTopologyNode>();
+                var leftnode = FindNodeLink(node, node.LayoutLines.edges[0].BeamSide, ref leftNodeList);
+                var rightnode = FindNodeLink(node, node.LayoutLines.edges[1].BeamSide, ref rightNodeList);
+                if (!leftnode.IsNull() && !rightnode.IsNull() && leftNodeList.Count + rightNodeList.Count < 3 && leftnode.CheckCurrentPixel(node) && rightnode.CheckCurrentPixel(node))
+                {
+                        var nodelist = leftNodeList.Union(rightNodeList).ToList();
+                        nodelist.Add(node);
+                        nodelist.ForEach(o =>o.Upgrade());
+                        Checknodes = Checknodes.Except(nodelist);
+                }
+                else
+                {
+                    var nodelist = leftNodeList.Union(rightNodeList).ToList();
+                    nodelist.Add(node);
+                    Checknodes = Checknodes.Except(nodelist);
+                }
+                node = Checknodes.FirstOrDefault();
+            }
+        }
+
+        private ThBeamTopologyNode FindNodeLink(ThBeamTopologyNode node, Line beamSide,ref List<ThBeamTopologyNode> nodes)
+        {
+            var neighbor = node.Neighbor.FirstOrDefault(o => o.Item1 == beamSide);
+            if(!neighbor.IsNull())
+            {
+                if (neighbor.Item2.LayoutLines.SecondaryBeamLines.Count == 1 && neighbor.Item2.LayoutLines.edges.Any(o => o.BeamSide == beamSide))
+                {
+                    nodes.Add(neighbor.Item2);
+                    var newSide = neighbor.Item2.LayoutLines.edges.First(o => o.BeamSide != beamSide).BeamSide;
+                    return FindNodeLink(neighbor.Item2, newSide, ref nodes);
+                }
+                else
+                {
+                    return neighbor.Item2;
+                }
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -124,17 +198,17 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 int index = 1;
                 using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {
-                    foreach (var item in algorithm.Aggregatespace)
-                    {
-                        foreach (var a in item)
-                        {
-                            var entity = a.Boundary.Clone() as Polyline;
-                            entity = entity.Buffer(-500)[0] as Polyline;
-                            entity.ColorIndex = index;
-                            acad.ModelSpace.Add(entity);
-                        }
-                        index=index%3 +1;
-                    }
+                    //foreach (var item in algorithm.Aggregatespace)
+                    //{
+                    //    foreach (var a in item)
+                    //    {
+                    //        var entity = a.Boundary.Clone() as Polyline;
+                    //        entity = entity.Buffer(-500)[0] as Polyline;
+                    //        entity.ColorIndex = index;
+                    //        acad.ModelSpace.Add(entity);
+                    //    }
+                    //    index=index % 11 +1;
+                    //}
 
                     //foreach (var item in algorithm.Adjustmentspace)
                     //{
@@ -160,27 +234,30 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
             //GeneticAlgorithm genetic = new GeneticAlgorithm(algorithm.Aggregatespace, algorithm.Adjustmentspace[3]);
             //genetic.Run();
 
+            //启用博弈树算法
             foreach (var space in algorithm.Adjustmentspace)
             {
-                var neighber = algorithm.Aggregatespace.Where(o => o.IsNeighbor(space)).OrderByDescending(o=>o.Count).ToList();
-                BeamGameTreeAlgorithm gameTree = new BeamGameTreeAlgorithm(neighber, space);
+                var neighber = algorithm.Aggregatespace.Where(o => o.IsNeighbor(space)).OrderByDescending(o => o.Count).ToList();
+                BeamGameTreeAlgorithm_Clone gameTree = new BeamGameTreeAlgorithm_Clone(neighber, space);
                 gameTree.Start();
-                var Result = gameTree.ChessGameResult;
-                if (!Result.IsNull())
-                {
-                    for (int i = 0; i < Result.Length; i++)
-                    {
-                        var node = space[i];
-                        if(!node.CheckCurrentPixel(neighber[Result[i] - 1].First()))
-                        {
-                            node.SwapLayout();
-                        }
-                    }
-                }
-                else
-                {
-                    //throw new NotImplementedException();
-                }
+                gameTree.Revise();
+                //var Result = gameTree.ChessGameResult;
+                ////var a = gameTree.CheckerboardCache.Where(o => Array.IndexOf(o.Key, 0) < 0).OrderByDescending(o => o.Value).ToList();
+                //if (!Result.IsNull())
+                //{
+                //    for (int i = 0; i < Result.Length; i++)
+                //    {
+                //        var node = space[i];
+                //        if (!node.CheckCurrentPixel(neighber[Result[i] - 1].First()))
+                //        {
+                //            node.SwapLayout();
+                //        }
+                //    }
+                //}
+                //else
+                //{
+                //    //throw new NotImplementedException();
+                //}
             }
 
         }
@@ -210,58 +287,65 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
 
         private void BuildGraph(Dictionary<Polyline, ThBeamTopologyNode> spaceDic, List<Line> beams, List<Line> assists)
         {
-            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(spaceDic.Keys.ToCollection());
-            foreach (var beam in beams)
+            try
             {
-                Point3d center = beam.GetCenterPt();
-                var square = center.CreateSquare(25);
-                var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
-                if (fence.Count > 2)
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(spaceDic.Keys.ToCollection());
+                foreach (var beam in beams)
                 {
-                    throw new NotImplementedException();
-                }
-                else if (fence.Count == 2)
-                {
-                    ThBeamTopologyNode node1 = spaceDic[fence[0]];
-                    ThBeamTopologyNode node2 = spaceDic[fence[1]];
-                    node1.UseBeams.Add(beam);
-                    node2.UseBeams.Add(beam);
-                    node1.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(beam, node2));
-                    node2.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(beam, node1));
-                }
-                else if (fence.Count == 1)
-                {
-                    ThBeamTopologyNode node1 = spaceDic[fence[0]];
-                    node1.UseBeams.Add(beam);
-                }
-                else
-                {
+                    Point3d center = beam.GetCenterPt();
+                    var square = center.CreateSquare(25);
+                    var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
+                    if (fence.Count > 2)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else if (fence.Count == 2)
+                    {
+                        ThBeamTopologyNode node1 = spaceDic[fence[0]];
+                        ThBeamTopologyNode node2 = spaceDic[fence[1]];
+                        node1.UseBeams.Add(beam);
+                        node2.UseBeams.Add(beam);
+                        node1.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(beam, node2));
+                        node2.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(beam, node1));
+                    }
+                    else if (fence.Count == 1)
+                    {
+                        ThBeamTopologyNode node1 = spaceDic[fence[0]];
+                        node1.UseBeams.Add(beam);
+                    }
+                    else
+                    {
 
+                    }
+                }
+                foreach (var assist in assists)
+                {
+                    Point3d center = assist.GetCenterPt();
+                    var square = center.CreateSquare(25);
+                    var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
+                    if (fence.Count > 2)
+                    {
+                        throw new NotImplementedException();
+                    }
+                    else if (fence.Count == 2)
+                    {
+                        ThBeamTopologyNode node1 = spaceDic[fence[0]];
+                        ThBeamTopologyNode node2 = spaceDic[fence[1]];
+                        node1.Assists.Add(assist);
+                        node2.Assists.Add(assist);
+                        node1.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(assist, node2));
+                        node2.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(assist, node1));
+                    }
+                    else if (fence.Count == 1)
+                    {
+                        ThBeamTopologyNode node1 = spaceDic[fence[0]];
+                        node1.Assists.Add(assist);
+                    }
                 }
             }
-            foreach (var assist in assists)
+            catch (Exception ex)
             {
-                Point3d center = assist.GetCenterPt();
-                var square = center.CreateSquare(25);
-                var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
-                if (fence.Count > 2)
-                {
-                    throw new NotImplementedException();
-                }
-                else if (fence.Count == 2)
-                {
-                    ThBeamTopologyNode node1 = spaceDic[fence[0]];
-                    ThBeamTopologyNode node2 = spaceDic[fence[1]];
-                    node1.Assists.Add(assist);
-                    node2.Assists.Add(assist);
-                    node1.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(assist, node2));
-                    node2.Neighbor.Add(new Tuple<Line, ThBeamTopologyNode>(assist, node1));
-                }
-                else if (fence.Count == 1)
-                {
-                    ThBeamTopologyNode node1 = spaceDic[fence[0]];
-                    node1.Assists.Add(assist);
-                }
+
             }
         }
 

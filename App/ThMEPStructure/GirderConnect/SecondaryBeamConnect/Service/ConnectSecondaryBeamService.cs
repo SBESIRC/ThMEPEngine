@@ -16,8 +16,14 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
     {
         public static void ConnectSecondaryBeam(List<Line> mainbeam, List<Line> assists)
         {
+            mainbeam= mainbeam.Where(o => o.Length > 10).ToList();
+            assists= assists.Where(o => o.Length > 10).ToList();
             List<Line> entitys = mainbeam.Union(assists).Select(o => o.ExtendLine(1)).ToList();
-            var space = entitys.ToCollection().PolygonsEx().Cast<Polyline>().Select(o=>o.DPSimplify(10)).Where(o=>o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000).ToList();
+            var space = entitys.ToCollection().PolygonsEx().Cast<Polyline>().Select(o => o.DPSimplify(10)).Where(o => o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000).ToList();
+            if (mainbeam.Count == 0 || space.Count == 0)
+            {
+                return;
+            }
             ThBeamTopologyGraph Beamgraph = new ThBeamTopologyGraph();
             Beamgraph.CreatGraph(space, mainbeam, assists);
             Beamgraph.PolygonSecondaryBeamLayout();

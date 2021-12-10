@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
 
-namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command
+namespace ThMEPStructure.GirderConnect.Command
 {
     public class SecondaryBeamConnectCmd : ThMEPBaseCommand, IDisposable
     {
@@ -29,13 +29,21 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command
             {
                 var ordinaryBeam = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "xk-ceshi" && o.ColorIndex !=90)
+                //.Where(o => o.Layer == "xk-ceshi" && o.ColorIndex !=90)
+                .Where(o => o.Layer == "TH_AI_BEAM")
                 .ToList();
 
+                var OutLineBeam = acad.ModelSpace
+                .OfType<Line>()
+                //.Where(o => o.Layer == "xk-ceshi" && o.ColorIndex !=90)
+                .Where(o => o.Layer == "TH_AI_WALLBOUND")
+                .ToList();
+                ordinaryBeam = ordinaryBeam.Union(OutLineBeam).ToList();
 
                 var brinkBeam = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "xk-ceshi" && o.ColorIndex == 90)
+                //.Where(o => o.Layer == "xk-ceshi" && o.ColorIndex == 90)
+                .Where(o => o.Layer == "TH_AI_HOUSEBOUND")
                 .ToList();
 
                 ConnectSecondaryBeamService.ConnectSecondaryBeam(ordinaryBeam, brinkBeam);
