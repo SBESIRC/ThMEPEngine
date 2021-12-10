@@ -790,12 +790,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="tolerance"></param>
-        public static void ReduceSimilarLine(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double tolerance = Math.PI / 15)
+        public static void ReduceSimilarLine(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double tolerance = Math.PI / 8)
         {
             foreach (var dic in dicTuples)
             {
                 int n = dic.Value.Count;
-                if(n <= 1)
+                if (n <= 1)
                 {
                     continue;
                 }
@@ -807,6 +807,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 double curDegree;
                 for (int i = 1; i <= n; ++i)
                 {
+                    if(cntPts[i % n].DistanceTo(cntPts[i - 1]) < 1.0)
+                    {
+                        continue;
+                    }
                     curDegree = (cntPts[i % n] - dic.Key).GetAngleTo(cntPts[i - 1] - dic.Key);
                     if (curDegree < minDegree)
                     {
@@ -814,7 +818,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         minDegreePairPt = new Tuple<Point3d, Point3d>(cntPts[i % n], cntPts[i - 1]);
                     }
                 }
-                if(minDegree > tolerance)
+                if (minDegree > tolerance)
                 {
                     continue;
                 }
@@ -827,8 +831,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     rmPt = minDegreePairPt.Item2;
                 }
+                //ShowInfo.DrawLine(dic.Key, rmPt, 210);
                 --n;
                 dic.Value.Remove(rmPt);
+                //if (dicTuples.ContainsKey(rmPt) && dicTuples[rmPt].Contains(dic.Key))
+                //{
+                //    dicTuples[rmPt].Remove(dic.Key);
+                //}
             }
         }
 
@@ -909,6 +918,62 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     dicTuples[closePt].Add(minDisBasePt);
                 }
             }
+        }
+        public static List<Point3d> ReduceSimilarPoints(List<Point3d> pts, List<Point3d> basePoints = null, double tolerance = 900)
+        {
+            var ptVisted = new HashSet<Point3d>();
+            List<Point3d> ansPts = new List<Point3d>();
+            foreach (var ptA in pts)
+            {
+                if (ptVisted.Contains(ptA))
+                {
+                    continue;
+                }
+                ptVisted.Add(ptA);
+                var closePtlist = new List<Point3d>();
+                double xSum = ptA.X;
+                double ySum = ptA.Y;
+                closePtlist.Add(ptA);
+                int cnt = 1;
+                foreach (var ptB in pts)
+                {
+                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance)
+                    {
+                        if (!ptVisted.Contains(ptB))
+                        {
+                            ptVisted.Add(ptB);
+                        }
+                        closePtlist.Add(ptB);
+                        //DeleteFromDicTuples(ptA, ptB, ref dicTuples);
+                        
+                        xSum += ptB.X;
+                        ySum += ptB.Y;
+                        ++cnt;
+                    }
+                }
+                if (cnt == 1)
+                {
+                    ansPts.Add(ptA);
+                    continue;
+                }
+                Point3d centerPt = new Point3d(xSum / cnt, ySum / cnt, 0);
+                double minDis = double.MaxValue;
+                Point3d minDisBasePt = centerPt;
+                if (basePoints != null)
+                {
+                    foreach (var basePt in basePoints)
+                    {
+                        var curDis = basePt.DistanceTo(centerPt);
+                        if (curDis < tolerance && curDis < minDis)
+                        {
+                            minDisBasePt = basePt;
+                            minDis = curDis;
+                        }
+                    }
+                }
+                ansPts.Add(minDisBasePt);
+            }
+            return ansPts;
         }
 
         /// <summary>

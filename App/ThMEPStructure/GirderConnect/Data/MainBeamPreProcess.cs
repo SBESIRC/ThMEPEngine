@@ -31,8 +31,8 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <param name="outlineClumns"></param>
-        public static void MPreProcess(List<Entity> outsideColumns, Dictionary<Entity, HashSet<Entity>> shearwallGroupDict, Dictionary<Entity, HashSet<Entity>> columnGroupDict,
-            List<Entity> outsideShearwall, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        public static void MPreProcess(List<Entity> outsideColumns, Dictionary<Entity, HashSet<Entity>> shearwallGroupDict, Dictionary<Entity, HashSet<Entity>> columnGroupDict, List<Entity> outsideShearwall, Point3dCollection clumnPts, 
+            ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
             //0、内部柱分类
             //columnGroupDict->outlineWalls/outlinePlColumns
@@ -64,8 +64,8 @@ namespace ThMEPStructure.GirderConnect.Data
             DataClassify.ClassifyOutlineWalls(outlineWalls, outlineClumns);
 
             //2、对于房间外的事物（wall & column）
-            //outsideColumns & outsideShearwall -> clumnPts & outlineWalls
-            DataClassify.OuterClassify(outsideColumns, clumnPts, ref outlineWalls, outsideShearwall);
+            //outsideColumns & outsideShearwall -> clumnPts & outerWalls
+            DataClassify.OuterClassify(outsideColumns, outsideShearwall, clumnPts, ref outerWalls, ref olCrossPts);
         }
     }
 }

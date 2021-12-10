@@ -64,13 +64,16 @@ namespace ThMEPStructure.GirderConnect.Command
                 Point3dCollection clumnPts = new Point3dCollection();
                 var outlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
+                var outerWalls = new Dictionary<Polyline, HashSet<Polyline>>();
+                var olCrossPts = new Dictionary<Polyline, HashSet<Point3d>>();
 
                 //处理算法输入
-                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
-                    outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
+                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
+                    clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
 
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 5);
                 //计算
-                var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
+                var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
 
                 //处理算法输出
                 MainBeamPostProcess.MPostProcess(dicTuples);

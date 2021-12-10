@@ -65,6 +65,11 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 var objs = o.Value.ToCollection();
                 var newObjs = objs.UnionPolygons();
                 var inners = newObjs.OfType<Polyline>().ToHashSet();
+                //result.Add(o.Key, new HashSet<Polyline>());
+                //foreach(var inner in inners)
+                //{
+                //    result[o.Key].Add(inner.DPSimplify(1));
+                //}
                 result.Add(o.Key, inners);
             });
             return result;
@@ -153,6 +158,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             foreach (var outlinePlColumn in outlinePlColumns)
             {
                 var outline = outlinePlColumn.Key;
+                //var newOutline = outlinePlColumn.Key.DPSimplify(1);
                 if (!outlineWalls.ContainsKey(outline))
                 {
                     outlineWalls.Add(outline, new HashSet<Polyline>());

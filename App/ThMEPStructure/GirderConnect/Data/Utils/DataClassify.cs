@@ -15,6 +15,8 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.Service;
 using NFox.Cad;
+using ThMEPEngineCore.Algorithm;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
 {
@@ -56,15 +58,14 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             {
                 if (curve is Polyline polyline)
                 {
-                    var newPolyline = polyline.DPSimplify(1);
-                    newPolyline.Closed = true;
-                    if (IsColumns(newPolyline))
+                    polyline.Closed = true;
+                    if (IsColumns(polyline))
                     {
-                        columns.Add(newPolyline.GetCentroidPoint());
+                        columns.Add(polyline.GetCentroidPoint());
                     }
                     else
                     {
-                        walls.Add(newPolyline);
+                        walls.Add(polyline);
                     }
                 }
             }
@@ -95,18 +96,17 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <param name="outsideShearwall"></param>
-        public static void OuterClassify(List<Entity> outsideColumns, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, List<Entity> outsideShearwall)
+        public static void OuterClassify(List<Entity> outsideColumns, List<Entity> outsideShearwall, 
+            Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
             Dictionary<Polyline, bool> plColumnVisted = new Dictionary<Polyline, bool>();
             foreach (var outsideColumn in outsideColumns)
             {
                 if (outsideColumn is Polyline pl)
                 {
-                    var newPl = pl.DPSimplify(1);
-                    if (!plColumnVisted.ContainsKey(newPl))
+                    if (!plColumnVisted.ContainsKey(pl))
                     {
-
-                        plColumnVisted.Add(newPl, false);
+                        plColumnVisted.Add(pl, false);
                     }
                 }
             }
@@ -116,9 +116,8 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 if (entity is Polyline polyline)
                 {
                     polyline.Closed = true;
-                    //var mergedPolyline = polyline;
-
                     DBObjectCollection mergeCollection = new DBObjectCollection();
+                    List<Point3d> olCrossPt = PointsDealer.CrossPointsOnPolyline(polyline, 100);
                     mergeCollection.Add(polyline);
                     foreach (var polylineColumn in polylineColumns)
                     {
@@ -128,11 +127,11 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                             plColumnVisted[polylineColumn] = true;
                         }
                     }
-                    //mergedPolyline = mergeCollection.Fix().UnionPolygons().OfType<Polyline>().FirstOrDefault();
                     var simplifiedPolyline = mergeCollection.UnionPolygons().OfType<Polyline>().FirstOrDefault().DPSimplify(1);
                     if (simplifiedPolyline != null)
                     {
-                        DataProcess.AddOutline(simplifiedPolyline, ref outlineWalls);
+                        DataProcess.AddOutline(simplifiedPolyline, ref outerWalls);
+                        olCrossPts.Add(simplifiedPolyline, olCrossPt.ToHashSet());
                     }
                 }
             }
@@ -162,20 +161,18 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 var columnGroupKey = columnGroup.Key;
                 if (columnGroupKey is Polyline outline)
                 {
-                    var newOutline = outline.DPSimplify(1);
-                    if (!outlineWalls.ContainsKey(newOutline))
+                    if (!outlineWalls.ContainsKey(outline))
                     {
-                        outlineWalls.Add(newOutline, new HashSet<Polyline>());
+                        outlineWalls.Add(outline, new HashSet<Polyline>());
                     }
-                    if (!outlinePlColumns.ContainsKey(newOutline))
+                    if (!outlinePlColumns.ContainsKey(outline))
                     {
-                        outlinePlColumns.Add(newOutline, new HashSet<Polyline>());
+                        outlinePlColumns.Add(outline, new HashSet<Polyline>());
                     }
-                    Classify(columnGroup.Value, outlinePlColumns[newOutline], outlineWalls[newOutline]);
+                    Classify(columnGroup.Value, outlinePlColumns[outline], outlineWalls[outline]);
                 }
             }
         }
-
 
         /// <summary>
         /// 判断是否形似矩形

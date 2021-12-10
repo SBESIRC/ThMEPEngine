@@ -26,6 +26,8 @@ using NFox.Cad;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
+using QuickGraph.Algorithms;
+
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -168,7 +170,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 if (!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
                                 {
                                     pl2pts.Value.Add(pt);
-                                    //ShowInfo.ShowPointAsO(pt, 230, 300);
+                                    ShowInfo.ShowPointAsX(pt, 2, 500);
                                 }
                             }
                         }
@@ -305,13 +307,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Dictionary<Point3d, bool> visitPt = new Dictionary<Point3d, bool>();
             foreach(var point in points)
             {
-                visitPt.Add(point, false);
+                if (!visitPt.ContainsKey(point))
+                {
+                    visitPt.Add(point, false);
+                }
             }
             foreach(var ptA in points)
             {
                 if(visitPt[ptA] == false)
                 {
                     visitPt[ptA] = true;
+                    ansPts.Add(ptA);
                     foreach(var ptB in points)
                     {
                         if (visitPt[ptB] == false && ptA.DistanceTo(ptB) < deviation)
@@ -330,7 +336,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="points"></param>
         /// <param name="outline"></param>
         /// <param name="maxDis"></param>
-        public static void RemovePointsFarFromOutline(List<Point3d> points, Polyline outline, double maxDis = 600)
+        public static void RemovePointsFarFromOutline(ref List<Point3d> points, Polyline outline, double maxDis = 600)
         {
             List<Point3d> tmpPoints = new List<Point3d>();
             tmpPoints.AddRange(points);
@@ -340,6 +346,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (curDis > maxDis)
                 {
                     points.Remove(pt);
+                    ShowInfo.ShowPointAsU(pt, 2);
                 }
             }
         }
@@ -440,6 +447,25 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
+        /// 寻找窄条形状的多边形的折角点
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="tolerence"></param>
+        /// <returns></returns>
+        public static List<Point3d> CrossPointsOnPolyline(Polyline polyline, double tolerence = 100)
+        {
+            List<Point3d> ansList = new List<Point3d>();
+            var lines = ThMEPPolygonService.CenterLine(polyline.ToNTSPolygon().ToDbMPolygon());
+            foreach (var line in lines)
+            {
+                ansList.Add(line.StartPoint);
+                ansList.Add(line.EndPoint);
+            }
+            ansList = RemoveSimmilerPoint(ansList, tolerence);
+            return ansList;
+        }
+
+        /// <summary>
         /// Judge wether a point is a cross point
         /// </summary>
         /// <param name="pt"></param>
@@ -503,7 +529,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="outline2BorderNearPts"></param>
         /// <param name="allConnects"></param>
-        public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> allConnects)
+        public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> connects)
         {
             foreach(var outline2BorderNearPt in outline2BorderNearPts)
             {
@@ -511,9 +537,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 foreach(var border2NearPts in outline2BorderNearPt.Value)
                 {
                     var borderPt = border2NearPts.Key;
-                    if (allConnects.ContainsKey(borderPt))
+                    if (connects.ContainsKey(borderPt))
                     {
-                        foreach(var pt in allConnects[borderPt])
+                        foreach(var pt in connects[borderPt])
                         {
                             if (!outline2BorderNearPt.Value.ContainsKey(pt) && !border2NearPts.Value.Contains(pt))
                             {
@@ -523,6 +549,33 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 生成一种数据结构，可以通过外框线找到其包含的边界点
+        /// </summary>
+        /// <param name="outlines"></param>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points)
+        {
+            var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
+            foreach(var outline in outlines)
+            {
+                if (!outline2BorderPts.ContainsKey(outline))
+                {
+                    outline2BorderPts.Add(outline, new HashSet<Point3d>());
+                }
+                foreach(var point in points)
+                {
+                    Polyline newOutline = outline.Buffer(500)[0] as Polyline;
+                    if (!outline2BorderPts[outline].Contains(point) && newOutline.ContainsOrOnBoundary(point))
+                    {
+                        outline2BorderPts[outline].Add(point);
+                    }
+                }
+            }
+            return outline2BorderPts;
         }
     }
 }

@@ -28,7 +28,7 @@ namespace ThMEPStructure
         /// <summary>
         /// 生成主梁
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSCZL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THZLSC", CommandFlags.Modal)]
         public void THZLSC()
         {
             using (var cmd = new ThBeamConnectorCommand())
@@ -40,7 +40,7 @@ namespace ThMEPStructure
         /// <summary>
         /// 生成次梁
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSCCL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THCLSC", CommandFlags.Modal)]
         public void THCLSC()
         {
             using (var cmd = new SecondaryBeamConnectCmd())

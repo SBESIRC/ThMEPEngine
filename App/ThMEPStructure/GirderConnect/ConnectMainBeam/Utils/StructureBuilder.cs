@@ -29,9 +29,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
             var voronoiDiagram = new VoronoiDiagramBuilder();
             voronoiDiagram.SetSites(points.ToNTSGeometry());
-
-            //foreach (Polygon polygon in voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory).Geometries) //Same use as fallow
-            foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
+            var xx = ThCADCoreNTSService.Instance.GeometryFactory;
+            foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow
+            //foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
             {
                 if (polygon.IsEmpty)
                 {
@@ -302,15 +302,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     tmpFstPts.Clear();
                     tmpThdPts.Clear();
                     //CenterLine.WallEdgePoint(wall.ToNTSPolygon(), 100, ref tmpFstPts, ref tmpThdPts);
-                    PointsDealer.WallCrossPoint(wall.ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                    PointsDealer.WallCrossPoint(wall.DPSimplify(1).ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
                     fstPtsS.AddRange(tmpFstPts);
                     outline2ZeroPts[curOutline].AddRange(tmpFstPts); /////////////////////这里可能重复添加了，可能需要进行单一化那个函数
                 }
                 outPts = PointsDealer.OutPoints(curOutline);
-                PointsDealer.RemovePointsFarFromOutline(fstPts, curOutline);
-                PointsDealer.RemovePointsFarFromOutline(thdPts, curOutline);
+                PointsDealer.RemovePointsFarFromOutline(ref fstPts, curOutline);
+                PointsDealer.RemovePointsFarFromOutline(ref thdPts, curOutline);
 
                 foreach (Point3d nearPt in tmpNearPts)
                 {
@@ -614,18 +614,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return cnt;
-        }
-
-        public static void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
-        {
-            //连接不同的边界
-            //点上的连接至少为1
-
-            //连接相同的边界
-            //连接逻辑：
-            //保留连接线中点不在这个边界内的线
-            //连接线两端的点不在同一条直线上
-            //同线判定：(（a到lineA<500 && b到lineA<500）||（b到lineB<500 && a到lineB<500）)  lineA\lineB分别为a\b最近的线
         }
     }
 }
