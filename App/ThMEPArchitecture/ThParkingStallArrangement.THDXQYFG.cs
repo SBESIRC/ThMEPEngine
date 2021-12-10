@@ -9,7 +9,7 @@ using ThMEPArchitecture.ParkingStallArrangement;
 namespace ThMEPArchitecture
 {
 
-        public partial class ThParkingStallArrangement
+    public partial class ThParkingStallArrangement
     {
             [CommandMethod("TIANHUACAD", "-THDXQYFG", CommandFlags.Modal)]
             public void ThArrangeParkingStall()
@@ -19,6 +19,17 @@ namespace ThMEPArchitecture
                     cmd.Execute();
                 }
             }
-        
+    }
+
+    public partial class ThParkingStallArrangementByFixedLines
+    {
+        [CommandMethod("TIANHUACAD", "-THDXQYFG2", CommandFlags.Modal)]
+        public void ThArrangeParkingStall2()
+        {
+            using (var cmd = new ThMEPArchitecture.ParkingStallArrangement.OneGenerationCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
