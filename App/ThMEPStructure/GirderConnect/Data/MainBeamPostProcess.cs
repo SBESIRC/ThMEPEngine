@@ -33,8 +33,8 @@ namespace ThMEPStructure.GirderConnect.Data
             string beamLayer = "TH_AI_BEAM";
             AddLayer(beamLayer, 4);
 
-            var unifiedTyples = UnifyTuples(dicTuples);
-            Output(unifiedTyples, beamLayer);
+            //var unifiedTyples = UnifyTuples(dicTuples);
+            Output(dicTuples, beamLayer);
         }
 
         /// <summary>
@@ -59,6 +59,29 @@ namespace ThMEPStructure.GirderConnect.Data
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
                     }
                     HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                });
+            }
+        }
+        public static void Output(Dictionary<Point3d, HashSet<Point3d>> tuples, string layerName)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                tuples.ForEach(o =>
+                {
+                    o.Value.ForEach(k =>
+                    {
+                        var line = new Line(o.Key, k);
+                        line.Layer = layerName;
+                        if (line.Length > 9000)
+                        {
+                            line.ColorIndex = 7;
+                        }
+                        else
+                        {
+                            line.ColorIndex = (int)ColorIndex.BYLAYER;
+                        }
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                    });
                 });
             }
         }

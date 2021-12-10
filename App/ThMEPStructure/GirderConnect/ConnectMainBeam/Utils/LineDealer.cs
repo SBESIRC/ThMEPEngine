@@ -538,7 +538,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="dicTuples"> 原始数据（可能有误差）</param>
         /// <param name="basePts"> 基于这些点 </param>
         /// <param name="deviation"> 误差</param>
-        public static void DicTuplesStandardize(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, double deviation = 0.001)
+        public static void DicTuplesStandardize(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, double deviation = 1)
         {
             Point3d tmpPtA = new Point3d();
             Point3d tmpPtB = new Point3d();

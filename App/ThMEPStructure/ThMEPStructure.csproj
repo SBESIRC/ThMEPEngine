@@ -150,6 +150,11 @@
     <Content Include="bin\Debug-NET45\ThMEPStructure.pdb" />
     <Content Include="bin\Debug-NET45\TianHua.Publics.BaseCode.dll" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="QuickGraph">
+      <Version>3.6.61119.7</Version>
+    </PackageReference>
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
