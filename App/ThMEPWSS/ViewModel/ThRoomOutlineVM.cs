@@ -73,9 +73,12 @@ namespace ThMEPWSS.ViewModel
 
         public void ResetCurrentLayer()
         {
-            using (var lockDoc = Active.Document.LockDocument())
+            if(Active.Document!=null)
             {
-                SetCurrentLayer(currentLayer);
+                using (var lockDoc = Active.Document.LockDocument())
+                {
+                    SetCurrentLayer(currentLayer);
+                }
             }
         }
 

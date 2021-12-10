@@ -1,76 +1,270 @@
 ﻿using System;
 using System.Linq;
+using NFox.Cad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
-using ThCADExtension;
-using System.Collections.Generic;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
+using System.Collections.Generic;
+
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThRoomOutlineBuilderEngine
     {
         private const double AreaTolerance = 1e-6;
+        private const double AngleTolerance = 1.0;
         private const double BufferDistance = 50.0; //用于处理墙、门、窗、柱等元素之间不相接的Case
-        public List<DBObjectCollection> results { get; set; }
-        public int Count { get { return _data.Count; }}
-        private DBObjectCollection _data;
-        private ObjectIdCollection CollectIds { get; set; }
+        private const double LineExtendDistance = 10.0;
+        private const double ArcTessellateLength = 100.0;
+        private const double SmallLineLengthTolerance = 1.0;
+        private const double Colliear_Gap_Distance = 2.0;
+        private Matrix3d WcsToUcs { get; set; }
+        public DBObjectCollection Areas { get; set; }
         //创建数据
-        public ThRoomOutlineBuilderEngine(DBObjectCollection dbobjs)
+        public ThRoomOutlineBuilderEngine()
         {
-            _data = dbobjs;
-            CollectIds = new ObjectIdCollection();
-            results = new List<DBObjectCollection>();
+            Areas = new DBObjectCollection();
+            WcsToUcs = AcHelper.Active.Editor.GetMatrixFromWcsToUcs();
         }
-
-        //此时拿到的数据均作了初步处理，但可能存在缝隙
-        public void CloseAndFilter()
+        public void Build(DBObjectCollection objs)
         {
-            // 把传入的数据全部转成Polygon
-            _data = ToAcPolygons(_data, BufferDistance);
-
+            // 转成线 + 对线进行合并处理
+            var lines = ToLines(objs);
+            lines = FilterSmallLines(lines, SmallLineLengthTolerance);
+            lines = Extend(lines, LineExtendDistance);
+            lines = Merge(lines);
             // 造面
-            _data = _data.PolygonsEx();   
-            _data = _data.FilterSmallArea(AreaTolerance);
-            //_data.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 1);
+            Areas = lines.PolygonsEx();
+            Areas = Areas.FilterSmallArea(AreaTolerance);
+        }        
 
-            // 新造的区域,因为扩大导致面积变小，需要扩大
-            _data = Buffer(_data, BufferDistance);
-            _data = _data.FilterSmallArea(AreaTolerance);
-        }
-
-        private DBObjectCollection ToPolylines(DBObjectCollection datas)
+        private DBObjectCollection Merge(DBObjectCollection lines)
         {
-            var results = new DBObjectCollection();
-            datas.Cast<Entity>().ForEach(e =>
+            // 先按角度分度
+            var angleGroups = GroupByAngle(lines);
+
+            // 在对角度是0和90度继续分组
+            var groups = new List<DBObjectCollection>();
+            foreach (var item in angleGroups)
             {
-                if(e is Polyline)
+                if (item.Key == 0.0)
                 {
-                    results.Add(e);
+                    groups.AddRange(GroupByYCoordinate(item.Value));
                 }
-                else if(e is MPolygon mPolygon)
+                else if (item.Key == 90.0)
                 {
-                    results.Add(mPolygon.Shell());
-                    mPolygon.Holes().ForEach(h => results.Add(h));
+                    groups.AddRange(GroupByXCoordinate(item.Value));
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    groups.Add(item.Value);
+                }
+            }
+            var lineResults = new DBObjectCollection();
+            groups.ForEach(g =>
+            {
+                var results = GroupLines(g);
+                results.ForEach(o => lineResults.Add(ToLine(o)));
+            });
+            return lineResults;
+        }
+
+        private Dictionary<double, DBObjectCollection> GroupByAngle(DBObjectCollection lines)
+        {
+            var results = new Dictionary<double, DBObjectCollection>();
+            var groups = lines.OfType<Line>().GroupBy(o => ByAngle(GetUcsAngle(o.StartPoint.GetVectorTo(o.EndPoint))));
+            foreach (var item in groups)
+            {
+                results.Add(item.Key, item.ToCollection());
+            }
+            return results;
+        }
+
+        private double GetUcsAngle(Vector3d wcsVec)
+        {
+            var newVec = wcsVec.TransformBy(WcsToUcs);
+            return newVec.GetAngleTo(Vector3d.XAxis).RadToAng();
+        }
+
+        private Point3d GetUcsPoint(Point3d wcsPt)
+        {
+            var newPt = wcsPt.TransformBy(WcsToUcs);
+            return newPt;
+        }
+
+        private double ByAngle(double ang)
+        {
+            ang %= 180.0;
+            if (ang < AngleTolerance || Math.Abs(ang - 180.0) < AngleTolerance)
+            {
+                return 0.0;
+            }
+            if (Math.Abs(ang - 90.0) < AngleTolerance || Math.Abs(ang - 270.0) < AngleTolerance)
+            {
+                return 90.0;
+            }
+            return ang;
+        }
+
+        private List<DBObjectCollection> GroupByXCoordinate(DBObjectCollection yDirLines)
+        {
+            var results = new List<DBObjectCollection>();
+            var xCoords = yDirLines.OfType<Line>().Select(o => GetUcsPoint(o.StartPoint).X).Distinct().OrderBy(o => o).ToList();
+            var groups = yDirLines.OfType<Line>().GroupBy(o => GetCoordGroupKey(xCoords, GetUcsPoint(o.StartPoint).X));
+            foreach (var group in groups)
+            {
+                results.Add(group.ToCollection());
+            }
+            return results;
+        }
+
+        private List<DBObjectCollection> GroupByYCoordinate(DBObjectCollection xDirLines)
+        {
+            var results = new List<DBObjectCollection>();
+            var yCoords = xDirLines.OfType<Line>().Select(o => GetUcsPoint(o.StartPoint).Y).Distinct().OrderBy(o=>o).ToList();
+            var groups = xDirLines.OfType<Line>().GroupBy(o => GetCoordGroupKey(yCoords, GetUcsPoint(o.StartPoint).Y));
+            foreach(var group in groups)
+            {
+                results.Add(group.ToCollection());
+            }
+            return results;
+        }
+
+        private double GetCoordGroupKey(List<double> values,double coord)
+        {
+            for(int i=0;i<values.Count;i++)
+            {
+                if(Math.Abs(coord-values[i])<= Colliear_Gap_Distance)
+                {
+                    return values[i];
+                }
+            }
+            return coord;
+        }
+
+        private Line ToLine(DBObjectCollection colliearLines)
+        {
+            var res = colliearLines.OfType<Line>().ToList().GetCollinearMaxPts();
+            return new Line(res.Item1,res.Item2);
+        }
+
+        private List<DBObjectCollection> GroupLines(DBObjectCollection lines)
+        {
+            var results = new List<DBObjectCollection>();
+            var sptialIndex = new ThCADCoreNTSSpatialIndex(lines);
+            lines.OfType<Line>().ForEach(o =>
+            {
+                var res = Query(o, sptialIndex);
+                if(res.Count==1)
+                {
+                    results.Add(res);
+                }
+                else if(res.Count >1)
+                {
+                   var groupIndex =  FindGroupIndex(results, res);
+                    if(groupIndex == -1)
+                    {
+                        results.Add(res);
+                    }
+                    else
+                    {
+                        results[groupIndex] = results[groupIndex].Union(res);
+                    }
+                }
+            });           
+            return results;
+        }
+
+        private int FindGroupIndex(List<DBObjectCollection> groups, DBObjectCollection newGroup)
+        {
+            for(int i =0;i< groups.Count;i++)
+            {
+                if(newGroup.OfType<Line>().Where(o => groups[i].Contains(o)).Any())
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        private DBObjectCollection Query(Line line,ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            var envelop = ThDrawTool.ToOutline(line.StartPoint, line.EndPoint, Colliear_Gap_Distance);
+            return spatialIndex
+                .SelectCrossingPolygon(envelop)
+                .OfType<Line>()
+                .Where(o => ThGeometryTool.IsCollinearEx(o.StartPoint,o.EndPoint,line.StartPoint,line.EndPoint))
+                .ToCollection();
+        }
+
+        private DBObjectCollection FilterSmallLines(DBObjectCollection lines,double length)
+        {
+            return lines.OfType<Line>().Where(o => o.Length > length).ToCollection();
+        }
+        private DBObjectCollection Extend(DBObjectCollection lines,double length)
+        {
+            var results = new DBObjectCollection();
+            lines.OfType<Line>().ForEach(o =>
+            {
+                results.Add(o.ExtendLine(length));
+            });
+            return results;
+        }
+        private DBObjectCollection ToLines(DBObjectCollection objs)
+        {
+            var results = new DBObjectCollection();
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Line line)
+                {
+                    results.Add(line);
+                }
+                else if (o is Polyline polyline)
+                {
+                    var newPoly = polyline.TessellatePolylineWithArc(ArcTessellateLength);
+                    newPoly.ToLines().ForEach(l => results.Add(l));
+                }
+                else if(o is MPolygon mPolygon)
+                {
+                    var shell = mPolygon.Shell();
+                    var holes = mPolygon.Holes();
+                    shell.ToLines().ForEach(l => results.Add(l));
+                    holes.SelectMany(h => h.ToLines()).ForEach(l => results.Add(l));
+                }
+                else if(o is Arc arc)
+                {
+                    var newPoly = arc.TessellateArcWithArc(ArcTessellateLength);
+                    newPoly.ToLines().ForEach(l => results.Add(l));
+                }
+                else
+                {
+                    //ToDo
                 }
             });
             return results;
         }
+        private void CloseAndFilter(DBObjectCollection objs)
+        {
+            // 把传入的数据全部转成Polygon
+            var polygons = ToAcPolygons(objs, BufferDistance);
 
+            // 造面
+            Areas = polygons.PolygonsEx();
+            Areas = Areas.FilterSmallArea(AreaTolerance);
+
+            // 新造的区域,因为扩大导致面积变小，需要扩大
+            Areas = Buffer(Areas, BufferDistance);
+            Areas = Areas.FilterSmallArea(AreaTolerance);
+        }
         private DBObjectCollection ToAcPolygons(DBObjectCollection objs,double dis)
         {
             var results = new DBObjectCollection();
             var bufferService = new ThNTSBufferService();
-            objs.OfType<Curve>().ForEach(e =>
+            objs.OfType<Entity>().ForEach(e =>
             {
                 if (e is Polyline poly)
                 {
@@ -84,13 +278,22 @@ namespace ThMEPEngineCore.Engine
                         results.Add(newPoly);
                     }
                 }
+                else if(e is MPolygon mPolygon)
+                {
+                    var newPolygon = bufferService.Buffer(mPolygon, dis) as MPolygon;
+                    if (newPolygon != null)
+                    {
+                        results.Add(newPolygon.Shell());
+                        newPolygon.Holes().ForEach(h => results.Add(h));
+                    }
+                }
                 else if (e is Line line)
                 {
                     results.Add(line.Buffer(dis, ThBufferEndCapStyle.Square));
                 }
                 else
                 {
-
+                    //TODO
                 }
             });            
             return results;
@@ -123,10 +326,9 @@ namespace ThMEPEngineCore.Engine
             return poly.Closed || poly.StartPoint.DistanceTo(poly.EndPoint) <= tolerance;
         }
 
-
         public Entity Query(Point3d point)
         {
-            var outlines =  ContainsPoint(_data, point);
+            var outlines =  ContainsPoint(Areas, point);
             if(outlines.Count==0)
             {
                 return null;
@@ -137,37 +339,6 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-
-        public void Build(Point3d point)
-        {
-            Polyline MinPolyline = new Polyline();
-            double area = double.MaxValue;
-            foreach (DBObject obj in _data)
-            {
-                if (obj is Polyline polyline && polyline.Contains(point) && polyline.Area < area)
-                {
-                    MinPolyline = polyline;
-                    area = polyline.Area;
-                }
-            }
-            if (MinPolyline.Area==0)
-                return ;
-            var result = new DBObjectCollection();
-            result.Add(MinPolyline);
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(_data);
-            var bufferService = new Service.ThNTSBufferService();
-            //认为索引对象均在数据层就进行了处理
-            foreach(DBObject dbObj in spatialIndex.SelectWindowPolygon(bufferService.Buffer(MinPolyline,-1.0))) //解决NTS共边导致的错误
-            {
-                result.Add(dbObj);
-            }
-            result = result.BuildArea();
-
-            result = ContainsPoint(result, point);
-
-            results.Add(result);
-            //makevalid似乎不支持DBObjectCollection作为参数
-        }
         private DBObjectCollection ContainsPoint(DBObjectCollection polygons,Point3d point)
         {
             var result = new DBObjectCollection();
@@ -183,26 +354,6 @@ namespace ThMEPEngineCore.Engine
                 }
             }
             return result;
-        }
-        public bool RoomContainPoint(Point3d point)
-        {
-            foreach(DBObjectCollection result in results)
-            {
-                foreach (DBObject obj in result)
-                {
-                    if (obj is Polyline polyline)
-                    {
-                        if (polyline.Contains(point))
-                            return true;
-                    }
-                    else if (obj is MPolygon polygon)
-                    {
-                        if (polygon.Shell().Contains(point))
-                            return true;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

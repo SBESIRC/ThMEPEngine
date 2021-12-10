@@ -258,32 +258,36 @@ namespace ThMEPEngineCore
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                var results = new DBObjectCollection();
+                // 提取数据+封面
+                Roomdata data = new Roomdata(false);
+                data.Build(acadDb.Database, frame.Vertices());
+                data.Transform(); // 移动到原点
+                data.Preprocess(); // 
 
-                //提取数据+封面
-                Roomdata data = new Roomdata(acadDb.Database, frame.Vertices());
-                //Roomdata构造函数非常慢，可能是其他元素提取导致的
-                data.Transform(); // 移到原点处
-                data.Preprocess();
-               
-                var totaldata = data.MergeData();
-                var builder = new ThRoomOutlineBuilderEngine(totaldata);
-                builder.CloseAndFilter();
+                // 用围合房间的数据造面
+                var totalDatas = data.MergeData(); // 传入的数据
+                var builder = new ThRoomOutlineBuilderEngine();
+                builder.Build(totalDatas);
 
+                // 过滤用户选择的点(不能选在柱子、门、墙等构件里面)
                 var newPts = selectPts
-                    .Select(p=>data.Transformer.Transform(p))
+                    .Select(p=> data.Transformer.Transform(p))
                     .Where(o => !data.ContatinPoint3d(o)).ToList();
+
+                // 通过用户选择点查询包含这些点的面
+                var results = new DBObjectCollection();
                 newPts.ForEach(p =>
                 {
                     var roomOutline = builder.Query(p);
-                    if (roomOutline!=null)
+                    if (roomOutline!=null && !results.Contains(roomOutline))
                     {
-                        results.Add(roomOutline);
+                        results.Add(roomOutline.Clone() as Entity);
                     }
                 });
 
-                // 还原
+                // 还原位置
                 data.Transformer.Reset(results);
+                data.Transformer.Reset(builder.Areas);
                 data.Reset();
                 return results;
             }
