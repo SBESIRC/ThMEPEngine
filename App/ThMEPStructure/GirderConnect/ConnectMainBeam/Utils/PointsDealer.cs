@@ -26,7 +26,6 @@ using NFox.Cad;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
-using QuickGraph.Algorithms;
 
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils

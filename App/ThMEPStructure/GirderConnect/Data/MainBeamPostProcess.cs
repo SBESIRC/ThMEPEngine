@@ -33,8 +33,8 @@ namespace ThMEPStructure.GirderConnect.Data
             string beamLayer = "TH_AI_BEAM";
             AddLayer(beamLayer, 4);
 
-            //var unifiedTyples = UnifyTuples(dicTuples);
-            Output(dicTuples, beamLayer);
+            var unifiedTyples = UnifyTuples(dicTuples);
+            Output(unifiedTyples, beamLayer);
         }
 
         /// <summary>
