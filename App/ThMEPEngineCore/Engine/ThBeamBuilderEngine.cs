@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
 using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Algorithm;
-using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -58,7 +57,7 @@ namespace ThMEPEngineCore.Engine
             return extraction.Results;
         }
 
-        public override List<ThIfcBuildingElement> Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
         {
             ThBuildingElementRecognitionEngine recognitionEngine;
             if (Convert.ToInt16(Application.GetSystemVariable("USERR1")) == 0)
@@ -70,34 +69,7 @@ namespace ThMEPEngineCore.Engine
                 recognitionEngine = new ThRawBeamRecognitionEngine();
             }
             recognitionEngine.Recognize(datas, pts);
-            return recognitionEngine.Elements;
-        }
-
-        public override void Build(Database db, Point3dCollection pts)
-        {
-            // 提取
-            var beams = Extract(db);
-            Build(beams, pts);
-        }
-
-        public void Build(List<ThRawIfcBuildingElementData> beams, Point3dCollection pts)
-        {
-            // 移动到近原点处
-            var objs = beams.Select(o => o.Geometry).ToCollection();
-            var transformer = new ThMEPOriginTransformer(objs);
-            transformer.Transform(objs);
-            var newPts = transformer.Transform(pts);
-
-            // 识别
-            var buildingElements = Recognize(beams, newPts);
-
-            // 恢复到原位置
-            buildingElements.ForEach(o => transformer.Reset(o.Outline));
-
-            // 保存结果
-            Elements = buildingElements
-                .OfType<ThIfcBuildingElement>()
-                .ToList();
+            Elements = recognitionEngine.Elements;
         }
 
         public void ResetSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)

@@ -2,7 +2,6 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
@@ -53,6 +52,7 @@ namespace ThMEPEngineCore.Engine
         }
         private void CreateEngines(Database database, Point3dCollection pts)
         {
+            // 移动到近原点位置
             OriginTransformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
             var newPts = pts.OfType<Point3d>().Select(o => OriginTransformer.Transform(o)).ToCollection();
 
@@ -72,8 +72,15 @@ namespace ThMEPEngineCore.Engine
 
             // 启动梁识别引擎
             BeamEngine = new ThBeamBuilderEngine();
-            BeamEngine.Build(database, pts);
-            BeamEngine.Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(OriginTransformer.Displacement));
+            var results = BeamEngine.Extract(database);
+            results.ForEach(x => OriginTransformer.Transform(x.Geometry));
+            BeamEngine.Recognize(results, newPts);
+
+            // 为了支持这样的处理流程：
+            //  1. 所有数据一次性获取后移动到近原点位置
+            //  2. 对****近原点数据****进行处理
+            //  3. 对处理后生成的结果恢复到原点位置
+            // 所以返回近原点数据
         }
         private void Recognize()
         {

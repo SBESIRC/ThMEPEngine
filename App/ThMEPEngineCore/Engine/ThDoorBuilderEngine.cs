@@ -1,13 +1,13 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -19,35 +19,43 @@ namespace ThMEPEngineCore.Engine
 
         public override List<ThRawIfcBuildingElementData> Extract(Database db)
         {
-            throw new NotSupportedException();
+            var doorExtractor = new ThDB3DoorExtractionEngine();
+            doorExtractor.Extract(db);            
+            return doorExtractor.Results;
         }
 
-        public override List<ThIfcBuildingElement> Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
         {
-            throw new NotSupportedException();           
+            var doorRecognition = new ThDB3DoorRecognitionEngine();
+            doorRecognition.Recognize(datas, pts);
+            Elements.AddRange(doorRecognition.Elements);
         }
         public override void Build(Database db, Point3dCollection pts)
         {
-            var rawelement = new List<ThRawIfcBuildingElementData>();
-            var doorExtractor = new ThDB3DoorExtractionEngine();
-            doorExtractor.Extract(db);
-            doorExtractor.Results.ForEach(e => rawelement.Add(new ThRawIfcBuildingElementData()
-            {
-                Geometry = e.Geometry,
-                Source = DataSource.DB3
-            }));
+            // 提取
+            var rawElements = Extract(db);
 
+            // 移动原点
             var center = pts.Envelope().CenterPoint();
             var transformer = new ThMEPOriginTransformer(center);
-            rawelement.ForEach(o => transformer.Transform(o.Geometry));
+            rawElements.ForEach(o =>
+            {
+                transformer.Transform(o.Geometry);
+                if (o is ThRawDoorMark doorMark)
+                {
+                    transformer.Transform(doorMark.Data as Entity);
+                }
+            });
             var newPts = pts.OfType<Point3d>()
                 .Select(o => transformer.Transform(o))
                 .ToCollection();
             CreateDoorNeibourSpatialIndex(db, pts, transformer);
 
-            var doorRecognize = new ThDB3DoorRecognitionEngine();
-            doorRecognize.Recognize(rawelement, newPts);
-            Elements = doorRecognize.Elements;
+            // 识别
+            Recognize(rawElements, newPts);
+
+            // 还原
+            Elements.ForEach(o=>transformer.Reset(o.Outline));
         }
         private void CreateDoorNeibourSpatialIndex(Database db, Point3dCollection pts, ThMEPOriginTransformer transformer)
         {

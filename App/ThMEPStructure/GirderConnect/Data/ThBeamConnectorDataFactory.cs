@@ -90,8 +90,8 @@ namespace ThMEPStructure.GirderConnect.Data
             var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
 
             var columnBuilderEngine = new ThColumnBuilderEngine();
-            var results = columnBuilderEngine.Recognize(columnVisitor.Results, newPts);
-            var objs = results.Select(o => o.Outline).ToCollection();
+            columnBuilderEngine.Recognize(columnVisitor.Results, newPts);
+            var objs = columnBuilderEngine.Elements.Select(o => o.Outline).ToCollection();
             transformer.Reset(objs);
             return objs;
         }
@@ -136,8 +136,8 @@ namespace ThMEPStructure.GirderConnect.Data
             var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
 
             var shearwallBuilder = new ThShearwallBuilderEngine();
-            var results = shearwallBuilder.Recognize(visitor.Results, newPts);
-            var objs = results.Select(o => o.Outline).ToCollection();
+            shearwallBuilder.Recognize(visitor.Results, newPts);
+            var objs = shearwallBuilder.Elements.Select(o => o.Outline).ToCollection();
             transformer.Reset(objs);
             return objs;
         }
