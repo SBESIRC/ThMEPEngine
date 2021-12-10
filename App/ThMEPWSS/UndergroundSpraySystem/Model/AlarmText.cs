@@ -124,15 +124,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-        public void CreateAlarmTextDic(SprayIn sprayIn, List<Point3dEx> alarmPts)
+        public void CreateAlarmTextDic(SprayIn sprayIn, List<Point3d> alarmPts)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(DBObjs);
-            foreach (var pt in alarmPts)
+            foreach (var pt1 in alarmPts)
             {
-                if(pt._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815, 0)) < 100)
-                {
-                    ;
-                }
+                var pt = new Point3dEx(pt1);
                 int tolerance = 200;
                 while(true)
                 {

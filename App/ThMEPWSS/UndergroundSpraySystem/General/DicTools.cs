@@ -161,19 +161,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
-        public static void CreatePtTypeDic1(List<Point3dEx> pts, string ptType, ref SprayIn sprayIn)
+        public static void CreatePtTypeDic1(List<Point3d> pts, string ptType, ref SprayIn sprayIn)
         {
-            var restPts = new List<Point3dEx>();
+            var restPts = new List<Point3d>();
             restPts.AddRange(pts);
             foreach (var pt1 in pts)
             {
-                if(pt1._pt.DistanceTo(new Point3d(18296952.6876, 21158767.9815,0))<10)
-                {
-                    ;
-                }
                 foreach (var pt in sprayIn.PtDic.Keys)
                 {
-                    if (pt._pt.DistanceTo(pt1._pt) < 20)
+                    if (pt._pt.DistanceTo(pt1) < 20)
                     {
                         sprayIn.PtTypeDic.AddType(pt, ptType);
                         restPts.Remove(pt1);
@@ -185,18 +181,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             {
                 foreach(var pt in sprayIn.PtDic.Keys)
                 {
-                    if (pt._pt.DistanceTo(pt2._pt) < 500)
+                    if (pt._pt.DistanceTo(pt2) < 500)
                     {
                         if(sprayIn.PtDic[pt].Count == 3)
                         {
-                            ;
                             sprayIn.PtTypeDic.AddType(pt, ptType);
                             break;
                         }
                     }
                 }
             }
-            ;
         }
 
 

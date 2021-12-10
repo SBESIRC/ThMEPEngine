@@ -55,6 +55,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
 
+            
+
             pipeLines.CreatePtDic(sprayIn);
             pipeLines = pipeLines.ConnectBreakLine(sprayIn);
             pipeLines.CreatePtDic(sprayIn);
@@ -205,6 +207,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             var alarmValve = new AlarmValve();
             var alarmPts = alarmValve.Extract(database, selectArea);
+            pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
+
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
             var alarmText = new AlarmText();
