@@ -99,6 +99,8 @@ namespace ThMEPWSS.Command
             //}
             var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
 
+           
+
             var visited = new HashSet<Point3dEx>();//访问标志
             visited.AddVisit(mainPathList);
             visited.AddVisit(subPathList);
@@ -107,6 +109,11 @@ namespace ThMEPWSS.Command
             var ValveDic = new Dictionary<Point3dEx, List<Point3dEx>>();//支点 + 阀门点
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
+
+            var checkPipe = new CheckPipe(mainPathList, subPathList);
+            checkPipe.DrawMainLoop(curDb);
+            checkPipe.DrawSubLoop(curDb);
+            checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
 
             GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
             GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取

@@ -183,5 +183,38 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 visited.Remove(p);
             }
         }
+
+        public static void dfsBranchLoop(Point3dEx cur, Point3dEx target, List<Point3dEx> tempPath, HashSet<Point3dEx> neverVisited, 
+            HashSet<Point3dEx> visited, ref List<List<Point3dEx>> rstPaths, FireHydrantSystemIn fireHydrantSysIn)
+        {
+            if (cur.Equals(target))//找到目标点，返回最终路径
+            {
+                var rstPath = new List<Point3dEx>(tempPath);
+                rstPaths.Add(rstPath);//把当前路径加入
+                return;
+            }
+
+            var neighbors = fireHydrantSysIn.PtDic[cur];//当前点的邻接点
+            foreach (Point3dEx p in neighbors)
+            {
+                if (neverVisited.Contains(p))//主环次环节点
+                {
+                    continue;
+                }
+                if (visited.Contains(p))//访问过
+                {
+                    continue;
+                }
+                tempPath.Add(p);
+                visited.Add(p);
+
+                //递归搜索
+                dfsBranchLoop(p, target, tempPath, visited, neverVisited, ref rstPaths, fireHydrantSysIn);
+
+                //删除不符合要求的点
+                tempPath.RemoveAt(tempPath.Count - 1);
+                visited.Remove(p);
+            }
+        }
     }
 }
