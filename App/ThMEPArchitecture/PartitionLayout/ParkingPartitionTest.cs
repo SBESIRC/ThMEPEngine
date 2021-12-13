@@ -3,29 +3,26 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPArchitecture.PartitionLayout;
 
 namespace ThMEPArchitecture
 {
-    public partial class BuildingBoxTest
+    public partial class ParkingPartitionTest
     {
-        [CommandMethod("TIANHUACAD", "BuildingBox", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "ThParkPartitionTest", CommandFlags.Modal)]
         public void ThParkPartitionTest()
+        {
+            Execute();
+        }
+
+        public void Execute()
         {
             var walls = new List<Polyline>();
             var iniLanes = new List<Line>();
             var obstacles = new List<Polyline>();
-            Read(walls, iniLanes, obstacles);
-            var boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
-            ;
-        }
-        public void Read(List<Polyline> walls, List<Line> iniLanes, List<Polyline> obstacles)
-        {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetSelection();
@@ -45,17 +42,22 @@ namespace ThMEPArchitecture
                     else if (o.Layer == "walls")
                     {
                         if (o is Polyline) walls.Add((Polyline)o);
-                        else if (o is Line) walls.Add(GeoUtilities.PolyFromLine((Line)o));
+                        else if (o is Line) walls.Add(PartitionLayout.GeoUtilities.PolyFromLine((Line)o));
                     }
                     else if (o.Layer == "obstacles") obstacles.Add((Polyline)o);
                 }
             }
+            var Cutters = new DBObjectCollection();
+            walls.ForEach(e => Cutters.Add(e));
+            iniLanes.ForEach(e => Cutters.Add(e));
+            obstacles.ForEach(e => Cutters.Add(e));
+            var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles, new Polyline());
+            partition.Boundary = GeoUtilities.JoinCurves(walls, iniLanes)[0];
+            partition.Cutters = Cutters;
+            partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+            //partition.Display();
+            partition.GenerateParkingSpaces();
         }
-
-        public void f(List<Polyline> walls, List<Line> iniLanes, List<Polyline> obstacles, Polyline boundary)
-        {
-            return ;
-        }
-
     }
 }

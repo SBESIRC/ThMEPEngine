@@ -93,6 +93,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     var rect = build.GetRect();
                     var obstacle = build.GetPlines();
                     bdBoxes.Add(rect);
+                    //using (AcadDatabase currentDb = AcadDatabase.Active())
+                    //{
+                    //    currentDb.CurrentSpace.Add(rect);
+                    //}
                     obstacles.Add(obstacle);
                 }
                 BuildingBoxes.Add(i, bdBoxes);

@@ -10,6 +10,8 @@ using System.IO;
 using ThCADExtension;
 using Serilog;
 using System.Diagnostics;
+using ThCADCore.NTS;
+using ThMEPArchitecture.PartitionLayout;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -26,8 +28,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             double diswidthlane = 5500;
             Value = value;
             Direction = direction;
-            MinValue = minValue /*+ diswidthlane / 2*/;
-            MaxValue = maxValue /*- diswidthlane / 2*/;
+            MinValue = minValue /*+ diswidthlane / 2*/;//绝对的最小值
+            MaxValue = maxValue /*- diswidthlane / 2*/;//绝对的最大值
             StartValue = startValue;
             EndValue = endValue;
         }
@@ -134,17 +136,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 //sw.Close();
                 //fs1.Close();
 
-                ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
+                //ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
                 //p.Logger = Logger;
                 //bool valid = p.Validate();
+
+
+                var Cutters = new DBObjectCollection();
+                obstacles.ForEach(e => Cutters.Add(e));
+                var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+
                 if (true)
                 {
                     //p.Log();
-                    p.Initialize();
+                    //p.Initialize();
 
                     try
                     {
-                        count += p.CalNumOfParkingSpaces();
+                        count += partition.CalNumOfParkingSpaces();
                     }
                     catch (Exception ex)
                     {
@@ -181,6 +191,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double MutationRate;
         double GeneMutationRate;
 
+
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
@@ -188,11 +199,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Range
         double Low, High;
 
-        //log file name
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
-
-        Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, rollingInterval: RollingInterval.Hour).CreateLogger();
+        public Serilog.Core.Logger Logger = null;
 
         public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
@@ -203,8 +210,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MaxTime = 300;
             CrossRate = 0.8;//交叉因子
-            MutationRate = 0.2;//变异因子
-            GeneMutationRate = 0.3;//基因变异因子
+            MutationRate = 0.5;//变异因子
+            GeneMutationRate = 0.5;//基因变异因子
 
             SelectionRate = 0.6;//保留因子
             SelectionSize = Math.Max(1, (int)(SelectionRate * popSize));
@@ -255,9 +262,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Run(List<Chromosome> histories)
         {
-            Logger.Information($"Iteration count: {IterationCount}");
-            Logger.Information($"Population count: {PopulationSize}");
-            Logger.Information($"Max minutes: {MaxTime}");
+            Logger?.Information($"Iteration count: {IterationCount}");
+            Logger?.Information($"Population count: {PopulationSize}");
+            Logger?.Information($"Max minutes: {MaxTime}");
 
             List<Chromosome> selected = new List<Chromosome>();
             try
@@ -270,7 +277,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
                 var strFirstPopCnt = $"\n  First poplulation size: {pop.Count}";
                 Active.Editor.WriteMessage(strFirstPopCnt);
-                Logger.Information(strFirstPopCnt);
+                Logger?.Information(strFirstPopCnt);
                 var curIteration = 0;
                 int maxCount = 0;
                 int maxNums = 0;
@@ -281,7 +288,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var strCurIterIndex = $"\n iteration index：     {curIteration}";
                     //Active.Editor.WriteMessage(strCurIterIndex);
-                    Logger.Information(strCurIterIndex);
+                    Logger?.Information(strCurIterIndex);
                     selected = Selection(pop, out int curNums);
                     histories.Add(selected.First());
                     if (maxNums == curNums)
@@ -294,9 +301,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     pop = CreateNextGeneration(selected);
                     //Mutation(pop);
-
-                    stopWatch.Stop();
                 }
+                stopWatch.Stop();
             }
             catch (Exception ex)
             {
@@ -317,7 +323,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             while (index >= cnt)//挑选染色体
             {
                 int num = RandInt(cnt);//生成随机号
-                if (selectedChromosome.Contains(num))
+                if (selectedChromosome.Contains(num) || num == 0)
                 {
                     continue;//重新摇号
                 }
@@ -348,7 +354,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var maxVal = s[i].Genome[j].MaxValue;
                     var minVal = s[i].Genome[j].MinValue;
-                    s[i].Genome[j].Value = Rand.NextDouble() * (maxVal - minVal) + minVal;
+                    //s[i].Genome[j].Value = Rand.NextDouble() * (maxVal - minVal) + minVal;
+                    var dist = Math.Min(maxVal - minVal, 15700);
+                    s[i].Genome[j].Value = Rand.NextDouble() * dist + minVal;
                 }
             }
         }
@@ -416,7 +424,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int[] covering_code = new int[chromoLen];
             for (int i = 0; i < chromoLen; ++i)
             {
-                var cc = RandInt(2);//rand.Next(0, 2);
+                var cc = RandInt(2);
                 if (cc == 0)
                 {
                     newS.AddChromos(s1.Genome[i]);
@@ -432,7 +440,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
         {
-            Logger.Information("Doing Selection");
+            Logger?.Information("Doing Selection");
 
             inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
 
@@ -440,7 +448,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             maxNums = sorted.First().Count;
             var strBestCnt = $"\n Current best： {sorted.First().Count}";
             //Active.Editor.WriteMessage(strBestCnt);
-            Logger.Information(strBestCnt);
+            Logger?.Information(strBestCnt);
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
             {
