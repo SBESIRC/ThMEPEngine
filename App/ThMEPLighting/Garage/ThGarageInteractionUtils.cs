@@ -62,7 +62,7 @@ namespace ThMEPLighting.Garage
                     transformer.Transform(newBorder);
                     var regionBorder = new ThRegionBorder
                     {
-                        RegionBorder = o,
+                        RegionBorder = o.Clone() as Entity,
                         Transformer = borderTransformer,
                         DxCenterLines = GetRegionLines(newBorder, allLaneLines),
                         FdxCenterLines = GetRegionLines(newBorder, allFdxLines),                        
@@ -79,7 +79,7 @@ namespace ThMEPLighting.Garage
                     {
                         var subRegionBorder = new ThRegionBorder
                         {
-                            RegionBorder = o,
+                            RegionBorder = o.Clone() as Entity,
                             Id = regionBorder.Id,
                             Transformer = borderTransformer,
                             ForSingleRowCableTrunking = true,
