@@ -48,7 +48,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         public IlluminationLightingCmd()
         {
-
+            InitialCmdInfo();
         }
         private void InitialCmdInfo()
         {
@@ -112,7 +112,7 @@ namespace ThMEPLighting.IlluminationLighting
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, true);
+                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, false);
                 if (geos.Count == 0)
                 {
                     return;
@@ -172,11 +172,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         private void SettingNoUI()
         {
-            _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
-            _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
-
-          
-
+           
             var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
             if (beam.Status != PromptStatus.OK)
             {

@@ -321,6 +321,7 @@
     <Compile Include="ServiceModels\ThFireAlarmModel.cs" />
     <Compile Include="ServiceModels\ThLigitingWiringModel.cs" />
     <Compile Include="ServiceModels\ThParkingStallService.cs" />
+    <Compile Include="IlluminationLighting\ThAFASIlluminateCmd.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThFEICmds.cs" />
     <Compile Include="ThMEPWiringCmds.cs" />

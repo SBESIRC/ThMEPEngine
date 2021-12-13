@@ -41,3 +41,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPWiringCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPGarageLightingCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPParkingStallLightingCmd))]
+[assembly: CommandClass(typeof(ThMEPLighting.IlluminationLighting.ThAFASIlluminateCmd))]

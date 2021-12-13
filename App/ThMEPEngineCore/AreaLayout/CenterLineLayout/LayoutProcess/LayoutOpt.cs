@@ -8,6 +8,17 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThCADExtension;
 using ThCADCore.NTS;
+
+using ThCADExtension;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.LaneLine;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.OverlayNG;
+
+
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
@@ -16,29 +27,72 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
     class LayoutOpt
     {
-        public static List<Point3d> Calculate(MPolygon mPolygon, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType, AcadDatabase acdb, MPolygon mPolygonShell)
+        //input
+      //  public MPolygon mPolygon { get; set; }
+      //  public MPolygon mPolygonShell { get; set; }
+        public MPolygon mRoom { get; set; }
+
+        public double radius { get; set; } = 0;
+        public BlindType equipmentType { get; set; } = BlindType.CoverArea;
+        public List<Polyline> detectArea { get; set; } = new List<Polyline>();
+        public List<MPolygon> layoutList { get; set; }
+        public List<Polyline> nonDeployableArea { get; set; } = new List<Polyline>();
+        public List<Point3d> centerLinePts { get; set; } = new List<Point3d>();
+
+        //inner user
+        public List<Point3d> pointsInLayoutList { get; private set; } = new List<Point3d>();
+        public Geometry EmptyDetect { get; private set; }
+        public ThCADCoreNTSSpatialIndex detectSpatialIdx { get; private set; }
+        public LayoutOpt()
         {
-            if(pointsInLayoutList.Count == 0)
+
+        }
+
+        public List<Point3d> Calculate()
+        {
+            GetPosiblePositions();
+            SetEmptyDetect();
+            SetDetectSptialIdx();
+
+            if (pointsInLayoutList.Count == 0)
             {
                 return new List<Point3d>();
             }
 
-            List<Point3d> fstPoints = FstStep(pointsInLayoutList, radius); //1、初选
+            //pointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
 
-            List<Point3d> sndPoints = SndStep(mPolygon, fstPoints, pointsInLayoutList, radius, equipmentType); //2、加点
+            List<Point3d> fstPoints = FstStep(); //1、初选
+            fstPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l1ptFirst", 3, 25, 30));
 
-            List<Point3d> sndHalfPoints = SndHalfStep(mPolygon, sndPoints, pointsInLayoutList, radius, equipmentType); //2.5、加点：针对大盲区
+            fstPoints = AddDetectAreaPts(fstPoints); //找探测区域内没有点的，在探测区域中心附近加点
+            fstPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l2ptAddDetectArea", 3, 25, 30));
+
+            List<Point3d> sndPoints = SndStep(fstPoints); //2、加点
+            sndPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l3ptCoverBlind", 150, 25, 30));
+
+            List<Point3d> sndHalfPoints = SndHalfStep(sndPoints); //2.5、加点：针对大盲区
+            sndHalfPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l4ptCoverBigBlind", 212, 25, 30));
 
             List<Point3d> ans = new List<Point3d>();//2.7、针对一个房间只布置一个点
             if (sndHalfPoints.Count == 1)
             {
-                ans.Add(PointsDealer.GetNearestPoint(mPolygon.ToNTSPolygon().Centroid.ToAcGePoint3d(), pointsInLayoutList));
+                var temp = PointsDealer.GetNearestPoint(mRoom.ToNTSPolygon().Centroid.ToAcGePoint3d(), pointsInLayoutList, mRoom.Shell());
+                if (temp != Point3d.Origin)
+                {
+                    ans.Add(temp);
+                }
+
                 return ans;
             }
 
-            List<Point3d> fourPoints = FourStep(mPolygonShell, sndHalfPoints, pointsInLayoutList, radius, equipmentType); //4、移点：修补需求：将一些点更加靠近中心线
+            var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
+            movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
 
-            List<Point3d> thdPoints = ThdStep(mPolygon, fourPoints, radius, equipmentType); //3、删点
+            List<Point3d> fourPoints = FourStep(movePtToLayoutCt); //4、移点：修补需求：将一些点更加靠近中心线
+            fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6ptMoveToCL", 141, 25, 30));
+
+            List<Point3d> thdPoints = ThdStep(fourPoints); //5、删点
+            thdPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l7ptDelet", 41, 25, 30));
 
             return thdPoints;
         }
@@ -50,17 +104,18 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="layoutList"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static List<Point3d> GetPosiblePositions(List<Polyline> nonDeployableArea, List<MPolygon> layoutList, double radius)
+        private void GetPosiblePositions()
         {
-            List<Point3d> pointsInLayoutList = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
+            List<Point3d> ans = new List<Point3d>();
+            var ptInLayoutArea = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
             Hashtable ht = new Hashtable();
-            foreach (var pt in pointsInLayoutList)
+            foreach (var pt in ptInLayoutArea)
             {
                 ht[pt] = true;
             }
             foreach (var pl in nonDeployableArea)
             {
-                foreach (var pt in pointsInLayoutList)
+                foreach (var pt in ptInLayoutArea)
                 {
                     if (pl.ContainsOrOnBoundary(pt))
                     {
@@ -68,7 +123,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     }
                 }
             }
-            List<Point3d> ans = new List<Point3d>();
+
             foreach (DictionaryEntry xx in ht)
             {
                 if ((bool)xx.Value == true)
@@ -76,7 +131,60 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     ans.Add((Point3d)xx.Key);
                 }
             }
-            return ans.Distinct().ToList();
+
+            pointsInLayoutList = ans.Distinct().ToList();
+
+        }
+
+        private void SetDetectSptialIdx()
+        {
+            if (detectArea.Count > 0)
+            {
+                DBObjectCollection dBObjectCollection = new DBObjectCollection();
+                foreach (var detect in detectArea)
+                {
+                    dBObjectCollection.Add(ThMPolygonTool.CreateMPolygon(detect));
+                }
+
+                detectSpatialIdx = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
+            }
+        }
+
+        private void SetEmptyDetect()
+        {
+            if (detectArea.Count > 0)
+            {
+                var emptyDetect = new List<Polygon>();
+                var obj = new DBObjectCollection();
+                foreach (var p in pointsInLayoutList)
+                {
+                    obj.Add(new DBPoint(p));
+                }
+                var pointIdx = new ThCADCoreNTSSpatialIndex(obj);
+
+                foreach (var d in detectArea)
+                {
+                    var hasLayout = layoutList.Where(x => d.Contains(x.Shell()));
+
+                    if (hasLayout.Count() == 0)
+                    {
+                        emptyDetect.Add(d.ToNTSPolygon());
+                    }
+                    else
+                    {
+                        hasLayout = hasLayout.OrderByDescending(x => x.Area);
+                        if (hasLayout.First().Area <= (radius * radius * 0.2 / 50)) //根据初始点位生成得出
+                        {
+                            var ptInDete = pointIdx.SelectCrossingPolygon(d);
+                            if (ptInDete.Count == 0)
+                            {
+                                emptyDetect.Add(d.ToNTSPolygon());
+                            }
+                        }
+                    }
+                }
+                EmptyDetect = OverlayNGRobust.Union(emptyDetect.ToArray());
+            }
         }
 
         /// <summary>
@@ -85,20 +193,20 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="pointsInAreas"></param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>返回初步筛选的点的集合</returns>
-        public static List<Point3d> FstStep(List<Point3d> pointsInAreas, double radius)
+        private List<Point3d> FstStep()
         {
             List<Point3d> fstPoints = new List<Point3d>();
             Hashtable ht = new Hashtable();
-            foreach (Point3d pt in pointsInAreas)
+            foreach (Point3d pt in pointsInLayoutList)
             {
                 ht.Add(pt, false);
             }
             bool flag;
             double adaptRadius = radius * AdaptRadius(radius);
-            foreach (Point3d pt in pointsInAreas)
+            foreach (Point3d pt in pointsInLayoutList)
             {
                 flag = false;
-                foreach (Point3d pt2 in pointsInAreas)
+                foreach (Point3d pt2 in pointsInLayoutList)
                 {
                     //距离在范围外，跳过
                     if (pt.DistanceTo(pt2) > adaptRadius)
@@ -122,6 +230,37 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         }
 
         /// <summary>
+        /// 检查DetectArea里面是否有点，如果没有加一个离中点最近的点
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        private List<Point3d> AddDetectAreaPts(List<Point3d> points)
+        {
+            var returnPts = new List<Point3d>();
+            returnPts.AddRange(points);
+
+            var addPtInDetect = new List<Point3d>();
+            for (int i = 0; i < detectArea.Count; i++)
+            {
+                var detect = detectArea[i];
+                var pInDetect = points.Where(x => detect.Contains(x));
+                if (pInDetect.Count() == 0)
+                {
+                    var centerPt = detect.Centroid();
+                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, pointsInLayoutList, detect);
+                    if (ptNearCenter != Point3d.Origin)
+                    {
+                        addPtInDetect.Add(ptNearCenter);
+                    }
+                }
+            }
+
+            returnPts.AddRange(addPtInDetect);
+            return returnPts;
+
+        }
+
+        /// <summary>
         /// 对第一步布置后的情况进行加点以覆盖完全部需覆盖区域（此步会产生冗余点）
         /// </summary>
         /// <param name="mPolygon">需覆盖带洞多边形边界</param>
@@ -129,7 +268,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="pointsInLayoutList">可能布置的点位</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>加电后的点集合</returns>
-        public static List<Point3d> SndStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        private List<Point3d> SndStep(List<Point3d> points)
         {
             int loopCnt = 0;
             bool flag = true;
@@ -138,18 +277,25 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 ++loopCnt;
                 flag = false;
                 //当前未覆盖区域集合
-                NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType);
+                var unCoverRegion = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
 
                 //在未覆盖区域附近加点
                 foreach (Entity obj in unCoverRegion.ToDbCollection())
                 {
                     if (obj.GetArea() > 500000)
                     {
+                        DrawUtils.ShowGeometry(obj, "l3Blind", 3);
                         flag = true;
                         Point3d pt = ((Polyline)obj).Centroid();
-                        Point3d pt1 = PointsDealer.GetNearestPoint(pt, pointsInLayoutList);
+                        var detect = new Polyline();
+                        if (detectArea.Count > 0)
+                        {
+                            detect = AreaCaculator.GetDetectPolyline(pt, detectSpatialIdx);
+                        }
+                        Point3d pt1 = PointsDealer.GetNearestPoint(pt, pointsInLayoutList, detect);
+
                         //如果存在永不可能覆盖的位置，放弃覆盖
-                        if (pt.DistanceTo(pt1) > radius)
+                        if (pt1 == Point3d.Origin || pt.DistanceTo(pt1) > radius)
                         {
                             flag = false;
                             continue;
@@ -170,30 +316,68 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="pointsInLayoutList"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static List<Point3d> SndHalfStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        private List<Point3d> SndHalfStep(List<Point3d> points)
         {
             //1、获得所有大面积未覆盖区域（多个）中所有的未覆盖区域中所有的未覆盖区域中的点（统一处理）
-            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType);
+            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
             List<Point3d> pointsInUncoverAreas = new List<Point3d>();
             foreach (Entity obj in unCoverRegion.ToDbCollection())
             {
                 if (obj.GetArea() > 500000)
                 {
+                    DrawUtils.ShowGeometry(obj, "l4BigBlind", 3);
                     List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(obj, 400);//-------------------
-                    foreach (Point3d pt in tmpPoints)
-                    {
-                        pointsInUncoverAreas.Add(pt);
-                    }
+                    pointsInUncoverAreas.AddRange(tmpPoints);
                 }
             }
             //2、找到以上获得的点（radius或者radius / 2）最近的可布置点
             foreach (Point3d pt in pointsInUncoverAreas)
             {
-                points.Add(PointsDealer.GetNearestPoint(pt, pointsInLayoutList));
+                var detect = new Polyline();
+                if (detectArea.Count > 0)
+                {
+                    detect = AreaCaculator.GetDetectPolyline(pt, detectSpatialIdx);
+                }
+                var newPt = PointsDealer.GetNearestPoint(pt, pointsInLayoutList, detect);
+                if (newPt != Point3d.Origin)
+                {
+                    points.Add(newPt);
+                }
             }
             points = points.Distinct().ToList();
             return points;
         }
+
+        /// <summary>
+        /// 点移动到中点附近
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        private List<Point3d> MovePtToLayoutCt(List<Point3d> points)
+        {
+            var movePtToCenter = new List<Point3d>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                var layout = layoutList.Where(x => x.Contains(points[i])).First();
+                var ptInLayout = points.Where(x => layout.Contains(x));
+                if (ptInLayout.Count() == 1)
+                {
+                    var centerPt = layout.Shell().Centroid();
+                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, pointsInLayoutList, layout.Shell());
+                    if (ptNearCenter != Point3d.Origin)
+                    {
+                        movePtToCenter.Add(ptNearCenter);
+                    }
+                }
+                else
+                {
+                    movePtToCenter.Add(points[i]);
+                }
+
+            }
+            return movePtToCenter;
+        }
+
 
         /// <summary>
         /// 删除不影响覆盖面积的点
@@ -202,99 +386,63 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="sndHalfPoints">第二次操作后的点集</param>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>返回删除后的点集</returns>
-        public static List<Point3d> ThdStep(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType)
+        private List<Point3d> ThdStep(List<Point3d> points)
         {
             Hashtable ht = new Hashtable();
             DeletePoints.ReducePoints(ht, points, radius);
-            DeletePoints.RemovePoints(mPolygon, ht, points, radius, equipmentType);
+            DeletePoints.RemovePoints(mRoom, ht, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
             return DeletePoints.SummaryPoints(ht);
         }
 
         /// <summary>
         /// 移动布置好的点位，使之尽量靠近中间线。
         /// </summary>
-        /// <param name="mPolygon"></param>
+        /// <param name="mPolygonShell"></param>
         /// <param name="points"></param>
         /// <param name="radius"></param>
         /// <param name="equipmentType"></param>
         /// <returns></returns>
-        public static List<Point3d> FourStep(MPolygon mPolygon, List<Point3d> points, List<Point3d> pointsInLayoutList, double radius, BlindType equipmentType)
+        private List<Point3d> FourStep(List<Point3d> points)
         {
-            double preBlandArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
-            List<Point3d> centerPts = CenterLineSimplify.CLSimplifyPts(mPolygon);
+            double preBlandArea = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect).Area;
+
             //key原始点，value原始点最近的中心点
             Dictionary<Point3d, Point3d> pt2center = new Dictionary<Point3d, Point3d>();
             foreach (var pt in points)
             {
-                pt2center[pt] = PointsDealer.GetNearestPoint(pt, centerPts);
+                pt2center[pt] = PointsDealer.GetNearestPoint(pt, centerLinePts, null);
             }
             //key原始点，value原始点最近的中心点最近的可布置点
             Dictionary<Point3d, Point3d> pt2move = new Dictionary<Point3d, Point3d>();
             foreach (var node in pt2center)
             {
-                pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, pointsInLayoutList);
+                var layout = layoutList.Where(x => x.Contains(node.Key)).First();
+                pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, pointsInLayoutList, layout.Shell());
             }
             foreach (var node in pt2move)
             {
-                points.Remove(node.Key);
-                points.Add(node.Value);
-                double curBlandArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
-                if (Math.Abs(preBlandArea - curBlandArea) > 500000)
+                if (node.Value != Point3d.Origin)
                 {
-                    points.Add(node.Key);
+                    points.Remove(node.Key);
+                    points.Add(node.Value);
+                    double curBlandArea = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect).Area;
+                    if (Math.Abs(preBlandArea - curBlandArea) > 500000)
+                    {
+                        //points.Remove(node.Value);
+                        points.Add(node.Key);
+                    }
                 }
             }
             return points.Distinct().ToList();
         }
 
-        /// <summary>
-        /// 获取布置点的方向
-        /// </summary>
-        /// <param name="frame"></param>
-        /// <param name="holeList"></param>
-        /// <param name="points"></param>
-        /// <param name="pointsWithDirection"></param>
-        public static void PointsWithDirection(Polyline frame, List<Polyline> holeList, List<Point3d> points, Dictionary<Point3d, Vector3d> pointsWithDirection)
-        {
-            var lines = new List<Line>();
-            var dbObjs = new DBObjectCollection();
-            frame.Explode(dbObjs);
-            foreach (var pl in holeList)
-            {
-                lines.AddRange(pl.ToLines());
-            }
-            foreach (var curve in dbObjs)
-            {
-                if (curve is Line line)
-                {
-                    if (line.StartPoint != line.EndPoint)
-                    {
-                        lines.Add(line);
-                    }
-                }
-                else if (curve is Polyline poly)
-                {
-                    lines.AddRange(poly.ToLines());
-                }
-                else if (curve is Circle circle)
-                {
-                    lines.AddRange(circle.Tessellate(100.0).ToLines());
-                }
-            }
-            foreach (var pt in points)
-            {
-                var closestLine = lines.OrderBy(o => o.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
-                //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(pt, closestLine.StartPoint));//--------------------显示链接线
-                pointsWithDirection.Add(pt, (closestLine.EndPoint - closestLine.StartPoint).GetNormal());
-            }
-        }
 
         /// <summary>
         /// 根据半径大小改变布点的密集程度
         /// </summary>
         /// <param name="radius">设备覆盖半径</param>
         /// <returns>两点相聚距离</returns>
-        public static double AdaptRadius(double radius)
+        private static double AdaptRadius(double radius)
         {
             double adaptRadius = 1 + (radius - 3600) / 11500;// 11500;----------------------------调参侠
             if (adaptRadius < 0.5) return 0.5;

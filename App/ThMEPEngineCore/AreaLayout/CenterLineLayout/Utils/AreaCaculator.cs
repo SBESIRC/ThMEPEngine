@@ -5,7 +5,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.OverlayNG;
+using NetTopologySuite.Operation.Overlay;
+
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.GridLayout.Method;
 
@@ -20,7 +23,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <param name="points"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static NetTopologySuite.Geometries.Geometry UnVisibleArea(MPolygon mPolygon, List<Point3d> points, double radius)
+        private static NetTopologySuite.Geometries.Geometry UnVisibleArea(MPolygon mPolygon, List<Point3d> points, double radius)
         {
             if (points.Count == 0)
             {
@@ -44,9 +47,9 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <param name="points"></param>
         /// <param name="radius"></param>
         /// <returns></returns>
-        public static NetTopologySuite.Geometries.Geometry UnCoverArea(MPolygon mPolygon, List<Point3d> points, double radius)
+        private static NetTopologySuite.Geometries.Geometry UnCoverArea(MPolygon mPolygon, List<Point3d> points, double radius)
         {
-            if(points.Count == 0)
+            if (points.Count == 0)
             {
                 return mPolygon.ToNTSPolygon();
             }
@@ -70,16 +73,68 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <param name="radius"></param>
         /// <param name="equipmentType"></param>
         /// <returns></returns>
-        public static NetTopologySuite.Geometries.Geometry BlandArea(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType)
+        //public static NetTopologySuite.Geometries.Geometry BlandArea(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType)
+        //{
+        //    if (equipmentType == BlindType.VisibleArea)
+        //    {
+        //        return UnVisibleArea(mPolygon, points, radius);
+        //    }
+        //    else
+        //    {
+        //        return UnCoverArea(mPolygon, points, radius);
+        //    }
+        //}
+
+
+        public static Geometry BlandArea(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType, ThCADCoreNTSSpatialIndex detectSpatialIdx, Geometry EmptyDetect)
         {
-            if (equipmentType == BlindType.VisibleArea)
+            var detect = new List<Polygon>();
+            var room = mPolygon.ToNTSPolygon();
+            var isVisible = equipmentType == BlindType.VisibleArea ? true : false;
+            foreach (var p in points)
             {
-                return UnVisibleArea(mPolygon, points, radius);
+                if (detectSpatialIdx != null)
+                {
+                    var detectHasPt = GetDetect(p, detectSpatialIdx);
+                    detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), detectHasPt, radius, isVisible));
+                }
+                else
+                    detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), room, radius, isVisible));
             }
-            else
+
+            var poly = OverlayNGRobust.Union(detect.ToArray());
+            var blind = OverlayNGRobust.Overlay(room, EmptyDetect, SpatialFunction.Difference);
+            blind = OverlayNGRobust.Overlay(blind, poly, SpatialFunction.Difference);
+
+            return blind;
+        }
+
+
+
+        private static Polygon GetDetect(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)
+        {
+            //计算包含该点的可布置区域
+            var min = new Point3d(point.X - 1, point.Y - 1, 0);
+            var max = new Point3d(point.X + 1, point.Y + 1, 0);
+
+            var d = detectSpatialIdx.SelectCrossingWindow(min, max).Cast<MPolygon>().First().ToNTSPolygon();
+            return d;
+        }
+
+        public static Polyline GetDetectPolyline(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)
+        {
+            //计算包含该点的可布置区域
+            var min = new Point3d(point.X - 1, point.Y - 1, 0);
+            var max = new Point3d(point.X + 1, point.Y + 1, 0);
+
+            var returnPl = new Polyline();
+
+            var tempPl = detectSpatialIdx.SelectCrossingWindow(min, max).Cast<MPolygon>();
+            if (tempPl.Count() > 0)
             {
-                return UnCoverArea(mPolygon, points, radius);
+                returnPl = tempPl.First().Shell();
             }
+            return returnPl;
         }
     }
 }

@@ -95,8 +95,8 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 //导入块图层。free图层
                 ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
-                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, true);
+                var needDetective = _referBeam == true ? true : false;
+                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, needDetective);
                 if (geos.Count == 0)
                 {
                     return;
@@ -106,7 +106,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 var transformer = ThAFASUtils.TransformToOrig(pts, geos);
                 //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
                 //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
-                //var transformer = ThAFASUtils.transformToOrig(newPts, geos);
+                //var transformer = ThAFASUtils.TransformToOrig(newPts, geos);
 
                 var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
                 //洞,必须先做找到框线

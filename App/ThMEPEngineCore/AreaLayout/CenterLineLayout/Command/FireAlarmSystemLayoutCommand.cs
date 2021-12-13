@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Overlay.Snap;
+using NetTopologySuite.Operation.OverlayNG;
+using NetTopologySuite.Operation.Overlay;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -15,7 +17,7 @@ using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 {
-    public class FireAlarmSystemLayoutCommand : ThMEPBaseCommand
+    public class FireAlarmSystemLayoutCommand
     {
         //input
         public Polyline frame { get; set; }//房间外框线
@@ -30,68 +32,92 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
         public BlindType equipmentType { get; set; }//盲区类型
 
         //output
-        public List<Point3d> layoutPoints { get; set; }//布置点位
-        public Dictionary<Point3d, Vector3d> pointsWithDirection { get; set; } //布置点位以及其方向//------------------------------
-        public List<Polyline> blinds { get; set; }//盲区
+        public List<Point3d> layoutPoints { get; set; } = new List<Point3d>();//布置点位
+        public Dictionary<Point3d, Vector3d> pointsWithDirection { get; set; } = new Dictionary<Point3d, Vector3d>(); //布置点位以及其方向//------------------------------
+        public List<Polyline> blinds { get; set; } = new List<Polyline>();//盲区
 
-        public override void SubExecute()
+        public void Execute()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                //Get MPolygon
-                var objs = new DBObjectCollection();
-                objs.Add(frame);
-                foreach (var hole in holeList)// --------------------------------------------
-                {
-                    hole.Closed = true;
-                    objs.Add(hole);
-                }
-                MPolygon mPolygonShell = objs.BuildMPolygon();
-                List<Polyline> nonDeployableArea = new List<Polyline>();
+                ////Get MPolygon
+                //var objs = new DBObjectCollection();
+                //objs.Add(frame);
+                //foreach (var hole in holeList)// --------------------------------------------
+                //{
+                //    hole.Closed = true;
+                //    objs.Add(hole);
+                //}
+                //MPolygon roomForCenterLine = objs.BuildMPolygon();
 
-                GetInputs(objs, nonDeployableArea);
+                GetRoomHoleMPoly(out var roomWithHole);
 
-                MPolygon mPolygon = objs.BuildMPolygon();
-                acdb.ModelSpace.Add(mPolygon);
-                mPolygon.SetDatabaseDefaults();
+                List<Point3d> centerLinePts = CenterLineSimplify.CLSimplifyPts(roomWithHole);
+                centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));
 
+                //List<Polyline> nonDeployableAreaOri = new List<Polyline>();
+                ////GetInputs(ref objs, nonDeployableAreaOri);
 
-                //处理数据
-                pointsWithDirection = new Dictionary<Point3d, Vector3d>();
+                //MPolygon roomMP = objs.BuildMPolygon();
+                ////acdb.ModelSpace.Add(roomMP);
+                ////roomMP.SetDatabaseDefaults();
+
+                //DrawUtils.ShowGeometry(roomHoleMP, "l0roomHole", 3, 30);
+                //DrawUtils.ShowGeometry(roomMP, "l0roomMp", 210, 30);
+
+                GetRoomMPoly(out var roomWithAllHole, out var nonDeployableArea);
+                DrawUtils.ShowGeometry(roomWithAllHole, "l0roomWithAllHole", 233, 30);
+
                 //计算布置点位
-                layoutPoints = LayoutOpt.Calculate(mPolygon, LayoutOpt.GetPosiblePositions(nonDeployableArea, layoutList, radius), radius, equipmentType, acdb, mPolygonShell);
+                var layoutServer = new LayoutOpt()
+                {
+                    // mPolygon = roomMP,
+                    //mPolygonShell = roomHoleMP,
+                    mRoom = roomWithAllHole,
+                    radius = radius,
+                    equipmentType = equipmentType,
+                    detectArea = detectArea,
+                    layoutList = layoutList,
+                    nonDeployableArea = nonDeployableArea,
+                    centerLinePts = centerLinePts,
+                };
+
+                layoutPoints = layoutServer.Calculate();
+
+
                 //获取布置点位方向
-                LayoutOpt.PointsWithDirection(frame, holeList, layoutPoints, pointsWithDirection);
+                pointsWithDirection = new Dictionary<Point3d, Vector3d>();
+                PointDirectionService.PointsWithDirection(frame, holeList, layoutPoints, pointsWithDirection);
 
                 //输出
                 blinds = new List<Polyline>();
-                NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, layoutPoints, radius, equipmentType);
+                var unCoverRegion = AreaCaculator.BlandArea(roomWithAllHole, layoutPoints, radius, equipmentType, layoutServer.detectSpatialIdx, layoutServer.EmptyDetect);
                 foreach (var ucr in unCoverRegion.ToDbCollection())
                 {
                     blinds.Add((Polyline)ucr);
                 }
+
                 //善后
-                mPolygon.UpgradeOpen();
-                mPolygon.Erase();
-                mPolygon.DowngradeOpen();
+                //mPolygon.UpgradeOpen();
+                //mPolygon.Erase();
+                //mPolygon.DowngradeOpen();
 
 #if DEBUG
-                //显示适配信息
-                ShowInfo.SafetyCaculate(mPolygon, layoutPoints, radius);
-                //显示布置点及方向
-                foreach (var dir in pointsWithDirection)
-                {
-                    ShowInfo.ShowPointAsO(dir.Key, 130, 200);
-                    ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
-                }
-                //显示盲区
-                ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
+                ////显示适配信息
+                //ShowInfo.SafetyCaculate(roomMP, layoutPoints, radius);
+                ////显示布置点及方向
+                //foreach (var dir in pointsWithDirection)
+                //{
+                //    ShowInfo.ShowPointAsO(dir.Key, 130, 200);
+                //    ShowInfo.ShowPointWithDirection(dir.Key, dir.Value, 130);
+                //}
+                ////显示盲区
+                //ShowInfo.ShowGeometry(unCoverRegion, acdb, 130);
 #endif      
             }
         }
 
-
-        public void GetInputs(DBObjectCollection objs, List<Polyline> nonDeployableArea)
+        public void GetInputs(ref DBObjectCollection objs, List<Polyline> nonDeployableArea)
         {
             var room = objs.BuildMPolygon().ToNTSPolygon();
             foreach (var hole in holeList)
@@ -133,10 +159,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 }
             }
 
-            foreach (var wall in wallList)
+            foreach (var col in columns)
             {
-                nonDeployableArea.Add(wall);
-                var geo = room.Difference(wall.ToNTSPolygon());
+                nonDeployableArea.Add(col);
+                var geo = room.Difference(col.ToNTSPolygon());
                 if (geo is Polygon polygon)
                 {
                     room = polygon;
@@ -152,17 +178,109 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                     room = tmpPoly;
                 }
             }
+
             foreach (var pl in prioritys)
             {
                 nonDeployableArea.Add(pl);
             }
+
             objs = room.ToDbCollection();
+
             foreach (var layout in layoutList)
             {
                 var layoutHole = layout.Holes();
                 nonDeployableArea.AddRange(layoutHole);
-                layoutHole.ForEach(x => objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), x.ToNTSPolygon()).ToDbCollection());
+                foreach (var hole in layoutHole)
+                {
+                    objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), hole.ToNTSPolygon()).ToDbCollection();
+                }
             }
         }
+
+        /// <summary>
+        /// 只有洞的房间框线（Mpolygon）
+        /// 用于生成中心线。
+        /// 加入柱子会使中心线形状很奇怪
+        /// </summary>
+        /// <param name="roomForCenterLine"></param>
+        public void GetRoomHoleMPoly(out MPolygon roomForCenterLine)
+        {
+
+            var room = frame.ToNTSPolygon();
+            foreach (var hole in holeList)
+            {
+                if (hole.Area / room.Area > 0.9) continue;
+                var geo = OverlayNGRobust.Overlay(room, hole.ToNTSPolygon(), SpatialFunction.Difference);
+                if (geo is Polygon polygon)
+                    room = polygon;
+                else if (geo is GeometryCollection collection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in collection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
+
+            var objs = room.ToDbCollection();
+            roomForCenterLine = objs.BuildMPolygon();
+        }
+
+        /// <summary>
+        /// 加入洞，墙，柱子的房间框线
+        /// 前序布置的外框不影响盲区不加入房间框线但是加入不可布区域
+        /// 不可布区域：用于生成可布离散点
+        /// </summary>
+        /// <param name="roomWithAllHole"></param>
+        /// <param name="nonDeployableArea"></param>
+        public void GetRoomMPoly(out MPolygon roomWithAllHole, out List<Polyline> nonDeployableArea)
+        {
+            nonDeployableArea = new List<Polyline>();
+            nonDeployableArea.AddRange(holeList);
+            nonDeployableArea.AddRange(wallList);
+            nonDeployableArea.AddRange(columns);
+
+
+            var room = frame.ToNTSPolygon();
+            foreach (var hole in nonDeployableArea)
+            {
+                if (hole.Area / room.Area > 0.9) continue;
+                var geo = OverlayNGRobust.Overlay(room, hole.ToNTSPolygon(), SpatialFunction.Difference);
+                if (geo is Polygon polygon)
+                    room = polygon;
+                else if (geo is GeometryCollection collection)
+                {
+                    Polygon tmpPoly = Polygon.Empty;
+                    foreach (var poly in collection)
+                    {
+                        if (poly is Polygon && poly.Area > tmpPoly.Area)
+                            tmpPoly = poly as Polygon;
+                    }
+                    room = tmpPoly;
+                }
+            }
+
+            var objs = room.ToDbCollection();
+
+            foreach (var layout in layoutList)
+            {
+                var layoutHole = layout.Holes();
+                nonDeployableArea.AddRange(layoutHole);
+                //foreach (var hole in layoutHole)
+                //{
+                //    objs = SnapIfNeededOverlayOp.Difference(objs.BuildMPolygon().ToNTSPolygon(), hole.ToNTSPolygon()).ToDbCollection();
+                //}
+            }
+
+            nonDeployableArea.AddRange(prioritys);//不可提前，之前布的块对盲区没有影响，不能扣掉
+            roomWithAllHole = objs.BuildMPolygon();
+
+
+        }
+
+
     }
 }
