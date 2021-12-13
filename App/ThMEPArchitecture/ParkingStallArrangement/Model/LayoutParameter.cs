@@ -20,18 +20,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
     {
         public Polyline OuterBoundary { get; set; }//最外包围框
         public List<int> AreaNumber { get; set; }//区域索引，从0开始
-        public List<Polyline> Obstacles { get; set; }//所有障碍物
+        public DBObjectCollection Obstacles { get; set; }//所有障碍物
         public List<Line> SegLines { get; set; }//所有分割线
         public List<Polyline> Areas { get; set; }//所有区域包围框
         public Dictionary<int, Polyline> AreaDic { get; set; }//区域包围框
         public Dictionary<int, List<Polyline>> AreaWalls { get; set; }//区域墙线
         public Dictionary<int, List<Line>> AreaSegs { get; set; }//区域分割线
-        public Dictionary<int, List<Polyline>> ObstacleDic { get; set; }//区域内的障碍物
+        public Dictionary<int, List<BlockReference>> ObstacleDic { get; set; }//区域内的障碍物块
+
+        public Dictionary<int, List<List<Polyline>>> ObstaclesList { get; set; }//区域内的障碍物线
+        public Dictionary<int, List<Polyline>> BuildingBoxes { get; set; }//区域内的障碍物boundingbox
         public Dictionary<int, List<Line>> SegLineDic { get; set; }//区域边界分割线
         public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
 
-        public LayoutParameter(Polyline outerBoundary, List<Polyline> obstacles, List<Line> segLines)
+        public LayoutParameter(Polyline outerBoundary, DBObjectCollection obstacles, List<Line> segLines)
         {
             OuterBoundary = outerBoundary;
             Obstacles = obstacles;
@@ -42,9 +45,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             AreaDic = new Dictionary<int, Polyline>();
             AreaWalls = new Dictionary<int, List<Polyline>>();
             AreaSegs = new Dictionary<int, List<Line>>();
-            ObstacleDic = new Dictionary<int, List<Polyline>>();
+            ObstacleDic = new Dictionary<int, List<BlockReference>>();
+            ObstaclesList = new Dictionary<int, List<List<Polyline>>>();
+            BuildingBoxes = new Dictionary<int, List<Polyline>>();
             SegLineDic = new Dictionary<int, List<Line>>();
-            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles.ToCollection());
+            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles);
         }
 
         public void Set(List<Gene> genome)
@@ -67,17 +72,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             SegLineDic.Clear();
             AreaWalls.Clear();
             AreaSegs.Clear();
-
+            BuildingBoxes.Clear();
+            ObstaclesList.Clear();
 
             Areas.AddRange(areas);
             for (int i = 0; i < areas.Count; i++)
             {
                 AreaNumber.Add(i);
                 AreaDic.Add(i, areas[i]);
-                ObstacleDic.Add(i, GetObstacles(areas[i]));
+                var buildings = GetObstacles(areas[i]);
+                ObstacleDic.Add(i, buildings);
                 SegLineDic.Add(i, GetSegLines(areas[i]));
                 AreaSegs.Add(i, GetAreaSegs(areas[i], SegLineDic[i], out List<Polyline> areaWall));
                 AreaWalls.Add(i, areaWall);
+
+                var bdBoxes = new List<Polyline>();//临时建筑物外包线
+                var obstacles = new List<List<Polyline>>();//临时建筑物框线
+                foreach(var build in buildings)
+                {
+                    var rect = build.GetRect();
+                    var obstacle = build.GetPlines();
+                    bdBoxes.Add(rect);
+                    obstacles.Add(obstacle);
+                }
+                BuildingBoxes.Add(i, bdBoxes);
+                ObstaclesList.Add(i, obstacles);
             }
         }
 
@@ -109,12 +128,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
         }
 
-        private List<Polyline> GetObstacles(Polyline area)
+        private List<BlockReference> GetObstacles(Polyline area)
         {
-            var obstacles = new List<Polyline>();
+            var obstacles = new List<BlockReference>();
             var dbObjs = ObstacleSpatialIndex.SelectCrossingPolygon(area);
-            dbObjs.Cast<Entity>()
-                .ForEach(e => obstacles.Add(e as Polyline));
+            dbObjs.Cast<BlockReference>()
+                .ForEach(e => obstacles.Add(e));
             return obstacles;
         }
 
@@ -263,6 +282,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 minAngle += Math.PI;
             }
             return false;
+        }
+    }
+
+    public static class Plines
+    {
+        public static List<Polyline> GetPlines(this BlockReference br)
+        {
+            var plines = new List<Polyline>();
+            var objs = new DBObjectCollection();
+            br.Explode(objs);
+            foreach (var obj in objs)
+            {
+                if (obj is Polyline pline)
+                {
+                    plines.Add(pline);
+                }
+            }
+            return plines;
         }
     }
 }

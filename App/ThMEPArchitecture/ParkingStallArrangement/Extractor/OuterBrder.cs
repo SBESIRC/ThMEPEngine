@@ -12,11 +12,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
     public class OuterBrder
     {
         public DBObjectCollection OuterLines = new DBObjectCollection();//外框线
-        public DBObjectCollection BuildingLines = new DBObjectCollection();//建筑物框线
+        public DBObjectCollection BuildingLines = new DBObjectCollection();//建筑物block
         public DBObjectCollection EquipmentLines = new DBObjectCollection();//机房设备线
         public DBObjectCollection SegmentLines = new DBObjectCollection();//分割线
         public List<Line> SegLines = new List<Line>();//分割线
-        public List<Polyline> BuildLines = new List<Polyline>();
+        public List<BlockReference> Building = new List<BlockReference>();//建筑物block
         public void Extract(Database database, Point3dCollection polygon)
         {
             var objs = new DBObjectCollection();
@@ -37,12 +37,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     var spt = (db as Polyline).StartPoint;
                     var ept = (db as Polyline).EndPoint;
                     SegLines.Add(new Line(spt, ept));
-                }
-                BuildingLines.Cast<Entity>()
-                    .ForEach(e => BuildLines.Add((e as Polyline).DPSimplify(10.0)));
-                foreach(var l in BuildLines)
-                {
-                    acadDatabase.CurrentSpace.Add(l);
                 }
             }
         }
@@ -92,7 +86,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             if (IsBuildingLayer(ent.Layer))
             {
-                AddObjs(ent, BuildingLines);
+                AddObjs2(ent, BuildingLines);
             }
             if (IsEquipmentLayer(ent.Layer))
             {
@@ -114,10 +108,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 dbObjs.Add(line.ToPolyline());
             }
         }
+        private void AddObjs2(Entity entity, DBObjectCollection dbObjs)
+        {
+            if (entity is BlockReference br)
+            {
+                Building.Add(br);
+                dbObjs.Add(br);
+            }
+        }
         private bool IsCurve(Entity ent)
         {
             return ent is Polyline ||
                    ent is Line;
         }
     }
+
+    
+
 }

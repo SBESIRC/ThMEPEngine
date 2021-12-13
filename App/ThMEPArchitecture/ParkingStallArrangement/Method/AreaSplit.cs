@@ -10,6 +10,7 @@ using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThMEPArchitecture.ParkingStallArrangement.General;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -205,7 +206,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var closedPts = new List<Point3d>();
             foreach(var build in buildLines)
             {
-                var pline = build as Polyline;
+                var br = build as BlockReference;
+                var pline = br.GetRect();
                 var pts = pline.GetPoints().ToList();
                 closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
             }

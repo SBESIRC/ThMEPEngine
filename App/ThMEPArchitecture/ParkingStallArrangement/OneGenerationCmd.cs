@@ -53,6 +53,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void CreateAreaSegment(AcadDatabase acadDatabase)
         {
+            
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
@@ -65,7 +66,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildLines, sortSegLines);
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
 
            
             var geneAlgorithm = new GA2(gaPara, layoutPara, 1, 1);
@@ -94,9 +95,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     int index = layoutPara.AreaNumber[j];
                     layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                     layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
                     layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                     layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+
+                    var obstacles = new List<Polyline>();
+                    obstaclesList.ForEach(e => obstacles.AddRange(e));
+
                     ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
                     bool valid = p.Validate();
                     if (valid)
@@ -106,7 +111,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                 }
             }
-
+            
             //layoutPara.Set(solution.Genome);
 
 
@@ -126,7 +131,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //        p.Display();
             //    }
             //}
-            Draw.DrawSeg(solution);
+            //Draw.DrawSeg(solution);
         }
 
         private static Point3dCollection SelectAreas()

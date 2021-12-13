@@ -16,6 +16,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
+using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -60,11 +61,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildLines, sortSegLines);
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
 
             var iterationCnt = Active.Editor.GetInteger("\n Input GA iteration count:");
             if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
@@ -104,9 +104,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     int index = layoutPara.AreaNumber[j];
                     layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                     layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
                     layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                     layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                    var obstacles = new List<Polyline>();
+                    obstaclesList.ForEach(e => obstacles.AddRange(e));
                     ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
                     bool valid = p.Validate();
                     if (valid)
@@ -117,7 +119,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 }
             }
 
-            //layoutPara.Set(solution.Genome);
+            layoutPara.Set(solution.Genome);
 
 
             //for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
@@ -125,9 +127,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //    int index = layoutPara.AreaNumber[j];
             //    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
             //    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-            //    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
+            //    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
             //    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
             //    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+            //    var obstacles = new List<Polyline>();
+            //    obstaclesList.ForEach(e => obstacles.AddRange(e));
             //    ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
             //    bool valid = p.Validate();
             //    if (valid)
@@ -136,7 +140,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //        p.Display();
             //    }
             //}
-            //Draw.DrawSeg(solution);
+            Draw.DrawSeg(solution);
         }
 
         private static Point3dCollection SelectAreas()
