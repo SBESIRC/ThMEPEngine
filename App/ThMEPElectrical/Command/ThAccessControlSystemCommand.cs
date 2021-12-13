@@ -92,14 +92,30 @@ namespace ThMEPElectrical.Command
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    var ACEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.AC_BLOCK_NAMES, ThMEPCommon.AC_PIPE_LAYER_NAME);
 
                     //布置
                     LayoutAccessControlService layoutService = new LayoutAccessControlService();
                     var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, floor);
 
+                    //删除旧图块
+                    DeleteBlock(ACEntitys);
+
                     //插入图块
                     InsertBlock(layoutInfo, originTransformer);
                 }
+            }
+        }
+
+        private void DeleteBlock(List<Entity> aCEntitys)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                aCEntitys.ForEach(vmEntity =>
+                {
+                    vmEntity.UpgradeOpen();
+                    vmEntity.Erase();
+                });
             }
         }
 

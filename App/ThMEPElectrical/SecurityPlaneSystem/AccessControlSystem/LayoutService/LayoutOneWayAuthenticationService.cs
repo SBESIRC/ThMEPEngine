@@ -38,13 +38,6 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
             structs = structs.ToCollection().UnionPolygons().Cast<Polyline>().ToList();
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in structs)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
             if (structs.Count <= 0)
             {
@@ -65,6 +58,27 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var cardReader = CalLayoutCardReader(structs, roomDoorInfo.Item2, roomA, roomB, door);
             if (button != null) accessControlModels.Add(button);
             if (cardReader != null) accessControlModels.Add(cardReader);
+            if (button.IsNull() || cardReader.IsNull())
+            {
+                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                Polyline roomBoundary = roomA;
+                var bufferRoomPL = roomBoundary.BufferPL(200)[0] as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(roomBoundary);
+                objs.Add(bufferDoor);
+                var rooms = ThCADCoreNTSEntityExtension.Difference(bufferRoomPL, objs).Cast<Polyline>().ToList();
+                structs.AddRange(rooms);
+                if (button.IsNull())
+                {
+                    button = CalLayoutButton(structs, roomDoorInfo.Item1, roomA, door);
+                    if (button != null) accessControlModels.Add(button);
+                }
+                if (cardReader.IsNull())
+                {
+                    cardReader = CalLayoutCardReader(structs, roomDoorInfo.Item2, roomA, roomB, door);
+                    if (cardReader != null) accessControlModels.Add(cardReader);
+                }
+            }
             accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item3));
 
             return accessControlModels;

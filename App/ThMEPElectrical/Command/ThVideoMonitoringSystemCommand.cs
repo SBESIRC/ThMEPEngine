@@ -102,9 +102,14 @@ namespace ThMEPElectrical.Command
                     var lanes = getPrimitivesService.GetLanes(outFrame, out List<List<Line>> otherLanes);
                     lanes.AddRange(otherLanes);
 
+                    var vmEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.VM_BLOCK_NAMES, ThMEPCommon.VM_PIPE_LAYER_NAME);
+
                     //布置
                     LayoutService layoutService = new LayoutService();
                     var layoutInfo = layoutService.LayoutFactory(rooms, doors, columns, walls, lanes.SelectMany(x => x).ToList(), floor);
+
+                    //删除旧图块
+                    DeleteBlock(vmEntitys);
 
                     //插入图块
                     InsertBlock(layoutInfo, originTransformer);
@@ -122,6 +127,18 @@ namespace ThMEPElectrical.Command
                     //    }
                     //}
                 }
+            }
+        }
+
+        private void DeleteBlock(List<Entity> vmEntitys)
+        {
+            using(AcadDatabase acad = AcadDatabase.Active())
+            {
+                vmEntitys.ForEach(vmEntity =>
+                {
+                    vmEntity.UpgradeOpen();
+                    vmEntity.Erase();
+                });
             }
         }
 

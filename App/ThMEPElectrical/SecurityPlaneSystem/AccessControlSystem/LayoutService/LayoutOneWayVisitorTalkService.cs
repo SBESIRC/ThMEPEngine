@@ -36,13 +36,6 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var nColumns = getLayoutStructureService.GetNeedColumns(columns, bufferRoom);
             var nWalls = getLayoutStructureService.GetNeedWalls(walls, bufferRoom);
             var structs = getLayoutStructureService.CalLayoutStruc(door, nColumns, nWalls);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in structs)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
             List<AccessControlModel> accessControlModels = new List<AccessControlModel>();
             if (structs.Count <= 0)
             {
@@ -63,6 +56,27 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
             var button = CalLayoutButton(structs, roomDoorInfo.Item1, roomA, door);
             if (intercom != null) accessControlModels.Add(intercom);
             if (button != null) accessControlModels.Add(button);
+            if(intercom.IsNull() || button.IsNull())
+            {
+                var bufferDoor = door.Buffer(5)[0] as Polyline;
+                Polyline roomBoundary = roomA;
+                var bufferRoomPL = roomBoundary.BufferPL(200)[0] as Polyline;
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(roomBoundary);
+                objs.Add(bufferDoor);
+                var rooms = ThCADCoreNTSEntityExtension.Difference(bufferRoomPL, objs).Cast<Polyline>().ToList();
+                structs.AddRange(rooms);
+                if(intercom.IsNull())
+                {
+                    intercom = CalLayoutIntercom(structs, roomDoorInfo.Item2, roomA, roomB, door);
+                    if (intercom != null) accessControlModels.Add(intercom);
+                }
+                if(button.IsNull())
+                {
+                    button = CalLayoutButton(structs, roomDoorInfo.Item1, roomA, door);
+                    if (button != null) accessControlModels.Add(button);
+                }
+            }
             accessControlModels.Add(CalLayoutElectricLock(doorCenterPt, roomDoorInfo.Item3));
 
             return accessControlModels;

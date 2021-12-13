@@ -110,7 +110,7 @@ namespace ThMEPElectrical.StructureHandleService
             var doors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => x.Clone() as Polyline).ToList();
+                doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => (x.Clone() as Polyline).FlattenRectangle()).Where(o => o.Area > 25000).ToList();
 
                 //doors.ForEach(x => originTransformer.Transform(x));
                 //var doorExtractEngine = new ThDoorExtractionEngine();
@@ -138,6 +138,25 @@ namespace ThMEPElectrical.StructureHandleService
             }
 
             return doors;
+        }
+
+        public List<Entity> GetOldLayout(Polyline polyline,List<string> blockNames,string LineLayer)
+        {
+            var vmInfo = new List<Entity>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var vmBlockInfo = acdb.ModelSpace.OfType<BlockReference>().Where(x => blockNames.Contains(x.GetEffectiveName())).ToList();
+                var vmLineInfo = acdb.ModelSpace.OfType<Line>().Where(x => x.Layer == LineLayer).ToList();
+                vmInfo.AddRange(vmBlockInfo);
+                vmInfo.AddRange(vmLineInfo);
+
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(vmInfo.ToCollection());
+                var boundary = polyline.Clone() as Polyline;
+                originTransformer.Reset(boundary);
+                var objs = spatialIndex.SelectWindowPolygon(boundary);
+                vmInfo = objs.Cast<Entity>().ToList();
+            }
+            return vmInfo;
         }
 
         /// <summary>
