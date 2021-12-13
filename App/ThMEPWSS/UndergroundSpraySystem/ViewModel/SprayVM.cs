@@ -59,7 +59,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
                     storeysRecEngine.Recognize(acadDatabase.Database, SelectedArea);
                     if (storeysRecEngine.Elements.Count == 0)
                     {
-                        MessageBox.Show("框选区域没有有效楼层");
+                        MessageBox.Show("\n 框选区域没有有效楼层");
                         return;
                     }
                     FloorListDatas = storeysRecEngine.Elements
@@ -84,7 +84,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
 
                     if (FloorListDatas.Count == 0)
                     {
-                        MessageBox.Show("框选区域没有标准楼层");
+                        MessageBox.Show("\n 框选区域没有标准楼层");
                         return;
                     }
                 }
@@ -113,7 +113,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.ViewModel
 
                 while (true)
                 {
-                    var opt = new PromptPointOptions("请指定喷淋总管标记插入点: \n");
+                    var opt = new PromptPointOptions("\n请指定喷淋总管标记插入点");
                     var pt = Active.Editor.GetPoint(opt);
                     if (pt.Status != PromptStatus.OK)
                     {

@@ -32,7 +32,7 @@ namespace ThMEPWSS.ViewModel
                 }
                 while (true)
                 {
-                    var opt = new PromptPointOptions("请指定环管标记插入点: \n");
+                    var opt = new PromptPointOptions("\n请指定环管标记插入点");
                     var pt = Active.Editor.GetPoint(opt);
                     if (pt.Status != PromptStatus.OK)
                     {
@@ -64,7 +64,7 @@ namespace ThMEPWSS.ViewModel
                 }
                 while (true)
                 {
-                    var opt = new PromptPointOptions("请指定环管节点标记插入点: \n");
+                    var opt = new PromptPointOptions("\n请指定环管节点标记插入点");
                     var pt = Active.Editor.GetPoint(opt);
                     if (pt.Status != PromptStatus.OK)
                     {

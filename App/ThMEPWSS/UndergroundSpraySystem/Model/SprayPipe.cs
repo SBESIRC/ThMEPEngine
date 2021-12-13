@@ -57,9 +57,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
 
         private bool IsTargetLayer(string layer)
         {
-            return layer.Contains("W-FRPT") &&
-                   layer.Contains("SPRL") &&
-                   layer.Contains("PIPE");
+            return  layer.Contains("SPRL") &&
+                   (layer.Contains("PIPE") ||
+                    layer.Contains("EQPM"));
         }
 
         public List<Line> CreateSprayLines()

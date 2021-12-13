@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             insertPt = new Point3d();
             var database = acadDatabase.Database;
-            var opt = new PromptPointOptions("请指定环管标记起点:");
+            var opt = new PromptPointOptions("\n请指定环管标记起点");
             var propRes = Active.Editor.GetPoint(opt);
             if (propRes.Status == PromptStatus.OK)
             {

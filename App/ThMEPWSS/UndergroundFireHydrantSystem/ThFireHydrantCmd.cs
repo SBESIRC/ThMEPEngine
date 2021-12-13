@@ -53,7 +53,7 @@ namespace ThMEPWSS.Command
         {
             Autodesk.AutoCAD.Geometry.Point3d loopStartPt;
             {
-                var opt = Active.Editor.GetPoint("请指定环管标记起点:");
+                var opt = Active.Editor.GetPoint("\n请指定环管标记起点");
                 if (opt.Status != PromptStatus.OK)
                 {
                     return null;
@@ -72,7 +72,7 @@ namespace ThMEPWSS.Command
             var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
-                var opt = Active.Editor.GetPoint("指定消火栓系统图插入点:");
+                var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
 
                 if (opt.Status != PromptStatus.OK)
                 {
@@ -98,8 +98,6 @@ namespace ThMEPWSS.Command
             //    curDb.CurrentSpace.Add(new Line(mainPathList[0][i]._pt, mainPathList[0][i + 1]._pt));
             //}
             var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
-
-           
 
             var visited = new HashSet<Point3dEx>();//访问标志
             visited.AddVisit(mainPathList);
