@@ -34,24 +34,14 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
         /// <returns></returns>
         public static Point3d GetColumnPoint(Polyline column)
         {
-            var pt1 = column.GetPoint3dAt(0);
-            var pt2 = column.GetPoint3dAt(2);
-            return new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
-        }
-
-        /// <summary>
-        /// 获得polyline上所有线
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public static List<Line> GetLinesByPolyline(this Polyline polyline)
-        {
-            List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            var pts = new List<Point3d>();
+            for (int i = 0; i < column.NumberOfVertices; i++)
             {
-                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+                pts.Add(column.GetPoint3dAt(i));
             }
-            return lines;
+            var pt1 = pts[0];
+            var pt2 = pts.OrderByDescending(x => x.DistanceTo(pt1)).First();
+            return new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
         }
     }
 }

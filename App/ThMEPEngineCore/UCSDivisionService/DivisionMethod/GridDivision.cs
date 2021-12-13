@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         public void Division(List<List<Curve>> girds, Polyline polyline, List<Polyline> walls)
         {
             //将所有轴网打成line
-            var gridLines = girds.Select(x => ConvertToLine(x, 500)).ToList();
+            var gridLines = girds.Select(x => GeoUtils.ConvertToLine(x, 500)).ToList();
 
             //获得所有轴网的网格区域
             var gridAreas = GetGridArea(gridLines.SelectMany(x => x).ToList());
@@ -69,35 +69,6 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         {
             var gridPts = StructUtils.GetCurvePoints(gridLines.Cast<Curve>().ToList());
             return ThCADCoreNTSPoint3dCollectionExtensions.ConvexHull(gridPts).ToDbCollection().Cast<Polyline>().OrderBy(x => x.Area).First();
-        }
-
-        private List<Line> ConvertToLine(List<Curve> girds, double arcChord)
-        {
-            List<Line> resLines = new List<Line>();
-            foreach (var grid in girds)
-            {
-                if (grid is Line line)
-                {
-                    resLines.Add(line);
-                }
-                else if (grid is Polyline)
-                {
-                    var objs = new DBObjectCollection();
-                    grid.Explode(objs);
-                    resLines.AddRange(objs.Cast<Line>());
-                }
-                else if (grid is Arc arc)
-                {
-                    var polyline = arc.TessellateArcWithChord(arcChord);
-                    var entitySet = new DBObjectCollection();
-                    polyline.Explode(entitySet);
-                    foreach (var obj in entitySet)
-                    {
-                        resLines.Add(obj as Line);
-                    }
-                }
-            }
-            return resLines;
         }
     }
 }

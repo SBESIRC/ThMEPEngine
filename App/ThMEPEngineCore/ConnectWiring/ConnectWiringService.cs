@@ -46,7 +46,7 @@ namespace ThMEPEngineCore.ConnectWiring
             {
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
-            var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull).ToList();
+            var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull && !(x.Database is null)).ToList();
             BranchConnectingService branchConnecting = new BranchConnectingService();
             //BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();

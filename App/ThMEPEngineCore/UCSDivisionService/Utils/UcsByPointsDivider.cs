@@ -24,7 +24,11 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
         {
             layouts = new List<Layout>();
             for (int i = 0; i < polylines.Count; i++)
-                layouts.Add(new Layout(polylines[i], i));
+            {
+                var lyt = new Layout(polylines[i], i);
+                if (lyt.ent.Area > 10) layouts.Add(lyt);
+            }
+                
             //按照方向初步分组
             var TmpGroups = new List<LayoutGroup>();
             foreach (Layout layout in layouts)
@@ -42,8 +46,8 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
                 }
             }
             //个数少的组合并到大组中
-            var rest = TmpGroups.Where(o => 1.0 * o.layouts.Count / layouts.Count <= 0.25).ToList();
-            foreach (var group in rest)
+            var reset = TmpGroups.Where(o => 1.0 * o.layouts.Count / layouts.Count <= 0.25).ToList();
+            foreach (var group in reset)
             {
                 foreach (var index in group.layouts)
                 {
@@ -71,7 +75,11 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
             {
                 foreach (var layout in layouts)
                 {
-                    var buffer = layout.ent.Buffer(2500).Cast<Polyline>().First();
+                    var buffer = layout.ent.Buffer(2500).Cast<Polyline>().FirstOrDefault();
+                    //if (buffer == null)
+                    //{
+                    //    continue;
+                    //}
                     var nearLayouts = layouts.Where(o => o.ent.Intersects(buffer)).ToList();
                     Dictionary<int, int> map = new Dictionary<int, int>();
                     int maxCount = -1;
@@ -96,9 +104,15 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
             foreach (var layout in layouts)
             {
                 if (groups.ContainsKey(TmpGroups[layout.GroupID].angle) == false)
-                    groups.Add(TmpGroups[layout.GroupID].angle, layout.ent.Buffer(1000));
+                    groups.Add(TmpGroups[layout.GroupID].angle, layout.ent.Buffer(0));
                 else
-                    groups[TmpGroups[layout.GroupID].angle].Add(layout.ent.Buffer(1000).Cast<Polyline>().First());
+                {
+                    var bufferEnt = layout.ent.Buffer(0).Cast<Polyline>().FirstOrDefault();
+                    if (bufferEnt != null)
+                    {
+                        groups[TmpGroups[layout.GroupID].angle].Add(bufferEnt);  //1000
+                    }
+                }    
             }
             //转化为需要的UCS字典
             foreach (var group in groups)
@@ -140,11 +154,13 @@ namespace ThMEPEngineCore.UCSDivisionService.Utils
                     var tmpAngle = GetAngle(dir.X, dir.Y);
                     int maxIndex = -1;
                     for (int j = 0; j < angle_list.Count; j++)
+                    {
                         if (Math.Abs(angle_list[j] - tmpAngle) < 5)
                         {
                             maxIndex = j;
                             break;
                         }
+                    }   
                     if (maxIndex >= 0)
                     {
                         len_list[maxIndex] += dir.Length;
