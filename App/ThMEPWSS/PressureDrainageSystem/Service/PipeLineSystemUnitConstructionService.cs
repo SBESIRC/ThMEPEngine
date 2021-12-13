@@ -399,9 +399,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         {
                             if (indexPipes.Count == 1)
                             {
-                                unit.VerticalPipes[indexPipes[0]].AppendedSubmergedPump = pump;
-                                cond_VertPipeFound = true;
-                                break;
+                                if (unit.VerticalPipes[indexPipes[0]].AppendedSubmergedPump == null)
+                                {
+                                    unit.VerticalPipes[indexPipes[0]].AppendedSubmergedPump = pump;
+                                    cond_VertPipeFound = true;
+                                    break;
+                                }
                             }
                             else
                             {
@@ -415,9 +418,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                                         index = p;
                                     }
                                 }
-                                unit.VerticalPipes[indexPipes[index]].AppendedSubmergedPump = pump;
-                                cond_VertPipeFound = true;
-                                break;
+                                if (unit.VerticalPipes[indexPipes[0]].AppendedSubmergedPump == null)
+                                {
+                                    unit.VerticalPipes[indexPipes[index]].AppendedSubmergedPump = pump;
+                                    cond_VertPipeFound = true;
+                                    break;
+                                }
                             }
                         }
                     }
@@ -447,10 +453,12 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             dis = dis < nowDis ? dis : nowDis;
                             ind = dis < nowDis ? ind : i;
                         }
-                        if (ind > -1)
+                        if (ind > -1 && unit.VerticalPipes[ind].AppendedSubmergedPump==null)
                         {
+
                             unit.VerticalPipes[ind].AppendedSubmergedPump = pump;
                             break;
+
                         }
                         else
                         {
