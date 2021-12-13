@@ -3,14 +3,20 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThSlabBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-        public ThSlabBuilderEngine() { }
+        public ThSlabBuilderEngine() 
+        {
+            Elements = new List<ThIfcBuildingElement>();
+        }
+
         public void Dispose()
         {
+            //
         }
 
         public override List<ThRawIfcBuildingElementData> Extract(Database db)

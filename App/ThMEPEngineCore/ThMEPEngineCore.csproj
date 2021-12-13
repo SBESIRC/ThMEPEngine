@@ -200,7 +200,7 @@
     <Compile Include="Engine\ThRailingBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
-    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
+    <Compile Include="Engine\ThShearWallBuilderEngine.cs" />
     <Compile Include="Engine\ThSlabBuilderEngine.cs" />
     <Compile Include="Engine\ThStairBuilderEngine.cs" />
     <Compile Include="Engine\ThTCHDuctExtractionVisitor.cs" />

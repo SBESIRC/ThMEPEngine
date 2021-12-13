@@ -14,7 +14,7 @@ namespace ThMEPWSS.WaterWellPumpLayout.Service
         {
             var results = new List<Line>();
             using (var columnEngine = new ThColumnBuilderEngine())
-            using (var shearWallEngine = new ThShearwallBuilderEngine())
+            using (var shearWallEngine = new ThShearWallBuilderEngine())
             using (var archWallEngine = new ThArchWallBuilderEngine())
             {
                 columnEngine.Build(db, pts);

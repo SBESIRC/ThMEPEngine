@@ -3,14 +3,20 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThCornicesBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-        public ThCornicesBuilderEngine() { }
+        public ThCornicesBuilderEngine() 
+        {
+            Elements = new List<ThIfcBuildingElement>();
+        }
+
         public void Dispose()
         {
+            //
         }
 
         public override List<ThRawIfcBuildingElementData> Extract(Database db)

@@ -1,20 +1,26 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
-using ThCADExtension;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThDoorBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
+        public ThDoorBuilderEngine()
+        {
+            Elements = new List<ThIfcBuildingElement>();
+        }
+
         public void Dispose()
         {
+            //
         }
 
         public override List<ThRawIfcBuildingElementData> Extract(Database db)

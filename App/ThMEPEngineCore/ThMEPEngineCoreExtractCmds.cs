@@ -213,7 +213,7 @@ namespace ThMEPEngineCore
                     }
                     else if (result3.StringResult == "全部")
                     {
-                        var shearwallBuilder = new ThShearwallBuilderEngine();
+                        var shearwallBuilder = new ThShearWallBuilderEngine();
                         shearwallBuilder.Build(acadDatabase.Database, frame.Vertices());
                         shearwallBuilder.Elements
                             .Select(o => o.Outline)

@@ -3,15 +3,22 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThArchWallBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-        public ThArchWallBuilderEngine() { }
+        public ThArchWallBuilderEngine() 
+        {
+            Elements = new List<ThIfcBuildingElement>();
+        }
+
         public void Dispose()
         {
+            //
         }
+        
         public override List<ThRawIfcBuildingElementData> Extract(Database db)
         {
             var res = new List<ThRawIfcBuildingElementData>();

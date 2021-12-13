@@ -114,7 +114,7 @@ namespace ThMEPStructure.GirderConnect.Data
 
         private DBObjectCollection ExtractShearwalls(Database database, Point3dCollection pts)
         {
-            var shearwallBuilder = new ThShearwallBuilderEngine();
+            var shearwallBuilder = new ThShearWallBuilderEngine();
             shearwallBuilder.Build(database, pts);
             return shearwallBuilder.Elements.Select(o => o.Outline).ToCollection();
         }
@@ -135,7 +135,7 @@ namespace ThMEPStructure.GirderConnect.Data
             visitor.Results.ForEach(o => transformer.Transform(o.Geometry));
             var newPts = pts.OfType<Point3d>().Select(p => transformer.Transform(p)).ToCollection();
 
-            var shearwallBuilder = new ThShearwallBuilderEngine();
+            var shearwallBuilder = new ThShearWallBuilderEngine();
             shearwallBuilder.Recognize(visitor.Results, newPts);
             var objs = shearwallBuilder.Elements.Select(o => o.Outline).ToCollection();
             transformer.Reset(objs);

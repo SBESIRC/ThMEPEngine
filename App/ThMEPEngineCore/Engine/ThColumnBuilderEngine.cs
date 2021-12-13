@@ -17,12 +17,14 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThColumnBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-
         public ThColumnBuilderEngine()
         {
+            Elements = new List<ThIfcBuildingElement>();
         }
+
         public void Dispose()
         {
+            //
         }    
         
         public override List<ThRawIfcBuildingElementData> Extract(Database db)
@@ -98,28 +100,6 @@ namespace ThMEPEngineCore.Engine
             results = simplifier.Simplify(results);
             results = results.FilterSmallArea(AREATOLERANCE);
             return results;
-        }
-        private DBObjectCollection FilterInRange(DBObjectCollection objs, Point3dCollection pts)
-        {
-            if (pts.Count > 2)
-            {
-                var results = new DBObjectCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var pline = new Polyline()
-                {
-                    Closed = true,
-                };
-                pline.CreatePolyline(pts);
-                foreach (DBObject filterObj in spatialIndex.SelectCrossingPolygon(pline))
-                {
-                    results.Add(filterObj);
-                }
-                return results;
-            }
-            else
-            {
-                return objs;
-            }
         }
         private DBObjectCollection Buffer(DBObjectCollection objs, double length)
         {
