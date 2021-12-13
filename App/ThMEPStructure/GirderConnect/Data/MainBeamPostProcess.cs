@@ -50,15 +50,16 @@ namespace ThMEPStructure.GirderConnect.Data
                 {
                     var line = new Line(o.Item1, o.Item2);
                     line.Layer = layerName;
-                    if (line.Length > 9000)
+                    if(line.Length < 18000 && line.Length > 9000)
                     {
                         line.ColorIndex = 7;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                     }
-                    else
+                    else if (line.Length > 10 && line.Length <= 9000)
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                     }
-                    HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                 });
             }
         }
@@ -100,7 +101,7 @@ namespace ThMEPStructure.GirderConnect.Data
                 {
                     var tuple = new Tuple<Point3d, Point3d>(dicTuple.Key, pt);
                     var converseTuple = new Tuple<Point3d, Point3d>(pt, dicTuple.Key);
-                    if (!ansTuples.Contains(converseTuple))
+                    if (!ansTuples.Contains(converseTuple) && dicTuple.Key.DistanceTo(pt) > 10)
                     {
                         ansTuples.Add(tuple);
                     }

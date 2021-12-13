@@ -154,7 +154,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
-        public static void DeleteSameClassLine(HashSet<Point3d> points, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
+        public static void DeleteSameClassLine(HashSet<Point3d> points, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 1)
         {
             List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
             foreach (var dic in dicTuples)
@@ -530,7 +530,53 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return dicTuples;
         }
+        public static Dictionary<Point3d, HashSet<Point3d>> TuplesStandardize(Dictionary<Point3d, Point3d> tuples, List<Point3d> basePts, double deviation = 350)
+        {
+            Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+            Point3d tmpPtA = new Point3d();
+            Point3d tmpPtB = new Point3d();
+            foreach (var tuple in tuples)
+            {
+                int flag = 0;
+                foreach (Point3d ptA in basePts)
+                {
+                    if (ptA.DistanceTo(tuple.Key) < deviation)
+                    {
+                        flag = 1;
+                        tmpPtA = ptA;
+                        break;
+                    }
+                }
+                if (flag == 0)//profs there is no nearest point
+                {
+                    tmpPtA = tuple.Key;
+                }
+                if (!dicTuples.ContainsKey(tmpPtA))
+                {
+                    dicTuples.Add(tmpPtA, new HashSet<Point3d>());
+                }
 
+                flag = 0;
+                foreach (Point3d ptB in basePts)
+                {
+                    if (ptB.DistanceTo(tuple.Value) < deviation)
+                    {
+                        flag = 1;
+                        tmpPtB = ptB;
+                        break;
+                    }
+                }
+                if (flag == 0)//no nearest point
+                {
+                    tmpPtB = tuple.Value;
+                }
+                if (!dicTuples[tmpPtA].Contains(tmpPtB))
+                {
+                    dicTuples[tmpPtA].Add(tmpPtB);
+                }
+            }
+            return dicTuples;
+        }
         /// <summary>
         /// Merge points whose very close to each other in double line structure
         /// If there is a single line, add a compair one
@@ -542,7 +588,74 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             Point3d tmpPtA = new Point3d();
             Point3d tmpPtB = new Point3d();
+            var newDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+            foreach(var dicTuple in dicTuples)
+            {
+                newDicTuples.Add(dicTuple.Key, dicTuple.Value);
+            }
+            foreach (var dicTuple in newDicTuples)
+            {
+                var hashpts = dicTuple.Value.ToList();
+                foreach (var edPt in hashpts)
+                {
+                    int flag = 0;
+                    foreach (Point3d ptA in basePts)
+                    {
+                        if (ptA.DistanceTo(dicTuple.Key) < deviation)
+                        {
+                            flag = 1;
+                            tmpPtA = ptA;
+                            break;
+                        }
+                    }
+                    if (flag == 0)//profs there is no nearest point
+                    {
+                        tmpPtA = dicTuple.Key;
+                    }
+                    if (!dicTuples.ContainsKey(tmpPtA))
+                    {
+                        dicTuples.Add(tmpPtA, new HashSet<Point3d>());
+                    }
+
+                    flag = 0;
+                    foreach (Point3d ptB in basePts)
+                    {
+                        if (ptB.DistanceTo(edPt) < deviation)
+                        {
+                            flag = 1;
+                            tmpPtB = ptB;
+                            break;
+                        }
+                    }
+                    if (flag == 0)//no nearest point
+                    {
+                        tmpPtB = edPt;
+                    }
+                    if (!dicTuples[tmpPtA].Contains(tmpPtB))
+                    {
+                        dicTuples[tmpPtA].Add(tmpPtB);
+                    }
+                    if (!dicTuples.ContainsKey(tmpPtB))
+                    {
+                        dicTuples.Add(tmpPtB, new HashSet<Point3d>());
+                    }
+                    if (!dicTuples[tmpPtB].Contains(tmpPtA))
+                    {
+                        dicTuples[tmpPtB].Add(tmpPtA);
+                    }
+                }
+            }
+        }
+        public static void DicTuplesStandardize(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, List<Point3d> basePts, double deviation = 1)
+        {
+            Point3d tmpPtA = new Point3d();
+            Point3d tmpPtB = new Point3d();
+            var newDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
             foreach (var dicTuple in dicTuples)
+            {
+                newDicTuples.Add(dicTuple.Key, dicTuple.Value);
+            }
+            foreach (var dicTuple in newDicTuples)
             {
                 var hashpts = dicTuple.Value.ToList();
                 foreach (var edPt in hashpts)
@@ -596,7 +709,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
         }
 
-
         /// <summary>
         /// Get AngleCount which is bigger than 180
         /// </summary>
@@ -622,6 +734,19 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 preVertex = tuples[i].Item1 - tuples[i].Item2;
             }
             return cnt;
+        }
+
+        public static HashSet<Tuple<Point3d, Point3d>> DicTuplesToTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
+            foreach(var dicTuple in dicTuples)
+            {
+                foreach(var point in dicTuple.Value)
+                {
+                    tuples.Add(new Tuple<Point3d, Point3d>(dicTuple.Key, point));
+                }
+            }
+            return tuples;
         }
     }
 }

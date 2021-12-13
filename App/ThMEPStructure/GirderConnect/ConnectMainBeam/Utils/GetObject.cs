@@ -367,7 +367,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             for (int i = 0; i < n; ++i)
             {
                 Line curLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
-                if (point.DistanceTo(curLine.GetClosestPointTo(point, false)) < 1)
+                if (point.DistanceTo(curLine.GetClosestPointTo(point, false)) < 10)
                 {
                     return curLine;
                 }

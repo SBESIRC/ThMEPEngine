@@ -306,11 +306,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
                     fstPtsS.AddRange(tmpFstPts);
-                    outline2ZeroPts[curOutline].AddRange(tmpFstPts); /////////////////////这里可能重复添加了，可能需要进行单一化那个函数
                 }
                 outPts = PointsDealer.OutPoints(curOutline);
                 PointsDealer.RemovePointsFarFromOutline(ref fstPts, curOutline);
                 PointsDealer.RemovePointsFarFromOutline(ref thdPts, curOutline);
+                outline2ZeroPts[curOutline].AddRange(fstPts);////////////////////这里可能重复添加了，可能需要进行单一化那个函数
 
                 foreach (Point3d nearPt in tmpNearPts)
                 {

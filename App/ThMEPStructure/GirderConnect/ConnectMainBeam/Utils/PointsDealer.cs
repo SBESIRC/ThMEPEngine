@@ -498,11 +498,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static HashSet<Point3d> FindIntersectNearPt(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
+        public static HashSet<Point3d> FindIntersectBorderPt(Point3dCollection clumnPts, List<Polyline> outlines,
             ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             var ansPts = new HashSet<Point3d>();
-            foreach(Polyline polyline in outlineWalls.Keys)
+            foreach(Polyline polyline in outlines)
             {
                 Polyline pl = polyline.Buffer(500)[0] as Polyline;
                 foreach (Point3d pt in clumnPts)
@@ -522,7 +522,22 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansPts;
         }
-
+        public static HashSet<Point3d> FindIntersectBorderPt(List<Point3d> clumnPts, List<Polyline> outlines)
+        {
+            var ansPts = new HashSet<Point3d>();
+            foreach (Polyline polyline in outlines)
+            {
+                Polyline pl = polyline.Buffer(500)[0] as Polyline;
+                foreach (Point3d pt in clumnPts)
+                {
+                    if (pl.ContainsOrOnBoundary(pt) && !ansPts.Contains(pt))
+                    {
+                        ansPts.Add(pt);
+                    }
+                }
+            }
+            return ansPts;
+        }
         /// <summary>
         /// Update structure Outline2BorderNearPts
         /// </summary>

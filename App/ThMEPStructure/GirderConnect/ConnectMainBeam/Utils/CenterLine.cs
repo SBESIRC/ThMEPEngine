@@ -11,6 +11,8 @@ using Linq2Acad;
 using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using NetTopologySuite.Geometries;
+using ThMEPEngineCore.Algorithm;
+using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -336,6 +338,31 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     SndPts.Add(point.Key);
                 }
             }
+        }
+
+        public static List<Polyline> RECCenterLines(HashSet<Polyline> polylines)
+        {
+            var objs = new DBObjectCollection();
+            var centerPolylines = new List<Polyline>();
+            foreach (var polyline in polylines)
+            {
+                objs.Add(polyline);
+            }
+            //ThMEPEngineCoreLayerUtils.CreateAICenterLineLayer(acadDatabase.Database);
+            objs.BuildArea()
+                .OfType<Entity>()
+                .ForEach(e =>
+                {
+                    ThMEPPolygonService.CenterLine(e)
+                    .ToCollection()
+                    .LineMerge()
+                    .OfType<Polyline>()
+                    .ForEach(o =>
+                    {
+                        centerPolylines.Add(o);
+                    });
+                });
+            return centerPolylines;
         }
     }
 }
