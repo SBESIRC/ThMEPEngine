@@ -57,10 +57,13 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs;
             }
-            curves = ThArchitectureWallSimplifier.MakeValid(curves);
             if (curves.Count > 0)
             {
+                // 处理Spikes
                 var results = ThArchitectureWallSimplifier.Normalize(curves);
+                // 处理Self-intersects
+                results = ThArchitectureWallSimplifier.MakeValid(results);
+                // 处理Duplicated Vertices
                 results = ThArchitectureWallSimplifier.Simplify(results);
                 results = ThArchitectureWallSimplifier.BuildArea(results);
                 results = ThArchitectureWallSimplifier.Filter(results);
