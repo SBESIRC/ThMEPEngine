@@ -117,9 +117,10 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THKJSQ", CommandFlags.Modal)]
         public void THKJSQ()
         {
+            // 获取选择框
+            var frame = new Polyline();
             using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var frame = new Polyline();
                 try
                 {
                     pc.Collect();
@@ -131,17 +132,24 @@ namespace ThMEPEngineCore
                 Point3dCollection winCorners = pc.CollectedPoints;
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
-                if (frame.Area < 1.0)
-                {
-                    return;
-                }
-                var roomPickUpService = new ThKJSQInteractionService();
-                roomPickUpService.PickUp(Active.Database, frame.Vertices());
-                roomPickUpService.ClearTransient();
-                if(roomPickUpService.Status == PickUpStatus.OK)
-                {
-                    roomPickUpService.PrintRooms();
-                }
+            }
+            if (frame.Area < 1.0)
+            {
+                return;
+            }
+
+            // 原始数据处理
+            Active.Editor.WriteLine("\n数据分析中......");
+            var roomPickUpService = new ThKJSQInteractionService();
+            roomPickUpService.Process(Active.Database, frame.Vertices());
+
+            // 拾取空间
+            roomPickUpService.Run();
+
+            // 输出结果到图纸
+            if (roomPickUpService.Status == PickUpStatus.OK)
+            {
+                roomPickUpService.PrintRooms();
             }
         }
 

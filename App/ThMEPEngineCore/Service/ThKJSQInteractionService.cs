@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Service
         /// </summary>
         private DBObjectCollection Bounaries { get; set; }
         private ThMEPOriginTransformer Transformer { get; set; }
-        public PickUpStatus Status { get; private set; } = PickUpStatus.OK;
+        public PickUpStatus Status { get; private set; } = PickUpStatus.Cancel;
         /// <summary>
         /// 最终生成的房间框线
         /// </summary>
@@ -44,9 +44,8 @@ namespace ThMEPEngineCore.Service
             RoomOutlineDisplayDict = new Dictionary<Entity, Entity>();
             Transformer = new ThMEPOriginTransformer(Point3d.Origin);
         }
-        public void PickUp(Database database, Point3dCollection frame)
+        public void Process(Database database, Point3dCollection frame)
         {
-            Active.Editor.WriteMessage("\n数据分析中......");
             // 获取围合房间的数据
             roomData = BuildRoomData(database, frame);
             Transformer = roomData.Transformer; // 房间数据的Transformer是用frame创建的,这儿保持一致，无需再创建
@@ -57,22 +56,16 @@ namespace ThMEPEngineCore.Service
             // 将数据移动到近原点处
             roomData.Transform();
             Transformer.Transform(Bounaries);
-
-            // 预览
-            Preview();
-
-            // 按空格、回车或鼠标右击 完成交互，并打印结果
-            // 按Esc退出，不打印任何结果
         }
 
-        private void Preview()
+        public void Run()
         {
-            var ppo = new PromptPointOptions("\n选择房间内的一点");
-            ppo.AllowNone = true;
-            ppo.AllowArbitraryInput = true;
-            ppo.Keywords.Add("Split", "Split", "Split(S)");
-            //ppo.Keywords.Add("Pick", "Pick", "Pick(P)");
-            //ppo.Keywords.Add("Undo", "Undo", "Undo(U)");
+            var ppo = new PromptPointOptions("\n选择房间内的一点")
+            {
+                AllowNone = true,
+                AllowArbitraryInput = true,
+            };
+            ppo.Keywords.Add("PARTITION", "PARTITION", "分割(P)");
             while (true)
             {
                 var ptRes = Active.Editor.GetPoint(ppo);
@@ -117,7 +110,7 @@ namespace ThMEPEngineCore.Service
                     {
                         Undo();
                     }
-                    else if (ptRes.StringResult == "Split")
+                    else if (ptRes.StringResult == "PARTITION")
                     {
                         using (var acadDb = AcadDatabase.Active())
                         {
@@ -142,6 +135,7 @@ namespace ThMEPEngineCore.Service
                     break;
                 }
             }
+            ClearTransients();
         }
 
         private void Split(Polyline splitLine)
@@ -370,7 +364,7 @@ namespace ThMEPEngineCore.Service
                 });
             }
         }
-        public void ClearTransient()
+        private void ClearTransients()
         {
             var displayObjs = RoomOutlineDisplayDict
                 .Where(o=>o.Value!=null)
