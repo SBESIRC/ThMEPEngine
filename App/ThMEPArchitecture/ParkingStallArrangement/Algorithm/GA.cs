@@ -129,6 +129,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
 
+
                 FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(fs1);
                 sw.WriteLine(w);
@@ -146,6 +147,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+
+                if (GeoUtilities.JoinCurves(walls, inilanes)[0].Length < 1)
+                {
+                    ;
+                }
 
                 if (true)
                 {

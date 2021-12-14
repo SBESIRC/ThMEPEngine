@@ -205,6 +205,26 @@ namespace ThMEPArchitecture.PartitionLayout
                 else ls.Add((Line)r);
             }
             Boundary = JoinCurves(pls, ls)[0];
+            if (Boundary.Length < 1)
+            {
+                ;
+                //for (int i = 0; i < edges.Count; i++)
+                //{
+                //    Line l = LineSDL(pto, vecs[i], 500000);
+                //    double mindis = 9999999;
+                //    Curve crv = new Line();
+                //    foreach (var c in res)
+                //    {
+                //        var pss = l.Intersect(c, Intersect.OnBothOperands);
+                //        if (pss.Count > 0 && pss[0].DistanceTo(l.StartPoint) < mindis)
+                //        {
+                //            mindis = pss[0].DistanceTo(l.StartPoint);
+                //            crv = c;
+                //        }
+                //    }
+                //    rs.Add(crv);
+                //}
+            }
             var tmplanes = new List<Line>();
             for (int i = 0; i < rs.Count; i++)
             {
@@ -642,7 +662,16 @@ namespace ThMEPArchitecture.PartitionLayout
             var pltest = PolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, unittest.EndPoint, unittest.StartPoint });
             ThCADCoreNTSSpatialIndex sindexwalls = new ThCADCoreNTSSpatialIndex(boundobstacles.ToCollection());
             var pltestsc = pltest.Clone() as Polyline;
-            pltestsc.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pltestsc.Centroid()));
+           
+
+            try
+            {
+                pltestsc.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pltestsc.Centroid()));
+            }
+            catch
+            {
+                ;
+            }
             var crossed = sindexwalls.SelectCrossingPolygon(pltestsc).Cast<Polyline>().ToList();
             crossed.AddRange(ObstaclesSpatialIndex.SelectCrossingPolygon(pltestsc).Cast<Polyline>());
             crossed.AddRange(CarSpatialIndex.SelectCrossingPolygon(pltestsc).Cast<Polyline>());

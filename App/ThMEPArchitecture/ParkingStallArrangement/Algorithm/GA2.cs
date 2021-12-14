@@ -74,7 +74,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                    var valueWithIndex = value + GaPara.MaxValues[i] - 2750;
+                    var valueWithIndex = value;
                     Gene gene = new Gene(valueWithIndex, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
@@ -97,7 +97,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 var line = GaPara.SegLine[i];
                 var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                var valueWithIndex = value + GaPara.MaxValues[i] - 2750; 
+                var valueWithIndex = value; 
                 Gene gene = new Gene(valueWithIndex, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                 genome.Add(gene);
             }

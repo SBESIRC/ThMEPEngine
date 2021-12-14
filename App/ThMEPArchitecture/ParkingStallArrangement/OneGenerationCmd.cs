@@ -7,6 +7,7 @@ using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -67,6 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
+            gaPara.Set(sortSegLines);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
 
            
@@ -74,8 +76,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
 
-            rst = geneAlgorithm.Run(histories);
-
+            try
+            {
+                rst = geneAlgorithm.Run(histories);
+            }
+            catch
+            {
+                ;
+            }
             var solution = rst.First();
             histories.Add(rst.First());
             for (int k = 0; k < histories.Count; k++)
@@ -109,9 +117,44 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+
+
+                    string w = "";
+                    string l = "";
+                    foreach (var e in walls)
+                    {
+                        foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                            w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+                    }
+                    foreach (var e in inilanes)
+                    {
+                        l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                            + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+                    }
+
+
+                    FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+                    StreamWriter sw = new StreamWriter(fs1);
+                    sw.WriteLine(w);
+                    sw.WriteLine(l);
+                    sw.Close();
+                    fs1.Close();
+
+                    if (GeoUtilities.JoinCurves(walls, inilanes)[0].Length < 1)
+                    {
+                        ;
+                    }
+
+
+                    //Draw.DrawSeg(lanes,index);
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
 
+
+                    if (partition.Boundary.Length < 1)
+                    {
+                        ;
+                    }
 
                     partition.Print(layerNames, 30);
 
@@ -140,7 +183,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //        p.Display();
             //    }
             //}
-            //Draw.DrawSeg(solution);
+            
         }
 
         private static Point3dCollection SelectAreas()
