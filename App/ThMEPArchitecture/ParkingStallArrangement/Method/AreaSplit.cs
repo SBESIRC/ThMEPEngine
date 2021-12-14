@@ -52,8 +52,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-            GaParameter gaParameter)
+            GaParameter gaParameter, out double maxVal, out double minVal)
         {
+            maxVal = 0;
+            minVal = 0;
             double simplifyFactor = 1.0;
             var segLine = gaParameter.SegLine[i];//分割线
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
@@ -72,11 +74,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         var boundPt = segLine.GetBoundPt(buildLines, segArea);
                         if(segLine.GetValueType(boundPt))
                         {
-                            gaParameter.MaxValues[i] = segLine.GetMinDist(boundPt)-2750;
+                            maxVal = segLine.GetMinDist(boundPt)-2750;
                         }
                         else
                         {
-                            gaParameter.MinValues[i] = -segLine.GetMinDist(boundPt)+2750;
+                            minVal = -segLine.GetMinDist(boundPt)+2750;
                         }
                     }
                     return true;
@@ -236,7 +238,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     public class Dfs
     {
         public static void dfsSplit(ref HashSet<int> usedLines, ref List<Polyline> areas, ref List<Line> sortSegLines, 
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter)
+            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter, ref List<double> maxVals, ref List<double> minVals)
         {
             if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
             {
@@ -249,15 +251,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     continue;
                 }
                 var line = gaParameter.SegLine[i];
-                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter))//分割线正好分割区域
+                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
                 {
                     sortSegLines.Add(line);
+                    maxVals.Add(maxVal);
+                    minVals.Add(minVal);
                     usedLines.Add(i);
                 }
             }
 
             //递归搜索
-            dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter);
+            dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals);
         }
     }
 }

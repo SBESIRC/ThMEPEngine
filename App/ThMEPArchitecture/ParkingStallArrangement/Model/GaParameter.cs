@@ -36,7 +36,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
         }
 
-        public void Set(List<Line> sortedSegLine)
+        public void Set(List<Line> sortedSegLine, List<double> maxVals, List<double> minVals)
         {
             LineNumber = new List<int>();
             SegLine = new Dictionary<int, Line>();
@@ -49,8 +49,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 LineNumber.Add(i);
                 SegLine.Add(i, sortedSegLine[i]);
-                MinValues.Add(i, 0);
-                MaxValues.Add(i, 0);
+                MinValues.Add(i, minVals[i]);
+                MaxValues.Add(i, maxVals[i]);
                 StartValues.Add(i, 0);
                 EndValues.Add(i, 0);
             }
