@@ -122,8 +122,11 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public int CalNumOfParkingSpaces()
         {
+            int count = 0;
             GenerateParkingSpaces();
-            return CarSpots.Count;
+            count = CarSpots.Count;
+            CarSpots.ForEach(e => e.Dispose());
+            return count;
         }
 
         public void Print(string layer="0", int colorIndex = 0)
