@@ -169,6 +169,7 @@
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
+    <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
