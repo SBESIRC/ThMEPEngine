@@ -129,12 +129,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
 
-                //FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                //StreamWriter sw = new StreamWriter(fs1);
-                //sw.WriteLine(w);
-                //sw.WriteLine(l);
-                //sw.Close();
-                //fs1.Close();
+                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(fs1);
+                sw.WriteLine(w);
+                sw.WriteLine(l);
+                sw.Close();
+                fs1.Close();
 
                 //ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
                 //p.Logger = Logger;
@@ -159,6 +159,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     catch (Exception ex)
                     {
                         Logger.Error(ex.Message);
+                        //partition.CalNumOfParkingSpaces();
                     }
 
                 }
@@ -199,7 +200,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Range
         double Low, High;
 
-        public Serilog.Core.Logger Logger = null;
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
@@ -230,7 +234,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                    var valueWithIndex = value + GaPara.MaxValues[i] - 2750;
+                    var valueWithIndex = value + GaPara.MaxValues[i];
                     Gene gene = new Gene(valueWithIndex, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
@@ -238,6 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
+
                     var valueWithIndex = value + (GaPara.MaxValues[i] - GaPara.MinValues[i]) / FirstPopulationSize * index + GaPara.MinValues[i];
                     Gene gene = new Gene(valueWithIndex, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
@@ -300,9 +305,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         maxNums = curNums;
                     }
                     pop = CreateNextGeneration(selected);
-                    //Mutation(pop);
+                    Mutation(pop);
                 }
+                var strBest = $"Best: {pop.First().Count}";
+                Active.Editor.WriteMessage(strBest);
+                Logger?.Information(strBest);
                 stopWatch.Stop();
+                var strTotalMins = $"Total minutes: {stopWatch.Elapsed.Minutes}";
+                Logger?.Information(strTotalMins);
             }
             catch (Exception ex)
             {
@@ -389,7 +399,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     solution.Logger = this.Logger;
                     var genome = ConvertLineToGene(i);//创建初始基因序列
                     solution.Genome = genome;
-                    //Draw.DrawSeg(solution);
+                    Draw.DrawSeg(solution);
                     solutions.Add(solution);
                 }
             }

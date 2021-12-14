@@ -243,7 +243,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     i--;
                 }
             }
-            if (pts.Count > 0)
+            if (pts.Count > 0 && curve.GetLength()>1)
             {
                 SortAlongCurve(pts, curve);
                 Point3dCollection ps = new Point3dCollection(pts.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
@@ -256,7 +256,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     ;
                 }
-                return splited.Cast<Curve>().ToArray().ToList();
+                return splited.Cast<Curve>().Where(e => e.GetLength() > 1).ToList();
             }
             else return new List<Curve>() { curve };
         }
@@ -267,12 +267,12 @@ namespace ThMEPArchitecture.PartitionLayout
             cutters.ForEach(e => points.AddRange(curve.Intersect(e, Intersect.OnBothOperands)));
             points = RemoveDuplicatePts(points, 1);
             SortAlongCurve(points, curve);
-            if (points.Count > 0)
+            if (points.Count > 0 && curve.GetLength()>1)
             {
                 Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
                 var splited = curve.GetSplitCurves(ps);
                 ps.Dispose();
-                return splited.Cast<Curve>().ToArray();
+                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
             }
             else
             {
@@ -286,7 +286,7 @@ namespace ThMEPArchitecture.PartitionLayout
             points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
             points = RemoveDuplicatePts(points, 1);
             SortAlongCurve(points, curve);
-            if (points.Count > 0)
+            if (points.Count > 0 && curve.GetLength()>1)
             {
                 Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
                 var splited = curve.GetSplitCurves(ps);
@@ -294,7 +294,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
                 //DoubleCollection param = new DoubleCollection(points.Select(e => curve.GetParamAtPointX(curve.GetClosestPointTo(e, false))).ToArray());
                 //var splited = curve.GetSplitCurves(param);
-                return splited.Cast<Curve>().ToArray();
+                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
             }
             else
             {
@@ -314,7 +314,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 points = points.Select(e => curve.GetClosestPointTo(e, false)).ToList();
                 var splited = GetSplitLine(curve, points);
                 ps.Dispose();
-                return splited.Cast<Curve>().ToArray();
+                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
             }
             else
             {
@@ -338,7 +338,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 points = points.Select(e => curve.GetClosestPointTo(e, false)).ToList();
                 var splited = GetSplitLine(curve, points);
                 ps.Dispose();
-                return splited.Cast<Curve>().ToArray();
+                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
             }
             else
             {
