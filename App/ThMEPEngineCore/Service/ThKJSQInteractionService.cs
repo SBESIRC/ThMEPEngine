@@ -127,8 +127,19 @@ namespace ThMEPEngineCore.Service
                 }
                 else if(ptRes.Status == PromptStatus.Cancel)
                 {
-                    Status = PickUpStatus.Cancel;
-                    break;
+                    var pko = new PromptKeywordOptions("\n是否要退出");
+                    pko.Keywords.Add("YES", "YES", "是(Y)");
+                    pko.Keywords.Add("NO", "NO", "否(N)");
+                    pko.Keywords.Default = "NO";
+                    var result1 = Active.Editor.GetKeywords(pko);
+                    if(result1.Status==PromptStatus.OK)
+                    {
+                        if(result1.StringResult== "YES")
+                        {
+                            Status = PickUpStatus.Cancel;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -197,10 +208,7 @@ namespace ThMEPEngineCore.Service
         {
             // 找到与splitLine相交且交点有2个以上的房间轮廓线
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return spatialIndex.SelectFence(splitLine)
-                .OfType<Entity>()
-                .Where(o => o.IntersectWithEx(splitLine).Count >= 2)
-                .ToCollection();
+            return spatialIndex.SelectFence(splitLine);
         }
 
         private void Undo()
