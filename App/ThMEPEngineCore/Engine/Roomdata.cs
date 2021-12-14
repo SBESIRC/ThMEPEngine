@@ -46,7 +46,7 @@ namespace ThMEPEngineCore.Engine
         public void Build(Database database, Point3dCollection polygon)
         {
             GetData(database, polygon);
-            BuildTransformer();
+            Transformer = new ThMEPOriginTransformer(polygon.Envelope().CenterPoint());
         }
         private void GetOldModeData(Database database, Point3dCollection polygon)
         {
@@ -115,11 +115,7 @@ namespace ThMEPEngineCore.Engine
             doorDatas.AddRange(vm.DB3DoorStoneVisitor.Results);
             _door = RecognizeDB3Door(doorDatas, polygon);
         }
-        private void BuildTransformer()
-        {
-            var objs = MergeData();
-            Transformer = new ThMEPOriginTransformer(objs);
-        }
+
         public void Preprocess()
         {
             Deburring();
@@ -397,6 +393,11 @@ namespace ThMEPEngineCore.Engine
             result = result.Union(_curtainWall);
             return result;
         }
+        /// <summary>
+        /// 查询点在构件里
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
         public bool ContatinPoint3d(Point3d p)
         {
             bool isInArchWall = IsInComponents(_architectureWall, p);
@@ -404,7 +405,8 @@ namespace ThMEPEngineCore.Engine
             bool isInColumn = IsInComponents(_column, p);
             bool isInDoor = IsInComponents(_door, p);
             bool isInWindow = IsInComponents(_window, p);
-            return isInArchWall || isInShearWall || isInColumn || isInDoor || isInWindow;
+            bool isInCurtainWall = IsInComponents(_curtainWall, p);
+            return isInArchWall || isInShearWall || isInColumn || isInDoor || isInWindow || isInCurtainWall;
         }
 
         private bool IsInComponents(DBObjectCollection polygons,Point3d pt)

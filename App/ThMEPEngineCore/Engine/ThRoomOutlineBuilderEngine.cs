@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomOutlineBuilderEngine
     {
-        private const double AreaTolerance = 1e-6;
+        private const double AreaTolerance = 1.0;
         private const double AngleTolerance = 1.0;
         private const double BufferDistance = 50.0; //用于处理墙、门、窗、柱等元素之间不相接的Case
         private const double LineExtendDistance = 10.0;
@@ -33,7 +33,7 @@ namespace ThMEPEngineCore.Engine
         public void Build(DBObjectCollection objs)
         {
             // 转成线 + 对线进行合并处理
-            var lines = ToLines(objs);
+            var lines = objs.ToLines(ArcTessellateLength);
             lines = FilterSmallLines(lines, SmallLineLengthTolerance);
             lines = Extend(lines, LineExtendDistance);
             lines = Merge(lines);
@@ -214,41 +214,11 @@ namespace ThMEPEngineCore.Engine
             });
             return results;
         }
-        private DBObjectCollection ToLines(DBObjectCollection objs)
-        {
-            var results = new DBObjectCollection();
-            objs.OfType<Entity>().ForEach(o =>
-            {
-                if (o is Line line)
-                {
-                    results.Add(line);
-                }
-                else if (o is Polyline polyline)
-                {
-                    var newPoly = polyline.TessellatePolylineWithArc(ArcTessellateLength);
-                    newPoly.ToLines().ForEach(l => results.Add(l));
-                }
-                else if(o is MPolygon mPolygon)
-                {
-                    var shell = mPolygon.Shell();
-                    var holes = mPolygon.Holes();
-                    shell.ToLines().ForEach(l => results.Add(l));
-                    holes.SelectMany(h => h.ToLines()).ForEach(l => results.Add(l));
-                }
-                else if(o is Arc arc)
-                {
-                    var newPoly = arc.TessellateArcWithArc(ArcTessellateLength);
-                    newPoly.ToLines().ForEach(l => results.Add(l));
-                }
-                else
-                {
-                    //ToDo
-                }
-            });
-            return results;
-        }
         private void CloseAndFilter(DBObjectCollection objs)
         {
+            // 此逻辑是想把所有传入的元素转成Polygon
+            // 因为目前是要弧段打散，造出的面瑕疵很大
+            // 后期若能完全支持弧，此逻辑也是可以使用的。
             // 把传入的数据全部转成Polygon
             var polygons = ToAcPolygons(objs, BufferDistance);
 

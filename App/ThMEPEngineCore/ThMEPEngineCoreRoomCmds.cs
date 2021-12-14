@@ -117,33 +117,31 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THKJSQ", CommandFlags.Modal)]
         public void THKJSQ()
         {
-            //记录用户在选择点的位置绘制的叉
-            var signObjs = new DBObjectCollection();
-            try
-            {   
-                // 获取框选范围
-                var frame = GetRange();
-                if(frame.Area<1.0)
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                var frame = new Polyline();
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-                // 选择房间点
-                var selectPts = new List<Point3d>();
-                signObjs = SelectUserPoints(selectPts);
-
-                if (selectPts.Count>0)
+                Point3dCollection winCorners = pc.CollectedPoints;
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                if (frame.Area < 1.0)
                 {
-                    var roomBoundaries = GetRoomBoundaries(frame, selectPts);
-                    PrintRoom(roomBoundaries);
+                    return;
                 }
-            }
-            catch(System.Exception ex)
-            {
-                Active.Editor.WriteMessage(ex.Message);
-            }
-            finally
-            {
-                EraseSigns(signObjs);
+                var roomPickUpService = new ThKJSQInteractionService();
+                roomPickUpService.PickUp(Active.Database, frame.Vertices());
+                roomPickUpService.ClearTransient();
+                if(roomPickUpService.Status == PickUpStatus.OK)
+                {
+                    roomPickUpService.PrintRooms();
+                }
             }
         }
 
@@ -224,155 +222,6 @@ namespace ThMEPEngineCore
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
-        }
-
-        private void PrintRoom(DBObjectCollection roomOutlines)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {               
-                var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
-                roomOutlines.Cast<Entity>().ForEach(o =>
-                {
-                    var objs = new DBObjectCollection();
-                    if (o is MPolygon mPolygon)
-                    {
-                        mPolygon.Explode(objs);
-                    }
-                    else
-                    {
-                        objs.Add(o);
-                    }
-                    objs.OfType<Entity>().ForEach(e =>
-                    {
-                        acadDb.ModelSpace.Add(e);
-                        e.LayerId = layerId;
-                        e.ColorIndex = (int)ColorIndex.BYLAYER;
-                        e.LineWeight = LineWeight.ByLayer;
-                        e.Linetype = "ByLayer";
-                    });
-                });
-            }
-        }
-
-        private DBObjectCollection GetRoomBoundaries(Polyline frame, List<Point3d> selectPts)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                // 提取数据+封面
-                Roomdata data = new Roomdata(false);
-                data.Build(acadDb.Database, frame.Vertices());
-                data.Transform(); // 移动到原点
-                data.Preprocess(); // 
-
-                // 用围合房间的数据造面
-                var totalDatas = data.MergeData(); // 传入的数据
-                var builder = new ThRoomOutlineBuilderEngine();
-                builder.Build(totalDatas);
-
-                // 过滤用户选择的点(不能选在柱子、门、墙等构件里面)
-                var newPts = selectPts
-                    .Select(p=> data.Transformer.Transform(p))
-                    .Where(o => !data.ContatinPoint3d(o)).ToList();
-
-                // 通过用户选择点查询包含这些点的面
-                var results = new DBObjectCollection();
-                newPts.ForEach(p =>
-                {
-                    var roomOutline = builder.Query(p);
-                    if (roomOutline!=null && !results.Contains(roomOutline))
-                    {
-                        results.Add(roomOutline.Clone() as Entity);
-                    }
-                });
-
-                // 还原位置
-                data.Transformer.Reset(results);
-                data.Transformer.Reset(builder.Areas);
-                data.Reset();
-                return results;
-            }
-        }
-
-        private DBObjectCollection SelectUserPoints(List<Point3d> selectPts)
-        {
-            var signObjs = new DBObjectCollection();
-            while (true)
-            {
-                var ppo = new PromptPointOptions("\n选择房间内的一点");
-                ppo.AllowNone = true;
-                ppo.AllowArbitraryInput = true;
-                var ptRes = Active.Editor.GetPoint(ppo);
-                if (ptRes.Status == PromptStatus.OK)
-                {
-                    using (var acadDb = AcadDatabase.Active())
-                    {
-                        var signs = CreateSign(ptRes.Value);
-                        signs.OfType<Curve>().ForEach(c => signObjs.Add(c));
-                        signs.OfType<Curve>().ForEach(c => c.TransformBy(Active.Editor.CurrentUserCoordinateSystem));
-                        signs.OfType<Curve>().ForEach(c =>
-                        {
-                            acadDb.ModelSpace.Add(c);
-                            c.ColorIndex = (int)ColorIndex.BYLAYER;
-                            c.SetDatabaseDefaults();
-                        });
-                        selectPts.Add(ptRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem));
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
-            return signObjs;
-        }
-
-        private DBObjectCollection CreateSign(Point3d pt)
-        {
-            var results = new DBObjectCollection();
-            var length = 200.0;
-            var mt1 = Matrix3d.Rotation(Math.PI * 0.25, Vector3d.ZAxis, Point3d.Origin);
-            var mt2 = Matrix3d.Rotation(Math.PI * 0.75, Vector3d.ZAxis, Point3d.Origin);
-            var vec1 = Vector3d.XAxis.TransformBy(mt1);
-            var vec2 = Vector3d.XAxis.TransformBy(mt2);
-
-            var line1 = new Line(pt + vec1.MultiplyBy(length / 2.0), pt - vec1.MultiplyBy(length / 2.0));
-            var line2 = new Line(pt + vec2.MultiplyBy(length / 2.0), pt - vec2.MultiplyBy(length / 2.0));
-
-            results.Add(line1);
-            results.Add(line2);
-            return results;
-        }
-
-        private Polyline GetRange()
-        {
-            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                var frame = new Polyline();
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return frame;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                return frame;
-            }
-        }
-        private void EraseSigns(DBObjectCollection signObjs)
-        {
-            // 删除生成的Signs
-            using (var acadDb = AcadDatabase.Active())
-            {
-                signObjs.OfType<Curve>().ForEach(c =>
-                {
-                    var entity = acadDb.Element<Entity>(c.ObjectId,true);                    
-                    entity.Erase();
-                });
-            }
         }
     }
 }
