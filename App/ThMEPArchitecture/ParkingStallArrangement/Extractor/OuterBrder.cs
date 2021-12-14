@@ -43,18 +43,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 
         private bool IsOuterLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "地库边界";
+            return layer.ToUpper() == "地库边界";
         }
         private bool IsBuildingLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "障碍物边缘";
+            return layer.ToUpper() == "障碍物边缘";
         }
         private bool IsEquipmentLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "机房";
+            return layer.ToUpper() == "机房";
         }
         private bool IsSegLayer(string layer)
         {
