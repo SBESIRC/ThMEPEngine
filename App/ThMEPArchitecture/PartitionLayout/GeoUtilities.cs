@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -91,36 +92,50 @@ namespace ThMEPArchitecture.PartitionLayout
             private Curve Curve;
             public int Compare(Point3d a, Point3d b)
             {
-                var param_a = Curve.EndParam;
-                try
+                var param_a = 0.0;
+                var param_b = 0.0;
+                if (Curve is Polyline)
                 {
-                    param_a = Curve.GetParamAtPointX(Curve.GetClosestPointTo(a, false));
+                    var pl = (Polyline)Curve;
+                    param_a = a.GetDisOnPolyLine(pl);
+                    param_b = b.GetDisOnPolyLine(pl);
                 }
-                catch
+                else if (Curve is Line)
                 {
-                    if (Curve.GetClosestPointTo(a, false).DistanceTo(Curve.StartPoint) < 1)
-                    {
-                        param_a = Curve.StartParam;
-                    }
+                    var line = (Line)Curve;
+                    var pa = line.GetClosestPointTo(a, false);
+                    var pb = line.GetClosestPointTo(b, false);
+                    param_a = pa.DistanceTo(line.StartPoint);
+                    param_b = pb.DistanceTo(line.StartPoint);
                 }
-                var param_b = Curve.EndParam;
-                try
-                {
-                    param_b = Curve.GetParamAtPointX(Curve.GetClosestPointTo(b, false));
-                }
-                catch
-                {
-
-                    if (Curve.GetClosestPointTo(a, false).DistanceTo(Curve.StartPoint) < 1)
-                    {
-                        param_a = Curve.StartParam;
-                    }
-                }
-
                 if (param_a == param_b) return 0;
                 else if (param_a < param_b) return -1;
                 else return 1;
             }
+        }
+
+        public static double GetDisOnPolyLine(this Point3d pt, Polyline poly)
+        {
+            if (poly.GetClosestPointTo(pt, false).DistanceTo(pt) > 0.1)
+            {
+                return -1;
+            }
+            double distance = 0.0;
+            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+            {
+                var lineSeg = poly.GetLineSegmentAt(i);
+                if (lineSeg.IsOn(pt, new Tolerance(1.0, 1.0)))
+                {
+                    var newPt = pt.GetProjectPtOnLine(lineSeg.StartPoint, lineSeg.EndPoint);
+                    distance += lineSeg.StartPoint.DistanceTo(newPt);
+                    break;
+                }
+                else
+                {
+                    distance += lineSeg.Length;
+                }
+            }
+            return distance;
         }
 
         public static Polyline PolyFromLine(Line a)
@@ -406,7 +421,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 List<Polyline> plys = new List<Polyline>();
                 var pl = (Polyline)curve;
                 var verts = pl.Vertices().Cast<Point3d>().ToList();
-                var param = verts.Select(e => pl.GetParamAtPointX(e)).ToList();
+                var param = verts.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e, pl)).ToList();
                 points.Insert(0, verts.First());
                 points.Add(verts.Last());
                 points = RemoveDuplicatePts(points);
@@ -418,7 +433,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if(verts.Count==0) return GetSplitLine(new Line(curve.StartPoint,curve.EndPoint), points).Cast<Curve>().ToList();
 
 
-                var curparam = points.Select(e => pl.GetParamAtPointX(e)).ToList();
+                var curparam = points.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e,pl)).ToList();
 
                 for (int i = 0; i < curparam.Count - 1; i++)
                 {
@@ -441,7 +456,15 @@ namespace ThMEPArchitecture.PartitionLayout
                             break;
                         }
                     }
-                    if (quit) continue;
+                    if (quit)
+                    {
+                        if (points.Count > 0)
+                        {
+                            points.RemoveAt(0);
+                            curparam.RemoveAt(0);
+                        }
+                        continue;
+                    }
                     p.AddVertexAt(index, points[i + 1].ToPoint2D(), 0, 0, 0);
                     plys.Add(p);
                 }

@@ -66,7 +66,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             
             var usedLines = new HashSet<int>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara);
-            gaPara.Set(sortSegLines);
+            //gaPara.Set(sortSegLines);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
 
             var iterationCnt = Active.Editor.GetInteger("\n Input GA iteration count:");

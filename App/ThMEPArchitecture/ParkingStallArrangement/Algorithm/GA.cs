@@ -140,7 +140,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 //ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
                 //p.Logger = Logger;
                 //bool valid = p.Validate();
-
+                ;
 
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
@@ -311,7 +311,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         maxNums = curNums;
                     }
                     pop = CreateNextGeneration(selected);
-                    Mutation(pop);
+                    //Mutation(pop);
                 }
                 var strBest = $"Best: {pop.First().Count}";
                 Active.Editor.WriteMessage(strBest);

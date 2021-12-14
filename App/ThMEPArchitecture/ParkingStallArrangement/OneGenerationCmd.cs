@@ -145,6 +145,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         ;
                     }
 
+                    ;
+                    inilanes = inilanes.Distinct().ToList();
 
                     //Draw.DrawSeg(lanes,index);
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
