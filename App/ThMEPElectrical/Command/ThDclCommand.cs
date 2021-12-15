@@ -75,6 +75,7 @@ namespace ThMEPElectrical.Command
                 ThOuterVerticalComponentRecognizer outerRecognizer = null;
                 if (outerComponentPattern)
                 {
+                    // 用产品文档上的
                     var modelData = architectureOutlineExtractor.ModelData;
                     componentData = new ThArchOuterVertialComponentData(modelData)
                     {
