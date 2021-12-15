@@ -144,18 +144,19 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             
             //2.2 close border
             Dictionary<Point3d, Point3d> closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
-            //closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
-            ////3.0 Split & Merge
-            //LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
-            //var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            //StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
-            ////3.1、splic polyline
-            //StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
-            ////3.2、merge fragments and split if possible
-            //StructureBuilder.MergeFragments(findPolylineFromLines, closeBorderLines);
-            ////4.0 Deal with Intersect Near Pointsnetload
-            //dicTuples.Clear();
-            //dicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
+
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            //3.0 Split & Merge
+            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
+            var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
+            //3.1、splic polyline
+            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
+            //3.2、merge fragments and split if possible
+            StructureBuilder.MergeFragments(findPolylineFromLines, closeBorderLines);
+            //4.0 Deal with Intersect Near Pointsnetload
+            dicTuples.Clear();
+            dicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
 
             var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts);
             
@@ -199,17 +200,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.DicTuplesStandardize(ref dicTuples, zeroPts); //耗时
             //SplitAndMerge(ref dicTuples, allPts, outline2BorderNearPts);
             List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
-
-
-            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
-            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
-            var  findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
-            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
-            StructureBuilder.MergeFragments(findPolylineFromLines, closeBorderLines);
-            dicTuples.Clear();
-            dicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
-
 
             //WallConnect(dicTuples, outline2ZeroPts);
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
