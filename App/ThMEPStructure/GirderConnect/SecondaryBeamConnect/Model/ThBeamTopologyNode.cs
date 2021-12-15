@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.CAD;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
@@ -68,14 +69,11 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
 
         public void Upgrade()
         {
-            if (this.HaveLayoutBackUp)
-            {
-                var layout = this.LayoutLines;
-                layout.SecondaryBeamLines = new List<Line>();
-                layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetOnethirdPt(), layout.edges[1].TrueSide.GetTwothirdPt()));
-                layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetTwothirdPt(), layout.edges[1].TrueSide.GetOnethirdPt()));
-                this.LayoutLines = layout;
-            }
+            var layout = this.LayoutLines;
+            layout.SecondaryBeamLines = new List<Line>();
+            layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetOnethirdPt(), layout.edges[1].TrueSide.GetTwothirdPt()));
+            layout.SecondaryBeamLines.Add(new Line(layout.edges[0].TrueSide.GetTwothirdPt(), layout.edges[1].TrueSide.GetOnethirdPt()));
+            this.LayoutLines = layout;
         }
 
         /// <summary>
@@ -108,6 +106,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         LayoutResult layoutResult = new LayoutResult();
                         //因为构造三角形区域次梁为最后一步，故不再设置其他属性
                         layoutResult.SecondaryBeamLines.Add(new Line(pts.First(), pts.Last()));
+                        layoutResult.vector = pts.First().GetVectorTo(pts.Last());
+                        layoutResult.edges.AddRange(this.Edges.Where(o => Needneighbor.Any(x => x.Item1 == o.BeamSide)));
                         this.LayoutLines = layoutResult;
                     }
                     else
@@ -115,12 +115,28 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         var P1 = this.Neighbor[0].Item1.GetCenterPt();
                         var P2 = this.Neighbor[1].Item1.GetCenterPt();
                         var P3 = this.Neighbor[2].Item1.GetCenterPt();
+                       
                         List<Line> lines = new List<Line>();
                         lines.Add(new Line(P1, P2));
                         lines.Add(new Line(P2, P3));
                         lines.Add(new Line(P1, P3));
+                        if(lines[0].Length < lines[1].Length && lines[0].Length < lines[2].Length)
+                        {
+                            Needneighbor.RemoveAt(2);
+                        }
+                        else if(lines[1].Length < lines[0].Length && lines[1].Length < lines[2].Length)
+                        {
+                            Needneighbor.RemoveAt(0);
+                        }
+                        else
+                        {
+                            Needneighbor.RemoveAt(1);
+                        }
                         LayoutResult layoutResult = new LayoutResult();
-                        layoutResult.SecondaryBeamLines.Add(lines.OrderByDescending(o => o.Length).First());
+                        var pts = Needneighbor.Select(o => o.Item1.GetCenterPt());
+                        layoutResult.SecondaryBeamLines.Add(new Line(pts.First(), pts.Last()));
+                        layoutResult.vector = pts.First().GetVectorTo(pts.Last());
+                        layoutResult.edges.AddRange(this.Edges.Where(o => Needneighbor.Any(x => x.Item1 == o.BeamSide)));
                         this.LayoutLines = layoutResult;
                     }
                 }
@@ -136,7 +152,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         Line centerLine = new Line(edges[1].TrueSide.GetCenterPt(), edges[3].TrueSide.GetCenterPt());
                         Line OnethirdLine = new Line(edges[1].TrueSide.GetOnethirdPt(), edges[3].TrueSide.GetTwothirdPt());
                         Line TwothirdLine = new Line(edges[1].TrueSide.GetTwothirdPt(), edges[3].TrueSide.GetOnethirdPt());
-                        layoutResult.vector=centerLine.Delta;
+                        layoutResult.vector=centerLine.LineDirection();
                         layoutResult.edges.Add(edges[1]);
                         layoutResult.edges.Add(edges[3]);
                         if (connectType == ConnectSecondaryBeamType.SingleConnect)
@@ -159,11 +175,11 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         Line OnethirdLine2 = new Line(edges[1].TrueSide.GetOnethirdPt(), edges[3].TrueSide.GetTwothirdPt());
                         Line TwothirdLine2 = new Line(edges[1].TrueSide.GetTwothirdPt(), edges[3].TrueSide.GetOnethirdPt());
                         LayoutResult layoutResult = new LayoutResult();
-                        layoutResult.vector=centerLine1.Delta;
+                        layoutResult.vector=centerLine1.LineDirection();
                         layoutResult.edges.Add(edges[0]);
                         layoutResult.edges.Add(edges[2]);
                         LayoutResult SparelayoutResult = new LayoutResult();
-                        SparelayoutResult.vector=centerLine2.Delta;
+                        SparelayoutResult.vector=centerLine2.LineDirection();
                         SparelayoutResult.edges.Add(edges[1]);
                         SparelayoutResult.edges.Add(edges[3]);
                         if (connectType == ConnectSecondaryBeamType.SingleConnect)
@@ -241,6 +257,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         //Update 逻辑更改：之前是选取两条中的最短边，现在是选取次梁最能够平分梁隔区域的最优边
                         //Line L1 = new Line(P1.DistanceTo(P3) < P2.DistanceTo(P3) ? P1 : P2, P3);
                         Line L1 = new Line(planA1.AreaRatio(planA2) > planB1.AreaRatio(planB2) ? P1 : P2, P3);
+                        double areaRatioL1 = Math.Max(planA1.AreaRatio(planA2) , planB1.AreaRatio(planB2));
 
                         Point3d P4 = edges[4].TrueSide.GetCenterPt();
                         Point3d P5 = edges[4].TrueSide.EndPoint;
@@ -252,6 +269,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         //同上
                         //Line L2 = new Line(P4.DistanceTo(P6) < P5.DistanceTo(P6) ? P4 : P5, P6);
                         Line L2 = new Line(planC1.AreaRatio(planC2) > planD1.AreaRatio(planD2) ? P4 : P5, P6);
+                        double areaRatioL2 = Math.Max(planC1.AreaRatio(planC2), planD1.AreaRatio(planD2));
+
                         CanAdjustment = Math.Max(L1.Length, L2.Length) < Math.Min(L1.Length, L2.Length) * SecondaryBeamLayoutConfig.Er;
                         layoutResult.edges.Add(edges[1]);
                         layoutResult.edges.Add(edges[3]);
@@ -282,6 +301,35 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         }
                         else if (edges[0].BeamType == BeamType.Beam)
                         {
+                            if (90 - edges[0].BeamSide.GetLineAngle(edges[1].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance &&
+                                90 - edges[0].BeamSide.GetLineAngle(edges[4].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance)
+                            {
+                                Polyline planE1 = new Point3dCollection() { edges[0].TrueSide.GetCenterPt(), edges[1].TrueSide.StartPoint, edges[2].TrueSide.StartPoint, edges[2].TrueSide.GetCenterPt() }.CreatePolyline();
+                                Polyline planE2 = new Point3dCollection() { edges[2].TrueSide.GetCenterPt(), edges[3].TrueSide.StartPoint, edges[4].TrueSide.StartPoint, edges[0].TrueSide.StartPoint, edges[0].TrueSide.GetCenterPt() }.CreatePolyline();
+                                Polyline planF1 = new Point3dCollection() { edges[0].TrueSide.GetCenterPt(), edges[1].TrueSide.StartPoint, edges[2].TrueSide.StartPoint, edges[3].TrueSide.StartPoint, edges[3].TrueSide.GetCenterPt() }.CreatePolyline();
+                                Polyline planF2 = new Point3dCollection() { edges[3].TrueSide.GetCenterPt(), edges[4].TrueSide.StartPoint, edges[4].TrueSide.EndPoint, edges[0].TrueSide.GetCenterPt() }.CreatePolyline();
+                                var areaRatioE = planE1.AreaRatio(planE2);
+                                var areaRatioF = planF1.AreaRatio(planF2);
+                                if (areaRatioE > areaRatioF && areaRatioE > areaRatioL2)
+                                {
+                                    L2 = new Line(edges[0].TrueSide.GetCenterPt(), edges[2].TrueSide.GetCenterPt());
+                                    SparelayoutResult = new LayoutResult();
+                                    SparelayoutResult.vector = edges[0].TrueSide.GetCenterPt().GetVectorTo(edges[2].TrueSide.GetCenterPt()); 
+                                    SparelayoutResult.edges.Add(edges[0]);
+                                    SparelayoutResult.edges.Add(edges[2]);
+                                    SparelayoutResult.SecondaryBeamLines.Add(L2);
+                                }
+                                else if(areaRatioF > areaRatioE && areaRatioF > areaRatioL1)
+                                {
+                                    L1 = new Line(edges[0].TrueSide.GetCenterPt(), edges[3].TrueSide.GetCenterPt());
+                                    layoutResult = new LayoutResult();
+                                    layoutResult.vector = edges[0].TrueSide.GetCenterPt().GetVectorTo(edges[3].TrueSide.GetCenterPt());
+                                    layoutResult.edges.Add(edges[0]);
+                                    layoutResult.edges.Add(edges[3]);
+                                    layoutResult.SecondaryBeamLines.Add(L1);
+                                }
+
+                            }
                             if (L1.Length > L2.Length)
                             {
                                 LayoutLines = layoutResult;
@@ -327,6 +375,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                             L1_1 = new Line(P2, P3);
                             L1_2 = new Line(edges[1].TrueSide.GetTwothirdPt(), edges[3].TrueSide.GetOnethirdPt());
                         }
+                        double areaRatioL1 = Math.Max(planA1.AreaRatio(planA2, planA3), planB1.AreaRatio(planB2, planB3));
 
                         Point3d P4 = edges[4].TrueSide.EndPoint;
                         Point3d P5 = edges[4].TrueSide.GetTwothirdPt();
@@ -350,8 +399,10 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                             L2_1 = new Line(P5, P6);
                             L2_2 = new Line(edges[4].TrueSide.GetOnethirdPt(), edges[2].TrueSide.GetTwothirdPt());
                         }
-                        double lengthPlan1 = L1_1.Length+L1_2.Length;
-                        double lengthPlan2 = L2_1.Length+L2_2.Length;
+                        double areaRatioL2 = Math.Max(planC1.AreaRatio(planC2, planC3), planD1.AreaRatio(planD2, planD3));
+
+                        double lengthPlan1 = L1_1.Length + L1_2.Length;
+                        double lengthPlan2 = L2_1.Length + L2_2.Length;
                         CanAdjustment = Math.Max(lengthPlan1, lengthPlan2) < Math.Min(lengthPlan1, lengthPlan2) * SecondaryBeamLayoutConfig.Er;
 
                         layoutResult.edges.Add(edges[1]);
@@ -385,6 +436,44 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         }
                         else if (edges[0].BeamType == BeamType.Beam)
                         {
+                            if (90 - edges[0].BeamSide.GetLineAngle(edges[1].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance &&
+                                90 - edges[0].BeamSide.GetLineAngle(edges[4].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance)
+                            {
+                                Polyline planE1 = new Point3dCollection() { edges[0].TrueSide.StartPoint, edges[0].TrueSide.GetOnethirdPt(), edges[2].TrueSide.GetTwothirdPt(), edges[3].TrueSide.StartPoint, edges[4].TrueSide.StartPoint }.CreatePolyline();
+                                Polyline planE2 = new Point3dCollection() { edges[0].TrueSide.GetOnethirdPt(), edges[0].TrueSide.GetTwothirdPt(), edges[2].TrueSide.GetOnethirdPt(), edges[2].TrueSide.GetTwothirdPt() }.CreatePolyline();
+                                Polyline planE3 = new Point3dCollection() { edges[0].TrueSide.GetTwothirdPt(), edges[1].TrueSide.StartPoint, edges[2].TrueSide.StartPoint, edges[2].TrueSide.GetOnethirdPt() }.CreatePolyline();
+
+                                Polyline planF1 = new Point3dCollection() { edges[0].TrueSide.StartPoint, edges[0].TrueSide.GetOnethirdPt(), edges[3].TrueSide.GetTwothirdPt(), edges[4].TrueSide.StartPoint }.CreatePolyline();
+                                Polyline planF2 = new Point3dCollection() { edges[0].TrueSide.GetOnethirdPt(), edges[0].TrueSide.GetTwothirdPt(), edges[3].TrueSide.GetOnethirdPt(), edges[3].TrueSide.GetTwothirdPt() }.CreatePolyline();
+                                Polyline planF3 = new Point3dCollection() { edges[0].TrueSide.GetTwothirdPt(), edges[1].TrueSide.StartPoint, edges[2].TrueSide.StartPoint, edges[3].TrueSide.StartPoint, edges[3].TrueSide.GetOnethirdPt() }.CreatePolyline();
+                                var areaRatioE = planE1.AreaRatio(planE2, planE3);
+                                var areaRatioF = planF1.AreaRatio(planF2, planF3);
+                                if (areaRatioE > areaRatioF && areaRatioE > areaRatioL2)
+                                {
+                                    L2_1 = new Line(edges[0].TrueSide.GetOnethirdPt(), edges[2].TrueSide.GetTwothirdPt());
+                                    L2_2 = new Line(edges[0].TrueSide.GetTwothirdPt(), edges[2].TrueSide.GetOnethirdPt());
+                                    lengthPlan2 = L2_1.Length + L2_2.Length;
+                                    SparelayoutResult = new LayoutResult();
+                                    SparelayoutResult.vector = edges[0].TrueSide.GetCenterPt().GetVectorTo(edges[2].TrueSide.GetCenterPt());
+                                    SparelayoutResult.edges.Add(edges[0]);
+                                    SparelayoutResult.edges.Add(edges[2]);
+                                    SparelayoutResult.SecondaryBeamLines.Add(L2_1);
+                                    SparelayoutResult.SecondaryBeamLines.Add(L2_2);
+                                }
+                                else if (areaRatioF > areaRatioE && areaRatioF > areaRatioL1)
+                                {
+                                    L1_1 = new Line(edges[0].TrueSide.GetOnethirdPt(), edges[3].TrueSide.GetTwothirdPt());
+                                    L1_2 = new Line(edges[0].TrueSide.GetTwothirdPt(), edges[3].TrueSide.GetOnethirdPt());
+                                    lengthPlan1 = L1_1.Length + L1_2.Length;
+                                    layoutResult = new LayoutResult();
+                                    layoutResult.vector = edges[0].TrueSide.GetCenterPt().GetVectorTo(edges[3].TrueSide.GetCenterPt());
+                                    layoutResult.edges.Add(edges[0]);
+                                    layoutResult.edges.Add(edges[3]);
+                                    layoutResult.SecondaryBeamLines.Add(L1_1);
+                                    layoutResult.SecondaryBeamLines.Add(L1_2);
+                                }
+
+                            }
                             if (lengthPlan1 > lengthPlan2)
                             {
                                 LayoutLines = layoutResult;

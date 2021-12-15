@@ -81,13 +81,15 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         public void AdjustmentDirection()
         {
             //分类，划分区隔
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(200000,0,0)));
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(250000,0,0)));
             CorrectWrongDir();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(400000, 0, 0)));
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(500000, 0, 0)));
             GroupBeamNodes();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(-200000, 0, 0)));
-            AdjustSingleBeam();
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(750000, 0, 0)));
+            CorrectWrongDir();
+            //DrawGraph(Matrix3d.Displacement(new Vector3d(-250000, 0, 0)));
         }
+
 
         /// <summary>
         /// 修正错误次梁布置
@@ -113,12 +115,35 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         node.SwapLayout();
                         NextNodes.AddRange(node.Neighbor.Select(o => o.Item2));
                     }
-                    else if(JunctionCount == SpareJunctionCount)
+                }
+                nodes = NextNodes.Distinct().ToList();
+            }
+
+            nodes = this.Nodes;
+            while (nodes.Count > 0)
+            {
+                var NextNodes = new List<ThBeamTopologyNode>();
+                foreach (var node in nodes)
+                {
+                    //没有可布置的次梁或次梁布置不可调整，直接跳过
+                    if (!node.HaveLayoutBackUp || node.LayoutLines.SecondaryBeamLines.Count == 0)
+                    {
+                        continue;
+                    }
+                    var JunctionCount = node.LayoutLines.edges.Count(o => node.Neighbor.Any(x => x.Item2.LayoutLines.edges.Any(y => y.BeamSide.Equals(o.BeamSide))));
+                    var SpareJunctionCount = node.SpareLayoutLines.edges.Count(o => node.Neighbor.Any(x => x.Item2.LayoutLines.edges.Any(y => y.BeamSide.Equals(o.BeamSide))));
+                    if (JunctionCount < SpareJunctionCount)
+                    {
+                        //Swap
+                        node.SwapLayout();
+                        NextNodes.AddRange(node.Neighbor.Select(o => o.Item2));
+                    }
+                    else if (JunctionCount == SpareJunctionCount)
                     {
                         JunctionCount = node.Neighbor.Count(o => o.Item2.CheckCurrentPixel(node));
                         node.SwapLayout();
                         SpareJunctionCount= node.Neighbor.Count(o => o.Item2.CheckCurrentPixel(node));
-                        if(JunctionCount >= SpareJunctionCount)
+                        if (JunctionCount >= SpareJunctionCount)
                         {
                             node.SwapLayout();
                         }
@@ -135,7 +160,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         /// <summary>
         /// 调整部分单梁
         /// </summary>
-        private void AdjustSingleBeam()
+        public void AdjustSingleBeam()
         {
             var nodes = this.Nodes;
             var Checknodes = nodes.Where(o => o.LayoutLines.SecondaryBeamLines.Count == 1);
@@ -146,12 +171,15 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 var rightNodeList = new List<ThBeamTopologyNode>();
                 var leftnode = FindNodeLink(node, node.LayoutLines.edges[0].BeamSide, ref leftNodeList);
                 var rightnode = FindNodeLink(node, node.LayoutLines.edges[1].BeamSide, ref rightNodeList);
-                if (!leftnode.IsNull() && !rightnode.IsNull() && leftNodeList.Count + rightNodeList.Count < 3 && leftnode.CheckCurrentPixel(node) && rightnode.CheckCurrentPixel(node))
+                if (leftNodeList.Count + rightNodeList.Count < 2 && (leftnode.IsNull() || leftnode.LayoutLines.SecondaryBeamLines.Count ==0 || leftnode.CheckCurrentPixel(node)) && (rightnode.IsNull() || rightnode.LayoutLines.SecondaryBeamLines.Count ==0 || rightnode.CheckCurrentPixel(node)))
                 {
-                        var nodelist = leftNodeList.Union(rightNodeList).ToList();
-                        nodelist.Add(node);
-                        nodelist.ForEach(o =>o.Upgrade());
-                        Checknodes = Checknodes.Except(nodelist);
+                    var nodelist = leftNodeList.Union(rightNodeList).ToList();
+                    nodelist.Add(node);
+                    if ((!leftnode.IsNull() && leftnode.LayoutLines.SecondaryBeamLines.Count ==2) || (!rightnode.IsNull() && rightnode.LayoutLines.SecondaryBeamLines.Count ==2))
+                    {
+                        nodelist.ForEach(o => o.Upgrade());
+                    }
+                    Checknodes = Checknodes.Except(nodelist);
                 }
                 else
                 {
@@ -192,55 +220,54 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         {
             RegionGrowAlgorithm algorithm = new RegionGrowAlgorithm();
             algorithm.RegionGrow(this.Nodes.ToArray().ToList());
-            //algorithm.CreatRandomSeed();
 
             {
-                int index = 1;
-                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
-                {
-                    //foreach (var item in algorithm.Aggregatespace)
-                    //{
-                    //    foreach (var a in item)
-                    //    {
-                    //        var entity = a.Boundary.Clone() as Polyline;
-                    //        entity = entity.Buffer(-500)[0] as Polyline;
-                    //        entity.ColorIndex = index;
-                    //        acad.ModelSpace.Add(entity);
-                    //    }
-                    //    index=index % 11 +1;
-                    //}
+                //int index = 1;
+                //using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                //{
+                //    foreach (var item in algorithm.Aggregatespace)
+                //    {
+                //        foreach (var a in item)
+                //        {
+                //            var entity = a.Boundary.Clone() as Polyline;
+                //            entity = entity.Buffer(-500)[0] as Polyline;
+                //            entity.ColorIndex = index;
+                //            acad.ModelSpace.Add(entity);
+                //        }
+                //        index=index % 11 +1;
+                //    }
 
-                    //foreach (var item in algorithm.Adjustmentspace)
-                    //{
-                    //    foreach (var a in item)
-                    //    {
-                    //        var entity = a.Boundary.Clone() as Polyline;
-                    //        try
-                    //        {
-                    //            entity = entity.Buffer(-2000)[0] as Polyline;
-                    //        }
-                    //        catch (Exception ex)
-                    //        {
-                    //            entity = entity.Buffer(-1000)[0] as Polyline;
-                    //        }
-                    //        entity.ColorIndex = index + 4;
-                    //        acad.ModelSpace.Add(entity);
-                    //    }
-                    //    index=index%3 +1;
-                    //}
-                }
+                //    foreach (var item in algorithm.Adjustmentspace)
+                //    {
+                //        foreach (var a in item)
+                //        {
+                //            var entity = a.Boundary.Clone() as Polyline;
+                //            try
+                //            {
+                //                entity = entity.Buffer(-2000)[0] as Polyline;
+                //            }
+                //            catch (Exception ex)
+                //            {
+                //                entity = entity.Buffer(-1000)[0] as Polyline;
+                //            }
+                //            entity.ColorIndex = index + 4;
+                //            acad.ModelSpace.Add(entity);
+                //        }
+                //        index=index%3 +1;
+                //    }
+                //}
             }
-
-            //GeneticAlgorithm genetic = new GeneticAlgorithm(algorithm.Aggregatespace, algorithm.Adjustmentspace[3]);
-            //genetic.Run();
 
             //启用博弈树算法
             foreach (var space in algorithm.Adjustmentspace)
             {
                 var neighber = algorithm.Aggregatespace.Where(o => o.IsNeighbor(space)).OrderByDescending(o => o.Count).ToList();
-                BeamGameTreeAlgorithm_Clone gameTree = new BeamGameTreeAlgorithm_Clone(neighber, space);
-                gameTree.Start();
-                gameTree.Revise();
+                if (neighber.Count > 0)
+                {
+                    BeamGameTreeAlgorithm_Clone gameTree = new BeamGameTreeAlgorithm_Clone(neighber, space);
+                    gameTree.Start();
+                    gameTree.Revise();
+                }
                 //var Result = gameTree.ChessGameResult;
                 ////var a = gameTree.CheckerboardCache.Where(o => Array.IndexOf(o.Key, 0) < 0).OrderByDescending(o => o.Value).ToList();
                 //if (!Result.IsNull())
@@ -259,9 +286,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 //    //throw new NotImplementedException();
                 //}
             }
-
         }
-
         public void DrawGraph(Matrix3d matrix,bool drawBoundary = true)
         {
             using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())

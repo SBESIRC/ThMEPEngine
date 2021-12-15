@@ -56,13 +56,15 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             CreatRandomSeed();
             //RegionalIntegration();
             RegionalOptimization();
-            EliminateDents();//new
+            EliminateDents();
             MergeUnchangeableArea();
             EliminateDents();
             MergeAdjacentRegion();
             DeleteSmallnSpace();
-            EliminateDents();//new
+            EliminateDents();
             MergeChangeArea();
+            MergeNotAdjacentRegion();
+            EliminateNotAdjacentDents();
         }
 
         /// <summary>
@@ -236,6 +238,74 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 }
             }
         }
+        
+        /// <summary>
+        /// 消除离散区域凹包
+        /// </summary>
+        private void EliminateNotAdjacentDents()
+        {
+            var nodeDic = Nodes.ToDictionary(o => o.Boundary, o => o);
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(nodeDic.Keys.ToCollection());
+            bool Signal = true;
+            while (Signal)
+            {
+                Signal = false;
+                for (int i = 0; i < Aggregatespace.Count; i++)
+                {
+                    var space = Aggregatespace[i];
+                    var UnionPolygon = space.UnionPolygon();
+                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                    var objs = spatialIndex.SelectCrossingPolygon(polyline);
+                    foreach (Polyline obj in objs)
+                    {
+                        var node = nodeDic[obj];
+                        if (this.Nodes.Contains(node) && node.Neighbor.Any(o => space.Contains(o.Item2)))
+                        {
+                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                            {
+                                if (!node.CheckCurrentPixel(space.First()))
+                                    node.SwapLayout();
+                                this.Nodes.Remove(node);
+                                space.Add(node);
+                                Signal = true;
+                            }
+                        }
+                    }
+                    Aggregatespace[i] = space;
+                }
+            }
+            for (int i = 0; i < Adjustmentspace.Count; i++)
+            {
+                while (Signal)
+                {
+                    Signal = false;
+                    var space = Adjustmentspace[i];
+                    var UnionPolygon = space.UnionPolygon();
+                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    var polyline = ConvexPolyline.Buffer(-10)[0] as Polyline;
+                    var objs = spatialIndex.SelectCrossingPolygon(polyline);
+                    foreach (Polyline obj in objs)
+                    {
+                        var node = nodeDic[obj];
+                        if (Nodes.Contains(node) && node.Neighbor.Any(o => space.Contains(o.Item2)))
+                        {
+                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                            {
+                                Nodes.Remove(node);
+                                space.Add(node);
+                                Signal = true;
+                            }
+                        }
+                    }
+                    Adjustmentspace[i] = space;
+                }
+            }
+        }
 
         /// <summary>
         /// 合并临近区域
@@ -295,6 +365,34 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             deleteNodes.ForEach(x => Nodes.Remove(x));
         }
 
+        /// <summary>
+        /// 合并临近区域
+        /// </summary>
+        private void MergeNotAdjacentRegion()
+        {
+            var deleteNodes = new List<ThBeamTopologyNode>();
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                var node = Nodes[i];
+                if(node.Edges[0].BeamType == BeamType.Scrap)
+                {
+                    continue;
+                }
+                var neighbor = node.Neighbor;
+                var needNeighbor = neighbor.Select(o => o.Item2).Where(o =>!Nodes.Contains(o)).ToList();
+                var needNeighborspace = needNeighbor.Select(o => Adjustmentspace.FirstOrDefault(x => x.Contains(o))).Where(o => !o.IsNull()).Distinct().ToList();
+                if(needNeighborspace.Count > 1)
+                {
+                    deleteNodes.Add(node);
+                    Adjustmentspace = Adjustmentspace.Except(needNeighborspace).ToList();
+                    var newSpace = needNeighborspace.SelectMany(o => o).ToList();
+                    newSpace.Add(node);
+                    Adjustmentspace.Add(newSpace);
+                }
+            }
+            deleteNodes.ForEach(x => Nodes.Remove(x));
+        }
+
         private void DeleteSmallnSpace()
         {
             var smallSpace = Aggregatespace.Where(o => o.Count == 1);
@@ -307,12 +405,14 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         /// </summary>
         private void MergeChangeArea()
         {
-            var seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+            var LayoutNodes = Nodes.Where(o => o.LayoutLines.edges.Count > 0).ToList();
+            Nodes = Nodes.Where(o => o.LayoutLines.edges.Count == 0).ToList();
+            var seed = LayoutNodes.FirstOrDefault();
             while (!seed.IsNull())
             {
-                var region = RegionGrowSmall(this.Nodes, seed, true);
+                var region = RegionGrowSmall(LayoutNodes, seed, true);
                 Adjustmentspace.Add(region);
-                seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+                seed = LayoutNodes.FirstOrDefault();
             }
         }
 

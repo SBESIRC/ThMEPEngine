@@ -49,12 +49,9 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {
-                    foreach (var item in UseBeams)
-                    {
-                        var a = beamSpace.Buffer(-100)[0] as Polyline;
-                        a.ColorIndex = 5;
-                        acad.ModelSpace.Add(a);
-                    }
+                    var a = beamSpace.Buffer(-10)[0] as Polyline;
+                    a.ColorIndex = 5;
+                    acad.ModelSpace.Add(a);
                 }
                 return new List<BeamEdge>();
             }
@@ -237,7 +234,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
 
         public static bool CheckCurrentPixel(this ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
         {
-            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 35);
+            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 25);
         }
     }
 }

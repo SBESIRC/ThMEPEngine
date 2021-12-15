@@ -359,27 +359,26 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 {
                     BeamGamePlayer player = new BeamGamePlayer();
                     player.Nodes = this.Space[i];
-                    var UnionPolygon = this.Space[i].UnionPolygon();
-                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
-                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
-                    var objs = SpatialIndex.SelectCrossingPolygon(polyline);
-                    foreach (Polyline obj in objs)
-                    {
-                        var node = Nodes.FirstOrDefault(o => o.Boundary.Equals(obj));
-                        if (!node.IsNull())
-                        {
-                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
-                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
-                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
-                            {
-                                if (!node.CheckCurrentPixel(this.Space[i].First()))
-                                    node.SwapLayout();
-                                player.Nodes.Add(node);
-                                Nodes.Remove(node);
-                            }
-                        }
-                    }
-
+                    //var UnionPolygon = this.Space[i].UnionPolygon();
+                    //var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    //var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                    //var objs = SpatialIndex.SelectCrossingPolygon(polyline);
+                    //foreach (Polyline obj in objs)
+                    //{
+                    //    var node = Nodes.FirstOrDefault(o => o.Boundary.Equals(obj));
+                    //    if (!node.IsNull())
+                    //    {
+                    //        var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                    //        var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                    //        if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                    //        {
+                    //            if (!node.CheckCurrentPixel(this.Space[i].First()))
+                    //                node.SwapLayout();
+                    //            player.Nodes.Add(node);
+                    //            Nodes.Remove(node);
+                    //        }
+                    //    }
+                    //}
                     var nation = Nations.FirstOrDefault(o => o.Players.First().Nodes.First().CheckCurrentPixel(player.Nodes.First()));
                     if (nation.IsNull())
                     {
@@ -390,24 +389,6 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                     else
                     {
                         nation.Players.Add(player);
-                    }
-                }
-            }
-            bool Signal = true;
-            while (Signal)
-            {
-                Signal = false;
-                for (int i = 0; i < Nodes.Count; i++)
-                {
-                    var node = Nodes[i];
-                    if (node.LayoutLines.edges.Count == 0 && node.Neighbor.Count(o => Nodes.Contains(o.Item2) && o.Item2.LayoutLines.edges.Count > 0) < 2)
-                    {
-                        Signal = true;
-                        Nodes.Remove(node);
-                        //using(Linq2Acad.AcadDatabase acad =Linq2Acad.AcadDatabase.Active())
-                        //{
-                        //    acad.ModelSpace.Add(node.Boundary.Buffer(-500)[0] as Polyline);
-                        //}
                     }
                 }
             }
