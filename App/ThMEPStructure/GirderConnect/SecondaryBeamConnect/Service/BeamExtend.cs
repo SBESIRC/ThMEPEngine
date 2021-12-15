@@ -49,9 +49,13 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {
-                    var a = beamSpace.Buffer(-10)[0] as Polyline;
-                    a.ColorIndex = 5;
-                    acad.ModelSpace.Add(a);
+                    var objs = beamSpace.Buffer(-10);
+                    if (objs.Count > 0)
+                    {
+                        var polyline = objs[0] as Polyline;
+                        polyline.ColorIndex = 5;
+                        acad.ModelSpace.Add(polyline);
+                    }
                 }
                 return new List<BeamEdge>();
             }
