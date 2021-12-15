@@ -13,20 +13,22 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
 {
     public class BuildMainBeam
     {
-        private Dictionary<Line, DBObjectCollection> LineDict { get; set; }
-        public BuildMainBeam(Dictionary<Line, DBObjectCollection> lineDict)
+        private List<Line> Lines { get; set; }
+        private DBObjectCollection Outlines { get; set; }
+        public BuildMainBeam(List<Line> lines, DBObjectCollection outlines)
         {
-            LineDict = lineDict;
+            Lines = lines;
+            Outlines = outlines;
         }
         public List<Entity> Build(string Switch)
         {
             List<Entity> result = new List<Entity>();
-            LineDict.ForEach(o =>
+            Lines.ForEach(o =>
             {
-                int B = Calculate(o.Key, Switch).Item1;
-                int H = Calculate(o.Key, Switch).Item2;
-                var outline = BuildLinearBeam(o.Key.StartPoint, o.Key.EndPoint, B);
-                var beam = Difference(outline, o.Value);
+                int B = Calculate(o, Switch).Item1;
+                int H = Calculate(o, Switch).Item2;
+                var outline = BuildLinearBeam(o.StartPoint, o.EndPoint, B);
+                var beam = Difference(outline, Outlines);
                 if(beam != null)
                 {
                     result.Add(beam);
