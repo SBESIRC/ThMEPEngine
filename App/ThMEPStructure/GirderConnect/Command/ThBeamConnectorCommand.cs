@@ -71,12 +71,13 @@ namespace ThMEPStructure.GirderConnect.Command
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
                     clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
 
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 5);
+                //ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 5);
                 //计算
                 var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
 
                 DBObjectCollection intersectCollection = new DBObjectCollection();
                 outlineWalls.ForEach(o => intersectCollection.Add(o.Key));
+                outlineWalls.ForEach(o => o.Value.ForEach(p => intersectCollection.Add(p)));
                 outerWalls.ForEach(o => intersectCollection.Add(o.Key));
                 outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
 

@@ -94,7 +94,13 @@ namespace ThMEPStructure.GirderConnect.Data
             using (var acdb = AcadDatabase.Active())
             {
                 //BuildMainBeam buildMainBeam = new BuildMainBeam(lines, intersectCollection);
-                //var xx = buildMainBeam.Build("地下室顶板");
+                //var mainBeams = buildMainBeam.Build("地下室顶板");
+                //foreach(var beam in mainBeams)
+                //{
+                //    beam.Layer = layerName;
+                //    beam.ColorIndex = 130;
+                //    HostApplicationServices.WorkingDatabase.AddToModelSpace(beam);
+                //}
                 lines.ForEach(line =>
                 {
                     line.Layer = layerName;
@@ -166,10 +172,24 @@ namespace ThMEPStructure.GirderConnect.Data
             {
                 lines.Add(new Line(tuple.Item1, tuple.Item2));
             }
-            var cleaner = new ThLaneLineCleanService();
-            var objs = cleaner.CleanNoding(lines.ToCollection());
-            lines = objs.OfType<Line>().ToList();
-            return lines;
+            lines = lines.Where(o => o.Length > 10).ToList();
+            var linesObjs = lines.ToCollection();
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(linesObjs);
+            var newLines = new List<Line>();
+            lines.ForEach(o=>
+            {
+                try
+                {
+                    var polylione = o.ExtendLine(1).Buffer(1);
+                    var objs = spatialIndex.SelectWindowPolygon(polylione);
+                    newLines.Add(objs.Cast<Line>().OrderBy(x => x.Length).First());
+                }
+                catch(Exception ex)
+                {
+
+                }
+            });
+            return newLines.Distinct().ToList();
         }
     }
 }

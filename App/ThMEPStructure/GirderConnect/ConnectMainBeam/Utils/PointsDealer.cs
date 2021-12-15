@@ -26,7 +26,7 @@ using NFox.Cad;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
-
+using GeometryExtensions;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -350,24 +350,44 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
         }
 
+        private static List<Line> GetCenterLines(Polyline pl)
+        {
+            var lines = ThMEPPolygonService.CenterLine(pl.ToNTSPolygon().ToDbMPolygon());
+            if(lines.Count == 0)
+            {
+                var pl2 = new Polyline();
+                int n = pl.NumberOfVertices;
+                for (int i = 1; i < n; ++i)
+                {
+                    pl2.SetPointAt(i-1, pl.GetPoint2dAt(i));
+                }
+                pl2.SetPointAt(n - 1, pl.GetPoint2dAt(0));
+
+                lines = ThMEPPolygonService.CenterLine(pl2.ToNTSPolygon().ToDbMPolygon());
+            }
+
+            return lines;
+        }
+
         /// <summary>
         /// 获得墙的拐角点和边界点
         /// </summary>
-        /// <param name="polygon"></param>
+        /// <param name="pline"></param>
         /// <param name="fstPts"></param>
         /// <param name="SndPts"></param>
-        public static void WallCrossPoint(Polygon polygon, ref List<Point3d> fstPts, ref List<Point3d> SndPts)//, ref HashSet<Point3d> zeroPts)
+        public static void WallCrossPoint(Polyline pline, ref List<Point3d> fstPts, ref List<Point3d> SndPts)//, ref HashSet<Point3d> zeroPts)
         {
             fstPts.Clear();
             SndPts.Clear();
             //首先找出中心线
-            var lines = ThMEPPolygonService.CenterLine(polygon.ToDbMPolygon());
+            //var lines = ThMEPPolygonService.CenterLine(polygon.ToDbMPolygon());
+            var lines = GetCenterLines(pline);
             Dictionary<Point3d, HashSet<Point3d>> pt2Pts = LinesToTuples(lines);
 
             //对块进行分割
             var walls = new DBObjectCollection();
             var columns = new DBObjectCollection();
-            ThVStructuralElementSimplifier.Classify(polygon.ToDbCollection(), columns, walls);
+            ThVStructuralElementSimplifier.Classify(pline.ToNTSPolygon().ToDbCollection(), columns, walls);
             List<Point3d> zeroPts = new List<Point3d>();
             foreach (var ent in columns)
             {

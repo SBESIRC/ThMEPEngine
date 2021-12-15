@@ -312,7 +312,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     //}
                     try
                     {
-                        PointsDealer.WallCrossPoint(wall.DPSimplify(1).ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                        PointsDealer.WallCrossPoint(wall.DPSimplify(1), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
                     }
                     catch (System.Exception Ex)
                     {
