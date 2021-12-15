@@ -35,7 +35,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.7.0.0")]
 [assembly: AssemblyFileVersion("1.7.0.0")]
 
-
+[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.THAFASDebugCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThLaneLineCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
@@ -44,7 +45,5 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPElectrical.ThSecurityPlaneCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThProtectThunderCmd))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThGroundGridCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.AFAS.ThAFASCmds))]
-[assembly: CommandClass(typeof(ThMEPElectrical.AFAS.THAFASDebugCmds))]
 
 
