@@ -30,7 +30,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var voronoiDiagram = new VoronoiDiagramBuilder();
             voronoiDiagram.SetSites(points.ToNTSGeometry());
             var xx = ThCADCoreNTSService.Instance.GeometryFactory;
-            foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow
+            foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow   points 0 or >3
             //foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
             {
                 if (polygon.IsEmpty)
@@ -230,7 +230,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlineClumns">某轮廓和它包含的柱点</param>
         /// <param name="outline2BorderNearPts">Input and Output</param>
         public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
-            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
         {
             List<Point3d> fstPtsS = new List<Point3d>();
             List<Point3d> fstPts = new List<Point3d>();
@@ -301,8 +301,23 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                     tmpFstPts.Clear();
                     tmpThdPts.Clear();
-                    //CenterLine.WallEdgePoint(wall.ToNTSPolygon(), 100, ref tmpFstPts, ref tmpThdPts);
-                    PointsDealer.WallCrossPoint(wall.DPSimplify(1).ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                    //var newWall = wall.DPSimplify(1).ToNTSPolygon().Buffer(0) as Polygon;
+                    //CenterLine.WallEdgePoint(newWall, 50, ref tmpFstPts, ref tmpThdPts);
+                    //foreach (Entity obj in wall.DPSimplify(1).ToNTSPolygon().Buffer(0).ToDbCollection())
+                    //{
+                    //    if (obj is Polyline polyline)
+                    //    {
+                    //        CenterLine.WallEdgePoint(polyline.ToNTSPolygon(), 50, ref tmpFstPts, ref tmpThdPts);
+                    //    }
+                    //}
+                    try
+                    {
+                        PointsDealer.WallCrossPoint(wall.DPSimplify(1).ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                    }
+                    catch (System.Exception Ex)
+                    {
+                        //continue;
+                    }
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
                     fstPtsS.AddRange(tmpFstPts);
@@ -311,7 +326,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 PointsDealer.RemovePointsFarFromOutline(ref fstPts, curOutline);
                 PointsDealer.RemovePointsFarFromOutline(ref thdPts, curOutline);
                 outline2ZeroPts[curOutline].AddRange(fstPts);////////////////////这里可能重复添加了，可能需要进行单一化那个函数
-
                 foreach (Point3d nearPt in tmpNearPts)
                 {
                     Point3d outlinePt = curOutline.GetClosePoint(nearPt);
@@ -336,10 +350,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             continue;
                         }
-                        //ShowInfo.DrawLine(closetLine.StartPoint, closetLine.EndPoint, 50);
                         if (i == 0)
                         {
-                            toleranceDegree = Math.PI / 4; /////////////////////4
+                            toleranceDegree = Math.PI / 4;
                         }
 
                         //找到近点nearPt最佳的边界连接点
@@ -426,6 +439,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             {
                                 findPolylineFromLines.Add(tmpLine, tmpLines);
                             }
+                            //ShowInfo.ShowGeometry()
                         }
                     }
                 }

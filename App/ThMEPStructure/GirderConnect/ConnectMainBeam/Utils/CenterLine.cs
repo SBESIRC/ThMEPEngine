@@ -249,7 +249,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     if (edgPts[pt] != 2)
                     {
                         lines.Add(new Tuple<Point3d, Point3d>(node.Key, pt));
-                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(node.Key, pt));//show line
                     }
                 }
             }

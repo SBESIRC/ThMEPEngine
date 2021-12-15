@@ -42,7 +42,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 {
                     outlineWalls.Add(houseOutline, new HashSet<Polyline>());
                 }
-                Classify(PreprocessLinealElements(outlineWall.Value.ToCollection()), outlineClumns[houseOutline], outlineWalls[houseOutline]);
+                Classify(PreprocessLinealElements(outlineWall.Value.ToCollection()), outlineClumns[houseOutline], outlineWalls[houseOutline], houseOutline, 600);
             }
         }
 
@@ -52,7 +52,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// <param name="curves"></param>
         /// <param name="columns"></param>
         /// <param name="walls"></param>
-        private static void Classify(DBObjectCollection curves, HashSet<Point3d> columns, HashSet<Polyline> walls)
+        private static void Classify(DBObjectCollection curves, HashSet<Point3d> columns, HashSet<Polyline> walls, Polyline outline, double maxDis = 600)
         {
             foreach (var curve in curves)
             {
@@ -61,7 +61,12 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                     polyline.Closed = true;
                     if (IsColumns(polyline))
                     {
-                        columns.Add(polyline.GetCentroidPoint());
+                        var centroidPt = polyline.GetCentroidPoint();
+                        double curDis = centroidPt.DistanceTo(outline.GetClosePoint(centroidPt));
+                        if (curDis < maxDis)
+                        {
+                            columns.Add(centroidPt);
+                        }
                     }
                     else
                     {

@@ -612,11 +612,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tmpPtA = dicTuple.Key;
                     }
-                    if (!dicTuples.ContainsKey(tmpPtA))
-                    {
-                        dicTuples.Add(tmpPtA, new HashSet<Point3d>());
-                    }
-
                     flag = 0;
                     foreach (Point3d ptB in basePts)
                     {
@@ -631,18 +626,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tmpPtB = edPt;
                     }
-                    if (!dicTuples[tmpPtA].Contains(tmpPtB))
-                    {
-                        dicTuples[tmpPtA].Add(tmpPtB);
-                    }
-                    if (!dicTuples.ContainsKey(tmpPtB))
-                    {
-                        dicTuples.Add(tmpPtB, new HashSet<Point3d>());
-                    }
-                    if (!dicTuples[tmpPtB].Contains(tmpPtA))
-                    {
-                        dicTuples[tmpPtB].Add(tmpPtA);
-                    }
+                    StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
+                    StructureDealer.AddLineTodicTuples(tmpPtB, tmpPtA, ref dicTuples);
                 }
             }
         }
@@ -674,11 +659,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tmpPtA = dicTuple.Key;
                     }
-                    if (!dicTuples.ContainsKey(tmpPtA))
-                    {
-                        dicTuples.Add(tmpPtA, new HashSet<Point3d>());
-                    }
-
                     flag = 0;
                     foreach (Point3d ptB in basePts)
                     {
@@ -693,18 +673,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tmpPtB = edPt;
                     }
-                    if (!dicTuples[tmpPtA].Contains(tmpPtB))
-                    {
-                        dicTuples[tmpPtA].Add(tmpPtB);
-                    }
-                    if (!dicTuples.ContainsKey(tmpPtB))
-                    {
-                        dicTuples.Add(tmpPtB, new HashSet<Point3d>());
-                    }
-                    if (!dicTuples[tmpPtB].Contains(tmpPtA))
-                    {
-                        dicTuples[tmpPtB].Add(tmpPtA);
-                    }
+                    StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
+                    StructureDealer.AddLineTodicTuples(tmpPtB, tmpPtA, ref dicTuples);
                 }
             }
         }

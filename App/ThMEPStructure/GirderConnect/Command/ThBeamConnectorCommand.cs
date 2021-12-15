@@ -75,8 +75,13 @@ namespace ThMEPStructure.GirderConnect.Command
                 //计算
                 var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
 
+                DBObjectCollection intersectCollection = new DBObjectCollection();
+                outlineWalls.ForEach(o => intersectCollection.Add(o.Key));
+                outerWalls.ForEach(o => intersectCollection.Add(o.Key));
+                outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
+
                 //处理算法输出
-                MainBeamPostProcess.MPostProcess(dicTuples);
+                MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
             }
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");

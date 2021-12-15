@@ -436,7 +436,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="outline2BorderNearPts"></param>
-        public static void DeleteConnectUpToFourA(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+        public static void DeleteConnectUpToFourA(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             foreach (var dic in dicTuples)
             {
@@ -513,7 +513,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="outline2BorderNearPts"></param>
-        public static void DeleteConnectUpToFourB(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+        public static void DeleteConnectUpToFourB(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             foreach (var dic in dicTuples)
             {
@@ -960,29 +960,49 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             var ptVisted = new HashSet<Point3d>();
             List<Point3d> pts = dicTuples.Keys.ToList();
-            
+            Dictionary<Point3d, List<Point3d>> newDicTuples = new Dictionary<Point3d, List<Point3d>>();
+            foreach(var dicTuple in dicTuples)
+            {
+                newDicTuples.Add(dicTuple.Key, dicTuple.Value.ToList());
+            }
             foreach (var ptA in pts)
             {
                 if (ptVisted.Contains(ptA))
                 {
                     continue;
                 }
-                ptVisted.Add(ptA);
+                //记录点ptA附近点所相连的点
                 var closePtlist = new List<Point3d>();
                 double xSum = ptA.X;
                 double ySum = ptA.Y;
-                closePtlist.Add(ptA);
+                ptVisted.Add(ptA);
+                foreach (var cntPtA in newDicTuples[ptA])
+                {
+                    if (dicTuples.ContainsKey(ptA) && dicTuples[ptA].Contains(cntPtA))
+                    {
+                        closePtlist.Add(cntPtA);
+                    }
+                }
                 int cnt = 1;
                 foreach (var ptB in pts)
                 {
-                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance)
+                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance && !ptVisted.Contains(ptB) && !ptVisted.Contains(ptB))
                     {
-                        if (!ptVisted.Contains(ptB))
+                        ptVisted.Add(ptB);
+                        ShowInfo.ShowPointAsX(ptB, 3, 500);
+                        foreach (var cntPtB in newDicTuples[ptB])
                         {
-                            ptVisted.Add(ptB);
+                            if (dicTuples.ContainsKey(cntPtB) && dicTuples[cntPtB].Contains(ptB))
+                            {
+                                closePtlist.Add(cntPtB);
+                                DeleteFromDicTuples(ptB, cntPtB, ref dicTuples);
+                            }
+                            if (dicTuples.ContainsKey(ptB) && dicTuples[ptB].Contains(cntPtB))
+                            {
+                                closePtlist.Add(cntPtB);
+                                DeleteFromDicTuples(ptB, cntPtB, ref dicTuples);
+                            }
                         }
-                        closePtlist.Add(ptB);
-                        DeleteFromDicTuples(ptA, ptB, ref dicTuples);
                         xSum += ptB.X;
                         ySum += ptB.Y;
                         ++cnt;
@@ -1007,24 +1027,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         }
                     }
                 }
-
+                ShowInfo.ShowPointAsX(minDisBasePt, 1, 700);
                 //将closePtlist中的所有点都换成minDisBasePt
-                if (!dicTuples.ContainsKey(minDisBasePt))
-                {
-                    dicTuples.Add(minDisBasePt, new HashSet<Point3d>());
-                }
                 foreach (var closePt in closePtlist)
                 {
-
-                    if (!dicTuples[minDisBasePt].Contains(closePt))
-                    {
-                        dicTuples[minDisBasePt].Add(closePt);
-                    }
-                    if (!dicTuples.ContainsKey(closePt))
-                    {
-                        dicTuples.Add(closePt, new HashSet<Point3d>());
-                    }
-                    dicTuples[closePt].Add(minDisBasePt);
+                    AddLineTodicTuples(minDisBasePt, closePt, ref dicTuples);
+                    AddLineTodicTuples(closePt, minDisBasePt, ref dicTuples);
+                    ShowInfo.DrawLine(minDisBasePt, closePt, 1);
                 }
             }
         }
@@ -1184,11 +1193,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
         }
 
-        public static void ReduceIntersectLines(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void RemoveIntersectLines(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
-            var points = dicTuples.Keys.ToList();
-            var tuples = LineDealer.DicTuplesToTuples(dicTuples);
-            var tmpTuples = tuples.ToList();
+            var tmpTuples = LineDealer.DicTuplesToTuples(dicTuples).ToList();
             foreach (var tupleA in tmpTuples)
             {
                 foreach(var tupleB in tmpTuples)
@@ -1201,12 +1208,25 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     if (tupleA.Item1.DistanceTo(tupleA.Item2) > tupleB.Item1.DistanceTo(tupleB.Item2))
                     {
                         DeleteFromDicTuples(tupleA.Item1, tupleA.Item2, ref dicTuples);
-                        //ShowInfo.DrawLine(tupleA.Item1, tupleA.Item2, 2);
                     }
                     else
                     {
                         DeleteFromDicTuples(tupleB.Item1, tupleB.Item2, ref dicTuples);
-                        //ShowInfo.DrawLine(tupleB.Item1, tupleB.Item2, 2);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveLinesInterSectWithCloseBorderLines(List<Tuple<Point3d, Point3d>> closebdLines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            var tmpTuples = LineDealer.DicTuplesToTuples(dicTuples).ToList();
+            foreach (var tup in closebdLines)
+            {
+                foreach (var tmpTuple in tmpTuples)
+                {
+                    if (LineDealer.IsIntersect(tup.Item1, tup.Item2, tmpTuple.Item1, tmpTuple.Item2))
+                    {
+                        DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
                     }
                 }
             }
