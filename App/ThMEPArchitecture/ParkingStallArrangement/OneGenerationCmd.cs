@@ -160,7 +160,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         ;
                     }
 
-                    partition.Print(layerNames, 30);
+                    partition.ProcessAndDisplay(layerNames, 30);
 
 
 

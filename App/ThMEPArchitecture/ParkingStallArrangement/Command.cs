@@ -123,7 +123,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
 
-                    partition.Print(layerNames, 30);
+                    partition.ProcessAndDisplay(layerNames, 30);
 
                 }
             }

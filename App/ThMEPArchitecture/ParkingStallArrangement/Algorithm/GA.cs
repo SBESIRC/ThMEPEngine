@@ -311,7 +311,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         maxNums = curNums;
                     }
                     pop = CreateNextGeneration(selected);
-                    //Mutation(pop);
+                    Mutation(pop);
                 }
                 var strBest = $"Best: {pop.First().Count}";
                 Active.Editor.WriteMessage(strBest);
@@ -394,7 +394,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 solution.Logger = this.Logger;
                 var genome = ConvertLineToGene();//创建初始基因序列
                 solution.Genome = genome;
-                Draw.DrawSeg(solution);
+                //Draw.DrawSeg(solution);
                 solutions.Add(solution);
             }
             else
@@ -405,7 +405,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     solution.Logger = this.Logger;
                     var genome = ConvertLineToGene(i);//创建初始基因序列
                     solution.Genome = genome;
-                    Draw.DrawSeg(solution);
+                    //Draw.DrawSeg(solution);
                     solutions.Add(solution);
                 }
             }
