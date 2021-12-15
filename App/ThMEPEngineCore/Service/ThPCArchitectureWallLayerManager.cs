@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Service
         private static bool IsArchitectureWallCurveLayer(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('$').Reverse().ToArray();
-            return (patterns[0] == "PC_YZ_WALL") || (patterns[0] == "PC_NQ_GZ_HACH");
+            return (patterns[0] == "PC_YZ_WALL") || (patterns[0] == "PC_NQ_GZ_HACH" || (patterns[0] == "PC_YZ"));
         }
     }
 }
