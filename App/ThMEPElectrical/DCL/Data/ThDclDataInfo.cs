@@ -38,6 +38,7 @@ namespace ThMEPElectrical.DCL.Data
         public List<ThEStoreyInfo> Storeys { get; private set; }
         public List<Curve> SpecialBelts { get; private set; }
         public List<Curve> DualpurposeBelts { get; private set; }
+        public ThMEPOriginTransformer Transformer { get; set; }
         #endregion
         public ThDclDataInfo()
         {
@@ -57,12 +58,17 @@ namespace ThMEPElectrical.DCL.Data
         public void Build(Database database,Point3dCollection pts)
         {
             // 提取
-            var vm = Extract(database);
             var spetialBeals = ExtractSpecialBelt(database);
             var dualpurposeBelts = ExtractDualpurposeBelt(database);
             var storyes = ExtractStoreys(database);
-
-            // 识别
+            SpecialBelts = RecognizeSpecialBelts(spetialBeals, pts);// 专用接闪带                                                    
+            DualpurposeBelts = RecognizeDualpurposeBelts(dualpurposeBelts, pts);// 兼用接闪带                                                              
+            Storeys = RecognizeEStoreys(storyes, pts);// 楼层框定
+            if (!IsValid())
+            {
+                return;
+            }
+            var vm = Extract(database);
             var columnDatas = new List<ThRawIfcBuildingElementData>();
             columnDatas.AddRange(vm.ColumnVisitor.Results);
             columnDatas.AddRange(vm.DB3ColumnVisitor.Results);
@@ -88,10 +94,28 @@ namespace ThMEPElectrical.DCL.Data
             doorDatas.AddRange(vm.DB3DoorMarkVisitor.Results);
             doorDatas.AddRange(vm.DB3DoorStoneVisitor.Results);
             Doors = RecognizeDB3Door(doorDatas, pts); // 门
-            
-            SpecialBelts = RecognizeSpecialBelts(spetialBeals, pts);// 专用接闪带                                                    
-            DualpurposeBelts = RecognizeDualpurposeBelts(dualpurposeBelts, pts);// 兼用接闪带                                                              
-            Storeys = RecognizeEStoreys(storyes, pts);// 楼层框定
+
+            Transformer = pts.Count>0?CreateTransformer(pts): CreateTransformer();
+        }
+        public bool IsValid()
+        {
+            return Storeys.Count > 0 && (SpecialBelts.Count + DualpurposeBelts.Count) > 0;
+        }
+        private ThMEPOriginTransformer CreateTransformer()
+        {
+            var objs = new DBObjectCollection();
+            objs = objs.Union(SpecialBelts.ToCollection());
+            objs = objs.Union(DualpurposeBelts.ToCollection());
+            return CreateTransformer(objs);
+        }
+        private ThMEPOriginTransformer CreateTransformer(Point3dCollection pts)
+        {
+            var center = pts.Envelope().CenterPoint();
+            return new ThMEPOriginTransformer(center);
+        }
+        private ThMEPOriginTransformer CreateTransformer(DBObjectCollection objs)
+        {
+            return new ThMEPOriginTransformer(objs);
         }
         #region ----------- 提取 ----------
         private ThBuildingElementVisitorManager Extract(Database database)

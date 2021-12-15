@@ -18,7 +18,11 @@ namespace ThMEPElectrical.DCL.Data
 
         protected override void GetElements(Database database, Point3dCollection collection)
         {
-            throw new NotImplementedException();
+            // 构建数据
+            var dclData = new ThDclDataInfo();
+            dclData.Build(database, collection);
+
+
         }
     }
 }
