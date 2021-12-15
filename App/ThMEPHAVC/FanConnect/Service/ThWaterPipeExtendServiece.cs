@@ -66,11 +66,12 @@ namespace ThMEPHVAC.FanConnect.Service
                                         //
                                         case PIPELEVEL.LEVEL1:
                                         case PIPELEVEL.LEVEL2:
+                                        case PIPELEVEL.LEVEL3:
                                             {
                                                 LineCount = 4;
                                             }
                                             break;
-                                        case PIPELEVEL.LEVEL3:
+                                        case PIPELEVEL.LEVEL4:
                                             {
                                                 LineCount = 2;
                                                 //根据路由生成CHS(路由线)+CHR+C
@@ -134,6 +135,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         //
                                         case PIPELEVEL.LEVEL1:
                                         case PIPELEVEL.LEVEL2:
+                                        case PIPELEVEL.LEVEL3:
                                             {
                                                 for (int i = 0; i < currentExLines.Count; i++)
                                                 {
@@ -149,7 +151,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 }
                                             }
                                             break;
-                                        case PIPELEVEL.LEVEL3:
+                                        case PIPELEVEL.LEVEL4:
                                             {
                                                 var cline1 = currentExLines[0];
                                                 var cline2 = currentExLines[1];
@@ -259,6 +261,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         //
                                         case PIPELEVEL.LEVEL1:
                                         case PIPELEVEL.LEVEL2:
+                                        case PIPELEVEL.LEVEL3:
                                             {
                                                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                                 {
@@ -281,7 +284,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 }
                                             }
                                             break;
-                                        case PIPELEVEL.LEVEL3:
+                                        case PIPELEVEL.LEVEL4:
                                             {
                                                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                                 {
@@ -345,7 +348,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 case 0://水系统
                     {
-                        if (!node.Item.IsConnect || node.Item.PipeLevel == PIPELEVEL.LEVEL3 || node.Item.WayCount == 3)
+                        if (!node.Item.IsConnect || node.Item.PipeLevel == PIPELEVEL.LEVEL4 || node.Item.WayCount == 3)
                         {
                             if (node.Item.WayCount == 2)
                             {

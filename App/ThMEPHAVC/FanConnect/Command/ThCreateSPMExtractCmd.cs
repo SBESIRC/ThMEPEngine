@@ -101,6 +101,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 ImportBlockFile();
                 //选择起点
                 var startPt = ThFanConnectUtils.SelectPoint();
+                if(startPt.IsEqualTo(new Point3d()))
+                {
+                    return;
+                }
                 //提取水管路由
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
                 //提取水管连接点

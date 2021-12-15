@@ -33,25 +33,39 @@ namespace ThMEPHVAC.FanConnect.Service
             ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
             var vector = node.Parent.Item.CntPoint.GetVectorTo(node.Item.CntPoint).GetNormal();
             var markAg = ThFanConnectUtils.GetVectorAngle(vector);
+
             //标记冷热水管
             if (!node.Item.IsCoolHotMarked)
             {
                 var markPt = node.Item.CntPoint.GetMidPt(node.Parent.Item.CntPoint);
+                
                 var direct = new Vector3d(Math.Cos(markAg + Math.PI / 2.0), Math.Sin(markAg + Math.PI / 2.0), 0.0);
+                if(node.Item.IsFlag)
+                {
+                    direct = new Vector3d(Math.Cos(markAg - Math.PI / 2.0), Math.Sin(markAg - Math.PI / 2.0), 0.0);
+                }
                 string blockName = "";
                 List<string> property = new List<string>();
                 if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
                 {
-                    markPt = markPt + direct * 200 * 1;
+
                     blockName = "AI-水管多排标注(2排)";
                     string strchs = "CHS " + coolPipe + strMarkHeight;
                     string strchr = "CHR " + hotPipe + strMarkHeight;
                     property.Add(strchs);
                     property.Add(strchr);
+                    if (!node.Item.IsFlag)
+                    {
+                        markPt = markPt + direct * 200 * 1;
+                    }
+                    else
+                    {
+                        property.Reverse();
+                    }
+                        
                 }
                 else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
                 {
-                    markPt = markPt + direct * 200 * 2;
                     blockName = "AI-水管多排标注(4排)";
                     string strcs = "CS " + coolPipe + strMarkHeight;
                     string strcr = "CR " + coolPipe + strMarkHeight;
@@ -61,9 +75,37 @@ namespace ThMEPHVAC.FanConnect.Service
                     property.Add(strcr);
                     property.Add(strhs);
                     property.Add(strhr);
+                    if (!node.Item.IsFlag)
+                        markPt = markPt + direct * 200 * 2;
+                    else
+                    {
+                        markPt = markPt - direct * 200 * 1;
+                        property.Reverse();
+                    }
+                }
+
+                if ( (markAg > Math.PI / 2.0 && markAg <= Math.PI) || (markAg > Math.PI && markAg <= Math.PI * 3.0 / 2.0))
+                {
+                    markAg = markAg + Math.PI;
+                    property.Reverse();
+                    if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
+                    {
+                        if (!node.Item.IsFlag)
+                            markPt = markPt - direct * 200 * 1;
+                        else
+                            markPt = markPt + direct * 200 * 1;
+                    }
+                    else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
+                    {
+                        if (!node.Item.IsFlag)
+                            markPt = markPt - direct * 200 * 3;
+                        else
+                            markPt = markPt + direct * 200 * 3;
+                    }
                 }
                 toDbServerviece.InsertPipeMark("H-PIPE-DIMS", blockName, markPt, markAg, property);
-                node.Item.IsCoolHotMarked = true;
+                SetIsCoolHotMarked1(node);
+                SetIsCoolHotMarked2(node);
             }
         }
         //冷凝水管标记
@@ -80,10 +122,18 @@ namespace ThMEPHVAC.FanConnect.Service
             ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
             var vector = node.Parent.Item.CntPoint.GetVectorTo(node.Item.CntPoint).GetNormal();
             var markAg = ThFanConnectUtils.GetVectorAngle(vector);
+            if (markAg > Math.PI / 2.0 && markAg <= Math.PI)
+            {
+                markAg = markAg + Math.PI;
+            }
+            else if (markAg > Math.PI && markAg <= Math.PI * 3.0 / 2.0)
+            {
+                markAg = markAg - Math.PI;
+            }
             if (node.Item.IsCondMarked != true)
             {
                 var markPt = node.Item.CntPoint.GetMidPt(node.Parent.Item.CntPoint);
-                var direct = new Vector3d(Math.Cos(markAg - Math.PI / 2.0), Math.Sin(markAg - Math.PI / 2.0), 0.0);
+                var direct = new Vector3d(Math.Cos(markAg + Math.PI / 2.0), Math.Sin(markAg + Math.PI / 2.0), 0.0);
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
                 {
                     if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)//两管制
@@ -120,9 +170,11 @@ namespace ThMEPHVAC.FanConnect.Service
                         markPt = markPt + direct * 120;
                     }
                 }
+
                 var strText = "C " + condPipe;
                 toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
-                node.Item.IsCondMarked = true;
+                SetIsCondMarked1(node);
+                SetIsCondMarked2(node);
             }
         }
         public void NodeMark(ThFanTreeNode<ThFanPointModel> node)
@@ -161,6 +213,10 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void BianLiTree(ThFanTreeNode<ThFanPointModel> node)
         {
+            if (node.Item.Level == PIPELEVEL.LEVEL3 || node.Item.Level == PIPELEVEL.LEVEL4)
+            {
+                return;
+            }
             //遍历子结点
             foreach (var child in node.Children)
             {
@@ -170,10 +226,10 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 return;
             }
-            if(node.Children.Count <= 1)
-            {
-                return;
-            }
+            //if(node.Children.Count <= 1)
+            //{
+            //    return;
+            //}
             ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
             //父结点冷水管管径
             var parentCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.CoolFlow);
@@ -523,6 +579,155 @@ namespace ThMEPHVAC.FanConnect.Service
             text.UpgradeOpen();
             text.TextString = strText;
             text.DowngradeOpen();
+        }
+        public void PipeMarkTest(ThPointTreeModel tree)
+        {
+            if (tree.RootNode.Children.Count == 0)
+            {
+                return;
+            }
+            NodeMarkTest(tree.RootNode.Children.First());
+            //遍历树
+            BianLiTreeTest(tree.RootNode);
+        }
+        public void CondMarkTest(ThFanTreeNode<ThFanPointModel> node, string condPipe)
+        {
+            ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
+            var vector = node.Parent.Item.CntPoint.GetVectorTo(node.Item.CntPoint).GetNormal();
+            var markAg = ThFanConnectUtils.GetVectorAngle(vector);
+            if (markAg > Math.PI / 2.0 && markAg <= Math.PI)
+            {
+                markAg = markAg + Math.PI;
+            }
+            else if (markAg > Math.PI && markAg <= Math.PI * 3.0 / 2.0)
+            {
+                markAg = markAg - Math.PI;
+            }
+            var markPt = node.Item.CntPoint.GetMidPt(node.Parent.Item.CntPoint);
+            var strText = condPipe;
+            toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
+        }
+        public void CoolHotMarkTest(ThFanTreeNode<ThFanPointModel> node, string coolPipe, string hotPipe, string strMarkHeight)
+        {
+            if(node.Item.IsCoolHotMarked)
+            {
+                return;
+            }
+            ThFanToDBServiece toDbServerviece = new ThFanToDBServiece();
+            var vector = node.Parent.Item.CntPoint.GetVectorTo(node.Item.CntPoint).GetNormal();
+            var markAg = ThFanConnectUtils.GetVectorAngle(vector);
+            if (markAg > Math.PI / 2.0 && markAg <= Math.PI)
+            {
+                markAg = markAg + Math.PI;
+            }
+            else if (markAg > Math.PI && markAg <= Math.PI * 3.0 / 2.0)
+            {
+                markAg = markAg - Math.PI;
+            }
+            var markPt = node.Item.CntPoint.GetMidPt(node.Parent.Item.CntPoint);
+            var strText ="冷水:"+ coolPipe + ";热水:"+ hotPipe;
+            toDbServerviece.InsertText("H-PIPE-DIMS", strText, markPt, markAg);
+            SetIsCoolHotMarked1(node);
+            SetIsCoolHotMarked2(node);
+        }
+        public void NodeMarkTest(ThFanTreeNode<ThFanPointModel> node)
+        {
+            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString() + ")";
+
+            var curCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.CoolFlow);//node.Item.CoolFlow.ToString();
+            //当前结点热水管管径
+            var curHotPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.HotFlow);//node.Item.HotFlow.ToString();
+            //当前结点冷凝水管管径
+            var curCondPipe = queryDNServiece.QueryCondPipeDN(node.Item.CoolCapa); //node.Item.CoolCapa.ToString();
+            if (ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
+            {
+                //标记冷热水管
+                CoolHotMarkTest(node, curCoolPipe, curHotPipe, strMarkHeight);
+                //标记冷凝水管
+            //    CondMarkTest(node, curCondPipe);
+            }
+            else if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
+            {
+                //标记冷凝水管
+                CondMarkTest(node, curCondPipe);
+            }
+            
+        }
+        public void BianLiTreeTest(ThFanTreeNode<ThFanPointModel> node)
+        {
+            //遍历子结点
+            foreach (var child in node.Children)
+            {
+                BianLiTreeTest(child);
+            }
+            if (node.Parent == null)
+            {
+                return;
+            }
+            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            //父结点冷水管管径
+            var parentCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.CoolFlow);
+            //父结点热水管管径
+            var parentHotPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.HotFlow);
+            //父结点冷凝水管管径
+            var parentCondPipe = queryDNServiece.QueryCondPipeDN(node.Parent.Item.CoolCapa);
+            //当前结点冷水管管径
+            var curCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.CoolFlow);
+            //当前结点热水管管径
+            var curHotPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.HotFlow);
+            //当前结点冷凝水管管径
+            var curCondPipe = queryDNServiece.QueryCondPipeDN(node.Item.CoolCapa);
+
+            if ((curCoolPipe != parentCoolPipe) || (curHotPipe != parentHotPipe))
+            {
+                if (node.Parent.Parent != null)
+                {
+                    NodeMarkTest(node.Parent);
+                }
+                NodeMarkTest(node);
+            }
+        }
+
+        public void SetIsCoolHotMarked1(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.IsCoolHotMarked = true;
+            if(node.Children.Count == 1)
+            {
+                SetIsCoolHotMarked1(node.Children[0]);
+            }
+
+        }
+        public void SetIsCoolHotMarked2(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.IsCoolHotMarked = true;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    SetIsCoolHotMarked2(node.Parent);
+                }
+            }
+        }
+
+        public void SetIsCondMarked1(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.IsCondMarked = true;
+            if (node.Children.Count == 1)
+            {
+                SetIsCondMarked1(node.Children[0]);
+            }
+        }
+        public void SetIsCondMarked2(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.IsCondMarked = true;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    SetIsCondMarked2(node.Parent);
+                }
+            }
         }
     }
 }

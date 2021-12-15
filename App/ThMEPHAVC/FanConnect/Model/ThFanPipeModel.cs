@@ -13,7 +13,8 @@ namespace ThMEPHVAC.FanConnect.Model
     {
         LEVEL1,//第一级管（干管）
         LEVEL2,//第二级管（支干管）
-        LEVEL3 //第三级管（支管）
+        LEVEL3,//第三级管（支管）
+        LEVEL4 //第四级管（连接最风机最后一段线）
     }
     public enum PIPETYPE
     {
@@ -58,6 +59,7 @@ namespace ThMEPHVAC.FanConnect.Model
     }
     public class ThFanPointModel
     {
+        public bool IsFlag { set; get; }//标识位，表示是否反向ExPline顺序
         public bool IsCondMarked { set; get; }//是否已标记冷凝水管
         public bool IsCoolHotMarked { set; get; }//是否已标记冷热水
         public double CoolCapa { set; get; }//制冷量
@@ -65,14 +67,17 @@ namespace ThMEPHVAC.FanConnect.Model
         public double HotFlow { set; get; }//制热流量值
         public Point3d CntPoint { set; get; }//连接点
         public double MarkSpace { set; get; }//标记间隔
+        public PIPELEVEL Level { set; get; }//主体级别
         public ThFanPointModel()
         {
+            IsFlag = false;
             IsCondMarked = false;
             IsCoolHotMarked = false;
             CoolCapa = 0.0;
             CoolFlow = 0.0;
             HotFlow = 0.0;
             MarkSpace = 200.0;
+            Level = PIPELEVEL.LEVEL1;
         }
     }
 }

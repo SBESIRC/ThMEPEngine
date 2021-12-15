@@ -437,7 +437,14 @@ namespace ThMEPHVAC.FanConnect.Command
             if (box.Contains(pt))
             {
                 node.Item.PipeWidth = 100.0;
-                node.Item.PipeLevel = PIPELEVEL.LEVEL3;
+                node.Item.PipeLevel = PIPELEVEL.LEVEL4;
+                if(node.Parent != null)
+                {
+                    if(node.Parent.Children.Count == 1)
+                    {
+                        FindFcuNode(node.Parent);
+                    }
+                }
                 return;
             }
 
@@ -446,5 +453,28 @@ namespace ThMEPHVAC.FanConnect.Command
                 FindFcuNode(item, pt);
             }
         }
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            node.Item.PipeLevel = PIPELEVEL.LEVEL3;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    FindFcuNode(node.Parent);
+                }
+            }
+        }
+
+        public static bool IsContains(Line l1,Line l2)
+        {
+            var box = l1.ExtendLine(10).Buffer(10);
+            if(box.Contains(l2.StartPoint) && box.Contains(l2.EndPoint))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        
     }
 }
