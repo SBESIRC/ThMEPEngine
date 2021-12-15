@@ -127,6 +127,7 @@
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
+    <Compile Include="DCL\Data\ThDCLDataSetFactory.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
