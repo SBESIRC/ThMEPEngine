@@ -65,7 +65,10 @@ namespace ThMEPEngineCore.GeojsonExtractor
             GroupOwner = new Dictionary<Entity, List<string>>();
             transformer = new ThMEPOriginTransformer(Point3d.Origin);
         }
-        public abstract void Extract(Database database, Point3dCollection pts);
+        public virtual void Extract(Database database, Point3dCollection pts)
+        {
+            //TODO
+        }
         public abstract List<ThGeometry> BuildGeometries();
         public virtual void SetRooms(List<ThIfcRoom> rooms)
         {
