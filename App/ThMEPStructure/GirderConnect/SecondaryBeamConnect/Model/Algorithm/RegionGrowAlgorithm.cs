@@ -215,7 +215,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                     var space = Aggregatespace[i];
                     var UnionPolygon = space.UnionPolygon();
                     var ConvexPolyline = UnionPolygon.ConvexHullPL();
-                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                    var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
                     var objs = spatialIndex.SelectCrossingPolygon(polyline);
                     foreach (Polyline obj in objs)
                     {
@@ -255,7 +255,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                     var space = Aggregatespace[i];
                     var UnionPolygon = space.UnionPolygon();
                     var ConvexPolyline = UnionPolygon.ConvexHullPL();
-                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                    var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
                     var objs = spatialIndex.SelectCrossingPolygon(polyline);
                     foreach (Polyline obj in objs)
                     {

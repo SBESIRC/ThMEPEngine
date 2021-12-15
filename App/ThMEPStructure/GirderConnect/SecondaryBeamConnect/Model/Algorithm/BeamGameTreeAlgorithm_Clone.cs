@@ -497,7 +497,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                     {
                         Signal = false;
                         var ConvexPolyline = Polygon.ConvexHullPL();
-                        var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
+                        var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
                         var objs = SpatialIndex.SelectCrossingPolygon(polyline);
                         foreach (Polyline obj in objs)
                         {
