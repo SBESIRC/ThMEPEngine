@@ -127,7 +127,7 @@ namespace ThMEPEngineCore.Service
                 }
                 else if(ptRes.Status == PromptStatus.Cancel)
                 {
-                    var pko = new PromptKeywordOptions("\n是否要退出");
+                    var pko = new PromptKeywordOptions("\n是否退出并取消本次生成");
                     pko.Keywords.Add("YES", "YES", "是(Y)");
                     pko.Keywords.Add("NO", "NO", "否(N)");
                     pko.Keywords.Default = "NO";
