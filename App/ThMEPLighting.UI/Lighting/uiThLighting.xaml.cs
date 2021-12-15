@@ -1,7 +1,6 @@
 ﻿using AcHelper;
 using System.Linq;
 using System.Windows;
-using AcHelper.Commands;
 using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPLighting.Garage;
@@ -181,7 +180,7 @@ namespace TianHua.Lighting.UI
         private void btnExtractLaneLine_Click(object sender, RoutedEventArgs e)
         {
             FocusToCAD();
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
+            UIConfigs.ExtractTCD();
         }
 
         private void rbCableTray_Checked(object sender, RoutedEventArgs e)

@@ -12,11 +12,20 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThLaneLineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
+        public List<string> LayerFilter { get; set; }
+        public ThLaneLineRecognitionEngine()
+        {
+            LayerFilter = new List<string>();
+        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             using (var lanelineDbExtension = new ThLaneLineDbExtension(database))
             {
+                if(LayerFilter.Count>0)
+                {
+                    lanelineDbExtension.LayerFilter = LayerFilter;
+                }
                 lanelineDbExtension.BuildElementCurves();
                 lanelineDbExtension.LaneCurves.ForEach(o =>
                 {
