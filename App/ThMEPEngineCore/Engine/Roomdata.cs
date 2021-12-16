@@ -398,7 +398,7 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public bool ContatinPoint3d(Point3d p)
+        public bool IsContatinPoint3d(Point3d p)
         {
             bool isInArchWall = IsInComponents(_architectureWall, p);
             bool isInShearWall = IsInComponents(_shearWall,p);
@@ -407,6 +407,50 @@ namespace ThMEPEngineCore.Engine
             bool isInWindow = IsInComponents(_window, p);
             bool isInCurtainWall = IsInComponents(_curtainWall, p);
             return isInArchWall || isInShearWall || isInColumn || isInDoor || isInWindow || isInCurtainWall;
+        }
+
+        public bool IsCloseToComponents(Point3d p,double tolerance)
+        {
+            bool isCloseToArchWall = IsCloseToComponents(_architectureWall, p, tolerance);
+            bool isCloseToShearWall = IsCloseToComponents(_shearWall, p, tolerance);
+            bool isCloseToColumn = IsCloseToComponents(_column, p, tolerance);
+            bool isCloseToDoor = IsCloseToComponents(_door, p, tolerance);
+            bool isCloseToWindow = IsCloseToComponents(_window, p, tolerance);
+            bool isCloseToCurtainWall = IsCloseToComponents(_curtainWall, p, tolerance);
+            return isCloseToArchWall || isCloseToShearWall || isCloseToColumn ||
+                isCloseToDoor || isCloseToWindow || isCloseToCurtainWall;
+        }
+        private bool IsCloseToComponents(DBObjectCollection polygons, Point3d pt,double tolerance)
+        {
+            foreach (DBObject obj in polygons)
+            {
+                if (obj is Polyline polyline)
+                {
+                    if (IsCloseTo(pt,polyline,tolerance))
+                    {
+                        return true;
+                    }
+                }
+                else if (obj is MPolygon mPolygon)
+                {
+                    var shell = mPolygon.Shell();
+                    if(IsCloseTo(pt, shell, tolerance))
+                    {
+                        return true;
+                    }
+                    if(mPolygon.Holes().Where(o=>IsCloseTo(pt,o,tolerance)).Any())
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private bool IsCloseTo(Point3d pt, Polyline polyline,double tolerance)
+        {
+            var closePt = polyline.GetClosestPointTo(pt, false);
+            return pt.DistanceTo(closePt) <= tolerance;
         }
 
         private bool IsInComponents(DBObjectCollection polygons,Point3d pt)

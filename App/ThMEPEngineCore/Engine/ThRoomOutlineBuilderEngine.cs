@@ -39,8 +39,23 @@ namespace ThMEPEngineCore.Engine
             lines = Merge(lines);
             // 造面
             Areas = lines.PolygonsEx();
-            Areas = Areas.FilterSmallArea(AreaTolerance);
-        }        
+            
+            // 后处理
+            Areas = PostProcess(Areas);
+        }  
+        
+        private DBObjectCollection PostProcess(DBObjectCollection objs)
+        {
+            var results = objs.FilterSmallArea(AreaTolerance);
+            var roomSimplifier = new ThRoomOutlineSimplifier();
+            results = roomSimplifier.Normalize(results);
+            results = results.FilterSmallArea(AreaTolerance);
+            results = roomSimplifier.MakeValid(results);
+            results = results.FilterSmallArea(AreaTolerance);
+            results = roomSimplifier.Simplify(results);
+            results = results.FilterSmallArea(AreaTolerance);
+            return results;
+        }
 
         private DBObjectCollection Merge(DBObjectCollection lines)
         {

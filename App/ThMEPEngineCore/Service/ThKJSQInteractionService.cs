@@ -75,9 +75,13 @@ namespace ThMEPEngineCore.Service
                     {
                         var pt = ptRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
                         var closeOriginPt = Transformer.Transform(pt);
-                        if(roomData.ContatinPoint3d(closeOriginPt))
+                        if(roomData.IsContatinPoint3d(closeOriginPt))
                         {
                             Active.Editor.WriteMessage("\n选择的点不能在墙、柱等构件中");
+                        }
+                        else if(roomData.IsCloseToComponents(closeOriginPt,1.0))
+                        {
+                            Active.Editor.WriteMessage("\n选择的点不能太靠近墙、柱等构件");
                         }
                         else
                         {
@@ -115,8 +119,11 @@ namespace ThMEPEngineCore.Service
                         using (var acadDb = AcadDatabase.Active())
                         {
                             var splitLine = ThMEPPolylineEntityJig.PolylineJig(41, "\n请选择下一个点", false);
-                            Transformer.Transform(splitLine);
-                            Split(splitLine); // 用分割线分割已获取到的房间
+                            if(splitLine.Length>=1.0)
+                            {
+                                Transformer.Transform(splitLine);
+                                Split(splitLine); // 用分割线分割已获取到的房间
+                            }
                         }
                     }
                 }
