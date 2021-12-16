@@ -25,7 +25,7 @@ namespace ThMEPStructure.GirderConnect.Command
         public SecondaryBeamConnectCmd()
         {
             ActionName = "生成次梁";
-            CommandName = "THSCCL";
+            CommandName = "THCLSC";
         }
 
         public void Dispose()
@@ -44,9 +44,9 @@ namespace ThMEPStructure.GirderConnect.Command
                     return;
                 }
                 var options = new PromptKeywordOptions("\n请选择处理方式:");
-                options.Keywords.Add("地下室顶板", "D", "地下室顶板(D)");
                 options.Keywords.Add("地下室中板", "Z", "地下室中板(Z)");
-                options.Keywords.Default = "地下室顶板";
+                options.Keywords.Add("地下室顶板", "D", "地下室顶板(D)");
+                options.Keywords.Default = "地下室中板";
                 var result = Active.Editor.GetKeywords(options);
                 if (result.Status != PromptStatus.OK)
                 {
@@ -67,6 +67,8 @@ namespace ThMEPStructure.GirderConnect.Command
                     originTransformer.Transform(polyline);
                     //获取主梁线和边框线
                     var beamLine = getPrimitivesService.GetBeamLine(polyline);
+                    var wallBound = getPrimitivesService.GetWallBound(polyline);
+                    beamLine = beamLine.Union(wallBound).ToList();
                     var houseBound = getPrimitivesService.GetHouseBound(polyline);
 
                     //次梁计算
@@ -80,8 +82,6 @@ namespace ThMEPStructure.GirderConnect.Command
                     originTransformer.Reset(collection);
                     ConnectSecondaryBeamService.DrawGraph(collection.Cast<Line>().ToList());
                 }
-
-                //此处预留出对接鲍同学单线提双线算法
             }
         }
 

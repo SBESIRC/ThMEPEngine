@@ -25,6 +25,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
     <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\BuildMainBeam\BuildMainBeam.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
@@ -51,9 +52,7 @@
     <Compile Include="GirderConnect\Data\Utils\HandleOverlap.cs" />
     <Compile Include="GirderConnect\Command\SecondaryBeamConnectCmd.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\BuildSecondaryBeam\BuildSecondaryBeam.cs" />
-    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm_Clone.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
-    <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\GeneticAlgorithm.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\RegionGrowAlgorithm.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\EvaluationModel.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\FusionRegion.cs" />

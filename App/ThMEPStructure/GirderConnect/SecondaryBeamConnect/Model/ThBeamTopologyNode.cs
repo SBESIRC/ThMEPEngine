@@ -50,9 +50,13 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 //throw new Exception("未正确识别出该梁隔区域!");
                 using(Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {
-                    var a = Boundary.Buffer(-10)[0] as Polyline;
-                    a.ColorIndex = 2;
-                    acad.ModelSpace.Add(a);
+                    var objs = Boundary.Buffer(-10);
+                    if(objs.Count == 1)
+                    {
+                        var polyline = objs[0] as Polyline;
+                        polyline.ColorIndex = 2;
+                        acad.ModelSpace.Add(polyline);
+                    }
                 }
             }
         }

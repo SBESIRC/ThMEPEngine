@@ -23,7 +23,7 @@ namespace ThMEPStructure.GirderConnect.Command
         public ThBeamConnectorCommand()
         {
             ActionName = "生成主梁";
-            CommandName = "THSCZL";
+            CommandName = "THZLSC";
         }
 
         public void Dispose()

@@ -24,7 +24,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         /// <param name="space"></param>
         /// <param name="beams"></param>
         /// <param name="assists"></param>
-        public void CreatGraph(List<Polyline> space,List<Line> beams,List<Line> assists)
+        public void CreatGraph(List<Polyline> space, List<Line> beams, List<Line> assists)
         {
             Nodes = new List<ThBeamTopologyNode>();
             var spacedic = new Dictionary<Polyline, ThBeamTopologyNode>();
@@ -191,10 +191,10 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
             }
         }
 
-        private ThBeamTopologyNode FindNodeLink(ThBeamTopologyNode node, Line beamSide,ref List<ThBeamTopologyNode> nodes)
+        private ThBeamTopologyNode FindNodeLink(ThBeamTopologyNode node, Line beamSide, ref List<ThBeamTopologyNode> nodes)
         {
             var neighbor = node.Neighbor.FirstOrDefault(o => o.Item1 == beamSide);
-            if(!neighbor.IsNull())
+            if (!neighbor.IsNull())
             {
                 if (neighbor.Item2.LayoutLines.SecondaryBeamLines.Count == 1 && neighbor.Item2.LayoutLines.edges.Any(o => o.BeamSide == beamSide))
                 {
@@ -264,30 +264,20 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                 var neighber = algorithm.Aggregatespace.Where(o => o.IsNeighbor(space)).OrderByDescending(o => o.Count).ToList();
                 if (neighber.Count > 0)
                 {
-                    BeamGameTreeAlgorithm_Clone gameTree = new BeamGameTreeAlgorithm_Clone(neighber, space);
+                    BeamGameTreeAlgorithm gameTree = new BeamGameTreeAlgorithm(neighber, space);
                     gameTree.Start();
                     gameTree.Revise();
                 }
-                //var Result = gameTree.ChessGameResult;
-                ////var a = gameTree.CheckerboardCache.Where(o => Array.IndexOf(o.Key, 0) < 0).OrderByDescending(o => o.Value).ToList();
-                //if (!Result.IsNull())
-                //{
-                //    for (int i = 0; i < Result.Length; i++)
-                //    {
-                //        var node = space[i];
-                //        if (!node.CheckCurrentPixel(neighber[Result[i] - 1].First()))
-                //        {
-                //            node.SwapLayout();
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    //throw new NotImplementedException();
-                //}
             }
         }
-        public void DrawGraph(Matrix3d matrix,bool drawBoundary = true)
+
+        /// <summary>
+        /// 不要删，预留
+        /// 画分组用，便于排查问题
+        /// </summary>
+        /// <param name="matrix"></param>
+        /// <param name="drawBoundary"></param>
+        public void DrawGraph(Matrix3d matrix, bool drawBoundary = true)
         {
             using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
             {
@@ -312,13 +302,13 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
 
         private void BuildGraph(Dictionary<Polyline, ThBeamTopologyNode> spaceDic, List<Line> beams, List<Line> assists)
         {
-            try
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(spaceDic.Keys.ToCollection());
+            foreach (var beam in beams)
             {
-                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(spaceDic.Keys.ToCollection());
-                foreach (var beam in beams)
+                try
                 {
                     Point3d center = beam.GetCenterPt();
-                    var square = center.CreateSquare(25);
+                    var square = center.CreateSquare(5);
                     var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
                     if (fence.Count > 2)
                     {
@@ -343,10 +333,17 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
 
                     }
                 }
-                foreach (var assist in assists)
+                catch (Exception ex)
+                {
+
+                }
+            }
+            foreach (var assist in assists)
+            {
+                try
                 {
                     Point3d center = assist.GetCenterPt();
-                    var square = center.CreateSquare(25);
+                    var square = center.CreateSquare(5);
                     var fence = spatialIndex.SelectFence(square).Cast<Polyline>().ToList();
                     if (fence.Count > 2)
                     {
@@ -367,14 +364,11 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         node1.Assists.Add(assist);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
+                catch (Exception ex)
+                {
 
+                }
             }
         }
-
-
-        
     }
 }

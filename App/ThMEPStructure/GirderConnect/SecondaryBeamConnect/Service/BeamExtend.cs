@@ -240,5 +240,10 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         {
             return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 25);
         }
+
+        public static bool CheckCurrentPixelVertical(this ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
+        {
+            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 65);
+        }
     }
 }

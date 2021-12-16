@@ -47,5 +47,17 @@ namespace ThMEPStructure
                 cmd.Execute();
             }
         }
+
+        /// <summary>
+        /// 生成双线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THSXSC", CommandFlags.Modal)]
+        public void THSXSC()
+        {
+            using (var cmd = new ThDoubleBeamLineCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
