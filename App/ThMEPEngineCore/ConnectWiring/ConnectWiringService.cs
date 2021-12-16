@@ -71,13 +71,17 @@ namespace ThMEPEngineCore.ConnectWiring
 
                     var blockGeos = GetBlockPts(resBlocks);
                     ThCableRouterMgd thCableRouter = new ThCableRouterMgd();
+                    ThCableRouteContextMgd context = new ThCableRouteContextMgd()
+                    {
+                        MaxLoopCount = maxNum,
+                    };
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     //allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
                     //allDatas.AddRange(GetUCSPolylines(objs));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
-                    var res = thCableRouter.RouteCable(dataGeoJson, maxNum);
+                    var res = thCableRouter.RouteCable(dataGeoJson, context);
                     if (!res.Contains("error"))
                     {
                         var lines = new List<Polyline>();
