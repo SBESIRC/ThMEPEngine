@@ -50,6 +50,7 @@
     <Compile Include="GirderConnect\Data\Utils\DataProcess.cs" />
     <Compile Include="GirderConnect\Data\Utils\HandleOverlap.cs" />
     <Compile Include="GirderConnect\Command\SecondaryBeamConnectCmd.cs" />
+    <Compile Include="GirderConnect\SecondaryBeamConnect\BuildSecondaryBeam\BuildSecondaryBeam.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm_Clone.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\BeamGameTreeAlgorithm.cs" />
     <Compile Include="GirderConnect\SecondaryBeamConnect\Model\Algorithm\GeneticAlgorithm.cs" />

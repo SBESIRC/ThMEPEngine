@@ -1,10 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.BuildSecondaryBeam
 {
@@ -20,12 +18,31 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.BuildSecondaryBeam
         public List<Entity> Build()
         {
             List<Entity> result = new List<Entity>();
+            List<Entity> tiltBeams = new List<Entity>();
             Lines.ForEach(o =>
             {
                 int B = Calculate(o).Item1;
                 int H = Calculate(o).Item2;
-                var outline = BuildLinearBeam(o.StartPoint, o.EndPoint, B);
+                var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
+                beam.ForEach(i => i.Layer = o.Layer);
+                if (beam != null)
+                {
+                    if (Math.Abs(o.Angle) % 90 < 0.01)
+                    {
+                        result.AddRange(beam);
+                    }
+                    else
+                    {
+                        tiltBeams.AddRange(beam);
+                    }
+                }
+            });
+            DBObjectCollection beams = new DBObjectCollection();
+            result.ForEach(o => beams.Add(o));
+            tiltBeams.ForEach(o =>
+            {
+                var beam = Difference(o as Polyline, beams);
                 if (beam != null)
                 {
                     result.Add(beam);
@@ -33,15 +50,28 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.BuildSecondaryBeam
             });
             return result;
         }
-        private Entity Difference(Polyline outline, DBObjectCollection columns)
+        private List<Polyline> Difference(List<Polyline> outline, DBObjectCollection columns)
         {
-            var objs = outline.Difference(columns);
-            return objs.OfType<Polyline>().OrderByDescending(o => o.Area).FirstOrDefault();
+            List<Polyline> objs = new List<Polyline>();
+            outline.ForEach(o =>
+            {
+                objs.Add(o.Difference(columns).OfType<Polyline>().OrderByDescending(i => i.Area).FirstOrDefault());
+            });
+            return objs;
         }
-
-        private Polyline BuildLinearBeam(Point3d start, Point3d end, int B)
+        private Polyline Difference(Polyline outline, DBObjectCollection columns)
         {
-            return ThDrawTool.ToRectangle(start, end, B);
+            Polyline objs = new Polyline();
+            objs = outline.Difference(columns).OfType<Polyline>().OrderByDescending(i => i.Area).FirstOrDefault();
+            return objs;
+        }
+        private List<Polyline> BuildLinearBeam(Line line, int B)
+        {
+            List<Polyline> result = new List<Polyline>();
+            result.Add(line.GetOffsetCurves(B / 2).Cast<Polyline>().First());
+            result.Add(line.GetOffsetCurves(-B / 2).Cast<Polyline>().First());
+
+            return result;
         }
 
         private Tuple<int, int> Calculate(Line SingleBeam)
