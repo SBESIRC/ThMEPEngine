@@ -338,26 +338,29 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPHVAC, 2016 version-->
+    <!--Assembly App, ThMEPStructure, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPHVAC, 2018 version-->
+    <!--Assembly App, ThMEPStructure, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>

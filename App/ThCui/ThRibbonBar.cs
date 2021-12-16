@@ -15,6 +15,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateWSSPanel(tab);
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
+                CreateStructurePanel(tab);
                 CreateArchitecturePanel(tab);
             }
         }
@@ -510,6 +511,36 @@ namespace TianHua.AutoCAD.ThCui
                 RibbonButtonStyle.LargeWithText);
         }
 
+        private static void CreateStructurePanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("SBEAM", "梁");
+            var row = panel.AddNewRibbonRow();
+
+            row.AddNewButton("主梁生成",
+                "天华主梁生成",
+                "THZLSC",
+                "天华主梁生成",
+                "IDI_THCAD_THZLSC_SMALL",
+                "IDI_THCAD_THZLSC_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("次梁生成",
+                "天华次梁生成",
+                "THCLSC",
+                "天华次梁生成",
+                "IDI_THCAD_THCLSC_SMALL",
+                "IDI_THCAD_THCLSC_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
+            row.AddNewButton("双线生成",
+                "天华双线生成",
+                "THSXSC",
+                "天华双线生成",
+                "IDI_THCAD_THSXSC_SMALL",
+                "IDI_THCAD_THSXSC_LARGE",
+                RibbonButtonStyle.LargeWithText);
+        }
+
         private static void CreatePreconditionPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("PRECONDITION", "前置输入");
@@ -648,6 +679,15 @@ namespace TianHua.AutoCAD.ThCui
                     "切换到天华建筑",
                     "IDI_THCAD_ARCHITECTURE_SMALL",
                     "IDI_THCAD_ARCHITECTURE_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+
+                // 结构专业
+                splitButton.AddNewButton("结构专业",
+                    "天华结构",
+                    "THMEPPROFILE _S",
+                    "切换到天华结构",
+                    "IDI_THCAD_STRUCTURE_SMALL",
+                    "IDI_THCAD_STRUCTURE_LARGE",
                     RibbonButtonStyle.LargeWithText);
 
                 // 暖通专业
