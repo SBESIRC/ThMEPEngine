@@ -513,7 +513,7 @@ namespace TianHua.AutoCAD.ThCui
 
         private static void CreateStructurePanel(RibbonTabSource tab)
         {
-            var panel = tab.AddNewPanel("SBEAM", "梁");
+            var panel = tab.AddNewPanel("SBEAM", "智能布梁");
             var row = panel.AddNewRibbonRow();
 
             row.AddNewButton("主梁生成",
