@@ -46,6 +46,8 @@ namespace ThMEPWSS.DrainageSystemAG.Services
 
                 foreach (var block in allBlockReference)
                 {
+                    if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                        continue;
                     if (!block.GetEffectiveName().ToUpper().Contains(DrainSysAGCommon.BLOCKNAMEPREFIX))
                         continue;
                     blockReferences.Add(block);
@@ -105,7 +107,6 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                     if (null == layer)
                         continue;
                     currentDb.Layers.Import(layer, true);
-                    //DbHelper.EnsureLayerOn(item);
                 }
                 foreach (var item in textStyleNames) 
                 {
@@ -119,7 +120,6 @@ namespace ThMEPWSS.DrainageSystemAG.Services
                         continue;
                     currentDb.TextStyles.Import(style);
                 }
-                
             }
         }
     }
