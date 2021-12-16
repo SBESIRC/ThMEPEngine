@@ -52,7 +52,7 @@ namespace ThMEPArchitecture.PartitionLayout
         const double DisCarAndHalfLane = DisLaneWidth / 2 + DisCarLength;
         const double DisModulus = DisCarAndHalfLane * 2;
 
-        const double LengthCanGIntegralModules = 4 * DisCarWidth + DisLaneWidth / 2;
+        const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
 
         /// <summary>
@@ -489,12 +489,12 @@ namespace ThMEPArchitecture.PartitionLayout
             crossedobjs.AddRange(Obstacles.Where(e => pl.GeometricExtents.IsPointIn(e.Centroid())));
             foreach (var obj in crossedobjs)
             {
-                points.AddRange(obj.Vertices().Cast<Point3d>());
+                points.AddRange(obj.Vertices().Cast<Point3d>().Where(e => pl.IsPointIn(e)));
                 points.AddRange(obj.Intersect(pl, Intersect.OnBothOperands));
             }
             points = points.Select(e => line.GetClosestPointTo(e, false)).ToList();
             RemoveDuplicatePts(points);
-            return GetSplitLine(line,points).Where(e => e.Length >= DisCarWidth)
+            return GetSplitLine(line, points).Where(e => e.Length >= DisCarWidth)
                 .Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles)).ToList();
         }
 
@@ -614,12 +614,20 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (distart > 1)
                 {
                     var generated = GenerateAdjLanesFunc(lane,true);
-                    if (generated) break;
+                    if (generated)
+                    {
+                        generate_adj_lanes = true;
+                        break;
+                    }
                 }
                 if (disend > 1)
                 {
                     var generated = GenerateAdjLanesFunc(lane, false);
-                    if (generated) break;
+                    if (generated)
+                    {
+                        generate_adj_lanes = true;
+                        break;
+                    }
                 }
             }
             return generate_adj_lanes;
@@ -654,7 +662,7 @@ namespace ThMEPArchitecture.PartitionLayout
             List<Line> segs = new List<Line>();
             Polyline pl = new Polyline();
             Line r = new Line();
-            var disu = IsUnderAndNearObstacles(BuildingBoxes, lt);
+            var disu = IsTheAdjLaneUnderAndNearObstacles(BuildingBoxes, lt);
             bool under = false;
             if (disu != -1 && IsHorizantal(lt))
             {
@@ -685,7 +693,7 @@ namespace ThMEPArchitecture.PartitionLayout
             var planes = IniLanes.Select(e => e.Line).Where(e => IsParallelLine(lane.Line, e)).ToList();
             var dis = ClosestPointInCurves(r.GetCenter(), planes);
             var distmp = ClosestPointInCurves(r.GetCenter(), IniLanes.Select(e => e.Line).ToList());
-            if (dis >= DisModulus && distmp > 1)
+            if (dis >= DisModulus / 2 && distmp > 1 && !IsInAnyPolys(r.GetCenter(), IntegralModules.Select(e => e.Box).ToList()))
             {
                 Vector3d vec = v;
                 if (under) vec = -Vector3d.YAxis;
@@ -1138,15 +1146,19 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             for (int i = 1; i < CarSpots.Count; i++)
             {
+                var pl = CarSpots[i].Clone() as Polyline;
+                pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pl.Centroid()));
                 for (int j = 0; j < i; j++)
                 {
-                    if (CarSpots[i].Intersect(IniBoundary, Intersect.OnBothOperands).Count > 0)
+                    if (pl.Intersect(IniBoundary, Intersect.OnBothOperands).Count > 0)
                     {
+                        pl.Dispose();
                         CarSpots.RemoveAt(i);
                         i--;
                         break;
                     }
                 }
+                pl.Dispose();
             }
         }
 
@@ -1167,6 +1179,29 @@ namespace ThMEPArchitecture.PartitionLayout
                     var p_on_box = box.GetClosePoint(p_on_lane);
                     double d = p_on_lane.DistanceTo(p_on_box);
                     if (d < DisModulus + DisLaneWidth / 2 - 10 && d < distance) distance = d;
+                }
+            }
+            if (distance == 9999999) return -1;
+            return distance;
+        }
+
+        /// <summary>
+        /// Judge if the adjacent lane to be generated is nececcary to move to the specific place near the building and return the distance.
+        /// </summary>
+        /// <param name="boxes"></param>
+        /// <param name="lane"></param>
+        /// <returns></returns>
+        private double IsTheAdjLaneUnderAndNearObstacles(List<Polyline> boxes, Line lane)
+        {
+            double distance = 9999999;
+            foreach (var box in boxes)
+            {
+                if (box.Centroid().Y > lane.GetCenter().Y)
+                {
+                    var p_on_lane = lane.GetClosestPointTo(box.Centroid(), true);
+                    var p_on_box = box.GetClosePoint(p_on_lane);
+                    double d = p_on_lane.DistanceTo(p_on_box);
+                    if (d < distance) distance = d;
                 }
             }
             if (distance == 9999999) return -1;

@@ -74,11 +74,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         var boundPt = segLine.GetBoundPt(buildLines, segArea);
                         if(segLine.GetValueType(boundPt))
                         {
-                            maxVal = segLine.GetMinDist(boundPt)-2750;
+                            maxVal = segLine.GetMinDist(boundPt)-2760;
                         }
                         else
                         {
-                            minVal = -segLine.GetMinDist(boundPt)+2750;
+                            minVal = -segLine.GetMinDist(boundPt)+2760;
                         }
                     }
                     return true;

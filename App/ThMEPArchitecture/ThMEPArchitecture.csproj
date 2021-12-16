@@ -28,6 +28,7 @@
     <Compile Include="ParkingStallArrangement\Algorithm\GA.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA2.cs" />
+    <Compile Include="PartitionLayout\GeoUtilitiesOptimized.cs" />
     <Compile Include="PartitionLayout\ParkingPartition.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionTest.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\RandInt2.cs" />

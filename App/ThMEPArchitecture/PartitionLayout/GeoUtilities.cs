@@ -494,7 +494,14 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             foreach (var p in pls)
             {
-                if (p.IsPointIn(pt)) return true;
+                var pp = p.Clone() as Polyline;
+                pp.TransformBy(Matrix3d.Scaling(0.99, pp.Centroid()));
+                if (pp.IsPointIn(pt))
+                {
+                    pp.Dispose();
+                    return true;
+                }
+                pp.Dispose();
             }
             return false;
         }
