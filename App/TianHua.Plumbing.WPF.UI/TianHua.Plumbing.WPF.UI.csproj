@@ -102,6 +102,9 @@
     <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
       <DependentUpon>DrainageSystemSupplyAxonometricUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\FireHydrantSystemUI.xaml.cs">
+      <DependentUpon>FireHydrantSystemUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\SprinklerCheckersUI.xaml.cs">
       <DependentUpon>SprinklerCheckersUI.xaml</DependentUpon>
     </Compile>
@@ -214,10 +217,6 @@
       <Project>{17f707af-855c-416c-a55e-dff6ff92fc30}</Project>
       <Name>ThControlLibraryWPF</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThMEPArchitecture\ThMEPArchitecture.csproj">
-      <Project>{65557B89-67B5-4776-A2D5-68DA51D5296A}</Project>
-      <Name>ThMEPArchitecture</Name>
-    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
@@ -231,6 +230,10 @@
     <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\FireHydrantSystemUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\SprinklerCheckersUI.xaml">
       <Generator>MSBuild:Compile</Generator>

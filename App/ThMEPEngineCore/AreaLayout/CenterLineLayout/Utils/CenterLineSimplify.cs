@@ -207,7 +207,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             foreach (var node in pt_edges)
             {
 #if DEBUG
-                ShowInfo.ShowPointAsX(node.Key, 1, 25);//请勿删除
+                //ShowInfo.ShowPointAsX(node.Key, 1, 25);//请勿删除
 #endif
                 ans.Add(node.Key);
             }

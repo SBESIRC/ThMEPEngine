@@ -37,6 +37,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var jumpWire = CreateJumpWire();
             Wires = Wires.Union(jumpWire);
 
+            // 创建T型路口的连线
+            var threewayJumpWire = CreateThreeWayJumpWire();
+            Wires = Wires.Union(threewayJumpWire);
+
             // 创建十字路口的连线
             var crossJumpWire = CreateCrossJumpWire();
             Wires = Wires.Union(crossJumpWire);
@@ -93,8 +97,27 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 LampLength = this.ArrangeParameter.LampLength,
                 DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
             };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.Build();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+
+        private DBObjectCollection CreateThreeWayJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayJumpWireLinks();
+            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+            {
+                LampLength = this.ArrangeParameter.LampLength,
+                DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
             jumpWireFactory.Build();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;

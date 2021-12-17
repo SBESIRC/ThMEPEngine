@@ -1,6 +1,7 @@
 ﻿using ThMEPLighting.Common;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage.Model
 {
@@ -22,6 +23,7 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public List<Curve> JumpWires { get; set; }
         public bool IsCrossLink { get; set; }
+        public Point3d? CrossIntersectionPt  { get; set; }
         public ThLightNodeLink()
         {
             Edges = new List<Line>();

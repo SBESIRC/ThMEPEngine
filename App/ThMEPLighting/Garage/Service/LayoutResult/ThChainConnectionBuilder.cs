@@ -47,12 +47,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 //linkWireObjs = DetuctLinkWire(linkWireObjs, ductions);
             }
 
+            // 创建T字型路口的线
+            var threewayJumpWireRes = CreateThreeWayJumpWire();
+
             // 创建十字路口的线
             var crossJumpWireRes = CreateCrossJumpWire();
 
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);
-            Wires = Wires.Union(crossJumpWireRes);        
+            Wires = Wires.Union(crossJumpWireRes);
+            Wires = Wires.Union(threewayJumpWireRes);        
             Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = Wires.Union(linkWireObjs);    
 
@@ -91,6 +95,24 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
+        private DBObjectCollection CreateThreeWayJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayJumpWireLinks();
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildCrossLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+
         private DBObjectCollection CreateCrossJumpWire()
         {
             var results = new DBObjectCollection();
@@ -103,6 +125,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
             jumpWireFactory.BuildCrossLinks();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;

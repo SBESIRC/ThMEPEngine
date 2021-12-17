@@ -10,18 +10,20 @@ using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThMEPArchitecture.ParkingStallArrangement.General;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
     public static class AreaSplit
     {
-        public static List<Polyline> Split(this Line line, Polyline polygon, double tor = 1.0)
+        public static List<Polyline> Split(this Line line, Polyline polygon, double tor = 5.0)
         {
             var lines = polygon.ToLines();
             lines.Add(line);
 
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
             var areas = extendLines.PolygonsEx();
+
 
             var rst = new List<Polyline>();
             foreach (var area in areas)
@@ -31,6 +33,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             return rst;
         }
+
+
 
         public static List<Polyline> Split2(this Line line, Polyline polygon, double tor = 1.0)
         {
@@ -51,8 +55,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-            GaParameter gaParameter)
+            GaParameter gaParameter, out double maxVal, out double minVal)
         {
+            maxVal = 0;
+            minVal = 0;
             double simplifyFactor = 1.0;
             var segLine = gaParameter.SegLine[i];//分割线
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
@@ -71,11 +77,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         var boundPt = segLine.GetBoundPt(buildLines, segArea);
                         if(segLine.GetValueType(boundPt))
                         {
-                            gaParameter.MaxValues[i] = segLine.GetMinDist(boundPt);
+                            maxVal = segLine.GetMinDist(boundPt)-2760;
                         }
                         else
                         {
-                            gaParameter.MinValues[i] = -segLine.GetMinDist(boundPt);
+                            minVal = -segLine.GetMinDist(boundPt)+2760;
                         }
                     }
                     return true;
@@ -205,7 +211,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var closedPts = new List<Point3d>();
             foreach(var build in buildLines)
             {
-                var pline = build as Polyline;
+                var br = build as BlockReference;
+                var pline = br.GetRect();
                 var pts = pline.GetPoints().ToList();
                 closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
             }
@@ -234,7 +241,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     public class Dfs
     {
         public static void dfsSplit(ref HashSet<int> usedLines, ref List<Polyline> areas, ref List<Line> sortSegLines, 
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter)
+            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter, ref List<double> maxVals, ref List<double> minVals)
         {
             if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
             {
@@ -247,15 +254,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     continue;
                 }
                 var line = gaParameter.SegLine[i];
-                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter))//分割线正好分割区域
+                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
                 {
                     sortSegLines.Add(line);
+                    maxVals.Add(maxVal);
+                    minVals.Add(minVal);
                     usedLines.Add(i);
                 }
             }
 
             //递归搜索
-            dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter);
+            dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals);
         }
     }
 }

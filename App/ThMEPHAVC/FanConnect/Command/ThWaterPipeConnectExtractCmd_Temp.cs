@@ -14,9 +14,12 @@ namespace ThMEPHVAC.FanConnect.Command
     {
         public void Dispose()
         {
-            throw new NotImplementedException();
         }
-
+        public ThWaterPipeConnectExtractCmd_Temp()
+        {
+            CommandName = "THLGTEMP";
+            ActionName = "生成水管路由";
+        }
         public override void SubExecute()
         {
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
@@ -27,7 +30,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 //获取风机设备
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 //水管干路和支干路
-                var pipes = ThEquipElementExtractServiece.GetFanPipes();
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
                 //获取房间框线
                 var rooms = ThBuildElementExtractServiece.GetBuildRooms();
                 ////AI洞口

@@ -61,7 +61,7 @@ namespace ThMEPHVAC.FanConnect.Model
         {
             RootNode = GetRootNode(startPt,lines, space);
         }
-        ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines, double space)
+        private ThFanTreeNode<ThFanPipeModel> GetRootNode(Point3d startPt, List<Line> lines, double space)
         {
             var line = FindStartLine(startPt, lines);
             if(line == null)
@@ -73,8 +73,7 @@ namespace ThMEPHVAC.FanConnect.Model
             InsertNodeFromLines(rootNode, lines, space);
             return rootNode;
         }
-
-        Line FindStartLine(Point3d startPt,List<Line> lines)
+        private Line FindStartLine(Point3d startPt,List<Line> lines)
         {
             foreach(var l in lines)
             {
@@ -94,8 +93,7 @@ namespace ThMEPHVAC.FanConnect.Model
             }
             return null;
         }
-
-        List<Line> FindConnectLine(Point3d pt,ref List<Line> lines)
+        private List<Line> FindConnectLine(Point3d pt,ref List<Line> lines)
         {
             var remLines = new List<Line>();
             var retLines = new List<Line>();
@@ -133,7 +131,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             return retLines;
         }
-        List<Line> FindNearLine(Line line ,ref List<Line> lines)
+        private List<Line> FindNearLine(Line line ,ref List<Line> lines)
         {
             var remLines = new List<Line>();
             var retLines = new List<Line>();
@@ -175,7 +173,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             return retLines;
         }
-        void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines, double space)
+        private void InsertNodeFromLines(ThFanTreeNode<ThFanPipeModel> node, List<Line> lines, double space)
         {
             //取当前结点的末端点
             var endPt = node.Item.PLine.EndPoint;
@@ -262,18 +260,21 @@ namespace ThMEPHVAC.FanConnect.Model
             var pointModel = new ThFanPointModel();
             pointModel.CntPoint = treeModel.Item.PLine.StartPoint;
             var rootNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
-            InsertNodeFromPipeTree(rootNode,ref allLines);
+            InsertNodeFromPipeTree(rootNode, treeModel,ref allLines);
             return rootNode;
         }
-        public void InsertNodeFromPipeTree(ThFanTreeNode<ThFanPointModel> node,ref List<Line> lines)
+        public void InsertNodeFromPipeTree(ThFanTreeNode<ThFanPointModel> node, ThFanTreeNode<ThFanPipeModel> treeModel, ref List<Line> lines)
         {
             var remLines = new List<Line>();
             foreach(var l in lines)
             {
                 if (node.Item.CntPoint.IsEqualTo(l.StartPoint))
                 {
+                    var model = FindPipeModel(l, treeModel);
                     var pointModel = new ThFanPointModel();
                     pointModel.CntPoint = l.EndPoint;
+                    pointModel.IsFlag = model.IsFlag;
+                    pointModel.Level = model.PipeLevel;
                     var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
                     node.InsertChild(pointNode);
                     remLines.Add(l);
@@ -282,7 +283,7 @@ namespace ThMEPHVAC.FanConnect.Model
             lines = lines.Except(remLines).ToList();
             foreach(var child in node.Children)
             {
-                InsertNodeFromPipeTree(child,ref lines);
+                InsertNodeFromPipeTree(child, treeModel,ref lines);
             }
         }
         public void CalNodeValue(ThFanTreeNode<ThFanPointModel> node, List<ThFanCUModel> fans)
@@ -342,6 +343,23 @@ namespace ThMEPHVAC.FanConnect.Model
                 retLines.Add(tmpLine);
             }
             return retLines;
+        }
+        public ThFanPipeModel FindPipeModel(Line l, ThFanTreeNode<ThFanPipeModel> rootNode)
+        {
+            if(ThFanConnectUtils.IsContains(rootNode.Item.PLine,l))
+            {
+                return rootNode.Item;
+            }
+
+            foreach (var child in rootNode.Children)
+            {
+                var retModel = FindPipeModel(l, child);
+                if (retModel != null)
+                {
+                    return retModel;
+                }
+            }
+            return null;
         }
     }
 }

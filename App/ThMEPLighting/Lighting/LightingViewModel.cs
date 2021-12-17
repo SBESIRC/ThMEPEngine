@@ -1,12 +1,12 @@
 ﻿using System;
+using System.Linq;
+using System.Windows.Data;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Data;
+using AcHelper.Commands;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPElectrical.Command;
 
 namespace ThMEPLighting.Lighting.ViewModels
 {
@@ -508,6 +508,21 @@ namespace ThMEPLighting.Lighting.ViewModels
             {
                 _items.Add(new Item() { Text = text ,IsSelected=true});
             }
+        }
+        private List<string> LaneLineLayers
+        {
+            get
+            {
+                return _items.Where(o => o.IsSelected).Select(o => o.Text).ToList();
+            }
+        }
+        public void ExtractTCD()
+        {
+            var parameters = new string[]
+            {
+                string.Join(",", LaneLineLayers),
+            };
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD", parameters);
         }
     }
 }

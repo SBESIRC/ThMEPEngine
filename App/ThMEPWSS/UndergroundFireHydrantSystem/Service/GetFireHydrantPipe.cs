@@ -10,7 +10,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class GetFireHydrantPipe
+    public class GetFireHydrantPipe
     {
         public static void GetMainLoop(ref FireHydrantSystemOut fireHydrantSysOut, List<Point3dEx> rstPath,
             FireHydrantSystemIn fireHydrantSysIn, Dictionary<Point3dEx, List<Point3dEx>> branchDic)
@@ -25,7 +25,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 try
                 {
-                    if(i==69)
+                    if (i == 69)
                     {
                         ;
                     }
@@ -185,7 +185,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                                     GetBranchType1(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
                                 }
                             }
-
+                            var pttt = new Point3dEx(1439132.4, 683015.4,0);
                             if (fireHydrantSysIn.TermPointDic[branchDic[pt][0]].Type.Equals(2))//终点是类型2，其他区域
                             {
                                 GetBranchType2(pt, ref fireHydrantSysOut, stPt, branchDic[pt][0], ValveDic, fireHydrantSysIn);
@@ -203,7 +203,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         {
                             ;
                             var vpt = new Point3dEx();
-                            foreach (var tpt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
+                            foreach (var tpt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
                             {
                                 if (tpt._pt.DistanceTo(branchDic[pt][0]._pt) < 150)
                                 {
@@ -248,7 +248,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
                                 }
                             }
-                            
+
                         }
                     }
                     if (branchDic[pt].Count == 2)//两个支路
@@ -325,7 +325,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        
+
         /// <summary>
         /// 绘制向下的单分支
         /// </summary>
@@ -400,7 +400,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var textLine1 = ThTextSet.ThTextLine(pt5, pt6);
             var textLine2 = ThTextSet.ThTextLine(pt6, pt6.OffsetX(textWidth - 50));
             var p2Flag = false;
-            if(pipeNumber1 is null)
+            if (pipeNumber1 is null)
             {
                 ;
             }
@@ -431,7 +431,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     }
                 }
             }
-            
+
             var strDN = "DN100";
             if (fireHydrantSysIn.TermDnDic.ContainsKey(tpt))
             {
@@ -456,7 +456,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 pipeNumber1 = fireHydrantSysIn.TermPointDic[tpts[0]].PipeNumber;//立管标号 1
             }
-            if (pipeNumber1?.Equals("")==true)
+            if (pipeNumber1?.Equals("") == true)
             {
                 GetBranchType1(branchPt, ref fireHydrantSysOut, stpt, tpts[1], ValveDic, fireHydrantSysIn, true);
                 GetBranchType2(branchPt, ref fireHydrantSysOut, stpt, tpts[0], ValveDic, fireHydrantSysIn, 3);

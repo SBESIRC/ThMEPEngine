@@ -3,6 +3,7 @@ using System.Collections;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using NetTopologySuite.Geometries;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
@@ -60,10 +61,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <param name="points"></param>
         /// <param name="radius"></param>
         /// <param name="equipmentType"></param>
-        public static void RemovePoints(MPolygon mPolygon, Hashtable ht, List<Point3d> points, double radius, BlindType equipmentType)
+        public static void RemovePoints(MPolygon mPolygon, Hashtable ht, List<Point3d> points, double radius, BlindType equipmentType, ThCADCoreNTSSpatialIndex detectSpatialIdx ,Geometry EmptyDetect)
         {
             //计算过当前剩余总面积
-            double totalUncoverArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType).Area;
+            double totalUncoverArea = AreaCaculator.BlandArea(mPolygon, points, radius, equipmentType, detectSpatialIdx, EmptyDetect).Area;
 
             foreach (Point3d pt in points)
             {
@@ -79,7 +80,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                         }
                     }
                     //获取删除这个点后的得到的未覆盖区域
-                    NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, tmpPt, radius, equipmentType);
+                    NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mPolygon, tmpPt, radius, equipmentType, detectSpatialIdx, EmptyDetect);
 
                     bool flag = true;//默认删点,false不删点
                     foreach (Entity obj in unCoverRegion.ToDbCollection())

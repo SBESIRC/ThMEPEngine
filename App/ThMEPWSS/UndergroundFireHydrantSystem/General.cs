@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem
 {
@@ -22,6 +23,28 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             return GetMidPt(pt1, pt2);
         }
 
+        /// <summary>
+        /// 获取点为中心的包围框
+        /// </summary>
+        /// <param name="centerPt"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static Polyline GetRect(this Point3d centerPt, double tolerance = 100)
+        {
+            var pl = new Polyline();
+            var pts = new Point2dCollection();
+            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y - tolerance)); // low left
+            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y + tolerance)); // high left
+            pts.Add(new Point2d(centerPt.X + tolerance, centerPt.Y + tolerance)); // high right
+            pts.Add(new Point2d(centerPt.X + tolerance, centerPt.Y - tolerance)); // low right
+            pts.Add(new Point2d(centerPt.X - tolerance, centerPt.Y - tolerance)); // low left
+
+            pl.CreatePolyline(pts);
+
+            return pl;
+        }
+
+        
 
         public static double GetLinesDist(this Line l1, Line l2)
         {

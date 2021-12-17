@@ -28,7 +28,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
     class ThAFASDisplayDeviceLayoutCmd : ThMEPBaseCommand, IDisposable
     {
         private bool UseUI { get; set; }
-        private BuildingType _buildingType = FireAlarmFixLayout.Data.BuildingType.None;
+        private BuildingType _buildingType = BuildingType.None;
         private string layoutBlkName = ThFaCommon.BlkName_Display_District;
         private double _scale = 100;
 
@@ -40,8 +40,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void InitialCmdInfo()
         {
-            CommandName = "ThFireAlarmDisplayDeviceLayout";
             ActionName = "布置";
+            CommandName = "THFADISPLAY";
         }
         private void InitialSetting()
         {

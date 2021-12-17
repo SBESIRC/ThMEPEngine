@@ -56,9 +56,15 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             CreatRandomSeed();
             //RegionalIntegration();
             RegionalOptimization();
+            EliminateDents();
             MergeUnchangeableArea();
             EliminateDents();
+            MergeAdjacentRegion();
+            DeleteSmallnSpace();
+            EliminateDents();
             MergeChangeArea();
+            MergeNotAdjacentRegion();
+            EliminateNotAdjacentDents();
         }
 
         /// <summary>
@@ -111,7 +117,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         /// </summary>
         private void RegionalOptimization()
         {
-            for (int i = 0; i < Aggregatespace.Count; i++)
+            var oldAggregatespaceCount = Aggregatespace.Count;
+            for (int i = 0; i < oldAggregatespaceCount; i++)
             {
                 var list = Aggregatespace[i];
                 bool Signal = true;
@@ -139,7 +146,26 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                         Signal = false;
                     }
                 }
-                Aggregatespace[i] = list;
+
+                //Aggregatespace[i] = list;
+
+                var newSpace = new List<List<ThBeamTopologyNode>>();
+                var seed = list.FirstOrDefault();
+                while (!seed.IsNull())
+                {
+                    var region = RegionGrowSmall(list, seed);
+                    newSpace.Add(region);
+                    seed = list.FirstOrDefault();
+                }
+                if (newSpace.Count>0)
+                {
+                    Aggregatespace[i] = newSpace[0];
+                    Aggregatespace.AddRange(newSpace.Skip(1));
+                }
+                else
+                {
+                    Aggregatespace[i] = new List<ThBeamTopologyNode>();
+                }
             }
             Aggregatespace.RemoveAll(o => o.Count == 0);
         }
@@ -161,7 +187,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             }
             foreach (var space in UnchangeableSpaces)
             {
-                var Adjacentspace = Aggregatespace.Where(o => space.Any(x => x.Neighbor.Any(neighbor => o.Contains(neighbor.Item2) && x.CheckCurrentPixel(neighbor.Item2)))).ToList();
+                //var Adjacentspace = Aggregatespace.Where(o => space.Any(x =>o.First().CheckCurrentPixel(space.First()) && x.Neighbor.Any(neighbor => o.Contains(neighbor.Item2)))).ToList();
+                var Adjacentspace = Aggregatespace.Where(o => o.First().CheckCurrentPixel(space.First())).Where(o => space.Any(x => x.Neighbor.Any(neighbor => o.Contains(neighbor.Item2)))).ToList();
                 var list = space.ToArray().ToList();
                 foreach (var adjacent in Adjacentspace)
                 {
@@ -188,12 +215,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                     var space = Aggregatespace[i];
                     var UnionPolygon = space.UnionPolygon();
                     var ConvexPolyline = UnionPolygon.ConvexHullPL();
-                    var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
-                    var objs = spatialIndex.SelectFence(polyline);
+                    var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
+                    var objs = spatialIndex.SelectCrossingPolygon(polyline);
                     foreach (Polyline obj in objs)
                     {
                         var node = nodeDic[obj];
-                        if(this.Nodes.Contains(node))
+                        if (this.Nodes.Contains(node) && node.Neighbor.Any(o=> space.Contains(o.Item2)))
                         {
                             var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
                             var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
@@ -201,12 +228,9 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                             {
                                 if (!node.CheckCurrentPixel(space.First()))
                                     node.SwapLayout();
-                                if (node.CheckCurrentPixel(space.First()))
-                                {
-                                    this.Nodes.Remove(node);
-                                    space.Add(node);
-                                    Signal = true;
-                                }
+                                this.Nodes.Remove(node);
+                                space.Add(node);
+                                Signal = true;
                             }
                         }
                     }
@@ -214,18 +238,181 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
                 }
             }
         }
+        
+        /// <summary>
+        /// 消除离散区域凹包
+        /// </summary>
+        private void EliminateNotAdjacentDents()
+        {
+            var nodeDic = Nodes.ToDictionary(o => o.Boundary, o => o);
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(nodeDic.Keys.ToCollection());
+            bool Signal = true;
+            while (Signal)
+            {
+                Signal = false;
+                for (int i = 0; i < Aggregatespace.Count; i++)
+                {
+                    var space = Aggregatespace[i];
+                    var UnionPolygon = space.UnionPolygon();
+                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
+                    var objs = spatialIndex.SelectCrossingPolygon(polyline);
+                    foreach (Polyline obj in objs)
+                    {
+                        var node = nodeDic[obj];
+                        if (this.Nodes.Contains(node) && node.Neighbor.Any(o => space.Contains(o.Item2)))
+                        {
+                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                            {
+                                if (!node.CheckCurrentPixel(space.First()))
+                                    node.SwapLayout();
+                                this.Nodes.Remove(node);
+                                space.Add(node);
+                                Signal = true;
+                            }
+                        }
+                    }
+                    Aggregatespace[i] = space;
+                }
+            }
+            for (int i = 0; i < Adjustmentspace.Count; i++)
+            {
+                while (Signal)
+                {
+                    Signal = false;
+                    var space = Adjustmentspace[i];
+                    var UnionPolygon = space.UnionPolygon();
+                    var ConvexPolyline = UnionPolygon.ConvexHullPL();
+                    var polyline = ConvexPolyline.Buffer(-10)[0] as Polyline;
+                    var objs = spatialIndex.SelectCrossingPolygon(polyline);
+                    foreach (Polyline obj in objs)
+                    {
+                        var node = nodeDic[obj];
+                        if (Nodes.Contains(node) && node.Neighbor.Any(o => space.Contains(o.Item2)))
+                        {
+                            var NewUnionPolygon = node.UnionPolygon(UnionPolygon);
+                            var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                            if (NewUnionPolygon.Area / NewConvexPolyline.Area > UnionPolygon.Area / ConvexPolyline.Area)
+                            {
+                                Nodes.Remove(node);
+                                space.Add(node);
+                                Signal = true;
+                            }
+                        }
+                    }
+                    Adjustmentspace[i] = space;
+                }
+            }
+        }
 
         /// <summary>
-        /// 合并可以更改版本
+        /// 合并临近区域
+        /// </summary>
+        private void MergeAdjacentRegion()
+        {
+            var deleteNodes = new List<ThBeamTopologyNode>();
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                var node = Nodes[i];
+                var neighbor = node.Neighbor;
+                //if (node.LayoutLines.edges.Count > 0)
+                //{
+                //    neighbor =node.Neighbor.Where(o => node.LayoutLines.edges.Select(x => x.BeamSide).Contains(o.Item1)).ToList();
+                //}
+                //var needNeighbor = neighbor.Select(o => o.Item2).Where(o =>o.LayoutLines.edges.Count>0 && !Nodes.Contains(o));
+                var needNeighbor = neighbor.Select(o => o.Item2).Where(o => !Nodes.Contains(o)).ToList();
+                var needNeighborspace = needNeighbor.Select(o => Aggregatespace.FirstOrDefault(x => x.Contains(o))).Where(o => !o.IsNull()).Distinct().ToList();
+                List<ThBeamTopologyNode> needNeighborspace1, needNeighborspace2;
+                if (needNeighborspace.Count == 2)
+                {
+                    needNeighborspace1 = needNeighborspace[0];
+                    needNeighborspace2 = needNeighborspace[1];
+                }
+                else if (needNeighborspace.Count == 3)
+                {
+                    if (needNeighborspace[0].First().CheckCurrentPixel(needNeighborspace[1].First()))
+                    {
+                        needNeighborspace1 = needNeighborspace[0];
+                        needNeighborspace2 = needNeighborspace[1];
+                    }
+                    else if (needNeighborspace[0].First().CheckCurrentPixel(needNeighborspace[2].First()))
+                    {
+                        needNeighborspace1 = needNeighborspace[0];
+                        needNeighborspace2 = needNeighborspace[2];
+                    }
+                    else
+                    {
+                        needNeighborspace1 = needNeighborspace[1];
+                        needNeighborspace2 = needNeighborspace[2];
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+                if (needNeighborspace1.First().CheckCurrentPixel(needNeighborspace2.First()) && (node.LayoutLines.edges.Count == 0 || needNeighborspace1.First().CheckCurrentPixel(node)))
+                {
+                    deleteNodes.Add(node);
+                    Aggregatespace.Remove(needNeighborspace1);
+                    Aggregatespace.Remove(needNeighborspace2);
+                    var newSpace = needNeighborspace1.Union(needNeighborspace2).ToList();
+                    newSpace.Add(node);
+                    Aggregatespace.Add(newSpace);
+                }
+            }
+            deleteNodes.ForEach(x => Nodes.Remove(x));
+        }
+
+        /// <summary>
+        /// 合并临近区域
+        /// </summary>
+        private void MergeNotAdjacentRegion()
+        {
+            var deleteNodes = new List<ThBeamTopologyNode>();
+            for (int i = 0; i < Nodes.Count; i++)
+            {
+                var node = Nodes[i];
+                if(node.Edges[0].BeamType == BeamType.Scrap)
+                {
+                    continue;
+                }
+                var neighbor = node.Neighbor;
+                var needNeighbor = neighbor.Select(o => o.Item2).Where(o =>!Nodes.Contains(o)).ToList();
+                var needNeighborspace = needNeighbor.Select(o => Adjustmentspace.FirstOrDefault(x => x.Contains(o))).Where(o => !o.IsNull()).Distinct().ToList();
+                if(needNeighborspace.Count > 1)
+                {
+                    deleteNodes.Add(node);
+                    Adjustmentspace = Adjustmentspace.Except(needNeighborspace).ToList();
+                    var newSpace = needNeighborspace.SelectMany(o => o).ToList();
+                    newSpace.Add(node);
+                    Adjustmentspace.Add(newSpace);
+                }
+            }
+            deleteNodes.ForEach(x => Nodes.Remove(x));
+        }
+
+        private void DeleteSmallnSpace()
+        {
+            var smallSpace = Aggregatespace.Where(o => o.Count == 1);
+            Nodes.AddRange(smallSpace.SelectMany(o => o));
+            Aggregatespace = Aggregatespace.Except(smallSpace).ToList();
+        }
+
+        /// <summary>
+        /// 合并离散点
         /// </summary>
         private void MergeChangeArea()
         {
-            var seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+            var LayoutNodes = Nodes.Where(o => o.LayoutLines.edges.Count > 0).ToList();
+            Nodes = Nodes.Where(o => o.LayoutLines.edges.Count == 0).ToList();
+            var seed = LayoutNodes.FirstOrDefault();
             while (!seed.IsNull())
             {
-                var region = RegionGrowSmall(this.Nodes, seed, true);
+                var region = RegionGrowSmall(LayoutNodes, seed, true);
                 Adjustmentspace.Add(region);
-                seed = Nodes.FirstOrDefault(o => o.LayoutLines.edges.Count>0);
+                seed = LayoutNodes.FirstOrDefault();
             }
         }
 
@@ -274,6 +461,4 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             return result;
         }
     }
-
-    
 }

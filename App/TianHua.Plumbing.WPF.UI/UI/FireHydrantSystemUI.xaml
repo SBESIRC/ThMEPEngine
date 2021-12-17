@@ -1,0 +1,56 @@
+﻿<cus:ThCustomWindow x:Class="ThMEPWSS.UndergroundFireHydrantSystem.UI.FireHydrantSystemUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:cvt="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
+             Title="消火栓编号"
+             SizeToContent="Height"
+             Width="150"
+             mc:Ignorable="d" ResizeMode="NoResize">
+    <Window.Resources>
+        <cvt:RadioUiValueConverter x:Key="RadioUiValueConverter" ></cvt:RadioUiValueConverter>
+        <cvt:VisibilityHiddenConverter x:Key="VisibilityConverter"></cvt:VisibilityHiddenConverter>
+    </Window.Resources>
+    <StackPanel Margin="5">
+        <DockPanel Margin="0,0,0,5">
+            <Label>出图比例：</Label>
+            <ComboBox x:Name="cbxRatio" SelectedItem="{Binding CurrentDwgRatio,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+        </DockPanel>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition></RowDefinition>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" x:Name="btnLabelRing" Click="btnLabelRing_Click" Height="24" Width="60">标记环管</Button>
+            <Button Grid.Column="1" x:Name="btnLabelNode" Click="btnLabelNode_Click" Height="24" Width="60">标记节点</Button>
+        </Grid>
+        <Rectangle Margin="5,5,5,0" Stroke="#AAAAAA" Height="1" StrokeThickness="1" SnapsToDevicePixels="True"/>
+        <StackPanel Orientation="Vertical">
+            <Label>编号方式</Label>
+            <RadioButton Margin="0,0,0,5" IsChecked="{Binding NumberingMethod, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=Whole}">整个环路连续编号</RadioButton>
+            <RadioButton IsChecked="{Binding NumberingMethod, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=Single}">每条环路独立编号</RadioButton>
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            <Label>处理对象</Label>
+            <RadioButton Margin="0,0,0,5" IsChecked="{Binding ProcessingObject, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=Whole}">整个消火栓环路</RadioButton>
+            <RadioButton Margin="0,0,0,5" IsChecked="{Binding ProcessingObject, Converter={StaticResource RadioUiValueConverter}, ConverterParameter=Single}">单条主(次)环路</RadioButton>
+        </StackPanel>
+        <DockPanel>
+            <Label>编号前缀：</Label>
+            <TextBox x:Name="tbxPrefix" Margin="0,2,0,2" Text="{Binding Prefix}"></TextBox>
+        </DockPanel>
+        <DockPanel>
+            <Label>起始序号：</Label>
+            <TextBox x:Name="tbxStartNum" Margin="0,2,0,2" Text="{Binding StartNum}"></TextBox>
+        </DockPanel>
+        <StackPanel>
+            <Button Margin="0,5,5,0" HorizontalAlignment="Right" Width="50" Height="24" x:Name="btnGenerate" Click="btnGenerate_Click">生成</Button>
+        </StackPanel>
+    </StackPanel>
+
+</cus:ThCustomWindow>

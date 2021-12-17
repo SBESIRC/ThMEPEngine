@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{43DFB17A-A94F-4994-B788-8269BBE99C3C}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{88B05B32-9CB2-40F7-A5FC-9F86464514BE}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
     <!--Assembly App, Telemetry, 2014 version-->
@@ -336,28 +336,31 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THSCZL" Global="THSCZL" />
-                <Command Local="THSCCL" Global="THSCCL" />
+                <Command Local="THZLSC" Global="THZLSC" />
+                <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPHVAC, 2016 version-->
+    <!--Assembly App, ThMEPStructure, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THSCZL" Global="THSCZL" />
-                <Command Local="THSCCL" Global="THSCCL" />
+                <Command Local="THZLSC" Global="THZLSC" />
+                <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPHVAC, 2018 version-->
+    <!--Assembly App, ThMEPStructure, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPStructure.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Structure" AppName="ThMEPStructure" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THSCZL" Global="THSCZL" />
-                <Command Local="THSCCL" Global="THSCCL" />
+                <Command Local="THZLSC" Global="THZLSC" />
+                <Command Local="THCLSC" Global="THCLSC" />
+                <Command Local="THSXSC" Global="THSXSC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -455,6 +458,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
@@ -481,6 +485,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
@@ -507,6 +512,7 @@
                 <Command Local="THJSZC" Global="THJSZC" />
                 <Command Local="THPTJH" Global="THPTJH" />
                 <Command Local="THFJKX" Global="THFJKX" />
+                <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THSprinkConn1" Global="THSprinkConn1" />
             </Commands>
         </ComponentEntry>
@@ -516,6 +522,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THSPM" Global="THSPM" />
                 <Command Local="THFPM" Global="THFPM" />
                 <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
@@ -531,6 +538,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THSPM" Global="THSPM" />
                 <Command Local="THFPM" Global="THFPM" />
                 <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />
@@ -546,6 +554,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THSPM" Global="THSPM" />
                 <Command Local="THFPM" Global="THFPM" />
                 <Command Local="THXFJ" Global="THXFJ" />
                 <Command Local="THDKFPMFG" Global="THDKFPMFG" />

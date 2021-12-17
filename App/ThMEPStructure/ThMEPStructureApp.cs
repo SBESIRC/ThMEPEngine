@@ -1,6 +1,14 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using System.Linq;
+using AcHelper;
+using Linq2Acad;
+using ThCADCore.NTS;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Command;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Command;
 
 namespace ThMEPStructure
 {
@@ -19,7 +27,7 @@ namespace ThMEPStructure
         /// <summary>
         /// 生成主梁
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSCZL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THZLSC", CommandFlags.Modal)]
         public void THZLSC()
         {
             using (var cmd = new ThBeamConnectorCommand())
@@ -31,10 +39,22 @@ namespace ThMEPStructure
         /// <summary>
         /// 生成次梁
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSCCL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THCLSC", CommandFlags.Modal)]
         public void THCLSC()
         {
             using (var cmd = new SecondaryBeamConnectCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        /// <summary>
+        /// 生成双线
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THSXSC", CommandFlags.Modal)]
+        public void THSXSC()
+        {
+            using (var cmd = new ThDoubleBeamLineCommand())
             {
                 cmd.Execute();
             }

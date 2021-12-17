@@ -213,7 +213,7 @@ namespace ThMEPEngineCore
                     }
                     else if (result3.StringResult == "全部")
                     {
-                        var shearwallBuilder = new ThShearwallBuilderEngine();
+                        var shearwallBuilder = new ThShearWallBuilderEngine();
                         shearwallBuilder.Build(acadDatabase.Database, frame.Vertices());
                         shearwallBuilder.Elements
                             .Select(o => o.Outline)
@@ -266,17 +266,23 @@ namespace ThMEPEngineCore
         public void ThExtractBeam()
         {
             using (var acadDatabase = AcadDatabase.Active())
-            using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                try
+                {
+                    pc.Collect();
+                }
+                catch
                 {
                     return;
                 }
-
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                beamEngine.Recognize(Active.Database, frame.Vertices());
-                beamEngine.Elements.ForEach(o =>
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+                var beamBuilder = new ThBeamBuilderEngine();
+                beamBuilder.Build(acadDatabase.Database, frame.Vertices());
+                beamBuilder.Elements.ForEach(o =>
                 {
                     var curve = o.Outline as Curve;
                     acadDatabase.ModelSpace.Add(curve.WashClone());

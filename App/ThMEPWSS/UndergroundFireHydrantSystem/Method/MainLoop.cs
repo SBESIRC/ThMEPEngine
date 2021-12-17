@@ -8,7 +8,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 {
-    class MainLoop
+    public class MainLoop
     {
         public static List<List<Point3dEx>> Get(ref FireHydrantSystemIn fireHydrantSysIn)
         {
@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
             visited.Add(fireHydrantSysIn.StartEndPts[0]);
             tempPath.Add(fireHydrantSysIn.StartEndPts[0]);
             //主环路深度搜索
-            DepthFirstSearch.dfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited, 
+            DepthFirstSearch.dfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited,
                 ref mainPathList, fireHydrantSysIn, ref extraNodes);
             ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
             return mainPathList;

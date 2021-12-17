@@ -11,19 +11,28 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
     internal class ThCrossLinkCalculator
     {
         /// <summary>
+        /// 图的边
+        /// 来源于双排布置
+        /// Edges中的线和CenterSideDicts没有对应关系关系，
+        /// </summary>
+        protected List<ThLightEdge> Edges { get; set; } = new List<ThLightEdge>();
+        /// <summary>
         /// 车道中心和1号线的Binding
         /// CenterSideDicts.Key 和CenterGroupLines.Dictionary.Key有映射关系
         /// 它们来源于双排布置返回的结果
         /// </summary>
-        protected Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; }
+        protected Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; } //Key->灯线中心线,Value->车道中心线按Buffer之后长生的线
         /// <summary>
         /// 某个区域灯线按连通性分组的结果
         /// </summary>
         private List<Tuple<Point3d, Dictionary<Line, Vector3d>>> CenterGroupLines { get; set; }
-        public ThCrossLinkCalculator(
+        protected ThQueryLineService EdgeQuery { get; set; }
+        public ThCrossLinkCalculator(List<ThLightEdge> edges,
             Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts)
         {
-            CenterSideDicts = centerSideDicts;
+            Edges = edges;
+            CenterSideDicts = centerSideDicts; 
+            EdgeQuery = ThQueryLineService.Create(Edges.Select(o => o.Edge).ToList());
         }
         public ThCrossLinkCalculator(
             Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts,
@@ -74,11 +83,139 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return results.Where(o=>o.Count>0).ToList();
         }
+
+        public List<List<Line>> LinkCableTrayTType()
+        {
+            var results = new List<List<Line>>();
+            var threeways = GetThreeWays();
+            threeways.ForEach(o =>
+            {
+                var pairs = GetLinePairs(o);
+                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1, k.Item2)).First();
+                if (IsMainBranch(mainPair.Item1, mainPair.Item2))
+                {
+                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
+                    results.Add(LinkTType(mainPair.Item1, mainPair.Item2, branch));
+                }
+            });
+            return results.Where(o => o.Count > 0).ToList();
+        }
+
+        private List<Point3d> GetCornerPts(Line adjacentA, Line adjacentB,List<Line> sides)
+        {
+            var area = CreateParallelogram(adjacentA, adjacentB);
+            var groupSides = GroupSides(area, sides); // 分组
+            var lineRoadService = new ThLineRoadQueryService(groupSides);
+            return lineRoadService.GetCornerPoints();
+        }
+
+        protected Line FindBranch(List<Line> threeways, Line first, Line second)
+        {
+            int firstIndex = threeways.IndexOf(first);
+            int secondIndex = threeways.IndexOf(second);
+            for (int i = 0; i < threeways.Count; i++)
+            {
+                if (i != firstIndex && i != secondIndex)
+                {
+                    return threeways[i];
+                }
+            }
+            return null;
+        }
+
+        protected bool IsMainBranch(Line first, Line second)
+        {
+            return ThGarageUtils.IsLessThan45Degree(
+                first.StartPoint, first.EndPoint,
+                second.StartPoint, second.EndPoint);
+        }
         protected List<List<Line>> GetCrosses()
         {
             var centerSidesQuery = new ThLineRoadQueryService(CenterSideDicts.Select(o => o.Key).ToList());
             return centerSidesQuery.GetCross();
         }
+        protected List<List<Line>> GetThreeWays()
+        {
+            var centerSidesQuery = new ThLineRoadQueryService(CenterSideDicts.Select(o => o.Key).ToList());
+            return centerSidesQuery.GetThreeWay();
+        }
+
+        private List<Line> LinkTType(Line mainLine1, Line mainLine2, Line branch)
+        {
+            var results = new List<Line>();
+            var line1CornerPt = GetCornerPt(mainLine1, branch);
+            var line2CornerPt = GetCornerPt(mainLine2, branch);
+            if(line1CornerPt.HasValue && line2CornerPt.HasValue)
+            {
+                var mainLine1EdgeVec = Query(mainLine1);
+                var maineLine2EdgeVec = Query(mainLine2);
+                var cornerLinkVec = line1CornerPt.Value.GetVectorTo(line2CornerPt.Value);
+                if (mainLine1EdgeVec.HasValue && maineLine2EdgeVec.HasValue)
+                {
+                    if (mainLine1EdgeVec.Value.IsSameDirection(maineLine2EdgeVec.Value))
+                    {
+                        if(cornerLinkVec.IsSameDirection(mainLine1EdgeVec.Value))
+                        {
+                            var projectionpt = GetCornerProjectionPt(mainLine1, line1CornerPt.Value);
+                            if(projectionpt.HasValue)
+                            {
+                                results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
+                                results.Add(new Line(line1CornerPt.Value, projectionpt.Value));
+                            }
+                        }
+                        else
+                        {
+                            var projectionpt = GetCornerProjectionPt(mainLine2, line2CornerPt.Value);
+                            if (projectionpt.HasValue)
+                            {
+                                results.Add(new Line(line1CornerPt.Value, line2CornerPt.Value));
+                                results.Add(new Line(line2CornerPt.Value, projectionpt.Value));
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    //TODO
+                }
+            }
+            return results;
+        }
+
+        private Point3d? GetCornerProjectionPt(Line mainLine,Point3d cornerPt)
+        {
+            var sideLines = GetCenterSides(new List<Line> { mainLine});
+            sideLines = sideLines.Where(o => o.IsParallelToEx(mainLine)).ToList();
+            if(sideLines.Count>0)
+            {
+                return sideLines
+                .Select(o => cornerPt.GetProjectPtOnLine(o.StartPoint, o.EndPoint))
+                .OrderByDescending(o => cornerPt.DistanceTo(o)).First();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private Point3d? GetCornerPt(Line adjacentA, Line adjacentB)
+        {
+            var sides = GetCenterSides(new List<Line> { adjacentA, adjacentB});
+            var cornerPts = GetCornerPts(adjacentA, adjacentB, sides);
+            var inters = ThGeometryTool.IntersectWithEx(adjacentA, adjacentB, Intersect.ExtendBoth);
+            if(inters.Count>0 && cornerPts.Count>0)
+            {
+                return cornerPts.OrderBy(o => o.DistanceTo(inters[0])).First();
+            }
+            return null;
+        }
+
+        protected double GetLineOuterAngle(Line first, Line second)
+        {
+            return ThGarageUtils.CalculateTwoLineOuterAngle(
+                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint);
+        }
+
         private List<Line> Link(List<Line> crosses,List<Point3d> pts)
         {
             var results = new List<Line>();
@@ -94,14 +231,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     if(mainBranch!=null)
                     {
                         var frame = CreatePolyline(pts);
-                        return DrawLines(mainBranch, frame);
+                        return DrawCrossLinkLines(mainBranch, frame);
                     }
                 }
             }
             return results;
         }
 
-        private List<Line> DrawLines(Tuple<Line, Vector3d, Line, Vector3d> mainBranch,Polyline frame)
+        private List<Line> DrawCrossLinkLines(Tuple<Line, Vector3d, Line, Vector3d> mainBranch,Polyline frame)
         {
             var results = new List<Line>();
             var firstIntersPt = mainBranch.Item1.IntersectWithEx(frame);
@@ -283,6 +420,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return sides
                 .Where(e => partition.IsContains(e.StartPoint) || partition.IsContains(e.EndPoint))
                 .ToList();
+        }
+        protected List<Tuple<Line, Line>> GetLinePairs(List<Line> lines)
+        {
+            var results = new List<Tuple<Line, Line>>();
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    results.Add(Tuple.Create(lines[i], lines[j]));
+                }
+            }
+            return results;
         }
     }
 }

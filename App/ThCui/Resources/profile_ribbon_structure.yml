@@ -65,7 +65,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "消火栓"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWUNDERGROUNDPLAN"
     name: "WUNDERGROUNDPLAN"
     title: "地下平面图"
@@ -76,7 +76,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "消火栓连管"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWUNDERGROUNDSYSTEM"
     name: "WUNDERGROUNDSYSTEM"
     title: "地下系统图"
@@ -105,14 +105,14 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "给水\r\n轴测"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWVALIDATION"
     name: "WVALIDATION"
     title: "校核"
     items:
         - text: "消火栓\r\n灭火器"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACCALCULATION"
     name: "HVACCALCULATION"
     title: "计算"
@@ -130,7 +130,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "小风机"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACPLAN"
     name: "HVACPLAN"
     title: "平面图"
@@ -145,7 +145,7 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "风管留洞"
             attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEGENERAL"
     name: "EGENERAL"
     title: "电气通用"
@@ -181,7 +181,7 @@ panels:
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "广播盲区显示"
             attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELIGHTING"
     name: "ELIGHTING"
     title: "照明系统"
@@ -196,7 +196,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "地库应急\r\n照明连线"
           attributes: { "IsVisible": true, "IsEnabled": true }
-    attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELECTRONIC"
     name: "ELECTRONIC"
     title: "弱电系统"
@@ -209,5 +209,16 @@ panels:
     title: "机电提资"
     items:
         - text: "风机基础"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }
+  - UID: "pnlSBEAM"
+    name: "SBEAM"
+    title: "梁"
+    items:
+        - text: "主梁生成"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "次梁生成"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "双线生成"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }

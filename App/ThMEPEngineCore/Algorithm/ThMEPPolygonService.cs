@@ -37,6 +37,14 @@ namespace ThMEPEngineCore.Algorithm
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                if (polygon is Polyline polyline && polyline.Area < 1.0)
+                {
+                    return new List<Line>();
+                }
+                if (polygon is MPolygon mPolygon && mPolygon.Area < 1.0)
+                {
+                    return new List<Line>();
+                }
                 var engine = new ThPolygonCenterLineMgd();
                 var serializer = GeoJsonSerializer.Create();
                 var geos = new List<ThGeometry>();

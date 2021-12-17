@@ -10,6 +10,7 @@ using ThMEPEngineCore.Command;
 using GeometryExtensions;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.Command
 {
@@ -48,14 +49,14 @@ namespace ThMEPWSS.Command
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-        public void CreateFireHydrantSystem(AcadDatabase curDb)
+        public Point3dCollection CreateFireHydrantSystem(AcadDatabase curDb, bool hasExtraSelection = false)
         {
             Autodesk.AutoCAD.Geometry.Point3d loopStartPt;
             {
-                var opt = Active.Editor.GetPoint("请指定环管标记起点:");
+                var opt = Active.Editor.GetPoint("\n请指定环管标记起点");
                 if (opt.Status != PromptStatus.OK)
                 {
-                    return;
+                    return null;
                 }
                 var propPtRes = opt.Value;
                 
@@ -65,26 +66,32 @@ namespace ThMEPWSS.Command
             var selectArea = Common.Utils.SelectAreas();//生成候选区域
             if (selectArea.Count == 0)
             {
-                return;
+                return null;
             }
 
             var fireHydrantSysIn = new FireHydrantSystemIn(_UiConfigs.SetViewModel.FloorLineSpace);//输入参数
             var fireHydrantSysOut = new FireHydrantSystemOut();//输出参数
             {
-                var opt = Active.Editor.GetPoint("指定消火栓系统图插入点:");
+                var opt = Active.Editor.GetPoint("\n指定消火栓系统图插入点");
 
                 if (opt.Status != PromptStatus.OK)
                 {
-                    return;
+                    return null;
                 }
                 fireHydrantSysOut.InsertPoint = opt.Value.TransformBy(Active.Editor.UCS2WCS());
+            }
+            if (hasExtraSelection)
+            {
+                Point3dCollection exArea = Common.Utils.SelectAreas();
+                if (exArea.Count == 0) return null;
+                return exArea;
             }
             GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
 
             var mainPathList = MainLoop.Get(ref fireHydrantSysIn);//主环提取
             if (mainPathList.Count == 0)
             {
-                return;
+                return null;
             }
             //for (int i = 0; i < mainPathList[0].Count - 1; i++)
             //{
@@ -101,10 +108,17 @@ namespace ThMEPWSS.Command
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, mainPathList, fireHydrantSysIn, visited);
             PtDic.CreateBranchDic(ref branchDic, ref ValveDic, subPathList, fireHydrantSysIn, visited);
 
+            var checkPipe = new CheckPipe(mainPathList, subPathList);
+            checkPipe.DrawMainLoop(curDb);
+            checkPipe.DrawSubLoop(curDb);
+            checkPipe.DrawBranchLoop(curDb, fireHydrantSysIn, branchDic);
+
             GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, mainPathList[0], fireHydrantSysIn, branchDic);//主环路获取
             GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, subPathList, fireHydrantSysIn, branchDic);//次环路获取
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
             fireHydrantSysOut.Draw();//绘制系统图
+
+            return null;
         }
     }
 }

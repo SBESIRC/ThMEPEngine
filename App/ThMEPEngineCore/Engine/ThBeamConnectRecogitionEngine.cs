@@ -2,13 +2,13 @@
 using NFox.Cad;
 using System.Linq;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Engine
         public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
         public ThMEPOriginTransformer OriginTransformer { get; private set; }
         public ThColumnRecognitionEngine ColumnEngine { get; private set; } 
-        public ThDB3BeamRecognitionEngine BeamEngine { get; private set; }
+        public ThBeamBuilderEngine BeamEngine { get; private set; }
         public ThShearWallRecognitionEngine ShearWallEngine { get; private set; } 
 
         private ThBeamLinkExtension BeamLinkExtension = new ThBeamLinkExtension();
@@ -53,6 +53,7 @@ namespace ThMEPEngineCore.Engine
         }
         private void CreateEngines(Database database, Point3dCollection pts)
         {
+            // 移动到近原点位置
             OriginTransformer = new ThMEPOriginTransformer(pts.Envelope().CenterPoint());
             var newPts = pts.OfType<Point3d>().Select(o => OriginTransformer.Transform(o)).ToCollection();
 
@@ -71,9 +72,16 @@ namespace ThMEPEngineCore.Engine
             ShearWallEngine.Recognize(extractor2.Results, newPts);
 
             // 启动梁识别引擎
-            BeamEngine = new ThDB3BeamRecognitionEngine();
-            BeamEngine.Recognize(database, pts);
-            BeamEngine.Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(OriginTransformer.Displacement));
+            BeamEngine = new ThBeamBuilderEngine();
+            var results = BeamEngine.Extract(database);
+            BeamEngine.Recognize(results, pts);
+            BeamEngine.Transform(OriginTransformer.Displacement);
+
+            // 为了支持这样的处理流程：
+            //  1. 所有数据一次性获取后移动到近原点位置
+            //  2. 对****近原点数据****进行处理
+            //  3. 对处理后生成的结果恢复到原点位置
+            // 所以返回近原点数据
         }
         private void Recognize()
         {

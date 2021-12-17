@@ -73,12 +73,27 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results.Where(o=>o.Length>1e-6).ToList();
         }
 
+        private List<Line> BuildTTypeLinks()
+        {
+            var results = new List<Line>();
+            if (CenterSideDicts.Count == 0 || CenterGroupLines.Count == 0)
+            {
+                return results;
+            }
+            var calulator = new ThCrossLinkCalculator(CenterSideDicts, CenterGroupLines);
+            var crossLinks = calulator.LinkCableTrayTType();
+            crossLinks.ForEach(o => results.AddRange(o));
+            return results.Where(o => o.Length > 1e-6).ToList();
+        }
+
         private ThCableTrayBuilder BuildCableTray()
         {
             var crossLines = BuildCrossLinks();
+            var tTypeLines = BuildTTypeLinks();
             var lines = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.IsDX).Select(o=>o.Edge).ToList();
             lines.AddRange(FdxLines);
             lines.AddRange(crossLines);
+            lines.AddRange(tTypeLines);
             lines.AddRange(SingleRowCableTrunking);
             var cableTrayEngine = new ThCableTrayBuilder(lines, ArrangeParameter.Width);
             cableTrayEngine.Build();

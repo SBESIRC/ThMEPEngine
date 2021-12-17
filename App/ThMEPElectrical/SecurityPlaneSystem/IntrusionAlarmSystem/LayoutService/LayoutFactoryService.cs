@@ -36,6 +36,11 @@ namespace ThMEPElectrical.SecurityPlaneSystem.IntrusionAlarmSystem
                 }
                 else if (connectRooms.Count == 1)
                 {
+                    Polyline minimumRectangle = (connectRooms.First().Boundary as Polyline).GetMinimumRectangle();
+                    if (minimumRectangle.Contains(door))
+                    {
+                        continue;
+                    }
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                     models.AddRange(DoLayout(layoutType, connectRooms[0], door, columns, walls));
                 }

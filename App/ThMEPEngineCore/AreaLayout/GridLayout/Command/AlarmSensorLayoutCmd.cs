@@ -17,7 +17,7 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout;
 
 namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
 {
-    public class AlarmSensorLayoutCmd : ThMEPBaseCommand
+    public class AlarmSensorLayoutCmd 
     {
         private BeamSensorOpt sensorOpt;
         private List<ObjectId> pointId_list { get; set; } = new List<ObjectId>();
@@ -40,7 +40,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
         //outputs
         public List<Point3d> layoutPoints { get; set; }//布置点位
         public List<Polyline> blinds { get; set; }//盲区
-        public override void SubExecute()
+        public void Execute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

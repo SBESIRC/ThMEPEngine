@@ -143,6 +143,45 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
+
+        public static DBObjectCollection ToLines(this DBObjectCollection objs,double arcTessellateLength)
+        {
+            var results = new DBObjectCollection();
+            objs.OfType<Entity>().ForEach(o =>
+            {
+                if (o is Line line)
+                {
+                    results.Add(line.Clone() as Line);
+                }
+                else if (o is Polyline polyline)
+                {
+                    polyline.ToLines(arcTessellateLength).ForEach(l => results.Add(l));
+                }
+                else if (o is MPolygon mPolygon)
+                {
+                    var shell = mPolygon.Shell();
+                    var holes = mPolygon.Holes();
+                    shell.ToLines(arcTessellateLength).ForEach(l => results.Add(l));
+                    holes.SelectMany(h => h.ToLines(arcTessellateLength)).ForEach(l => results.Add(l));
+                }
+                else if (o is Arc arc)
+                {
+                    var newPoly = arc.TessellateArcWithArc(arcTessellateLength);
+                    newPoly.ToLines().ForEach(l => results.Add(l));
+                }
+                else if(o is Circle circle)
+                {
+                    var newPoly = circle.TessellateCircleWithArc(arcTessellateLength);
+                    newPoly.ToLines().ForEach(l => results.Add(l));
+                }
+                else
+                {
+                    //ToDo
+                }
+            });
+            return results;
+        }
+
         public static List<Line> ExplodeLines(this Polyline polyline,double arcLength=5.0)
         {
             var results = new List<Line>();

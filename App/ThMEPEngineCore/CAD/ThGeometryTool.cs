@@ -69,6 +69,10 @@ namespace ThMEPEngineCore.CAD
         {
             return pt1 + pt1.GetVectorTo(pt2) * 0.5;
         }
+        public static Point3d GetExtentPoint(this Point3d pt,Vector3d direction,double length)
+        {
+            return pt+ direction.GetNormal().MultiplyBy(length);
+        }
         public static Point3d GetProjectPtOnLine(this Point3d outerPt, Point3d startPt, Point3d endPt)
         {
             Vector3d firstVec = startPt.GetVectorTo(endPt);

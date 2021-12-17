@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
@@ -15,38 +17,66 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
     /// </summary>
     public class BeamGameTreeAlgorithm
     {
+        private class BeamGameNation
+        {
+            public BeamGameNation()
+            {
+                Players = new List<BeamGamePlayer>();
+                Boundarys = new List<Polyline>();
+            }
+            public List<BeamGamePlayer> Players { get; set; }
+
+            public List<Polyline> Boundarys { get; set; }
+        }
+
+        private class BeamGamePlayer
+        {
+            public List<ThBeamTopologyNode> Nodes { get; set; }
+        }
+
+        private class Scoreboard
+        {
+            public Scoreboard()
+            {
+                Boundarys = new List<Polyline>();
+            }
+            public int[] board { get; set; }
+            public List<Polyline> Boundarys { get; set; }
+        }
+
         private int PlayerCount { get; set; }
         private double AverageArea { get; set; }
         private double AverageCount { get; set; }
+        private int Percentage { get; set; } = 15;
 
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public Dictionary<int[],int> CheckerboardCache { get; set; }
+        private Tuple<int[], int> CheckerboardCache { get; set; }
+
+        private List<BeamGameNation> Nations { get; set; }
         List<List<ThBeamTopologyNode>> Space { get; set; }
         List<ThBeamTopologyNode> Nodes { get; set; }
 
-        Dictionary<ThBeamTopologyNode,int > NodeCoordinate { get; set; }
-        Dictionary<int,Polyline> UnionPolygonDic { get; set; }
+        Dictionary<ThBeamTopologyNode, int> NodeCoordinate { get; set; }
+        Dictionary<int, Polyline> UnionPolygonDic { get; set; }
 
         private Random random = new Random();
 
-        public int[] ChessGameResult { 
-            get 
-            { 
-                return CheckerboardCache.Where(o => Array.IndexOf(o.Key, 0) < 0).OrderByDescending(o => o.Value).FirstOrDefault().Key; 
-            } 
-        }
+        //public int[] ChessGameResult {
+        //    get
+        //    {
+        //        return CheckerboardCache.Where(o => Array.IndexOf(o.Key, 0) < 0).OrderByDescending(o => o.Value).FirstOrDefault().Key;
+        //    }
+        //}
 
         public BeamGameTreeAlgorithm(List<List<ThBeamTopologyNode>> space, List<ThBeamTopologyNode> nodes)
         {
             Space = space;
             Nodes = nodes;
             PlayerCount=space.Count;
-            CheckerboardCache = new Dictionary<int[], int>();
+            Nations = new List<BeamGameNation>();
+            //CheckerboardCache = new Dictionary<int[], int>();
+            CheckerboardCache = new Tuple<int[], int>(null, 0);
             NodeCoordinate = new Dictionary<ThBeamTopologyNode, int>();
-            for (int i = 0; i < nodes.Count; i++)
-            {
-                NodeCoordinate.Add(nodes[i], i);
-            }
             UnionPolygonDic = new Dictionary<int, Polyline>();
             for (int i = 0; i < PlayerCount; i++)
             {
@@ -57,120 +87,265 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             AverageArea = AreaSum / space.Count;
             var CountSum = space.Sum(o => o.Count);
             AverageCount = CountSum / space.Count;
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(nodes.Select(o => o.Boundary).ToCollection());
+            var secondCount = 0;
+            if (space.Count > 1 && (secondCount = space.OrderBy(o => o.Count).ToList()[1].Count)< AverageCount / 2)
+            {
+                AverageCount = secondCount * 2;
+            }
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(this.Nodes.Select(o => o.Boundary).ToCollection());
         }
 
         public void Start()
         {
-            int[] CurrentBoard = new int[Nodes.Count];
-            var scoreCache = new int[PlayerCount,4]; // Row:PlayerCount Cell:4
-            PlayChess(CurrentBoard, scoreCache);
+            Pretreatment();
+            if (Nations.Count > 2)
+            {
+                Nations = Nations.Where(o => !Nations.All(x => x.Players[0].Nodes.First().CheckCurrentPixelVertical(o.Players[0].Nodes.First()))).ToList();
+            }
+
+            var Scoreboards = new List<Scoreboard>(){
+                new Scoreboard()
+                {
+                    board = new int[Nodes.Count]
+                }
+            };
+            for (int i = 0; i < Nations.Count - 1; i++)
+            {
+                int Round = i;
+                var boundarys = Nations[Round].Boundarys;
+                for (int j = 0; j < Scoreboards.Count; j++)
+                {
+                    Scoreboards[j].Boundarys.AddRange(boundarys);
+                }
+                Scoreboards = GameRound(Round, Scoreboards);
+            }
+            //DrawNationFirst(Scoreboards.Select(o=>o.board).ToList());
+            StatisticalScore(Scoreboards);
         }
 
-        private void PlayChess(int[] currentBoard, int[,] scoreCache)
+        private void DrawNationFirst(List<int[]> scoreboard)
         {
-            if (Array.IndexOf(currentBoard, 0) >= 0)
+            using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
             {
-                //有棋子还没有落子，游戏继续
-                for (int i = 0; i < PlayerCount; i++)
+                Vector3d Allvector = new Vector3d(0, 100000, 0);
+                Vector3d vector = new Vector3d(100000, 0, 0);
+                Matrix3d matrix = Matrix3d.Displacement(vector);
+                for (int i = 0; i < scoreboard.Count; i++)
                 {
-                    if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3])
+                    for (int j = 0; j < Nations[0].Players[0].Nodes.Count; j++)
                     {
-                        //连续三步都是'差'的操作，则剪枝，不再考虑后续的走动
-                        return;
+                        var polyline = Nations[0].Players[0].Nodes[j].Boundary.Clone() as Polyline;
+                        polyline.ColorIndex =90;
+                        polyline.TransformBy(matrix);
+                        acad.ModelSpace.Add(polyline);
                     }
-                    //if (scoreCache[i, 0] > scoreCache[i, 1] && scoreCache[i, 1] > scoreCache[i, 2] && scoreCache[i, 2] > scoreCache[i, 3] && scoreCache[i, 3] > scoreCache[i, 4])
-                    //{
-                    //    //连续四步都是'差'的操作，则剪枝，不再考虑后续的走动
-                    //    return;
-                    //}
-                }
-                for (int i = 0; i < PlayerCount; i++)
-                {
-                    var player = Space[i];
-                    if (player.Count >= AverageCount / 2)
+                    for (int j = 0; j<Nodes.Count; j++)
                     {
-                        var places = Nodes.Where(o => currentBoard[NodeCoordinate[o]] == 0 && o.Neighbor.Any(x => player.Contains(x.Item2) || (Nodes.Contains(x.Item2) && currentBoard[NodeCoordinate[x.Item2]] == i + 1)));
-                        foreach (var place in places)
+                        if (scoreboard[i][j] == 1)
                         {
-                            var NewcurrentBoard = new int[Nodes.Count];
-                            currentBoard.CopyTo(NewcurrentBoard, 0);
-                            NewcurrentBoard[NodeCoordinate[place]] = i + 1;
-                            if (CheckerboardCache.Keys.Any(o => o.SequenceEqual(NewcurrentBoard)))
-                            {
-                                //此棋盘已存在
-                                continue;
-                            }
-                            CheckerboardCache.Add(NewcurrentBoard, 0);
-
-                            var NewcurrentBoardClone = new int[Nodes.Count];
-                            NewcurrentBoard.CopyTo(NewcurrentBoardClone, 0);
-                            NewcurrentBoardClone = EliminateDents(i + 1, NewcurrentBoardClone);
-                            NewcurrentBoardClone = AdjustCurrentBoard(NewcurrentBoardClone);
-                            if (CheckerboardCache.Keys.Any(o => o.SequenceEqual(NewcurrentBoardClone)))
-                            {
-                                //此棋盘已存在
-                                continue;
-                            }
-                            var Fraction = Evaluation(NewcurrentBoardClone);
-                            CheckerboardCache.Add(NewcurrentBoardClone, Fraction);
-
-                            var NewScore = scoreCache.Clone() as int[,];
-                            NewScore[i, 0] = NewScore[i, 1];
-                            NewScore[i, 1] = NewScore[i, 2];
-                            NewScore[i, 2] = NewScore[i, 3];
-                            //NewScore[i, 3] = NewScore[i, 4];
-                            //NewScore[i, 4] = Fraction;
-                            NewScore[i, 3] = Fraction;
-                            PlayChess(NewcurrentBoardClone, NewScore);
+                            var polyline = Nodes[j].Boundary.Clone() as Polyline;
+                            polyline.ColorIndex =130;
+                            polyline.TransformBy(matrix);
+                            acad.ModelSpace.Add(polyline);
                         }
+                    }
+                    vector = vector + Allvector;
+                    matrix = Matrix3d.Displacement(vector);
+                }
+            }
+        }
+
+        public void Revise()
+        {
+            var Result = CheckerboardCache;
+            if (!Result.IsNull())
+            {
+                for (int i = 0; i < Result.Item1.Length; i++)
+                {
+                    var node = Nodes[i];
+                    if (!node.CheckCurrentPixel(Nations[Result.Item1[i] - 1].Players.First().Nodes.First()))
+                    {
+                        node.SwapLayout();
                     }
                 }
             }
             else
             {
-                // GAME OVER
+                //throw new NotImplementedException();
+            }
+        }
+
+        private List<Scoreboard> GameRound(int round, List<Scoreboard> scoreboards)
+        {
+            List<Scoreboard> NewScoreboards = new List<Scoreboard>();
+            var nation = Nations[round];
+            var LowScore = Evaluation(nation.Players) - Percentage - nation.Players.Count * 5;
+            if (scoreboards.Count > 10)
+            {
+                LowScore += 20;//为了使算法尽快的跳出来，所以拔高最低分数，
+            }
+            foreach (var scoreboard in scoreboards)
+            {
+                List<Scoreboard> refscoreboard = new List<Scoreboard>();
+                refscoreboard.Add(scoreboard);
+                PlayChess(scoreboard, LowScore, round + 1, ref refscoreboard);
+                NewScoreboards.AddRange(refscoreboard);
+            }
+            return NewScoreboards;
+        }
+
+        private void StatisticalScore(List<Scoreboard> currentBoards)
+        {
+            int LastNationIndex = Nations.Count;
+            currentBoards.ForEach(currentBoard =>
+            {
+                var score = Evaluation(currentBoard);
+                if(CheckerboardCache.Item2 < score)
+                {
+                    var newcurrentBoard = currentBoard.board.Select(o =>
+                    {
+                        if (o == 0)
+                        {
+                            return LastNationIndex;
+                        }
+                        else
+                            return o;
+                    }).ToArray();
+                    CheckerboardCache = new Tuple<int[], int>(newcurrentBoard, score);
+                }
+            });
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="currentBoard">当前棋局</param>
+        /// <param name="scoreCache"></param>
+        /// <param name="stage"></param>
+        /// <param name="permissionPlayer"></param>
+        /// <param name="scoreboard"></param>
+        private void PlayChess(Scoreboard currentBoard, int lowScore, int stage, ref List<Scoreboard> scoreboard)
+        {
+            if (scoreboard.Count <= 200 && Array.IndexOf(currentBoard.board, 0) >= 0)
+            {
+                List<BeamGamePlayer> permissionPlayer = Nations[stage - 1].Players;
+                if(permissionPlayer.Count == 1 && scoreboard.Count > 50)
+                {
+                    return;
+                }
+                var places = Nodes.Where(o => currentBoard.board[NodeCoordinate[o]] == 0 && o.Neighbor.Any(x => permissionPlayer.Any(y=>y.Nodes.Contains(x.Item2)) || (Nodes.Contains(x.Item2) && currentBoard.board[NodeCoordinate[x.Item2]] == stage))).ToList();
+                ThBeamTopologyNode place;
+                while (!(place = places.FirstOrDefault()).IsNull())
+                {
+                    var NewBoard = new int[Nodes.Count];
+                    currentBoard.board.CopyTo(NewBoard, 0);
+                    NewBoard[NodeCoordinate[place]] = stage;
+                    if (scoreboard.Any(o => o.board.SequenceEqual(NewBoard)))
+                    {
+                        //此棋盘已存在
+                        places.Remove(place);
+                        continue;
+                    }
+                    if (Array.IndexOf(NewBoard, 0) < 0)
+                    {
+                        //棋盘已被填充满
+                        places.Remove(place);
+                        continue;
+                    }
+                    //var NewcurrentBoard = EliminateDents(permissionPlayer, stage, NewBoard);
+                    NewBoard = EliminateDents(stage, NewBoard);
+
+                    if (scoreboard.Any(o => o.board.SequenceEqual(NewBoard)))
+                    {
+                        places.Remove(place);
+                        continue;
+                    }
+                    var nodeSet = new List<ThBeamTopologyNode>();
+                    for (int i = 0; i < NewBoard.Length; i++)
+                    {
+                        if (currentBoard.board[i] == 0 && NewBoard[i] ==stage)
+                        {
+                            nodeSet.Add(Nodes[i]);
+                        }
+                    }
+                    if (nodeSet.All(o => places.Contains(o)))
+                    {
+                        places = places.Except(nodeSet).ToList();
+                    }
+                    else
+                    {
+                        places.Remove(place);
+                    }
+
+                    var NewcurrentBoard = AdsorbDiscreteRegions(stage, NewBoard);
+                    if (Evaluation(NewcurrentBoard.board, stage) <= lowScore)
+                    {
+                        continue;
+                    }
+                    if (scoreboard.Any(o => o.board.SequenceEqual(NewcurrentBoard.board)))
+                    {
+                        continue;
+                    }
+                    scoreboard.Add(NewcurrentBoard);
+                    PlayChess(NewcurrentBoard, lowScore, stage, ref scoreboard);
+                }
+            }
+            else
+            {
+                return;
             }
         }
 
         /// <summary>
-        /// 调整棋盘
+        /// 游戏开始前的预处理操作
         /// </summary>
-        /// <param name="newcurrentBoard"></param>
-        /// <returns></returns>
         /// <exception cref="NotImplementedException"></exception>
-        private int[] AdjustCurrentBoard(int[] currentBoard)
+        private void Pretreatment()
         {
-            var newSpace = new List<List<ThBeamTopologyNode>>();
-            for (int i = 0; i < Space.Count; i++)
+            //为玩家分组
+            GroupingPlayer();
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(this.Nodes.Select(o => o.Boundary).ToCollection());
+            for (int i = 0; i < Nodes.Count; i++)
             {
-                var NewNodes = Space[i].ToArray().ToList();
-                for (int j = 0; j < currentBoard.Length; j++)
+                NodeCoordinate.Add(Nodes[i], i);
+            }
+        }
+
+        /// <summary>
+        /// 玩家分组
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        private void GroupingPlayer()
+        {
+            for (int i = 0; i < this.Space.Count; i++)
+            {
+                if (this.Space[i].Count == 1)
                 {
-                    if (currentBoard[j] == i + 1)
+                    //this.Nodes.Add(this.Space[i][0]);
+                }
+                else
+                {
+                    BeamGamePlayer player = new BeamGamePlayer();
+                    player.Nodes = this.Space[i];
+                    var nation = Nations.FirstOrDefault(o => o.Players.First().Nodes.First().CheckCurrentPixel(player.Nodes.First()));
+                    if (nation.IsNull())
                     {
-                        NewNodes.Add(Nodes[j]);
+                        nation = new BeamGameNation();
+                        nation.Players.Add(player);
+                        Nations.Add(nation);
+                    }
+                    else
+                    {
+                        nation.Players.Add(player);
                     }
                 }
-                newSpace.Add(NewNodes);
             }
-            for (int i = 0; i < newSpace.Count; i++)
+            //var deleteNodes = Nodes.Where(node => node.LayoutLines.edges.Count == 0 && node.Neighbor.Count(o => Nodes.Contains(o.Item2) && o.Item2.LayoutLines.edges.Count > 0) < 2);
+            for (int i = 0; i < Nations.Count; i++)
             {
-                for (int j = i + 1; j < newSpace.Count; j++)
-                {
-                    if (newSpace[i].IsNeighbor(newSpace[j], true))
-                    {
-                        for (int k = 0; k < currentBoard.Length; k++)
-                        {
-                            if (currentBoard[k] == j + 1)
-                            {
-                                currentBoard[k] = i + 1;
-                            }
-                        }
-                    }
-                }
+                Nations[i].Boundarys = Nations[i].Players.SelectMany(o => o.Nodes).ToList().UnionPolygons();
             }
-            return currentBoard;
+            Nations = Nations.OrderBy(o => o.Players.Count).ThenByDescending(o => o.Players.Sum(x => x.Nodes.Count)).ToList();
         }
 
         /// <summary>
@@ -178,81 +353,170 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         /// </summary>
         /// <param name="currentBoard"></param>
         /// <returns></returns>
-        private int Evaluation(int[] currentBoard)
+        private int Evaluation(Scoreboard scoreboard)
         {
-            var newSpace = new List<List<ThBeamTopologyNode>>();
-            for (int i = 0; i < Space.Count; i++)
+            var polygons = scoreboard.Boundarys;
+            var nodes = new List<ThBeamTopologyNode>();
+            for (int j = 0; j < scoreboard.board.Length; j++)
             {
-                var NewNodes = Space[i].ToArray().ToList();
-                for (int j = 0; j < currentBoard.Length; j++)
-                {
-                    if (currentBoard[j] == i + 1)
-                    {
-                        NewNodes.Add(Nodes[j]);
-                    }
-                }
-                var neighbor = newSpace.FirstOrDefault(o => o.IsNeighbor(NewNodes, true));
-                if (neighbor != null)
-                {
-                    neighbor.AddRange(NewNodes);
-                }
-                else
-                {
-                    newSpace.Add(NewNodes);
-                }
+                if (scoreboard.board[j] == 0)
+                    nodes.Add(Nodes[j]);
             }
+            var UnionPolygons = nodes.UnionPolygons(Nations.Last().Boundarys);
+            polygons.AddRange(UnionPolygons);
             int BaseScore = 500;
-            newSpace.ForEach(o =>
+            polygons.ForEach(o =>
             {
-                var UnionPolygon = o.UnionPolygon();
-                var ConvexPolyline = UnionPolygon.ConvexHullPL();
-                var weights = UnionPolygon.Area > AverageArea ? UnionPolygon.Area / AverageArea : 1;//为大面积附加权重，使其'脱颖而出'
-                var score = (int)Math.Ceiling(UnionPolygon.Area / ConvexPolyline.Area * 100 * weights);
+                var ConvexPolyline = o.ConvexHullPL();
+                var weights = o.Area > AverageArea ? o.Area / AverageArea : 1;//为大面积附加权重，使其'脱颖而出'
+                var score = (int)Math.Ceiling(o.Area / ConvexPolyline.Area * 100 * weights);
                 BaseScore += score;
             });
-            BaseScore -= newSpace.Count * 100;
+            BaseScore -= polygons.Count * 100;
+            return BaseScore;
+        }
+
+        /// <summary>
+        /// 评估分数
+        /// </summary>
+        /// <param name="currentBoard"></param>
+        /// <returns></returns>
+        private int Evaluation(int[] currentBoard, int stage)
+        {
+            var nodes = new List<ThBeamTopologyNode>();
+            for (int i = 0; i < currentBoard.Length; i++)
+            {
+                if (currentBoard[i] == stage)
+                    nodes.Add(Nodes[i]);
+            }
+            var UnionPolygons = nodes.UnionPolygons(this.Nations[stage -1].Boundarys);
+            int BaseScore = 300;
+            UnionPolygons.ForEach(o =>
+            {
+                var ConvexPolyline = o.ConvexHullPL();
+                var score = (int)Math.Ceiling(o.Area / ConvexPolyline.Area * 100);
+                BaseScore += score;
+            });
+            BaseScore -= UnionPolygons.Count * 100;
+            return BaseScore;
+        }
+
+        /// <summary>
+        /// 评估分数
+        /// </summary>
+        /// <param name="currentBoard"></param>
+        /// <returns></returns>
+        private int Evaluation(List<BeamGamePlayer> permissionPlayer)
+        {
+            var nodes = permissionPlayer.SelectMany(o => o.Nodes).ToList();
+            var UnionPolygons = nodes.UnionPolygons();
+            int BaseScore = 300;
+            UnionPolygons.ForEach(o =>
+            {
+                var ConvexPolyline = o.ConvexHullPL();
+                var score = (int)Math.Ceiling(o.Area / ConvexPolyline.Area * 100);
+                BaseScore += score;
+            });
+            BaseScore -= UnionPolygons.Count * 100;
             return BaseScore;
         }
 
         /// <summary>
         /// 消除凹包
         /// </summary>
-        private int[] EliminateDents(int index , int[] currentBoard)
+        private int[] EliminateDents(int index , int[] board)
         {
-            bool Signal = true;
-            while (Signal)
+            var NewBoard = new int[Nodes.Count];
+            var UnionPolygons = new List<Polyline>();
+            while (!NewBoard.SequenceEqual(board))
             {
-                Signal = false;
-                var Pieces = new List<ThBeamTopologyNode>();
-                for (int i = 0; i < currentBoard.Length; i++)
+                var nodes = new List<ThBeamTopologyNode>();
+                board.CopyTo(NewBoard, 0);
+                for (int i = 0; i < board.Length; i++)
                 {
-                    if (currentBoard[i] == index)
-                    {
-                        Pieces.Add(Nodes[i]);
-                    }
+                    if (board[i] == index)
+                        nodes.Add(Nodes[i]);
                 }
-                var unionPolygon = Pieces.UnionPolygon(UnionPolygonDic[index]);
-                var ConvexPolyline = unionPolygon.ConvexHullPL();
-                var polyline = ConvexPolyline.Buffer(-1000)[0] as Polyline;
-                var objs = SpatialIndex.SelectFence(polyline);
+                UnionPolygons = nodes.UnionPolygons(this.Nations[index -1].Boundarys);
+                UnionPolygons.ForEach((Polygon) =>
+                {
+                    bool Signal = true;
+                    while (Signal)
+                    {
+                        Signal = false;
+                        var ConvexPolyline = Polygon.ConvexHullPL();
+                        var polyline = ConvexPolyline.Buffer(-100)[0] as Polyline;
+                        var objs = SpatialIndex.SelectCrossingPolygon(polyline);
+                        foreach (Polyline obj in objs)
+                        {
+                            var nodeindex = Nodes.FindIndex(o => o.Boundary.Equals(obj));
+                            if (nodeindex > -1 && board[nodeindex] == 0)
+                            {
+                                var NewUnionPolygon = Nodes[nodeindex].UnionPolygon(Polygon);
+                                var NewConvexPolyline = NewUnionPolygon.ConvexHullPL();
+                                if (NewUnionPolygon.Area / NewConvexPolyline.Area > Polygon.Area / ConvexPolyline.Area - 0.05)
+                                {
+                                    Signal = true;
+                                    board[nodeindex] = index;
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            return NewBoard;
+        }
+
+        /// <summary>
+        /// 吸附离散区域
+        /// </summary>
+        /// <param name="permissionPlayer"></param>
+        /// <param name="index"></param>
+        /// <param name="currentBoard"></param>
+        /// <returns></returns>
+        private Scoreboard AdsorbDiscreteRegions(int index, int[] board)
+        {
+            var nodeSet = new List<ThBeamTopologyNode>();
+            for (int i = 0; i < board.Length; i++)
+            {
+                if (board[i] == 0)
+                {
+                    nodeSet.Add(Nodes[i]);
+                }
+            }
+
+            var RemainingSpace = Nations.Skip(index).SelectMany(o => o.Boundarys);
+            var polylines = nodeSet.UnionPolygons();
+            polylines = polylines.Where(polygon =>
+            {
+                var pts = polygon.GetPoints();
+                if (RemainingSpace.Any(o => pts.Count(x => o.DistanceTo(x, false) < 10) > 1))
+                {
+                    return false;
+                }
+                return true;
+            }).ToList();
+            foreach (var polyline in polylines)
+            {
+                var objs = SpatialIndex.SelectWindowPolygon(polyline.Buffer(1000)[0] as Polyline);
                 foreach (Polyline obj in objs)
                 {
                     var nodeindex = Nodes.FindIndex(o => o.Boundary.Equals(obj));
-                    if (nodeindex > -1 && currentBoard[nodeindex] == 0)
+                    if (nodeindex > -1 && board[nodeindex] == 0)
                     {
-                        Signal = true;
-                        currentBoard[nodeindex] = index;
+                        nodeSet.Add(Nodes[nodeindex]);
+                        board[nodeindex] = index;
                     }
                 }
             }
-            return currentBoard;
-        }
-    }
 
-    public class BeamGameTree
-    {
-        public BeamGameTree Parent { get; set; }
-        public List<BeamGameTree> Childs { get; set; }
-        
+            var UnionPolygons = new List<Polyline>();
+            UnionPolygons = nodeSet.UnionPolygons(this.Nations[index -1].Boundarys);
+            UnionPolygons.AddRange(Nations.Take(index - 1).SelectMany(o => o.Boundarys));
+            Scoreboard NewScoreBoard = new Scoreboard();
+            NewScoreBoard.board = board;
+            NewScoreBoard.Boundarys = UnionPolygons;
+            return NewScoreBoard;
+        }
     }
 }

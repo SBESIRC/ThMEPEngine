@@ -67,13 +67,13 @@ namespace ThMEPLighting.IlluminationLighting
 
         private static void LayoutProcess(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThAFASIlluminationLayoutParameter layoutParameter, ThIlluminationCommon.LayoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
-            var blindType = BlindType.CoverArea;
+            var blindType = BlindType.VisibleArea;
             var radius = layoutParameter.radiusN;
             if (layoutType == ThIlluminationCommon.LayoutType.evacuation)
             {
                 radius = layoutParameter.radiusE;
             }
-            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3, 200, 300);
+            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3, 25, 300);
 
 
             //区域类型
@@ -99,7 +99,7 @@ namespace ThMEPLighting.IlluminationLighting
 
             var pt = frame.GetCentroidPoint();
             var ptNew = new Point3d(pt.X, pt.Y - 350, 0);
-            DrawUtils.ShowGeometry(ptNew, string.Format("process：{0}:{1}", stype, sCenterLine), "l0process", 3, 200, 300);
+            DrawUtils.ShowGeometry(ptNew, string.Format("process：{0}:{1}", stype, sCenterLine), "l0process", 3, 25, 300);
 
             //DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
             DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0wall"), 10);

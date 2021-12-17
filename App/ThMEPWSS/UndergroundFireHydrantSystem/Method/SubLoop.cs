@@ -5,7 +5,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 {
-    class SubLoop
+    public class SubLoop
     {
         public static List<List<Point3dEx>> Get(ref FireHydrantSystemIn fireHydrantSysIn, List<List<Point3dEx>> mainPathList)
         {

@@ -80,7 +80,7 @@ namespace ThMEPElectrical.FireAlarmArea
             var blindType = BlindType.CoverArea; 
             var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, layoutParameter.FloorHightIdx, layoutParameter.RootThetaIdx, layoutType);//to do...frame.area need to remove hole's area
             //radius = radius * 0.9;
-            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3, 200,300);
+            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3, 25,300);
 
             //区域类型
             var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], radius * 0.8, layoutParameter.AisleAreaThreshold);
@@ -112,7 +112,7 @@ namespace ThMEPElectrical.FireAlarmArea
 
             var pt = frame.GetCentroidPoint();
             var ptNew = new Point3d(pt.X, pt.Y - 350, 0);
-            DrawUtils.ShowGeometry(ptNew, string.Format("process：{0}:{1}", stype, sCenterLine), "l0process", 3, 200,300);
+            DrawUtils.ShowGeometry(ptNew, string.Format("process：{0}:{1}", stype, sCenterLine), "l0process", 3,25, 200);
 
             //DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
             DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0wall"), 10);

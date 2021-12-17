@@ -15,15 +15,21 @@ using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
+using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
     public class ThBeamConnectorCommand : ThMEPBaseCommand, IDisposable
     {
+        private DBObjectCollection results;
+
         public ThBeamConnectorCommand()
         {
             ActionName = "生成主梁";
-            CommandName = "THSCZL";
+            CommandName = "THZLSC";
         }
 
         public void Dispose()
@@ -39,14 +45,23 @@ namespace ThMEPStructure.GirderConnect.Command
             {
                 // 选择范围
                 var pts = GetRangePoints();
-
+                if(pts.Count == 0)
+                {
+                    return;
+                }
                 //接入数据
                 var dataFactory = new ThBeamConnectorDataFactory();
                 dataFactory.Create(acdb.Database, pts);
                 var columns = dataFactory.Columns;
                 var shearwalls = dataFactory.Shearwalls;
-                var mainBuildings = dataFactory.MainBuildings.OfType<Entity>().ToList();
+                var buildings = dataFactory.MainBuildings;
 
+                ThBeamGeometryPreprocessor.Z0Curves(ref columns);
+                ThBeamGeometryPreprocessor.Z0Curves(ref shearwalls);
+                //var mainBuildings = dataFactory.MainBuildings.OfType<Entity>().ToList();
+                
+                ThBeamGeometryPreprocessor.Z0Curves(ref buildings);
+                var mainBuildings = buildings.OfType<Entity>().ToList();
                 // print extract data
                 ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(columns.OfType<Entity>().ToList(), acdb.Database, 5);
                 ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(shearwalls.OfType<Entity>().ToList(), acdb.Database, 6);
@@ -64,16 +79,30 @@ namespace ThMEPStructure.GirderConnect.Command
                 Point3dCollection clumnPts = new Point3dCollection();
                 var outlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
+                var outerWalls = new Dictionary<Polyline, HashSet<Polyline>>();
+                var olCrossPts = new Dictionary<Polyline, HashSet<Point3d>>();
 
                 //处理算法输入
-                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict,
-                    outsideShearwall, clumnPts, ref outlineWalls, outlineClumns);
+                MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
+                    clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
 
+                //string showInfoLayer = "TH_AI_SHOWINFO";
+                //ShowInfo showInfo = new ShowInfo(showInfoLayer);
+                //LayerDealer.AddLayer(showInfoLayer, 2);
+                
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 5);
                 //计算
-                var dicTuples = Connect.Calculate(clumnPts, outlineWalls, outlineClumns, acdb);
+                var connectService = new Connect();
+                var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
+
+                DBObjectCollection intersectCollection = new DBObjectCollection();
+                outlineWalls.ForEach(o => intersectCollection.Add(o.Key));
+                outlineWalls.ForEach(o => o.Value.ForEach(p => intersectCollection.Add(p)));
+                outerWalls.ForEach(o => intersectCollection.Add(o.Key));
+                outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
 
                 //处理算法输出
-                MainBeamPostProcess.MPostProcess(dicTuples);
+                MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
             }
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");

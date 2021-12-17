@@ -19,28 +19,45 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         public static List<BeamEdge> GetAllSides(this Polyline beamSpace, List<Line> UseBeams, List<Line> assist)
         {
             List<BeamEdge> edges = new List<BeamEdge>();
-            var lines = beamSpace.GetAllLinesInPolyline();
-            foreach (var side in lines)
+            try
             {
-                edges.AddRange(side.GetEdge(UseBeams, assist));
-            }
-            var index = edges.FindIndex(o => o.BeamType == BeamType.Scrap);
-            if (index > 0)
-            {
-                var list = edges.Take(index).ToList();
-                edges.RemoveRange(0, index);
-                edges.AddRange(list);
-            }
-            else if (index < 0)
-            {
-                double minlength = edges.Min(o => o.BeamSide.Length);
-                index = edges.FindIndex(o => o.BeamSide.Length -minlength < 1);
+                var lines = beamSpace.GetAllLinesInPolyline();
+                foreach (var side in lines)
+                {
+                    edges.AddRange(side.GetEdge(UseBeams, assist));
+                }
+                var index = edges.FindIndex(o => o.BeamType == BeamType.Scrap);
                 if (index > 0)
                 {
                     var list = edges.Take(index).ToList();
                     edges.RemoveRange(0, index);
                     edges.AddRange(list);
                 }
+                else if (index < 0)
+                {
+                    double minlength = edges.Min(o => o.BeamSide.Length);
+                    index = edges.FindIndex(o => o.BeamSide.Length -minlength < 1);
+                    if (index > 0)
+                    {
+                        var list = edges.Take(index).ToList();
+                        edges.RemoveRange(0, index);
+                        edges.AddRange(list);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+                {
+                    var objs = beamSpace.Buffer(-10);
+                    if (objs.Count > 0)
+                    {
+                        var polyline = objs[0] as Polyline;
+                        polyline.ColorIndex = 5;
+                        acad.ModelSpace.Add(polyline);
+                    }
+                }
+                return new List<BeamEdge>();
             }
             return edges;
         }
@@ -59,12 +76,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             }
             using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
             {
-                //side.ColorIndex = 1;
+                //side.ColorIndex = 2;
                 //acad.ModelSpace.Add(side);
                 //foreach (var item in useBeams)
                 //{
                 //    var a = item.Clone() as Line;
-                //    a.ColorIndex = 1;
+                //    a.ColorIndex = 2;
                 //    acad.ModelSpace.Add(a);
                 //}
             }
@@ -103,7 +120,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             return edges;
         }
 
-        public static bool IsSameLine(this Line line, Line otherLine, double distance = 10)
+        public static bool IsSameLine(this Line line, Line otherLine, double distance = 100)
         {
             if (line == null || otherLine == null)
             {
@@ -159,6 +176,21 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
              return nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection().UnionPolygons().Cast<Polyline>().OrderByDescending(x => x.Area).First().Buffer(-10)[0] as Polyline;
         }
 
+        public static List<Polyline> UnionPolygons(this List<ThBeamTopologyNode> nodes)
+        {
+            return nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection().UnionPolygons().Cast<Polyline>().Select(o => o.Buffer(-10)[0] as Polyline).ToList();
+        }
+
+        public static List<Polyline> UnionPolygons(this List<ThBeamTopologyNode> nodes, List<Polyline> polylines)
+        {
+            var objs = nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection();
+            polylines.ForEach(polyline =>
+            {
+                objs.Add(polyline.Buffer(10)[0] as Polyline);
+            });
+            return objs.UnionPolygons().Cast<Polyline>().Select(o => o.Buffer(-10)[0] as Polyline).ToList();
+        }
+
         public static Polyline UnionPolygon(this List<ThBeamTopologyNode> nodes, Polyline polyline)
         {
             var objs = nodes.Select(o => o.Boundary.Buffer(10)[0] as Polyline).ToCollection();
@@ -206,7 +238,12 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
 
         public static bool CheckCurrentPixel(this ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
         {
-            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 35);
+            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 25);
+        }
+
+        public static bool CheckCurrentPixelVertical(this ThBeamTopologyNode currentPixel, ThBeamTopologyNode neighborCurrentPixel)
+        {
+            return currentPixel.LayoutLines.vector.IsParallelWithTolerance(neighborCurrentPixel.LayoutLines.vector, 65);
         }
     }
 }

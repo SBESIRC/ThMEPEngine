@@ -37,5 +37,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangement))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangementByFixedLines))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingPartitionTest))]
-[assembly: CommandClass(typeof(ThMEPArchitecture.BuildingBoxTest))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.ParkingPartitionTestV2))]
+[assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.TestCommondV3))]

@@ -32,8 +32,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void InitialCmdInfo()
         {
-            CommandName = "ThFireAlarmFireTelLayoutCmd";
             ActionName = "布置";
+            CommandName = "THFATEL";
         }
         private void InitialSetting()
         {

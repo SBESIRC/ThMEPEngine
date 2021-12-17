@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
         {
             insertPt = new Point3d();
             var database = acadDatabase.Database;
-            var opt = new PromptPointOptions("请指定环管标记起点:");
+            var opt = new PromptPointOptions("\n请指定环管标记起点");
             var propRes = Active.Editor.GetPoint(opt);
             if (propRes.Status == PromptStatus.OK)
             {
@@ -54,6 +54,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             pipeLines = pipeLines.ConnectVerticalLine(sprayIn);
 
             pipeLines = pipeLines.PipeLineAutoConnect(sprayIn);//自动连接
+
+            
 
             pipeLines.CreatePtDic(sprayIn);
             pipeLines = pipeLines.ConnectBreakLine(sprayIn);
@@ -205,6 +207,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             var alarmValve = new AlarmValve();
             var alarmPts = alarmValve.Extract(database, selectArea);
+            pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
+
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
             var alarmText = new AlarmText();

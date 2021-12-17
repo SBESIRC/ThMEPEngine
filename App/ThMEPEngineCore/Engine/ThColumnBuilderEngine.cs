@@ -17,12 +17,14 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThColumnBuilderEngine : ThBuildingElementBuilder, IDisposable
     {
-
         public ThColumnBuilderEngine()
         {
+            Elements = new List<ThIfcBuildingElement>();
         }
+
         public void Dispose()
         {
+            //
         }    
         
         public override List<ThRawIfcBuildingElementData> Extract(Database db)
@@ -43,16 +45,14 @@ namespace ThMEPEngineCore.Engine
             return res;
         }
 
-        public override List<ThIfcBuildingElement> Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts)
         {
             var columnRecognize = new ThColumnRecognitionEngine();
             var db3columnReconize = new ThDB3ColumnRecognitionEngine();
-            var res = new List<ThIfcBuildingElement>();
             columnRecognize.Recognize(datas.Where(o=>o.Source==DataSource.Raw).ToList(), pts);
             db3columnReconize.Recognize(datas.Where(o => o.Source == DataSource.DB3).ToList(), pts);
-            res.AddRange(columnRecognize.Elements);
-            res.AddRange(db3columnReconize.Elements);
-            return res;
+            Elements.AddRange(columnRecognize.Elements);
+            Elements.AddRange(db3columnReconize.Elements);
         }
 
         public override void Build(Database db, Point3dCollection pts)
@@ -70,18 +70,13 @@ namespace ThMEPEngineCore.Engine
                 .ToCollection();
 
             // 识别
-            var buildingElements = Recognize(columns, newPts);
+            Recognize(columns, newPts);
 
             // 后处理
-            var handleColumns = Union(buildingElements);
+            Elements = Union(Elements).OfType<ThIfcBuildingElement>().ToList();
 
             // 恢复到原位置
-            handleColumns.ForEach(c => transformer.Reset(c.Outline));
-
-            // 保存结果
-            Elements = handleColumns
-                .OfType<ThIfcBuildingElement>()
-                .ToList();
+            Elements.ForEach(c => transformer.Reset(c.Outline));
         }
         public List<ThIfcColumn> Union(List<ThIfcBuildingElement> buildingElements)
         {
@@ -105,28 +100,6 @@ namespace ThMEPEngineCore.Engine
             results = simplifier.Simplify(results);
             results = results.FilterSmallArea(AREATOLERANCE);
             return results;
-        }
-        private DBObjectCollection FilterInRange(DBObjectCollection objs, Point3dCollection pts)
-        {
-            if (pts.Count > 2)
-            {
-                var results = new DBObjectCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var pline = new Polyline()
-                {
-                    Closed = true,
-                };
-                pline.CreatePolyline(pts);
-                foreach (DBObject filterObj in spatialIndex.SelectCrossingPolygon(pline))
-                {
-                    results.Add(filterObj);
-                }
-                return results;
-            }
-            else
-            {
-                return objs;
-            }
         }
         private DBObjectCollection Buffer(DBObjectCollection objs, double length)
         {

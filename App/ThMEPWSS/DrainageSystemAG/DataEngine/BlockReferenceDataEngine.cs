@@ -58,9 +58,10 @@ namespace ThMEPWSS.DrainageSystemAG.DataEngine
                     thDistributionMS.Extract(acdb.Database);
 
                     var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
-                    var test = blocks.Where(c => c.GetEffectiveName().Contains("AI")).ToList();
                     foreach (var block in blocks)
                     {
+                        if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                            continue;
                         foreach (var visitor in equipmentBlcokVisitorsModelSpace) 
                         {
                             var elems = new List<ThRawIfcDistributionElementData>();

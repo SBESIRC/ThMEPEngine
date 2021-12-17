@@ -37,7 +37,11 @@ namespace ThMEPHVAC.FanLayout.Command
         public Point3dCollection Areas { set; private get; }
         public void Dispose()
         {
-            throw new NotImplementedException();
+        }
+        public ThFanMaterialTableExtractCmd()
+        {
+            CommandName = "THXFJ";
+            ActionName = "导出材料表";
         }
         override public void SubExecute()
         {

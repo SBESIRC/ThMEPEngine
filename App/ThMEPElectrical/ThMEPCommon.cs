@@ -37,6 +37,14 @@ namespace ThMEPElectrical
         public const string DOMECAMERA_SHILED_BLOCK_NAME = "E-BVSCS210";                //半球摄像机保护罩图块
         public const string GUNCAMERA_SHIELD_BLOCK_NAME = "E-VSCS-DEVC";                //枪式摄像机保护罩图块
         public const string FACERECOGNITIONCAMERA_BLOCK_NAME = "E-BVSCS110-Bio";        //人脸识别摄像机图块
+        public static List<string> VM_BLOCK_NAMES = new List<string>()
+        {
+            GUNCAMERA_BLOCK_NAME,
+            PANTILTCAMERA_BLOCK_NAME,
+            DOMECAMERA_SHILED_BLOCK_NAME,
+            GUNCAMERA_SHIELD_BLOCK_NAME,
+            FACERECOGNITIONCAMERA_BLOCK_NAME
+        };
         //----视频监控系统连管
         public static readonly string VM_PIPE_LAYER_NAME = "E-VSCS-WIRE";               //视频监控系统连管图层
         public static readonly string VM_PIPE_LINETYPE = "ByLayer";                     //视频监控系统连管线型
@@ -46,6 +54,13 @@ namespace ThMEPElectrical
         public const string ELECTRICLOCK_BLOCK_NAME = "E-BACS21";                       //电锁图块
         public const string INTERCOM_BLOCK_NAME = "E-BACS01";                           //出入口对讲门口机图块
         public const string CARDREADER_BLOCK_NAME = "E-BACS41";                         //读卡器图块
+        public static List<string> AC_BLOCK_NAMES = new List<string>()
+        {
+            BUTTON_BLOCK_NAME,
+            ELECTRICLOCK_BLOCK_NAME,
+            INTERCOM_BLOCK_NAME,
+            CARDREADER_BLOCK_NAME,
+        };
         //----出入口控制系统连管
         public static readonly string AC_PIPE_LAYER_NAME = "E-ACS-WIRE";               //出入口控制系统连管图层
         public static readonly string AC_PIPE_LINETYPE = "ByLayer";                        //出入口控制系统连管线型
@@ -58,13 +73,29 @@ namespace ThMEPElectrical
         public const string DISABLEDALARM_BLOCK_NAME = "E-BIAS200";                     //残卫报警按钮
         public const string SOUNDLIGHTALARM_BLOCK_NAME = "E-BIAS020";                   //残卫声光报警器
         public const string EMERGENCYALARM_BLOCK_NAME = "E-BIAS201";                    //紧急报警按钮
+        public static List<string> IA_BLOCK_NAMES = new List<string>()
+        {
+            CONTROLLER_BLOCK_NAME,
+            INFRAREDWALLDETECTOR_BLOCK_NAME,
+            DOUBLEDETECTOR_BLOCK_NAME,
+            INFRAREDHOSITINGDETECTOR_BLOCK_NAME,
+            DISABLEDALARM_BLOCK_NAME,
+            SOUNDLIGHTALARM_BLOCK_NAME,
+            EMERGENCYALARM_BLOCK_NAME
+        };
         //----入侵报警系统 连管
         public static readonly string IA_PIPE_LAYER_NAME = "E-IAS-WIRE";               //入侵报警系统连管图层
         public static readonly string IA_PIPE_LINETYPE = "ByLayer";                        //入侵报警系统连管线型
         //----电子巡更系统
         public const string GT_LAYER_NAME = "E-GTS-DEVC";                               //入侵报警系统放置图层
         public const string TIMERECORDER_BLOCK_NAME = "E-BGTS10";                        //入侵报警控制器
-
+        public static List<string> GT_BLOCK_NAMES = new List<string>()
+        {
+            TIMERECORDER_BLOCK_NAME
+        };
+        //----电子巡更系统 连管
+        public static readonly string GT_PIPE_LAYER_NAME = "E-GTS-WIRE";               //入侵报警系统连管图层
+        public static readonly string GT_PIPE_LINETYPE = "ByLayer";                        //入侵报警系统连管线型
         // 图层
         public const short LANELINE_LAYER_COLORINDEX = 2;
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";

@@ -320,6 +320,12 @@
     <Image Include="Images\THKJZX_dark_large.ico" />
     <Image Include="Images\THLX_dark_small.ico" />    
     <Image Include="Images\THLX_dark_large.ico" />
+    <Image Include="Images\THZLSC_dark_small.ico" />    
+    <Image Include="Images\THZLSC_dark_large.ico" />
+    <Image Include="Images\THCLSC_dark_small.ico" />    
+    <Image Include="Images\THCLSC_dark_large.ico" />
+    <Image Include="Images\THSXSC_dark_small.ico" />    
+    <Image Include="Images\THSXSC_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

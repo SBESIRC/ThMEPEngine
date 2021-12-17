@@ -76,7 +76,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.Link();
+                return crossLinker.LinkCross();
+            }
+            else
+            {
+                return new List<ThLightNodeLink>();
+            }
+        }
+
+        protected List<ThLightNodeLink> GetThreeWayJumpWireLinks()
+        {
+            // 创建T型路口跳接线
+            if (CenterSideDicts.Count > 0)
+            {
+                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
+                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
+                return crossLinker.LineThreeWay();
             }
             else
             {

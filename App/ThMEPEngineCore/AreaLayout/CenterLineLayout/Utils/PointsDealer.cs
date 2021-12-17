@@ -276,11 +276,30 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <param name="center"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static Point3d GetNearestPoint(Point3d center, List<Point3d> points)
+        public static Point3d GetNearestPoint(Point3d center, List<Point3d> points, Polyline Area)
+        {
+            Point3d ans = new Point3d();
+            var newPtList = new List<Point3d>();
+            if (Area != null && Area.Area > 0)
+            {
+                newPtList = points.Where(x => Area.ContainsOrOnBoundary(x)).ToList();
+            }
+            else
+            {
+                newPtList = points;
+            }
+
+            ans = GetNearestPoint(center, newPtList);
+
+            return ans;
+        }
+
+        private static Point3d GetNearestPoint(Point3d center, List<Point3d> points)
         {
             double minDis = double.MaxValue;
             double tmpDis;
             Point3d ans = new Point3d();
+
             foreach (Point3d pt in points)
             {
                 tmpDis = center.DistanceTo(pt);
@@ -292,6 +311,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             }
             return ans;
         }
+
+
 
         /// <summary>
         /// 获取两个点的中心点

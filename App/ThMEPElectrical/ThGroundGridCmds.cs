@@ -10,6 +10,7 @@ using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.UCSDivisionService;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical
 {
@@ -53,13 +54,14 @@ namespace ThMEPElectrical
                 List<Polyline> frameLst = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    var frame = acadDatabase.Element<BlockReference>(obj);
+                    var frame = acadDatabase.Element<Polyline>(obj);
                     frameLst.Add(frame.Clone() as Polyline);
                 }
 
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(Point3d.Origin);
                 foreach (var frame in frameLst)
                 {
+                    var simiplyFrame = frame.DPSimplify(5);
                     GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                     getPrimitivesService.GetStructureInfo(frame, out List<Polyline> columns, out List<Polyline> walls);
 

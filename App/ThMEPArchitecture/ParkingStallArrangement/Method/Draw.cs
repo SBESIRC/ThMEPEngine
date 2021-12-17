@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
+using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -39,6 +40,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
             }
                 
+        }
+
+        public static void DrawSeg(List<Line> lines, int index, string layer = "0")
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var line = lines[i];
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, "t" + Convert.ToString(index), 0);
+                    }
+                    catch { }
+                    line.LayerId = DbHelper.GetLayerId("t"+Convert.ToString(index));
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+            }
+
         }
     }
 }

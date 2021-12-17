@@ -134,7 +134,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, double> AngleList { get; set; }
         public Dictionary<Point3dEx, string> MarkList { get; set; }
         public Dictionary<Point3dEx, string> PtTypeDic { get; set; }
-        public List<Point3dEx> HydrantPosition { get; set; }
+        public List<Point3dEx> VerticalPosition { get; set; }
         public Dictionary<Point3dEx, TermPoint> TermPointDic { get; set; }
         public Dictionary<Point3dEx, List<Point3dEx>> PtDic { get; set; }
         public Dictionary<Line, List<Line>> LeadLineDic { get; set; }
@@ -155,7 +155,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             AngleList = new Dictionary<Point3dEx, double>();//次环节点角度
             MarkList = new Dictionary<Point3dEx, string>();//次环节点名称
             PtTypeDic = new Dictionary<Point3dEx, string>();//当前点的类型字典对
-            HydrantPosition = new List<Point3dEx>(); //消火栓端点
+            VerticalPosition = new List<Point3dEx>(); //消火栓端点
             TermPointDic = new Dictionary<Point3dEx, TermPoint>();//端点字典对
             PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//当前点和邻接点字典对
             LeadLineDic = new Dictionary<Line, List<Line>>();//引线和邻接线字典对

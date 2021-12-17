@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     internal class ThJumpWireDirectionCalculator
     {
-        private const double PointToLineDis = 1.0;
         private ThQueryLineService LineQuery { get; set; }
         private Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; }
         public ThJumpWireDirectionCalculator(
@@ -33,7 +33,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// <returns></returns>
         public Vector3d? Calcuate(Point3d pt)
         {
-            var lines = LineQuery.Query(pt, PointToLineDis);
+            var lines = LineQuery.Query(pt, ThGarageLightCommon.RepeatedPointDistance);
             if(lines.Count == 1)
             {
                 var center = FindCenter(lines[0]);

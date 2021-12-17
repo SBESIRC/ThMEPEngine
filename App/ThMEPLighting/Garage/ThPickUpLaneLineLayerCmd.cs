@@ -29,10 +29,13 @@ namespace ThMEPLighting.Garage
                     var pner = Active.Editor.GetNestedEntity(pneo);
                     if (pner.Status == PromptStatus.OK)
                     {
-                        var entity = acdb.Element<Entity>(pner.ObjectId);
-                        if (entity is Curve)
+                        if (pner.ObjectId != ObjectId.Null)
                         {
-                            _UiConfigs.Add(entity.Layer);
+                            var entity = acdb.Element<Entity>(pner.ObjectId);
+                            if (entity is Curve)
+                            {
+                                _UiConfigs.Add(entity.Layer);
+                            }
                         }
                     }
                     else

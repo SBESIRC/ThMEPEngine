@@ -168,7 +168,7 @@ namespace ThMEPLighting
                     holes.AddRange(columns);
                     holes.AddRange(walls);
                     holes.AddRange(rooms.SelectMany(x => x.Value).ToList());
-
+                    
                     //布置
                     var thRooms = rooms.Select(x => x.Key).ToList();
                     LayoutService layoutService = new LayoutService();

@@ -32,7 +32,7 @@ namespace ThMEPLighting
             if (_isExternal)
             {
                 retBlockName = (_selectEntity as BlockReference).GetEffectiveName();
-                retBlockName = retBlockName.Split(new char[] { '|', '$' }).Last().Trim();
+                retBlockName = ThMEPEngineCore.Algorithm.ThMEPXRefService.OriginalFromXref(retBlockName);
                 if (retBlockName.Contains("*"))
                     return "";
             }

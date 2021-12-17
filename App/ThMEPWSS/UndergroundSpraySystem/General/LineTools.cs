@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -85,6 +86,74 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
             return PipeLineList.CleanLaneLines3(lineList);//merge
         }
+
+        public static void PipeLineAutoConnect(this List<Line> lineList, SprayIn sprayIn, List<Point3d> alarmPts)
+        {
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            double alarmValveRidus = 200 + 50;//湿式报警阀半径
+            foreach(var pt in alarmPts)
+            {
+                var rect = pt.GetRect(alarmValveRidus);
+                var lines = lineSpatialIndex.SelectCrossingPolygon(rect);
+                var pts = pt.GetRectPt(sprayIn, lines, alarmValveRidus);
+                AddPtDic(sprayIn, pts, pt);
+            }
+        }
+
+        public static void AddPtDic(SprayIn sprayIn, List<Point3d> pts, Point3d centerPt)
+        {
+            var centPtex = new Point3dEx(centerPt);//报警阀中心点
+            if(sprayIn.PtDic.Keys.Contains(centPtex))//字典包含报警阀中心点
+            {
+                foreach(var pt in pts)
+                {
+                    var ptex = new Point3dEx(pt);
+                    if(centPtex.Equals(ptex))
+                    {
+                        continue;
+                    }
+                    if (!sprayIn.PtDic[centPtex].Contains(ptex))
+                    {
+                        sprayIn.PtDic[centPtex].Add(ptex);
+                    }
+                }
+            }
+            else//字典不包含报警阀中心点
+            {
+                var ptsNew = new List<Point3dEx>();
+                foreach(var pt in pts)
+                {
+                    var ptex = new Point3dEx(pt);
+                    if (centPtex.Equals(ptex))
+                    {
+                        continue;
+                    }
+                    ptsNew.Add(ptex);
+                }
+                sprayIn.PtDic.Add(centPtex, ptsNew);
+            }
+
+            foreach(var pt in pts)
+            {
+                var ptex = new Point3dEx(pt);
+                if (centPtex.Equals(ptex))
+                {
+                    continue;
+                }
+                if (sprayIn.PtDic.Keys.Contains(ptex))
+                {
+                    if(!sprayIn.PtDic[ptex].Contains(centPtex))
+                    {
+                        sprayIn.PtDic[ptex].Add(centPtex);
+                    }
+                }
+                else
+                {
+                    sprayIn.PtDic.Add(ptex, new List<Point3dEx>() { centPtex });
+                }
+            }
+        }
+
         public static List<Line> ConnectBreakLine(this List<Line> lineList, SprayIn sprayIn)
         {
             //连接不是端点的孤立线段

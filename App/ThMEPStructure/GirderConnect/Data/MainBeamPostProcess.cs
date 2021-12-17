@@ -20,6 +20,7 @@ using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
 using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Geometries;
 using NFox.Cad;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam;
 
 namespace ThMEPStructure.GirderConnect.Data
 {
@@ -28,13 +29,15 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <summary>
         /// 对主梁连接算法结果的后续处理
         /// </summary>
-        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
         {
             string beamLayer = "TH_AI_BEAM";
             AddLayer(beamLayer, 4);
 
-            var unifiedTyples = UnifyTuples(dicTuples);
-            Output(unifiedTyples, beamLayer);
+            //var unifiedTyples = UnifyTuples(dicTuples);
+            var tuples = LineDealer.DicTuplesToTuples(dicTuples);
+            var lines = TuplesToLines(tuples);
+            Output(lines, beamLayer, intersectCollection);
         }
 
         /// <summary>
@@ -50,15 +53,67 @@ namespace ThMEPStructure.GirderConnect.Data
                 {
                     var line = new Line(o.Item1, o.Item2);
                     line.Layer = layerName;
-                    if (line.Length > 9000)
+                    if(line.Length < 18000 && line.Length > 9000)
                     {
                         line.ColorIndex = 7;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                     }
-                    else
+                    else if (line.Length > 10 && line.Length <= 9000)
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
                     }
-                    HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                });
+            }
+        }
+        public static void Output(Dictionary<Point3d, HashSet<Point3d>> tuples, string layerName)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                tuples.ForEach(o =>
+                {
+                    o.Value.ForEach(k =>
+                    {
+                        var line = new Line(o.Key, k);
+                        line.Layer = layerName;
+                        if (line.Length > 9000)
+                        {
+                            line.ColorIndex = 7;
+                        }
+                        else
+                        {
+                            line.ColorIndex = (int)ColorIndex.BYLAYER;
+                        }
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                    });
+                });
+            }
+        }
+        public static void Output(List<Line> lines, string layerName, DBObjectCollection intersectCollection)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                //BuildMainBeam buildMainBeam = new BuildMainBeam(lines, intersectCollection);
+                //var mainBeams = buildMainBeam.Build("地下室顶板");
+                //foreach (var beam in mainBeams)
+                //{
+                //    beam.Layer = layerName;
+                //    beam.ColorIndex = 130;
+                //    HostApplicationServices.WorkingDatabase.AddToModelSpace(beam);
+                //}
+                lines.ForEach(line =>
+                {
+                    line.Layer = layerName;
+                    if (line.Length < 18000 && line.Length > 9000)
+                    {
+                        line.ColorIndex = 7;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                    }
+                    else if (line.Length > 10 && line.Length <= 9000)
+                    {
+                        line.ColorIndex = (int)ColorIndex.BYLAYER;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
+                    }
                 });
             }
         }
@@ -71,15 +126,19 @@ namespace ThMEPStructure.GirderConnect.Data
         public static HashSet<Tuple<Point3d, Point3d>> UnifyTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             var ansTuples = new HashSet<Tuple<Point3d, Point3d>>();
-            foreach (var dicTuple in dicTuples)
+            foreach (var kv in dicTuples)
             {
-                foreach(var pt in dicTuple.Value)
+                var ptSet = kv.Value;
+                foreach(var pt in ptSet)
                 {
-                    var tuple = new Tuple<Point3d, Point3d>(dicTuple.Key, pt);
-                    var converseTuple = new Tuple<Point3d, Point3d>(pt, dicTuple.Key);
-                    if (!ansTuples.Contains(converseTuple))
+                    if (kv.Key.DistanceTo(pt) <= 10) continue;
+
+                    var positiveTuple = new Tuple<Point3d, Point3d>(kv.Key, pt);
+                    var negativeTuple = new Tuple<Point3d, Point3d>(pt, kv.Key);
+
+                    if (!ansTuples.Contains(positiveTuple) && !ansTuples.Contains(negativeTuple))
                     {
-                        ansTuples.Add(tuple);
+                        ansTuples.Add(positiveTuple);
                     }
                 }
             }
@@ -104,6 +163,33 @@ namespace ThMEPStructure.GirderConnect.Data
                 acdb.Database.UnOffLayer(layerName);
                 acdb.Database.UnFrozenLayer(layerName);
             }
+        }
+
+        public static List<Line> TuplesToLines(HashSet<Tuple<Point3d, Point3d>> tuples)
+        {
+            List<Line> lines = new List<Line>();
+            foreach(var tuple in tuples)
+            {
+                lines.Add(new Line(tuple.Item1, tuple.Item2));
+            }
+            lines = lines.Where(o => o.Length > 10).ToList();
+            var linesObjs = lines.ToCollection();
+            ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(linesObjs);
+            var newLines = new List<Line>();
+            lines.ForEach(o=>
+            {
+                try
+                {
+                    var polylione = o.ExtendLine(1).Buffer(1);
+                    var objs = spatialIndex.SelectWindowPolygon(polylione);
+                    newLines.Add(objs.Cast<Line>().OrderBy(x => x.Length).First());
+                }
+                catch(Exception ex)
+                {
+
+                }
+            });
+            return newLines.Distinct().ToList();
         }
     }
 }

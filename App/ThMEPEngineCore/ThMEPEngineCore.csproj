@@ -124,9 +124,11 @@
     <Compile Include="Algorithm\ThMEPOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
+    <Compile Include="AreaLayout\CenterLineLayout\DrawUtils.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Command\FireAlarmSystemLayoutCommand.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\DeletePoints.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\LayoutOpt.cs" />
+    <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\PointDirectionService.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\AreaCaculator.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\CenterLineSimplify.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Utils\PointsDealer.cs" />
@@ -163,9 +165,14 @@
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\Roomdata.cs" />
+    <Compile Include="Engine\ThBeamBuilderEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
+    <Compile Include="GridOperation\Utils\GridMergeService.cs" />
+    <Compile Include="IO\ThMEPGeoJSONService.cs" />
+    <Compile Include="Service\ThKJSQInteractionService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
     <Compile Include="Engine\ThArchWallBuilderEngine.cs" />
     <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
@@ -199,7 +206,7 @@
     <Compile Include="Engine\ThRailingBuilderEngine.cs" />
     <Compile Include="Engine\ThRoomOutlineExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomOutlineRecognitionEngine.cs" />
-    <Compile Include="Engine\ThShearwallBuilderEngine.cs" />
+    <Compile Include="Engine\ThShearWallBuilderEngine.cs" />
     <Compile Include="Engine\ThSlabBuilderEngine.cs" />
     <Compile Include="Engine\ThStairBuilderEngine.cs" />
     <Compile Include="Engine\ThTCHDuctExtractionVisitor.cs" />
@@ -714,7 +721,7 @@
     <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.4" />
     <PackageReference Include="NPOI">
-      <Version>2.5.3</Version>
+      <Version>2.5.5</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

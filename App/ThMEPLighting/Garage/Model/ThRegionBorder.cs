@@ -66,7 +66,7 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 边界到原点的偏移
         /// </summary>
-        public ThMEPOriginTransformer Transformer { get; set; }
+        public ThMEPOriginTransformer Transformer { get; set; } = new ThMEPOriginTransformer(Point3d.Origin);
         /// <summary>
         /// Ucs的矩阵
         /// </summary>

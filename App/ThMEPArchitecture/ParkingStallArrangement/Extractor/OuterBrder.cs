@@ -12,11 +12,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
     public class OuterBrder
     {
         public DBObjectCollection OuterLines = new DBObjectCollection();//外框线
-        public DBObjectCollection BuildingLines = new DBObjectCollection();//建筑物框线
+        public DBObjectCollection BuildingLines = new DBObjectCollection();//建筑物block
         public DBObjectCollection EquipmentLines = new DBObjectCollection();//机房设备线
         public DBObjectCollection SegmentLines = new DBObjectCollection();//分割线
         public List<Line> SegLines = new List<Line>();//分割线
-        public List<Polyline> BuildLines = new List<Polyline>();
+        public List<BlockReference> Building = new List<BlockReference>();//建筑物block
+        public Polyline WallLine = new Polyline();//外框线
         public void Extract(Database database, Point3dCollection polygon)
         {
             var objs = new DBObjectCollection();
@@ -38,29 +39,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     var ept = (db as Polyline).EndPoint;
                     SegLines.Add(new Line(spt, ept));
                 }
-                BuildingLines.Cast<Entity>()
-                    .ForEach(e => BuildLines.Add((e as Polyline).DPSimplify(10.0)));
-                foreach(var l in BuildLines)
+
+                foreach(var obj in OuterLines)
                 {
-                    acadDatabase.CurrentSpace.Add(l);
+                    var pline = obj as Polyline;
+                    if (pline.Length > 0.0)
+                    {
+                        pline = pline.DPSimplify(1.0);
+                        pline = pline.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
+                    }
+                    WallLine = pline;
+                    break;
                 }
             }
         }
 
         private bool IsOuterLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "地库边界";
+            return layer.ToUpper() == "地库边界";
         }
         private bool IsBuildingLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "障碍物边缘";
+            return layer.ToUpper() == "障碍物边缘";
         }
         private bool IsEquipmentLayer(string layer)
         {
-            return layer.ToUpper() == "0" ||
-                   layer.ToUpper() == "机房";
+            return layer.ToUpper() == "机房";
         }
         private bool IsSegLayer(string layer)
         {
@@ -92,7 +96,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             if (IsBuildingLayer(ent.Layer))
             {
-                AddObjs(ent, BuildingLines);
+                AddObjs2(ent, BuildingLines);
             }
             if (IsEquipmentLayer(ent.Layer))
             {
@@ -114,10 +118,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 dbObjs.Add(line.ToPolyline());
             }
         }
+        private void AddObjs2(Entity entity, DBObjectCollection dbObjs)
+        {
+            if (entity is BlockReference br)
+            {
+                Building.Add(br);
+                dbObjs.Add(br);
+            }
+        }
         private bool IsCurve(Entity ent)
         {
             return ent is Polyline ||
                    ent is Line;
         }
     }
+
+    
+
 }

@@ -55,7 +55,7 @@ namespace ThMEPElectrical.FireAlarmArea
             var blindType = BlindType.CoverArea;
             var radius = layoutParameter.ProtectRadius;
 
-            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius");
+            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3,25, 300);
             //区域类型
             var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], radius * 0.8, layoutParameter.AisleAreaThreshold);
             if (bIsAisleArea == false)

@@ -49,7 +49,10 @@ namespace TianHua.Hvac.UI.UI.FanConnect
 
         private void btnUpdateSPM_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-
+            FocusMainWindow();
+            var updateSpmCmd = new ThUpdateSPMExtractCmd();
+            updateSpmCmd.ConfigInfo = ViewModel.WaterPipeConfigInfo;
+            updateSpmCmd.Execute();
         }
 
         private void btnConnectPipe_Click(object sender, System.Windows.RoutedEventArgs e)

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -73,7 +74,7 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public static Point3d SelectPoint()
         {
-            var point1 = Active.Editor.GetPoint("\n请选择水管起点位置");
+            var point1 = Active.Editor.GetPoint("\n请选择水管起点位置\n");
             if (point1.Status != PromptStatus.OK)
             {
                 return new Point3d();
@@ -387,5 +388,93 @@ namespace ThMEPHVAC.FanConnect.Command
             double retAngle = basVector.GetAngleTo(vector, refVector);
             return retAngle;
         }
+        public static void EnsureLayerOn(AcadDatabase acadDb, string layer)
+        {
+            acadDb.Database.UnFrozenLayer(layer);
+            acadDb.Database.UnLockLayer(layer);
+            acadDb.Database.UnOffLayer(layer);
+        }
+        public static void FindFourWay(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            foreach (var item in node.Children)
+            {
+                FindFourWay(item);
+            }
+
+            if (node.Children.Count <= 1)
+            {
+                return;
+            }
+            var connectChild = node.Children.Where(o => o.Item.IsConnect).ToList();
+            var nonConnectChild = node.Children.Where(o => !o.Item.IsConnect).ToList();
+            if (connectChild.Count == 2)
+            {
+                connectChild[0].Item.WayCount = 3;
+                connectChild[0].Item.BrotherItem = connectChild[1].Item;
+                connectChild[1].Item.WayCount = 3;
+                connectChild[1].Item.BrotherItem = connectChild[0].Item;
+            }
+            for (int i = 0; i < nonConnectChild.Count; i++)
+            {
+                for (int j = 0; j < nonConnectChild.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        if (nonConnectChild[i].Item.PLine.StartPoint.IsEqualTo(nonConnectChild[j].Item.PLine.StartPoint))
+                        {
+                            nonConnectChild[i].Item.BrotherItem = nonConnectChild[j].Item;
+                            nonConnectChild[i].Item.WayCount = 4;
+                        }
+                    }
+                }
+            }
+
+        }
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Point3d pt)
+        {
+            var box = node.Item.PLine.ExtendLine(10).Buffer(10);
+
+            if (box.Contains(pt))
+            {
+                node.Item.PipeWidth = 100.0;
+                node.Item.PipeLevel = PIPELEVEL.LEVEL4;
+                if(node.Parent != null)
+                {
+                    if(node.Parent.Children.Count == 1)
+                    {
+                        FindFcuNode(node.Parent);
+                    }
+                }
+                return;
+            }
+
+            foreach (var item in node.Children)
+            {
+                FindFcuNode(item, pt);
+            }
+        }
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            node.Item.PipeLevel = PIPELEVEL.LEVEL3;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    FindFcuNode(node.Parent);
+                }
+            }
+        }
+
+        public static bool IsContains(Line l1,Line l2)
+        {
+            var box = l1.ExtendLine(10).Buffer(10);
+            if(box.Contains(l2.StartPoint) && box.Contains(l2.EndPoint))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        
     }
 }

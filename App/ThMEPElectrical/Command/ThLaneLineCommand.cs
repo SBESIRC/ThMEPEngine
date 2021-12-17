@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using AcHelper.Commands;
@@ -19,6 +20,13 @@ namespace ThMEPElectrical.Command
 {
     public class ThLaneLineCommand : IAcadCommand, IDisposable
     {
+        private List<string> LaneLineLayers;
+
+        public ThLaneLineCommand()
+        {
+            LaneLineLayers = new List<string>();
+        }
+
         public void Dispose()
         {
             //
@@ -28,6 +36,13 @@ namespace ThMEPElectrical.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var pr = Active.Editor.GetString("\n请输入图层名，以逗号分隔");
+                if (pr.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                LaneLineLayers = pr.StringResult.Split(',').ToList();
+
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -105,8 +120,9 @@ namespace ThMEPElectrical.Command
 
         private DBObjectCollection LoadLaneLines(Database database, Polyline frame)
         {
-            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
+            using (var laneLineEngine = new ThLaneLineRecognitionEngine())
             {
+                laneLineEngine.LayerFilter = LaneLineLayers;
                 var bFrame = ThMEPFrameService.Buffer(frame, 100000.0);
                 laneLineEngine.Recognize(database, bFrame.Vertices());
                 return laneLineEngine.Spaces.Select(o => o.Boundary).ToCollection();

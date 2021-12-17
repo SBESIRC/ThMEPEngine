@@ -211,3 +211,14 @@ panels:
         - text: "风机基础"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlSBEAM"
+    name: "SBEAM"
+    title: "梁"
+    items:
+        - text: "主梁生成"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "次梁生成"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "双线生成"
+          attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": false, "IsEnabled": false }

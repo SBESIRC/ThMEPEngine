@@ -26,6 +26,8 @@ namespace ThMEPHVAC.FanLayout.Command
         public ThFanLayoutConfigInfo thFanLayoutConfigInfo { set; get; }
         public ThFanLayoutExtractCmd()
         {
+            CommandName = "THXFJ";
+            ActionName = "插入";
         }
         public void Dispose()
         {

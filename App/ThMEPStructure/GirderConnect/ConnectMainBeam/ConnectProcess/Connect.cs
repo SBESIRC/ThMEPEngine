@@ -1,50 +1,75 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using AcHelper;
-using Linq2Acad;
-using DotNetARX;
 using ThCADCore.NTS;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 {
-    class Connect
+    public class Connect
     {
+        private  Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
+        
+        private  Dictionary<Polyline, HashSet<Polyline>> outlineWallsMerged = new Dictionary<Polyline, HashSet<Polyline>>();
+        
+        private  Dictionary<Polyline, List<Point3d>> outline2ZeroPts = new Dictionary<Polyline, List<Point3d>>();
+        
+        private  Dictionary<Polyline, Point3dCollection> outlineNearPts = new Dictionary<Polyline, Point3dCollection>();
+        
+        private  Point3dCollection allPts = new Point3dCollection();
+        
+        private  HashSet<Point3d> borderPts = new HashSet<Point3d>();
+        
+        private  Point3dCollection zeroPtCollections = new Point3dCollection();
+
+        private  List<Point3d> zeroPts = new List<Point3d>();
+
+        private  HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
+
+        private  Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+
+        private  Dictionary<Point3d, Point3d> closeBorderLines = new Dictionary<Point3d, Point3d>();
+
+        public Connect()
+        {
+            //
+        }
         /// <summary>
         /// Connect Steps
         /// </summary>
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static Dictionary<Point3d, HashSet<Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
-            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, AcadDatabase acdb = null)
+        public Dictionary<Point3d, HashSet<Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
-            //Steps:
-            //1.1:Get near points of outlines
-            Dictionary<Polyline, Point3dCollection> outlineNearPts = new Dictionary<Polyline, Point3dCollection>();
-            foreach (var pl in outlineWalls.Keys)
+            if(clumnPts.Count == 0)
             {
-                outlineNearPts.Add(pl, new Point3dCollection());
+                return null;
             }
-            PointsDealer.VoronoiDiagramNearPoints(clumnPts, outlineNearPts);
-
-            Dictionary<Polyline, List<Point3d>> outline2ZeroPts = new Dictionary<Polyline, List<Point3d>>();
-            //HashSet<Point3d> zeroPts = new HashSet<Point3d>();
-            Point3dCollection allPts = new Point3dCollection();
-            HashSet<Point3d> borderPts = new HashSet<Point3d>();
+            //Steps:
+            //1.0: Merge "outlineWalls" and "outerWalls"
+            outlineWalls.ForEach(o => outlineWallsMerged.Add(o.Key, o.Value));
+            outerWalls.ForEach(o => outlineWallsMerged.Add(o.Key, o.Value));
+            //1.1:Get near points of outlines
+            foreach (var pl in outlineWallsMerged.Keys)
+            {
+                if (!outlineNearPts.ContainsKey(pl))
+                {
+                    outlineNearPts.Add(pl, new Point3dCollection());
+                }
+            }
             foreach (Point3d clumnPt in clumnPts)
             {
                 allPts.Add(clumnPt);
+                zeroPtCollections.Add(clumnPt);
             }
             foreach (var outlineClumn in outlineClumns)
             {
@@ -57,25 +82,39 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     allPts.Add(pt);
                     borderPts.Add(pt);
                     outline2ZeroPts[outlineClumn.Key].Add(pt);
+                    zeroPtCollections.Add(pt);
                 }
             }
-            //1.2:Get border points on/in outlines
-            Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
-            StructureBuilder.PriorityBorderPoints(outlineNearPts, outlineWalls, outlineClumns, outline2BorderNearPts, ref outline2ZeroPts);
+
+            //1.2
+            BorderConnectToVDNear(clumnPts, outlineClumns);
+
+            foreach (var outline2ZeroPt in outline2ZeroPts)
+            {
+                zeroPts.AddRange(outline2ZeroPt.Value);
+                foreach (var pt in outline2ZeroPt.Value)
+                {
+                    zeroPtCollections.Add(pt);
+                }
+            }
 
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
-                foreach (var borderPt in borderPt2NearPts.Keys)
+                foreach (var borderPt2NearPt in borderPt2NearPts)
                 {
+                    var borderPt = borderPt2NearPt.Key;
                     borderPts.Add(borderPt);
                     allPts.Add(borderPt);
+                    zeroPtCollections.Add(borderPt);
                 }
             }
 
+            zeroPtCollections = StructureDealer.ReduceSimilarPoints(zeroPtCollections);
+
             //1.3:DT/VDconnect points with borderPoints and clumnPoints
             //HashSet<Tuple<Point3d, Point3d>> tuples = StructureBuilder.DelaunayTriangulationConnect(allPts);
-            HashSet<Tuple<Point3d, Point3d>> tuples = StructureBuilder.VoronoiDiagramConnect(allPts);
-            Dictionary<Point3d, HashSet<Point3d>> dicTuples = LineDealer.TuplesStandardize(tuples, allPts);
+            tuples = StructureBuilder.VoronoiDiagramConnect(allPts);
+            dicTuples = LineDealer.TuplesStandardize(tuples, allPts);
 
             //1.4:find true border points with it`s near point of a outline
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
@@ -101,74 +140,27 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.AddSpecialLine(outline2BorderNearPts, dicTuples);
 
             //2.1、delete connect up to four
-            StructureDealer.DeleteConnectUpToFourA(dicTuples, outline2BorderNearPts);
+            StructureDealer.DeleteConnectUpToFourA(dicTuples, ref outline2BorderNearPts);
             
             //2.2 close border
-            Dictionary<Point3d, Point3d> closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
-            //ShowDic(closeBorderLines, 2);
-            foreach (var closeBorderLine in closeBorderLines)
-            {
-                if (!dicTuples.ContainsKey(closeBorderLine.Key))
-                {
-                    dicTuples.Add(closeBorderLine.Key, new HashSet<Point3d>());
-                }
-                if (!dicTuples[closeBorderLine.Key].Contains(closeBorderLine.Value))
-                {
-                    dicTuples[closeBorderLine.Key].Add(closeBorderLine.Value);
-                }
-            }
+            closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
 
-            //3.0 Split & Merge
-            LineDealer.DicTuplesStandardize(dicTuples, allPts);
-            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
-            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines, acdb);
-            //3.1、splic polyline
-            StructureBuilder.SplitBlock(findPolylineFromLines, acdb, closeBorderLines);
+            //3.0 分割、合并区域
+            dicTuples = SplitAndMerge(dicTuples, allPts, closeBorderLines);
 
-            //ShowHash(findPolylineFromLines.Keys.ToList());
-            //3.2、merge fragments and split if possible
-            StructureBuilder.MergeFragments(findPolylineFromLines, acdb, closeBorderLines);
-            var mainBeam = findPolylineFromLines.Keys.ToHashSet();
-            foreach (var borderLine in closeBorderLines)
-            {
-                var tuple = new Tuple<Point3d, Point3d>(borderLine.Key, borderLine.Value);
-                var converseTuple = new Tuple<Point3d, Point3d>(borderLine.Value, borderLine.Key);
-                if (mainBeam.Contains(tuple))
-                {
-                    mainBeam.Remove(tuple);
-                }
-                if (mainBeam.Contains(converseTuple))
-                {
-                    mainBeam.Remove(converseTuple);
-                }
-            }
-            //ShowDic(dicTuples);
-            //4.0 Deal with Intersect Near Pointsnetload
-            dicTuples.Clear();
-            dicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
-            //ShowDic(dicTuples, 1);
-            var itcNearPts = PointsDealer.FindIntersectNearPt(allPts, outlineWalls, ref outline2BorderNearPts);
+            var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts);
             
-            //ShowInfo.ShowPoints(itcNearPts.ToList(), 'O', 2, 600);///////////
-            //ShowInfo.ShowPoints(allPts, 'X', 2, 600);
-            LineDealer.DeleteSameClassLine(itcNearPts, mainBeam); //删除相交近点互相之间的连线
-            LineDealer.DeleteDiffClassLine(itcNearPts, borderPts, dicTuples);//删除近点和其连接的边界点之间的连线
+            LineDealer.DeleteSameClassLine(itcBorderPts, dicTuples);//删除相交近点互相之间的连线
+            LineDealer.DeleteDiffClassLine(itcBorderPts, borderPts, dicTuples);//删除近点和其连接的边界点之间的连线
             //LineDealer.DeleteDiffClassLine(itcNearPts, itcNearPts, dicTuples);
 
             //StructureDealer.DeleteConnectUpToFour(dicTuples, outline2BorderNearPts);
 
-            //add to four constrained
-            foreach(var tup in mainBeam)
-            {
-                AddTupleToDicTuple(tup, dicTuples);
-                StructureDealer.AddLineTodicTuples(tup.Item1, tup.Item2, ref dicTuples);
-                StructureDealer.AddLineTodicTuples(tup.Item2, tup.Item1, ref dicTuples);
-            }
-
-            StructureDealer.AddConnectUpToFour(dicTuples, outline2BorderNearPts, allPts, itcNearPts);
+            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
+            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
             PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
             //delete to four
-            StructureDealer.DeleteConnectUpToFourB(dicTuples, outline2BorderNearPts); //删除的时候，如果删除点的对点是外边线上的并且只有这一个连线，则不能删掉，其他都可删
+            StructureDealer.DeleteConnectUpToFourB(dicTuples, ref outline2BorderNearPts); //删除的时候，如果删除点的对点是外边线上的并且只有这一个连线，则不能删掉，其他都可删
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt in borderPt2NearPts.Keys)
@@ -184,75 +176,161 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 }
             }
             //在此之前 outline2BorderNearPts 有问题， 有些点是空的，可能是较好的点但被删除了。、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、
-            StructureDealer.ReduceSimilarLine(ref dicTuples);
-            List<Point3d> zeroPts = new List<Point3d>();
-            foreach(var outline2ZeroPt in outline2ZeroPts)
-            {
-                zeroPts.AddRange(outline2ZeroPt.Value);
-            }
-            StructureDealer.ReduceSimilarPoints(ref dicTuples, zeroPts);
-            //PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
-            HashSet<Tuple<Point3d, Point3d>> closeBorderLineB = StructureDealer.CloseBorder(outline2BorderNearPts, outline2ZeroPts);
-            string outlineLayer = "TH_AI_OUTLINE";
-            LayerDealer.AddLayer(outlineLayer, 1);
-            LayerDealer.Output(closeBorderLineB, outlineLayer);
+            //StructureDealer.ReduceSimilarPoints(ref dicTuples, zeroPts);
 
-            //foreach(var tup in closeBorderLineB)
-            //{
-            //    AddTupleToDicTuple(tup, dicTuples);
-            //}
-            //foreach (var item in dicTuples.Keys)
-            //{
-            //    allPts.Add(item);
-            //}
-            //StructureDealer.AddConnectUpToFour(dicTuples, outline2BorderNearPts, allPts, itcNearPts);
-            //StructureBuilder.WallConnect(dicTuples, outline2ZeroPts);
+            //PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
+            StructureDealer.ReduceSimilarLine(ref dicTuples); //快
+            StructureDealer.ReduceSimilarPoints(ref dicTuples, zeroPts); //较快
+            foreach (var item in dicTuples.Keys)
+            {
+                allPts.Add(item);
+            }
+            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
+            StructureDealer.RemoveIntersectLines(ref dicTuples); //慢
+            LineDealer.DicTuplesStandardize(ref dicTuples, zeroPts); //耗时
+
+            //SplitAndMerge(ref dicTuples, allPts, outline2BorderNearPts);
+            List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
+
+            //dicTuples = OnlySplit(dicTuples, allPts, closebdLines);
+            //WallConnect(dicTuples, outline2ZeroPts);
+            StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
+            foreach (var tup in closebdLines)
+            {
+                StructureDealer.DeleteFromDicTuples(tup.Item1, tup.Item2, ref dicTuples);
+            }
+            itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outline2BorderNearPts.Keys.ToList(), ref outline2BorderNearPts);
+            LineDealer.DeleteSameClassLine(itcBorderPts, dicTuples);
             return dicTuples;
         }
 
-        public static void ShowDic(Dictionary<Point3d, HashSet<Point3d>> dicTuples, int color = 1)
+
+        private void BorderConnectToVDNear(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
         {
-            foreach(var dic in dicTuples)
-            {
-                foreach(var pt in dic.Value)
-                {
-                    ShowInfo.DrawLine(dic.Key, pt, color);
-                }
-            }
-        }
-        public static void ShowDic(Dictionary<Point3d, Point3d> dicTuples, int color = 2)
-        {
-            foreach (var dic in dicTuples)
-            {
-                ShowInfo.DrawLine(dic.Key, dic.Value, color);
-            }
-        }
-        public static void ShowHash(List<Tuple<Point3d, Point3d>> tuples, int color = 2)
-        {
-            foreach(var tuple in tuples)
-            {
-                ShowInfo.DrawLine(tuple.Item1, tuple.Item2, color);
-            }
+            //1、获取NearPt  Get near points of outlines
+            PointsDealer.VoronoiDiagramNearPoints(clumnPts, outlineNearPts);
+            //2、获取“BorderPt与NearPt的连接”
+            //Get border points on/in outlines
+            StructureBuilder.PriorityBorderPoints(outlineNearPts, outlineWallsMerged, outlineClumns, ref outline2BorderNearPts, ref outline2ZeroPts);
+            //3、删减无用的“BorderPt与NearPt的连接”
         }
 
-        public static void AddTupleToDicTuple(Tuple<Point3d, Point3d> tuple , Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        private Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
         {
-            if (!dicTuples.ContainsKey(tuple.Item1))
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            //Split & Merge
+            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
+            var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
+            //splic polyline
+            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
+            //merge fragments and split if possible
+            StructureBuilder.MergeFragments(findPolylineFromLines, closeBorderLines);
+            //Deal with Intersect Near Pointsnetload
+            Dictionary<Point3d, HashSet<Point3d>> newDicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
+            return newDicTuples;
+        }
+
+        private Dictionary<Point3d, HashSet<Point3d>> OnlySplit(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
+        {
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            //Split & Merge
+            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
+            var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
+            //splic polyline
+            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
+            //merge fragments and split if possible
+            //Deal with Intersect Near Pointsnetload
+            Dictionary<Point3d, HashSet<Point3d>> newDicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
+            return newDicTuples;
+        }
+
+        /// <summary>
+        /// 分情况连接边界上的点
+        /// </summary>
+        /// <param name="dicTuples"></param>
+        /// <param name="outlineWalls"></param>
+        /// <param name="outerWalls"></param>
+        /// <param name="olCrossPts"></param>
+        private List<Tuple<Point3d, Point3d>> BorderPtsConnect(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
+            Dictionary<Polyline, HashSet<Polyline>> outerWalls, Dictionary<Polyline, HashSet<Point3d>> olCrossPts, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            List<Tuple<Point3d, Point3d>> closeBorderLines = new List<Tuple<Point3d, Point3d>>();
+            Dictionary<Point3d, Point3d> closeBorderLineA = StructureDealer.CloseBorderA(outlineWalls.Keys.ToHashSet(), dicTuples.Keys.ToList());
+            string outlineLayerA = "TH_AI_HOUSEBOUND";
+            LayerDealer.AddLayer(outlineLayerA, 1);
+            LayerDealer.Output(closeBorderLineA, outlineLayerA);
+            foreach(var dic in closeBorderLineA)
             {
-                dicTuples.Add(tuple.Item1, new HashSet<Point3d>());
+                StructureDealer.AddLineTodicTuples(dic.Key, dic.Value, ref dicTuples);
+                StructureDealer.AddLineTodicTuples(dic.Value, dic.Key, ref dicTuples);
+                closeBorderLines.Add(new Tuple<Point3d, Point3d>(dic.Key, dic.Value));
             }
-            if (!dicTuples[tuple.Item1].Contains(tuple.Item2))
+            var oriPtsB = dicTuples.Keys.ToList();
+            foreach (var pts in olCrossPts.Values)
             {
-                dicTuples[tuple.Item1].Add(tuple.Item2);
+                oriPtsB.AddRange(pts);
             }
-            if (!dicTuples.ContainsKey(tuple.Item2))
+            //oriPtsB = StructureDealer.ReduceSimilarPoints(oriPtsB, zeroPts);
+            Dictionary<Point3d, Point3d> closeBorderLineB = StructureDealer.CloseBorderA(outerWalls.Keys.ToHashSet(), oriPtsB);//oriPtsB
+            Dictionary<Point3d, HashSet<Point3d>> newdicTuples = LineDealer.TuplesStandardize(closeBorderLineB, dicTuples.Keys.ToList());
+            var unifiedTyples = MainBeamPostProcess.UnifyTuples(newdicTuples);
+            foreach (var unifiedTyple in unifiedTyples)
             {
-                dicTuples.Add(tuple.Item2, new HashSet<Point3d>());
+                StructureDealer.AddLineTodicTuples(unifiedTyple.Item1, unifiedTyple.Item2, ref dicTuples);
+                StructureDealer.AddLineTodicTuples(unifiedTyple.Item2, unifiedTyple.Item1, ref dicTuples);
+                closeBorderLines.Add(new Tuple<Point3d, Point3d>(unifiedTyple.Item1, unifiedTyple.Item2));
             }
-            if (!dicTuples[tuple.Item2].Contains(tuple.Item1))
+            string outlineLayerB = "TH_AI_WALLBOUND";
+            LayerDealer.AddLayer(outlineLayerB, 2);
+            LayerDealer.Output(unifiedTyples, outlineLayerB);
+            return closeBorderLines;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="dicTuples">已经加入房屋边框的dicTuples</param>
+        /// <param name="outline2ZeroPts"></param>
+        private void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
+        {
+            var itcBorderPts = PointsDealer.FindIntersectBorderPt(dicTuples.Keys.ToList(), outline2ZeroPts.Keys.ToList());
+            var outlines = outline2ZeroPts.Keys.ToList();
+
+            //连接相同的边界
+            //连接逻辑：
+            //保留连接线中点不在这个边界内的线
+            //连接线两端的点不在同一条直线上
+            //同线判定：(（a到lineA<500 && b到lineA<500）||（b到lineB<500 && a到lineB<500）)  lineA\lineB分别为a\b最近的线
+            foreach (var outlineA in outlines)
             {
-                dicTuples[tuple.Item2].Add(tuple.Item1);
+                var outlineAPts = outline2ZeroPts[outlineA];
+                //创建适合当前情况的dictuples
+                foreach (var outlineAPtA in outlineAPts)
+                {
+                    if (dicTuples[outlineAPtA].Count > 2)
+                    {
+                        continue;
+                    }
+                    Point3d verticalPt = outlineA.GetClosePoint(outlineAPtA);
+                    Line closetLine = GetObject.FindLineContainPoint(outlineA, verticalPt);
+
+                    //StructureDealer.AddConnectUpToFour(ref dicTuples, outlineAPts, itcBorderPts);
+                    //foreach (var outlineAPtB in outlineAPts)
+                    //{
+                    //    if(closetLine.DistanceTo(outlineAPtB, false) > 500 && dicTuples[outlineAPtB].Count < 4)
+                    //    {
+                    //        StructureDealer.AddConnectUpToFour(ref dicTuples, outlineAPts, itcBorderPts);
+                    //    }
+                    //}
+                }
+
             }
+
+            //连接不同的边界
+            //点上的连接至少为1
+            //连接一边有墙点，一边没有墙点
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private ThBuildingElementRecognitionEngine BeamEngine
+        private ThBeamBuilderEngine BeamEngine
         {
             get
             {

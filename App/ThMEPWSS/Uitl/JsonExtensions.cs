@@ -245,6 +245,7 @@ namespace ThMEPWSS.CADExtensionsNs
             }
         }
         public static Point2d GetCenter(this Geometry geo) => geo.ToGRect().Center;
+        public static GArc ToGArc(this Arc arc) => new(arc.Center.X, arc.Center.Y, arc.Radius, arc.StartAngle, arc.EndAngle, arc.Normal.DotProduct(Vector3d.ZAxis) < 0);
         public static GRect ToGRect(this Geometry geo)
         {
             var env = geo.EnvelopeInternal;

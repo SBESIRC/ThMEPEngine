@@ -1,12 +1,16 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using ThCADExtension;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using System;
-using ThCADExtension;
+using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
+using NFox.Cad;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -72,7 +76,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// 中心往两边偏移的1、2号线
         /// </summary>
         public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; } = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
-
+        protected ThCADCore.NTS.ThCADCoreNTSSpatialIndex SideLineSpatialIndex { get; set; }
         /// <summary>
         /// 灯编号的跳线要偏移的方向标记
         /// 大于0->相对车道中心线，往外偏；小于零->相对车道中心线，往里偏
@@ -83,6 +87,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         protected List<ThLightNodeLink> LightNodeLinks { get; set; } = new List<ThLightNodeLink>();
         protected bool IsArcPortOnLightSide = true;
         private ThJumpWireDirectionQuery JumpWireDirectionQuery { get; set; }
+        /// <summary>
+        /// 用于收集在T型或十字型绘制连接线转接点
+        /// </summary>
+        protected List<Point3d> CrossInstallPoints { get; set; } = new List<Point3d>();
+        protected double CrossInstallPtStep = 300.0;
+        protected double LightLinkShortenDis = 10.0; // 用于把连接两个灯直线的线内缩，查询是否与其它灯线相交
         public LightWireFactory()
         {
             DefaultNumbers = new List<string>();
@@ -269,6 +279,118 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
             return Tuple.Create(startPt, endPt);
+        }
+        protected bool IsUsed(Point3d pt)
+        {
+            // 检查拐角点是否被使用
+            return CrossInstallPoints
+                .Where(o => o.DistanceTo(pt) <= 1.0)
+                .Any();
+        }
+        private Point3d? CalculateInstallPt(Point3d start, Point3d intersPt)
+        {
+            var vec = intersPt.GetVectorTo(start);
+            var validPts = new List<Point3d>();
+            validPts.Add(intersPt.GetExtentPoint(vec, CrossInstallPtStep));
+            validPts.Add(intersPt.GetExtentPoint(vec, CrossInstallPtStep * 2.0));
+            var otherPts = GetCurrentCoordPts(intersPt, CrossInstallPtStep);
+            validPts.AddRange(otherPts.Where(o => intersPt.GetVectorTo(o).IsSameDirection(vec)).ToList());
+            foreach (Point3d pt in validPts)
+            {
+                if (!IsUsed(pt))
+                {
+                    return pt;
+                }
+            }
+            return null;
+        }
+
+        private Point3d? CalculateRandomInstallPt(Point3d start, Point3d intersPt, double step)
+        {
+            var vec = intersPt.GetVectorTo(start);
+            double distance = step;
+            var pts = new List<Point3d>();
+            while (distance <= intersPt.DistanceTo(start) / 2.0)
+            {
+                pts.Add(intersPt.GetExtentPoint(vec, distance));
+                distance += step;
+            }
+            foreach (Point3d pt in pts)
+            {
+                if (!IsUsed(pt))
+                {
+                    return pt;
+                }
+            }
+            return null;
+        }
+
+        private List<Point3d> GetCurrentCoordPts(Point3d wcsPt, double length)
+        {
+            var results = new List<Point3d>();
+            var wcs2Ucs = AcHelper.Active.Editor.WCS2UCS();
+            var ucs2Wcs = AcHelper.Active.Editor.UCS2WCS();
+            var ucsPt = wcsPt.TransformBy(wcs2Ucs);
+            var pt1 = ucsPt.GetExtentPoint(Vector3d.XAxis, length);
+            var pt2 = ucsPt.GetExtentPoint(Vector3d.YAxis, length);
+            var pt3 = ucsPt.GetExtentPoint(Vector3d.XAxis.Negate(), length);
+            var pt4 = ucsPt.GetExtentPoint(Vector3d.YAxis.Negate(), length);
+            results.Add(pt1.TransformBy(ucs2Wcs));
+            results.Add(pt2.TransformBy(ucs2Wcs));
+            results.Add(pt3.TransformBy(ucs2Wcs));
+            results.Add(pt4.TransformBy(ucs2Wcs));
+            return results;
+        }
+
+        protected Point3d FindBrigePt(Point3d start, Point3d initBrigePt)
+        {
+            var newBrigePt = initBrigePt;
+            if (IsUsed(newBrigePt))
+            {
+                var newCornerPtRes = CalculateInstallPt(start, initBrigePt);
+                if (newCornerPtRes.HasValue)
+                {
+                    newBrigePt = newCornerPtRes.Value;
+                }
+                else
+                {
+                    newCornerPtRes = CalculateRandomInstallPt(start, initBrigePt, CrossInstallPtStep * 0.75);
+                    if (newCornerPtRes.HasValue)
+                    {
+                        newBrigePt = newCornerPtRes.Value;
+                    }
+                }
+            }
+            return newBrigePt;
+        }
+        public void BuildSideLinesSpatialIndex()
+        {
+            var lines = new List<Line>();
+            CenterSideDicts.ForEach(o =>
+            {
+                lines.AddRange(o.Value.Item1);
+                lines.AddRange(o.Value.Item2);
+            });
+            SideLineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
+        }
+        protected DBObjectCollection QuerySideLines(Polyline envelop)
+        {
+            if(SideLineSpatialIndex==null)
+            {
+                return new DBObjectCollection();
+            }
+            return SideLineSpatialIndex.SelectCrossingPolygon(envelop);
+        }
+        protected Tuple<Point3d,Point3d> Shorten(Point3d start,Point3d end,double shortenDis)
+        {
+            var newSp = start.GetExtentPoint(start.GetVectorTo(end), shortenDis);
+            var newEp = end.GetExtentPoint(end.GetVectorTo(start), shortenDis);
+            return Tuple.Create(newSp, newEp);
+        }
+        protected bool CheckLightLinkConflictedSideLines(Point3d startPt, Point3d endPt, double width)
+        {
+            var envelop = ThDrawTool.ToOutline(startPt, endPt, width);
+            return QuerySideLines(envelop).Count > 0;
         }
     }
 }

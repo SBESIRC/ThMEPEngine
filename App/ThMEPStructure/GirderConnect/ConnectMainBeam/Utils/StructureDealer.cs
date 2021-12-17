@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+using NFox.Cad;
 using Linq2Acad;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 using ThCADCore.NTS;
+
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -27,7 +22,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             //Recursion boundary
             int n = tuples.Count;
-            if (n == 0 || n > 10)
+            if (n == 0 || n > 20)
             {
                 return;
             }
@@ -226,13 +221,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             List<Tuple<Point3d, Point3d>> evenLines = MergePolyline(polylineA, polylineB);
             List<List<Tuple<Point3d, Point3d>>> polylines = new List<List<Tuple<Point3d, Point3d>>>();
             SplitPolyline(evenLines, polylines);
-            foreach (var lines in polylines)
-            {
-                foreach (var line in lines)
-                {
-                    ShowInfo.DrawLine(line.Item1, line.Item2, 130);
-                }
-            }
         }
 
         /// <summary>
@@ -264,7 +252,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
                 foreach (Point3d nearPt in dicOutl2Pts.Value) //for each near point on a outline
                 {
-                    ShowInfo.ShowPointAsX(nearPt, 210, 520);
+                    //ShowInfo.ShowPointAsX(nearPt, 210, 520);
                     if (tmpDicTuples.ContainsKey(nearPt))
                     {
                         minDis = double.MaxValue;
@@ -274,7 +262,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             if (innerPts.Contains(curCntPt))
                             {
-                                ShowInfo.ShowPointAsO(curCntPt, 1, 300);
+                                //ShowInfo.ShowPointAsO(curCntPt, 1, 300);
                                 curDis = curCntPt.DistanceTo(nearPt);
                                 if (curDis < minDis)//; && preCntPt != nearPt)
                                 {
@@ -303,7 +291,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (!dicTuples[stayPt].Contains(nearPt))
                             {
                                 dicTuples[stayPt].Add(nearPt);
-                                ShowInfo.DrawLine(stayPt, nearPt);
+                                //ShowInfo.DrawLine(stayPt, nearPt);
                             }
                             if (!dicTuples.ContainsKey(nearPt))
                             {
@@ -312,7 +300,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (!dicTuples[nearPt].Contains(stayPt))
                             {
                                 dicTuples[nearPt].Add(stayPt);
-                                ShowInfo.DrawLine(nearPt, stayPt);
+                                //ShowInfo.DrawLine(nearPt, stayPt);
                             }
                         }
                     }
@@ -413,7 +401,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
 
             //4、Return the vertical point on outline
-            ShowInfo.ShowPointAsU(verticalPt, 7, 200); //common or do not delete
+            //ShowInfo.ShowPointAsU(verticalPt, 7, 200); //common or do not delete
             return verticalPt;
         }
 
@@ -422,7 +410,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="outline2BorderNearPts"></param>
-        public static void DeleteConnectUpToFourA(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+        public static void DeleteConnectUpToFourA(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             foreach (var dic in dicTuples)
             {
@@ -499,7 +487,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="outline2BorderNearPts"></param>
-        public static void DeleteConnectUpToFourB(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
+        public static void DeleteConnectUpToFourB(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
         {
             foreach (var dic in dicTuples)
             {
@@ -602,13 +590,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 将点的连接增加至4个
         /// </summary>
         /// <param name="dicTuples"></param>
-        public static void AddConnectUpToFour(Dictionary<Point3d, HashSet<Point3d>> dicTuples, 
-            Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Point3dCollection basePts, HashSet<Point3d> itcNearPts)
+        public static void AddConnectUpToFour(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, HashSet<Point3d> itcNearPts = null)
         {
             double partice = Math.PI / 36;
             foreach (Point3d basePt in basePts)
             {
-                if (itcNearPts.Contains(basePt))
+                if (itcNearPts == null || itcNearPts.Contains(basePt))
                 {
                     continue;
                 }
@@ -619,58 +606,58 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     int cnt = nowCntPts.Count;
                     if (cnt == 1)
                     {
-                        ShowInfo.ShowPointAsO(basePt, 2, 300);
+                        //ShowInfo.ShowPointAsO(basePt, 2, 300);
                         var baseVector = nowCntPts[0] - basePt;
                         for (int i = 1; i <= 3; ++i)
                         {
-                            var ansPt = GetObject.GetPointByDirection(basePt ,baseVector.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis), basePts, partice * 3);
+                            var ansPt = GetObject.GetPointByDirection(basePt ,baseVector.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis), basePts, partice * 3, 13000);
                             AddLineTodicTuples(basePt, ansPt, ref dicTuples);
                             AddLineTodicTuples(ansPt, basePt, ref dicTuples);
-                            ShowInfo.DrawLine(ansPt, basePt, 2);
+                            //ShowInfo.DrawLine(ansPt, basePt, 2);
                         }
                     }
                     else if (cnt == 2)
                     {
-                        ShowInfo.ShowPointAsO(basePt, 3, 600);
+                        //ShowInfo.ShowPointAsO(basePt, 3, 600);
                         var vecA = nowCntPts[0] - basePt;
                         var vecB = nowCntPts[1] - basePt;
                         double baseAngel = vecA.GetAngleTo(vecB);
                         if (baseAngel > partice * 18 && baseAngel < partice * 22)
                         {
-                            var ansPtA = GetObject.GetPointByDirection(basePt, -vecA, basePts, partice * 3);
+                            var ansPtA = GetObject.GetPointByDirection(basePt, -vecA, basePts, partice * 3, 13000);
                             AddLineTodicTuples(basePt, ansPtA, ref dicTuples);
                             AddLineTodicTuples(ansPtA, basePt, ref dicTuples);
-                            ShowInfo.DrawLine(ansPtA, basePt, 3);
-                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecB, basePts, partice * 3);
+                            //ShowInfo.DrawLine(ansPtA, basePt, 3);
+                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecB, basePts, partice * 3, 13000);
                             AddLineTodicTuples(basePt, ansPtB, ref dicTuples);
                             AddLineTodicTuples(ansPtB, basePt, ref dicTuples);
-                            ShowInfo.DrawLine(ansPtB, basePt, 3);
+                            //ShowInfo.DrawLine(ansPtB, basePt, 3);
                         }
                         else if(baseAngel > Math.PI - partice * 4)
                         {
-                            var ansPtA = GetObject.GetPointByDirection(basePt, vecA + vecB, basePts, partice * 3);
+                            var ansPtA = GetObject.GetPointByDirection(basePt, vecA + vecB, basePts, partice * 3, 13000);
                             AddLineTodicTuples(basePt, ansPtA, ref dicTuples);
                             AddLineTodicTuples(ansPtA, basePt, ref dicTuples);
-                            ShowInfo.DrawLine(ansPtA, basePt, 5);
-                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecA - vecB, basePts, partice * 3);
+                            //ShowInfo.DrawLine(ansPtA, basePt, 5);
+                            var ansPtB = GetObject.GetPointByDirection(basePt, -vecA - vecB, basePts, partice * 3, 13000);
                             AddLineTodicTuples(basePt, ansPtB, ref dicTuples);
                             AddLineTodicTuples(ansPtB, basePt, ref dicTuples);
-                            ShowInfo.DrawLine(ansPtB, basePt, 6);
+                            //ShowInfo.DrawLine(ansPtB, basePt, 6);
                         }
                     }
                     else if(cnt == 3)
                     {
-                        ShowInfo.ShowPointAsO(basePt, 7, 900);
+                        //ShowInfo.ShowPointAsO(basePt, 7, 900);
                         var findVec = GetObject.GetDirectionByThreeVecs(basePt, nowCntPts[0], nowCntPts[1], nowCntPts[2]);
-                        var ansPt = GetObject.GetPointByDirection(basePt, findVec, basePts, partice * 3);
+                        var ansPt = GetObject.GetPointByDirection(basePt, findVec, basePts, partice * 3, 13000);
                         AddLineTodicTuples(basePt, ansPt, ref dicTuples);
                         AddLineTodicTuples(ansPt, basePt, ref dicTuples);
-                        ShowInfo.DrawLine(ansPt, basePt, 7);
+                        //ShowInfo.DrawLine(ansPt, basePt, 7);
                     }
                 }
                 else
                 {
-                    ShowInfo.ShowPointAsO(basePt, 2, 1000); //孤零零点
+                    //ShowInfo.ShowPointAsO(basePt, 2, 1000); //孤零零点
                     //cnt = 0;
                 }
             }
@@ -717,6 +704,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansDic;
         }
+
         public static HashSet<Tuple<Point3d, Point3d>> CloseBorder(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Polyline, List<Point3d>> outline2ZeroPts = null)
         {
             Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
@@ -760,26 +748,124 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         ansTuple.Add(new Tuple<Point3d, Point3d>(points[i % points.Count], points[i - 1]));
                     }
                 }
-                ansTuple.Add(new Tuple<Point3d, Point3d>(points[points.Count - 1], points[0]));
+                if (points.Count > 1)
+                {
+                    ansTuple.Add(new Tuple<Point3d, Point3d>(points[points.Count - 1], points[0]));
+                }
             }
             return ansTuple;
         }
 
-        /// <summary>
-        /// 将一条线加入字典结构
-        /// </summary>
-        /// <param name="tuple"></param>
-        /// <param name="dicTuples"></param>
-        public static void AddLineTodicTuples(Point3d ptA, Point3d ptB ,ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static Dictionary<Point3d, Point3d> CloseBorderA(HashSet<Polyline> polylines, List<Point3d> oriPoints)
         {
-            if (!dicTuples.ContainsKey(ptA))
+            var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints);
+            Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
+            foreach (var dic in outline2BorderPts)
             {
-                dicTuples.Add(ptA, new HashSet<Point3d>());
+                Polyline polyline = dic.Key;
+                List<Point3d> points = new List<Point3d>();
+                int n = polyline.NumberOfVertices;
+                for (int i = 0; i < n; ++i)
+                {
+                    Line tmpLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
+                    List<Point3d> tmpPts = new List<Point3d>();
+                    foreach (var borderPt in dic.Value)
+                    {
+                        if (borderPt.DistanceTo(tmpLine.GetClosestPointTo(borderPt, false)) < 700)
+                        {
+                            tmpPts.Add(borderPt);
+                        }
+                    }
+                    tmpPts = tmpPts.OrderBy(p => p.DistanceTo(tmpLine.StartPoint)).ToList();
+                    points.AddRange(tmpPts);
+                }
+                for (int i = 1; i <= points.Count; i++)
+                {
+                    if (!ansDic.ContainsKey(points[i % points.Count]))
+                    {
+                        ansDic.Add(points[i % points.Count], points[i - 1]);
+                    }
+                }
             }
-            if (!dicTuples[ptA].Contains(ptB))
+            return ansDic;
+        }
+        public static Dictionary<Point3d, Point3d> CloseBorderB(HashSet<Polyline> polylines, List<Point3d> oriPoints)
+        {
+            var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints);
+            Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
+            foreach (var dic in outline2BorderPts)
             {
-                dicTuples[ptA].Add(ptB);
+                Polyline polyline = dic.Key;
+                List<Point3d> points = new List<Point3d>();
+                int n = polyline.NumberOfVertices;
+                for (int i = 0; i < n; ++i)
+                {
+                    Line tmpLine = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % n));
+                    
+                    List<Point3d> tmpPts = new List<Point3d>();
+                    foreach (var borderPt in dic.Value)
+                    {
+                        if (borderPt.DistanceTo(tmpLine.GetClosestPointTo(borderPt, false)) < 400)
+                        {
+                            tmpPts.Add(borderPt);
+                        }
+                    }
+                    tmpPts = tmpPts.OrderBy(p => p.DistanceTo(tmpLine.StartPoint)).ToList();
+                    points.AddRange(tmpPts);
+                }
+                HashSet<Point3d> ptVisted = new HashSet<Point3d>();
+                int cnt = points.Count;
+                for (int i = 1; i <= cnt; i++)
+                {
+                    Point3d ptSt = points[i - 1];
+                    Point3d ptEd = points[i % points.Count];
+                    if (!ansDic.ContainsKey(ptSt) && !ptVisted.Contains(ptEd))
+                    {
+                        ptVisted.Add(ptSt);
+                        ptVisted.Add(ptEd);
+                        ansDic.Add(ptSt, ptEd);
+                    }
+                }
             }
+            return ansDic;
+        }
+        public static Dictionary<Point3d, Point3d> CloseBorderCL(HashSet<Polyline> polylines, List<Point3d> oriPoints)
+        {
+            var objs = new DBObjectCollection();
+            var centerPolylines = CenterLine.RECCenterLines(polylines);
+            //var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints); //////////使用这个结构可以显著减少复杂度
+
+            //做中心线
+            Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
+            HashSet<Point3d> ptVisit = new HashSet<Point3d>();
+            foreach (var centerPolyline in centerPolylines)
+            {
+                int n = centerPolyline.NumberOfVertices;
+                List<Point3d> points = new List<Point3d>();
+                for (int i = 0; i < n; ++i)
+                {
+                    Line tmpLine = new Line(centerPolyline.GetPoint3dAt(i), centerPolyline.GetPoint3dAt((i + 1) % n));
+                    List<Point3d> tmpPts = new List<Point3d>();
+                    foreach (var borderPt in oriPoints)
+                    {
+                        if (!ptVisit.Contains(borderPt) && borderPt.DistanceTo(tmpLine.GetClosestPointTo(borderPt, false)) < 400)
+                        {
+                            tmpPts.Add(borderPt);
+                            ptVisit.Add(borderPt);
+                        }
+                    }
+                    tmpPts = tmpPts.OrderBy(p => p.DistanceTo(tmpLine.StartPoint)).ToList();
+                    points.AddRange(tmpPts);
+                }
+                for (int i = 1; i <= points.Count; i++)
+                {
+                    if (!ansDic.ContainsKey(points[i % points.Count]))
+                    {
+                        ansDic.Add(points[i % points.Count], points[i - 1]);
+                    }
+                }
+            }
+            return ansDic;
         }
 
         /// <summary>
@@ -787,12 +873,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="tolerance"></param>
-        public static void ReduceSimilarLine(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double tolerance = Math.PI / 15)
+        public static void ReduceSimilarLine(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double tolerance = Math.PI / 8)
         {
             foreach (var dic in dicTuples)
             {
                 int n = dic.Value.Count;
-                if(n <= 1)
+                if (n <= 1)
                 {
                     continue;
                 }
@@ -804,6 +890,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 double curDegree;
                 for (int i = 1; i <= n; ++i)
                 {
+                    if(cntPts[i % n].DistanceTo(cntPts[i - 1]) < 1.0 || dic.Key.DistanceTo(cntPts[i - 1]) < 1.0 || cntPts[i % n].DistanceTo(dic.Key) < 1.0)
+                    {
+                        continue;
+                    }
                     curDegree = (cntPts[i % n] - dic.Key).GetAngleTo(cntPts[i - 1] - dic.Key);
                     if (curDegree < minDegree)
                     {
@@ -811,7 +901,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         minDegreePairPt = new Tuple<Point3d, Point3d>(cntPts[i % n], cntPts[i - 1]);
                     }
                 }
-                if(minDegree > tolerance)
+                if (minDegree > tolerance)
                 {
                     continue;
                 }
@@ -824,8 +914,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     rmPt = minDegreePairPt.Item2;
                 }
+                //ShowInfo.DrawLine(dic.Key, rmPt, 210);
                 --n;
                 dic.Value.Remove(rmPt);
+                if (dicTuples.ContainsKey(rmPt) && dicTuples[rmPt].Contains(dic.Key))
+                {
+                    dicTuples[rmPt].Remove(dic.Key);
+                }
             }
         }
 
@@ -839,27 +934,49 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             var ptVisted = new HashSet<Point3d>();
             List<Point3d> pts = dicTuples.Keys.ToList();
+            Dictionary<Point3d, List<Point3d>> newDicTuples = new Dictionary<Point3d, List<Point3d>>();
+            foreach(var dicTuple in dicTuples)
+            {
+                newDicTuples.Add(dicTuple.Key, dicTuple.Value.ToList());
+            }
             foreach (var ptA in pts)
             {
                 if (ptVisted.Contains(ptA))
                 {
                     continue;
                 }
-                ptVisted.Add(ptA);
+                //记录点ptA附近点所相连的点
                 var closePtlist = new List<Point3d>();
                 double xSum = ptA.X;
                 double ySum = ptA.Y;
-                closePtlist.Add(ptA);
+                ptVisted.Add(ptA);
+                foreach (var cntPtA in newDicTuples[ptA])
+                {
+                    if (dicTuples.ContainsKey(ptA) && dicTuples[ptA].Contains(cntPtA))
+                    {
+                        closePtlist.Add(cntPtA);
+                    }
+                }
                 int cnt = 1;
                 foreach (var ptB in pts)
                 {
-                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance)
+                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance && !ptVisted.Contains(ptB) && !ptVisted.Contains(ptB))
                     {
-                        if (!ptVisted.Contains(ptB))
+                        ptVisted.Add(ptB);
+                        //ShowInfo.ShowPointAsX(ptB, 3, 500);
+                        foreach (var cntPtB in newDicTuples[ptB])
                         {
-                            ptVisted.Add(ptB);
+                            if (dicTuples.ContainsKey(cntPtB) && dicTuples[cntPtB].Contains(ptB))
+                            {
+                                closePtlist.Add(cntPtB);
+                                DeleteFromDicTuples(ptB, cntPtB, ref dicTuples);
+                            }
+                            if (dicTuples.ContainsKey(ptB) && dicTuples[ptB].Contains(cntPtB))
+                            {
+                                closePtlist.Add(cntPtB);
+                                DeleteFromDicTuples(ptB, cntPtB, ref dicTuples);
+                            }
                         }
-                        closePtlist.Add(ptB);
                         xSum += ptB.X;
                         ySum += ptB.Y;
                         ++cnt;
@@ -884,43 +1001,207 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         }
                     }
                 }
+                //ShowInfo.ShowPointAsX(minDisBasePt, 1, 700);
                 //将closePtlist中的所有点都换成minDisBasePt
-                if (!dicTuples.ContainsKey(minDisBasePt))
-                {
-                    dicTuples.Add(minDisBasePt, new HashSet<Point3d>());
-                }
                 foreach (var closePt in closePtlist)
                 {
-                    if (dicTuples.ContainsKey(closePt) && minDisBasePt != closePt)
+                    AddLineTodicTuples(minDisBasePt, closePt, ref dicTuples);
+                    AddLineTodicTuples(closePt, minDisBasePt, ref dicTuples);
+                    //ShowInfo.DrawLine(minDisBasePt, closePt, 1);
+                }
+            }
+        }
+        public static List<Point3d> ReduceSimilarPoints(List<Point3d> pts, List<Point3d> basePoints = null, double tolerance = 900)
+        {
+            var ptVisted = new HashSet<Point3d>();
+            List<Point3d> ansPts = new List<Point3d>();
+            foreach (var ptA in pts)
+            {
+                if (ptVisted.Contains(ptA))
+                {
+                    continue;
+                }
+                ptVisted.Add(ptA);
+                var closePtlist = new List<Point3d>();
+                double xSum = ptA.X;
+                double ySum = ptA.Y;
+                closePtlist.Add(ptA);
+                int cnt = 1;
+                foreach (var ptB in pts)
+                {
+                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance)
                     {
-                        foreach(var pt in dicTuples[closePt])
+                        if (!ptVisted.Contains(ptB))
                         {
-                            if (!dicTuples[minDisBasePt].Contains(pt))
-                            {
-                                dicTuples[minDisBasePt].Add(pt);
-                            }
-                            //结构善后
-                            if (!dicTuples.ContainsKey(pt))
-                            {
-                                dicTuples.Add(pt, new HashSet<Point3d>());
-                            }
-                            dicTuples[pt].Add(minDisBasePt);
-                            if (dicTuples[pt].Contains(closePt))
-                            {
-                                dicTuples[pt].Remove(closePt);
-                                if (dicTuples[pt].Count == 0)
-                                {
-                                    dicTuples.Remove(pt);
-                                }
-                            }
-
+                            ptVisted.Add(ptB);
                         }
-                        dicTuples.Remove(closePt);
+                        closePtlist.Add(ptB);
+                        //DeleteFromDicTuples(ptA, ptB, ref dicTuples);
+                        
+                        xSum += ptB.X;
+                        ySum += ptB.Y;
+                        ++cnt;
                     }
                 }
-                if(dicTuples[minDisBasePt].Count == 0)
+                if (cnt == 1)
                 {
-                    dicTuples.Remove(minDisBasePt);
+                    ansPts.Add(ptA);
+                    continue;
+                }
+                Point3d centerPt = new Point3d(xSum / cnt, ySum / cnt, 0);
+                double minDis = double.MaxValue;
+                Point3d minDisBasePt = centerPt;
+                if (basePoints != null)
+                {
+                    foreach (var basePt in basePoints)
+                    {
+                        var curDis = basePt.DistanceTo(centerPt);
+                        if (curDis < tolerance && curDis < minDis)
+                        {
+                            minDisBasePt = basePt;
+                            minDis = curDis;
+                        }
+                    }
+                }
+                ansPts.Add(minDisBasePt);
+            }
+            return ansPts;
+        }
+        public static Point3dCollection ReduceSimilarPoints(Point3dCollection pts, List<Point3d> basePoints = null, double tolerance = 10)
+        {
+            var ptVisted = new HashSet<Point3d>();
+            Point3dCollection ansPts = new Point3dCollection();
+            foreach (Point3d ptA in pts)
+            {
+                if (ptVisted.Contains(ptA))
+                {
+                    continue;
+                }
+                ptVisted.Add(ptA);
+                var closePtlist = new List<Point3d>();
+                double xSum = ptA.X;
+                double ySum = ptA.Y;
+                closePtlist.Add(ptA);
+                int cnt = 1;
+                foreach (Point3d ptB in pts)
+                {
+                    if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance)
+                    {
+                        if (!ptVisted.Contains(ptB))
+                        {
+                            ptVisted.Add(ptB);
+                        }
+                        closePtlist.Add(ptB);
+                        //DeleteFromDicTuples(ptA, ptB, ref dicTuples);
+
+                        xSum += ptB.X;
+                        ySum += ptB.Y;
+                        ++cnt;
+                    }
+                }
+                if (cnt == 1)
+                {
+                    ansPts.Add(ptA);
+                    continue;
+                }
+                Point3d centerPt = new Point3d(xSum / cnt, ySum / cnt, 0);
+                double minDis = double.MaxValue;
+                Point3d minDisBasePt = centerPt;
+                if (basePoints != null)
+                {
+                    foreach (var basePt in basePoints)
+                    {
+                        var curDis = basePt.DistanceTo(centerPt);
+                        if (curDis < tolerance && curDis < minDis)
+                        {
+                            minDisBasePt = basePt;
+                            minDis = curDis;
+                        }
+                    }
+                }
+                ansPts.Add(minDisBasePt);
+            }
+            return ansPts;
+        }
+        /// <summary>
+        /// 从DicTuple中删除一条双向线
+        /// </summary>
+        /// <param name="ptA"></param>
+        /// <param name="ptB"></param>
+        /// <param name="dicTuples"></param>
+        public static void DeleteFromDicTuples(Point3d ptA, Point3d ptB, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            if (dicTuples.ContainsKey(ptA) && dicTuples[ptA].Contains(ptB))
+            {
+                dicTuples[ptA].Remove(ptB);
+                if(dicTuples[ptA].Count == 0)
+                {
+                    dicTuples.Remove(ptA);
+                }
+            }
+
+            if (dicTuples.ContainsKey(ptB) && dicTuples[ptB].Contains(ptA))
+            {
+                dicTuples[ptB].Remove(ptA);
+                if (dicTuples[ptB].Count == 0)
+                {
+                    dicTuples.Remove(ptB);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 将一条线加入字典结构
+        /// </summary>
+        /// <param name="tuple"></param>
+        /// <param name="dicTuples"></param>
+        public static void AddLineTodicTuples(Point3d ptA, Point3d ptB, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            if (!dicTuples.ContainsKey(ptA))
+            {
+                dicTuples.Add(ptA, new HashSet<Point3d>());
+            }
+            if (!dicTuples[ptA].Contains(ptB))
+            {
+                dicTuples[ptA].Add(ptB);
+            }
+        }
+
+        public static void RemoveIntersectLines(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            var tmpTuples = LineDealer.DicTuplesToTuples(dicTuples).ToList();
+            foreach (var tupleA in tmpTuples)
+            {
+                foreach(var tupleB in tmpTuples)
+                {
+                    //若两线相交，删除长线
+                    if(tupleA == tupleB || (tupleA.Item1 == tupleB.Item2 && tupleB.Item1 == tupleA.Item2) || !LineDealer.IsIntersect(tupleA.Item1, tupleA.Item2, tupleB.Item1, tupleB.Item2))
+                    {
+                        continue;
+                    }
+                    if (tupleA.Item1.DistanceTo(tupleA.Item2) > tupleB.Item1.DistanceTo(tupleB.Item2))
+                    {
+                        DeleteFromDicTuples(tupleA.Item1, tupleA.Item2, ref dicTuples);
+                    }
+                    else
+                    {
+                        DeleteFromDicTuples(tupleB.Item1, tupleB.Item2, ref dicTuples);
+                    }
+                }
+            }
+        }
+
+        public static void RemoveLinesInterSectWithCloseBorderLines(List<Tuple<Point3d, Point3d>> closebdLines, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        {
+            var tmpTuples = LineDealer.DicTuplesToTuples(dicTuples).ToList();
+            foreach (var tup in closebdLines)
+            {
+                foreach (var tmpTuple in tmpTuples)
+                {
+                    if (LineDealer.IsIntersect(tup.Item1, tup.Item2, tmpTuple.Item1, tmpTuple.Item2))
+                    {
+                        DeleteFromDicTuples(tmpTuple.Item1, tmpTuple.Item2, ref dicTuples);
+                    }
                 }
             }
         }

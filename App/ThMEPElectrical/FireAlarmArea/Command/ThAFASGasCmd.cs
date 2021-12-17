@@ -1,31 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
-using GeometryExtensions;
-using NFox.Cad;
-
-using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.IO;
-using ThMEPEngineCore.IO.GeoJSON;
-
-using ThMEPEngineCore.AreaLayout.GridLayout.Command;
-using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.ViewModel;
@@ -54,8 +36,8 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
         private void InitialCmdInfo()
         {
-            CommandName = "THFireAlarmGasLayout";
             ActionName = "布置";
+            CommandName = "THFAGAS";
         }
 
         public override void SubExecute()
@@ -128,7 +110,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                     DrawUtils.ShowGeometry(frame.Value, string.Format("l0hole"), 140);
                 }
 
-                var layoutParameter = new ThAFASGasLayoutParameter ();
+                var layoutParameter = new ThAFASGasLayoutParameter();
                 layoutParameter.Scale = _scale;
                 layoutParameter.AisleAreaThreshold = 0.025;
                 layoutParameter.ProtectRadius = _radius;

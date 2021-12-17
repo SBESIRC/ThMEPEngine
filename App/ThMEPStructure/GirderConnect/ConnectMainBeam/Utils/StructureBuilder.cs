@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
+using ThCADCore.NTS;
+using ThCADExtension;
 using Linq2Acad;
+using AcHelper;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
-using ThCADCore.NTS;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -29,8 +30,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
             var voronoiDiagram = new VoronoiDiagramBuilder();
             voronoiDiagram.SetSites(points.ToNTSGeometry());
-
-            //foreach (Polygon polygon in voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory).Geometries) //Same use as fallow
+            //var xx = ThCADCoreNTSService.Instance.GeometryFactory;
+            //foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow   points 0 or >3
             foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
             {
                 if (polygon.IsEmpty)
@@ -213,7 +214,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
-            //foreach (var line in linesType.Keys)///////////////////////////////////////////
+            //foreach (var line in linesType.Keys)
             //{
             //    //if (linesType[line] == 0 )//&& linesType.ContainsKey(new Tuple<Point3d, Point3d>(line.Item2, line.Item1)) && linesType[new Tuple<Point3d, Point3d>(line.Item2, line.Item1)] == 0)
             //    {
@@ -230,7 +231,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlineClumns">某轮廓和它包含的柱点</param>
         /// <param name="outline2BorderNearPts">Input and Output</param>
         public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
-            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
         {
             List<Point3d> fstPtsS = new List<Point3d>();
             List<Point3d> fstPts = new List<Point3d>();
@@ -292,21 +293,40 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     continue;
                 }
+                //var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
                 foreach (var wall in outlineWalls[curOutline])
                 {
+                    if (wall.Closed == false || wall.Area < 10000)
+                    {
+                        continue;
+                    }
                     tmpFstPts.Clear();
                     tmpThdPts.Clear();
-                    //CenterLine.WallEdgePoint(wall.ToNTSPolygon(), 100, ref tmpFstPts, ref tmpThdPts);
-                    PointsDealer.WallCrossPoint(wall.ToNTSPolygon(), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                    //var newWall = wall.DPSimplify(1).ToNTSPolygon().Buffer(0) as Polygon;
+                    //CenterLine.WallEdgePoint(newWall, 50, ref tmpFstPts, ref tmpThdPts);
+                    //foreach (Entity obj in wall.DPSimplify(1).ToNTSPolygon().Buffer(0).ToDbCollection())
+                    //{
+                    //    if (obj is Polyline polyline)
+                    //    {
+                    //        CenterLine.WallEdgePoint(polyline.ToNTSPolygon(), 50, ref tmpFstPts, ref tmpThdPts);
+                    //    }
+                    //}
+                    try
+                    {
+                        PointsDealer.WallCrossPoint(wall.DPSimplify(1), ref tmpFstPts, ref tmpThdPts);//, ref zeroPts);
+                    }
+                    catch (System.Exception Ex)
+                    {
+                        //continue;
+                    }
                     fstPts.AddRange(tmpFstPts);
                     thdPts.AddRange(tmpThdPts);
                     fstPtsS.AddRange(tmpFstPts);
-                    outline2ZeroPts[curOutline].AddRange(tmpFstPts);
                 }
                 outPts = PointsDealer.OutPoints(curOutline);
-                PointsDealer.RemovePointsFarFromOutline(fstPts, curOutline);
-                PointsDealer.RemovePointsFarFromOutline(thdPts, curOutline);
-
+                PointsDealer.RemovePointsFarFromOutline(ref fstPts, curOutline);
+                PointsDealer.RemovePointsFarFromOutline(ref thdPts, curOutline);
+                outline2ZeroPts[curOutline].AddRange(fstPts);////////////////////这里可能重复添加了，可能需要进行单一化那个函数
                 foreach (Point3d nearPt in tmpNearPts)
                 {
                     Point3d outlinePt = curOutline.GetClosePoint(nearPt);
@@ -331,10 +351,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             continue;
                         }
-                        //ShowInfo.DrawLine(closetLine.StartPoint, closetLine.EndPoint, 50);
                         if (i == 0)
                         {
-                            toleranceDegree = Math.PI / 4; /////////////////////4
+                            toleranceDegree = Math.PI / 4;
                         }
 
                         //找到近点nearPt最佳的边界连接点
@@ -355,6 +374,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             //Merge very close points to one whithout change structure
             //LineDealer.SimplifyLineConnect(borderPt2NearPts, thdPts);
             LineDealer.SimplifyLineConnect(outline2BorderNearPts, fstPtsS);
+            //Polyline pl = new Polyline();
+            //pl =pl.FlattenRectangle();
         }
 
         /// <summary>
@@ -363,9 +384,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="dicTuples"></param>
         /// <param name="findPolylineFromLines"></param>
-        /// <param name="acdb"></param>
         public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Tuple<Point3d, Point3d>,
-            List<Tuple<Point3d, Point3d>>> findPolylineFromLines, AcadDatabase acdb = null)
+            List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
             foreach (var dicTuple in dicTuples)
@@ -422,6 +442,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             {
                                 findPolylineFromLines.Add(tmpLine, tmpLines);
                             }
+                            //ShowInfo.ShowGeometry()
                         }
                     }
                 }
@@ -460,8 +481,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="findPolylineFromLines"></param>
         /// <param name="closeBorderLines"></param>
         /// <param name="acdb"></param>
-        public static void SplitBlock(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, 
-            AcadDatabase acdb = null, Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void SplitBlock(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Dictionary<Point3d, Point3d> closeBorderLines = null)
         {
             //Remove closeBorder Lines
             if (closeBorderLines != null)
@@ -512,7 +532,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             // change structure
-            AddPolylinesToDic(splitedPolylines, findPolylineFromLines, acdb);
+            AddPolylinesToDic(splitedPolylines, findPolylineFromLines);
         }
 
         /// <summary>
@@ -520,8 +540,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 缺乏当一个三角形有多个可用时选择哪个的策略
         /// </summary>
         /// <param name="findPolylineFromLines"></param>
-        public static void MergeFragments(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            AcadDatabase acdb = null, Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void MergeFragments(Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, Dictionary<Point3d, Point3d> closeBorderLines = null)
         {
             //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
             Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
@@ -571,14 +590,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             findPolylineFromLines.Remove(converseLine);
                         }
                         // change structure
-                        AddPolylinesToDic(mergedPolylines, findPolylineFromLines, acdb);
+                        AddPolylinesToDic(mergedPolylines, findPolylineFromLines);
                     }
                 }
             }
         }
 
         public static void AddPolylinesToDic(List<List<Tuple<Point3d, Point3d>>> splitedPolylines, 
-            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, AcadDatabase acdb = null)
+            Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             foreach (var splitedPolyline in splitedPolylines)
             {
@@ -597,12 +616,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             findPolylineFromLines.Remove(reverseL);
                         }
                     }
-                    //if(acdb != null)
-                    //{
-                    //    Polyline polyline = LineDealer.Tuples2Polyline(splitedPolyline);
-                    //    polyline.ColorIndex = 210;
-                    //    acdb.ModelSpace.Add(polyline);
-                    //}
                 }
             }
         }
@@ -618,18 +631,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return cnt;
-        }
-
-        public static void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
-        {
-            //连接不同的边界
-            //点上的连接至少为1
-
-            //连接相同的边界
-            //连接逻辑：
-            //保留连接线中点不在这个边界内的线
-            //连接线两端的点不在同一条直线上
-            //同线判定：(（a到lineA<500 && b到lineA<500）||（b到lineB<500 && a到lineB<500）)  lineA\lineB分别为a\b最近的线
         }
     }
 }

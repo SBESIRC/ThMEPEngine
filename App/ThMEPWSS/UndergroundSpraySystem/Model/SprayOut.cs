@@ -31,7 +31,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public List<WaterPump>  WaterPumps{ get; set; }
         public SprayOut()
         {
-            var opt = new PromptPointOptions("指定喷淋系统图插入点:");
+            var opt = new PromptPointOptions("\n指定喷淋系统图插入点");
 
             var propPtRes = Active.Editor.GetPoint(opt);
             InsertPoint = new Point3d();

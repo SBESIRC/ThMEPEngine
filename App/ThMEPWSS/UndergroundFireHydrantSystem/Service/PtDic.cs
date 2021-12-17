@@ -66,6 +66,61 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                     fireHydrantSysIn.PtDic.Remove(pt);
                 }
             }
+
+            var plineList = new List<Line>();
+            foreach (var line in lineList)
+            {
+                plineList.Add(line);
+            }
+            var plineSpatialIndex = new ThCADCoreNTSSpatialIndex(plineList.ToCollection());
+            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
+            {
+                if (pt._pt.DistanceTo(new Point3d(9449431.4796, 3379390.4115, 0)) < 1)
+                {
+                    ;
+                }
+                if (fireHydrantSysIn.PtDic[pt].Count == 1)
+                {
+                    var rect = GetRect(pt._pt);
+                    var rst = plineSpatialIndex.SelectCrossingPolygon(rect);
+                    if (rst.Count > 1)
+                    {
+                        foreach(var db in rst)
+                        {
+                            var line = db as Line;
+                            var spt = new Point3dEx(line.StartPoint);
+                            var ept = new Point3dEx(line.EndPoint);
+                            var sdist = spt._pt.DistanceTo(pt._pt);
+                            var edist = ept._pt.DistanceTo(pt._pt);
+                            if (sdist > 1 && edist > 1)
+                            {
+                                fireHydrantSysIn.PtDic[pt].Add(ept);
+                                fireHydrantSysIn.PtDic[ept].Add(pt);
+
+                                fireHydrantSysIn.PtDic[pt].Add(spt);
+                                fireHydrantSysIn.PtDic[spt].Add(pt);
+
+                                fireHydrantSysIn.PtDic[ept].Remove(spt);
+                                fireHydrantSysIn.PtDic[spt].Remove(ept);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static Polyline GetRect(Point3d pt)
+        {
+            var polyline = new Polyline();
+            var pts = new Point2dCollection();
+            pts.Add(new Point2d(pt.X - 1, pt.Y + 1));
+            pts.Add(new Point2d(pt.X + 1, pt.Y + 1));
+            pts.Add(new Point2d(pt.X + 1, pt.Y - 1));
+            pts.Add(new Point2d(pt.X - 1, pt.Y - 1));
+            pts.Add(new Point2d(pt.X - 1, pt.Y + 1));
+            
+            polyline.CreatePolyline(pts);
+            return polyline;
         }
 
         public static void CreateLeadPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Line> lineList)
@@ -185,13 +240,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+        public static void CreateTermPtDicOrg(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
             int indxx = 0;
-            foreach (var pt in fireHydrantSysIn.HydrantPosition)//每个圈圈的中心点
+            foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
+                var pttt = new Point3dEx(1439132.4, 683015.4, 0);
+                if(pt.DistanceToEx(pttt) <5)
+                {
+                    ;
+                }
                 try
                 {
                     CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
@@ -212,6 +272,41 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 {
                     ;
                 }   
+            }
+        }
+
+        public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
+            List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
+            ThCADCoreNTSSpatialIndex fhSpatialIndex)
+        {
+            int indxx = 0;
+            foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
+            {
+                var pttt = new Point3dEx(1436842.5, 662004.6, 0);
+                if (pt.DistanceToEx(pttt) < 5)
+                {
+                    ;
+                }
+                try
+                {
+                    CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
+
+                }
+                catch
+                {
+                    ;
+                }
+            }
+            foreach (var pt in pointList)
+            {
+                try
+                {
+                    CreateTermPtDic3(pt, ref fireHydrantSysIn, labelLine, textSpatialIndex, fhSpatialIndex);
+                }
+                catch
+                {
+                    ;
+                }
             }
         }
 
@@ -386,7 +481,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 
             //get terminal origin point
             var termStartPtEx = new Point3dEx(Point3d.Origin);
-            var verPipeCenters = fireHydrantSysIn.HydrantPosition;
+            var verPipeCenters = fireHydrantSysIn.VerticalPosition;
             var verPipeBounds = verPipeCenters.Select(c =>
             {
                 Polyline pl = CreatePolyline(c);
@@ -801,6 +896,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             {
                 var visited = new HashSet<Point3dEx>();
                 var cnt = fireHydrantSysIn.PtDic[pt].Count;
+                if(cnt==0)
+                {
+                    continue;
+                }
                 var curPt = pt;
 
                 var nextPt = fireHydrantSysIn.PtDic[pt][0];
