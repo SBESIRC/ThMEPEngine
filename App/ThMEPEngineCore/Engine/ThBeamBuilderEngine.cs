@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.Model;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -70,6 +72,11 @@ namespace ThMEPEngineCore.Engine
             }
             recognitionEngine.Recognize(datas, pts);
             Elements = recognitionEngine.Elements;
+        }
+
+        public override void Transform(Matrix3d matrix)
+        {
+            Elements.ForEach(o => o.TransformBy(matrix));
         }
 
         public void ResetSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)

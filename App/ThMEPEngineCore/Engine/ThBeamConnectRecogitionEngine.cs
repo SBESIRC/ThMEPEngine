@@ -8,6 +8,7 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -73,8 +74,8 @@ namespace ThMEPEngineCore.Engine
             // 启动梁识别引擎
             BeamEngine = new ThBeamBuilderEngine();
             var results = BeamEngine.Extract(database);
-            results.ForEach(x => OriginTransformer.Transform(x.Geometry));
-            BeamEngine.Recognize(results, newPts);
+            BeamEngine.Recognize(results, pts);
+            BeamEngine.Transform(OriginTransformer.Displacement);
 
             // 为了支持这样的处理流程：
             //  1. 所有数据一次性获取后移动到近原点位置

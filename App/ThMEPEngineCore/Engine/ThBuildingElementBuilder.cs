@@ -33,6 +33,11 @@ namespace ThMEPEngineCore.Engine
             Elements.ForEach(o => transformer.Reset(o.Outline));
         }
 
+        public virtual void Transform(Matrix3d matrix)
+        {
+            Elements.ForEach(o => o.Outline.TransformBy(matrix));
+        }
+
         public abstract List<ThRawIfcBuildingElementData> Extract(Database db);
 
         public abstract void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection pts);
