@@ -60,7 +60,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
             outerBrder.Extract(database, selectArea);//提取多段线
-            var area = outerBrder.OuterLines[0] as Polyline;
+            var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
@@ -161,33 +161,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
 
                     partition.ProcessAndDisplay(layerNames, 30);
-
-
-
-
                 }
             }
-            ;
-            //layoutPara.Set(solution.Genome);
-
-
-            //for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
-            //{
-            //    int index = layoutPara.AreaNumber[j];
-            //    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-            //    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-            //    layoutPara.ObstacleDic.TryGetValue(index, out List<Polyline> obstacles);
-            //    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-            //    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-            //    ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
-            //    bool valid = p.Validate();
-            //    if (valid)
-            //    {
-            //        p.Initialize();
-            //        p.Display();
-            //    }
-            //}
-            
         }
 
         private static Point3dCollection SelectAreas()

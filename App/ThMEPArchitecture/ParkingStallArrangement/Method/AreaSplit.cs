@@ -18,12 +18,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     {
         public static List<Polyline> Split(this Line line, Polyline polygon, double tor = 5.0)
         {
-            if (polygon.Length > 0.0)
-            {
-                polygon = polygon.DPSimplify(1.0); // 
-                polygon = polygon.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
-            }
-
             var lines = polygon.ToLines();
             lines.Add(line);
 
@@ -39,6 +33,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             return rst;
         }
+
+
 
         public static List<Polyline> Split2(this Line line, Polyline polygon, double tor = 1.0)
         {

@@ -58,7 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
             outerBrder.Extract(database, selectArea);//提取多段线
-            var area = outerBrder.OuterLines[0] as Polyline;
+            var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
@@ -71,10 +71,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             gaPara.Set(sortSegLines, maxVals, minVals);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
 
-            var iterationCnt = Active.Editor.GetInteger("\n Input GA iteration count:");
+            var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
             if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var popSize = Active.Editor.GetInteger("\n Input population size:");
+            var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
             var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);

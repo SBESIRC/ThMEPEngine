@@ -17,6 +17,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         public DBObjectCollection SegmentLines = new DBObjectCollection();//分割线
         public List<Line> SegLines = new List<Line>();//分割线
         public List<BlockReference> Building = new List<BlockReference>();//建筑物block
+        public Polyline WallLine = new Polyline();//外框线
         public void Extract(Database database, Point3dCollection polygon)
         {
             var objs = new DBObjectCollection();
@@ -37,6 +38,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     var spt = (db as Polyline).StartPoint;
                     var ept = (db as Polyline).EndPoint;
                     SegLines.Add(new Line(spt, ept));
+                }
+
+                foreach(var obj in OuterLines)
+                {
+                    var pline = obj as Polyline;
+                    if (pline.Length > 0.0)
+                    {
+                        pline = pline.DPSimplify(1.0);
+                        pline = pline.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
+                    }
+                    WallLine = pline;
+                    break;
                 }
             }
         }

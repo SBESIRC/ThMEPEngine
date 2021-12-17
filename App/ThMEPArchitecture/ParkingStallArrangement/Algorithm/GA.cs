@@ -273,9 +273,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Run(List<Chromosome> histories)
         {
-            Logger?.Information($"Iteration count: {IterationCount}");
-            Logger?.Information($"Population count: {PopulationSize}");
-            Logger?.Information($"Max minutes: {MaxTime}");
+            Logger?.Information($"迭代次数: {IterationCount}");
+            Logger?.Information($"种群数量: {PopulationSize}");
+            Logger?.Information($"最大迭代时间: {MaxTime} 分");
 
             List<Chromosome> selected = new List<Chromosome>();
             try
@@ -286,7 +286,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     return pop;
                 }
 
-                var strFirstPopCnt = $"\n  First poplulation size: {pop.Count}";
+                var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
                 Active.Editor.WriteMessage(strFirstPopCnt);
                 Logger?.Information(strFirstPopCnt);
                 var curIteration = 0;
@@ -297,7 +297,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 stopWatch.Start();
                 while (curIteration++ < IterationCount && maxCount < 20 && stopWatch.Elapsed.Minutes < MaxTime)
                 {
-                    var strCurIterIndex = $"\n iteration index：     {curIteration}";
+                    var strCurIterIndex = $"迭代次数：{curIteration}";
                     //Active.Editor.WriteMessage(strCurIterIndex);
                     Logger?.Information(strCurIterIndex);
                     selected = Selection(pop, out int curNums);
@@ -313,11 +313,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     pop = CreateNextGeneration(selected);
                     Mutation(pop);
                 }
-                var strBest = $"Best: {pop.First().Count}";
+                var strBest = $"最大车位数: {pop.First().Count}";
                 Active.Editor.WriteMessage(strBest);
                 Logger?.Information(strBest);
                 stopWatch.Stop();
-                var strTotalMins = $"Total minutes: {stopWatch.Elapsed.Minutes}";
+                var strTotalMins = $"运行总时间: {stopWatch.Elapsed.Minutes} 分";
                 Logger?.Information(strTotalMins);
             }
             catch (Exception ex)
@@ -330,7 +330,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public void Mutation(List<Chromosome> s)
         {
-            //变异代码，有待完善
             int cnt = Math.Min((int)(s.Count * MutationRate), 1);//需要变异的染色体数目，最小为1
             int geneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
             int index = 0;
@@ -456,14 +455,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
         {
-            Logger?.Information("Doing Selection");
+            Logger?.Information("进行选择");
 
             inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
 
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;
-            var strBestCnt = $"\n Current best： {sorted.First().Count}";
-            //Active.Editor.WriteMessage(strBestCnt);
+            var strBestCnt = $"当前最大车位数： {sorted.First().Count}\n";
             Logger?.Information(strBestCnt);
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
