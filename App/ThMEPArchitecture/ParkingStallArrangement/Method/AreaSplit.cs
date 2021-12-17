@@ -16,13 +16,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
     public static class AreaSplit
     {
-        public static List<Polyline> Split(this Line line, Polyline polygon, double tor = 1.0)
+        public static List<Polyline> Split(this Line line, Polyline polygon, double tor = 5.0)
         {
+            if (polygon.Length > 0.0)
+            {
+                polygon = polygon.DPSimplify(1.0); // 
+                polygon = polygon.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
+            }
+
             var lines = polygon.ToLines();
             lines.Add(line);
 
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
             var areas = extendLines.PolygonsEx();
+
 
             var rst = new List<Polyline>();
             foreach (var area in areas)

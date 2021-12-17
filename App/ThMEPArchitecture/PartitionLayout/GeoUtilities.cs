@@ -494,6 +494,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             foreach (var p in pls)
             {
+                if (p.Area < 1) continue;
                 var pp = p.Clone() as Polyline;
                 pp.TransformBy(Matrix3d.Scaling(0.99, pp.Centroid()));
                 if (pp.IsPointIn(pt))
@@ -675,6 +676,16 @@ namespace ThMEPArchitecture.PartitionLayout
             foreach (var e in pls)
             {
                 s += AnalysisPoly(e) + ";";
+            }
+            return s;
+        }
+
+        public static string AnalysisPointList(List<Point3d> points)
+        {
+            string s = "";
+            foreach (var pt in points)
+            {
+                s += pt.X.ToString() + "," + pt.Y.ToString() + ",";
             }
             return s;
         }

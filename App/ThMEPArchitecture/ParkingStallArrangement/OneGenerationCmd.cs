@@ -167,7 +167,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 }
             }
-
+            ;
             //layoutPara.Set(solution.Genome);
 
 
