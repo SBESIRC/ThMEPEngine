@@ -144,8 +144,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
+                var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
+                //Cutters.Add(bound);
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+
+                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
 
                 if (GeoUtilities.JoinCurves(walls, inilanes)[0].Length < 1)
@@ -218,7 +221,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PopulationSize = popSize;//种群数量
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MaxTime = 300;
+            MaxTime = 180;
             CrossRate = 0.8;//交叉因子
             MutationRate = 0.5;//变异因子
             GeneMutationRate = 0.5;//基因变异因子
@@ -295,7 +298,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                while (curIteration++ < IterationCount && maxCount < 20 && stopWatch.Elapsed.Minutes < MaxTime)
+                while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
                 {
                     var strCurIterIndex = $"迭代次数：{curIteration}";
                     //Active.Editor.WriteMessage(strCurIterIndex);
@@ -308,6 +311,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     else
                     {
+                        maxCount = 0;
                         maxNums = curNums;
                     }
                     pop = CreateNextGeneration(selected);

@@ -598,8 +598,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 points.AddRange(obj.Vertices().Cast<Point3d>().Where(e => pl.IsPointIn(e)));
                 points.AddRange(obj.Intersect(pl, Intersect.OnBothOperands));
             }
-            points = points.Select(e => line.GetClosestPointTo(e, false)).ToList();
-            RemoveDuplicatePts(points);
+            points = points.Select(e => line.GetClosestPointTo(e, false)).Distinct().ToList();
+            //RemoveDuplicatePts(points);
             return GetSplitLine(line, points).Where(e => e.Length >= DisCarWidth)
                 .Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles)).ToList();
         }
@@ -636,16 +636,16 @@ namespace ThMEPArchitecture.PartitionLayout
                 points.AddRange(o.Vertices().Cast<Point3d>().ToArray());
                 points.AddRange(o.Intersect(pltest, Intersect.OnBothOperands));
             }
-            points = RemoveDuplicatePts(points);
-            points = points.Where(e => pltest.IsPointIn(e) || pltest.GetClosePoint(e).DistanceTo(e) < 1).ToList();
+            //points = RemoveDuplicatePts(points);
+            points = points.Where(e => pltest.IsPointIn(e) || pltest.GetClosePoint(e).DistanceTo(e) < 1).Distinct().ToList();
             Line edgea = new Line(lane.StartPoint, unittest.StartPoint);
             Line edgeb = new Line(lane.EndPoint, unittest.EndPoint);
-            var pointsa = points.Where(e => edgea.GetClosestPointTo(e, false).DistanceTo(e) <=
-              edgeb.GetClosestPointTo(e, false).DistanceTo(e))
-                .Select(e => edgea.GetClosestPointTo(e, false));
-            var pointsb = points.Where(e => edgea.GetClosestPointTo(e, false).DistanceTo(e) >
-              edgeb.GetClosestPointTo(e, false).DistanceTo(e))
-                .Select(e => edgeb.GetClosestPointTo(e, false));
+            var pointsa = points.Where(e => edgea.GetClosestPointTo(e, false).DistanceTo(e) <
+                    DisCarLength + DisLaneWidth)
+                     .Select(e => edgea.GetClosestPointTo(e, false));
+            var pointsb = points.Where(e => edgeb.GetClosestPointTo(e, false).DistanceTo(e) <
+                      DisCarLength + DisLaneWidth)
+                       .Select(e => edgeb.GetClosestPointTo(e, false));
             Point3d pta;
             Point3d ptb;
             if (pointsa.ToArray().Length == 0) pta = lane.StartPoint;
@@ -817,11 +817,36 @@ namespace ThMEPArchitecture.PartitionLayout
         /// </summary>
         private void GenerateCarSpots()
         {
+            RemoveDuplicateIniLanes();
             GenerateIntegralModuleCars();
             Laneboxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2-10)).Distinct());
             if (IniLanes.Count==Countinilanes) return;
             GenerateCarsInSingleVerticalDirection();
             GenerateCarsInSingleParallelDirection();
+        }
+
+        /// <summary>
+        /// Remove duplicate iniLanes.
+        /// </summary>
+        private void RemoveDuplicateIniLanes()
+        {
+            if (IniLanes.Count < 2) return;
+            for (int i = 1; i < IniLanes.Count; i++)
+            {
+                for (int j = 0; j < i; j++)
+                {
+                    var conda = IniLanes[i].Line.StartPoint.DistanceTo(IniLanes[j].Line.StartPoint) < 1
+                        && IniLanes[i].Line.EndPoint.DistanceTo(IniLanes[j].Line.EndPoint) < 1;
+                    var condb = IniLanes[i].Line.StartPoint.DistanceTo(IniLanes[j].Line.EndPoint) < 1
+                        && IniLanes[i].Line.EndPoint.DistanceTo(IniLanes[j].Line.StartPoint) < 1;
+                    if (conda || condb)
+                    {
+                        IniLanes.RemoveAt(i);
+                        i--;
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -870,7 +895,8 @@ namespace ThMEPArchitecture.PartitionLayout
                             if (CarSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && ObstaclesSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && (!IsInAnyPolys(plcarsc.Centroid(), Laneboxes))
-                                && CheckCarLegal(plcar))
+                                && CheckCarLegal(plcar)
+                                && (!IsInAnyPolys(plcarsc.GetRecCentroid(),CarModuleBox)))
                             {
                                 AddToSpatialIndex(plcar, ref CarSpatialIndex);
                                 CarSpots.Add(plcar);
@@ -914,7 +940,8 @@ namespace ThMEPArchitecture.PartitionLayout
                             if (CarSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && ObstaclesSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && (!IsInAnyPolys(plcarsc.Centroid(), Laneboxes))
-                                && CheckCarLegal(plcar))
+                                && CheckCarLegal(plcar)
+                                && (!IsInAnyPolys(plcarsc.GetRecCentroid(),CarModuleBox)))
                             {
                                 AddToSpatialIndex(plcar, ref CarSpatialIndex);
                                 CarSpots.Add(plcar);
@@ -970,7 +997,8 @@ namespace ThMEPArchitecture.PartitionLayout
                             if (CarSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && ObstaclesSpatialIndex.SelectCrossingPolygon(plcarsc).Count == 0
                                 && (!IsInAnyPolys(plcarsc.Centroid(), Laneboxes))
-                                && CheckCarLegal(plcar))
+                                && CheckCarLegal(plcar)
+                                && (!IsInAnyPolys(plcarsc.GetRecCentroid(),CarModuleBox)))
                             {
                                 AddToSpatialIndex(plcar, ref CarSpatialIndex);
                                 CarSpots.Add(plcar);
@@ -1029,6 +1057,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// </summary>
         private void GenerateIntegralModuleCars()
         {
+            IniLanes.ForEach(e => e.Line.AddToCurrentSpace());
             foreach (var module in IntegralModules)
             {
                 var points = IniLanes.Select(e => e.Line.StartPoint).Where(e => module.Box.IsPointIn(e)).ToList();
@@ -1116,6 +1145,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 else continue;
                 splited = SplitLine(offsetlane, CarModuleBox).ToArray();
                 if (splited.Length > 1) offsetlane = (Line)splited.OrderBy(e => e.GetCenter().DistanceTo(lane.GetClosestPointTo(e.GetCenter(), false))).ToArray()[0];
+                if (offsetlane.Length < DisLaneWidth / 2 + DisCarWidth * 4) continue;
                 if (IsInAnyPolys(offsetlane.GetCenter(), CarModuleBox)) continue;
                 var ply = PolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, offsetlane.EndPoint, offsetlane.StartPoint });
                 bool isConnected = false;
@@ -1235,7 +1265,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 for (int j = 0; j < i; j++)
                 {
-                    if (CarSpots[i].Centroid().DistanceTo(CarSpots[j].Centroid()) < 1)
+                    if (CarSpots[i].GetRecCentroid().DistanceTo(CarSpots[j].GetRecCentroid()) < 100)
                     {
                         CarSpots.RemoveAt(i);
                         i--;
@@ -1254,11 +1284,11 @@ namespace ThMEPArchitecture.PartitionLayout
             for (int i = 1; i < CarSpots.Count; i++)
             {
                 var pl = CarSpots[i].Clone() as Polyline;
-                pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pl.Centroid()));
+                var pt = pl.GetRecCentroid();
+                pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pt));         
                 for (int j = 0; j < i; j++)
                 {
-                    if (pl.Intersect(IniBoundary, Intersect.OnBothOperands).Count > 0 || !IniBoundary.IsPointIn(pl.Centroid())
-                        || IsInAnyPolys(pl.Centroid(), obspls))
+                    if (!IniBoundary.IsPointIn(pt) || IsInAnyPolys(pt, obspls))
                     {
                         pl.Dispose();
                         CarSpots.RemoveAt(i);
