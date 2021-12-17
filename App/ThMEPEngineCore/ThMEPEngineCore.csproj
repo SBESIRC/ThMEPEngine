@@ -169,6 +169,7 @@
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
     <Compile Include="GridOperation\Utils\GridMergeService.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
