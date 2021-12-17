@@ -207,7 +207,7 @@ namespace ThMEPWSS.ViewModel
                 var obb = CreateFrame(blk);
                 var newFrame = bufferService.Buffer(obb, 100.0) as Polyline;
                 newFrame.Color = Color.FromRgb(255, 0, 0);
-                newFrame.LineWeight = LineWeight.LineWeight100;
+                newFrame.ConstantWidth = 100;
                 newFrames.Add(newFrame);
             }
             BlockNestedEntityFrames.Add(blockName, newFrames);
