@@ -95,7 +95,7 @@ namespace ThMEPStructure.GirderConnect.Data
             {
                 //BuildMainBeam buildMainBeam = new BuildMainBeam(lines, intersectCollection);
                 //var mainBeams = buildMainBeam.Build("地下室顶板");
-                //foreach(var beam in mainBeams)
+                //foreach (var beam in mainBeams)
                 //{
                 //    beam.Layer = layerName;
                 //    beam.ColorIndex = 130;

@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper.Commands;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
@@ -99,10 +96,11 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// </summary>
         /// <param name="outsideColumns"></param>
         /// <param name="clumnPts"></param>
-        /// <param name="outlineWalls"></param>
+        /// <param name="outerWalls"></param>
         /// <param name="outsideShearwall"></param>
         public static void OuterClassify(List<Entity> outsideColumns, List<Entity> outsideShearwall, 
-            Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
+            Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, 
+            ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
             Dictionary<Polyline, bool> plColumnVisted = new Dictionary<Polyline, bool>();
             foreach (var outsideColumn in outsideColumns)
@@ -144,7 +142,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             polylineColumns.Clear();
             foreach (var plColumnVist in plColumnVisted)
             {
-                if(plColumnVist.Value == false)
+                if(plColumnVist.Value == false) //false
                 {
                     polylineColumns.Add(plColumnVist.Key);
                 }

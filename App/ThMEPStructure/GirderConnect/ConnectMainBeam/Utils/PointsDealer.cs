@@ -169,7 +169,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 if (!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
                                 {
                                     pl2pts.Value.Add(pt);
-                                    ShowInfo.ShowPointAsX(pt, 2, 500);
+                                    //ShowInfo.ShowPointAsX(pt, 2, 500);
                                 }
                             }
                         }
@@ -345,7 +345,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (curDis > maxDis)
                 {
                     points.Remove(pt);
-                    ShowInfo.ShowPointAsU(pt, 2);
+                    //ShowInfo.ShowPointAsU(pt, 2);
                 }
             }
         }
@@ -353,19 +353,24 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         private static List<Line> GetCenterLines(Polyline pl)
         {
             var lines = ThMEPPolygonService.CenterLine(pl.ToNTSPolygon().ToDbMPolygon());
-            if(lines.Count == 0)
+            int n = pl.NumberOfVertices;
+            for(int j = 0; j < n; ++j)
             {
+                if(lines.Count != 0)
+                {
+                    break;
+                }
+                //pl.ReverseCurve();
                 var pl2 = new Polyline();
-                int n = pl.NumberOfVertices;
                 for (int i = 1; i < n; ++i)
                 {
-                    pl2.SetPointAt(i-1, pl.GetPoint2dAt(i));
+                    pl2.SetPointAt(i - 1, pl.GetPoint2dAt(i));
                 }
                 pl2.SetPointAt(n - 1, pl.GetPoint2dAt(0));
-
+                pl2.Closed = true;
+                //pl = pl.Buffer(2)[0] as Polyline;
                 lines = ThMEPPolygonService.CenterLine(pl2.ToNTSPolygon().ToDbMPolygon());
             }
-
             return lines;
         }
 
@@ -395,7 +400,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     zeroPts.Add(polyline.GetCentroidPoint());
                     fstPts.Add(polyline.GetCentroidPoint());
-                    ShowInfo.ShowPointAsO(polyline.GetCentroidPoint(), 3, 500);
+                    //ShowInfo.ShowPointAsO(polyline.GetCentroidPoint(), 3, 500);
                 }
             }
             foreach (var pt2Pt in pt2Pts)
@@ -423,12 +428,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (IsCrossPt(pt, pt2Pts))
                             {
                                 fstPts.Add(pt);
-                                ShowInfo.ShowPointAsO(pt, 1);
+                                //ShowInfo.ShowPointAsO(pt, 1);
                             }
                             else
                             {
                                 SndPts.Add(pt);
-                                ShowInfo.ShowPointAsO(pt, 5);
+                                //ShowInfo.ShowPointAsO(pt, 5);
                             }
                         }
                     }
@@ -594,20 +599,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points)
         {
             var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
-            foreach(var outline in outlines)
+            var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            foreach (var outline in outlines)
             {
-                if (!outline2BorderPts.ContainsKey(outline))
-                {
-                    outline2BorderPts.Add(outline, new HashSet<Point3d>());
-                }
-                foreach(var point in points)
-                {
-                    Polyline newOutline = outline.Buffer(500)[0] as Polyline;
-                    if (!outline2BorderPts[outline].Contains(point) && newOutline.ContainsOrOnBoundary(point))
-                    {
-                        outline2BorderPts[outline].Add(point);
-                    }
-                }
+                var innerPoints = outline.Buffer(500).OfType<Polyline>()
+                    .Where(o => o.Area > 1.0)
+                    .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
+                    .OfType<DBPoint>()
+                    .Select(d => d.Position)).Distinct().ToList();
+                outline2BorderPts.Add(outline, innerPoints.ToHashSet());
             }
             return outline2BorderPts;
         }

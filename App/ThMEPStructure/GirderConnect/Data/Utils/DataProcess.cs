@@ -15,7 +15,6 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.Service;
 using NFox.Cad;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
 {
@@ -30,21 +29,21 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         {
             foreach (var group in groupDict)
             {
-                if (group.Key is Polyline houseOutline)
+                if (group.Key is Polyline newHouseOutline)
                 {
-                    houseOutline.Closed = true;
-                    if (!outlineWalls.ContainsKey(houseOutline))
+                    newHouseOutline.Closed = true;
+                    if (!outlineWalls.ContainsKey(newHouseOutline))
                     {
-                        outlineWalls.Add(houseOutline, new HashSet<Polyline>());
+                        outlineWalls.Add(newHouseOutline, new HashSet<Polyline>());
                     }
                     foreach (var wall in group.Value)
                     {
-                        if (wall is Polyline polyline)
+                        if (wall is Polyline newPolyline)
                         {
-                            polyline.Closed = true;
-                            if (!outlineWalls[houseOutline].Contains(polyline))
+                            newPolyline.Closed = true;
+                            if (!outlineWalls[newHouseOutline].Contains(newPolyline))
                             {
-                                outlineWalls[houseOutline].Add(polyline);
+                                outlineWalls[newHouseOutline].Add(newPolyline);
                             }
                         }
                     }
@@ -158,7 +157,6 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             foreach (var outlinePlColumn in outlinePlColumns)
             {
                 var outline = outlinePlColumn.Key;
-                //var newOutline = outlinePlColumn.Key.DPSimplify(1);
                 if (!outlineWalls.ContainsKey(outline))
                 {
                     outlineWalls.Add(outline, new HashSet<Polyline>());

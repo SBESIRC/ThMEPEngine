@@ -10,23 +10,29 @@ using Linq2Acad;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
     class ShowInfo
     {
+        //private static string infoLayer { get; set; }
+        //public ShowInfo(string showInfoLayer)
+        //{
+        //    infoLayer = showInfoLayer;
+        //}
         /// <summary>
         /// 显示一个Geometry集合
         /// </summary>
         /// <param name="geometry"></param>
-        /// <param name="acdb"></param>
         /// <param name="colerIndex"></param>
-        public static void ShowGeometry(NetTopologySuite.Geometries.Geometry geometry, AcadDatabase acdb, int colerIndex = 1)
+        public void ShowGeometry(NetTopologySuite.Geometries.Geometry geometry, int colerIndex = 1)
         {
             foreach (Entity obj in geometry.ToDbCollection())
             {
                 obj.ColorIndex = colerIndex;
-                acdb.ModelSpace.Add(obj);
+                //obj.Layer = infoLayer;
+                HostApplicationServices.WorkingDatabase.AddToModelSpace(obj);
             }
         }
 
@@ -35,10 +41,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="pt">设备位置</param>
         /// <param name="radius">设备可覆盖半径</param>
-        public static void ShowArea(Point3d pt, double radius, int colorIndex = 90)
+        public void ShowArea(Point3d pt, double radius, int colorIndex = 90)
         {
             Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
+            //circle.Layer = infoLayer;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(circle);
         }
 
@@ -46,10 +53,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 用O显示一个点
         /// </summary>
         /// <param name="pt">点的位置</param>
-        public static void ShowPointAsO(Point3d pt, int colorIndex = 80, double radius = 141.59265)
+        public static void  ShowPointAsO(Point3d pt, int colorIndex = 80, double radius = 141.59265)
         {
             Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
+            //circle.Layer = infoLayer;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(circle);
         }
 

@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
+using ThCADCore.NTS;
+using ThCADExtension;
 using Linq2Acad;
+using AcHelper;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
-using ThCADCore.NTS;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -29,9 +30,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
             var voronoiDiagram = new VoronoiDiagramBuilder();
             voronoiDiagram.SetSites(points.ToNTSGeometry());
-            var xx = ThCADCoreNTSService.Instance.GeometryFactory;
-            foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow   points 0 or >3
-            //foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
+            //var xx = ThCADCoreNTSService.Instance.GeometryFactory;
+            //foreach (Polygon polygon in voronoiDiagram.GetDiagram(xx).Geometries) //Same use as fallow   points 0 or >3
+            foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
             {
                 if (polygon.IsEmpty)
                 {
@@ -373,6 +374,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             //Merge very close points to one whithout change structure
             //LineDealer.SimplifyLineConnect(borderPt2NearPts, thdPts);
             LineDealer.SimplifyLineConnect(outline2BorderNearPts, fstPtsS);
+            //Polyline pl = new Polyline();
+            //pl =pl.FlattenRectangle();
         }
 
         /// <summary>

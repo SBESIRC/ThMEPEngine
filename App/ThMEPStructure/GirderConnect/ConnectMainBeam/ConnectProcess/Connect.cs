@@ -1,55 +1,53 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using AcHelper;
-using Linq2Acad;
-using DotNetARX;
 using ThCADCore.NTS;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.Data;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
+using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 {
     public class Connect
     {
-        private static Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
+        private  Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
         
-        private static Dictionary<Polyline, HashSet<Polyline>> outlineWallsMerged = new Dictionary<Polyline, HashSet<Polyline>>();
+        private  Dictionary<Polyline, HashSet<Polyline>> outlineWallsMerged = new Dictionary<Polyline, HashSet<Polyline>>();
         
-        private static Dictionary<Polyline, List<Point3d>> outline2ZeroPts = new Dictionary<Polyline, List<Point3d>>();
+        private  Dictionary<Polyline, List<Point3d>> outline2ZeroPts = new Dictionary<Polyline, List<Point3d>>();
         
-        private static Dictionary<Polyline, Point3dCollection> outlineNearPts = new Dictionary<Polyline, Point3dCollection>();
+        private  Dictionary<Polyline, Point3dCollection> outlineNearPts = new Dictionary<Polyline, Point3dCollection>();
         
-        private static Point3dCollection allPts = new Point3dCollection();
+        private  Point3dCollection allPts = new Point3dCollection();
         
-        private static HashSet<Point3d> borderPts = new HashSet<Point3d>();
+        private  HashSet<Point3d> borderPts = new HashSet<Point3d>();
         
-        private static Point3dCollection zeroPtCollections = new Point3dCollection();
+        private  Point3dCollection zeroPtCollections = new Point3dCollection();
 
-        private static List<Point3d> zeroPts = new List<Point3d>();
+        private  List<Point3d> zeroPts = new List<Point3d>();
 
-        private static HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
+        private  HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
 
-        private static Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+        private  Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
 
-        private static Dictionary<Point3d, Point3d> closeBorderLines = new Dictionary<Point3d, Point3d>();
+        private  Dictionary<Point3d, Point3d> closeBorderLines = new Dictionary<Point3d, Point3d>();
 
+        public Connect()
+        {
+            //
+        }
         /// <summary>
         /// Connect Steps
         /// </summary>
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static Dictionary<Point3d, HashSet<Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
+        public Dictionary<Point3d, HashSet<Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
             Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
             if(clumnPts.Count == 0)
@@ -190,9 +188,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
             StructureDealer.RemoveIntersectLines(ref dicTuples); //慢
             LineDealer.DicTuplesStandardize(ref dicTuples, zeroPts); //耗时
+
             //SplitAndMerge(ref dicTuples, allPts, outline2BorderNearPts);
             List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
 
+            //dicTuples = OnlySplit(dicTuples, allPts, closebdLines);
             //WallConnect(dicTuples, outline2ZeroPts);
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
             foreach (var tup in closebdLines)
@@ -205,7 +205,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         }
 
 
-        public static void BorderConnectToVDNear(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
+        private void BorderConnectToVDNear(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
         {
             //1、获取NearPt  Get near points of outlines
             PointsDealer.VoronoiDiagramNearPoints(clumnPts, outlineNearPts);
@@ -215,7 +215,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //3、删减无用的“BorderPt与NearPt的连接”
         }
 
-        public static Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
+        private Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
         {
             closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
             //Split & Merge
@@ -231,6 +231,21 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             return newDicTuples;
         }
 
+        private Dictionary<Point3d, HashSet<Point3d>> OnlySplit(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
+        {
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            //Split & Merge
+            LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
+            var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygons(dicTuples, findPolylineFromLines);
+            //splic polyline
+            StructureBuilder.SplitBlock(findPolylineFromLines, closeBorderLines);
+            //merge fragments and split if possible
+            //Deal with Intersect Near Pointsnetload
+            Dictionary<Point3d, HashSet<Point3d>> newDicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), allPts);
+            return newDicTuples;
+        }
+
         /// <summary>
         /// 分情况连接边界上的点
         /// </summary>
@@ -238,7 +253,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// <param name="outlineWalls"></param>
         /// <param name="outerWalls"></param>
         /// <param name="olCrossPts"></param>
-        public static List<Tuple<Point3d, Point3d>> BorderPtsConnect(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
+        private List<Tuple<Point3d, Point3d>> BorderPtsConnect(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
             Dictionary<Polyline, HashSet<Polyline>> outerWalls, Dictionary<Polyline, HashSet<Point3d>> olCrossPts, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             List<Tuple<Point3d, Point3d>> closeBorderLines = new List<Tuple<Point3d, Point3d>>();
@@ -278,7 +293,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// </summary>
         /// <param name="dicTuples">已经加入房屋边框的dicTuples</param>
         /// <param name="outline2ZeroPts"></param>
-        public static void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
+        private void WallConnect(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Dictionary<Polyline, List<Point3d>> outline2ZeroPts)
         {
             var itcBorderPts = PointsDealer.FindIntersectBorderPt(dicTuples.Keys.ToList(), outline2ZeroPts.Keys.ToList());
             var outlines = outline2ZeroPts.Keys.ToList();

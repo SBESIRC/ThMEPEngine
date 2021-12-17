@@ -411,8 +411,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tuples.Add(new Tuple<Point3d, Point3d>(borderPt, nearPt));
                         tuples.Add(new Tuple<Point3d, Point3d>(nearPt, borderPt));
-                        ShowInfo.DrawLine(borderPt, nearPt, 210);
-                        ShowInfo.DrawLine(nearPt, borderPt, 210);
+                        //ShowInfo.DrawLine(borderPt, nearPt, 210);
+                        //ShowInfo.DrawLine(nearPt, borderPt, 210);
                     }
                 }
             }
@@ -709,6 +709,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static HashSet<Tuple<Point3d, Point3d>> DicTuplesToTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
+            if(dicTuples.IsNull())
+            {
+                return tuples;
+            }
             foreach(var dicTuple in dicTuples)
             {
                 foreach(var point in dicTuple.Value)

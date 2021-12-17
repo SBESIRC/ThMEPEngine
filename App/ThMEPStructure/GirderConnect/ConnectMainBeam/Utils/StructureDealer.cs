@@ -1,32 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using Linq2Acad;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
-using ThCADCore.NTS;
-using DotNetARX;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Autodesk.AutoCAD.Colors;
-using NetTopologySuite.LinearReferencing;
-using AcHelper.Commands;
 using NFox.Cad;
-using ThMEPStructure.GirderConnect.Data;
-using ThMEPStructure.GirderConnect.Command;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore;
-using ThMEPStructure.GirderConnect.Data.Utils;
+using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+using ThCADCore.NTS;
+
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -240,13 +221,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             List<Tuple<Point3d, Point3d>> evenLines = MergePolyline(polylineA, polylineB);
             List<List<Tuple<Point3d, Point3d>>> polylines = new List<List<Tuple<Point3d, Point3d>>>();
             SplitPolyline(evenLines, polylines);
-            foreach (var lines in polylines)
-            {
-                foreach (var line in lines)
-                {
-                    ShowInfo.DrawLine(line.Item1, line.Item2, 130);
-                }
-            }
         }
 
         /// <summary>
@@ -278,7 +252,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
                 foreach (Point3d nearPt in dicOutl2Pts.Value) //for each near point on a outline
                 {
-                    ShowInfo.ShowPointAsX(nearPt, 210, 520);
+                    //ShowInfo.ShowPointAsX(nearPt, 210, 520);
                     if (tmpDicTuples.ContainsKey(nearPt))
                     {
                         minDis = double.MaxValue;
@@ -288,7 +262,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             if (innerPts.Contains(curCntPt))
                             {
-                                ShowInfo.ShowPointAsO(curCntPt, 1, 300);
+                                //ShowInfo.ShowPointAsO(curCntPt, 1, 300);
                                 curDis = curCntPt.DistanceTo(nearPt);
                                 if (curDis < minDis)//; && preCntPt != nearPt)
                                 {
@@ -317,7 +291,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (!dicTuples[stayPt].Contains(nearPt))
                             {
                                 dicTuples[stayPt].Add(nearPt);
-                                ShowInfo.DrawLine(stayPt, nearPt);
+                                //ShowInfo.DrawLine(stayPt, nearPt);
                             }
                             if (!dicTuples.ContainsKey(nearPt))
                             {
@@ -326,7 +300,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (!dicTuples[nearPt].Contains(stayPt))
                             {
                                 dicTuples[nearPt].Add(stayPt);
-                                ShowInfo.DrawLine(nearPt, stayPt);
+                                //ShowInfo.DrawLine(nearPt, stayPt);
                             }
                         }
                     }
@@ -427,7 +401,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
 
             //4、Return the vertical point on outline
-            ShowInfo.ShowPointAsU(verticalPt, 7, 200); //common or do not delete
+            //ShowInfo.ShowPointAsU(verticalPt, 7, 200); //common or do not delete
             return verticalPt;
         }
 
@@ -673,7 +647,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                     else if(cnt == 3)
                     {
-                        ShowInfo.ShowPointAsO(basePt, 7, 900);
+                        //ShowInfo.ShowPointAsO(basePt, 7, 900);
                         var findVec = GetObject.GetDirectionByThreeVecs(basePt, nowCntPts[0], nowCntPts[1], nowCntPts[2]);
                         var ansPt = GetObject.GetPointByDirection(basePt, findVec, basePts, partice * 3, 13000);
                         AddLineTodicTuples(basePt, ansPt, ref dicTuples);
@@ -989,7 +963,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     if (ptA != ptB && ptA.DistanceTo(ptB) < tolerance && !ptVisted.Contains(ptB) && !ptVisted.Contains(ptB))
                     {
                         ptVisted.Add(ptB);
-                        ShowInfo.ShowPointAsX(ptB, 3, 500);
+                        //ShowInfo.ShowPointAsX(ptB, 3, 500);
                         foreach (var cntPtB in newDicTuples[ptB])
                         {
                             if (dicTuples.ContainsKey(cntPtB) && dicTuples[cntPtB].Contains(ptB))
@@ -1027,13 +1001,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         }
                     }
                 }
-                ShowInfo.ShowPointAsX(minDisBasePt, 1, 700);
+                //ShowInfo.ShowPointAsX(minDisBasePt, 1, 700);
                 //将closePtlist中的所有点都换成minDisBasePt
                 foreach (var closePt in closePtlist)
                 {
                     AddLineTodicTuples(minDisBasePt, closePt, ref dicTuples);
                     AddLineTodicTuples(closePt, minDisBasePt, ref dicTuples);
-                    ShowInfo.DrawLine(minDisBasePt, closePt, 1);
+                    //ShowInfo.DrawLine(minDisBasePt, closePt, 1);
                 }
             }
         }

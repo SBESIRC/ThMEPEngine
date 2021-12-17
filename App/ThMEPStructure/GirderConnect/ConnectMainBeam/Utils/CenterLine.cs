@@ -24,7 +24,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="mPolygon"></param>
         /// <param name="interpolationDistance"></param>
         /// <returns></returns>
-        public static List<Line> CLSimplify(MPolygon mPolygon, double interpolationDistance = 300)
+        public List<Line> CLSimplify(MPolygon mPolygon, double interpolationDistance = 300)
         {
             //1.init
             var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), interpolationDistance);
@@ -74,7 +74,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 else if (node.Value > 4)
                 {
                     edgPts[node.Key] = 3;
-                    ShowInfo.ShowPointAsO(node.Key, 130, 14.159265 * 2);//请勿删除
+                    //ShowInfo.ShowPointAsO(node.Key, 130, 14.159265 * 2);//请勿删除
                     ++bigPtCnt;
                 }
             }
@@ -106,7 +106,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (pt_edges.ContainsKey(pt) && edgPts[pt] != 3)
                 {
                     pt_edges.Remove(pt);
-                    ShowInfo.ShowPointAsX(pt, 80, 10);//请勿删除
+                    //ShowInfo.ShowPointAsX(pt, 80, 10);//请勿删除
                 }
             }
             List<Line> lines = new List<Line>();
@@ -117,7 +117,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     if (edgPts[pt] != 2)
                     {
                         lines.Add(new Line(node.Key, pt));
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(node.Key, pt));//show line
+                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(node.Key, pt));//show line
                     }
                 }
             }
@@ -132,7 +132,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="interpolationDistance">分割细粒度</param>
         public static void CutBrancheLoop(MPolygon mPolygon, int looptime = 5, double interpolationDistance = 30)
         {
-
             var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), interpolationDistance);
             var lines = new List<Tuple<Point3d, Point3d>>();
             foreach (var cl in centerlines)
