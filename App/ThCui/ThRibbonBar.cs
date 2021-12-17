@@ -15,7 +15,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateWSSPanel(tab);
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
-                CreateStructurePanel(tab);
+                //CreateStructurePanel(tab);
                 CreateArchitecturePanel(tab);
             }
         }
@@ -681,14 +681,14 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_ARCHITECTURE_LARGE",
                     RibbonButtonStyle.LargeWithText);
 
-                // 结构专业
-                splitButton.AddNewButton("结构专业",
-                    "天华结构",
-                    "THMEPPROFILE _S",
-                    "切换到天华结构",
-                    "IDI_THCAD_STRUCTURE_SMALL",
-                    "IDI_THCAD_STRUCTURE_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+                //// 结构专业
+                //splitButton.AddNewButton("结构专业",
+                //    "天华结构",
+                //    "THMEPPROFILE _S",
+                //    "切换到天华结构",
+                //    "IDI_THCAD_STRUCTURE_SMALL",
+                //    "IDI_THCAD_STRUCTURE_LARGE",
+                //    RibbonButtonStyle.LargeWithText);
 
                 // 暖通专业
                 splitButton.AddNewButton("暖通专业",
