@@ -291,7 +291,7 @@ namespace ThMEPEngineCore.Algorithm
                             var intersectPts = lines[tuple.Item1].Intersect(lines[tuple.Item2], Intersect.OnBothOperands);
                             if (intersectPts.Count != 1)
                             {
-                                throw new NotSupportedException();
+                                continue;  //throw new NotSupportedException();
                             }
                             else
                             {

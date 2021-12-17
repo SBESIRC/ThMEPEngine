@@ -120,6 +120,10 @@ namespace ThMEPLighting.FEI.EvacuationPath
         private List<List<Line>> FindInsectLanes(Polyline line, List<List<Line>> lanes)
         {
             List<List<Line>> otherLanes = new List<List<Line>>();
+            if (line.Length < 5)
+            {
+                return otherLanes;
+            }
 
             var laneLines = lanes.SelectMany(x => x).ToList();
             var bufferLine = line.BufferPL(tol)[0] as Polyline;

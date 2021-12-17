@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.DSFEL.Model;
 
@@ -60,14 +61,14 @@ namespace ThMEPLighting.DSFEL.Service
             }
         }
 
-        public static void ImportModel(this Database database, string blockName, string layerName)
+        private static void ImportModel(this Database database, string blockName, string layerName)
         {
-            //using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            //using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalSecurityPlaneDwgPath(), DwgOpenMode.ReadOnly, false))
-            //{
-            //    currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), false);
-            //    currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), false);
-            //}
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingFEIDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), false);
+            }
         }
     }
 }

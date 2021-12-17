@@ -143,6 +143,7 @@ namespace ThMEPLighting.DSFEL.Service
             {
                 var ColumnExtractEngine = new ThColumnExtractionEngine();
                 ColumnExtractEngine.Extract(acdb.Database);
+
                 ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var ColumnEngine = new ThColumnRecognitionEngine();
                 ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
