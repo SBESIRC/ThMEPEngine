@@ -409,6 +409,22 @@ namespace ThMEPEngineCore.Engine
             return isInArchWall || isInShearWall || isInColumn || isInDoor || isInWindow || isInCurtainWall;
         }
 
+        public bool IsContains(Entity polygon)
+        {
+            if(polygon==null)
+            {
+                return false;
+            }
+            bool isArchWallContains = IsContains(_architectureWall, polygon);
+            bool isShearWallContains = IsContains(_shearWall, polygon);
+            bool isColumnContains = IsContains(_column, polygon);
+            bool isDoorContains = IsContains(_door, polygon);
+            bool isWindowContains = IsContains(_window, polygon);
+            bool isCurtainWallContains = IsContains(_curtainWall, polygon);
+            return isArchWallContains || isShearWallContains || isColumnContains ||
+                isDoorContains || isWindowContains || isCurtainWallContains;
+        }
+
         public bool IsCloseToComponents(Point3d p,double tolerance)
         {
             bool isCloseToArchWall = IsCloseToComponents(_architectureWall, p, tolerance);
@@ -420,6 +436,11 @@ namespace ThMEPEngineCore.Engine
             return isCloseToArchWall || isCloseToShearWall || isCloseToColumn ||
                 isCloseToDoor || isCloseToWindow || isCloseToCurtainWall;
         }
+        private bool IsContains(DBObjectCollection polygons, Entity polygon)
+        {
+            return polygons.OfType<Entity>().Where(o=>o.IsContains(polygon)).Any();    
+        }
+
         private bool IsCloseToComponents(DBObjectCollection polygons, Point3d pt,double tolerance)
         {
             foreach (DBObject obj in polygons)

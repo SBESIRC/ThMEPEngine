@@ -91,10 +91,15 @@ namespace ThMEPEngineCore.Service
                             {
                                 // 通过选择的点从造的面中查询包含此点的房间框线,并添加到RoomOutlines
                                 var boundaries = Query(Bounaries, closeOriginPt);
-                                var newAdds = boundaries.OfType<Entity>().Select(o => o.Clone() as Entity).ToCollection();
-
-                                // 将新的房间轮廓线添加到RoomOutlines
-                                RoomOutlines = RoomOutlines.Union(newAdds);
+                                var newAdds = new DBObjectCollection();
+                                // 用原始造的面和现有存储的面进行差集，将剩余的面添加到RoomOutlines中
+                                boundaries.OfType<Entity>().ForEach(o =>
+                                {
+                                    var subRooms = Difference(o, RoomOutlines);
+                                    subRooms = subRooms.OfType<Entity>().Where(e => !roomData.IsContains(Buffer(e,-1.0))).ToCollection();
+                                    newAdds = newAdds.Union(subRooms);
+                                    RoomOutlines = RoomOutlines.Union(subRooms);
+                                });
 
                                 // 更新显示
                                 var displayObjs = AddToDisplay(newAdds);
@@ -154,6 +159,67 @@ namespace ThMEPEngineCore.Service
                 }
             }
             ClearTransients();
+        }
+
+        private DBObjectCollection Difference(Entity originArea,DBObjectCollection polygons)
+        {
+            var results = new DBObjectCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(polygons);
+            var objs = spatialIndex.SelectCrossingPolygon(originArea);
+            if(objs.Count == 0)
+            {
+                results.Add(originArea);
+            }
+            else
+            {
+                //减去不在Entity里面的东西
+                //fixed TopologyException
+                var length = 1.0;
+                var newOriginArea = Buffer(originArea, -1.0 * length);
+                var newObjs = Buffer(objs, -1.0 * length);
+                if (newOriginArea != null && newObjs.Count>0)
+                {
+                    results = ThCADCoreNTSEntityExtension.Difference(newOriginArea, newObjs, true);
+                    results = Buffer(results,1.0* length);
+                    results = Process(results);
+                }
+            }
+            return results;
+        }
+
+        private DBObjectCollection Buffer(DBObjectCollection polygons,double length)
+        {
+            var results = new DBObjectCollection();
+            var bufferService = new ThNTSBufferService();
+            polygons.OfType<Entity>().ForEach(o =>
+            {
+                var newEnt = bufferService.Buffer(o, length);
+                if(newEnt!=null)
+                {
+                    results.Add(newEnt);
+                }
+            });
+            return results;
+        }
+        private Entity Buffer(Entity polygon, double length)
+        {
+            var bufferService = new ThNTSBufferService();
+            return bufferService.Buffer(polygon, length);
+        }
+
+        private DBObjectCollection Process(DBObjectCollection polygons)
+        {
+            // 处理Polygons
+            var simplifier = new ThPolygonalElementSimplifier();
+            var results = polygons.FilterSmallArea(1.0);
+            results = simplifier.Normalize(results);
+            results = polygons.FilterSmallArea(1.0);
+            results = simplifier.MakeValid(results); //解决自交的Case
+            results = polygons.FilterSmallArea(1.0);
+            results = simplifier.Simplify(results); 
+            results = polygons.FilterSmallArea(1.0);
+            results = ThCADCoreNTSGeometryFilter.GeometryEquality(results); // 去重
+            return results;
         }
 
         private void Split(Polyline splitLine)
