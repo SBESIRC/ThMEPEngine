@@ -337,7 +337,7 @@ namespace ThMEPLighting.Garage
         public static void SetDatabaseDefaults(this ThCableTrayParameter cableTrayParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 var centerLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.CenterLineParameter.LineType));
                 var laneLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.LaneLineBlockParameter.LineType));
@@ -380,7 +380,7 @@ namespace ThMEPLighting.Garage
         public static void SetDatabaseDefaults(this ThLightArrangeParameter arrangeParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(arrangeParameter.LightNumberTextStyle), false);

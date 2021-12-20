@@ -80,51 +80,34 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "暖通.选型.风机.dwg");
         }
 
-        // 暖通管道设备块
+        // 暖通图层图块
         public static string HvacPipeDwgPath()
         {
             return Path.Combine(SupportPath(), "暖通图层图块.dwg");
         }
-        // 电气烟感/温感图块
-        public static string ElectricalSensorDwgPath()
+
+        // 电气图层图块
+        public static string ElectricalDwgPath()
         {
-            return Path.Combine(SupportPath(), "烟感温感图块.dwg");
+            return Path.Combine(SupportPath(), "电气图层图块.dwg");
         }
 
-        // 电气消防应急广播图块
-        public static string ElectricalBroadcastDwgPath()
+        // 电气提资转换图块
+        public static string BlockConvertDwgPath()
         {
-            return Path.Combine(SupportPath(), "消防应急广播.dwg");
+            return Path.Combine(SupportPath(), "提电气块转换配置表.dwg");
         }
 
-        // 电气地库应急照明图块
-        public static string ElectricalSecurityPlaneDwgPath()
+        // 火灾自动报警系统
+        public static string AutoFireAlarmSystemDwgPath()
         {
-            return Path.Combine(SupportPath(), "安防图例模板.dwg");
-        }
-
-        // 电气地库应急照明图块
-        public static string LightingEmgLightDwgPath()
-        {
-            return Path.Combine(SupportPath(), "地库应急照明图块.dwg");
+            return ElectricalDwgPath();
         }
 
         // 消防喷淋块
         public static string SprinklerDwgPath()
         {
             return Path.Combine(SupportPath(), "给排水.喷淋.dwg");
-        }
-
-        // 车道线布灯
-        public static string LaneLineLightDwgPath()
-        {
-            return Path.Combine(SupportPath(), "车道灯图块.dwg");
-        }
-
-        // 车位布灯块
-        public static string ParkStallLightDwgPath()
-        {
-            return Path.Combine(SupportPath(), "车位灯图块.dwg");
         }
 
         // 楼层框定图块
@@ -137,12 +120,6 @@ namespace ThCADExtension
         public static string WSSDwgPath()
         {
             return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
-        }
-
-        // 电气照明疏散指示灯图块
-        public static string LightingFEIDwgPath()
-        {
-            return Path.Combine(SupportPath(), "疏散指示灯图块.dwg");
         }
 
         // 房间名称分类处理
@@ -211,19 +188,6 @@ namespace ThCADExtension
         public static string DuctInOutMapping()
         {
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
-        }
-
-        // 消防喷淋块
-        public static string AutoFireAlarmSystemDwgPath()
-        {
-            return Path.Combine(SupportPath(), "火灾自动报警系统图例.dwg");
-        }
-
-
-        // 电气提资转换图块
-        public static string BlockConvertDwgPath()
-        {
-            return Path.Combine(SupportPath(), "提电气块转换配置表.dwg");
         }
 
         // 运行时根目录

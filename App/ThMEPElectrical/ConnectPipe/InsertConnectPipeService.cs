@@ -10,7 +10,7 @@ namespace ThMEPElectrical.ConnectPipe
         public static void InsertConnectPipe(List<Polyline> polylines)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Layers.Import(
                     blockDb.Layers.ElementOrDefault(ThMEPCommon.ConnectPipeLayerName), false);

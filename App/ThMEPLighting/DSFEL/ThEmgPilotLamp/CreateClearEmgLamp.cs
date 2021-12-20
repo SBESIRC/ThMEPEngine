@@ -147,7 +147,7 @@ namespace ThMEPLighting.DSFEI.ThEmgPilotLamp
         public static void LoadBlockToDocument(this Database database) 
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingFEIDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 foreach (var item in lampBlockNames) 
                 {
