@@ -18,6 +18,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
     public class LayoutParameter
     {
+        public Polyline InitialWalls { get; set; }//初始外包框，不被disposal
         public Polyline OuterBoundary { get; set; }//最外包围框
         public List<int> AreaNumber { get; set; }//区域索引，从0开始
         public DBObjectCollection Obstacles { get; set; }//所有障碍物
@@ -36,6 +37,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
         public LayoutParameter(Polyline outerBoundary, DBObjectCollection obstacles, List<Line> segLines)
         {
+            InitialWalls = outerBoundary.Clone() as Polyline;
             OuterBoundary = outerBoundary;
             Obstacles = obstacles;
             SegLines = segLines;
@@ -52,12 +54,98 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles);
         }
 
+        public void Clear()
+        {
+            AreaNumber.Clear();
+
+            foreach (var line in SegLines)
+            {
+                line.Dispose();
+            }
+            SegLines.Clear();
+
+            foreach(var pline in Areas)
+            {
+                pline.Dispose();
+            }
+            Areas.Clear();
+
+            foreach(var pline in AreaDic.Values)
+            {
+                pline.Dispose();
+            }
+            AreaDic.Clear();
+
+            foreach(var blocks in ObstacleDic.Values)
+            {
+                foreach(var block in blocks)
+                {
+                    block.Dispose();
+                }
+                blocks.Clear();
+            }
+            ObstacleDic.Clear();
+
+            foreach (var lines in SegLineDic.Values)
+            {
+                foreach (var line in lines)
+                {
+                    line.Dispose();
+                }
+                lines.Clear();
+            }
+            SegLineDic.Clear();
+
+            foreach (var plines in AreaWalls.Values)
+            {
+                foreach (var pline in plines)
+                {
+                    pline.Dispose();
+                }
+                plines.Clear();
+            }
+            AreaWalls.Clear();
+
+            foreach (var lines in AreaSegs.Values)
+            {
+                foreach (var line in lines)
+                {
+                    line.Dispose();
+                }
+                lines.Clear();
+            }
+            AreaSegs.Clear();
+
+            foreach (var plines in BuildingBoxes.Values)
+            {
+                foreach (var pline in plines)
+                {
+                    pline.Dispose();
+                }
+                plines.Clear();
+            }
+            BuildingBoxes.Clear();
+
+            foreach (var plinesList in ObstaclesList.Values)
+            {
+                foreach(var plines in plinesList)
+                {
+                    foreach (var pline in plines)
+                    {
+                        pline.Dispose();
+                    }
+                    plines.Clear();
+                }
+                plinesList.Clear();
+            }
+            ObstaclesList.Clear();
+        }
+
         public void Set(List<Gene> genome)
         {
             var areas = new List<Polyline>();
-            areas.Add(OuterBoundary);
-            SegLines.Clear();
-
+            areas.Add(InitialWalls);
+            Clear();//清空所有参数
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
@@ -65,25 +153,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLines.Add(GetSegLine(gene));
             }
             SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
-            AreaNumber.Clear();
-            Areas.Clear();
-            AreaDic.Clear();
-            ObstacleDic.Clear();
-            SegLineDic.Clear();
-            AreaWalls.Clear();
-            AreaSegs.Clear();
-            BuildingBoxes.Clear();
-            ObstaclesList.Clear();
 
             Areas.AddRange(areas);
-            for (int i = 0; i < areas.Count; i++)
+
+            for (int i = 0; i < Areas.Count; i++)
             {
                 AreaNumber.Add(i);
-                AreaDic.Add(i, areas[i]);
-                var buildings = GetObstacles(areas[i]);
+                AreaDic.Add(i, Areas[i]);
+                var buildings = GetObstacles(Areas[i]);
                 ObstacleDic.Add(i, buildings);
-                SegLineDic.Add(i, GetSegLines(areas[i]));
-                AreaSegs.Add(i, GetAreaSegs(areas[i], SegLineDic[i], out List<Polyline> areaWall));
+                SegLineDic.Add(i, GetSegLines(Areas[i]));
+                AreaSegs.Add(i, GetAreaSegs(Areas[i], SegLineDic[i], out List<Polyline> areaWall));
                 AreaWalls.Add(i, areaWall);
 
                 var bdBoxes = new List<Polyline>();//临时建筑物外包线
@@ -93,10 +173,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     var rect = build.GetRect();
                     var obstacle = build.GetPlines();
                     bdBoxes.Add(rect);
-                    //using (AcadDatabase currentDb = AcadDatabase.Active())
-                    //{
-                    //    currentDb.CurrentSpace.Add(rect);
-                    //}
                     obstacles.Add(obstacle);
                 }
                 BuildingBoxes.Add(i, bdBoxes);

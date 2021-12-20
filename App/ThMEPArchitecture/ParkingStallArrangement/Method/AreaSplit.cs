@@ -86,6 +86,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                     return true;
                 }
+                if(segAreas.Count > 2)
+                {
+                    var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
+                    var res = sortedAreas.Take(2);
+                    areas.RemoveAt(k);
+                    areas.AddRange(res);
+                    foreach (var segArea in res)
+                    {
+                        var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
+                        var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                        if (segLine.GetValueType(boundPt))
+                        {
+                            maxVal = segLine.GetMinDist(boundPt) - 2760;
+                        }
+                        else
+                        {
+                            minVal = -segLine.GetMinDist(boundPt) + 2760;
+                        }
+                    }
+                    return true;
+                }
             }
             return false;
         }
