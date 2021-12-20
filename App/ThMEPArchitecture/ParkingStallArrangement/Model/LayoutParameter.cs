@@ -140,12 +140,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             ObstaclesList.Clear();
         }
-
+        public void Clear2()
+        {
+            AreaNumber.Clear();
+            SegLines.Clear();
+            Areas.Clear();
+            AreaDic.Clear();
+            ObstacleDic.Clear();
+            SegLineDic.Clear();
+            AreaWalls.Clear();
+            AreaSegs.Clear();
+            BuildingBoxes.Clear();
+            ObstaclesList.Clear();
+        }
         public void Set(List<Gene> genome)
         {
             var areas = new List<Polyline>();
-            areas.Add(InitialWalls);
-            Clear();//清空所有参数
+            areas.Add(OuterBoundary);
+            Clear2();//清空所有参数
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
