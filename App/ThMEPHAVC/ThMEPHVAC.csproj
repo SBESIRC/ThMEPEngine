@@ -32,6 +32,7 @@
     <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
+    <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />

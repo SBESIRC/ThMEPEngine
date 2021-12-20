@@ -253,6 +253,11 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 CalNodeValue(RootNode, fan);
             }
+            foreach (var fcu in fan)
+            {
+                FindFcuNode(RootNode, fcu.FanPoint);
+            }
+            RemBadNode(RootNode, PIPELEVEL.LEVEL2);
         }
         ThFanTreeNode<ThFanPointModel> GetRootNode(ThFanTreeNode<ThFanPipeModel> treeModel)
         {
@@ -274,7 +279,7 @@ namespace ThMEPHVAC.FanConnect.Model
                     var pointModel = new ThFanPointModel();
                     pointModel.CntPoint = l.EndPoint;
                     pointModel.IsFlag = model.IsFlag;
-                    pointModel.Level = model.PipeLevel;
+                    pointModel.Level = PIPELEVEL.LEVEL1;
                     var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
                     node.InsertChild(pointNode);
                     remLines.Add(l);
@@ -293,7 +298,10 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 CalNodeValue(child, fans);
             }
-
+            if(node.Children.Count >= 2)
+            {
+                node.Item.IsCrossPoint = true;
+            }
             if(node.Children.Count == 0)
             {
                 foreach (var f in fans)
@@ -325,21 +333,21 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 retLines.AddRange(GetLinesFromNode(child));
             }
-            var pts = new List<Point3d>();
-            pts.Add(treeNode.Item.PLine.StartPoint);
+            var pts = new List<Point3dEx>();
+            pts.Add(new Point3dEx(treeNode.Item.PLine.StartPoint));
             foreach (var child in treeNode.Children)
             {
                 if(!child.Item.IsConnect)
                 {
-                    pts.Add(child.Item.PLine.StartPoint);
+                    pts.Add(new Point3dEx(child.Item.PLine.StartPoint));
                 }
             }
-            pts.Add(treeNode.Item.PLine.EndPoint);
+            pts.Add(new Point3dEx(treeNode.Item.PLine.EndPoint));
             pts = pts.Distinct().ToList();
-            pts = pts.OrderBy(o=> treeNode.Item.PLine.StartPoint.DistanceTo(o)).ToList();
+            pts = pts.OrderBy(o=> treeNode.Item.PLine.StartPoint.DistanceTo(o._pt)).ToList();
             for(int i = 0; i < pts.Count - 1;i++)
             {
-                var tmpLine = new Line(pts[i], pts[i + 1]);
+                var tmpLine = new Line(pts[i]._pt, pts[i + 1]._pt);
                 retLines.Add(tmpLine);
             }
             return retLines;
@@ -360,6 +368,48 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
             return null;
+        }
+        public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node, Point3d pt)
+        {
+            if (node.Item.CntPoint.DistanceTo(pt) < 10.0)
+            {
+                node.Item.Level = PIPELEVEL.LEVEL2;
+                if (node.Parent != null)
+                {
+                    if (node.Parent.Children.Count == 1)
+                    {
+                        FindFcuNode(node.Parent);
+                    }
+                }
+                return;
+            }
+            foreach (var item in node.Children)
+            {
+                FindFcuNode(item, pt);
+            }
+        }
+        public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.Level = PIPELEVEL.LEVEL2;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    FindFcuNode(node.Parent);
+                }
+            }
+        }
+        public void RemBadNode(ThFanTreeNode<ThFanPointModel> node, PIPELEVEL level)
+        {
+            var remChildren = new List<ThFanTreeNode<ThFanPointModel>>();
+            foreach (var child in node.Children)
+            {
+                if (child.Item.Level != level)
+                {
+                    RemBadNode(child, level);
+                }
+            }
+            node.Children = node.Children.Where(o => o.Item.Level != level).ToList();
         }
     }
 }

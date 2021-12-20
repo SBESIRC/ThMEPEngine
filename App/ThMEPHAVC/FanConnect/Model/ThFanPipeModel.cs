@@ -62,6 +62,7 @@ namespace ThMEPHVAC.FanConnect.Model
         public bool IsFlag { set; get; }//标识位，表示是否反向ExPline顺序
         public bool IsCondMarked { set; get; }//是否已标记冷凝水管
         public bool IsCoolHotMarked { set; get; }//是否已标记冷热水
+        public bool IsCrossPoint { set; get; }//是否是交叉点
         public double CoolCapa { set; get; }//制冷量
         public double CoolFlow { set; get; }//制冷流量值
         public double HotFlow { set; get; }//制热流量值
@@ -73,6 +74,7 @@ namespace ThMEPHVAC.FanConnect.Model
             IsFlag = false;
             IsCondMarked = false;
             IsCoolHotMarked = false;
+            IsCrossPoint = false;
             CoolCapa = 0.0;
             CoolFlow = 0.0;
             HotFlow = 0.0;
