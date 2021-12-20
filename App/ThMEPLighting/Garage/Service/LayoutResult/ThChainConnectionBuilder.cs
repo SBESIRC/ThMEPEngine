@@ -34,8 +34,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             LightPositionDict = BuildLightPos();
 
             // 创建连接线，按照灯长度把灯所在的边打断
-            var linkWireObjs = CreateLinkWire();
-            linkWireObjs = FilerLinkWire(linkWireObjs);
+            var firstEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.First).ToList();
+            var secondEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.Second).ToList();
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);
+            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
+            var secondLinkWireObjs = CreateLinkWire(secondEdges);
+            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
 
             // 建议允许最大的回路编号是4
             var ductions = new List<Point3dCollection>();
@@ -58,7 +62,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = Wires.Union(crossJumpWireRes);
             Wires = Wires.Union(threewayJumpWireRes);        
             Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
-            Wires = Wires.Union(linkWireObjs);    
+            Wires = Wires.Union(firstLinkWireObjs); // 切记：请在BreakWire之后，添加进去
+            Wires = Wires.Union(secondLinkWireObjs);// 切记：请在BreakWire之后，添加进去
 
             // 创建灯文字
             NumberTexts = BuildNumberText(

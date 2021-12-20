@@ -19,6 +19,12 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
+            AcadApp.DocumentManager.DocumentBecameCurrent += DocumentManager_DocumentBecameCurrent;
+        }
+
+        private void DocumentManager_DocumentBecameCurrent(object sender, Autodesk.AutoCAD.ApplicationServices.DocumentCollectionEventArgs e)
+        {
+            TianHua.Lighting.UI.uiThLighting.Update();
         }
 
         public void Terminate()
@@ -27,6 +33,7 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
+            AcadApp.DocumentManager.DocumentBecameCurrent -= DocumentManager_DocumentBecameCurrent;
         }
 
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]

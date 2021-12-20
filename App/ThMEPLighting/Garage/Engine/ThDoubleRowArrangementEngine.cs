@@ -247,10 +247,10 @@ namespace ThMEPLighting.Garage.Engine
             return results;
         }
 
-        private List<ThLightEdge> BuildEdges(List<Line> lines)
+        private List<ThLightEdge> BuildEdges(List<Line> lines,EdgePattern edgePattern)
         {
             var edges = new List<ThLightEdge>();           
-            lines.ForEach(o => edges.Add(new ThLightEdge(o)));
+            lines.ForEach(o => edges.Add(new ThLightEdge(o) { EdgePattern = edgePattern }));
             return edges;
         }
 
@@ -395,8 +395,8 @@ namespace ThMEPLighting.Garage.Engine
             ThRegionBorder regionBorder,List<Line> firstLines,List<Line> secondLines)
         {
             
-            var firstLightEdges = BuildEdges(firstLines);
-            var secondLightEdges = BuildEdges(secondLines);
+            var firstLightEdges = BuildEdges(firstLines,EdgePattern.First);
+            var secondLightEdges = BuildEdges(secondLines,EdgePattern.Second);
 
             // 布点
             var linePoints = new Dictionary<Line, List<Point3d>>();

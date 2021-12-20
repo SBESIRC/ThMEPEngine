@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Linq;
+using AcHelper.Commands;
 using System.Windows.Data;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using AcHelper.Commands;
 using ThControlLibraryWPF.ControlUtils;
-using ThMEPElectrical.Command;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Lighting.ViewModels
 {
@@ -523,6 +524,33 @@ namespace ThMEPLighting.Lighting.ViewModels
                 string.Join(",", LaneLineLayers),
             };
             CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD", parameters);
+        }
+        public void UpdateLaneLineLayers()
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                AddAdSignLayers();
+                var removeLayerTexts = _items.Select(o => o.Text).Where(o => !acadDb.Layers.Contains(o)).ToList();
+                removeLayerTexts.ForEach(o => Remove(o));
+            }
+        }
+
+        private void Remove(string layer)
+        {
+            var querys = _items.Where(o => o.Text == layer).Select(o=>o.Text).ToList();
+            foreach(string text in querys)
+            {
+                var item = _items.Where(o => o.Text == text).First();
+                _items.Remove(item);
+            }
+        }
+
+        public void AddAdSignLayers()
+        {
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                ThLaneLineLayerManager.GeometryXrefLayers(acadDb.Database).ForEach(o => Add(o));
+            }
         }
     }
 }

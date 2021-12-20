@@ -30,10 +30,21 @@ namespace TianHua.Lighting.UI
             {
                 UIConfigs = new LightingViewModel();
             }
+            // 更新车道线图层
+            Update();
+
             DataContext = UIConfigs;
             InitUI();
             //For single form instance
             MutexName = "Mutext_uiThLighting";
+        }
+
+        public static void Update()
+        {
+            if(UIConfigs!=null)
+            {
+                UIConfigs.UpdateLaneLineLayers();
+            }
         }
 
         private void InitUI()

@@ -182,7 +182,6 @@
     <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
     <Compile Include="Garage\Engine\ThLaneLineGraphEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
-    <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
     <Compile Include="Garage\Model\ThLineSplitParameter.cs" />
     <Compile Include="Garage\Service\LayoutPoint\ThAvoidBeamLayoutPointService.cs" />
     <Compile Include="Garage\Service\LayoutPoint\ThEqualDistanceLayoutPointService.cs" />

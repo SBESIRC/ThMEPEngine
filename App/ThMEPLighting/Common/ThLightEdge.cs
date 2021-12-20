@@ -20,11 +20,13 @@ namespace ThMEPLighting.Common
         /// </summary>
         public Vector3d Direction { get; set; }
         public bool IsDX { get; set; }
+        public EdgePattern EdgePattern { get; set; }
         public ThLightEdge()
         {
+            IsDX = true;
+            EdgePattern = EdgePattern.Unknown;
             LightNodes = new List<ThLightNode>();
             MultiBranch = new List<Tuple<Point3d, ThLightEdge>>();
-            IsDX = true;
         }
         public ThLightEdge(Line line):this()
         {
@@ -110,27 +112,6 @@ namespace ThMEPLighting.Common
                 endPt = Edge.StartPoint;
             }
             return Tuple.Create(startPt, endPt);
-        }
-        public static EdgePattern Trans(string patternName)
-        {
-            patternName = patternName.ToUpper();
-            var pattern = EdgePattern.Unknown;
-            switch (patternName)
-            {
-                case "FIRST":
-                    pattern = EdgePattern.First;
-                    break;
-                case "SECOND":
-                    pattern = EdgePattern.Second;
-                    break;
-                case "CENTER":
-                    pattern = EdgePattern.Center;
-                    break;
-                default:
-                    pattern = EdgePattern.Unknown;
-                    break;
-            }
-            return pattern;
         }
         public Point3d StartPoint
         {

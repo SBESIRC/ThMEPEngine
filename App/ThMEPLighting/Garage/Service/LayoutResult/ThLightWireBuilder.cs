@@ -55,10 +55,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return lightWireFactory.Results;
         }
 
-        protected DBObjectCollection CreateLinkWire()
+        protected DBObjectCollection CreateLinkWire(List<ThLightEdge> edges)
         {
-            // 创建线与灯的连线
-            var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
             var lightWireFactory = new ThLightLinkWireFactory(edges)
             {
                 LampLength = ArrangeParameter.LampLength,
