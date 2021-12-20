@@ -264,7 +264,14 @@ namespace ThMEPHVAC.FanLayout.Service
                     string strKey = "水管标注" + (i + 1).ToString();
                     attNameValues.Add(strKey, properties[i]);
                 }
-                InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
+                var blkID = InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, new Scale3d(1, 1, 1), angle, attNameValues);
+                foreach (DynamicBlockReferenceProperty property in blkID.GetDynProperties())
+                {
+                    if (property.PropertyName.Contains("管间距"))
+                    {
+                        property.Value = 300.0;
+                    }
+                }
             }
         }
         public void InsertBlockReference(string layer, string blockName, Point3d position, double angle, Scale3d scale)
