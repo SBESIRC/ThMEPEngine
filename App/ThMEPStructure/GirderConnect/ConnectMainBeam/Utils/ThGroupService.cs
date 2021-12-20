@@ -9,7 +9,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
     class ThGroupService
     {
-        private const double BufferLength = 500.0;//10.0
+        private const double BufferLength = 500.0;
         private DBObjectCollection Objs { get; set; }
         private List<Entity> Outlines = new List<Entity>();
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }

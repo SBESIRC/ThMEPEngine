@@ -41,6 +41,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         {
             //
         }
+
         /// <summary>
         /// Connect Steps
         /// </summary>
@@ -86,7 +87,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 }
             }
 
-            //1.2
+            //1.2、获得临近点、边界点 并连接
             BorderConnectToVDNear(clumnPts, outlineClumns);
 
             foreach (var outline2ZeroPt in outline2ZeroPts)
@@ -97,7 +98,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     zeroPtCollections.Add(pt);
                 }
             }
-
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt2NearPt in borderPt2NearPts)
@@ -109,10 +109,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 }
             }
 
-            zeroPtCollections = StructureDealer.ReduceSimilarPoints(zeroPtCollections);
-
             //1.3:DT/VDconnect points with borderPoints and clumnPoints
-            //HashSet<Tuple<Point3d, Point3d>> tuples = StructureBuilder.DelaunayTriangulationConnect(allPts);
+            //tuples = StructureBuilder.DelaunayTriangulationConnect(allPts);
+            allPts = PointsDealer.PointsDistinct(allPts, 1);
             tuples = StructureBuilder.VoronoiDiagramConnect(allPts);
             dicTuples = LineDealer.TuplesStandardize(tuples, allPts);
 
@@ -138,29 +137,26 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.DeleteSameClassLine(borderPts, dicTuples);
             LineDealer.DeleteDiffClassLine(borderPts, clumnPts, dicTuples); //重要区分,删除与否要看情况
             LineDealer.AddSpecialLine(outline2BorderNearPts, dicTuples);
-
             //2.1、delete connect up to four
             StructureDealer.DeleteConnectUpToFourA(dicTuples, ref outline2BorderNearPts);
-            
+
             //2.2 close border
             closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
 
-            //3.0 分割、合并区域
+            //3.0 Split & Merge areas
             dicTuples = SplitAndMerge(dicTuples, allPts, closeBorderLines);
-
             var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts);
-            
-            LineDealer.DeleteSameClassLine(itcBorderPts, dicTuples);//删除相交近点互相之间的连线
-            LineDealer.DeleteDiffClassLine(itcBorderPts, borderPts, dicTuples);//删除近点和其连接的边界点之间的连线
-            //LineDealer.DeleteDiffClassLine(itcNearPts, itcNearPts, dicTuples);
-
-            //StructureDealer.DeleteConnectUpToFour(dicTuples, outline2BorderNearPts);
+            //var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWalls.Keys.ToList(), ref outline2BorderNearPts);
+            //itcBorderPts = PointsDealer.PointsDistinct(itcBorderPts);
+            LineDealer.DeleteSameClassLine(itcBorderPts, dicTuples);
+            LineDealer.DeleteDiffClassLine(itcBorderPts, borderPts, dicTuples);
+            LineDealer.AddSpecialLine(outline2BorderNearPts, dicTuples);
 
             LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
             StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
             PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
             //delete to four
-            StructureDealer.DeleteConnectUpToFourB(dicTuples, ref outline2BorderNearPts); //删除的时候，如果删除点的对点是外边线上的并且只有这一个连线，则不能删掉，其他都可删
+            StructureDealer.DeleteConnectUpToFourB(dicTuples, ref outline2BorderNearPts);
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt in borderPt2NearPts.Keys)
@@ -175,35 +171,30 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     }
                 }
             }
-            //在此之前 outline2BorderNearPts 有问题， 有些点是空的，可能是较好的点但被删除了。、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、、
-            //StructureDealer.ReduceSimilarPoints(ref dicTuples, zeroPts);
-
-            //PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
+            
             StructureDealer.ReduceSimilarLine(ref dicTuples); //快
             StructureDealer.ReduceSimilarPoints(ref dicTuples, zeroPts); //较快
-            foreach (var item in dicTuples.Keys)
-            {
-                allPts.Add(item);
-            }
+            PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
+
+            dicTuples.Keys.ForEach(o => allPts.Add(o));
             StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
+
             StructureDealer.RemoveIntersectLines(ref dicTuples); //慢
             LineDealer.DicTuplesStandardize(ref dicTuples, zeroPts); //耗时
-
             //SplitAndMerge(ref dicTuples, allPts, outline2BorderNearPts);
             List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
-
             //dicTuples = OnlySplit(dicTuples, allPts, closebdLines);
             //WallConnect(dicTuples, outline2ZeroPts);
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
-            foreach (var tup in closebdLines)
-            {
-                StructureDealer.DeleteFromDicTuples(tup.Item1, tup.Item2, ref dicTuples);
-            }
+            closebdLines.ForEach(o => StructureDealer.DeleteFromDicTuples(o.Item1, o.Item2, ref dicTuples));
+
+            StructureDealer.ReduceSimilarLine(ref dicTuples);
+            StructureDealer.ReduceSimilarPoints(ref dicTuples);
             itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outline2BorderNearPts.Keys.ToList(), ref outline2BorderNearPts);
+            itcBorderPts = PointsDealer.PointsDistinct(itcBorderPts);
             LineDealer.DeleteSameClassLine(itcBorderPts, dicTuples);
             return dicTuples;
         }
-
 
         private void BorderConnectToVDNear(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Point3d>> outlineClumns)
         {
@@ -325,9 +316,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     //    }
                     //}
                 }
-
             }
-
             //连接不同的边界
             //点上的连接至少为1
             //连接一边有墙点，一边没有墙点

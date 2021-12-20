@@ -1,17 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Collections.Generic;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Linq2Acad;
-using AcHelper;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.ApplicationServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
 
@@ -214,13 +208,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
-            //foreach (var line in linesType.Keys)
-            //{
-            //    //if (linesType[line] == 0 )//&& linesType.ContainsKey(new Tuple<Point3d, Point3d>(line.Item2, line.Item1)) && linesType[new Tuple<Point3d, Point3d>(line.Item2, line.Item1)] == 0)
-            //    {
-            //        ShowInfo.DrawLine(line.Item1, line.Item2, 130);
-            //    }
-            //}
+            foreach (var line in linesType.Keys)
+            {
+                //if (linesType[line] == 0 )//&& linesType.ContainsKey(new Tuple<Point3d, Point3d>(line.Item2, line.Item1)) && linesType[new Tuple<Point3d, Point3d>(line.Item2, line.Item1)] == 0)
+                {
+                    ShowInfo.DrawLine(line.Item1, line.Item2, 130);
+                }
+            }
         }
 
         /// <summary>
@@ -276,7 +270,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         if (!outline2BorderNearPts[curOutline][borderPt].Contains(cntNearPt))
                         {
                             outline2BorderNearPts[curOutline][borderPt].Add(cntNearPt);
-                            //ShowInfo.DrawLine(borderPt, cntNearPt, 7);
                         }
                         if (tmpNearPts.Contains(cntNearPt))
                         {
@@ -293,7 +286,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     continue;
                 }
-                //var bufferService = new ThMEPEngineCore.Service.ThNTSBufferService();
                 foreach (var wall in outlineWalls[curOutline])
                 {
                     if (wall.Closed == false || wall.Area < 10000)
@@ -367,15 +359,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             outline2BorderNearPts[curOutline].Add(borderPt, new HashSet<Point3d>());
                         }
                         outline2BorderNearPts[curOutline][borderPt].Add(nearPt);
-                        //ShowInfo.DrawLine(nearPt, borderPt, 1);
                     }
                 }
             }
             //Merge very close points to one whithout change structure
             //LineDealer.SimplifyLineConnect(borderPt2NearPts, thdPts);
             LineDealer.SimplifyLineConnect(outline2BorderNearPts, fstPtsS);
-            //Polyline pl = new Polyline();
-            //pl =pl.FlattenRectangle();
         }
 
         /// <summary>
@@ -433,16 +422,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         }
                     }
 
-                    if (tmpLines.Count > 1 && flag != 1) //如果算法好，"tmpLines.Count > 1"是可以不要的
+                    if (tmpLines.Count > 1 && flag != 1)
                     {
                         foreach (var tmpLine in tmpLines)
                         {
-                            //ShowInfo.DrawLine(tmpLine.Item1, tmpLine.Item2);
                             if (!findPolylineFromLines.ContainsKey(tmpLine))
                             {
                                 findPolylineFromLines.Add(tmpLine, tmpLines);
                             }
-                            //ShowInfo.ShowGeometry()
                         }
                     }
                 }

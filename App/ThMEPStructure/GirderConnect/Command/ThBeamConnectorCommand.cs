@@ -58,14 +58,8 @@ namespace ThMEPStructure.GirderConnect.Command
 
                 ThBeamGeometryPreprocessor.Z0Curves(ref columns);
                 ThBeamGeometryPreprocessor.Z0Curves(ref shearwalls);
-                //var mainBuildings = dataFactory.MainBuildings.OfType<Entity>().ToList();
-                
                 ThBeamGeometryPreprocessor.Z0Curves(ref buildings);
                 var mainBuildings = buildings.OfType<Entity>().ToList();
-                // print extract data
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(columns.OfType<Entity>().ToList(), acdb.Database, 5);
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(shearwalls.OfType<Entity>().ToList(), acdb.Database, 6);
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(mainBuildings, acdb.Database, 7);
 
                 // 分组 
                 var columnGroupService = new ThGroupService(mainBuildings, columns);
@@ -86,13 +80,9 @@ namespace ThMEPStructure.GirderConnect.Command
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
                     clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
 
-                //string showInfoLayer = "TH_AI_SHOWINFO";
-                //ShowInfo showInfo = new ShowInfo(showInfoLayer);
-                //LayerDealer.AddLayer(showInfoLayer, 2);
-                
-                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(outlineWalls.SelectMany(o=>o.Value.ToList()).OfType<Entity>().ToList(), acdb.Database, 5);
                 //计算
                 var connectService = new Connect();
+
                 var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
 
                 DBObjectCollection intersectCollection = new DBObjectCollection();

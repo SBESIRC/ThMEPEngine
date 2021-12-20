@@ -1,26 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using AcHelper;
-using Linq2Acad;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
     class ShowInfo
     {
-        //private static string infoLayer { get; set; }
-        //public ShowInfo(string showInfoLayer)
-        //{
-        //    infoLayer = showInfoLayer;
-        //}
         /// <summary>
         /// 显示一个Geometry集合
         /// </summary>
@@ -187,6 +176,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Line line = new Line(point1, point2);
             line.ColorIndex = color;
             line.AddToCurrentSpace();
+        }
+
+        public static void ShowDicTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples, int color)
+        {
+            foreach(var dicTuple in dicTuples)
+            {
+                foreach(var pt in dicTuple.Value)
+                {
+                    DrawLine(dicTuple.Key, pt, color);
+                }
+            }
         }
     }
 }

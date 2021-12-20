@@ -14,7 +14,6 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using System.Collections;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Algorithm.Match;
 using Dreambuild.AutoCAD;
@@ -169,6 +168,13 @@ namespace ThMEPStructure.GirderConnect.Data
             var spatialExtractor = new ThSpatialElementExtractor();
             spatialExtractor.Accept(mainBuildingVisitor);
             spatialExtractor.Extract(database);
+            mainBuildingVisitor.Results
+                .ForEach(o =>
+                    {
+                        if (o.Geometry is Polyline pl)
+                            pl.Closed = true;
+                    }
+               );
             var mainBuildings = mainBuildingVisitor.Results.Select(o => o.Geometry).ToCollection();
             return Clean(mainBuildings);
         }

@@ -23,7 +23,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         private static bool IsMainBuildingHatchLayer(string name)
         {
             string layer = ThStructureUtils.OriginalFromXref(name);
-            //return layer.EndsWith("主楼填充") || layer.ToUpper().EndsWith("S_WALL_DETL");
             return  layer.ToUpper().EndsWith("S_WALL_DETL") || layer.EndsWith("主楼填充");
         }
     }

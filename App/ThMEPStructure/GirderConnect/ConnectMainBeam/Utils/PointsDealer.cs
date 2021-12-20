@@ -1,32 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Linq2Acad;
-using System.Collections;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
+using NFox.Cad;
+using AcHelper;
+using Linq2Acad;
 using ThCADExtension;
 using ThCADCore.NTS;
-using AcHelper;
-using DotNetARX;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Overlay;
-using NetTopologySuite.Operation.Overlay.Snap;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.ApplicationServices;
-using NetTopologySuite.Triangulate;
-using NetTopologySuite.LinearReferencing;
-using AcHelper.Commands;
-using NFox.Cad;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Triangulate;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -611,6 +598,35 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 outline2BorderPts.Add(outline, innerPoints.ToHashSet());
             }
             return outline2BorderPts;
+        }
+
+        public static Point3dCollection PointsDistinct(Point3dCollection pts, double deviation = 1.0)
+        {
+            Point3dCollection ansPts = new Point3dCollection();
+            var kdTree = new ThCADCoreNTSKdTree(deviation);
+            foreach(Point3d pt in pts)
+            {
+                kdTree.InsertPoint(pt);
+            }
+            kdTree.Nodes.ForEach(o =>
+            {
+                ansPts.Add(o.Key.Coordinate.ToAcGePoint3d());
+            });
+            return ansPts;
+        }
+        public static HashSet<Point3d> PointsDistinct(HashSet<Point3d> pts)
+        {
+            HashSet<Point3d> ansPts = new HashSet<Point3d>();
+            var kdTree = new ThCADCoreNTSKdTree(1.0);
+            foreach (Point3d pt in pts)
+            {
+                kdTree.InsertPoint(pt);
+            }
+            kdTree.Nodes.ForEach(o =>
+            {
+                ansPts.Add(o.Key.Coordinate.ToAcGePoint3d());
+            });
+            return ansPts;
         }
     }
 }

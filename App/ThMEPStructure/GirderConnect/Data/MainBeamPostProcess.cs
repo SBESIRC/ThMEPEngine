@@ -1,26 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
 using AcHelper;
 using DotNetARX;
+using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using ThMEPEngineCore.Service;
-using ThMEPStructure.GirderConnect.Data;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess;
-using NetTopologySuite.Operation.OverlayNG;
-using NetTopologySuite.Geometries;
-using NFox.Cad;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam;
 
 namespace ThMEPStructure.GirderConnect.Data
 {
@@ -93,14 +83,6 @@ namespace ThMEPStructure.GirderConnect.Data
         {
             using (var acdb = AcadDatabase.Active())
             {
-                //BuildMainBeam buildMainBeam = new BuildMainBeam(lines, intersectCollection);
-                //var mainBeams = buildMainBeam.Build("地下室顶板");
-                //foreach (var beam in mainBeams)
-                //{
-                //    beam.Layer = layerName;
-                //    beam.ColorIndex = 130;
-                //    HostApplicationServices.WorkingDatabase.AddToModelSpace(beam);
-                //}
                 lines.ForEach(line =>
                 {
                     line.Layer = layerName;

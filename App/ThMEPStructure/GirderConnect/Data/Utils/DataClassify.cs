@@ -1,18 +1,11 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
 using AcHelper;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using ThMEPEngineCore.Service;
 using NFox.Cad;
-using ThMEPEngineCore.Algorithm;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Service;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
@@ -78,7 +71,6 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             {
                 if (curve is Polyline polyline)
                 {
-                    polyline.Closed = true;
                     if (IsColumns(polyline) && !columns.Contains(polyline))
                     {
                         columns.Add(polyline);
@@ -124,7 +116,8 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                     mergeCollection.Add(polyline);
                     foreach (var polylineColumn in polylineColumns)
                     {
-                        if(plColumnVisted[polylineColumn] == false && polyline.Intersects(polylineColumn))
+                        var centroidPt = polylineColumn.GetCentroidPoint();
+                        if (plColumnVisted[polylineColumn] == false && centroidPt.DistanceTo(polyline.GetClosestPointTo(centroidPt, false)) < 900)
                         {
                             mergeCollection.Add(polylineColumn);
                             plColumnVisted[polylineColumn] = true;
@@ -142,7 +135,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             polylineColumns.Clear();
             foreach (var plColumnVist in plColumnVisted)
             {
-                if(plColumnVist.Value == false) //false
+                if(plColumnVist.Value == false)
                 {
                     polylineColumns.Add(plColumnVist.Key);
                 }
@@ -212,6 +205,26 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             results = ThVStructuralElementSimplifier.Normalize(results);
             results = ThVStructuralElementSimplifier.Simplify(results);
             return results;
+        }
+
+        public static Dictionary<Polyline, HashSet<Polyline>> SimplifyOutlineThings(Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        {
+            Dictionary<Polyline, HashSet<Polyline>> newOutlineWalls = new Dictionary<Polyline, HashSet<Polyline>>();
+            foreach (var outlineWall in outlineWalls)
+            {
+                var outline = outlineWall.Key;
+                newOutlineWalls.Add(outline, new HashSet<Polyline>());
+                var walls = PreprocessLinealElements(outlineWall.Value.ToCollection());
+                foreach(var wall in walls)
+                {
+                    if(wall is Polyline polyline)
+                    {
+                        polyline.Closed = true;
+                        newOutlineWalls[outline].Add(polyline);
+                    }
+                }
+            }
+            return newOutlineWalls;
         }
     }
 }
