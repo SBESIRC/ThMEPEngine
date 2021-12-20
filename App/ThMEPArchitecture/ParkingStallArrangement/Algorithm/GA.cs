@@ -168,7 +168,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     catch (Exception ex)
                     {
                         Logger.Error(ex.Message);
-                        //partition.CalNumOfParkingSpaces();
                     }
 
                 }

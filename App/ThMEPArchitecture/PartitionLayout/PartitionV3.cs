@@ -80,9 +80,9 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             int count = 0;
             GenerateParkingSpaces();
-            count = CarSpots.Count;
+            count = CarSpots.Count;        
             CarSpots.ForEach(e => e.Dispose());
-            Obstacles.ForEach(e => e.Dispose());
+            Dispose();
             return count;
         }
 
@@ -94,7 +94,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public void ProcessAndDisplay(string layer = "0", int colorIndex = 0)
         {
             GenerateParkingSpaces();
-            Obstacles.ForEach(e => e.Dispose());
+            Dispose();
             Display(layer, colorIndex);
         }
 
@@ -112,6 +112,26 @@ namespace ThMEPArchitecture.PartitionLayout
                 return e;
             }).AddToCurrentSpace();
 
+        }
+
+        public void Dispose()
+        {
+            Walls.ForEach(e => e.Dispose());
+            IniLanes.ForEach(e => e.Line.Dispose());
+            Obstacles.ForEach(e => e.Dispose());
+            Boundary.Dispose();
+            ObstaclesSpatialIndex.Dispose();
+            CarModuleBox.ForEach(e => e.Dispose());
+            MoudleSpatialIndex.Dispose();
+            IntegralModules.ForEach(e => e.Box.Dispose());
+            IntegralModules.ForEach(e => e.Lanes.ForEach(o => o.Dispose()));
+            IniLaneLines.ForEach(e => e.Dispose());
+            BuildingBoxes.ForEach(e => e.Dispose());
+            BoundingBox.Dispose();
+            CarSpatialIndex.Dispose();
+            ModuleBox.ForEach(e => e.Dispose());
+            Laneboxes.ForEach(e => e.Dispose());
+            IniBoundary.Dispose();
         }
 
         /// <summary>
@@ -147,6 +167,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 pl.Dispose();
                 return false;
             }
+            pl.Dispose();
             return true;
         }
 

@@ -424,7 +424,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 var param = verts.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e, pl)).ToList();
                 points.Insert(0, verts.First());
                 points.Add(verts.Last());
-                points = RemoveDuplicatePts(points);
+                points = RemoveDuplicatePts(points,1);
+                points=points.Distinct().ToList();
                 SortAlongCurve(points, pl);
                 param.RemoveAt(0);
                 param.RemoveAt(param.Count - 1);
