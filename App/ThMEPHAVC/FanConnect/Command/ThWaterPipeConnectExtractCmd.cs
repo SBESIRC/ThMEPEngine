@@ -51,7 +51,7 @@ namespace ThMEPHVAC.FanConnect.Command
             using (var database = AcadDatabase.Active())
             {
                 ImportBlockFile();
-                double pipeWidth = 200.0;
+                double pipeWidth = 300.0;
                 switch (ConfigInfo.WaterSystemConfigInfo.SystemType)//系统
                 {
                     case 0://水系统

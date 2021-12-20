@@ -58,7 +58,7 @@ namespace ThMEPHVAC.FanConnect.Service
             var collection = ObstacleHoles.ToCollection();
             collection.Add(model.FanObb);
             //根据model的类型，先走一步
-            var stepPt = TakeStep(model.FanObb, model.FanPoint,500);
+            var stepPt = TakeStep(model.FanObb, model.FanPoint,300);
             //根据model位置和line，构建一个框frame
             var frame = ThFanConnectUtils.CreateMapFrame(line, stepPt,10000);
             //提取frame里面的hole和room
