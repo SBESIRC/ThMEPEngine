@@ -66,7 +66,7 @@ namespace ThMEPStructure.GirderConnect.Command
                     Polyline polyline = pts.CreatePolyline();
                     originTransformer.Transform(polyline);
                     //获取主梁线和边框线
-                    var beamLine = getPrimitivesService.GetBeamLine(polyline);
+                    var beamLine = getPrimitivesService.GetBeamLine(polyline , out ObjectIdCollection objs);
                     var wallBound = getPrimitivesService.GetWallBound(polyline);
                     beamLine = beamLine.Union(wallBound).ToList();
                     var houseBound = getPrimitivesService.GetHouseBound(polyline);

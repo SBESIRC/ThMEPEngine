@@ -42,7 +42,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                 foreach (var line in secondaryBeamLines)
                 {
                     var newLine = line.Clone() as Line;
-                    newLine.Layer = "TH_AICL_BEAM";
+                    newLine.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
                     acad.ModelSpace.Add(newLine);
                 }
             }
@@ -52,11 +52,70 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                database.AddLayer(SecondaryBeamLayoutConfig.LayerName);
-                database.SetLayerColor(SecondaryBeamLayoutConfig.LayerName, SecondaryBeamLayoutConfig.ColorIndex);
-                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.LayerName);
-                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.LayerName);
-                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.LayerName);
+                database.AddLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
+                database.SetLayerColor(SecondaryBeamLayoutConfig.SecondaryBeamLayerName, SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex);
+                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
+                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
+                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
+            }
+        }
+
+        public static void CreateSecondaryBeamTextLayer(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                database.AddLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
+                database.SetLayerColor(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName, SecondaryBeamLayoutConfig.SecondaryBeamTextLayerColorIndex);
+                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
+                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
+                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
+            }
+        }
+
+        public static void CreateMainBeamTextLayer(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                database.AddLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
+                database.SetLayerColor(SecondaryBeamLayoutConfig.MainBeamTextLayerName, SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex);
+                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
+                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
+                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
+            }
+        }
+
+        public static ObjectId AddToModelSpace(Entity obj)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                return acad.ModelSpace.Add(obj);
+            }
+        }
+        public static ObjectIdList InsertEntity(List<Entity> ents)
+        {
+            ObjectIdList objectIds = new ObjectIdList();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var item in ents)
+                {
+                    var objId = acadDatabase.ModelSpace.Add(item);
+                    objectIds.Add(objId);
+                }
+            }
+            return objectIds;
+        }
+
+        public static void Erase(ObjectIdCollection objs)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                foreach (ObjectId objId in objs)
+                {
+                    var entity = acad.Element<Entity>(objId);
+                    entity.UpgradeOpen();
+                    entity.Erase();
+                    entity.DowngradeOpen();
+                }
             }
         }
     }

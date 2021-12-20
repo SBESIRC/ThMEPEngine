@@ -284,6 +284,24 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         SparelayoutResult.SecondaryBeamLines.Add(L2);
                         if (edges[0].BeamType == BeamType.Scrap)
                         {
+                            if (edges[1].BeamSide.GetLineAngle(edges[4].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance)
+                            {
+                                Polyline planE1 = new Point3dCollection() { edges[1].TrueSide.GetCenterPt(), edges[2].TrueSide.StartPoint, edges[3].TrueSide.StartPoint, edges[4].TrueSide.StartPoint, edges[4].TrueSide.GetCenterPt() }.CreatePolyline();
+                                Polyline planE2 = new Point3dCollection() { edges[1].TrueSide.GetCenterPt(), edges[1].TrueSide.StartPoint, edges[0].TrueSide.StartPoint, edges[4].TrueSide.GetCenterPt() }.CreatePolyline();
+                                var L3 = new Line(edges[1].BeamSide.GetCenterPt(), edges[4].BeamSide.GetCenterPt());
+                                var areaRatioE = planE1.AreaRatio(planE2);
+                                if (areaRatioE > areaRatioL1 && areaRatioE > areaRatioL2 
+                                    && edges[0].TrueSide.GetLineAngle(L3) < edges[0].TrueSide.GetLineAngle(L1) 
+                                    && edges[0].TrueSide.GetLineAngle(L3) < edges[0].TrueSide.GetLineAngle(L2))
+                                {
+                                    L1 = L3;
+                                    layoutResult = new LayoutResult();
+                                    layoutResult.vector = edges[1].TrueSide.GetCenterPt().GetVectorTo(edges[4].TrueSide.GetCenterPt());
+                                    layoutResult.edges.Add(edges[1]);
+                                    layoutResult.edges.Add(edges[4]);
+                                    layoutResult.SecondaryBeamLines.Add(L1);
+                                }
+                            }
                             if (edges[0].TrueSide.GetLineAngle(L1) < edges[0].TrueSide.GetLineAngle(L2))
                             {
                                 LayoutLines = layoutResult;
@@ -419,6 +437,29 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                         SparelayoutResult.SecondaryBeamLines.Add(L2_2);
                         if (edges[0].BeamType == BeamType.Scrap)
                         {
+                            if (edges[1].BeamSide.GetLineAngle(edges[4].BeamSide) < SecondaryBeamLayoutConfig.AngleTolerance)
+                            {
+                                Polyline planE1 = new Point3dCollection() { edges[1].TrueSide.StartPoint, edges[1].TrueSide.GetOnethirdPt(), edges[4].TrueSide.GetTwothirdPt(), edges[0].TrueSide.StartPoint}.CreatePolyline();
+                                Polyline planE2 = new Point3dCollection() { edges[1].TrueSide.GetOnethirdPt(), edges[1].TrueSide.GetTwothirdPt(), edges[4].TrueSide.GetOnethirdPt(), edges[4].TrueSide.GetTwothirdPt() }.CreatePolyline();
+                                Polyline planE3 = new Point3dCollection() { edges[1].TrueSide.GetTwothirdPt(), edges[2].TrueSide.StartPoint, edges[3].TrueSide.StartPoint, edges[4].TrueSide.StartPoint, edges[4].TrueSide.GetOnethirdPt() }.CreatePolyline();
+
+                                var L3_1 = new Line(edges[0].TrueSide.GetOnethirdPt(), edges[4].TrueSide.GetTwothirdPt());
+                                var L3_2 = new Line(edges[0].TrueSide.GetTwothirdPt(), edges[4].TrueSide.GetOnethirdPt());
+                                var areaRatioE = planE1.AreaRatio(planE2,planE3);
+                                if (areaRatioE > areaRatioL1 && areaRatioE > areaRatioL2
+                                    && edges[0].TrueSide.GetLineAngle(L3_2) < edges[0].TrueSide.GetLineAngle(L1_2)
+                                    && edges[0].TrueSide.GetLineAngle(L3_2) < edges[0].TrueSide.GetLineAngle(L2_2))
+                                {
+                                    L1_1 = L3_1;
+                                    L1_2 = L3_2;
+                                    layoutResult = new LayoutResult();
+                                    layoutResult.vector = edges[1].TrueSide.GetCenterPt().GetVectorTo(edges[4].TrueSide.GetCenterPt());
+                                    layoutResult.edges.Add(edges[1]);
+                                    layoutResult.edges.Add(edges[4]);
+                                    layoutResult.SecondaryBeamLines.Add(L1_1);
+                                    layoutResult.SecondaryBeamLines.Add(L1_2);
+                                }
+                            }
                             if (edges[0].TrueSide.GetLineAngle(L1_2) < edges[0].TrueSide.GetLineAngle(L2_2))
                             {
                                 LayoutLines = layoutResult;
