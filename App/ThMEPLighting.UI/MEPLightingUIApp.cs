@@ -1,7 +1,9 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using TianHua.Lighting.UI;
 using ThMEPLighting.UI.UI;
 using ThMEPLighting.UI.emgLightLayout;
 using ThMEPLighting.UI.WiringConnecting;
+using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPLighting.UI
@@ -19,12 +21,8 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
+            AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
             AcadApp.DocumentManager.DocumentBecameCurrent += DocumentManager_DocumentBecameCurrent;
-        }
-
-        private void DocumentManager_DocumentBecameCurrent(object sender, Autodesk.AutoCAD.ApplicationServices.DocumentCollectionEventArgs e)
-        {
-            TianHua.Lighting.UI.uiThLighting.Update();
         }
 
         public void Terminate()
@@ -33,7 +31,25 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
+            AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
             AcadApp.DocumentManager.DocumentBecameCurrent -= DocumentManager_DocumentBecameCurrent;
+        }
+        private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
+        {
+            if(AcadApp.DocumentManager.Count==1)
+            {
+                if (uiThLighting.Instance != null)
+                {
+                    uiThLighting.Instance.Hide();
+                }
+            }
+        }
+        private void DocumentManager_DocumentBecameCurrent(object sender, DocumentCollectionEventArgs e)
+        {
+            if (uiThLighting.Instance != null)
+            {
+                uiThLighting.Instance.Update();
+            }
         }
 
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
@@ -77,8 +93,15 @@ namespace ThMEPLighting.UI
         [CommandMethod("TIANHUACAD", "THZM", CommandFlags.Modal)]
         public void THZMUI()
         {
-            var ui = new TianHua.Lighting.UI.uiThLighting();
-            AcadApp.ShowModelessWindow(ui);
+            if (null != uiThLighting.Instance && uiThLighting.Instance.IsLoaded)
+            {
+                if (!uiThLighting.Instance.IsVisible)
+                {
+                    uiThLighting.Instance.Show();
+                }
+                return;
+            }
+            AcadApp.ShowModelessWindow(uiThLighting.Instance);
         }
 
         /// <summary>

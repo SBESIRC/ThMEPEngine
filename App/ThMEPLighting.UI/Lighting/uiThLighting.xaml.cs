@@ -14,16 +14,20 @@ namespace TianHua.Lighting.UI
     /// </summary>
     public partial class uiThLighting : ThCustomWindow
     {
-        static LightingViewModel UIConfigs = null;
-
+        LightingViewModel UIConfigs = null;
+        public static uiThLighting Instance = null;
         //static uiThLighting()
         //{
         //    var items = UIConfigs.Items;
         //    items.Add(new LightingViewModel.Item() { Text = "全选" });
         //    items.Add(new LightingViewModel.Item() { Text = "AD-SIGN" });
         //}
+        static uiThLighting()
+        {
+            Instance = new uiThLighting();
+        }
 
-        public uiThLighting()
+        uiThLighting()
         {
             InitializeComponent();
             if (UIConfigs == null)
@@ -39,7 +43,7 @@ namespace TianHua.Lighting.UI
             MutexName = "Mutext_uiThLighting";
         }
 
-        public static void Update()
+        public void Update()
         {
             if(UIConfigs!=null)
             {
@@ -202,6 +206,12 @@ namespace TianHua.Lighting.UI
         private void rbCableTray_Unchecked(object sender, RoutedEventArgs e)
         {
             connectModeGroup.IsEnabled = true;
+        }
+
+        private void ThCustomWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;            
         }
     }
 }
