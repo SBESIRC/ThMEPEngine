@@ -18,9 +18,6 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{929F2B38-CF52-47B0-B4CE-209121205824}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\提电气块转换配置表.dwg" KeyPath="yes" />
-            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" Guid="{FA3F8351-30BA-4B0A-A0CC-B3D9B066BE8A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion_Table" Source="$(var.AutoloaderContentsPath)\Support\提资转换配置表.xlsx" KeyPath="yes" />
             </Component>
@@ -127,7 +124,6 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Electrical" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />
