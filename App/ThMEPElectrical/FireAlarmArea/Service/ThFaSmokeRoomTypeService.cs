@@ -84,8 +84,10 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 
 
                 frameSensorType.Add(roomFrameDict[room], typeInt);
-                DrawUtils.ShowGeometry(roomFrameDict[room].GetPoint3dAt(0), string.Format("roomName:{0}", roomName), "l0roomName", 121, 25, 200);
-
+                var printPt = roomFrameDict[room].GetPoint3dAt(0);
+                DrawUtils.ShowGeometry(printPt, string.Format("roomName:{0}", roomName), "l0roomName", 121, 25, 200);
+                DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(printPt.X, printPt.Y - 300, 0), string.Format("roomType:{0}", typeInt.ToString()), "l0roomType", 121, 25, 200);
+            
             }
 
             return frameSensorType;

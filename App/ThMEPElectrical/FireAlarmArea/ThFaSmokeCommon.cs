@@ -21,6 +21,8 @@ namespace ThMEPElectrical.FireAlarmArea
         public static string expPrfTag = "防爆";
         public static string nonLayoutTag = "非火灾探测区域";
 
+        public static double AisleAreaThreshold = 0.75;
+
         public enum layoutType
         {
             stair = 0,

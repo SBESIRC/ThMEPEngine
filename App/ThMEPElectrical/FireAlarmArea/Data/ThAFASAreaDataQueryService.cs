@@ -108,7 +108,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             });
         }
 
-        private List<ThGeometry> QueryC(string category)
+        public List<ThGeometry> QueryC(string category)
         {
             var result = new List<ThGeometry>();
             foreach (ThGeometry geo in Data)

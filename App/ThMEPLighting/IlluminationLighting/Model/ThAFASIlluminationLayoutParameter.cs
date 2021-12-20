@@ -16,7 +16,7 @@ namespace ThMEPLighting.IlluminationLighting.Model
         public Point3dCollection framePts;
         public ThMEPOriginTransformer transformer;
         public double Scale { get; set; } = 100;
-        public double AisleAreaThreshold { get; set; } = 0.025;
+        public double AisleAreaThreshold { get; set; } =0.75;
 
         public string BlkNameN = "";
         public string BlkNameE = "";

@@ -112,7 +112,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 var layoutParameter = new ThAFASGasLayoutParameter();
                 layoutParameter.Scale = _scale;
-                layoutParameter.AisleAreaThreshold = 0.025;
+                layoutParameter.AisleAreaThreshold = ThFaSmokeCommon.AisleAreaThreshold;
                 layoutParameter.ProtectRadius = _radius;
                 layoutParameter.RoomType = roomType;
                 layoutParameter.BlkNameGas = layoutBlkNameGas;

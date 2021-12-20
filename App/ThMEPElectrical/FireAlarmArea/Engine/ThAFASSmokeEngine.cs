@@ -77,47 +77,41 @@ namespace ThMEPElectrical.FireAlarmArea
 
         private static void LayoutProcess(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThAFASSmokeLayoutParameter layoutParameter, ThFaSmokeCommon.layoutType layoutType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
-            var blindType = BlindType.CoverArea; 
-            var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, layoutParameter.FloorHightIdx, layoutParameter.RootThetaIdx, layoutType);//to do...frame.area need to remove hole's area
-            //radius = radius * 0.9;
-            DrawUtils.ShowGeometry(frame.GetCentroidPoint(), string.Format("r:{0}", radius), "l0radius", 3, 25,300);
+            localPts = new Dictionary<Point3d, Vector3d>();
+            blines = new List<Polyline>();
 
+            var blindType = BlindType.CoverArea;
+            var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, layoutParameter.FloorHightIdx, layoutParameter.RootThetaIdx, layoutType);//to do...frame.area need to remove hole's area
             //区域类型
-            var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], radius * 0.8, layoutParameter.AisleAreaThreshold);
+            var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(dataQuery.FrameLayoutList[frame], radius);       
+            var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], beamGridWidth, layoutParameter.AisleAreaThreshold);
+
             if (bIsAisleArea == false)
             {
-                DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
+                DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea, radius, beamGridWidth);
                 ThFaAreaLayoutService.ThFaAreaLayoutGrid(frame, dataQuery, radius, blindType, out localPts, out blines);
                 DebugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
             else
             {
-                DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea);
+                DebugShowFrame(frame, dataQuery, layoutType, bIsAisleArea, radius, beamGridWidth);
                 ThFaAreaLayoutService.ThFaAreaLayoutCenterline(frame, dataQuery, radius, blindType, out localPts, out blines);
                 DebugShowResult(localPts, blines, layoutType, bIsAisleArea);
             }
         }
 
-        private static void DebugShowFrame(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThFaSmokeCommon.layoutType type, bool isCenterLine)
+        private static void DebugShowFrame(Polyline frame, ThAFASAreaDataQueryService dataQuery, ThFaSmokeCommon.layoutType type, bool isCenterLine, double radius, double beamGridWidth)
         {
             var stype = type == ThFaSmokeCommon.layoutType.heat ? "heat" : "smoke";
             var sCenterLine = isCenterLine == false ? "grid" : "cl";
 
-            //DrawUtils.ShowGeometry(frame, string.Format("l0{0}{1}-room", sCenterLine, stype), 30);
-            //DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0{0}{1}-wall", sCenterLine, stype), 10);
-            //DrawUtils.ShowGeometry(dataQuery.FrameColumnList[frame], string.Format("l0{0}{1}-column", sCenterLine, stype), 3);
-            //DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0{0}{1}-hole", sCenterLine, stype), 140);
-            //DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), string.Format("l0{0}{1}-layoutArea", sCenterLine, stype), 200);
-            //DrawUtils.ShowGeometry(dataQuery.FramePriorityList[frame], string.Format("l0{0}{1}-priority", sCenterLine, stype), 60);
-
             var pt = frame.GetCentroidPoint();
-            var ptNew = new Point3d(pt.X, pt.Y - 350, 0);
-            DrawUtils.ShowGeometry(ptNew, string.Format("process：{0}:{1}", stype, sCenterLine), "l0process", 3,25, 200);
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", stype, sCenterLine), "l0Info", 3, 25, 200);
 
-            //DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
             DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0wall"), 10);
             DrawUtils.ShowGeometry(dataQuery.FrameColumnList[frame], string.Format("l0column"), 3);
-            //DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
             DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), string.Format("l0layoutArea"), 200);
             DrawUtils.ShowGeometry(dataQuery.FramePriorityList[frame], string.Format("l0priority"), 60);
             DrawUtils.ShowGeometry(dataQuery.FrameDetectAreaList[frame], string.Format("l0DetectArea"), 96);

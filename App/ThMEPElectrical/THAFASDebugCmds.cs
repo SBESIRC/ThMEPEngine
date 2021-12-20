@@ -80,13 +80,17 @@ namespace ThMEPElectrical
 
             //画框，提数据，转数据
             var pts = ThAFASUtils.GetFrame();
+
+            //var pts = ThAFASUtils.GetRoomFrame();
+
+
             if (pts.Count == 0)
             {
                 return;
             }
             var referBeam = true;
             var wallThick = 100;
-            var needDetective = true;
+            var needDetective = false;
 
             var theta = 0;
             var floorHight = 2;
@@ -100,30 +104,32 @@ namespace ThMEPElectrical
 
 
             var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
+            var beam = dataQuery.QueryC(ThMEPEngineCore.Model.BuiltInCategory.Beam.ToString());
 
-            DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
-            DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0Wall", 10);
+            DrawUtils.ShowGeometry(dataQuery.Rooms.Select(x => x.Boundary).ToList(), "l0Room", 30);
+            DrawUtils.ShowGeometry(dataQuery.ArchitectureWalls.Select(x => x.Boundary).ToList(), "l0ArchiWall", 10);
+            DrawUtils.ShowGeometry(dataQuery.Shearwalls.Select(x => x.Boundary).ToList(), "l0ShearWall", 10);
             DrawUtils.ShowGeometry(dataQuery.Columns.Select(x => x.Boundary).ToList(), "l0Column", 3);
             DrawUtils.ShowGeometry(dataQuery.LayoutArea.Select(x => x.Boundary).ToList(), "l0PlaceCoverage", 200);
             DrawUtils.ShowGeometry(dataQuery.Holes.Select(x => x.Boundary).ToList(), "l0hole", 140);
             DrawUtils.ShowGeometry(dataQuery.DetectArea.Select(x => x.Boundary).ToList(), "l0DetectArea", 96);
+            beam.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0beam", 127));
 
             //洞,必须先做找到框线
             dataQuery.AnalysisHoles();
+            dataQuery.ClassifyData();
             var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
             foreach (var frame in dataQuery.FrameList)
             {
-                var centPt = frame.GetCentroidPoint();
-                DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
-                DrawUtils.ShowGeometry(centPt, string.Format("roomType:{0}", roomType[frame].ToString()), "l0roomType", 25, 25, 200);
-
                 var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
+                var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(dataQuery.FrameLayoutList[frame], radius);
                 var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], radius * 0.8, 0.025);
-
-                DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 1, 0), string.Format("r:{0}", radius), "l0radius", 25, 25, 200);
-                DrawUtils.ShowGeometry(new Autodesk.AutoCAD.Geometry.Point3d(centPt.X, centPt.Y - 350 * 2, 0), string.Format("bIsAisleArea:{0}", bIsAisleArea), "l0Area", 25, 25, 200);
+              
+                var type = bIsAisleArea == true ? "centerline" : "grid";
+                var centPt = frame.GetCentroidPoint();
+                DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
+                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l4lastInfo", 3, 25, 200);
             }
         }
 
@@ -149,5 +155,6 @@ namespace ThMEPElectrical
                 ThGeoOutput.Output(geos, path, fileInfo.Name);
             }
         }
+
     }
 }

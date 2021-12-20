@@ -16,6 +16,7 @@ using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
 using ThMEPElectrical.AFAS.Model;
+using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Model;
 
@@ -23,7 +24,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
 {
     public class ThFaAreaLayoutService
     {
-        public static void ThFaAreaLayoutGrid(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, BlindType blindType , out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
+        public static void ThFaAreaLayoutGrid(Polyline frame, ThAFASAreaDataQueryService dataQuery, double radius, BlindType blindType, out Dictionary<Point3d, Vector3d> localPts, out List<Polyline> blines)
         {
             localPts = new Dictionary<Point3d, Vector3d>();
             blines = new List<Polyline>();
@@ -92,15 +93,72 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             blines.AddRange(layoutCmd.blinds);
         }
 
+        //public static bool IsAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
+        //{
+        //    return ThMEPPolygonShapeRecognitionService.IsAisle(
+        //        frame,
+        //        HoleList,
+        //        shrinkValue,
+        //        threshold);
+        //}
+
+        /// <summary>
+        /// threshold:non aisle area
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="HoleList"></param>
+        /// <param name="shrinkValue"></param>
+        /// <param name="threshold"></param>
+        /// <returns></returns>
         public static bool IsAisleArea(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
         {
-            return ThMEPPolygonShapeRecognitionService.IsAisle(
-                frame,
-                HoleList,
-                shrinkValue,
-                threshold);
+            var ans = ThMEPPolygonShapeRecognitionService.IsAisleBufferShrinkFrame(frame, HoleList, shrinkValue, threshold);
+            return ans;
         }
 
+        public static double LayoutAreaWidth(List<MPolygon> LayoutArea, double radius)
+        {
+            var width = 2700.0;
+            var noChange = true;
+
+            if (LayoutArea.Count > 2)
+            {
+                var layoutWidth = LayoutArea.SelectMany(x => GetLayoutWidth(x)).ToList();
+                var w = layoutWidth
+                        .OrderByDescending(x => x)
+                        .GroupBy(x => Math.Round(x / 1000, MidpointRounding.AwayFromZero))
+                        .OrderByDescending(x => x.Count())
+                        .First()
+                        .ToList()
+                        .First();
+
+                width = w + 1000;
+
+                if ((radius / 5) < width && width <= radius)
+                {
+                    noChange = false;
+                }
+            }
+
+            if (noChange == true)
+            {
+                width = radius / 2.5;
+            }
+
+            return width;
+        }
+
+        private static List<double> GetLayoutWidth(MPolygon layout)
+        {
+            var obb = layout.Shell().CalObb();
+            DrawUtils.ShowGeometry(obb, "l0OBB", 3);
+
+            var d1 = obb.GetPoint3dAt(0).DistanceTo(obb.GetPoint3dAt(1));
+            var d2 = obb.GetPoint3dAt(1).DistanceTo(obb.GetPoint3dAt(2));
+            var w = new List<double>() { d1, d2 };
+
+            return w;
+        }
         public static void AddResult(List<ThLayoutPt> layoutResult, List<Polyline> blindsResult, Dictionary<Point3d, Vector3d> localPts, List<Polyline> localBlinds, string blkName)
         {
             foreach (var r in localPts)
