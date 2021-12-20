@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
@@ -74,7 +74,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             ptsCollection.Add(outline.Item1.EndPoint);
             var Spts = ptsCollection.Where(o => o.DistanceTo(outline.Item1.StartPoint) < o.DistanceTo(outline.Item1.EndPoint));
             var Epts = ptsCollection.Except(Spts);
-            Point3d centerPt = outline.Item1.GetMiddlePt();
+            Point3d centerPt = outline.Item1.GetMidpoint();
             Item1 = new Line(Spts.OrderBy(o => o.DistanceTo(centerPt)).First(), Epts.OrderBy(o => o.DistanceTo(centerPt)).First());
             ptsCollection.Clear();
             querysItem2.Cast<Entity>().ToList().ForEach(o =>
@@ -91,7 +91,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             ptsCollection.Add(outline.Item2.EndPoint);
             Spts = ptsCollection.Where(o => o.DistanceTo(outline.Item2.StartPoint) < o.DistanceTo(outline.Item2.EndPoint));
             Epts = ptsCollection.Except(Spts);
-            centerPt = outline.Item2.GetMiddlePt();
+            centerPt = outline.Item2.GetMidpoint();
             Item2 = new Line(Spts.OrderBy(o => o.DistanceTo(centerPt)).First(), Epts.OrderBy(o => o.DistanceTo(centerPt)).First());
 
             return (Item1, Item2).ToTuple();
