@@ -85,6 +85,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPArchitecture\ThMEPArchitecture.csproj">
+      <Project>{65557B89-67B5-4776-A2D5-68DA51D5296A}</Project>
+      <Name>ThMEPArchitecture</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>

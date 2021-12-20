@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam;
@@ -65,6 +66,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 var shearwalls = dataFactory.Shearwalls;
                 var mainBuildings = dataFactory.MainBuildings.OfType<Entity>().ToList();
                 var intersectCollection = columns.Union(shearwalls);
+                ThBeamGeometryPreprocessor.Z0Curves(ref intersectCollection);
                 foreach (var item in mainBuildings)
                 {
                     intersectCollection.Add(item);
@@ -92,8 +94,11 @@ namespace ThMEPStructure.GirderConnect.Command
                     foreach (var beam in mainBeams)
                     {
                         //beam.Layer = layerName;
-                        beam.ColorIndex = 130;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam);
+                        beam.Key.Item1.ColorIndex = 130;
+                        beam.Key.Item2.ColorIndex = 130;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item1);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item2);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Value);
                     }
                 }
                 else if (UserChoice == "地下室中板")
@@ -106,16 +111,40 @@ namespace ThMEPStructure.GirderConnect.Command
                     var beamLineForSecondaryBeam = beamLine.Except(beamLineForOwner).ToList();
                     BuildMainBeam buildMainBeam = new BuildMainBeam(beamLineForOwner, beamLineForSecondaryBeam, intersectCollection);
                     var mainBeams = buildMainBeam.Build(result.StringResult);
+                    foreach (var beam in mainBeams)
+                    {
+                        //beam.Layer = layerName;
+                        beam.Key.Item1.ColorIndex = 130;
+                        beam.Key.Item2.ColorIndex = 130;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item1);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item2);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Value);
+                    }
                     if (beamLine.Count * 2 == mainBeams.Count)
                     {
                         //理论上 双线是原本单线的二倍
                         //还要执行完后把原本主梁线删除，测试阶段暂时先不处理
                     }
-
-                    BuildSecondaryBeam buildSecondaryBeam = new BuildSecondaryBeam(secondaryBeamLine, mainBeams.ToCollection());
+                    DBObjectCollection objs = new DBObjectCollection();
+                    mainBeams.ForEach(o => 
+                    {
+                        objs.Add(o.Key.Item1);
+                        objs.Add(o.Key.Item2);
+                    });
+                    BuildSecondaryBeam buildSecondaryBeam = new BuildSecondaryBeam(secondaryBeamLine, objs);
                     var secondartBeams = buildSecondaryBeam.Build();
+                    foreach (var beam in secondartBeams)
+                    {
+                        //beam.Layer = layerName;
+                        beam.Key.Item1.ColorIndex = 130;
+                        beam.Key.Item2.ColorIndex = 130;
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item1);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item2);
+                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Value);
+                    }
                     if (secondaryBeamLine.Count * 2 == secondartBeams.Count)
                     {
+                        //理论上 双线是原本单线的二倍
                         //理论上 双线是原本单线的二倍
                         //还要执行完后把原本次梁线删除，测试阶段暂时先不处理
                     }
