@@ -98,6 +98,12 @@ namespace ThCADExtension
             return ElectricalDwgPath();
         }
 
+        // 结构专业图层
+        public static string StructTemplatePath()
+        {
+            return Path.Combine(SupportPath(), "结构图层图块.dwg");
+        }
+
         // 消防喷淋块
         public static string SprinklerDwgPath()
         {

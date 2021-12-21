@@ -17,10 +17,9 @@ using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPStructure.GirderConnect.Data;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.BuildSecondaryBeam;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
+using ThMEPStructure.GirderConnect.Service;
+using ThMEPStructure.GirderConnect.BuildBeam;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -82,39 +81,26 @@ namespace ThMEPStructure.GirderConnect.Command
                 //获取主梁线
                 var beamLine = getPrimitivesService.GetBeamLine(polyline,out ObjectIdCollection objIDs);
 
-                //创建主梁文字图层
-                ConnectSecondaryBeamService.CreateMainBeamTextLayer(acad.Database);
+                //导入主梁文字图层
+                ImportService.ImportMainBeamInfo();
+                //导入文字样式
+                ImportService.ImportTextStyle();
 
                 bool CreatGroup = true;//是否分组
                 if (UserChoice == "地下室顶板")
                 {
                     //主梁
-                    BuildMainBeam buildMainBeam = new BuildMainBeam(beamLine, new List<Line>(), intersectCollection);
-                    var mainBeams = buildMainBeam.Build(result.StringResult);
+                    ThBuildBeam buildMainBeam = new ThBuildBeam(beamLine, new List<Line>(), new List<Line>(), intersectCollection);
+                    var mainBeams = buildMainBeam.build(UserChoice);
                     if (beamLine.Count == mainBeams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();
                         foreach (var beam in mainBeams)
                         {
-                            ////beam.Layer = layerName;
-                            //beam.Key.Item1.ColorIndex = 130;
-                            //beam.Key.Item2.ColorIndex = 130;
-                            //HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item1);
-                            //HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Key.Item2);
-                            //HostApplicationServices.WorkingDatabase.AddToModelSpace(beam.Value);
                             List<Entity> entities = new List<Entity>();
-                            var Line1 = beam.Key.Item1;
-                            Line1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                            Line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line1);
-                            var Line2 = beam.Key.Item2;
-                            Line2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                            Line2.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line2);
-                            var text = beam.Value;
-                            text.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
-                            text.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(text);
+                            entities.Add(beam.Key.Item1);
+                            entities.Add(beam.Key.Item2);
+                            entities.Add(beam.Value);
                             var groupIds = ConnectSecondaryBeamService.InsertEntity(entities);
                             Groups.Add(groupIds);
                         }
@@ -127,38 +113,31 @@ namespace ThMEPStructure.GirderConnect.Command
                         //删掉旧线
                         ConnectSecondaryBeamService.Erase(objIDs);
                     }
+
                 }
                 else if (UserChoice == "地下室中板")
                 {
-                    //创建次梁文字图层
-                    ConnectSecondaryBeamService.CreateSecondaryBeamTextLayer(acad.Database);
+                    //导入次梁文字图层
+                    ImportService.ImportSecondaryBeamInfo();
 
                     //获取次梁线
                     var secondaryBeamLine = getPrimitivesService.GetSecondaryBeamLine(polyline, out ObjectIdCollection SecondaryBeamobjIDs);
                     ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(secondaryBeamLine.Select(o => o.ExtendLine(100)).ToCollection());
-
                     var beamLineForSecondaryBeam = beamLine.Where(o => spatialIndex.SelectFence(o).Count > 0).ToList();
                     var beamLineForOwner = beamLine.Except(beamLineForSecondaryBeam).ToList();
-                    BuildMainBeam buildMainBeam = new BuildMainBeam(beamLineForOwner, beamLineForSecondaryBeam, intersectCollection);
-                    var mainBeams = buildMainBeam.Build(result.StringResult);
-                    if (beamLine.Count == mainBeams.Count)
+
+                    ThBuildBeam buildMainBeam = new ThBuildBeam(beamLineForOwner, beamLineForSecondaryBeam, secondaryBeamLine, intersectCollection);
+                    var beams = buildMainBeam.build(UserChoice);
+
+                    if (beamLine.Count + secondaryBeamLine.Count == beams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();
-                        foreach (var beam in mainBeams)
+                        foreach (var beam in beams)
                         {
                             List<Entity> entities = new List<Entity>();
-                            var Line1 = beam.Key.Item1;
-                            Line1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                            Line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line1);
-                            var Line2 = beam.Key.Item2;
-                            Line2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                            Line2.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line2);
-                            var text = beam.Value;
-                            text.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
-                            text.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(text);
+                            entities.Add(beam.Key.Item1);
+                            entities.Add(beam.Key.Item2);
+                            entities.Add(beam.Value);
                             var groupIds = ConnectSecondaryBeamService.InsertEntity(entities);
                             Groups.Add(groupIds);
                         }
@@ -170,45 +149,6 @@ namespace ThMEPStructure.GirderConnect.Command
                         }
                         //删掉旧线
                         ConnectSecondaryBeamService.Erase(objIDs);
-                    }
-                    DBObjectCollection objs = new DBObjectCollection();
-                    mainBeams.ForEach(o =>
-                    {
-                        objs.Add(o.Key.Item1);
-                        objs.Add(o.Key.Item2);
-                    });
-                    objs = objs.Union(intersectCollection);
-                    BuildSecondaryBeam buildSecondaryBeam = new BuildSecondaryBeam(secondaryBeamLine, objs);
-                    var secondartBeams = buildSecondaryBeam.Build();
-                    
-                    if (secondaryBeamLine.Count == secondartBeams.Count)
-                    {
-                        List<ObjectIdList> Groups = new List<ObjectIdList>();
-                        foreach (var beam in secondartBeams)
-                        {
-                            List<Entity> entities = new List<Entity>();
-                            var Line1 = beam.Key.Item1;
-                            Line1.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
-                            Line1.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line1);
-                            var Line2 = beam.Key.Item2;
-                            Line2.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
-                            Line2.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(Line2);
-                            var text = beam.Value;
-                            text.Layer = SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName;
-                            text.ColorIndex = (int)ColorIndex.BYLAYER;
-                            entities.Add(text);
-                            var groupIds = ConnectSecondaryBeamService.InsertEntity(entities);
-                            Groups.Add(groupIds);
-                        }
-
-                        //打组
-                        if (CreatGroup)
-                        {
-                            Groups.ForEach(g => GroupTools.CreateGroup(acad.Database, Guid.NewGuid().ToString(), g));
-                        }
-                        //删掉旧线
                         ConnectSecondaryBeamService.Erase(SecondaryBeamobjIDs);
                     }
                 }

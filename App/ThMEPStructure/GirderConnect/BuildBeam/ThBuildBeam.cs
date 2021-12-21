@@ -1,12 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
+using ThMEPStructure.GirderConnect.Data;
 
 namespace ThMEPStructure.GirderConnect.BuildBeam
 {
@@ -37,12 +38,15 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                    beam.Item2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    code.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
-                    code.ColorIndex = SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex;
+                    beam.Item1.Layer = BeamConfig.MainBeamLayerName;
+                    beam.Item2.Layer = BeamConfig.MainBeamLayerName;
+                    beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item1.Linetype = "ByLayer";
+                    beam.Item2.Linetype = "ByLayer";
+                    code.Layer = BeamConfig.MainBeamTextLayerName;
+                    code.ColorIndex = (int)ColorIndex.BYLAYER;
+                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                 }
             });
@@ -50,22 +54,22 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             var objs = new DBObjectCollection();
             SecondaryBeams.ForEach(o => objs.Add(o));
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            SecondaryMainBeams.ForEach(o => 
+            SecondaryMainBeams.ForEach(o =>
             {
                 int B = CalculateSecondaryMainBeams(o, Switch).Item1;
                 int H = CalculateSecondaryMainBeams(o, Switch).Item2;
                 var query = spatialIndex.SelectFence(o);
-                query.Cast<Entity>().ToList().ForEach(i => 
-                { 
-                    if(SecondaryBeamsData[i as Line].Item2 +50 > H)
+                query.Cast<Entity>().ToList().ForEach(i =>
+                {
+                    if (SecondaryBeamsData[i as Line].Item2 +50 > H)
                     {
                         H = SecondaryBeamsData[i as Line].Item2 + 50;
                     }
                 });
-                if (B < H / 4 )
+                if (B < H / 4)
                 {
                     B = H / 4;
-                    if(B % 50 != 0)
+                    if (B % 50 != 0)
                     {
                         B = Convert.ToInt32(B / 50) * 50 + 50;
                     }
@@ -75,33 +79,39 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                    beam.Item2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
-                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    code.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
-                    code.ColorIndex = SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex;
+                    beam.Item1.Layer = BeamConfig.MainBeamLayerName;
+                    beam.Item2.Layer = BeamConfig.MainBeamLayerName;
+                    beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item1.Linetype = "ByLayer";
+                    beam.Item2.Linetype = "ByLayer";
+                    code.Layer = BeamConfig.MainBeamTextLayerName;
+                    code.ColorIndex = (int)ColorIndex.BYLAYER;
+                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                 }
             });
-            results.ToList().ForEach(o => 
+            results.ToList().ForEach(o =>
             {
                 Outlines.Add(o.Key.Item1);
                 Outlines.Add(o.Key.Item2);
             });
-            SecondaryBeams.ForEach(o => 
+            SecondaryBeams.ForEach(o =>
             {
                 code = AddText(o, SecondaryBeamsData[o].Item1, SecondaryBeamsData[o].Item2);
                 var outline = BuildLinearBeam(o, SecondaryBeamsData[o].Item1);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
-                    beam.Item2.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
-                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
-                    code.Layer = SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName;
-                    code.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamTextLayerColorIndex;
+                    beam.Item1.Layer = BeamConfig.SecondaryBeamLayerName;
+                    beam.Item2.Layer = BeamConfig.SecondaryBeamLayerName;
+                    beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
+                    beam.Item1.Linetype = "ByLayer";
+                    beam.Item2.Linetype = "ByLayer";
+                    code.Layer = BeamConfig.SecondaryBeamTextLayerName;
+                    code.ColorIndex = (int)ColorIndex.BYLAYER;
+                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                 }
             });
@@ -282,7 +292,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             }
             return (B, H).ToTuple();
         }
-        private Dictionary<Line,Tuple<int, int>> getSecondaryMainBeams()
+        private Dictionary<Line, Tuple<int, int>> getSecondaryMainBeams()
         {
             var results = new Dictionary<Line, Tuple<int, int>>();
             SecondaryBeams.ForEach(o =>

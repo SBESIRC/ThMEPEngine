@@ -10,6 +10,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.CAD;
+using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
@@ -53,7 +54,8 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                     if (objs.Count > 0)
                     {
                         var polyline = objs[0] as Polyline;
-                        polyline.ColorIndex = 5;
+                        polyline.Layer = BeamConfig.ErrorLayerName;
+                        polyline.ColorIndex = (int)ColorIndex.BYLAYER;
                         acad.ModelSpace.Add(polyline);
                     }
                 }

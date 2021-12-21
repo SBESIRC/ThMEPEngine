@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Algorithm;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
+using ThMEPStructure.GirderConnect.Data;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
 {
@@ -26,7 +26,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var BeamLines = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == SecondaryBeamLayoutConfig.MainBeamLayerName);
+                .Where(o => o.Layer == BeamConfig.MainBeamLayerName);
                 var BeamLineDic = BeamLines.ToDictionary(key => key.Clone() as Line, value => value.Id);
                 var objs = new DBObjectCollection();
                 BeamLineDic.ForEach(x =>
@@ -51,7 +51,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var BeamLines = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
+                .Where(o => o.Layer == BeamConfig.SecondaryBeamLayerName);
                 var BeamLineDic = BeamLines.ToDictionary(key => key.Clone() as Line, value => value.Id);
                 var objs = new DBObjectCollection();
                 BeamLineDic.ForEach(x =>
@@ -75,7 +75,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var brinkBeam = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AI_HOUSEBOUND")
+                .Where(o => o.Layer == BeamConfig.HouseBoundLayerName)
                 .Where(o => o.Length > 100);//过滤小于10cm的梁
 
                 var objs = new DBObjectCollection();
@@ -98,7 +98,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var WallBounds = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AI_WALLBOUND")
+                .Where(o => o.Layer == BeamConfig.WallBoundLayerName)
                 .Where(o => o.Length > 100);//过滤小于10cm的梁
 
                 var objs = new DBObjectCollection();

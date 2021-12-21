@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
@@ -20,7 +21,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         public static List<Line> ConnectSecondaryBeam(List<Line> mainbeam, List<Line> assists)
         {
             List<Line> entitys = mainbeam.Union(assists).Select(o => o.ExtendLine(1)).ToList();
-            var space = entitys.ToCollection().PolygonsEx().Cast<Entity>().Where(o => o is Polyline).Cast<Polyline>().Select(o => o.DPSimplify(10)).Where(o => o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000).ToList();
+            var space = entitys.ToCollection().PolygonsEx().Cast<Entity>().Where(o => o is Polyline).Cast<Polyline>().Select(o => o.DPSimplify(10)).Where(o => o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000 * 1000).ToList();
             if (mainbeam.Count == 0 || space.Count == 0)
             {
                 return new List<Line>();
@@ -42,55 +43,14 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                 foreach (var line in secondaryBeamLines)
                 {
                     var newLine = line.Clone() as Line;
-                    newLine.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
+                    newLine.Layer = BeamConfig.SecondaryBeamLayerName;
+                    newLine.ColorIndex = (int)ColorIndex.BYLAYER;
+                    newLine.Linetype = "ByLayer";
                     acad.ModelSpace.Add(newLine);
                 }
             }
         }
 
-        public static void CreateSecondaryBeamLineLayer(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                database.AddLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
-                database.SetLayerColor(SecondaryBeamLayoutConfig.SecondaryBeamLayerName, SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex);
-                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
-                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
-                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.SecondaryBeamLayerName);
-            }
-        }
-
-        public static void CreateSecondaryBeamTextLayer(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                database.AddLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
-                database.SetLayerColor(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName, SecondaryBeamLayoutConfig.SecondaryBeamTextLayerColorIndex);
-                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
-                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
-                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName);
-            }
-        }
-
-        public static void CreateMainBeamTextLayer(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                database.AddLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
-                database.SetLayerColor(SecondaryBeamLayoutConfig.MainBeamTextLayerName, SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex);
-                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
-                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
-                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.MainBeamTextLayerName);
-            }
-        }
-
-        public static ObjectId AddToModelSpace(Entity obj)
-        {
-            using (AcadDatabase acad = AcadDatabase.Active())
-            {
-                return acad.ModelSpace.Add(obj);
-            }
-        }
         public static ObjectIdList InsertEntity(List<Entity> ents)
         {
             ObjectIdList objectIds = new ObjectIdList();
