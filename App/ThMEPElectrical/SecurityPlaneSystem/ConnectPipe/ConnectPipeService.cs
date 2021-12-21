@@ -32,7 +32,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 
             trunking = trunking.Where(o => o.Length > 400).ToList();
             SystemConnectPipeService systemConnectPipeService = new SystemConnectPipeService();
-            var resPolyDic = systemConnectPipeService.Conenct(polyline, columns, blockModels, trunking, ConnectLines, connectBlocks, holes);
+            var resPolyDic = systemConnectPipeService.Connect(polyline, columns, blockModels, trunking, ConnectLines, connectBlocks, holes);
             resPolyDic = systemConnectPipeService.ChooseTrunking(trunking, resPolyDic);
             var resPolys = systemConnectPipeService.AdjustEndRoute(columns, blockModels.Select(o => o.Boundary).ToList(), resPolyDic);
             //断开有交叉的连线

@@ -18,7 +18,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
 {
     public class SystemConnectPipeService
     {
-        public Dictionary<Line, List<Polyline>> Conenct(Polyline polyline, List<Polyline> columns, List<BlockModel> allBlocks, List<Line> trunkings, List<Line> ExistingLines, List<BlockModel> models, List<Polyline> holes)
+        public Dictionary<Line, List<Polyline>> Connect(Polyline polyline, List<Polyline> columns, List<BlockModel> allBlocks, List<Line> trunkings, List<Line> ExistingLines, List<BlockModel> models, List<Polyline> holes)
         {
             Dictionary<Line, List<Polyline>> resLines = new Dictionary<Line, List<Polyline>>();
             if (trunkings.Count <= 0)
