@@ -25,6 +25,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GirderConnect\BuildBeam\ThBuildBeam.cs" />
     <Compile Include="GirderConnect\Command\ThDoubleBeamLineCommand.cs" />
     <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\BuildMainBeam\BuildMainBeam.cs" />

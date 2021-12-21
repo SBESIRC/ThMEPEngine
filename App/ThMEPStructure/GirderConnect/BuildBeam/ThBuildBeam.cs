@@ -1,57 +1,112 @@
-﻿using System;
-using System.Linq;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
 
-namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
+namespace ThMEPStructure.GirderConnect.BuildBeam
 {
-    public class BuildMainBeam
+    class ThBuildBeam
     {
-        private List<Line> Lines { get; set; }            //无次梁搁置
-        private List<Line> SecondaryLines { get; set; }   //有次梁搁置
-        private DBObjectCollection Outlines { get; set; }
-        public BuildMainBeam(List<Line> lines, List<Line> secondaryLines, DBObjectCollection outlines)
+        private List<Line> MainBeams { get; set; }            //无次梁搁置主梁
+        private List<Line> SecondaryMainBeams { get; set; }   //有次梁搁置主梁
+        private List<Line> SecondaryBeams { get; set; }       //次梁
+        private DBObjectCollection Outlines { get; set; }     //障碍物
+        private const int LMax = 9000;
+        public ThBuildBeam(List<Line> mainBeams, List<Line> secondaryMainBeams, List<Line> secondaryBeams, DBObjectCollection outlines)
         {
-            Lines = lines;
-            SecondaryLines = secondaryLines;
+            MainBeams = mainBeams;
+            SecondaryMainBeams = secondaryMainBeams;
+            SecondaryBeams = secondaryBeams;
             Outlines = outlines;
         }
-        
-        public Dictionary<Tuple<Line, Line>, DBText> Build(string Switch)
+        public Dictionary<Tuple<Line, Line>, DBText> build(string Switch)
         {
-            Dictionary<Tuple<Line, Line>, DBText> result = new Dictionary<Tuple<Line, Line>, DBText>();
+            Dictionary<Tuple<Line, Line>, DBText> results = new Dictionary<Tuple<Line, Line>, DBText>();
             var code = new DBText();
-            Lines.ForEach(o =>
+            MainBeams.ForEach(o =>
             {
-                int B = Calculate(o, Switch).Item1;
-                int H = Calculate(o, Switch).Item2;
+                int B = CalculateMainBeams(o, Switch).Item1;
+                int H = CalculateMainBeams(o, Switch).Item2;
                 code = AddText(o, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    result.Add(beam,code);
-                    
+                    beam.Item1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
+                    beam.Item2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
+                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    code.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
+                    code.ColorIndex = SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex;
+                    results.Add(beam, code);
                 }
             });
-            SecondaryLines.ForEach(o =>
+            var SecondaryBeamsData = getSecondaryMainBeams();
+            var objs = new DBObjectCollection();
+            SecondaryBeams.ForEach(o => objs.Add(o));
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            SecondaryMainBeams.ForEach(o => 
             {
-                int B = CalculateSecond(o, Switch).Item1;
-                int H = CalculateSecond(o, Switch).Item2;
+                int B = CalculateSecondaryMainBeams(o, Switch).Item1;
+                int H = CalculateSecondaryMainBeams(o, Switch).Item2;
+                var query = spatialIndex.SelectFence(o);
+                query.Cast<Entity>().ToList().ForEach(i => 
+                { 
+                    if(SecondaryBeamsData[i as Line].Item2 +50 > H)
+                    {
+                        H = SecondaryBeamsData[i as Line].Item2 + 50;
+                    }
+                });
+                if (B < H / 4 )
+                {
+                    B = H / 4;
+                    if(B % 50 != 0)
+                    {
+                        B = Convert.ToInt32(B / 50) * 50 + 50;
+                    }
+                }
                 code = AddText(o, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    result.Add(beam, code);
+                    beam.Item1.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
+                    beam.Item2.Layer = SecondaryBeamLayoutConfig.MainBeamLayerName;
+                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    code.Layer = SecondaryBeamLayoutConfig.MainBeamTextLayerName;
+                    code.ColorIndex = SecondaryBeamLayoutConfig.MainBeamTextLayerColorIndex;
+                    results.Add(beam, code);
                 }
             });
-           
-            return result;
+            results.ToList().ForEach(o => 
+            {
+                Outlines.Add(o.Key.Item1);
+                Outlines.Add(o.Key.Item2);
+            });
+            SecondaryBeams.ForEach(o => 
+            {
+                code = AddText(o, SecondaryBeamsData[o].Item1, SecondaryBeamsData[o].Item2);
+                var outline = BuildLinearBeam(o, SecondaryBeamsData[o].Item1);
+                var beam = Difference(outline, Outlines);
+                if (!beam.Item1.IsNull())
+                {
+                    beam.Item1.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
+                    beam.Item2.Layer = SecondaryBeamLayoutConfig.SecondaryBeamLayerName;
+                    beam.Item1.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    beam.Item2.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamLayerColorIndex;
+                    code.Layer = SecondaryBeamLayoutConfig.SecondaryBeamTextLayerName;
+                    code.ColorIndex = SecondaryBeamLayoutConfig.SecondaryBeamTextLayerColorIndex;
+                    results.Add(beam, code);
+                }
+            });
+
+            return results;
         }
         private Tuple<Line, Line> Difference(Tuple<Line, Line> outline, DBObjectCollection columns)
         {
@@ -63,7 +118,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             {
                 var pts = new Point3dCollection();
                 outline.Item1.IntersectWith(o, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                if(pts.Count > 0)
+                if (pts.Count > 0)
                 {
                     ptsCollection.Add(pts.Cast<Point3d>().First());
                 }
@@ -95,7 +150,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
 
             return (Item1, Item2).ToTuple();
         }
-        private Tuple<Line, Line> BuildLinearBeam(Line line,int B)
+        private Tuple<Line, Line> BuildLinearBeam(Line line, int B)
         {
             return (line.GetOffsetCurves(B / 2).OfType<Line>().First(),
                     line.GetOffsetCurves(-B / 2).OfType<Line>().First()).ToTuple();
@@ -104,11 +159,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
         {
             var newLine = line.Normalize();
             DBText code = new DBText();
-            code.TextString = B+"×"+ H;
+            code.TextString = B + "×" + H;
             var basePt = newLine.StartPoint.GetMidPt(newLine.EndPoint);
             double angle = newLine.Angle / Math.PI * 180.0; //rad->ang
             var alignPt = new Point3d();
-            if (Math.Abs(angle -90)<= 1.0 || Math.Abs(angle - 270) <= 1.0)
+            if (Math.Abs(angle - 90) <= 1.0 || Math.Abs(angle - 270) <= 1.0)
             {
                 if (newLine.StartPoint.Y < newLine.EndPoint.Y)
                 {
@@ -148,15 +203,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
         {
             var result = angle;
             angle = angle % 180.0;
-            if(angle<=1.0)
+            if (angle <= 1.0)
             {
                 result = 0.0;
             }
-            else if(Math.Abs(angle-180.0)<=1.0)
+            else if (Math.Abs(angle - 180.0) <= 1.0)
             {
                 result = 0.0;
             }
-            else if(Math.Abs(angle - 90.0) <= 1.0)
+            else if (Math.Abs(angle - 90.0) <= 1.0)
             {
                 result = 90.0;
             }
@@ -166,20 +221,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             }
             return result;
         }
-        private Dictionary<Tuple<Line, Line>, DBText> HandleBeamConflict(Dictionary<Tuple<Line, Line>, DBText> result)
-        {
-            var objs = new DBObjectCollection();
-            foreach (var beam in result)
-            {
-                objs.Add(beam.Key.Item1);
-                objs.Add(beam.Key.Item2);
-            }
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            
-
-            return result;
-        }
-        private Tuple<int, int> Calculate(Line SingleBeam, string Switch)
+        //计算无次梁搁置主梁BH
+        private Tuple<int, int> CalculateMainBeams(Line SingleBeam, string Switch)
         {
             double L = SingleBeam.Length;
             if (Switch is "地下室顶板")
@@ -204,7 +247,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             }
             return null;
         }
-        private Tuple<int, int> CalculateSecond(Line SingleBeam, string Switch)
+        //计算有次梁搁置主梁
+        private Tuple<int, int> CalculateSecondaryMainBeams(Line SingleBeam, string Switch)
         {
             double L = SingleBeam.Length;
             if (Switch is "地下室顶板")
@@ -213,7 +257,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
                 int B = Math.Max(200, Convert.ToInt32(H / 100) * 50);
                 return (B, H).ToTuple();
             }
-            else if(Switch is "地下室中板")
+            else if (Switch is "地下室中板")
             {
                 int H = Math.Max(300, Convert.ToInt32(L / 500) * 50);
                 int B = Math.Max(200, Convert.ToInt32(H / 100) * 50);
@@ -221,6 +265,34 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam
             }
 
             return null;
+        }
+        //计算次梁BH
+        private Tuple<int, int> CalculateSecondaryBeams(Line SingleBeam)
+        {
+            double L = SingleBeam.Length;
+            int H = Math.Max(300, Convert.ToInt32(L / 750) * 50);
+            int B = H / 3;
+            if (B % 50 == 0)
+            {
+                B = Math.Max(200, B);
+            }
+            else
+            {
+                B = Math.Max(200, Convert.ToInt32(B / 50) * 50 + 50);
+            }
+            return (B, H).ToTuple();
+        }
+        private Dictionary<Line,Tuple<int, int>> getSecondaryMainBeams()
+        {
+            var results = new Dictionary<Line, Tuple<int, int>>();
+            SecondaryBeams.ForEach(o =>
+            {
+                int B = CalculateSecondaryBeams(o).Item1;
+                int H = CalculateSecondaryBeams(o).Item2;
+                results.Add(o, (B, H).ToTuple());
+            });
+
+            return results;
         }
     }
 }
