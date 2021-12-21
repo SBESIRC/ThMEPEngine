@@ -18,10 +18,10 @@ namespace ThMEPEngineCore.Engine
         private const double AreaTolerance = 1.0;
         private const double AngleTolerance = 1.0;
         private const double BufferDistance = 50.0; //用于处理墙、门、窗、柱等元素之间不相接的Case
-        private const double LineExtendDistance = 10.0;
-        private const double ArcTessellateLength = 100.0;
         private const double SmallLineLengthTolerance = 1.0;
         private const double Colliear_Gap_Distance = 2.0;
+        public double LineExtendDistance { get; set; } = 10.0;
+        public double ArcTessellateLength { get; set; } = 100.0;
         private Matrix3d WcsToUcs { get; set; }
         public DBObjectCollection Areas { get; set; }
         //创建数据

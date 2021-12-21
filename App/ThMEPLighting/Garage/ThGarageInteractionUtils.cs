@@ -156,7 +156,7 @@ namespace ThMEPLighting.Garage
                         else
                         {
                             // 进一步处理
-                            newBorder = HandlePolygon(border, FrameArcTesslateLength, FrameExtendLength);
+                            newBorder = ThMEPFrameService.Rebuild(border, FrameExtendLength, FrameArcTesslateLength);
                             if(newBorder.Area > 1.0)
                             {
                                 results.Add(newBorder);
@@ -166,37 +166,6 @@ namespace ThMEPLighting.Garage
                 }
                 return results;
             }
-        }
-
-        private static Polyline HandlePolygon(Polyline frame,double tesslateLength,double extendLength)
-        {
-            if (frame == null || frame.Area<= SmallAreaTolerance)
-            {
-                return new Polyline();
-            }
-            var lines = frame.TessellatePolylineWithArc(tesslateLength).ToLines().ToCollection();
-            var extendLines = Extend(lines, extendLength);
-            var polygons = BuildPolygons(lines);
-            if(polygons.Count>0)
-            {
-                return polygons.OfType<Polyline>().OrderByDescending(o => o.Area).First();
-            }
-            else
-            {
-                return new Polyline();
-            }
-        }
-
-        private static DBObjectCollection BuildPolygons(DBObjectCollection lines)
-        {
-            var roomOutlineBuilder = new ThRoomOutlineBuilderEngine();
-            roomOutlineBuilder.Build(lines);
-            return roomOutlineBuilder.Areas;
-        }
-
-        private static DBObjectCollection Extend(DBObjectCollection lines, double length)
-        {
-            return lines.OfType<Line>().Select(o => o.ExtendLine(length)).ToCollection();
         }
 
         private static DBObjectCollection GetCenterLines(AcadDatabase acdb)

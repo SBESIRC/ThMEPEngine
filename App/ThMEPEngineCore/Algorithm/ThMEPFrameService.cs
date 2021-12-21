@@ -4,6 +4,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -56,6 +57,25 @@ namespace ThMEPEngineCore.Algorithm
             // 返回"Dummy"框线
             // 暂时不支持分割线的情况
             return new Polyline();
+        }
+
+        public static Polyline Rebuild(Polyline frame,double extendLength=1.0,double tesslateLength=100.0)
+        {
+            var objs = new DBObjectCollection() { frame };
+            var roomOutlineBuilder = new ThRoomOutlineBuilderEngine()
+            { 
+                ArcTessellateLength = tesslateLength,
+                LineExtendDistance = extendLength,
+            };
+            roomOutlineBuilder.Build(objs);
+            if (roomOutlineBuilder.Areas.Count>0)
+            {
+                return roomOutlineBuilder.Areas.OfType<Polyline>().OrderByDescending(o => o.Area).First();
+            }
+            else
+            {
+                return frame;
+            }
         }
 
         public static Polyline Buffer(Polyline frame, double distance)
