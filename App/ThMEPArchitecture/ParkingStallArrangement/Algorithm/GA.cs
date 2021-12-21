@@ -101,9 +101,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
                 layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                 layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                var obstacles=new List<Polyline>();
+                var obstacles = new List<Polyline>();
                 obstaclesList.ForEach(e => obstacles.AddRange(e));
-#if DEBUG
+
                 List<Polyline> pls = walls;
                 string w = "";
                 string l = "";
@@ -117,6 +117,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
+#if DEBUG
                 FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(fs1);
                 sw.WriteLine(w);
@@ -130,14 +131,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                try
+                if (partition.Validate())
                 {
-                    count += partition.CalNumOfParkingSpaces();
+                    try
+                    {
+                        count += partition.CalNumOfParkingSpaces();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        partition.Dispose();
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    Logger.Error(ex.Message);
-                    partition.Dispose();
+                    Logger.Error("数据无效, wall: " + w + "lanes: " + l + "Boundary: " + GeoUtilities.AnalysisPoly(boundary));
                 }
             }
             return count;

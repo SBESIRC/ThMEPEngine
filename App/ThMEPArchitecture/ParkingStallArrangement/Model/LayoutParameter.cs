@@ -157,7 +157,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             var areas = new List<Polyline>();
             areas.Add(InitialWalls);
-            Clear();//清空所有参数
+            Clear2();//清空所有参数
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
