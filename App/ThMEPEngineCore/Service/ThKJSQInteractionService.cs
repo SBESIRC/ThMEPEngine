@@ -96,7 +96,7 @@ namespace ThMEPEngineCore.Service
                                 boundaries.OfType<Entity>().ForEach(o =>
                                 {
                                     var subRooms = Difference(o, RoomOutlines);
-                                    //subRooms = subRooms.OfType<Entity>().Where(e => !roomData.IsContains(Buffer(e,-1.0))).ToCollection();
+                                    subRooms = subRooms.OfType<Entity>().Where(e => !roomData.IsContains(Buffer(e,-1.0))).ToCollection();
                                     newAdds = newAdds.Union(subRooms);
                                     RoomOutlines = RoomOutlines.Union(subRooms);
                                 });
