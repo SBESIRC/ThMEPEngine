@@ -228,14 +228,15 @@ namespace ThMEPEngineCore.Service
         private DBObjectCollection Process(DBObjectCollection polygons)
         {
             // 处理Polygons
+            var results = Rebuild(polygons); // 处理狭长线
             var simplifier = new ThPolygonalElementSimplifier();
-            var results = polygons.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(1.0);
             results = simplifier.Normalize(results);
-            results = polygons.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(1.0);
             results = simplifier.MakeValid(results); //解决自交的Case
-            results = polygons.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(1.0);
             results = simplifier.Simplify(results);
-            results = polygons.FilterSmallArea(1.0);
+            results = results.FilterSmallArea(1.0);
             results = ThCADCoreNTSGeometryFilter.GeometryEquality(results); // 去重
             return results;
         }
@@ -272,7 +273,18 @@ namespace ThMEPEngineCore.Service
                .ForEach(o =>
                {
                    var displayObj = CreateDisplayBoundary(o);
-                   RoomOutlineDisplayDict.Add(o, displayObj);
+                   if(RoomOutlineDisplayDict.ContainsKey(o))
+                   {
+                       if(RoomOutlineDisplayDict[o]!=null)
+                       {
+                           ClearTransientGraphics(new DBObjectCollection() { RoomOutlineDisplayDict[o] });
+                       }
+                       RoomOutlineDisplayDict[o] = displayObj;
+                   }
+                   else
+                   {
+                       RoomOutlineDisplayDict.Add(o, displayObj);
+                   }
                    if (displayObj != null)
                    {
                        displayObjs.Add(displayObj);
@@ -280,16 +292,36 @@ namespace ThMEPEngineCore.Service
                });
             return displayObjs;
         }
+
         private DBObjectCollection Split(Polyline splitLine, DBObjectCollection objs)
         {
             var polygonDatas = new DBObjectCollection();
             polygonDatas = polygonDatas.Union(objs);
             polygonDatas.Add(splitLine);
 
-            var roomoutlineBuilder = new ThRoomOutlineBuilderEngine();
-            roomoutlineBuilder.Build(polygonDatas);
-
-            return roomoutlineBuilder.Areas;
+            var builder = new ThRoomOutlineBuilderEngine();
+            builder.Build(polygonDatas);
+            var results = builder.Areas;
+            results = Rebuild(results);
+            results = builder.PostProcess(results);
+            return results;
+        }
+        private DBObjectCollection Rebuild(DBObjectCollection objs)
+        {
+            var results = new DBObjectCollection();
+            objs.OfType<Entity>().Where(e=>e.GetArea()>=1.0).ForEach(e =>
+            {
+                if (e is Polyline polyline)
+                {
+                    var newPolyline = ThMEPFrameService.Rebuild(polyline, 10.0);
+                    results.Add(newPolyline);
+                }
+                else
+                {
+                    results.Add(e);
+                }
+            });
+            return results;
         }
         private DBObjectCollection FindIntersects(Polyline splitLine, DBObjectCollection objs)
         {
@@ -312,6 +344,7 @@ namespace ThMEPEngineCore.Service
             {
                 var disPlayObj = RoomOutlineDisplayDict[roomOutline];
                 ClearTransientGraphics(new DBObjectCollection() { disPlayObj });
+                RoomOutlineDisplayDict.Remove(roomOutline);
             }
         }
         private DBObjectCollection Query(DBObjectCollection polygons, Point3d point)
@@ -358,11 +391,14 @@ namespace ThMEPEngineCore.Service
             var totalDatas = data.MergeData(); // 传入的数据
             var builder = new ThRoomOutlineBuilderEngine();
             builder.Build(totalDatas);
+            var results = builder.Areas;
+            results = Rebuild(results);
+            results = builder.PostProcess(results);
 
             // 将生产的面恢复到原位置
-            data.Transformer.Reset(builder.Areas);
+            data.Transformer.Reset(results);
             data.Reset();
-            return builder.Areas;
+            return results;
         }
         private Entity CreateHatch(Database database, Entity entity, int colorIndex = 21)
         {
@@ -448,7 +484,7 @@ namespace ThMEPEngineCore.Service
             {
                 var tm = cadGraph.TransientManager.CurrentTransientManager;
                 IntegerCollection intCol = new IntegerCollection();
-                objs.OfType<Entity>().ToList().ForEach(o =>
+                objs.OfType<Entity>().Where(o=>o!=null).ForEach(o =>
                 {
                     tm.EraseTransient(o, intCol);
                 });

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -8,8 +9,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
-using System.Collections.Generic;
-
 
 namespace ThMEPEngineCore.Engine
 {
@@ -39,12 +38,12 @@ namespace ThMEPEngineCore.Engine
             lines = Merge(lines);
             // 造面
             Areas = lines.PolygonsEx();
-            
+
             // 后处理
             Areas = PostProcess(Areas);
         }  
         
-        private DBObjectCollection PostProcess(DBObjectCollection objs)
+        public DBObjectCollection PostProcess(DBObjectCollection objs)
         {
             var results = objs.FilterSmallArea(AreaTolerance);
             var roomSimplifier = new ThRoomOutlineSimplifier();
