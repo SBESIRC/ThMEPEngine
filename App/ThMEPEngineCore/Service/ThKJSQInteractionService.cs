@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.Service
 {
     internal class ThKJSQInteractionService
     {
-        private Roomdata roomData;
+        private ThRoomdata roomData;
         /// <summary>
         /// 通过房间数据造的面
         /// </summary>
@@ -57,7 +57,6 @@ namespace ThMEPEngineCore.Service
             roomData.Transform();
             Transformer.Transform(Bounaries);
         }
-
         public void Run()
         {
             var ppo = new PromptPointOptions("\n选择房间内的一点")
@@ -75,11 +74,11 @@ namespace ThMEPEngineCore.Service
                     {
                         var pt = ptRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
                         var closeOriginPt = Transformer.Transform(pt);
-                        if(roomData.IsContatinPoint3d(closeOriginPt))
+                        if (roomData.IsContatinPoint3d(closeOriginPt))
                         {
                             Active.Editor.WriteMessage("\n选择的点不能在墙、柱等构件中");
                         }
-                        else if(roomData.IsCloseToComponents(closeOriginPt,1.0))
+                        else if (roomData.IsCloseToComponents(closeOriginPt, 1.0))
                         {
                             Active.Editor.WriteMessage("\n选择的点不能太靠近墙、柱等构件");
                         }
@@ -87,14 +86,20 @@ namespace ThMEPEngineCore.Service
                         {
                             // 查询用户选择的点是否存在于已选的房间框线中
                             var existInRoomBoundaries = Query(RoomOutlines, closeOriginPt);
-                            if(existInRoomBoundaries.Count == 0)
+                            if (existInRoomBoundaries.Count == 0)
                             {
                                 // 通过选择的点从造的面中查询包含此点的房间框线,并添加到RoomOutlines
                                 var boundaries = Query(Bounaries, closeOriginPt);
-                                var newAdds = boundaries.OfType<Entity>().Select(o => o.Clone() as Entity).ToCollection();
-
-                                // 将新的房间轮廓线添加到RoomOutlines
-                                RoomOutlines = RoomOutlines.Union(newAdds);
+                                var newAdds = new DBObjectCollection();
+                                // 用原始造的面和现有存储的面进行差集，将剩余的面添加到RoomOutlines中
+                                boundaries.OfType<Entity>().ForEach(o =>
+                                {
+                                    var subRooms = Difference(o, RoomOutlines);
+                                    //暂时不做这种过滤，以免影响执行效率
+                                    //subRooms = subRooms.OfType<Entity>().Where(e => !roomData.IsContains(Buffer(e, -1.0))).ToCollection();
+                                    newAdds = newAdds.Union(subRooms);
+                                    RoomOutlines = RoomOutlines.Union(subRooms);
+                                });
 
                                 // 更新显示
                                 var displayObjs = AddToDisplay(newAdds);
@@ -103,14 +108,14 @@ namespace ThMEPEngineCore.Service
                             }
                             else
                             {
-                                existInRoomBoundaries.OfType<Entity>().ForEach(o => Remove(o)); 
+                                existInRoomBoundaries.OfType<Entity>().ForEach(o => Remove(o));
                             }
                         }
                     }
                 }
-                else if(ptRes.Status == PromptStatus.Keyword)
+                else if (ptRes.Status == PromptStatus.Keyword)
                 {
-                    if(ptRes.StringResult == "Undo")
+                    if (ptRes.StringResult == "Undo")
                     {
                         Undo();
                     }
@@ -119,7 +124,7 @@ namespace ThMEPEngineCore.Service
                         using (var acadDb = AcadDatabase.Active())
                         {
                             var splitLine = ThMEPPolylineEntityJig.PolylineJig(41, "\n请选择下一个点", false);
-                            if(splitLine.Length>=1.0)
+                            if (splitLine.Length >= 1.0)
                             {
                                 Transformer.Transform(splitLine);
                                 Split(splitLine); // 用分割线分割已获取到的房间
@@ -127,21 +132,21 @@ namespace ThMEPEngineCore.Service
                         }
                     }
                 }
-                else if(ptRes.Status == PromptStatus.None)
+                else if (ptRes.Status == PromptStatus.None)
                 {
                     Status = PickUpStatus.OK;
                     break;
                 }
-                else if(ptRes.Status == PromptStatus.Cancel)
+                else if (ptRes.Status == PromptStatus.Cancel)
                 {
                     var pko = new PromptKeywordOptions("\n是否退出并取消本次生成");
                     pko.Keywords.Add("YES", "YES", "是(Y)");
                     pko.Keywords.Add("NO", "NO", "否(N)");
                     pko.Keywords.Default = "NO";
                     var result1 = Active.Editor.GetKeywords(pko);
-                    if(result1.Status==PromptStatus.OK)
+                    if (result1.Status == PromptStatus.OK)
                     {
-                        if(result1.StringResult== "YES")
+                        if (result1.StringResult == "YES")
                         {
                             Status = PickUpStatus.Cancel;
                             break;
@@ -155,14 +160,92 @@ namespace ThMEPEngineCore.Service
             }
             ClearTransients();
         }
-
+        public void PrintRooms()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                // 将房间框线移动到原位置
+                var rooms = GetRooms();
+                Transformer.Reset(rooms);
+                var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
+                rooms.Cast<Entity>().ForEach(o =>
+                {
+                    var objs = new DBObjectCollection();
+                    if (o is MPolygon mPolygon)
+                    {
+                        mPolygon.Explode(objs);
+                    }
+                    else
+                    {
+                        objs.Add(o);
+                    }
+                    objs.OfType<Entity>().ForEach(e =>
+                    {
+                        acadDb.ModelSpace.Add(e);
+                        e.LayerId = layerId;
+                        e.ColorIndex = (int)ColorIndex.BYLAYER;
+                        e.LineWeight = LineWeight.ByLayer;
+                        e.Linetype = "ByLayer";
+                    });
+                });
+            }
+        }
+        private DBObjectCollection Difference(Entity originArea, DBObjectCollection polygons)
+        {
+            var results = new DBObjectCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(polygons);
+            var objs = spatialIndex.SelectCrossingPolygon(originArea);
+            if (objs.Count == 0)
+            {
+                results.Add(originArea);
+            }
+            else
+            {
+                results = ThCADCoreNTSEntityExtension.Difference(originArea, objs, true);
+                results = Process(results);
+            }
+            return results;
+        }
+        private DBObjectCollection Buffer(DBObjectCollection polygons, double length)
+        {
+            var results = new DBObjectCollection();
+            var bufferService = new ThNTSBufferService();
+            polygons.OfType<Entity>().ForEach(o =>
+            {
+                var newEnt = bufferService.Buffer(o, length);
+                if (newEnt != null)
+                {
+                    results.Add(newEnt);
+                }
+            });
+            return results;
+        }
+        private Entity Buffer(Entity polygon, double length)
+        {
+            var bufferService = new ThNTSBufferService();
+            return bufferService.Buffer(polygon, length);
+        }
+        private DBObjectCollection Process(DBObjectCollection polygons)
+        {
+            // 处理Polygons
+            var simplifier = new ThPolygonalElementSimplifier();
+            var results = polygons.FilterSmallArea(1.0);
+            results = simplifier.Normalize(results);
+            results = polygons.FilterSmallArea(1.0);
+            results = simplifier.MakeValid(results); //解决自交的Case
+            results = polygons.FilterSmallArea(1.0);
+            results = simplifier.Simplify(results);
+            results = polygons.FilterSmallArea(1.0);
+            results = ThCADCoreNTSGeometryFilter.GeometryEquality(results); // 去重
+            return results;
+        }
         private void Split(Polyline splitLine)
         {
             // 对分割线做一次清理
             splitLine = splitLine.DPSimplify(1.0);
 
             // 找与splitLine相交的实体
-            var intersObjs = FindIntersects(splitLine, RoomOutlines);            
+            var intersObjs = FindIntersects(splitLine, RoomOutlines);
             if (intersObjs.Count > 0)
             {
                 // 删除原有的显示
@@ -181,7 +264,6 @@ namespace ThMEPEngineCore.Service
                 AddToTransient(displayObjs);
             }
         }
-
         private DBObjectCollection AddToDisplay(DBObjectCollection newAdds)
         {
             var displayObjs = new DBObjectCollection();
@@ -198,8 +280,7 @@ namespace ThMEPEngineCore.Service
                });
             return displayObjs;
         }
-
-        private DBObjectCollection Split(Polyline splitLine,DBObjectCollection objs)
+        private DBObjectCollection Split(Polyline splitLine, DBObjectCollection objs)
         {
             var polygonDatas = new DBObjectCollection();
             polygonDatas = polygonDatas.Union(objs);
@@ -210,23 +291,20 @@ namespace ThMEPEngineCore.Service
 
             return roomoutlineBuilder.Areas;
         }
-
-        private DBObjectCollection FindIntersects(Polyline splitLine,DBObjectCollection objs)
+        private DBObjectCollection FindIntersects(Polyline splitLine, DBObjectCollection objs)
         {
             // 找到与splitLine相交且交点有2个以上的房间轮廓线
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             return spatialIndex.SelectFence(splitLine);
         }
-
         private void Undo()
         {
-            if(RoomOutlines.Count>0)
+            if (RoomOutlines.Count > 0)
             {
                 var last = RoomOutlines[RoomOutlines.Count - 1] as Entity;
                 Remove(last);
             }
         }
-
         private void Remove(Entity roomOutline)
         {
             RoomOutlines.Remove(roomOutline);
@@ -236,7 +314,6 @@ namespace ThMEPEngineCore.Service
                 ClearTransientGraphics(new DBObjectCollection() { disPlayObj });
             }
         }
-
         private DBObjectCollection Query(DBObjectCollection polygons, Point3d point)
         {
             var outlines = ContainsPoint(polygons, point);
@@ -249,7 +326,6 @@ namespace ThMEPEngineCore.Service
                 return outlines.Cast<Entity>().OrderByDescending(e => e.GetArea()).ToCollection();
             }
         }
-
         private DBObjectCollection ContainsPoint(DBObjectCollection polygons, Point3d point)
         {
             var result = new DBObjectCollection();
@@ -267,14 +343,13 @@ namespace ThMEPEngineCore.Service
             result = result.Distinct();
             return result;
         }
-
-        private Roomdata BuildRoomData(Database database, Point3dCollection frame)
+        private ThRoomdata BuildRoomData(Database database, Point3dCollection frame)
         {
-            Roomdata data = new Roomdata(false);
+            ThRoomdata data = new ThRoomdata(false);
             data.Build(database, frame);
             return data;
         }
-        private DBObjectCollection BuildRoomBounaries(Roomdata data)
+        private DBObjectCollection BuildRoomBounaries(ThRoomdata data)
         {
             data.Transform(); // 移动到原点
             data.Preprocess();
@@ -351,7 +426,7 @@ namespace ThMEPEngineCore.Service
                 newEnt.LayerId = layerId;
                 newEnt.LineWeight = LineWeight.ByLayer;
                 newEnt.ColorIndex = (int)ColorIndex.BYLAYER;
-                newEnt.Linetype ="ByLayer";
+                newEnt.Linetype = "ByLayer";
                 return newEnt;
             }
         }
@@ -382,42 +457,11 @@ namespace ThMEPEngineCore.Service
         private void ClearTransients()
         {
             var displayObjs = RoomOutlineDisplayDict
-                .Where(o=>o.Value!=null)
-                .Select(o=>o.Value)
+                .Where(o => o.Value != null)
+                .Select(o => o.Value)
                 .ToCollection();
             ClearTransientGraphics(displayObjs);
         }
-        public void PrintRooms()
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                // 将房间框线移动到原位置
-                var rooms = GetRooms();
-                Transformer.Reset(rooms);
-                var layerId = acadDb.Database.CreateAIRoomOutlineLayer();
-                rooms.Cast<Entity>().ForEach(o =>
-                {
-                    var objs = new DBObjectCollection();
-                    if (o is MPolygon mPolygon)
-                    {
-                        mPolygon.Explode(objs);
-                    }
-                    else
-                    {
-                        objs.Add(o);
-                    }
-                    objs.OfType<Entity>().ForEach(e =>
-                    {
-                        acadDb.ModelSpace.Add(e);
-                        e.LayerId = layerId;
-                        e.ColorIndex = (int)ColorIndex.BYLAYER;
-                        e.LineWeight = LineWeight.ByLayer;
-                        e.Linetype = "ByLayer";
-                    });
-                });
-            }
-        }
-
         private DBObjectCollection GetRooms()
         {
             return RoomOutlines.Clone();

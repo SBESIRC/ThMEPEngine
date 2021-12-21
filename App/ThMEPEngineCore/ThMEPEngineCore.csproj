@@ -164,7 +164,7 @@
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
-    <Compile Include="Engine\Roomdata.cs" />
+    <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />

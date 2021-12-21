@@ -17,7 +17,7 @@ using ThMEPEngineCore.GeojsonExtractor.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class Roomdata
+    public class ThRoomdata
     {
         private const double ColumnEnlargeDistance = 50.0;
         private const double SlabBufferDistance = 20.0;
@@ -30,11 +30,11 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _cornice = new DBObjectCollection(); //仅支持Polyline
         private DBObjectCollection _roomSplitline = new DBObjectCollection();
         private DBObjectCollection _curtainWall = new DBObjectCollection();
-        public ThMEPOriginTransformer Transformer { get;private set;}
+        public ThMEPOriginTransformer Transformer { get; private set; }
         private Action<Database, Point3dCollection> GetData;
-        public Roomdata(bool isUseOldMode)
+        public ThRoomdata(bool isUseOldMode)
         {
-            if(isUseOldMode)
+            if (isUseOldMode)
             {
                 GetData = GetOldModeData;
             }
@@ -221,7 +221,7 @@ namespace ThMEPEngineCore.Engine
         }
         private DBObjectCollection RecognizeDB3ShearWall(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            return Recognize(datas,polygon, new ThDB3ShearWallRecognitionEngine());
+            return Recognize(datas, polygon, new ThDB3ShearWallRecognitionEngine());
         }
         private DBObjectCollection RecognizeColumn(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
@@ -246,11 +246,11 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection RecognizeDB3Door(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
             // 创建门依赖索引(请在此之前把门依赖的元素提取出来)
-            var neibourObjDict = CreateDoorDependences();   
-            
+            var neibourObjDict = CreateDoorDependences();
+
             // 对门依赖的数据和提取出来的门垛、文字进行偏移
             var transformer = new ThMEPOriginTransformer(datas.Where(o => o is ThRawDoorStone)
-                .Select(o => o.Geometry).ToCollection());            
+                .Select(o => o.Geometry).ToCollection());
             ThSpatialIndexCacheService.Instance.Transformer = transformer;
             ThSpatialIndexCacheService.Instance.Build(neibourObjDict);
             datas.ForEach(e =>
@@ -261,15 +261,15 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if (e is ThRawDoorMark doorMark)
                 {
-                    if(doorMark.Geometry!=null)
+                    if (doorMark.Geometry != null)
                     {
                         transformer.Transform(doorMark.Geometry);
                     }
-                    if(doorMark.Data!=null && doorMark.Data is Entity entity)
+                    if (doorMark.Data != null && doorMark.Data is Entity entity)
                     {
                         transformer.Transform(entity);
                     }
-                    
+
                 }
             });
             var newPts = transformer.Transform(polygon);
@@ -312,7 +312,7 @@ namespace ThMEPEngineCore.Engine
         }
         private void FilterIsolatedColumns(double enlargeTolerance)
         {
-            var data =  MergeData();
+            var data = MergeData();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(data);
             var collector = new DBObjectCollection();
             var bufferService = new ThNTSBufferService();
@@ -350,10 +350,10 @@ namespace ThMEPEngineCore.Engine
         /// <param name="polys"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        private DBObjectCollection BufferCollectionContainsLines(DBObjectCollection polys,double length, bool lineflag=false)
+        private DBObjectCollection BufferCollectionContainsLines(DBObjectCollection polys, double length, bool lineflag = false)
         {
             DBObjectCollection res = new DBObjectCollection();
-            polys.Cast<Entity>().ForEach(o => 
+            polys.Cast<Entity>().ForEach(o =>
             {
                 if (o is Polyline poly && ThAuxiliaryUtils.DoubleEquals(poly.Area, 0.0))
                 {
@@ -368,7 +368,7 @@ namespace ThMEPEngineCore.Engine
                     else
                         res.Add(poly);
                 }
-                else if(o is Polyline polygon && polygon.Area>1.0)
+                else if (o is Polyline polygon && polygon.Area > 1.0)
                     polygon.ToNTSPolygon().Buffer(length, new BufferParameters() { JoinStyle = JoinStyle.Mitre, EndCapStyle = EndCapStyle.Square })
                     .ToDbCollection().Cast<Entity>()
                     .ForEach(e => res.Add(e));
@@ -401,7 +401,7 @@ namespace ThMEPEngineCore.Engine
         public bool IsContatinPoint3d(Point3d p)
         {
             bool isInArchWall = IsInComponents(_architectureWall, p);
-            bool isInShearWall = IsInComponents(_shearWall,p);
+            bool isInShearWall = IsInComponents(_shearWall, p);
             bool isInColumn = IsInComponents(_column, p);
             bool isInDoor = IsInComponents(_door, p);
             bool isInWindow = IsInComponents(_window, p);
@@ -409,7 +409,23 @@ namespace ThMEPEngineCore.Engine
             return isInArchWall || isInShearWall || isInColumn || isInDoor || isInWindow || isInCurtainWall;
         }
 
-        public bool IsCloseToComponents(Point3d p,double tolerance)
+        public bool IsContains(Entity polygon)
+        {
+            if (polygon == null)
+            {
+                return false;
+            }
+            bool isArchWallContains = IsContains(_architectureWall, polygon);
+            bool isShearWallContains = IsContains(_shearWall, polygon);
+            bool isColumnContains = IsContains(_column, polygon);
+            bool isDoorContains = IsContains(_door, polygon);
+            bool isWindowContains = IsContains(_window, polygon);
+            bool isCurtainWallContains = IsContains(_curtainWall, polygon);
+            return isArchWallContains || isShearWallContains || isColumnContains ||
+                isDoorContains || isWindowContains || isCurtainWallContains;
+        }
+
+        public bool IsCloseToComponents(Point3d p, double tolerance)
         {
             bool isCloseToArchWall = IsCloseToComponents(_architectureWall, p, tolerance);
             bool isCloseToShearWall = IsCloseToComponents(_shearWall, p, tolerance);
@@ -420,13 +436,18 @@ namespace ThMEPEngineCore.Engine
             return isCloseToArchWall || isCloseToShearWall || isCloseToColumn ||
                 isCloseToDoor || isCloseToWindow || isCloseToCurtainWall;
         }
-        private bool IsCloseToComponents(DBObjectCollection polygons, Point3d pt,double tolerance)
+        private bool IsContains(DBObjectCollection polygons, Entity polygon)
+        {
+            return polygons.OfType<Entity>().Where(o => o.IsContains(polygon)).Any();
+        }
+
+        private bool IsCloseToComponents(DBObjectCollection polygons, Point3d pt, double tolerance)
         {
             foreach (DBObject obj in polygons)
             {
                 if (obj is Polyline polyline)
                 {
-                    if (IsCloseTo(pt,polyline,tolerance))
+                    if (IsCloseTo(pt, polyline, tolerance))
                     {
                         return true;
                     }
@@ -434,11 +455,11 @@ namespace ThMEPEngineCore.Engine
                 else if (obj is MPolygon mPolygon)
                 {
                     var shell = mPolygon.Shell();
-                    if(IsCloseTo(pt, shell, tolerance))
+                    if (IsCloseTo(pt, shell, tolerance))
                     {
                         return true;
                     }
-                    if(mPolygon.Holes().Where(o=>IsCloseTo(pt,o,tolerance)).Any())
+                    if (mPolygon.Holes().Where(o => IsCloseTo(pt, o, tolerance)).Any())
                     {
                         return true;
                     }
@@ -447,16 +468,16 @@ namespace ThMEPEngineCore.Engine
             return false;
         }
 
-        private bool IsCloseTo(Point3d pt, Polyline polyline,double tolerance)
+        private bool IsCloseTo(Point3d pt, Polyline polyline, double tolerance)
         {
             var closePt = polyline.GetClosestPointTo(pt, false);
             return pt.DistanceTo(closePt) <= tolerance;
         }
 
-        private bool IsInComponents(DBObjectCollection polygons,Point3d pt)
+        private bool IsInComponents(DBObjectCollection polygons, Point3d pt)
         {
             bool isIn = false;
-            foreach(DBObject obj in polygons)
+            foreach (DBObject obj in polygons)
             {
                 if (obj is Polyline polyline)
                 {
@@ -465,7 +486,7 @@ namespace ThMEPEngineCore.Engine
                         isIn = polyline.IsContains(pt);
                     }
                 }
-                else if(obj is MPolygon mPolygon)
+                else if (obj is MPolygon mPolygon)
                 {
                     isIn = mPolygon.IsContains(pt);
                 }
@@ -498,4 +519,3 @@ namespace ThMEPEngineCore.Engine
         }
     }
 }
-
