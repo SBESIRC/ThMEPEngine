@@ -70,6 +70,10 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="SmallAreaArrangement\PipelineArrangement.cs" />
+    <Compile Include="SmallAreaArrangement\SearchRouteForPipelines.cs" />
+    <Compile Include="SmallAreaArrangement\SmallAreaPipelineCmd.cs" />
+    <Compile Include="SmallAreaArrangement\testIntersection.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
