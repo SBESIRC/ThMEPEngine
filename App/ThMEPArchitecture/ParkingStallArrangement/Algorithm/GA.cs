@@ -92,17 +92,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         private int GetParkingNums(LayoutParameter layoutPara)
         {
-
             //这个函数是用于统计车位数，由余工完成
-            //var guid = Guid.NewGuid();
-            //var rand = new Random(guid.GetHashCode());
-            //int num = rand.Next(10);
-            //return num;
-
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-
                 int index = layoutPara.AreaNumber[j];
                 layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                 layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
@@ -110,11 +103,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
                 layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                 layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-
                 var obstacles=new List<Polyline>();
                 obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-                //log
+#if DEBUG
                 List<Polyline> pls = walls;
                 string w = "";
                 string l = "";
@@ -128,48 +119,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
-
-
                 FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(fs1);
                 sw.WriteLine(w);
                 sw.WriteLine(l);
                 sw.Close();
                 fs1.Close();
-
-                //ParkingPartition p = new ParkingPartition(walls, inilanes, obstacles, boundary);
-                //p.Logger = Logger;
-                //bool valid = p.Validate();
-                ;
-
+#endif
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
                 var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
-                //Cutters.Add(bound);
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-
-                if (GeoUtilities.JoinCurves(walls, inilanes)[0].Length < 1)
+                try
                 {
-                    ;
+                    count += partition.CalNumOfParkingSpaces();
                 }
-
-                if (true)
+                catch (Exception ex)
                 {
-                    //p.Log();
-                    //p.Initialize();
-
-                    try
-                    {
-                        count += partition.CalNumOfParkingSpaces();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.Error(ex.Message);
-                    }
-
+                    Logger.Error(ex.Message);
+                    partition.Dispose();
                 }
             }
             return count;

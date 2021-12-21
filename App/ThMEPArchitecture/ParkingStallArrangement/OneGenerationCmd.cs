@@ -54,8 +54,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
 
         public void CreateAreaSegment(AcadDatabase acadDatabase)
-        {
-            
+        {       
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
@@ -64,27 +63,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-
             var gaPara = new GaParameter(outerBrder.SegLines);
             var usedLines = new HashSet<int>();
             var maxVals = new List<double>();
             var minVals = new List<double>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
             gaPara.Set(sortSegLines, maxVals, minVals);
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);
-
-           
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);      
             var geneAlgorithm = new GA2(gaPara, layoutPara, 1, 1);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
-
             try
             {
                 rst = geneAlgorithm.Run(histories);
             }
             catch
             {
-                ;
             }
             var solution = rst.First();
             histories.Add(rst.First());
@@ -100,7 +94,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch { }
                 }
-
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
 
@@ -111,16 +104,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
                     layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                     layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-
                     var obstacles = new List<Polyline>();
                     obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-
-
+#if DEBUG
                     string w = "";
                     string l = "";
                     foreach (var e in walls)
@@ -141,25 +130,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     sw.WriteLine(l);
                     sw.Close();
                     fs1.Close();
-
-                    if (GeoUtilities.JoinCurves(walls, inilanes)[0].Length < 1)
-                    {
-                        ;
-                    }
-                    ;
-                    ;
+#endif
                     inilanes = inilanes.Distinct().ToList();
-
                     //Draw.DrawSeg(lanes,index);
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-
-
-                    if (partition.Boundary.Length < 1)
-                    {
-                        ;
-                    }
-
                     partition.ProcessAndDisplay(layerNames, 30);
                 }
             }
@@ -184,6 +159,5 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 return frame.Vertices();
             }
         }
-
     }
 }
