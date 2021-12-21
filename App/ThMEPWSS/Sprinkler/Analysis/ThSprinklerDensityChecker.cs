@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Sprinkler.Service;
+using ThCADExtension;
 
 namespace ThMEPWSS.Sprinkler.Analysis
 {
@@ -85,7 +86,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var tag = true;
                 lineDirection.ForEach(o =>
                 {
-                    if (tag && (distanceCheck[0].Delta.GetAngleTo(o[0].Delta) < Math.PI / 60 || distanceCheck[0].Delta.GetAngleTo(o[0].Delta) > Math.PI * 59 / 60))
+                    if (tag && (distanceCheck[0].LineDirection().GetAngleTo(o[0].LineDirection()) < Math.PI / 60 
+                               || distanceCheck[0].LineDirection().GetAngleTo(o[0].LineDirection()) > Math.PI * 59 / 60))
                     {
                         o.Add(distanceCheck[0]);
                         distanceCheck.RemoveAt(0);

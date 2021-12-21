@@ -1,31 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NetTopologySuite.Operation.Relate;
 
 using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
 
 using ThMEPWSS.DrainageSystemDiagram;
-using ThMEPWSS.SprinklerConnect.Model;
-using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Engine;
 
 
 namespace ThMEPWSS.SprinklerConnect.Service
@@ -59,18 +41,18 @@ namespace ThMEPWSS.SprinklerConnect.Service
             {
                 var mainP = mainTemp.Where(x => IsWithIn(l, x));
                 if (mainP.Count() > 0)
-                    {
-                        mainLine.Add(l);
+                {
+                    mainLine.Add(l);
                 }
                 else
                 {
                     var subP = subMainTemp.Where(x => IsWithIn(l, x));
                     if (subP.Count() > 0)
                     {
-                            subMainLine.Add(l);
-                        }
+                        subMainLine.Add(l.ExtendLine(10.0));
                     }
                 }
+            }
 
         }
 
@@ -104,7 +86,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         break;
                     }
                 }
-               
+
                 if (bMainP == false)
                 {
                     foreach (var sub in subMainTemp)

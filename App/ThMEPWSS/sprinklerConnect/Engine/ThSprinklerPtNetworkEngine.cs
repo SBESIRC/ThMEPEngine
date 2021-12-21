@@ -87,13 +87,17 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             // 往组里添加线
             ThSprinklerNetworkService.AddSingleDTLineToGroup(dtSeg, groupList, DTTol * 1.5);
             ThSprinklerNetworkService.AddSinglePTToGroup(groupList, pts, DTTol * 1.5);
+            
+            // 删除穿墙的线
+            groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
+
             ThSprinklerNetworkService.AddShortLineToGroup(groupList, pts, subMainPipe, DTTol * 0.8);
+            groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
+
             for (int i = 0; i < groupList.Count; i++)
             {
                 //DrawUtils.ShowGeometry(groupList.ElementAt(i).Value, string.Format("l2filterGroup{0}-{1}", i, groupList.ElementAt(i).Value.Count), i % 7);
             }
-            // 删除穿墙的线
-            groupList = ThSprinklerNetworkService.DeleteWallLine(groupList, geometry);
 
             
 
