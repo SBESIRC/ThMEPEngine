@@ -25,11 +25,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public double EndValue { get; set; }//线的终止点另一维
         public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
         {
-            double diswidthlane = 5500;
             Value = value;
             Direction = direction;
-            MinValue = minValue /*+ diswidthlane / 2*/;//绝对的最小值
-            MaxValue = maxValue /*- diswidthlane / 2*/;//绝对的最大值
+            MinValue = minValue;//绝对的最小值
+            MaxValue = maxValue;//绝对的最大值
             StartValue = startValue;
             EndValue = endValue;
         }
@@ -92,7 +91,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         private int GetParkingNums(LayoutParameter layoutPara)
         {
-            //这个函数是用于统计车位数，由余工完成
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
@@ -156,8 +154,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         Random Rand = new Random();
 
         //Genetic Algorithm parameters
-        int MaxTime;
-        int IterationCount = 10;
+        readonly int MaxTime;
+        readonly int IterationCount = 10;
         int PopulationSize;
 
         int FirstPopulationSize;
@@ -165,18 +163,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int FirstPopulationSizeMultiplyFactor = 2;
         int SelectionSize = 6;
 
-        int ChromoLen = 2;
-        double CrossRate;
         double MutationRate;
         double GeneMutationRate;
-
 
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
-
-        //Range
-        double Low, High;
 
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
@@ -191,7 +183,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MaxTime = 180;
-            CrossRate = 0.8;//交叉因子
             MutationRate = 0.5;//变异因子
             GeneMutationRate = 0.5;//基因变异因子
 
@@ -301,7 +292,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return selected;
         }
 
-        public void Mutation(List<Chromosome> s)
+        private void Mutation(List<Chromosome> s)
         {
             int cnt = Math.Min((int)(s.Count * MutationRate), 1);//需要变异的染色体数目，最小为1
             int geneCnt = Math.Min((int)(s[0].GenomeCount() * GeneMutationRate), 1);//需要变异的基因数目，最小为1
@@ -357,7 +348,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return i;
         }
 
-        public List<Chromosome> CreateFirstPopulation(bool accordingSegline)
+        private List<Chromosome> CreateFirstPopulation(bool accordingSegline)
         {
             List<Chromosome> solutions = new List<Chromosome>();
             if (accordingSegline)
@@ -386,10 +377,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return solutions;
         }
 
-
-
-
-        public List<Chromosome> CreateNextGeneration(List<Chromosome> solutions)
+        private List<Chromosome> CreateNextGeneration(List<Chromosome> solutions)
         {
             List<Chromosome> rst = new List<Chromosome>();
             rst.Add(solutions.First());
@@ -405,7 +393,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return rst;
         }
 
-        public Chromosome Crossover(Chromosome s1, Chromosome s2)
+        private Chromosome Crossover(Chromosome s1, Chromosome s2)
         {
             Chromosome newS = new Chromosome();
             var chromoLen = s1.Genome.Count;
@@ -426,7 +414,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return newS;
         }
 
-        public List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
+        private List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
 

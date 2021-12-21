@@ -70,74 +70,62 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
             gaPara.Set(sortSegLines, maxVals, minVals);
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);      
-            var geneAlgorithm = new GA2(gaPara, layoutPara, 1, 1);
-            var rst = new List<Chromosome>();
-            var histories = new List<Chromosome>();
-            try
-            {
-                rst = geneAlgorithm.Run(histories);
-            }
-            catch
-            {
-            }
-            var solution = rst.First();
-            histories.Add(rst.First());
-            for (int k = 0; k < histories.Count; k++)
-            {
-                layoutPara.Set(histories[k].Genome);
-                var layerNames = "solutions" + k.ToString();
-                using (AcadDatabase adb = AcadDatabase.Active())
-                {
-                    try
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                    }
-                    catch { }
-                }
-                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
-                {
+            var geneAlgorithm = new GA2(gaPara);
+         
+            var rst = geneAlgorithm.Run();
 
-                    int index = layoutPara.AreaNumber[j];
-                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                    layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                    var obstacles = new List<Polyline>();
-                    obstaclesList.ForEach(e => obstacles.AddRange(e));
-                    var Cutters = new DBObjectCollection();
-                    obstacles.ForEach(e => Cutters.Add(e));
-                    var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+            layoutPara.Set(rst);
+            var layerNames = "solutions0";
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                try
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                }
+                catch { }
+            }
+            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            {
+                int index = layoutPara.AreaNumber[j];
+                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
+                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
+                layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
+                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                var obstacles = new List<Polyline>();
+                obstaclesList.ForEach(e => obstacles.AddRange(e));
+                var Cutters = new DBObjectCollection();
+                obstacles.ForEach(e => Cutters.Add(e));
+                var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
 #if DEBUG
-                    string w = "";
-                    string l = "";
-                    foreach (var e in walls)
-                    {
-                        foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
-                            w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
-                    }
-                    foreach (var e in inilanes)
-                    {
-                        l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
-                            + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
-                    }
-
-
-                    FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                    StreamWriter sw = new StreamWriter(fs1);
-                    sw.WriteLine(w);
-                    sw.WriteLine(l);
-                    sw.Close();
-                    fs1.Close();
-#endif
-                    inilanes = inilanes.Distinct().ToList();
-                    //Draw.DrawSeg(lanes,index);
-                    PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
-                    partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                    partition.ProcessAndDisplay(layerNames, 30);
+                string w = "";
+                string l = "";
+                foreach (var e in walls)
+                {
+                    foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                        w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
                 }
+                foreach (var e in inilanes)
+                {
+                    l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                        + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+                }
+
+
+                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+                StreamWriter sw = new StreamWriter(fs1);
+                sw.WriteLine(w);
+                sw.WriteLine(l);
+                sw.Close();
+                fs1.Close();
+#endif
+                inilanes = inilanes.Distinct().ToList();
+                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                partition.ProcessAndDisplay(layerNames, 30);
             }
+            
         }
 
         private static Point3dCollection SelectAreas()

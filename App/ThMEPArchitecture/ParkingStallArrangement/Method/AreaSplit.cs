@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPEngineCore.CAD;
 using ThCADCore.NTS;
 using NFox.Cad;
@@ -138,26 +136,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
                 else if(segAreas.Count >2)
                 {
-                    try
+                    var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
+                    for (int i = 0; i < 2; i++)
                     {
-                        var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
-                        for (int i = 0; i < 2; i++)
+                        var a = sortedAreas[i];
+                        if (a.Area < 100)
                         {
-                            var a = sortedAreas[i];
-                            if (a.Area < 100)
-                            {
-                                return false;
-                            }
+                            return false;
                         }
-                        areas.RemoveAt(k);
-                        areas.Add(sortedAreas[0]);
-                        areas.Add(sortedAreas[1]);
-                        return true;
                     }
-                    catch(Exception ex)
-                    {
-                        ;
-                    }
+                    areas.RemoveAt(k);
+                    areas.Add(sortedAreas[0]);
+                    areas.Add(sortedAreas[1]);
+                    return true;
                 }
             }
             return false;
@@ -193,27 +184,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                     else if (segAreas.Count > 2)
                     {
-                        try
+                        var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
+                        for (int i = 0; i < 2; i++)
                         {
-                            var sortedAreas = segAreas.OrderByDescending(e => e.Area).ToList();
-                            for (int i = 0; i < 2; i++)
+                            var a = sortedAreas[i];
+                            if (a.Area < 100)
                             {
-                                var a = sortedAreas[i];
-                                if (a.Area < 100)
-                                {
-                                    breakFlag = true;
-                                    continue ;
-                                }
+                                breakFlag = true;
+                                continue ;
                             }
-                            areas.RemoveAt(k);
-                            areas.Add(sortedAreas[0]);
-                            areas.Add(sortedAreas[1]);
-                            return true;
                         }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
+                        areas.RemoveAt(k);
+                        areas.Add(sortedAreas[0]);
+                        areas.Add(sortedAreas[1]);
+                        return true;
                     }
                     return false;
                 }

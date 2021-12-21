@@ -84,7 +84,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 rst = geneAlgorithm.Run(histories);
             }
-            catch (Exception ex)
+            catch
             {
 
             }
@@ -116,20 +116,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     var obstacles = new List<Polyline>();
                     obstaclesList.ForEach(e => obstacles.AddRange(e));
 
-
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-
                     partition.ProcessAndDisplay(layerNames, 30);
-
                 }
             }
 
             layoutPara.Set(solution.Genome);
-
             Draw.DrawSeg(solution);
         }
 
@@ -152,6 +148,5 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 return frame.Vertices();
             }
         }
-
     }
 }
