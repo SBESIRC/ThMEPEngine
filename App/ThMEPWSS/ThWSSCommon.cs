@@ -2,7 +2,6 @@
 {
     public static class ThWSSCommon
     {
-        public const string FrameLayerName = "AI-房间框线";                                    //房间框线图层
         public const string SprayUpBlockName = "上喷喷头";                                     //上喷喷头名
         public const string SprayDownBlockName = "下喷喷头";                                   //下喷喷头名
         public const string SprayLayerName = "W-FRPT-SPRL";                                    //喷淋图层名          

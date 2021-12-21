@@ -15,6 +15,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.Service;
+using ThMEPEngineCore;
 
 namespace ThMEPWSS.Sprinkler.Service
 {
@@ -104,7 +105,7 @@ namespace ThMEPWSS.Sprinkler.Service
                 };
                 var layerNames = new string[]
                 {
-                    ThWSSCommon.FrameLayerName,
+                    ThMEPEngineCoreLayerUtils.ROOMOUTLINE,
                 };
                 var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
                 var result = Active.Editor.GetSelection(options, filter);
@@ -145,7 +146,7 @@ namespace ThMEPWSS.Sprinkler.Service
                 };
                 var layerNames = new string[]
                 {
-                    ThWSSCommon.FrameLayerName,
+                    ThMEPEngineCoreLayerUtils.ROOMOUTLINE,
                 };
                 var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
                     o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
