@@ -252,7 +252,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             string outlineLayerA = "TH_AI_HOUSEBOUND";
             LayerDealer.AddLayer(outlineLayerA, 1);
             LayerDealer.Output(closeBorderLineA, outlineLayerA);
-            foreach(var dic in closeBorderLineA)
+            LayerDealer.HiddenLayer(outlineLayerA);
+            foreach (var dic in closeBorderLineA)
             {
                 StructureDealer.AddLineTodicTuples(dic.Key, dic.Value, ref dicTuples);
                 StructureDealer.AddLineTodicTuples(dic.Value, dic.Key, ref dicTuples);
@@ -276,6 +277,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             string outlineLayerB = "TH_AI_WALLBOUND";
             LayerDealer.AddLayer(outlineLayerB, 2);
             LayerDealer.Output(unifiedTyples, outlineLayerB);
+            LayerDealer.HiddenLayer(outlineLayerB);
             return closeBorderLines;
         }
 

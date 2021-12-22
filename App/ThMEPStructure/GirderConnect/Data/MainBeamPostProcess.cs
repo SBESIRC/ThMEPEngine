@@ -21,81 +21,21 @@ namespace ThMEPStructure.GirderConnect.Data
         /// </summary>
         public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
         {
-            string beamLayer = "TH_AI_BEAM";
-            AddLayer(beamLayer, 4);
-
             //var unifiedTyples = UnifyTuples(dicTuples);
             var tuples = LineDealer.DicTuplesToTuples(dicTuples);
             var lines = TuplesToLines(tuples);
-            Output(lines, beamLayer, intersectCollection);
+            Output(lines);
         }
-
-        /// <summary>
-        /// 输出结果，转换结果作为次梁输入
-        /// </summary>
-        /// <param name="tuples"></param>
-        /// <param name="layerName"></param>
-        public static void Output(HashSet<Tuple<Point3d, Point3d>> tuples, string layerName)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                tuples.ForEach(o =>
-                {
-                    var line = new Line(o.Item1, o.Item2);
-                    line.Layer = layerName;
-                    if(line.Length < 18000 && line.Length > 9000)
-                    {
-                        line.ColorIndex = 7;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                    }
-                    else if (line.Length > 10 && line.Length <= 9000)
-                    {
-                        line.ColorIndex = (int)ColorIndex.BYLAYER;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                    }
-                });
-            }
-        }
-        public static void Output(Dictionary<Point3d, HashSet<Point3d>> tuples, string layerName)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                tuples.ForEach(o =>
-                {
-                    o.Value.ForEach(k =>
-                    {
-                        var line = new Line(o.Key, k);
-                        line.Layer = layerName;
-                        if (line.Length > 9000)
-                        {
-                            line.ColorIndex = 7;
-                        }
-                        else
-                        {
-                            line.ColorIndex = (int)ColorIndex.BYLAYER;
-                        }
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                    });
-                });
-            }
-        }
-        public static void Output(List<Line> lines, string layerName, DBObjectCollection intersectCollection)
+        public static void Output(List<Line> lines)
         {
             using (var acdb = AcadDatabase.Active())
             {
                 lines.ForEach(line =>
                 {
-                    line.Layer = layerName;
-                    if (line.Length < 18000 && line.Length > 9000)
-                    {
-                        line.ColorIndex = 7;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                    }
-                    else if (line.Length > 10 && line.Length <= 9000)
-                    {
-                        line.ColorIndex = (int)ColorIndex.BYLAYER;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                    }
+                    line.Layer = BeamConfig.MainBeamLayerName;
+                    line.ColorIndex = (int)ColorIndex.BYLAYER;
+                    line.Linetype = "ByLayer";
+                    acdb.ModelSpace.Add(line);
                 });
             }
         }
@@ -125,26 +65,6 @@ namespace ThMEPStructure.GirderConnect.Data
                 }
             }
             return ansTuples;
-        }
-
-        /// <summary>
-        /// 创建一个新的图层
-        /// </summary>
-        /// <param name="layerName"></param>
-        /// <param name="colorIndex"></param>
-        public static void AddLayer(string layerName, short colorIndex)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                if (!acdb.Layers.Contains(layerName))
-                {
-                    acdb.Database.AddLayer(layerName);
-                    acdb.Database.SetLayerColor(layerName, colorIndex);
-                }
-                acdb.Database.UnLockLayer(layerName);
-                acdb.Database.UnOffLayer(layerName);
-                acdb.Database.UnFrozenLayer(layerName);
-            }
         }
 
         public static List<Line> TuplesToLines(HashSet<Tuple<Point3d, Point3d>> tuples)

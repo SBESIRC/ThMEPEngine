@@ -65,6 +65,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 acdb.Database.UnLockLayer(layerName);
                 acdb.Database.UnOffLayer(layerName);
                 acdb.Database.UnFrozenLayer(layerName);
+                acdb.Database.UnPrintLayer(layerName);
+
+            }
+        }
+
+        public static void HiddenLayer(string layerName)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                acdb.Database.OffLayer(layerName);
             }
         }
     }

@@ -258,11 +258,11 @@ namespace DotNetARX
         }
 
         /// <summary>
-        /// 将图层隐藏
+        /// 将图层关闭
         /// </summary>
         /// <param name="db"></param>
         /// <param name="layerName"></param>
-        public static void HiddenLayer(this Database db, string layerName)
+        public static void OffLayer(this Database db, string layerName)
         {
             //打开层表
             LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
@@ -273,9 +273,9 @@ namespace DotNetARX
             LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
             if (ltr != null)
             {
-                if (ltr.IsHidden)
+                if (!ltr.IsOff)
                 {
-                    ltr.IsHidden = true;
+                    ltr.IsOff = true;
                 }
             }
         }

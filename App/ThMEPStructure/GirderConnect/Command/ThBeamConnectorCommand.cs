@@ -19,6 +19,7 @@ using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
+using ThMEPStructure.GirderConnect.Service;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -90,6 +91,9 @@ namespace ThMEPStructure.GirderConnect.Command
                 outlineWalls.ForEach(o => o.Value.ForEach(p => intersectCollection.Add(p)));
                 outerWalls.ForEach(o => intersectCollection.Add(o.Key));
                 outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
+
+                //导入主梁信息
+                ImportService.ImportMainBeamInfo();
 
                 //处理算法输出
                 MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);

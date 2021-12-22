@@ -73,7 +73,7 @@ namespace ThMEPStructure.GirderConnect.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.StructTemplatePath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), true);
             }
         }
 
