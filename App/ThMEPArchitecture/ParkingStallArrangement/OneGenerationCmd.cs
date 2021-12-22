@@ -40,6 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
                     CreateAreaSegment(currentDb);
+
                 }
             }
             catch (Exception ex)
@@ -69,7 +70,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var minVals = new List<double>();
             Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
             gaPara.Set(sortSegLines, maxVals, minVals);
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines);      
+
+            var segLineDic = new Dictionary<int, Line>();
+            for (int i = 0; i < sortSegLines.Count; i++)
+            {
+                segLineDic.Add(i, sortSegLines[i]);
+            }
+
+            var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
+            var linePtDic = Intersection.GetLinePtDic(ptDic);
+            var intersectPtCnt = ptDic.Count;//交叉点数目
+            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
+
+            foreach (var num in ptDic.Keys)
+            {
+                var random = new Random();
+                var flag = General.Utils.RandDouble() < 0.5;
+                directionList.Add(num, flag);//默认给全横向
+            }
+
+
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
             var geneAlgorithm = new GA2(gaPara);
          
             var rst = geneAlgorithm.Run();
@@ -131,7 +152,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     ;
                 }
             }
-
+            layoutPara.Dispose();
         }
 
         private static Point3dCollection SelectAreas()

@@ -341,21 +341,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var maxVal = s[i].Genome[j].MaxValue;
                     var minVal = s[i].Genome[j].MinValue;
-                    //s[i].Genome[j].Value = Rand.NextDouble() * (maxVal - minVal) + minVal;
                     var dist = Math.Min(maxVal - minVal, 15700);
-                    s[i].Genome[j].Value = Rand.NextDouble() * dist + minVal;
+                    s[i].Genome[j].Value = RandDouble() * dist + minVal;
                 }
             }
         }
 
         private int RandInt(int range)
         {
-            var guid = Guid.NewGuid();
-            var rand = new Random(guid.GetHashCode());
-            int i = rand.Next(range);
-            return i;
+            return General.Utils.RandInt(range);
         }
-
+        private double RandDouble()
+        {
+            return General.Utils.RandDouble();
+        }
         private List<Chromosome> CreateFirstPopulation(bool accordingSegline)
         {
             List<Chromosome> solutions = new List<Chromosome>();
@@ -380,8 +379,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     solutions.Add(solution);
                 }
             }
-
-
             return solutions;
         }
 
