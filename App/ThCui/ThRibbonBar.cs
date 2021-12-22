@@ -93,19 +93,19 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            {
-                var subPanel = row.AddNewPanel();
+            //{
+            //    var subPanel = row.AddNewPanel();
 
-                // 地库风平面
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("地库风平面",
-                    "天华地库风平面",
-                    "THDKFPM",
-                    "天华地库风平面",
-                    "IDI_THCAD_THDKFPM_SMALL",
-                    "IDI_THCAD_THDKFPM_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            //    // 地库风平面
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    subRow.AddNewButton("地库风平面",
+            //        "天华地库风平面",
+            //        "THDKFPM",
+            //        "天华地库风平面",
+            //        "IDI_THCAD_THDKFPM_SMALL",
+            //        "IDI_THCAD_THDKFPM_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
 
             {
                 var subPanel = row.AddNewPanel();
@@ -681,14 +681,14 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_ARCHITECTURE_LARGE",
                     RibbonButtonStyle.LargeWithText);
 
-                //// 结构专业
-                //splitButton.AddNewButton("结构专业",
-                //    "天华结构",
-                //    "THMEPPROFILE _S",
-                //    "切换到天华结构",
-                //    "IDI_THCAD_STRUCTURE_SMALL",
-                //    "IDI_THCAD_STRUCTURE_LARGE",
-                //    RibbonButtonStyle.LargeWithText);
+                // 结构专业
+                splitButton.AddNewButton("结构专业",
+                    "天华结构",
+                    "THMEPPROFILE _S",
+                    "切换到天华结构",
+                    "IDI_THCAD_STRUCTURE_SMALL",
+                    "IDI_THCAD_STRUCTURE_LARGE",
+                    RibbonButtonStyle.LargeWithText);
 
                 // 暖通专业
                 splitButton.AddNewButton("暖通专业",
