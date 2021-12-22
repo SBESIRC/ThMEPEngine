@@ -111,7 +111,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 var lines = ThFanConnectUtils.CleanLaneLines(pipes);
-                double space = 200.0;
+                double space = 300.0;
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
                     space = 100.0;
@@ -140,6 +140,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     return;
                 }
+
                 //标记流量
                 ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;

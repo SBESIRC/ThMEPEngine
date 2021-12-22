@@ -26,7 +26,7 @@ namespace ThMEPElectrical
         public static void ImportCompassBlock(this Database database, string name, string layer)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalSensorDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);

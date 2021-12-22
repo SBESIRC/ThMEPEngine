@@ -1,20 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper.Commands;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
-using AcHelper;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using ThMEPEngineCore.Service;
-using NFox.Cad;
 using ThMEPStructure.GirderConnect.Data.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data
@@ -63,9 +49,15 @@ namespace ThMEPStructure.GirderConnect.Data
             //1.4、对房间中的事物进行分类
             DataClassify.ClassifyOutlineWalls(outlineWalls, outlineClumns);
 
+            //1.5、清理outlineWalls
+            outlineWalls = DataClassify.SimplifyOutlineThings(outlineWalls);
+
             //2、对于房间外的事物（wall & column）
             //outsideColumns & outsideShearwall -> clumnPts & outerWalls
             DataClassify.OuterClassify(outsideColumns, outsideShearwall, clumnPts, ref outerWalls, ref olCrossPts);
+
+            //2.1、清理outerWalls+
+            outerWalls = DataClassify.SimplifyOutlineThings(outerWalls);
         }
     }
 }

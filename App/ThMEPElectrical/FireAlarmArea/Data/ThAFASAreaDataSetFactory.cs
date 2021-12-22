@@ -71,13 +71,13 @@ namespace ThMEPElectrical.FireAlarmArea.Data
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3BeamVisitor.Results,
                     },
-                      new ThAFASWindowExtractor()
+                    new ThAFASWindowExtractor()
                     {
                         ElementLayer="AI-窗",
                         Transformer = Transformer,
                         Db3ExtractResults = vm.DB3WindowVisitor.Results,
                     },
-                          new ThAFASDoorOpeningExtractor()
+                    new ThAFASDoorOpeningExtractor()
                     {
                         ElementLayer = "AI-门",
                         Transformer = Transformer,

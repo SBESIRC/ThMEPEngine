@@ -26,7 +26,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => o is BlockReference || IsCurve(o));
+                   .Where(o => o is BlockReference);
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
 

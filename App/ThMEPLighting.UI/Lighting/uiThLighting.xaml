@@ -19,7 +19,7 @@
                          xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
                                          Title="电气照明" SizeToContent="Manual" Height="650"
                                         Width="485" MaxWidth="600" MaxHeight="1000"
-                         mc:Ignorable="d" >
+                         mc:Ignorable="d" Closing="ThCustomWindow_Closing">
     <Window.Resources>
         <ResourceDictionary>
             <viewmodels:RadioUiValueConverter x:Key="RadioUiValueConverter" ></viewmodels:RadioUiValueConverter>

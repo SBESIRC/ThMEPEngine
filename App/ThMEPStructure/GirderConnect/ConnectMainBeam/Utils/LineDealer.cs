@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Linq2Acad;
-using System.Collections;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -156,6 +152,28 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
         public static void DeleteSameClassLine(HashSet<Point3d> points, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 1)
         {
+            HashSet<Point3d> pts = new HashSet<Point3d>();
+            HashSet<Point3d> classPts = new HashSet<Point3d>();
+            foreach (var pt in points.ToList())
+            {
+                if (!pts.Contains(pt))
+                {
+                    pts.Add(pt);
+                    classPts.Add(pt);
+                }
+                foreach(var ptB in classPts)
+                {
+                    if (pts.Contains(ptB))
+                    {
+                        continue;
+                    }
+                    if(ptB.DistanceTo(pt) < deviation)
+                    {
+                        pts.Add(ptB);
+                    }
+                }
+            }
+                
             List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
             foreach (var dic in dicTuples)
             {
@@ -169,7 +187,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var tuple in tmpTuples)
             {
                 cnt = 0;
-                foreach (var pt in points)
+                foreach (var pt in classPts)
                 {
                     if (pt.DistanceTo(tuple.Item1) < deviation)
                     {
@@ -386,7 +404,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 {
                                     borderPt2NearPts[stayPt].Add(pt);
                                 }
-                                //borderPt2NearPts[stayPt].AddRange(borderPt2NearPts[deletePt]);
                                 borderPt2NearPts.Remove(deletePt);
                             }
                         }
@@ -411,8 +428,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     {
                         tuples.Add(new Tuple<Point3d, Point3d>(borderPt, nearPt));
                         tuples.Add(new Tuple<Point3d, Point3d>(nearPt, borderPt));
-                        //ShowInfo.DrawLine(borderPt, nearPt, 210);
-                        //ShowInfo.DrawLine(nearPt, borderPt, 210);
                     }
                 }
             }

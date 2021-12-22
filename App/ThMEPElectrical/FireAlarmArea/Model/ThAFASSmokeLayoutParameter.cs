@@ -18,7 +18,7 @@ namespace ThMEPElectrical.FireAlarmArea.Model
         public int FloorHightIdx { get; set; } = -1;
         public int RootThetaIdx { get; set; } = -1;
         public double Scale { get; set; } = 100;
-        public double AisleAreaThreshold { get; set; } = 0.025;
+        public double AisleAreaThreshold { get; set; } = 0.75;
 
         public string BlkNameHeat = "";
         public string BlkNameSmoke = "";

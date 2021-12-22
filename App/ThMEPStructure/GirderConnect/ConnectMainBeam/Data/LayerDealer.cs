@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
+using NFox.Cad;
 using AcHelper;
 using DotNetARX;
 using Dreambuild.AutoCAD;
-using NFox.Cad;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
 {
@@ -31,11 +25,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 {
                     var line = new Line(o.Item1, o.Item2);
                     line.Layer = layerName;
-                    //if (line.Length > 9000)
-                    //{
-                    //    line.ColorIndex = 3;
-                    //}
-                    //else
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
                     }
@@ -51,11 +40,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 {
                     var line = new Line(o.Key, o.Value);
                     line.Layer = layerName;
-                    //if (line.Length > 9000)
-                    //{
-                    //    line.ColorIndex = 6;
-                    //}
-                    //else
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
                     }
@@ -81,6 +65,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 acdb.Database.UnLockLayer(layerName);
                 acdb.Database.UnOffLayer(layerName);
                 acdb.Database.UnFrozenLayer(layerName);
+                acdb.Database.UnPrintLayer(layerName);
+
+            }
+        }
+
+        public static void HiddenLayer(string layerName)
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                acdb.Database.OffLayer(layerName);
             }
         }
     }

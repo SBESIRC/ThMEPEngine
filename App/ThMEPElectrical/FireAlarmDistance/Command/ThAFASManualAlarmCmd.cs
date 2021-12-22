@@ -58,8 +58,6 @@ namespace ThMEPElectrical.FireAlarmDistance
                 _scale = FireAlarmSetting.Instance.Scale;
                 _stepLength = FireAlarmSetting.Instance.StepLengthMA;
             }
-
-
         }
         public void Dispose()
         {

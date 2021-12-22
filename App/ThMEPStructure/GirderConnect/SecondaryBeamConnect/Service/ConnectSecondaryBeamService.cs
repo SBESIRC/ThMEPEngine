@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
@@ -20,7 +21,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
         public static List<Line> ConnectSecondaryBeam(List<Line> mainbeam, List<Line> assists)
         {
             List<Line> entitys = mainbeam.Union(assists).Select(o => o.ExtendLine(1)).ToList();
-            var space = entitys.ToCollection().PolygonsEx().Cast<Entity>().Where(o => o is Polyline).Cast<Polyline>().Select(o => o.DPSimplify(10)).Where(o => o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000).ToList();
+            var space = entitys.ToCollection().PolygonsEx().Cast<Entity>().Where(o => o is Polyline).Cast<Polyline>().Select(o => o.DPSimplify(10)).Where(o => o.NumberOfVertices<7 && o.NumberOfVertices>3 && o.Area > 1000 * 1000).ToList();
             if (mainbeam.Count == 0 || space.Count == 0)
             {
                 return new List<Line>();
@@ -42,21 +43,39 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                 foreach (var line in secondaryBeamLines)
                 {
                     var newLine = line.Clone() as Line;
-                    newLine.Layer = "TH_AICL_BEAM";
+                    newLine.Layer = BeamConfig.SecondaryBeamLayerName;
+                    newLine.ColorIndex = (int)ColorIndex.BYLAYER;
+                    newLine.Linetype = "ByLayer";
                     acad.ModelSpace.Add(newLine);
                 }
             }
         }
 
-        public static void CreateSecondaryBeamLineLayer(Database database)
+        public static ObjectIdList InsertEntity(List<Entity> ents)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            ObjectIdList objectIds = new ObjectIdList();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                database.AddLayer(SecondaryBeamLayoutConfig.LayerName);
-                database.SetLayerColor(SecondaryBeamLayoutConfig.LayerName, SecondaryBeamLayoutConfig.ColorIndex);
-                acadDatabase.Database.UnLockLayer(SecondaryBeamLayoutConfig.LayerName);
-                acadDatabase.Database.UnOffLayer(SecondaryBeamLayoutConfig.LayerName);
-                acadDatabase.Database.UnFrozenLayer(SecondaryBeamLayoutConfig.LayerName);
+                foreach (var item in ents)
+                {
+                    var objId = acadDatabase.ModelSpace.Add(item);
+                    objectIds.Add(objId);
+                }
+            }
+            return objectIds;
+        }
+
+        public static void Erase(ObjectIdCollection objs)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                foreach (ObjectId objId in objs)
+                {
+                    var entity = acad.Element<Entity>(objId);
+                    entity.UpgradeOpen();
+                    entity.Erase();
+                    entity.DowngradeOpen();
+                }
             }
         }
     }

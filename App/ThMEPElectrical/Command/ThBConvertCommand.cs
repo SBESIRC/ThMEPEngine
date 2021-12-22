@@ -59,7 +59,7 @@ namespace ThMEPElectrical.Command
 
         private string BlockDwgPath()
         {
-            return ThCADCommon.BlockConvertDwgPath();
+            return ThCADCommon.ElectricalDwgPath();
         }
 
         private ThBConvertEngine CreateConvertEngine(ConvertMode mode)
@@ -271,7 +271,7 @@ namespace ThMEPElectrical.Command
                                     if (o.EffectiveName.Contains("潜水泵-AI"))
                                     {
                                         currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("水泵标注"), false);
-                                        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("0"), false);
+                                        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault("E-UNIV-NOTE"), false);
                                         engine.Displacement(objId, o, collectingWellEngine.Results, scale);
                                     }
                                     else

@@ -119,6 +119,60 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
+        public static Point3dCollection GetRoomFrame()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                Point3dCollection pts = new Point3dCollection();
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return pts;
+                }
+
+                var frameList = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    //获取外包框
+                    var frameTemp = acdb.Element<Polyline>(obj);
+                    var nFrame = ProcessFrame(frameTemp);
+                    if (nFrame.Area < 1)
+                    {
+                        continue;
+                    }
+
+                    frameList.Add(nFrame);
+                }
+                var frame = frameList.OrderByDescending(x => x.Area).First();
+                pts = frame.Vertices();
+                return pts;
+            }
+        }
+
+        private static Polyline ProcessFrame(Polyline frame)
+        {
+            Polyline nFrame = null;
+            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
+            if (nFrameNormal.Area > 10)
+            {
+                nFrameNormal = nFrameNormal.DPSimplify(1);
+                nFrame = nFrameNormal;
+            }
+            return nFrame;
+        }
+
         private static List<Entity> GetBlockInfo(BlockReference blockReference)
         {
             var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
@@ -241,96 +295,5 @@ namespace ThMEPElectrical.AFAS.Utils
         }
 
 
-        #region DebugFunction
-        ///// <summary>
-        ///// for debug
-        ///// </summary>
-        ///// <param name="pts"></param>
-        ///// <param name="extractBlkList"></param>
-        ///// <returns></returns>
-        //public static List<ThGeometry> WriteSmokeData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick,bool needDetective)
-        //{
-        //    var fileInfo = new FileInfo(Active.Document.Name);
-        //    var path = fileInfo.Directory.FullName;
-
-        //    var geos = new List<ThGeometry>();
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-
-        //        var datasetFactory = new ThFaAreaLayoutDataSetFactory()
-        //        {
-        //            ReferBeam = referBeam,
-        //            WallThick = wallThick,
-        //            NeedDetective = needDetective,
-        //        }; 
-        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-        //        geos.AddRange(dataset.Container);
-
-        //        ThGeoOutput.Output(geos, path, fileInfo.Name);
-
-        //    }
-
-        //    return geos;
-        //}
-
-        /// <summary>
-        /// for debug
-        /// </summary>
-        public static Polyline SelectFrame()
-        {
-            var frame = new Polyline();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择框线",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return frame;
-                }
-
-                var frameList = new List<Polyline>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    //获取外包框
-                    var frameTemp = acdb.Element<Polyline>(obj);
-                    var nFrame = ProcessFrame(frameTemp);
-                    if (nFrame.Area < 1)
-                    {
-                        continue;
-                    }
-
-                    frameList.Add(nFrame);
-                }
-                frame = frameList.OrderByDescending(x => x.Area).First();
-
-                return frame;
-            }
-        }
-
-        private static Polyline ProcessFrame(Polyline frame)
-        {
-            Polyline nFrame = null;
-            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
-            if (nFrameNormal.Area > 10)
-            {
-                nFrameNormal = nFrameNormal.DPSimplify(1);
-                nFrame = nFrameNormal;
-            }
-            return nFrame;
-        }
-
-        #endregion
     }
 }

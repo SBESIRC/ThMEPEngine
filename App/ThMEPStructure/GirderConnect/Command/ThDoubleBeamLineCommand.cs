@@ -1,26 +1,25 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using Linq2Acad;
+﻿using System;
+using AcHelper;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
+using DotNetARX;
+using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
-using ThMEPStructure.GirderConnect.ConnectMainBeam.BuildMainBeam;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPStructure.GirderConnect.Data;
-using ThMEPStructure.GirderConnect.SecondaryBeamConnect.BuildSecondaryBeam;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
+using ThMEPStructure.GirderConnect.Service;
+using ThMEPStructure.GirderConnect.BuildBeam;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -69,6 +68,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 {
                     intersectCollection.Add(item);
                 }
+                ThBeamGeometryPreprocessor.Z0Curves(ref intersectCollection);
 
                 //ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pts[0]);
                 //暂时不处理超远问题，因为目前主梁有一些问题，增加了一些不必要的后处理
@@ -77,47 +77,79 @@ namespace ThMEPStructure.GirderConnect.Command
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 Polyline polyline = pts.CreatePolyline();
                 originTransformer.Transform(polyline);
+
                 //获取主梁线
-                var beamLine = getPrimitivesService.GetBeamLine(polyline);
+                var beamLine = getPrimitivesService.GetBeamLine(polyline,out ObjectIdCollection objIDs);
+
+                //导入主梁文字图层
+                ImportService.ImportMainBeamInfo();
+                //导入文字样式
+                ImportService.ImportTextStyle();
+
+                bool CreatGroup = true;//是否分组
                 if (UserChoice == "地下室顶板")
                 {
                     //主梁
-                    BuildMainBeam buildMainBeam = new BuildMainBeam(beamLine,new List<Line>(), intersectCollection);
-                    var mainBeams = buildMainBeam.Build(result.StringResult);
-                    if(beamLine.Count * 2 == mainBeams.Count)
+                    ThBuildBeam buildMainBeam = new ThBuildBeam(beamLine, new List<Line>(), new List<Line>(), intersectCollection);
+                    var mainBeams = buildMainBeam.build(UserChoice);
+                    if (beamLine.Count == mainBeams.Count)
                     {
-                        //理论上 双线是原本单线的二倍
-                        //还要执行完后把原本主梁线删除，测试阶段暂时先不处理
+                        List<ObjectIdList> Groups = new List<ObjectIdList>();
+                        foreach (var beam in mainBeams)
+                        {
+                            List<Entity> entities = new List<Entity>();
+                            entities.Add(beam.Key.Item1);
+                            entities.Add(beam.Key.Item2);
+                            entities.Add(beam.Value);
+                            var groupIds = ConnectSecondaryBeamService.InsertEntity(entities);
+                            Groups.Add(groupIds);
+                        }
+
+                        //打组
+                        if (CreatGroup)
+                        {
+                            Groups.ForEach(g => GroupTools.CreateGroup(acad.Database, Guid.NewGuid().ToString(), g));
+                        }
+                        //删掉旧线
+                        ConnectSecondaryBeamService.Erase(objIDs);
                     }
-                    foreach (var beam in mainBeams)
-                    {
-                        //beam.Layer = layerName;
-                        beam.ColorIndex = 130;
-                        HostApplicationServices.WorkingDatabase.AddToModelSpace(beam);
-                    }
+
                 }
                 else if (UserChoice == "地下室中板")
                 {
+                    //导入次梁文字图层
+                    ImportService.ImportSecondaryBeamInfo();
+
                     //获取次梁线
-                    var secondaryBeamLine = getPrimitivesService.GetSecondaryBeamLine(polyline);
+                    var secondaryBeamLine = getPrimitivesService.GetSecondaryBeamLine(polyline, out ObjectIdCollection SecondaryBeamobjIDs);
                     ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(secondaryBeamLine.Select(o => o.ExtendLine(100)).ToCollection());
+                    var beamLineForSecondaryBeam = beamLine.Where(o => spatialIndex.SelectFence(o).Count > 0).ToList();
+                    var beamLineForOwner = beamLine.Except(beamLineForSecondaryBeam).ToList();
 
-                    var beamLineForOwner = beamLine.Where(o => spatialIndex.SelectFence(o).Count > 0).ToList();
-                    var beamLineForSecondaryBeam = beamLine.Except(beamLineForOwner).ToList();
-                    BuildMainBeam buildMainBeam = new BuildMainBeam(beamLineForOwner, beamLineForSecondaryBeam, intersectCollection);
-                    var mainBeams = buildMainBeam.Build(result.StringResult);
-                    if (beamLine.Count * 2 == mainBeams.Count)
-                    {
-                        //理论上 双线是原本单线的二倍
-                        //还要执行完后把原本主梁线删除，测试阶段暂时先不处理
-                    }
+                    ThBuildBeam buildMainBeam = new ThBuildBeam(beamLineForOwner, beamLineForSecondaryBeam, secondaryBeamLine, intersectCollection);
+                    var beams = buildMainBeam.build(UserChoice);
 
-                    BuildSecondaryBeam buildSecondaryBeam = new BuildSecondaryBeam(secondaryBeamLine, mainBeams.ToCollection());
-                    var secondartBeams = buildSecondaryBeam.Build();
-                    if (secondaryBeamLine.Count * 2 == secondartBeams.Count)
+                    if (beamLine.Count + secondaryBeamLine.Count == beams.Count)
                     {
-                        //理论上 双线是原本单线的二倍
-                        //还要执行完后把原本次梁线删除，测试阶段暂时先不处理
+                        List<ObjectIdList> Groups = new List<ObjectIdList>();
+                        foreach (var beam in beams)
+                        {
+                            List<Entity> entities = new List<Entity>();
+                            entities.Add(beam.Key.Item1);
+                            entities.Add(beam.Key.Item2);
+                            entities.Add(beam.Value);
+                            var groupIds = ConnectSecondaryBeamService.InsertEntity(entities);
+                            Groups.Add(groupIds);
+                        }
+
+                        //打组
+                        if (CreatGroup)
+                        {
+                            Groups.ForEach(g => GroupTools.CreateGroup(acad.Database, Guid.NewGuid().ToString(), g));
+                        }
+                        //删掉旧线
+                        ConnectSecondaryBeamService.Erase(objIDs);
+                        ConnectSecondaryBeamService.Erase(SecondaryBeamobjIDs);
                     }
                 }
             }

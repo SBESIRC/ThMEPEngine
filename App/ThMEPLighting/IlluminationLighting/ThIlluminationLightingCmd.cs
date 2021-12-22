@@ -16,8 +16,9 @@ using Linq2Acad;
 
 using ThMEPEngineCore.Command;
 
-using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.FireAlarmArea;
 using ThMEPElectrical.FireAlarmArea.Data;
 
 using ThMEPLighting.Lighting.ViewModels;
@@ -140,7 +141,7 @@ namespace ThMEPLighting.IlluminationLighting
 
                 var layoutParameter = new ThAFASIlluminationLayoutParameter();
                 layoutParameter.Scale = _scale;
-                layoutParameter.AisleAreaThreshold = 0.025;
+                layoutParameter.AisleAreaThreshold = ThFaSmokeCommon.AisleAreaThreshold;
                 layoutParameter.BlkNameN = layoutBlkNameN;
                 layoutParameter.BlkNameE = layoutBlkNameE;
                 layoutParameter.radiusN = _radiusN;

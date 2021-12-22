@@ -196,7 +196,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var n = 0;
                     for (; n < lineList.Count; n++)
                     {
-                        var angleChecker = Math.Abs(lineList[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.98;
+                        var angleChecker = Math.Abs(lineList[n].LineDirection().DotProduct(newLine.LineDirection())) > 0.998;
                         // 如果存在两条线段overlap，则退出循环
                         if(angleChecker 
                             && newLine.DistanceTo(lineList[n].StartPoint, false) < 1.0 
@@ -253,6 +253,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 return;
             }
 
+            //pts = pts.OrderBy(pt => pt.X).ToList();
+
             var lineList = new List<Line>();
             groupList.ForEach(o => lineList.AddRange(o.Value));
 
@@ -268,7 +270,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var n = 0;
                         for (; n < lineList.Count; n++)
                         {
-                            var angleChecker = Math.Abs(lineList[n].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
+                            var angleChecker = Math.Abs(lineList[n].LineDirection().DotProduct(newLine.LineDirection())) > 0.998;
                             // 如果存在两条线段overlap，则退出循环
                             if (angleChecker
                                 && (lineList[n].DistanceTo(reduceLine.StartPoint, false) < 1.0
@@ -360,6 +362,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 for (int j = net.ptsGraph.Count - 1; j >= 0; j--)
                 {
                     var convex = GraphConvexHull(net, j);
+                    if(convex.Area < 1.0)
+                    {
+                        continue;
+                    }
                     //DrawUtils.ShowGeometry(convex, string.Format("l4Convex{0}-{1}", i, j), i % 7, 30);
 
                     var containby = convexList.Where(x => x.Contains(convex));
@@ -383,18 +389,32 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             var convexPl = new Polyline();
             var netI = net.GetGraphPts(graphIdx);
+            if(netI.Count < 3)
+            {
+                return new Polyline();
+            }
+
             var netI2d = netI.Select(x => x.ToPoint2d()).ToList();
             //netI.ForEach(x => DrawUtils.ShowGeometry(x, "l4ConvexPts", 42, 30));
 
-            var convex = netI2d.GetConvexHull();
-
-            for (int j = 0; j < convex.Count; j++)
+            if(netI2d.Select(o => o.X).Distinct().Count() > 1 && netI2d.Select(o => o.Y).Distinct().Count() > 1)
             {
-                convexPl.AddVertexAt(convexPl.NumberOfVertices, convex.ElementAt(j), 0, 0, 0);
-            }
-            convexPl.Closed = true;
+                var convex = netI2d.GetConvexHull();
+                for (int j = 0; j < convex.Count; j++)
+                {
+                    convexPl.AddVertexAt(convexPl.NumberOfVertices, convex.ElementAt(j), 0, 0, 0);
+                }
+                convexPl.Closed = true;
 
-            return convexPl;
+                return convexPl;
+            }
+            else
+            {
+                netI = netI.OrderBy(pt => pt.X).ThenBy(pt => pt.Y).ToList();
+                var longLine = new Line(netI.First(), netI[netI.Count - 1]);
+                return longLine.Buffer(1.0);
+            }
+                
         }
 
         /// <summary>
@@ -606,15 +626,18 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="tol"></param>
         /// <param name="closePt"></param>
         /// <returns></returns>
-        public  static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList)
+        public  static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList, bool extend = false)
         {
             ptList = new List<Point3d>();
             for (int i = 0; i < subMainPipe.Count; i++)
             {
                 var closePt = subMainPipe[i].GetClosestPointTo(pt, false);
-                if (Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].Delta.GetNormal())) > 0.005)
+                if (Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].LineDirection())) > 0.05)
                 {
-                    continue;
+                    if(!extend || Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].LineDirection())) < 0.998)
+                    {
+                        continue;
+                    }
                 }
                 var dist = closePt.DistanceTo(pt);
                 if(dist < tol)
@@ -636,7 +659,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
         private static Line LineExtend(Line line)
         {
-            return new Line(line.StartPoint, line.StartPoint + line.Delta.GetNormal() * (line.Length + 0.9));
+            return new Line(line.StartPoint, line.StartPoint + line.LineDirection() * (line.Length + 0.9));
         }
     }
 }

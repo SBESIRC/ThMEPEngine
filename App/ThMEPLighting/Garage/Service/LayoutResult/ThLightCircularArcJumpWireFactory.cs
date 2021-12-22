@@ -250,9 +250,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var endPt = startEndPt.Item2;
             var initOffsetDir = startPt.GetVectorTo(endPt).GetPerpendicularVector();
             var shortRes = Shorten(startPt, endPt, LightLinkShortenDis);
-            if(CheckLightLinkConflictedSideLines(shortRes.Item1, shortRes.Item2, 1.0) == false)
+            var detectArc1 = DrawArc(shortRes.Item1, shortRes.Item2, initOffsetDir);
+            var detectArc2 = DrawArc(shortRes.Item1, shortRes.Item2, initOffsetDir.Negate());
+            if (CheckLightLinkConflictedSideLines(detectArc1, 1.0) == false)
             {
-                lightNodeLink.JumpWires.Add(DrawArc(startPt,endPt, initOffsetDir));
+                lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir));
+            }
+            else if (CheckLightLinkConflictedSideLines(detectArc2, 1.0) == false)
+            {
+                lightNodeLink.JumpWires.Add(DrawArc(startPt, endPt, initOffsetDir.Negate()));
             }
             else 
             {

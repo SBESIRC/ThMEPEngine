@@ -1,20 +1,10 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AcHelper.Commands;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using ThCADCore.NTS;
-using ThCADExtension;
-using AcHelper;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
-using ThMEPEngineCore.Service;
 using NFox.Cad;
+using AcHelper;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils
 {
@@ -31,7 +21,6 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             {
                 if (group.Key is Polyline newHouseOutline)
                 {
-                    newHouseOutline.Closed = true;
                     if (!outlineWalls.ContainsKey(newHouseOutline))
                     {
                         outlineWalls.Add(newHouseOutline, new HashSet<Polyline>());
@@ -40,7 +29,6 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                     {
                         if (wall is Polyline newPolyline)
                         {
-                            newPolyline.Closed = true;
                             if (!outlineWalls[newHouseOutline].Contains(newPolyline))
                             {
                                 outlineWalls[newHouseOutline].Add(newPolyline);
@@ -64,11 +52,6 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
                 var objs = o.Value.ToCollection();
                 var newObjs = objs.UnionPolygons();
                 var inners = newObjs.OfType<Polyline>().ToHashSet();
-                //result.Add(o.Key, new HashSet<Polyline>());
-                //foreach(var inner in inners)
-                //{
-                //    result[o.Key].Add(inner.DPSimplify(1));
-                //}
                 result.Add(o.Key, inners);
             });
             return result;

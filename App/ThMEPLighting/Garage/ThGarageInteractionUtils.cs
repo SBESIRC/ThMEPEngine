@@ -1,27 +1,32 @@
-﻿using AcHelper;
+﻿using System.Linq;
+using System.Collections.Generic;
+using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Garage.Model;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service.LayoutPoint;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage
 {
     public static class ThGarageInteractionUtils
     {
         private const double ArcTesslateLength = 10.0;
+        private const double SmallAreaTolerance = 1.0;
+        private const double FrameArcTesslateLength = 1000.0; // 防火分区,或车道线分区等
+        private const double FrameExtendLength = 1000.0; // 防火分区,或车道线分区等
         public static List<ThRegionBorder> GetFireRegionBorders(List<string> laneLineLayers)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
@@ -142,17 +147,27 @@ namespace ThMEPLighting.Garage
                     psr.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
+                        
                         var newBorder = ThMEPFrameService.NormalizeEx(border);
                         if(newBorder.Area>1.0)
                         {
                             results.Add(newBorder);
+                        }
+                        else
+                        {
+                            // 进一步处理
+                            newBorder = ThMEPFrameService.Rebuild(border, FrameExtendLength, FrameArcTesslateLength);
+                            if(newBorder.Area > 1.0)
+                            {
+                                results.Add(newBorder);
+                            }
                         }
                     });
                 }
                 return results;
             }
         }
-            
+
         private static DBObjectCollection GetCenterLines(AcadDatabase acdb)
         {
             // 中心线(线槽)
@@ -337,7 +352,7 @@ namespace ThMEPLighting.Garage
         public static void SetDatabaseDefaults(this ThCableTrayParameter cableTrayParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 var centerLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.CenterLineParameter.LineType));
                 var laneLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(cableTrayParameter.LaneLineBlockParameter.LineType));
@@ -380,7 +395,7 @@ namespace ThMEPLighting.Garage
         public static void SetDatabaseDefaults(this ThLightArrangeParameter arrangeParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(arrangeParameter.LightNumberTextStyle), false);

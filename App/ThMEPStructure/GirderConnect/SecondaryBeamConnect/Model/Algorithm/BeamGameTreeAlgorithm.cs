@@ -180,7 +180,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
             List<Scoreboard> NewScoreboards = new List<Scoreboard>();
             var nation = Nations[round];
             var LowScore = Evaluation(nation.Players) - Percentage - nation.Players.Count * 5;
-            if (scoreboards.Count > 10)
+            if (scoreboards.Count > 10 || Nodes.Count > 50)
             {
                 LowScore += 20;//为了使算法尽快的跳出来，所以拔高最低分数，
             }
@@ -226,10 +226,10 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm
         /// <param name="scoreboard"></param>
         private void PlayChess(Scoreboard currentBoard, int lowScore, int stage, ref List<Scoreboard> scoreboard)
         {
-            if (scoreboard.Count <= 200 && Array.IndexOf(currentBoard.board, 0) >= 0)
+            if (scoreboard.Count <= 50 && Array.IndexOf(currentBoard.board, 0) >= 0)
             {
                 List<BeamGamePlayer> permissionPlayer = Nations[stage - 1].Players;
-                if(permissionPlayer.Count == 1 && scoreboard.Count > 50)
+                if ((permissionPlayer.Count == 1 || Nodes.Count > 50) && scoreboard.Count > 36)
                 {
                     return;
                 }

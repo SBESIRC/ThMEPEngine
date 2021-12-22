@@ -115,7 +115,14 @@ namespace Autodesk.AutoCAD.DatabaseServices
         /// <returns></returns>
         public static ObjectIdCollection ToObjectIdCollection(this IEnumerable<ObjectId> source)
         {
-            return new ObjectIdCollection(source.ToArray());
+            if (source.Any())
+            {
+                return new ObjectIdCollection(source.ToArray());
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
         }
 
         /// <summary>

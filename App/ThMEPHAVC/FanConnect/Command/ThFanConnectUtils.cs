@@ -428,7 +428,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     }
                 }
             }
-
+        }
+        public static bool IsContains(Line l1, Line l2)
+        {
+            var box = l1.ExtendLine(10).Buffer(10);
+            if (box.Contains(l2.StartPoint) && box.Contains(l2.EndPoint))
+            {
+                return true;
+            }
+            return false;
         }
         public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Point3d pt)
         {
@@ -464,17 +472,5 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
             }
         }
-
-        public static bool IsContains(Line l1,Line l2)
-        {
-            var box = l1.ExtendLine(10).Buffer(10);
-            if(box.Contains(l2.StartPoint) && box.Contains(l2.EndPoint))
-            {
-                return true;
-            }
-            return false;
-        }
-
-        
     }
 }

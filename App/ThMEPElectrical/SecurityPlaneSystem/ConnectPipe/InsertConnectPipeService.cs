@@ -11,7 +11,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
         {
             List<Line> reLines = new List<Line>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalSecurityPlaneDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), true);
                 acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(lineType), true);

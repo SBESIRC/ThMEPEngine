@@ -92,6 +92,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// </summary>
         protected List<Point3d> CrossInstallPoints { get; set; } = new List<Point3d>();
         protected double CrossInstallPtStep = 300.0;
+        protected const double LinkArcTesslateLength = 500.0; 
         protected double LightLinkShortenDis = 10.0; // 用于把连接两个灯直线的线内缩，查询是否与其它灯线相交
         public LightWireFactory()
         {
@@ -308,12 +309,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private Point3d? CalculateRandomInstallPt(Point3d start, Point3d intersPt, double step)
         {
             var vec = intersPt.GetVectorTo(start);
+            var penpendVec = vec.GetPerpendicularVector();
             double distance = step;
             var pts = new List<Point3d>();
             while (distance <= intersPt.DistanceTo(start) / 2.0)
             {
                 pts.Add(intersPt.GetExtentPoint(vec, distance));
                 distance += step;
+            }
+            for(int i=1;i<=2;i++)
+            {
+                pts.Add(intersPt.GetExtentPoint(penpendVec, step*i));
+                pts.Add(intersPt.GetExtentPoint(penpendVec.Negate(), step * i));
             }
             foreach (Point3d pt in pts)
             {
@@ -390,6 +397,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         protected bool CheckLightLinkConflictedSideLines(Point3d startPt, Point3d endPt, double width)
         {
             var envelop = ThDrawTool.ToOutline(startPt, endPt, width);
+            return QuerySideLines(envelop).Count > 0;
+        }
+        protected bool CheckLightLinkConflictedSideLines(Arc arc, double width)
+        {
+            var polyArc = arc.TessellateArcWithArc(LinkArcTesslateLength);
+            var envelop = polyArc.BufferPath(width,false);
             return QuerySideLines(envelop).Count > 0;
         }
     }

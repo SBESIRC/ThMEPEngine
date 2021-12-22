@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,9 +66,10 @@ namespace ThMEPArchitecture.PartitionLayout
             return;
         }
 
-        public static List<Line> DivideLineByLength(Line line,double length)
+        public static List<Line> DivideLineByLength(Line line, double length)
         {
             int count = ((int)Math.Floor(line.Length / length));
+            if (count == 0) return new List<Line>() { line };
             List<Line> res = new List<Line>();
             Line a = LineSDL(line.StartPoint, Vector(line), length);
             for (int i = 0; i < count; i++)
@@ -424,7 +426,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 var param = verts.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e, pl)).ToList();
                 points.Insert(0, verts.First());
                 points.Add(verts.Last());
-                points = RemoveDuplicatePts(points);
+                points = RemoveDuplicatePts(points,1);
+                points=points.Distinct().ToList();
                 SortAlongCurve(points, pl);
                 param.RemoveAt(0);
                 param.RemoveAt(param.Count - 1);
@@ -495,14 +498,26 @@ namespace ThMEPArchitecture.PartitionLayout
             foreach (var p in pls)
             {
                 if (p.Area < 1) continue;
-                var pp = p.Clone() as Polyline;
-                pp.TransformBy(Matrix3d.Scaling(0.99, pp.Centroid()));
-                if (pp.IsPointIn(pt))
+                if (p.IsPointIn(pt))
                 {
-                    pp.Dispose();
                     return true;
                 }
-                pp.Dispose();
+            }
+            return false;
+        }
+
+        public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes)
+        {
+            foreach (var p in boxes)
+            {
+                if (p.Area < 1) continue;
+                p.TransformBy(Matrix3d.Scaling(0.99, p.GetRecCentroid()));
+                if (p.GeometricExtents.IsPointIn(pt))
+                {
+                    p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
+                    return true;
+                }
+                p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
             }
             return false;
         }
@@ -572,6 +587,26 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return res;
         }
+
+        public static double ClosestPointInVertCurves(Point3d pt, Line line, List<Line> crvss)
+        {
+            var crvs = crvss.Where(e => IsPerpLine(line, e)).ToList();
+            if (crvs.Count == 0) return 0;
+            var p = crvs[0].GetClosestPointTo(pt, false);
+            var res = p.DistanceTo(pt);
+            if (crvs.Count == 1) return res;
+            for (int i = 1; i < crvs.Count; i++)
+            {
+                var pc = crvs[i].GetClosestPointTo(pt, false);
+                var d = pc.DistanceTo(pt);
+                if (d < res)
+                {
+                    res = d;
+                }
+            }
+            return res;
+        }
+
 
         public static double ClosestPointInCurves(Point3d pt, List<Polyline> crvs)
         {

@@ -17,6 +17,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
+using ThMEPStructure.GirderConnect.Service;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -66,16 +67,16 @@ namespace ThMEPStructure.GirderConnect.Command
                     Polyline polyline = pts.CreatePolyline();
                     originTransformer.Transform(polyline);
                     //获取主梁线和边框线
-                    var beamLine = getPrimitivesService.GetBeamLine(polyline);
+                    var beamLine = getPrimitivesService.GetBeamLine(polyline , out ObjectIdCollection objs);
                     var wallBound = getPrimitivesService.GetWallBound(polyline);
                     beamLine = beamLine.Union(wallBound).ToList();
                     var houseBound = getPrimitivesService.GetHouseBound(polyline);
 
+                    //导入图层
+                    ImportService.ImportSecondaryBeamInfo();
+
                     //次梁计算
                     var SecondaryBeamLines = ConnectSecondaryBeamService.ConnectSecondaryBeam(beamLine, houseBound);
-
-                    //创建图层
-                    ConnectSecondaryBeamService.CreateSecondaryBeamLineLayer(acad.Database);
 
                     //写入次梁
                     var collection = SecondaryBeamLines.ToCollection();

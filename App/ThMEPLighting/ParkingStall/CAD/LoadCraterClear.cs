@@ -19,7 +19,7 @@ namespace ThMEPLighting.ParkingStall.CAD
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             {
-                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingEmgLightDwgPath(), DwgOpenMode.ReadOnly, false))
+                using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
                     foreach (var item in layerNames)
                     {

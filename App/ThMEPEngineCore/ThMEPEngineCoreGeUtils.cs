@@ -73,5 +73,51 @@ namespace ThMEPEngineCore
 
             return shrinkedArea / originalArea < threshold;
         }
+
+        /// <summary>
+        /// 内缩外扩判断区域是不是走廊
+        /// threshold:非走廊区域面积占全面积百分比
+        /// </summary>
+        /// <param name="areaPolygon"></param>
+        /// <param name="shrinkValue"></param>
+        /// <param name="threshold"></param>
+        /// <returns></returns>
+        public static bool IsAisleBufferShrinkFrame(Geometry areaPolygon, double shrinkValue = 3600, double threshold = 0.1)
+        {
+            var isAisle = true;
+
+            var originalArea = areaPolygon.Area;
+            var shrinkedGeom = areaPolygon.Buffer(-shrinkValue);
+            var shrinkedArea = shrinkedGeom.Area;
+            //var objs2 = shrinkedGeom.ToDbCollection();
+            //foreach (var obj in objs2)
+            //{
+            //    if (obj is Entity pl)
+            //    {
+            //        ThMEPEngineCore.AreaLayout.CenterLineLayout.DrawUtils.ShowGeometry(pl, "l1shrink", 2);
+            //    }
+            //}
+
+            var bufferShrink = shrinkedGeom.Buffer(shrinkValue);
+            var bufferShrinkArea = bufferShrink.Area;
+            //var objs3 = bufferShrink.ToDbCollection();
+            //foreach (var obj in objs3)
+            //{
+            //    if (obj is Entity pl)
+            //    {
+            //        ThMEPEngineCore.AreaLayout.CenterLineLayout.DrawUtils.ShowGeometry(pl, "l2bufferShrink", 3);
+            //    }
+            //}
+
+            var shrinkAreaPer = shrinkedArea / originalArea;
+            var bufferShrinkAreaPer = bufferShrinkArea / originalArea;
+
+            if (bufferShrinkAreaPer >= threshold)
+            {
+                isAisle = false;
+            }
+
+            return isAisle;
+        }
     }
 }

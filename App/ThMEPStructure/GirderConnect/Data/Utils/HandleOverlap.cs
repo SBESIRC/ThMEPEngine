@@ -1,11 +1,8 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Service;
 
 namespace ThMEPStructure.GirderConnect.Data.Utils

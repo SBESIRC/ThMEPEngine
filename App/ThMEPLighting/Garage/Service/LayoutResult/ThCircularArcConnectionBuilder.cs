@@ -51,11 +51,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             avoidService.Avoid();
             Wires = avoidService.Results;
 
-            // 创建连接线，按照灯长度把灯所在的边打断
-            var linkWireObjs = CreateLinkWire();
-            linkWireObjs = FilerLinkWire(linkWireObjs);
-
-            Wires = Wires.Union(linkWireObjs);
+            // 创建连接线，按照灯长度把灯所在的边打断   
+            var firstEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.EdgePattern==EdgePattern.First).ToList();
+            var secondEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.Second).ToList();
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);
+            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
+            var secondLinkWireObjs = CreateLinkWire(secondEdges);
+            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
+            Wires = Wires.Union(firstLinkWireObjs);
+            Wires = Wires.Union(secondLinkWireObjs);
 
             // 创建灯文字
             NumberTexts = BuildNumberText(

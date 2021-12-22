@@ -1,10 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.ParkingStall.Model;
 using ThMEPLighting.ServiceModels;
 
@@ -14,10 +11,11 @@ namespace ThMEPLighting.ParkingStall.Business.Block
     public class BlockInsertor
     {
         private List<LightPlaceInfo> m_LightPlaceInfos;
-
-        public BlockInsertor(List<LightPlaceInfo> lightPlaceInfos)
+        private ThMEPOriginTransformer m_OriginTransformer;
+        public BlockInsertor(List<LightPlaceInfo> lightPlaceInfos, ThMEPOriginTransformer originTransformer)
         {
             m_LightPlaceInfos = lightPlaceInfos;
+            m_OriginTransformer = originTransformer;
         }
 
         /// <summary>
@@ -25,9 +23,9 @@ namespace ThMEPLighting.ParkingStall.Business.Block
         /// </summary>
         /// <param name="insertPts"></param>
         /// <param name="sensorType"></param>
-        public static void MakeBlockInsert(List<LightPlaceInfo> lightPlaceInfos)
+        public static void MakeBlockInsert(List<LightPlaceInfo> lightPlaceInfos, ThMEPOriginTransformer originTransformer =null)
         {
-            var blockInsertor = new BlockInsertor(lightPlaceInfos);
+            var blockInsertor = new BlockInsertor(lightPlaceInfos, originTransformer);
 
             blockInsertor.Do();
         }
@@ -42,7 +40,15 @@ namespace ThMEPLighting.ParkingStall.Business.Block
                 db.Database.ImportModel(ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, ParkingStallCommon.PARK_LIGHT_LAYER);
                 foreach (var lightInfo in m_LightPlaceInfos)
                 {
-                    lightInfo.InsertBlockId = db.Database.InsertModel(ParkingStallCommon.PARK_LIGHT_LAYER, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, lightInfo.Position, scale, lightInfo.Angle);
+                    var position = lightInfo.Position;
+                    if (null != m_OriginTransformer)
+                        position = m_OriginTransformer.Reset(position);
+                    lightInfo.InsertBlockId = db.Database.InsertModel(
+                        ParkingStallCommon.PARK_LIGHT_LAYER, 
+                        ParkingStallCommon.PARK_LIGHT_BLOCK_NAME,
+                        position, 
+                        scale, 
+                        lightInfo.Angle);
                 }
             }
         }

@@ -28,6 +28,7 @@ namespace ThMEPLighting.ParkingStall.Core
     {
         private Light_Place_Type lightDirection = Light_Place_Type.LONG_EDGE;
         public List<string> ErrorMsgs = new List<string>();
+        private ThMEPOriginTransformer _originTransformer;
         public CommandManager() 
         {
             lightDirection = ThParkingStallService.Instance.LightDirection;
@@ -252,6 +253,8 @@ namespace ThMEPLighting.ParkingStall.Core
                 laneLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
+                    if (_originTransformer != null)
+                        _originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
                 var _lanLineSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
@@ -284,23 +287,6 @@ namespace ThMEPLighting.ParkingStall.Core
                 }
                 return otherLanes;
             }
-            
-
-            //using (var acdb = AcadDatabase.Active())
-            //{
-            //    var objs = new DBObjectCollection();
-            //    var laneLines = acdb.ModelSpace
-            //        .OfType<Curve>()
-            //        .Where(o => o.Layer == ParkingStallCommon.LANELINE_LAYER_NAME);
-            //    laneLines.ForEach(x => objs.Add(x));
-
-            //    //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
-            //    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            //    var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
-                
-            //    //return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
-            //    return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Entity>().ToList().Where(c => c is Curve).Cast<Curve>().ToList()).ToList();
-            //}
         }
 
         public void GenerateLaneGroup()
@@ -384,6 +370,26 @@ namespace ThMEPLighting.ParkingStall.Core
             bool addAlert = false;
             foreach (var polygonInfo in wallPolygonInfos)
             {
+                var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
+                //进行偏移，超远距离处理
+                var pt = polygonInfo.ExternalProfile.StartPoint;
+                _originTransformer = new ThMEPOriginTransformer(pt);
+                var outPLine = (Polyline)polygonInfo.ExternalProfile.Clone();
+                _originTransformer.Transform(outPLine);
+                var innerPLines = new List<Polyline>();
+                if (null != polygonInfo.InnerProfiles && polygonInfo.InnerProfiles.Count > 0)
+                {
+                    foreach (var pl in polygonInfo.InnerProfiles)
+                    {
+                        var copy = (Polyline)pl.Clone();
+                        _originTransformer.Transform(copy);
+                        innerPLines.Add(copy);
+                    }
+                }
+                polygonInfo.ExternalProfile = outPLine;
+                polygonInfo.InnerProfiles = innerPLines;
+
+
                 var curves = GetLanes(polygonInfo.ExternalProfile);
                 if (null == curves || curves.Count < 1)
                 {
@@ -392,7 +398,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 }
                 using (AcadDatabase acdb = AcadDatabase.Active())
                 {
-                    LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, null); 
+                    LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, _originTransformer); 
                 }
                 var lines = new List<Line>();
                 curves.ForEach(e =>
@@ -429,11 +435,17 @@ namespace ThMEPLighting.ParkingStall.Core
                 // 延长的车位线
                 var extendPolys = LaneCentralLineGenerator.MakeLaneCentralPolys(lanePolys, polygonInfo, ParkingStallCommon.LaneLineExtendLength);
 
-                var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
                 var selectRelatedParkProfiles = InfoReader.MakeParkingStallPolys(wallPtCollection);
+                var parkingPLines = new List<Polyline>();
+                foreach (var pl in selectRelatedParkProfiles)
+                {
+                    var copy = (Polyline)pl.Clone();
+                    _originTransformer.Transform(copy);
+                    parkingPLines.Add(copy);
+                }
 
                 // 去除内部的车位信息
-                var validParkProfiles = GenerateValidParkPolys.MakeValidParkPolylines(selectRelatedParkProfiles, polygonInfo.InnerProfiles);
+                var validParkProfiles = GenerateValidParkPolys.MakeValidParkPolylines(parkingPLines, polygonInfo.InnerProfiles);
                 // 分组车位信息处理
                 var parkingRelatedGroups = ParkingGroupGenerator.MakeParkingGroupGenerator(validParkProfiles);
 
@@ -471,7 +483,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 optimzeLightPlaceInfos.Clear();
                 optimzeLightPlaceInfos.AddRange(canInertorGroup);
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
-                BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
+                BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos,_originTransformer);
                 // 生成的灯图层前置
                 if (null == optimzeLightPlaceInfos || optimzeLightPlaceInfos.Count < 1)
                     continue;

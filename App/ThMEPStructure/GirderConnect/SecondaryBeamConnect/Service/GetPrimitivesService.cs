@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Algorithm;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
+using ThMEPStructure.GirderConnect.Data;
 
 namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
 {
@@ -17,48 +18,52 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             this.originTransformer = originTransformer;
         }
 
-        public List<Line> GetBeamLine(Polyline polyline)
+        public List<Line> GetBeamLine(Polyline polyline, out ObjectIdCollection objIDs)
         {
             var allLines = new List<Line>();
+            objIDs = new ObjectIdCollection();
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 var BeamLines = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AI_BEAM")
-                .Where(o => o.Length > 100);//过滤小于10cm的梁
-
+                .Where(o => o.Layer == BeamConfig.MainBeamLayerName);
+                var BeamLineDic = BeamLines.ToDictionary(key => key.Clone() as Line, value => value.Id);
                 var objs = new DBObjectCollection();
-                BeamLines.ForEach(x =>
+                BeamLineDic.ForEach(x =>
                 {
-                    var transCurve = x.Clone() as Line;
+                    var transCurve = x.Key;
                     originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                allLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Line>().ToList();
+                var dbobjs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline);
+                allLines = dbobjs.Cast<Line>().Where(o => o.Length > 100).ToList();//过滤小于10cm的梁
+                objIDs =BeamLineDic.Where(o => dbobjs.Contains(o.Key)).Select(o => o.Value).ToObjectIdCollection();
             }
             return allLines;
         }
 
-        public List<Line> GetSecondaryBeamLine(Polyline polyline)
+        public List<Line> GetSecondaryBeamLine(Polyline polyline, out ObjectIdCollection objIDs)
         {
             var allLines = new List<Line>();
+            objIDs = new ObjectIdCollection();
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 var BeamLines = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AICL_BEAM")
-                .Where(o => o.Length > 100);//过滤小于10cm的梁
-
+                .Where(o => o.Layer == BeamConfig.SecondaryBeamLayerName);
+                var BeamLineDic = BeamLines.ToDictionary(key => key.Clone() as Line, value => value.Id);
                 var objs = new DBObjectCollection();
-                BeamLines.ForEach(x =>
+                BeamLineDic.ForEach(x =>
                 {
-                    var transCurve = x.Clone() as Line;
+                    var transCurve = x.Key;
                     originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                allLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Line>().ToList();
+                var dbobjs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline);
+                allLines = dbobjs.Cast<Line>().Where(o => o.Length > 100).ToList();//过滤小于10cm的梁
+                objIDs =BeamLineDic.Where(o => dbobjs.Contains(o.Key)).Select(o => o.Value).ToObjectIdCollection();
             }
             return allLines;
         }
@@ -70,7 +75,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var brinkBeam = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AI_HOUSEBOUND")
+                .Where(o => o.Layer == BeamConfig.HouseBoundLayerName)
                 .Where(o => o.Length > 100);//过滤小于10cm的梁
 
                 var objs = new DBObjectCollection();
@@ -93,7 +98,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
             {
                 var WallBounds = acad.ModelSpace
                 .OfType<Line>()
-                .Where(o => o.Layer == "TH_AI_WALLBOUND")
+                .Where(o => o.Layer == BeamConfig.WallBoundLayerName)
                 .Where(o => o.Length > 100);//过滤小于10cm的梁
 
                 var objs = new DBObjectCollection();

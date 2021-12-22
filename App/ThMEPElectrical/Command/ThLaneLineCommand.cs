@@ -41,8 +41,7 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
-                LaneLineLayers = pr.StringResult.Split(',').ToList();
-
+                LaneLineLayers = pr.StringResult.Split(',').Where(o => !string.IsNullOrEmpty(o)).ToList();
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -52,7 +51,6 @@ namespace ThMEPElectrical.Command
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Polyline)).DxfName,
-
                 };
                 var filterlist = OpFilter.Bulid(o =>
                     o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames)

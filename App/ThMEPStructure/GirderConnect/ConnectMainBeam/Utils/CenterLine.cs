@@ -1,18 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-
+using System.Collections.Generic;
+using NFox.Cad;
+using AcHelper;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using ThCADCore.NTS;
-using Linq2Acad;
-using AcHelper;
-using Autodesk.AutoCAD.EditorInput;
 using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Algorithm;
-using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -117,7 +113,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     if (edgPts[pt] != 2)
                     {
                         lines.Add(new Line(node.Key, pt));
-                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(new Line(node.Key, pt));//show line
                     }
                 }
             }
@@ -203,7 +198,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     edgPts[node.Key] = 3;
                     //ShowInfo.ShowPointAsO(node.Key, 130, 14.159265 * 2);//请勿删除
-
                     crossPt.Add(node.Key);
                     ++bigPtCnt;
                 }
@@ -346,7 +340,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             {
                 objs.Add(polyline);
             }
-            //ThMEPEngineCoreLayerUtils.CreateAICenterLineLayer(acadDatabase.Database);
             objs.BuildArea()
                 .OfType<Entity>()
                 .ForEach(e =>

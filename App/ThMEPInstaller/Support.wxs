@@ -3,12 +3,6 @@
     <?include Variable.wxi ?>
     <Fragment>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support">
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" Guid="{709830D4-071F-4060-A5D8-0FDF02030EB5}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_Broadcast" Source="$(var.AutoloaderContentsPath)\Support\消防应急广播.dwg" KeyPath="yes" />
-            </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" Guid="{D8BBCB17-68E6-4898-A97E-D7D4DC8DC032}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_Sensor" Source="$(var.AutoloaderContentsPath)\Support\烟感温感图块.dwg" KeyPath="yes" />
-            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Spray" Guid="{3672DEE5-E3ED-4E05-BCF6-7ED249249922}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Spray" Source="$(var.AutoloaderContentsPath)\Support\给排水.喷淋.dwg" KeyPath="yes" />
             </Component>
@@ -18,32 +12,20 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" Guid="{125C830F-C903-45DB-AEDD-D364A43FEBA8}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Pipe" Source="$(var.AutoloaderContentsPath)\Support\暖通图层图块.dwg" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" Guid="{4484A7C6-7202-4B4D-9180-89684485FEA4}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_LaneLineLight" Source="$(var.AutoloaderContentsPath)\Support\车道灯图块.dwg" KeyPath="yes" />
+            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Electrical" Guid="{C0AFA11E-94F6-48DA-9D8F-A79C54E992E7}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Block_Electrical" Source="$(var.AutoloaderContentsPath)\Support\电气图层图块.dwg" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Structure" Guid="{1748CAE0-4CE9-45B6-AF0C-89622D77B60A}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Block_Structure" Source="$(var.AutoloaderContentsPath)\Support\结构图层图块.dwg" KeyPath="yes" />
             </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" Guid="{8EF2BF90-0220-4317-9722-5BDF61C8FE28}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_EmergencyLight" Source="$(var.AutoloaderContentsPath)\Support\地库应急照明图块.dwg" KeyPath="yes" />
-            </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_EvacuationLight" Guid="{50401006-C41B-40C3-A0D2-6111794E616A}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_EvacuationLight" Source="$(var.AutoloaderContentsPath)\Support\疏散指示灯图块.dwg" KeyPath="yes" />
-            </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{929F2B38-CF52-47B0-B4CE-209121205824}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\提电气块转换配置表.dwg" KeyPath="yes" />
-            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion_Table" Guid="{FA3F8351-30BA-4B0A-A0CC-B3D9B066BE8A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion_Table" Source="$(var.AutoloaderContentsPath)\Support\提资转换配置表.xlsx" KeyPath="yes" />
             </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" Guid="{937CF1FE-CCA4-4BDA-9F34-C15721D7411D}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_AFAS" Source="$(var.AutoloaderContentsPath)\Support\火灾自动报警系统图例.dwg" KeyPath="yes" />
-            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" Guid="{43833F2E-6239-4C90-A71E-61903B3F7A2A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Block_HVAC" Source="$(var.AutoloaderContentsPath)\Support\地上给水排水平面图模板.dwg" KeyPath="yes" />
-            </Component>
-            <Component Id="CMP_Autoloader_PackageContents_Support_Block_Security" Guid="{2FAEE441-5663-458F-8CC4-6446F00BACA7}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_Block_Security" Source="$(var.AutoloaderContentsPath)\Support\安防图例模板.dwg" KeyPath="yes" />
             </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Guid="{A21AD44A-402A-4739-94C6-9EA6524A9013}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Source="$(var.AutoloaderContentsPath)\Support\离心风机选型.json" KeyPath="yes" />
@@ -142,16 +124,10 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Structure" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Electrical" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Security" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EvacuationLight" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />

@@ -63,5 +63,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return 0;//斜线输出 0
         }
+
+        public static bool EqualsTo(this Line line1, Line line2, double tor = 1.0)
+        {
+            var spt1 = line1.StartPoint;
+            var ept1 = line1.EndPoint;
+            var spt2 = line2.StartPoint;
+            var ept2 = line2.EndPoint;
+            if (spt1.DistanceTo(spt2) < tor && ept2.DistanceTo(ept2) < tor)
+            {
+                return true;
+            }
+            if (spt1.DistanceTo(ept2) < tor && spt2.DistanceTo(ept1) < tor)
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }
