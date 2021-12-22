@@ -51,9 +51,17 @@ namespace ThMEPEngineCore.Engine
                         //  将矩形柱转化成2d Solid，缩放后再转回多段线
                         if (poly.NumberOfVertices <= 5)
                         {
-                            var solid = poly.ToSolid();
-                            solid.TransformBy(matrix);
-                            curves.Add(solid.ToPolyline());
+                            if (poly.NumberOfVertices > 2)
+                            {
+                                var solid = poly.ToSolid();
+                                solid.TransformBy(matrix);
+                                curves.Add(solid.ToPolyline());
+                            }
+                            else
+                            {
+                                // 发现hatch生成的Boundaries中有顶点数为2的Polyline
+                                return;
+                            }
                         }
                         else
                         {
