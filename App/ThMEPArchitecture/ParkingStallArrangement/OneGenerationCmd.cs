@@ -98,7 +98,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-#if DEBUG
+
                 string w = "";
                 string l = "";
                 foreach (var e in walls)
@@ -111,8 +111,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
                         + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
                 }
-
-
+#if DEBUG
                 FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
                 StreamWriter sw = new StreamWriter(fs1);
                 sw.WriteLine(w);
@@ -123,9 +122,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 inilanes = inilanes.Distinct().ToList();
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                partition.ProcessAndDisplay(layerNames, 30);
+                try
+                {
+                    partition.ProcessAndDisplay(layerNames, 30);
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
             }
-            
+
         }
 
         private static Point3dCollection SelectAreas()
