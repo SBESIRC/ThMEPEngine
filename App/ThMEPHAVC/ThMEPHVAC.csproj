@@ -35,6 +35,16 @@
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
     <Compile Include="FanConnect\Service\ThAddValveServiece.cs" />
+    <Compile Include="FanPipeAlgorithm\data_process.cs" />
+    <Compile Include="FanPipeAlgorithm\edge.cs" />
+    <Compile Include="FanPipeAlgorithm\FPAgraph.cs" />
+    <Compile Include="FanPipeAlgorithm\node.cs" />
+    <Compile Include="FanPipeAlgorithm\PublicValue.cs" />
+    <Compile Include="FanPipeAlgorithm\run.cs" />
+    <Compile Include="FanPipeAlgorithm\single_graph.cs" />
+    <Compile Include="FanPipeAlgorithm\test.cs" />
+    <Compile Include="FanPipeAlgorithm\tool.cs" />
+    <Compile Include="FanPipeAlgorithm\total_graph.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
