@@ -89,7 +89,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 directionList.Add(num, flag);//默认给全横向
             }
 
-
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
             var geneAlgorithm = new GA2(gaPara);
          

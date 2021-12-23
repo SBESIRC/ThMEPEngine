@@ -99,15 +99,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
+            bool recordprevious = false;
             try
             {
-                rst = geneAlgorithm.Run(histories);
+                rst = geneAlgorithm.Run(histories, recordprevious);
             }
             catch
             {
 
             }
-
             var solution = rst.First();
             histories.Add(rst.First());
             for (int k = 0; k < histories.Count; k++)

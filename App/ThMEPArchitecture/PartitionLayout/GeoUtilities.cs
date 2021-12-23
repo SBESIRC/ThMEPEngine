@@ -493,8 +493,12 @@ namespace ThMEPArchitecture.PartitionLayout
             return pt_on_a.DistanceTo(pt_on_b);
         }
 
-        public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls)
+        public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
         {
+            if (!allowOnEdge)
+            {
+                if (ClosestPointInCurves(pt, pls) < 1) return false;
+            }
             foreach (var p in pls)
             {
                 if (p.Area < 1) continue;

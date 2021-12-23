@@ -463,7 +463,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     if (curPt.GetPtDir(pts[i]) == secondDir)
                     {
-                        sortPt.Add(curPt);//添加为1分割点
+                        if(sortPt.Count == 0)
+                        {
+                            sortPt.Add(curPt);//添加为1分割点
+                        }
+                        
                         sortPt.Add(pts[i]);//获取最后分割点
                     }
                 }

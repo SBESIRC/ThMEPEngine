@@ -242,7 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return genome;
         }
 
-        public List<Chromosome> Run(List<Chromosome> histories)
+        public List<Chromosome> Run(List<Chromosome> histories, bool recordprevious)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
@@ -263,7 +263,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var curIteration = 0;
                 int maxCount = 0;
                 int maxNums = 0;
-
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
@@ -272,7 +271,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     //Active.Editor.WriteMessage(strCurIterIndex);
                     Logger?.Information(strCurIterIndex);
                     selected = Selection(pop, out int curNums);
-                    histories.Add(selected.First());
+                    if (recordprevious)
+                    {
+                        histories.Add(selected.First());
+                    }
                     if (maxNums == curNums)
                     {
                         maxCount++;
