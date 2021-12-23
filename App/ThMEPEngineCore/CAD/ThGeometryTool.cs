@@ -137,16 +137,22 @@ namespace ThMEPEngineCore.CAD
                 Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, dBText.Normal, dBText.Position);
                 DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
 
-                Polyline obb = newText.GeometricExtents.ToRectangle();
-                Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
-                obb.TransformBy(counterClockwiseMat);
-                return obb;
+                if(newText.GeometricExtents!=null)
+                {
+                    Polyline obb = newText.GeometricExtents.ToRectangle();
+                    Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
+                    obb.TransformBy(counterClockwiseMat);
+                    return obb;
+                }
+                else
+                {
+                    return new Polyline();
+                }
             }
             catch
             {
                 //
             }
-
             return new Polyline();
         }
         public static Polyline TextOBB(this MText mText)
@@ -165,7 +171,10 @@ namespace ThMEPEngineCore.CAD
             var extents = new Extents3d();
             objs.Cast<DBText>().ForEach(o =>
             {
-                extents.AddExtents(o.GeometricExtents);
+                if(o.GeometricExtents!=null)
+                {
+                    extents.AddExtents(o.GeometricExtents);
+                }
             });
             var obb = extents.ToRectangle();
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(ang, mText.Normal, mText.Location);
