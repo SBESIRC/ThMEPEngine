@@ -757,7 +757,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             start_graph = new graph(real_end_points, real_start_point, total_wall, this.hole_wall);
 
    
-            print_graph();
+            //print_graph();
             find_farthest_room();
 
 
