@@ -311,6 +311,8 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
                 <Command Local="THFGLD" Global="THFGLD" />
+                <Command Local="THFJBZ" Global="THFJBZ" />
+                <Command Local="THFJFZ" Global="THFJFZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -321,6 +323,8 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
                 <Command Local="THFGLD" Global="THFGLD" />
+                <Command Local="THFJBZ" Global="THFJBZ" />
+                <Command Local="THFJFZ" Global="THFJFZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -331,6 +335,8 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFJJC" Global="THFJJC" />
                 <Command Local="THFGLD" Global="THFGLD" />
+                <Command Local="THFJBZ" Global="THFJBZ" />
+                <Command Local="THFJFZ" Global="THFJFZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -533,6 +539,7 @@
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
                 <Command Local="THFJGN" Global="THFJGN" />
+                <Command Local="THSNJ" Global="THSNJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -549,6 +556,7 @@
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
                 <Command Local="THFJGN" Global="THFJGN" />
+                <Command Local="THSNJ" Global="THSNJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -565,6 +573,7 @@
                 <Command Local="THSWSZ" Global="THSWSZ" />
                 <Command Local="THFJBH" Global="THFJBH" />
                 <Command Local="THFJGN" Global="THFJGN" />
+                <Command Local="THSNJ" Global="THSNJ" />
             </Commands>
         </ComponentEntry>
     </Components>
