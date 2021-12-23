@@ -54,6 +54,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<Lane> GSingleLanes = new List<Lane>();
         private Polyline NewBound = new Polyline();
         private List<Curve> NewBoundEdges = new List<Curve>();
+        private List<Polyline> PModuleBox = new List<Polyline>();
 
         const double DisLaneWidth = 5500;
         const double DisCarLength = 5100;
@@ -672,6 +673,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 count += curcount;
             }
+            PModuleBox.AddRange(plys);
             result.Bounds = plys;
             result.Count = count;
             result.Lanes = ilanes;
@@ -723,6 +725,7 @@ namespace ThMEPArchitecture.PartitionLayout
             unittest.TransformBy(Matrix3d.Displacement(vec.GetNormal() * MaxDistance));
             var pltest = PolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, unittest.EndPoint, unittest.StartPoint });
             ThCADCoreNTSSpatialIndex sindexwalls = new ThCADCoreNTSSpatialIndex(boundobstacles.ToCollection());
+            sindexwalls.Update(PModuleBox.ToCollection(), new DBObjectCollection());
             var pltestsc = pltest.Clone() as Polyline;
             try
             {

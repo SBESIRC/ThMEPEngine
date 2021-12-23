@@ -56,6 +56,7 @@
     <Compile Include="ParkingStallArrangement\Method\PtTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\GaParameter.cs" />
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
+    <Compile Include="PartitionLayout\PartitionFast.cs" />
     <Compile Include="PartitionLayout\PartitionTestV2.cs" />
     <Compile Include="ParkingStallArrangement\OneGenerationCmd.cs" />
     <Compile Include="PartitionLayout\PartitionV2.cs" />

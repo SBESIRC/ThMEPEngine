@@ -248,44 +248,44 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
                 {
                     
-                    var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
+                    //var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
 
-                    if (bdBoxes.Count == 0)//这个区域没有建筑物
-                    {
-                        SubAreaDic.Add(Convert.ToString(i) + "a", null);
-                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                        {
-                            var sub = subArea[k];
-                            SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
-                        }
-                    }
-                    else
-                    {
-                        var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
-                        var index = 0;
-                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                        {
-                            var sub = subArea[k];
-                            var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
-                            if (rst.Count > 0)//当前子区域包含建筑物
-                            {
-                                SubAreaDic.Add(Convert.ToString(i) + "a", sub);
-                                index = k;
-                                break;
-                            }
-                        }
-                        var curIndex = 1;
-                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                        {
-                            if (k == index)
-                            {
-                                continue;
-                            }
-                            var sub = subArea[k];
-                            SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
-                            curIndex++;
-                        }
-                    }
+                    //if (bdBoxes.Count == 0)//这个区域没有建筑物
+                    //{
+                    //    SubAreaDic.Add(Convert.ToString(i) + "a", null);
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        var sub = subArea[k];
+                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
+                    //    var index = 0;
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        var sub = subArea[k];
+                    //        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
+                    //        if (rst.Count > 0)//当前子区域包含建筑物
+                    //        {
+                    //            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
+                    //            index = k;
+                    //            break;
+                    //        }
+                    //    }
+                    //    var curIndex = 1;
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        if (k == index)
+                    //        {
+                    //            continue;
+                    //        }
+                    //        var sub = subArea[k];
+                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
+                    //        curIndex++;
+                    //    }
+                    //}
                 }
             }
 

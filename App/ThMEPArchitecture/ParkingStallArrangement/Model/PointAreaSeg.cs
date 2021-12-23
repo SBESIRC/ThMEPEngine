@@ -18,23 +18,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public static List<Polyline> PtAreaSeg(Polyline area, List<int> ptIndex, List<int> direction, List<Polyline> building,
             List<Point3d> intersectPt)
         {
-            var pts = new List<Point3d>();
-            for (int i = 0; i < ptIndex.Count; i++)
+            try
             {
-                pts.Add(intersectPt[ptIndex[i]]);//交点提取
+                var pts = new List<Point3d>();
+                for (int i = 0; i < ptIndex.Count; i++)
+                {
+                    pts.Add(intersectPt[ptIndex[i]]);//交点提取
+                }
+                if (ptIndex.Count == 1)
+                {
+                    return Pt1Seg(area, pts[0], direction[0], building);
+                }
+                if (ptIndex.Count == 2)
+                {
+                    return Pt2Seg(area, pts, direction, building);
+                }
+                if (ptIndex.Count == 4)
+                {
+                    return Pt4Seg(area, pts, direction, building);
+                }
             }
-            if (ptIndex.Count == 1)
+            catch (Exception ex)
             {
-                return Pt1Seg(area, pts[0], direction[0], building);
+                ;
             }
-            if (ptIndex.Count == 2)
-            {
-                return Pt2Seg(area, pts, direction, building);
-            }
-            if (ptIndex.Count == 4)
-            {
-                return Pt4Seg(area, pts, direction, building);
-            }
+            
 
             return new List<Polyline>() { area };
         }

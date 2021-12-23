@@ -89,6 +89,42 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return result;
         }
 
+        public int GetMaximumNumberFast(LayoutParameter layoutPara, GaParameter gaPara)
+        {
+            layoutPara.Set(Genome);
+            int result = GetParkingNumsFast(layoutPara);
+            Count = result;
+            return result;
+        }
+
+        private int GetParkingNumsFast(LayoutParameter layoutPara)
+        {
+            int count = 0;
+            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            {
+                int index = layoutPara.AreaNumber[j];
+                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
+                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
+                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
+                layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
+                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
+                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                var obstacles = new List<Polyline>();
+                obstaclesList.ForEach(e => obstacles.AddRange(e));
+                var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
+                PartitionFast partition = new PartitionFast(walls, inilanes, obstacles, bound, buildingBoxes);
+                try
+                {
+                    count += partition.CalCarSpotsFastly();
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
+            }
+            return count;
+        }
+
         private int GetParkingNums(LayoutParameter layoutPara)
         {
             int count = 0;
@@ -425,7 +461,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             Logger?.Information("进行选择");
 
-            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            //inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
 
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;
