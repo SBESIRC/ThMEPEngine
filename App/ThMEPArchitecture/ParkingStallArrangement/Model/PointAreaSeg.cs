@@ -254,7 +254,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (!tmp.Contains(pts[i]))
                     {
                         splitAreas.Remove(tmp);
-                        splitAreas.AddRange(Pt1Seg(tmp, pts[i], directions[i], building));
+                        try
+                        {
+                            splitAreas.AddRange(Pt1Seg(tmp, pts[i], directions[i], building));
+
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
                         break;
                     }
                 }

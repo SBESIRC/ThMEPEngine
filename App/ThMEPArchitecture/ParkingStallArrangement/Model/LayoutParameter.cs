@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
@@ -245,42 +246,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         }
                     }
                 }
-                var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
+                {
+                    
+                    var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
 
-                if (bdBoxes.Count == 0)//这个区域没有建筑物
-                {
-                    SubAreaDic.Add(Convert.ToString(i) + "a", null);
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    if (bdBoxes.Count == 0)//这个区域没有建筑物
                     {
-                        var sub = subArea[k];
-                        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
-                    }
-                }
-                else
-                {
-                    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
-                    var index = 0;
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    {
-                        var sub = subArea[k];
-                        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
-                        if (rst.Count > 0)//当前子区域包含建筑物
+                        SubAreaDic.Add(Convert.ToString(i) + "a", null);
+                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
                         {
-                            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
-                            index = k;
-                            break;
+                            var sub = subArea[k];
+                            SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
                         }
                     }
-                    var curIndex = 1;
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    else
                     {
-                        if (k == index)
+                        var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
+                        var index = 0;
+                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
                         {
-                            continue;
+                            var sub = subArea[k];
+                            var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
+                            if (rst.Count > 0)//当前子区域包含建筑物
+                            {
+                                SubAreaDic.Add(Convert.ToString(i) + "a", sub);
+                                index = k;
+                                break;
+                            }
                         }
-                        var sub = subArea[k];
-                        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
-                        curIndex++;
+                        var curIndex = 1;
+                        for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                        {
+                            if (k == index)
+                            {
+                                continue;
+                            }
+                            var sub = subArea[k];
+                            SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
+                            curIndex++;
+                        }
                     }
                 }
             }
@@ -338,14 +342,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
                 dbObjs.Cast<Entity>()
                     .ForEach(e => segLines.Add(e as Line));
-                if (segLines.Count == 0)
-                {
-                    //using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                    //{
-                    //    acadDatabase.CurrentSpace.Add(area);
-                    //}
-                }
-                
+
             }
             catch(Exception ex)
             {
@@ -359,16 +356,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             lineNums = new List<int>();
             var pts = area.GetPoints();
             var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
+            var areaColl = new List<Polyline>() { area };
+            var areaIndex = new ThCADCoreNTSSpatialIndex(areaColl.ToCollection());
             foreach (var db in dbObjs)
             {
+                
                 var line = db as Line;
-                foreach (var pt in pts)
+                var extendLine = line.ExtendLine(-10.0);
+                
+                var rect = extendLine.Buffer(1.0);
+                var rst = areaIndex.SelectCrossingPolygon(rect);
+                if(rst.Count > 0)
                 {
-                    if (line.GetClosestPointTo(pt, false).DistanceTo(pt) < 1.0)
-                    {
-                        segLines.Add(line);
-                        break;
-                    }
+                    segLines.Add(line);
                 }
             }
             for (int i = 0; i < SegLineIndexDic.Count; i++)
