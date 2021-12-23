@@ -242,6 +242,118 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var targetPt = line.GetClosestPointTo(pt, true);
             return pt.DistanceTo(targetPt);
         }
+
+        public static Line VerticalSeg(ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
+        {
+            double dist = 5000;
+            double laneWidth = 5500;
+            maxVal = 0;
+            minVal = 0;
+            var area = orgAreas.First();//进来就一个区域
+            var orderPts = area.GetPoints().OrderBy(pt => pt.X);
+            var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
+            var left = orderPts.First().X;
+            var right = orderPts.Last().X;
+            var buttom = orderPts2.First().Y - dist;
+            var upper = orderPts2.Last().Y + dist;
+
+            var startX = left;
+            while(startX < right)//直线在框内
+            {
+                var upPt = new Point3d(startX, upper, 0);
+                var buttomPt = new Point3d(startX, buttom, 0);
+                var segLine = new Line(upPt, buttomPt);
+                var segRect = segLine.Buffer(1.0);
+                var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);
+                if(segRectInBuild.Count > 0)
+                {
+                    startX += laneWidth;
+                    continue;//分割线穿墙直接删除
+                }
+                //var areas = new List<Polyline>() { area };
+                if (IsCorrectSegLines(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
+                {
+                    return segLine;
+                }
+                startX += laneWidth;
+            }
+            return null;
+        }
+
+        public static Line HorizontalSeg(ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
+        {
+            double dist = 5000;
+            double laneWidth = 5500;
+            maxVal = 0;
+            minVal = 0;
+            var area = orgAreas.First();//进来就一个区域
+            var orderPts = area.GetPoints().OrderBy(pt => pt.X);
+            var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
+            var left = orderPts.First().X - dist;
+            var right = orderPts.Last().X + dist;
+            var buttom = orderPts2.First().Y;
+            var upper = orderPts2.Last().Y;
+
+            var startX = buttom;
+            while (startX < upper)//直线在框内
+            {
+                var leftPt = new Point3d(left, startX, 0);
+                var rightPt = new Point3d(right, startX, 0);
+                var segLine = new Line(leftPt, rightPt);
+                var segRect = segLine.Buffer(1.0);
+                var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);
+                if (segRectInBuild.Count > 0)
+                {
+                    startX += laneWidth;
+                    continue;//分割线穿墙直接删除
+                }
+                //var areas = new List<Polyline>() { area };
+                if (IsCorrectSegLines(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
+                {
+                    return segLine;
+                }
+                startX += laneWidth;
+            }
+            return null;
+        }
+
+        public static bool IsCorrectSegLines(Line segLine, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
+          out double maxVal, out double minVal)
+        {
+            maxVal = 0;
+            minVal = 0;
+            var area = areas.First();//其实进来也就一个区域
+
+            var segAreas = segLine.Split(area);
+            if(segAreas.Count < 2)
+            {
+                return false;
+            }
+                
+            var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
+            var res = sortedAreas.Take(2);
+            foreach (var segArea in res)
+            {
+                var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
+                if (buildLines.Count == 0)
+                {
+                    return false;//没有建筑物要他作甚
+                }
+                var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                if (segLine.GetValueType(boundPt))
+                {
+                    maxVal = segLine.GetMinDist(boundPt) - 2760;
+                }
+                else
+                {
+                    minVal = -segLine.GetMinDist(boundPt) + 2760;
+                }
+            }
+            areas.RemoveAt(0);
+            areas.AddRange(res);
+            return true;
+        }
+
     }
     public class Dfs
     {
@@ -270,6 +382,47 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             //递归搜索
             dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals);
+        }
+
+
+        public static void dfsSplitWithoutSegline(ref List<Polyline> areas, ref List<Line> sortSegLines, 
+            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals)
+        {
+            if (areas.Count == buildNums)//楼层分割完毕, 退出递归
+            {
+                return;
+            }
+            foreach(var area in areas)
+            {
+                var orgAreas = new List<Polyline>() { area };
+                var builds = buildLinesSpatialIndex.SelectCrossingPolygon(area);
+                if(builds.Count > 1)//建筑物数目大于1
+                {
+                    var verticalSegline = AreaSplit.VerticalSeg(ref orgAreas, buildLinesSpatialIndex, out double maxVal, out double minVal);
+                    if (!(verticalSegline is null))//分割线正好分割区域
+                    {
+                        areas.Remove(area);
+                        areas.AddRange(orgAreas);
+                        sortSegLines.Add(verticalSegline);
+                        maxVals.Add(maxVal);
+                        minVals.Add(minVal);
+                        break;
+                    }
+                    var horizontalSegline = AreaSplit.HorizontalSeg(ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
+                    if(!(horizontalSegline is null))//分割线正好分割区域
+                    {
+                        areas.Remove(area);
+                        areas.AddRange(orgAreas);
+                        sortSegLines.Add(horizontalSegline);
+                        maxVals.Add(maxVal);
+                        minVals.Add(minVal);
+                        break;
+                    }
+                }
+            }
+
+            //递归搜索
+            dfsSplitWithoutSegline(ref areas, ref sortSegLines, buildLinesSpatialIndex,  buildNums, ref maxVals, ref minVals);
         }
     }
 }
