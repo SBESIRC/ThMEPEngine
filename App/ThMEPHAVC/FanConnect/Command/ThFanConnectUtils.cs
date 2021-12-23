@@ -463,6 +463,7 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
         {
+            node.Item.PipeWidth = 100.0;
             node.Item.PipeLevel = PIPELEVEL.LEVEL3;
             if (node.Parent != null)
             {

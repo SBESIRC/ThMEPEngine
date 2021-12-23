@@ -79,6 +79,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-R"), true);
                 }
+                if (blockDb.Layers.Contains("H-PIPE-APPE"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), true);
+                }
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -91,6 +95,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CHS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CHR");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-R");
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-APPE");
             }
         }
         public override void SubExecute()
@@ -114,7 +119,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 double space = 300.0;
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
-                    space = 100.0;
+                    space = 150.0;
                 }
                 //构建Tree
                 ThFanTreeModel treeModel = new ThFanTreeModel(startPt, lines, space);
@@ -145,6 +150,11 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;
                 pipeMarkServiece.PipeMark(pointTreeModel);
+
+                //插入阀门
+                ThAddValveServiece addValveServiece = new ThAddValveServiece();
+                addValveServiece.ConfigInfo = ConfigInfo;
+                addValveServiece.AddValve(treeModel);
             }
         }
     }

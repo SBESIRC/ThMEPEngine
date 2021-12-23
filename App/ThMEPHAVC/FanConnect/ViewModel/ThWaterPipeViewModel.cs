@@ -99,30 +99,23 @@ namespace ThMEPHVAC.FanConnect.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        public string FeedPipeValve
-        {
-            get { return WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValve; }
-            set
-            {
-                WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValve = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public string ReturnPipeValeve
-        {
-            get { return WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeve; }
-            set
-            {
-                WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeve = value;
-                this.RaisePropertyChanged();
-            }
-        }
         public string MapScale
         {
             get { return WaterPipeConfigInfo.WaterValveConfigInfo.MapScale; }
             set
             {
                 WaterPipeConfigInfo.WaterValveConfigInfo.MapScale = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        public string RoomCount
+        {
+            get 
+            {
+                return WaterPipeConfigInfo.WaterValveConfigInfo.RoomObb.Count.ToString();
+            }
+            set
+            {
                 this.RaisePropertyChanged();
             }
         }

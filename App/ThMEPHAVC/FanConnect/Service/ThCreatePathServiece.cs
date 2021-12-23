@@ -125,7 +125,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 Polyline line = new Polyline();
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
                 line.AddVertexAt(1, closetPt.ToPoint2D(), 0, 0, 0);
-                if (!ThFanConnectUtils.LineIntersctBySelect(holes, line, 50)
+                if (!ThFanConnectUtils.LineIntersctBySelect(holes, line, 300)
                     && !ThFanConnectUtils.LineIntersctBySelect(rooms, line)
                     && !ThFanConnectUtils.CheckIntersectWithFrame(line, frame))
                 {
@@ -140,7 +140,7 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 200);
             var costGetter = new ToLineCostGetterEx();
             var pathAdjuster = new ThFanPipeAdjustPath();
             aStarRoute.costGetter = costGetter;

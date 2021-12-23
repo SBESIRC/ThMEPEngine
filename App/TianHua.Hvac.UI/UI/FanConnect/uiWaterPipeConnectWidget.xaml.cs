@@ -1,4 +1,5 @@
 ﻿using AcHelper;
+using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -66,6 +67,65 @@ namespace TianHua.Hvac.UI.UI.FanConnect
         {
             e.Cancel = true;
             this.Hide();
+        }
+        private void btnSelectRoom_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            FocusMainWindow();
+            var pickRoomExtractCmd = new ThPickRoomExtractCmd();
+            pickRoomExtractCmd.ConfigInfo = ViewModel.WaterPipeConfigInfo;
+            pickRoomExtractCmd.Execute();
+            ViewModel.RoomCount = "1";//仅触发页面刷新，不能实际赋值
+        }
+
+        private void SuppAddBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if(SuppLeftListBox.SelectedItem != null)
+            {
+                
+                var selectedItem = (ListBoxItem)SuppLeftListBox.SelectedItem;
+                string selectedValve = (string)selectedItem.Content;
+                if (!SuppRightListBox.Items.Contains(selectedValve))
+                {
+                    SuppRightListBox.Items.Add(selectedValve);
+                    ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValves.Add(selectedValve);
+                }
+            }
+        }
+
+        private void SuppCanBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (SuppRightListBox.SelectedItem != null)
+            {
+                var selectedItem = (ListBoxItem)SuppRightListBox.SelectedItem;
+                string selectedValve = (string)selectedItem.Content;
+                SuppRightListBox.Items.Remove(SuppRightListBox.SelectedItem);
+                ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValves.Remove(selectedValve);
+            }
+        }
+
+        private void BackAddBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (BackLeftListBox.SelectedItem != null)
+            {
+                var selectedItem = (ListBoxItem)BackLeftListBox.SelectedItem;
+                string selectedValve = (string)selectedItem.Content;
+                if (!BackRightListBox.Items.Contains(selectedValve))
+                {
+                    BackRightListBox.Items.Add(selectedValve);
+                    ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeves.Add(selectedValve);
+                }
+            }
+        }
+
+        private void BackCanBtn_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (BackRightListBox.SelectedItem != null)
+            {
+                var selectedItem = (ListBoxItem)BackRightListBox.SelectedItem;
+                string selectedValve = (string)selectedItem.Content;
+                BackRightListBox.Items.Remove(BackRightListBox.SelectedItem);
+                ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeves.Remove(selectedValve);
+            }
         }
     }
 }

@@ -33,6 +33,8 @@
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
+    <Compile Include="FanConnect\Service\ThAddValveServiece.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />

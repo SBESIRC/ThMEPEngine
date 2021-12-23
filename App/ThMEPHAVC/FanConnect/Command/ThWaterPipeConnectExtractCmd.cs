@@ -42,7 +42,9 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                DbHelper.EnsureLayerOn("AI-水管路由");
+                acadDb.Database.UnFrozenLayer("AI-水管路由");
+                acadDb.Database.UnLockLayer("AI-水管路由");
+                acadDb.Database.UnOffLayer("AI-水管路由");
             }
         }
         public override void SubExecute()

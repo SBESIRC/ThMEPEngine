@@ -1,4 +1,5 @@
-﻿using Dreambuild.AutoCAD;
+﻿using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,9 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                DbHelper.EnsureLayerOn("AI-水管路由");
+                acadDb.Database.UnFrozenLayer("AI-水管路由");
+                acadDb.Database.UnLockLayer("AI-水管路由");
+                acadDb.Database.UnOffLayer("AI-水管路由");
             }
         }
         public override void SubExecute()
@@ -54,7 +57,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 ////AI洞口
                 var holes = ThBuildElementExtractServiece.GetAIHole();
 
-                double pipeWidth = 200.0;
+                double pipeWidth = 300.0;
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeStartPt = startPt;
