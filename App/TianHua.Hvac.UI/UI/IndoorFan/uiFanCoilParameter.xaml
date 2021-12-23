@@ -1,0 +1,290 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Hvac.UI.UI.IndoorFan.uiFanCoilParameter" 
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns:local="clr-namespace:TianHua.Hvac.UI.UI.IndoorFan"
+                    mc:Ignorable="d" Title="详细参数"
+                    Width="1500"
+                    MaxHeight="1200"
+                    SizeToContent="Height">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="FanParameterRes.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+            <Style x:Key="HeadCoilFanCooling" TargetType="DataGridColumnHeader">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Border x:Name="BackgroundBorder" BorderBrush="{DynamicResource HeadLineColor}" Width="Auto">
+                                <Grid>
+                                    <Grid x:Name="Root">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition></ColumnDefinition>
+                                            <ColumnDefinition Width="1"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="21"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                                <ColumnDefinition Width="1*" MinWidth="60"></ColumnDefinition>
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="冷却盘管"/>
+
+                                            <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                            <Label Grid.Row="2" Grid.Column="0" Grid.RowSpan="4" Content="全热" BorderThickness="0" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Content="显热" Style="{DynamicResource DataGridLabel}"/>
+
+                                            <Label Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Style="{DynamicResource DataGridLabel}"
+                                               Content="进风参数"/>
+                                            <Rectangle Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="2" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"></Rectangle>
+
+                                            <Label Grid.Row="4" Grid.Column="2" Content="干球" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="4" Grid.Column="3" Content="相对湿度" Style="{DynamicResource DataGridLabel}"/>
+
+                                            <Label Grid.Row="2"  Grid.Column="4" Grid.RowSpan="4" Content="进口水温" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2" Grid.Column="5"  Grid.RowSpan="4" Content="出口水温" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2"  Grid.Column="6"  Grid.RowSpan="4" Content="接管尺寸" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2" Grid.Column="7"  Grid.RowSpan="4" Content="工作压力" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2" Grid.Column="8"  Grid.RowSpan="4" Content="压降" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="2"  Grid.Column="9"  Grid.RowSpan="4" Content="流量" Style="{DynamicResource DataGridLabel}"/>
+
+
+                                            <Rectangle Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                            <Label Grid.Row="6" Grid.Column="0"  Content="kW" Style="{DynamicResource DataGridLabel}" BorderThickness="0"/>
+                                            <Label Grid.Row="6"  Grid.Column="1"  Content="kW" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6" Grid.Column="2"  Content="℃" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6" Grid.Column="3"  Content="%" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6" Grid.Column="4"  Content="℃" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6" Grid.Column="5" Content="℃" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6"  Grid.Column="6" Content="DN" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6"  Grid.Column="7" Content="MPa" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6"  Grid.Column="8" Content="kPa" Style="{DynamicResource DataGridLabel}"/>
+                                            <Label Grid.Row="6"  Grid.Column="9" Content="I/s" Style="{DynamicResource DataGridLabel}"/>
+                                        </Grid>
+                                    </Grid>
+                                    <Rectangle Width="1" Fill="{DynamicResource HeadLineColor}" HorizontalAlignment="Right" Grid.ColumnSpan="1" />
+
+                                    <Thumb x:Name="PART_RightHeaderGripper"
+                                           Cursor="SizeWE" 
+                                           HorizontalAlignment="Right" 
+                                           Width="1"
+                                           Background="Transparent"
+                                           Height="Auto"
+                                           VerticalAlignment="Stretch" >
+                                    </Thumb>
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+            <Style x:Key="HeadCoilFanHeating" TargetType="DataGridColumnHeader">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate>
+                            <Border x:Name="BackgroundBorder" BorderBrush="{DynamicResource HeadLineColor}" Width="Auto">
+                                <Grid>
+                                    <Grid x:Name="Root">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition></ColumnDefinition>
+                                            <ColumnDefinition Width="1"></ColumnDefinition>
+                                        </Grid.ColumnDefinitions>
+                                        <Grid Grid.Column="0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="20"></RowDefinition>
+                                                <RowDefinition Height="1"></RowDefinition>
+                                                <RowDefinition Height="21"></RowDefinition>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                                <ColumnDefinition Width="1*" MinWidth="40"/>
+                                            </Grid.ColumnDefinitions>
+                                            <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="加热盘管"/>
+                                            <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                            <Label Grid.Row="2" Grid.Column="0" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" BorderThickness="0,0,1,0" Content="热量"/>
+
+                                            <Label Grid.Row="2" Grid.Column="1"  Style="{DynamicResource DataGridLabel}" BorderThickness="0,0,0,1" Content="进风温度"/>
+                                            <Label Grid.Row="4" Grid.Column="1" Style="{DynamicResource DataGridLabel}" BorderThickness="0" Content="干球"/>
+
+                                            <Label Grid.Row="2" Grid.Column="2" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="进口水温"/>
+                                            <Label Grid.Row="2" Grid.Column="3" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="出口水温"/>
+                                            <Label Grid.Row="2"  Grid.Column="4" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="接管尺寸"/>
+                                            <Label Grid.Row="2"  Grid.Column="5"  Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="工作压力"/>
+                                            <Label Grid.Row="2"  Grid.Column="6" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="压降"/>
+                                            <Label Grid.Row="2" Grid.Column="7" Grid.RowSpan="4" Style="{DynamicResource DataGridLabel}" Content="流量"/>
+
+                                            <Rectangle Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                            <Label Grid.Row="6" Grid.Column="0" Style="{DynamicResource DataGridLabel}"  Content="kW" BorderThickness="0"/>
+                                            <Label Grid.Row="6" Grid.Column="1" Style="{DynamicResource DataGridLabel}" Content="℃" Margin="-1,0,0,0"/>
+                                            <Label Grid.Row="6" Grid.Column="2" Style="{DynamicResource DataGridLabel}" Content="℃"/>
+                                            <Label Grid.Row="6" Grid.Column="3" Style="{DynamicResource DataGridLabel}" Content="℃"/>
+                                            <Label Grid.Row="6"  Grid.Column="4" Style="{DynamicResource DataGridLabel}" Content="DN"/>
+                                            <Label Grid.Row="6"  Grid.Column="5" Style="{DynamicResource DataGridLabel}" Content="MPa"/>
+                                            <Label Grid.Row="6"  Grid.Column="6" Style="{DynamicResource DataGridLabel}" Content="kPa"/>
+                                            <Label Grid.Row="6"  Grid.Column="7" Style="{DynamicResource DataGridLabel}" Content="I/s"/>
+                                        </Grid>
+                                    </Grid>
+                                    <Rectangle Width="1" Fill="{DynamicResource HeadLineColor}" HorizontalAlignment="Right" Grid.ColumnSpan="1" />
+
+                                    <Thumb x:Name="PART_RightHeaderGripper"
+                                           Cursor="SizeWE" 
+                                           HorizontalAlignment="Right" 
+                                           Width="1"
+                                           Background="Transparent"
+                                           Height="Auto"
+                                           VerticalAlignment="Stretch" >
+                                    </Thumb>
+                                </Grid>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="5,0,5,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid Margin="0,10,0,5" Grid.Row="0">
+            <Label Name="lableFanType" Content="风机盘管：" HorizontalAlignment="Left" HorizontalContentAlignment="Left" Margin="5,0,0,0"/>
+            <WrapPanel Name="panelChange" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <cus:ImageButton Name="addRow" Content="新增" Height="20" Width="40" Click="addRow_Click"></cus:ImageButton>
+                <cus:ImageButton Name="deleteRow" Content="删除" Height="20" Width="40" Margin="10,0,0,0" Click="deleteRow_Click"></cus:ImageButton>
+            </WrapPanel>
+        </Grid>
+
+        <!--风机盘管信息-->
+        <DataGrid Grid.Row="1" RowHeight="25" ItemsSource="{Binding FanInfos,Mode=TwoWay}" AutoGenerateColumns="False" CanUserAddRows="False"
+                  SelectionMode="Single" Margin="0,10,0,0"
+                  RowHeaderWidth="0" Visibility="Visible">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber}"/>
+                <DataGridTextColumn Header="形式" Binding="{Binding FanLayout}" MinWidth="40"/>
+                <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanAirVolume}" CellStyle="{StaticResource CellFanAirVolume}"/>
+                <DataGridTemplateColumn HeaderStyle="{StaticResource HeadCoilFanCooling}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <UniformGrid Columns="10" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
+                                <!--冷却盘管 全热-->
+                                <Border BorderThickness="0" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding CoolTotalHeat}" />
+                                </Border>
+                                <!--冷却盘管 显热-->
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding CoolShowHeat}" />
+                                </Border>
+                                <!--进风参数 干球-->
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletDryBall}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletHumidity}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolEnterPortWaterTEMP}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolExitWaterTEMP}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding CoolPipeSize}" />
+                                </Border>
+                                <!--制冷工况 内机进风参数 湿球温度-->
+                                <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolWorkXeF}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding CoolXeFDrop}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox  Text="{Binding CoolFlow,StringFormat={}{0:F3}}" />
+                                </Border>
+                            </UniformGrid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn HeaderStyle="{StaticResource HeadCoilFanHeating}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <UniformGrid Columns="8" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
+                                <!--制热工况制冷量-->
+                                <Border BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding HotHeat,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <!--制热工况 内机进风参数 干球温度-->
+                                <Border BorderThickness="1,0,0,0" Margin="-1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding HotAirInletDryBall,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <!--制热工况 内机进风参数 湿球温度-->
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding HotEnterPortWaterTEMP,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox IsReadOnly="True" Text="{Binding HotExitWaterTEMP,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding HotPipSize,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding HotWorkXeF,UpdateSourceTrigger=PropertyChanged}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding HotXeFDrop}" />
+                                </Border>
+                                <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                                    <TextBox Text="{Binding HotFlow}" />
+                                </Border>
+                            </UniformGrid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise}" MinWidth="40"/>
+                <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanSize}" CellStyle="{StaticResource CellFanSize}"/>
+                <DataGridTextColumn Header="送风管&#13;尺寸&#13;mmxmm" Binding="{Binding AirSupplyuctSize}" MinWidth="70"/>
+                <DataGridTemplateColumn HeaderStyle="{StaticResource HeadAirOutlet}" CellStyle="{StaticResource CellAirOutlet}"/>
+                <DataGridTextColumn Header="回风口&#13;尺寸&#13;mmxmm" Binding="{Binding ReturnAirOutletSize}" MinWidth="70"/>
+                <DataGridTextColumn Header="备注" Binding="{Binding Remarks}" MinWidth="40"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Orientation="Vertical" Grid.Row="2" Height="35">
+            <cus:ImageButton Name="OkBtn" Content="确定" Margin="0,5,0,0" Width="50" Height="25" HorizontalAlignment="Right" Click="OkBtn_Click"/>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

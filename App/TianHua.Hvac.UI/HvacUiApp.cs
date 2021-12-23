@@ -87,5 +87,13 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
+        [CommandMethod("TIANHUACAD", "THSNJ", CommandFlags.Modal)]
+        public void THSNJ()
+        {
+            using (var cmd = new ThHvacIndoorFanCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

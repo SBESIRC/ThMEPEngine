@@ -1,0 +1,294 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:Array x:Key="TypeList" Type ="sys:String">
+        <sys:String>方形散流器</sys:String>
+        <sys:String>圆形风口</sys:String>
+    </x:Array>
+    <SolidColorBrush x:Key="HeadLineColor" Color="#474747"/>
+    <Style TargetType="TextBox">
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="Foreground" Value="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type DataGridCell},AncestorLevel=1},Path=Foreground}"/>
+        <Setter Property="CaretBrush" Value="White"/>
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="Height" Value="Auto"/>
+        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+        <Setter Property="BorderBrush" Value="#474747"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="Block.TextAlignment" Value="Center"/>
+    </Style>
+    <Style TargetType="Label">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="DataGridLabel" TargetType="Label">
+        <Setter Property="Padding" Value="0"/>
+        <Setter Property="BorderThickness" Value="1,0,0,0"/>
+        <Setter Property="BorderBrush" Value="#474747"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style x:Key="HeadFanSize" TargetType="DataGridColumnHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border x:Name="BackgroundBorder" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource HeadLineColor}" Width="Auto">
+                        <Grid>
+                            <Grid x:Name="Root" >
+                                <Grid Grid.Column="0" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="20"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!--第一行-->
+                                    <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="外形尺寸"/>
+                                    <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                    <!--第二行-->
+                                    <Label Grid.Row="2" Grid.Column="0" Content="宽" Style="{DynamicResource DataGridLabel}" BorderThickness="0"/>
+                                    <Label Grid.Row="2" Grid.Column="1" Content="高" Style="{DynamicResource DataGridLabel}"/>
+                                    <Label Grid.Row="2" Grid.Column="2" Content="深" Style="{DynamicResource DataGridLabel}"/>
+                                    <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                                    <!--第三行-->
+                                    <Label Grid.Row="4" Grid.Column="0" Content="mm" Style="{DynamicResource DataGridLabel}" BorderThickness="0"/>
+                                    <Label Grid.Row="4" Grid.Column="1" Content="mm" Style="{DynamicResource DataGridLabel}"/>
+                                    <Label Grid.Row="4" Grid.Column="2" Content="mm" Style="{DynamicResource DataGridLabel}"/>
+                                </Grid>
+                            </Grid>
+                            <Rectangle Width="1" Fill="{DynamicResource HeadLineColor}" HorizontalAlignment="Right" Grid.ColumnSpan="1" />
+
+                            <Thumb x:Name="PART_RightHeaderGripper"
+                                   Cursor="SizeWE" 
+                                   HorizontalAlignment="Right" 
+                                   Width="1"
+                                   Background="Transparent"
+                                   Height="Auto"
+                                   VerticalAlignment="Stretch" >
+                            </Thumb>
+                        </Grid>
+                    </Border>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+    <Style x:Key="CellFanSize" TargetType="DataGridCell">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <UniformGrid Columns="3" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
+                        <!--制冷工况制冷量-->
+                        <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding OverallDimensionWidth}" />
+                        </Border>
+                        <!--制冷工况 内机进风参数 干球温度-->
+                        <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox  Text="{Binding OverallDimensionHeight}" />
+                        </Border>
+                        <!--制冷工况 内机进风参数 湿球温度-->
+                        <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox  Text="{Binding OverallDimensionLength}" />
+                        </Border>
+                    </UniformGrid>
+                </ControlTemplate>
+
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="HeadFanAirVolume" TargetType="DataGridColumnHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border x:Name="BackgroundBorder" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource HeadLineColor}" Width="Auto">
+                        <Grid>
+                            <Grid x:Name="Root" >
+                                <Grid Grid.Column="0" >
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="20"/>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                        <ColumnDefinition Width="1*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <!--第一行-->
+                                    <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="风机"/>
+                                    <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                    <!--第二行-->
+                                    <Label Grid.Row="2" Grid.Column="0" Content="风量" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               Margin="-1,0,0,0" Padding="0" HorizontalContentAlignment="Center"
+                                               BorderThickness="1,0,0,0"></Label>
+                                    <Label Grid.Row="2" Grid.Column="1" Content="机外静压" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               BorderThickness="1,0,0,0" Padding="0" HorizontalContentAlignment="Center"></Label>
+                                    <Label Grid.Row="2" Grid.Column="2" Content="电源" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               BorderThickness="1,0,0,0" Padding="0" HorizontalContentAlignment="Center"></Label>
+                                    <Label Grid.Row="2" Grid.Column="3" Content="功率" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               BorderThickness="1,0,0,0" Padding="0" HorizontalContentAlignment="Center"></Label>
+                                    <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                                    <!--第三行-->
+                                    <Label Grid.Row="4" Grid.Column="0" Content="m3/h" BorderBrush="{DynamicResource HeadLineColor}"
+                                               Margin="-1,0,0,0" Padding="0" VerticalContentAlignment="Center"  HorizontalContentAlignment="Center"
+                                               BorderThickness="1,0,0,0"></Label>
+                                    <Label Grid.Row="4" Grid.Column="1" Content="Pa" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               BorderThickness="1,0,0,0" Padding="0" Margin="0" VerticalContentAlignment="Center" HorizontalContentAlignment="Center"></Label>
+                                    <Label Grid.Row="4" Grid.Column="2" Content="V-φ-Hz" BorderBrush="{DynamicResource HeadLineColor}"
+                                               BorderThickness="1,0,0,0"></Label>
+                                    <Label Grid.Row="4" Grid.Column="3" Content="W" BorderBrush="{DynamicResource HeadLineColor}" 
+                                               BorderThickness="1,0,0,0"></Label>
+                                </Grid>
+                            </Grid>
+                            <Rectangle Width="1" Fill="{DynamicResource HeadLineColor}" HorizontalAlignment="Right" Grid.ColumnSpan="1" />
+
+                            <Thumb x:Name="PART_RightHeaderGripper"
+                                   Cursor="SizeWE" 
+                                   HorizontalAlignment="Right" 
+                                   Width="1"
+                                   Background="Transparent"
+                                   Height="Auto"
+                                   VerticalAlignment="Stretch" >
+                            </Thumb>
+                        </Grid>
+                    </Border>
+
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+
+    </Style>
+    <Style x:Key="CellFanAirVolume" TargetType="DataGridCell">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <UniformGrid Columns="4" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
+                        <!--风机信息 风量-->
+                        <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch" >
+                            <TextBox Text="{Binding FanAirVolume}" />
+                        </Border>
+                        <!--风机信息 机外静压-->
+                        <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding ExternalStaticVoltage}" />
+                        </Border>
+                        <!--风机信息 电源-->
+                        <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding PowerSupply}" />
+                        </Border>
+                        <!--风机信息 功率-->
+                        <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding Power}" />
+                        </Border>
+                    </UniformGrid>
+                </ControlTemplate>
+
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="HeadAirOutlet" TargetType="DataGridColumnHeader">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Border x:Name="BackgroundBorder" BorderThickness="0,0,0,1" BorderBrush="{DynamicResource HeadLineColor}" Width="Auto">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid x:Name="Root">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition></ColumnDefinition>
+                                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                                </Grid.ColumnDefinitions>
+                                <Grid Grid.Column="0">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="20"></RowDefinition>
+                                        <RowDefinition Height="1"></RowDefinition>
+                                        <RowDefinition Height="20*"></RowDefinition>
+                                        <RowDefinition Height="1"></RowDefinition>
+                                        <RowDefinition Height="20"></RowDefinition>
+                                    </Grid.RowDefinitions>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="1*" MinWidth="50"></ColumnDefinition>
+                                        <ColumnDefinition Width="1"></ColumnDefinition>
+                                        <ColumnDefinition Width="1*" MinWidth="50"></ColumnDefinition>
+                                        <ColumnDefinition Width="1"></ColumnDefinition>
+                                        <ColumnDefinition Width="1*" MinWidth="50"></ColumnDefinition>
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="送风口"/>
+                                    <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                    <ContentPresenter Grid.Row="1" Grid.Column="0" Grid.RowSpan="33" Content="形式" HorizontalAlignment="Center" VerticalAlignment="Center"></ContentPresenter>
+                                    <Rectangle Grid.Row="1" Grid.Column="1"  Grid.RowSpan="33" VerticalAlignment="Stretch" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+
+                                    <ContentPresenter Grid.Row="2" Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="一个"/>
+                                    <Rectangle Grid.Row="2" Grid.Column="3" VerticalAlignment="Stretch" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                                    <ContentPresenter Grid.Row="2"  Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="两个"/>
+
+                                    <Rectangle Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                                    <ContentPresenter Grid.Row="4"  Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="mmxmm"/>
+                                    <Rectangle Grid.Row="4" Grid.Column="3" Width="1" VerticalAlignment="Stretch" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                                    <ContentPresenter Grid.Row="4"  Grid.Column="4" HorizontalAlignment="Center" VerticalAlignment="Center" Content="mmxmm"/>
+                                </Grid>
+                                <Rectangle Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="{DynamicResource HeadLineColor}" Visibility="Visible"/>
+                            </Grid>
+                            <Rectangle Width="1" Fill="{DynamicResource HeadLineColor}" HorizontalAlignment="Right" Grid.ColumnSpan="1" />
+
+                            <Thumb x:Name="PART_RightHeaderGripper"
+                                   Cursor="SizeWE"
+                                   HorizontalAlignment="Right" 
+                                   Width="1"
+                                   Background="Transparent"
+                                   Height="Auto"
+                                   VerticalAlignment="Stretch" >
+                            </Thumb>
+                        </Grid>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <Style x:Key="CellAirOutlet" TargetType="DataGridCell">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <UniformGrid Columns="3" Background="Transparent" VerticalAlignment="Stretch" Margin="0">
+                        <!--送风口形式-->
+                        <Border BorderThickness="1,0,0,0" Margin="-1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <ComboBox Margin="2" ItemsSource="{Binding Source={StaticResource TypeList}}"
+                                          SelectedItem="{Binding AirSupplyOutletType,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+                        </Border>
+                        <!--送风口尺寸 一个-->
+                        <Border BorderThickness="1,0,0,0" Margin="-1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding AirSupplyOutletOneSize}" />
+                        </Border>
+                        <!--送风口尺寸 两个-->
+                        <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
+                            <TextBox Text="{Binding AirSupplyOutletTwoSize}" />
+                        </Border>
+
+                    </UniformGrid>
+                </ControlTemplate>
+
+            </Setter.Value>
+        </Setter>
+    </Style>
+</ResourceDictionary>

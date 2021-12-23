@@ -1,0 +1,124 @@
+﻿<UserControl x:Class="TianHua.Hvac.UI.UI.IndoorFan.uTabRadio"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI.IndoorFan"
+             xmlns:cus ="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns:cusLocal="clr-namespace:ThControlLibraryWPF;assembly=ThControlLibraryWPF"
+             mc:Ignorable="d">
+    <Grid x:Name="gridTabRadio" Margin="1,0,0,0">
+        <Grid.Resources>
+            <ResourceDictionary>
+                <cusLocal:BoolToVisibilty x:Key="bootToVisibilty"/>
+                <cusLocal:CheckTwoStringEqualsConverter x:Key="towStringCheck"/>
+                <Style TargetType="{x:Type RadioButton}" x:Key="tabItemRadioBtn">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type RadioButton}">
+                                <Border BorderBrush="Black" x:Name="radinButtonInner"  
+                                        Background="#E0E0E0" 
+                                        Padding="0"
+                                        BorderThickness="1"
+                                        Margin="-1,0,0,0">
+                                    <Grid Height="{TemplateBinding Height}">
+                                        <Grid HorizontalAlignment="Center" Height="{TemplateBinding Height}">
+                                            <Grid.ColumnDefinitions >
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Label VerticalAlignment="Center" VerticalContentAlignment="Center" Padding="0" 
+                                                   HorizontalContentAlignment="Center" HorizontalAlignment="Center"
+                                                   Margin="10,0,10,0"
+                                                   Height="20"
+                                                   Content="{Binding Content}"/>
+                                            <cus:ImageButton ImageTextLocation="ImageOnly" 
+                                                         Focusable="False"
+                                                         Grid.Column="1"
+                                                         HoverImage="/ThControlLibraryWPF;component/Images/Delete_red.png"
+                                                         Tag="{Binding Id,Mode=OneWay}"
+                                                         Background="Transparent" 
+                                                         MouseOverBackground="Transparent"
+                                                         Click="IconPathButton_Click"
+                                                         BorderThickness="0"
+                                                         Margin="0,0,5,0"
+                                                         ImageHeight="12" ImageWidth="12"
+                                                         NormalImage="/ThControlLibraryWPF;component/Images/Delete.png"
+                                                         Visibility="{Binding CanDelete,Converter={StaticResource bootToVisibilty}}"/>
+                                        </Grid>
+                                        <TextBox x:Name="txtEditContent"
+                                                 AcceptsTab="False"
+                                                 VerticalAlignment="Stretch" 
+                                                 LostFocus="TextBox_LostFocus"
+                                                 Background="White"
+                                                 Panel.ZIndex="1"
+                                                 BorderThickness="0"
+                                                 Tag="{Binding Id,Mode=OneWay}"
+                                                 Text="{Binding Content,NotifyOnSourceUpdated=True,UpdateSourceTrigger=LostFocus}" 
+                                                 Visibility="{Binding InEdit,Converter={StaticResource bootToVisibilty},ConverterParameter=0}"></TextBox>
+                                    </Grid>
+                                    
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsChecked" Value="true">
+                                        <Setter TargetName="radinButtonInner" Property="Background" Value="white"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </ResourceDictionary>
+        </Grid.Resources>
+        <WrapPanel Orientation="Horizontal">
+            <ItemsControl ItemsSource="{Binding TabRadioItems,Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton VerticalContentAlignment="Center" VerticalAlignment="Center" Padding="0" 
+                                 MinWidth="30"
+                                 Margin="0,2,0,2"
+                                 Content="{Binding Content}" 
+                                 Style="{StaticResource  tabItemRadioBtn}"
+                                 Checked="RadioButton_Checked"
+                                 MouseDoubleClick="RadioButton_MouseDoubleClick"
+                                 Tag="{Binding Id,Mode=OneWay}"
+                                 GroupName="{Binding GroupName,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}">
+                            <RadioButton.IsChecked>
+                                <MultiBinding Converter="{StaticResource towStringCheck}">
+                                    <Binding Path="DataContext.SelectRadioTabItem.Id" ElementName="gridTabRadio" 
+                                         Mode="OneWay"
+                                         UpdateSourceTrigger="PropertyChanged" NotifyOnSourceUpdated="True"/>
+                                    <Binding Path="Id" Mode="OneWay" />
+                                </MultiBinding>
+                            </RadioButton.IsChecked>
+                        </RadioButton>
+
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" ></WrapPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+
+            <cus:ImageButton Width="50" 
+                             Height="22"
+                             ImageTextLocation="TextOnly"
+                             Content="+"
+                             FontSize="14"
+                             x:Name="AddBtn"
+                             Focusable="False"
+                             Background="#E0E0E0" 
+                             MouseOverBackground="#E0E0E0"
+                             Click="AddBtn_Click"
+                             BorderThickness="1"
+                             BorderBrush="Black"
+                             Margin="-1,0,5,0"
+                             ImageHeight="12" ImageWidth="12"
+                             Visibility="{Binding HaveAddButton,Converter={StaticResource bootToVisibilty}}"/>
+        
+        </WrapPanel>
+        
+    </Grid>
+</UserControl>

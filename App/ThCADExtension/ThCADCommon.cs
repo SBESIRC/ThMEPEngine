@@ -136,7 +136,14 @@ namespace ThCADExtension
         {
             return Path.Combine(ThCADCommon.SupportPath(), "导出材料表.xlsx");
         }
-
+        /// <summary>
+        /// 室内机信息表
+        /// </summary>
+        /// <returns></returns>
+        public static string IndoorFanDataTablePath() 
+        {
+            return Path.Combine(SupportPath(), "室内机配置表.xlsx");
+        }
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

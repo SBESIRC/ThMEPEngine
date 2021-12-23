@@ -64,6 +64,7 @@
     <Compile Include="ControlUtils\FormUtil.cs" />
     <Compile Include="ControlUtils\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlUtils\UListItemData.cs" />
+    <Compile Include="ConverterUtil.cs" />
     <Compile Include="CustomControl\ImageButton.cs" />
     <Compile Include="CustomProperty\TextBoxBaseProperty.cs" />
     <Compile Include="ModelCloneUtil.cs" />
@@ -96,6 +97,10 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\SettingIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\Delete.png" />
+    <Resource Include="Images\Delete_red.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
