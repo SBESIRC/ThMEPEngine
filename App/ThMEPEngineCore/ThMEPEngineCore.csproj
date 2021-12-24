@@ -46,6 +46,7 @@
     <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="AFASRegion\Util\UtilService.cs" />
+    <Compile Include="Algorithm\ArcAlgorithm\ThArcGeoUitls.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AdjustAStarPath.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarLine.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarEntity.cs" />
@@ -170,10 +171,17 @@
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
-    <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
-    <Compile Include="GridOperation\Utils\GridMergeService.cs" />
     <Compile Include="IO\ExcelService\ExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
+    <Compile Include="GridOperation\Model\ArcGridModel.cs" />
+    <Compile Include="GridOperation\Model\GridModel.cs" />
+    <Compile Include="GridOperation\Model\LineGridModel.cs" />
+    <Compile Include="GridOperation\Utils\GridArcExtendService.cs" />
+    <Compile Include="GridOperation\Utils\GridArcMergeService.cs" />
+    <Compile Include="GridOperation\Utils\GridArcSimplifyService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineMergeService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineSimplifyService.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
