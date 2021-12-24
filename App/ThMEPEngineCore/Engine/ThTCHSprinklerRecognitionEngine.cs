@@ -146,7 +146,9 @@ namespace ThMEPEngineCore.Engine
                 var block = data.Geometry as BlockReference;
                 if (block == null
                     || !block.Bounds.HasValue
-                    || !(block.Name.Contains("$TwtSys$00000131") || block.Name.Contains("$TwtSys$00000125")))
+                    || !(block.Name.Contains("$TwtSys$00000131")
+                        || block.Name.Contains("$ATTACHMENT$00000094") 
+                        || block.Name.Contains("$TwtSys$00000125")))
                 {
                     continue;
                 }
@@ -162,7 +164,7 @@ namespace ThMEPEngineCore.Engine
                     Position = block.Position,
                 };
                 var dictionary = data.Data as Dictionary<string, object>;
-                if (block.Name.Contains("$TwtSys$00000131"))
+                if (block.Name.Contains("$TwtSys$00000131") || block.Name.Contains("$ATTACHMENT$00000094"))
                 {
                     sprinkler.Category = "侧喷";
                     if (dictionary["横向镜像"] as string == "是")
