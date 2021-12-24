@@ -17,17 +17,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
-            using (var acadDatabase = AcadDatabase.Use(database))
-            {
-                var lines = ThDrainageSystemServiceGeoCollector.GetLines(
-                    acadDatabase.ModelSpace.OfType<Entity>().ToList(),
-                    layer => layer.Contains("W-FRPT") &&
-                             layer.Contains("HYDT") &&
-                             layer.Contains("PIPE"));
-                return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())
-                    (polygon.ToRect().ToPolygon()).
-                    SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
-            }
+            using var acadDatabase = AcadDatabase.Use(database);
+            var lines = ThDrainageSystemServiceGeoCollector.GetLines(
+                acadDatabase.ModelSpace.OfType<Entity>().ToList(),
+                IsHYDTPipeLayer);
+            return GeoFac.CreateIntersectsSelector(lines.Select(x => x.ToLineString()).ToList())
+                (polygon.ToRect().ToPolygon()).
+                SelectMany(x => x.ToDbCollection().OfType<DBObject>()).ToCollection();
+        }
+        public static bool IsHYDTPipeLayer(string layer)
+        {
+            return layer.Contains("W-FRPT") && layer.Contains("HYDT") && layer.Contains("PIPE");
         }
     }
 }

@@ -113,8 +113,6 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         {
             Generate(FireHydrantSystemUIViewModel.Singleton);
         }
-        public static void cbLabelNode() { }
-        public static void cbLabelRing() { }
         public const int THESAURUSHOUSING = 1;
         public const int THESAURUSPERMUTATION = 2;
         public const int THESAURUSSTAMPEDE = 0;
@@ -137,6 +135,9 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const string SEMITRANSPARENT = "1:150";
         public const double THESAURUSSOMBRE = 525.0;
         public const double THESAURUSCOMPULSIVE = 350.0;
+        public const string DISINTEGRATIVELY = "消火栓环管节点标记";
+        public const string PHENYLHYDRAZONE = "\n请使用最近的消火栓环管节点图块\n";
+        public const string TELECOMMUNICATIONS = "没找到主环";
         public static void Generate(FireHydrantSystemUIViewModel vm)
         {
             int @case = THESAURUSSTAMPEDE;
@@ -161,6 +162,14 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 throw new NotSupportedException();
             }
             Point3d selPt = default;
+            using (var adb = AcadDatabase.Active())
+            {
+                string GetEffectiveName(BlockReference br) => br.BlockTableRecord.IsNull ? string.Empty : (br.IsDynamicBlock || br.DynamicBlockTableRecord.IsValid ? adb.Element<BlockTableRecord>(br.DynamicBlockTableRecord).Name : br.Name);
+                if (adb.ModelSpace.OfType<BlockReference>().Where(br => GetEffectiveName(br) is DISINTEGRATIVELY).Any())
+                {
+                    Active.Editor.WriteMessage(PHENYLHYDRAZONE);
+                }
+            }
             FireHydrantSystem GetCtx()
             {
                 FocusMainWindow();
@@ -199,7 +208,10 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 {
                     GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, selectArea, loopStartPt);
                     var _mainPathList = MainLoop.Get(ref fireHydrantSysIn);
-                    if (_mainPathList.Count == THESAURUSSTAMPEDE) return null;
+                    if (_mainPathList.Count == THESAURUSSTAMPEDE)
+                    {
+                        throw new Exception(TELECOMMUNICATIONS);
+                    }
                     var _subPathList = SubLoop.Get(ref fireHydrantSysIn, _mainPathList);
                     var visited = new HashSet<Point3dEx>();
                     visited.AddVisit(_mainPathList);

@@ -1151,7 +1151,7 @@ namespace ThMEPWSS.FlatDiagramNs
         public const string THESAURUSJOURNAL = "CP";
         public const int THESAURUSEVERLASTING = 25;
         public const string QUOTATIONPELVIC = "PipeDN100";
-        public const string THESAURUSOUTWARD = "XXX";
+        public const string THESAURUSOUTWARD = "DNXXX";
         public const int THESAURUSABANDON = 14;
         public const int THESAURUSFINALITY = 10000;
         public const string THESAURUSBOTTOM = "PL-";

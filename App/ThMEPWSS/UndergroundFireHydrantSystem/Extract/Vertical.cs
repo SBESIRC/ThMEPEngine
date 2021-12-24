@@ -84,89 +84,63 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
         private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
         {
-            try
+            if (IsDWLGBlock(br))//如果是定位立管
             {
-                if (IsDWLGBlock(br))//如果是定位立管
+                return;
+            }
+            else
+            {
+                var objs = new DBObjectCollection();
+                br.Explode(objs);//把块炸开
+                foreach (var obj in objs)//遍历
                 {
-                    return;
-                }
-                else
-                {
-                    var objs = new DBObjectCollection();
-                    br.Explode(objs);//把块炸开
-                    foreach (var obj in objs)//遍历
+                    var ent = obj as Entity;
+                    if (!ent.Visible)
                     {
-                        var ent = obj as Entity;
-                        if(!ent.Visible)
+                        continue;
+                    }
+                    if (obj is Circle circle)//圆
+                    {
+                        if (IsTargetLayer(circle.Layer))
                         {
-                            continue;
+                            DBobjsResults.Add(circle);
                         }
-                        if (obj is Circle circle)//圆
-                        {
-                            if (IsTargetLayer(circle.Layer))
-                            {
-                                DBobjsResults.Add(circle);
-                            }
-                        }
-                        if (obj is BlockReference)//块
-                        {
-                            ExplodeBlock(obj as BlockReference, DBobjsResults);//炸块
-                        }
+                    }
+                    if (obj is BlockReference)//块
+                    {
+                        ExplodeBlock(obj as BlockReference, DBobjsResults);//炸块
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                ;
-            }
-            
         }
         private static void ExplodeTZBlock(Entity ent, DBObjectCollection DBobjsResults)
         {
             if (ent is null) return;
-            try
+            //炸天正块
+            var objs = new DBObjectCollection();
+            ent.Explode(objs);//把块炸开
+            foreach (var obj in objs)//遍历
             {
-                //炸天正块
-                var objs = new DBObjectCollection();
-                ent.Explode(objs);//把块炸开
-                foreach (var obj in objs)//遍历
+                if (obj is Circle circle)//圆
                 {
-                    if (obj is Circle circle)//圆
-                    {
-                        DBobjsResults.Add(circle);
-                    }
-                    if (ent.GetType().Name.Equals("ImpEntity"))//天正对象
-                    {
-                        ExplodeTZBlock(obj as BlockReference, DBobjsResults);//炸
-                    }
+                    DBobjsResults.Add(circle);
+                }
+                if (ent.GetType().Name.Equals("ImpEntity"))//天正对象
+                {
+                    ExplodeTZBlock(obj as BlockReference, DBobjsResults);//炸
                 }
             }
-            catch (Exception ex)
-            {
-                ;
-            }
-            
         }
         private static bool IsDWLGBlock(BlockReference br)
         {
-            try
-            {
-                return br.GetEffectiveName().Contains("定位立管");
-            }
-            catch (Exception ex)
-            {
-                return br.Name.Contains("定位立管");
-            }
-            
+            return br.Name.Contains("定位立管");
         }
         public static void ExplodeDWLG(BlockReference br, DBObjectCollection DBobjsResults)//炸定位立管
         {
             var objColl = new DBObjectCollection();
             var objs = new DBObjectCollection();
             br.Explode(objColl);
-            objColl.Cast<Entity>()
-                .Where(e => e is Circle)
-                .ForEach(e => objs.Add(e));
+            objColl.Cast<Entity>().Where(e => e is Circle).ForEach(e => objs.Add(e));
             var circles = objs.OfType<Circle>().OrderByDescending(e => e.Radius);
             if(circles.Count() > 0)
             {
@@ -269,14 +243,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
         public override bool IsDistributionElement(Entity entity)
         {
-            try
-            {
-                return (entity as BlockReference).GetEffectiveName().Contains("定位立管");
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
+            return (entity as BlockReference)?.Name?.Contains("定位立管") ?? false;
         }
 
         public override bool CheckLayerValid(Entity curve)

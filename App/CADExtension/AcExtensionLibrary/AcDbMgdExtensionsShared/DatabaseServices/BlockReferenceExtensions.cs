@@ -80,7 +80,7 @@ namespace Autodesk.AutoCAD.DatabaseServices
             {
                 foreach (ObjectId id in bref.AttributeCollection)
                 {
-                    yield return (AttributeReference) trx.GetObject(id, mode, true, openObjectsOnLockedLayers);
+                    yield return (AttributeReference)trx.GetObject(id, mode, true, openObjectsOnLockedLayers);
                 }
             }
             else
@@ -89,7 +89,7 @@ namespace Autodesk.AutoCAD.DatabaseServices
                 {
                     if (!id.IsErased)
                     {
-                        yield return (AttributeReference) trx.GetObject(id, mode, false, openObjectsOnLockedLayers);
+                        yield return (AttributeReference)trx.GetObject(id, mode, false, openObjectsOnLockedLayers);
                     }
                 }
             }

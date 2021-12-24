@@ -2255,10 +2255,10 @@ namespace ThMEPWSS.Assistant
             //}
         }
 
-        public static T SelectEntity<T>(AcadDatabase adb) where T : DBObject
+        public static T SelectEntity<T>(AcadDatabase adb, bool openForWrite = false) where T : DBObject
         {
             var id = GetEntity();
-            var ent = adb.Element<T>(id);
+            var ent = adb.Element<T>(id, openForWrite);
             return ent;
         }
         public static T TrySelectEntity<T>(AcadDatabase adb) where T : DBObject
