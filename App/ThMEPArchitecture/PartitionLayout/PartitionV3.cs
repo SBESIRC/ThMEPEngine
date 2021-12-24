@@ -16,8 +16,9 @@ namespace ThMEPArchitecture.PartitionLayout
     public class PartitionV3
     {
         public PartitionV3(List<Polyline> walls, List<Line> iniLanes,
-        List<Polyline> obstacles, Polyline boundary, List<Polyline> buildingBox)
+        List<Polyline> obstacles, Polyline boundary, List<Polyline> buildingBox, bool gpillars = true)
         {
+            GPillars = gpillars;
             Walls = walls;
             IniLaneLines = iniLanes;
             Obstacles = obstacles;
@@ -30,7 +31,7 @@ namespace ThMEPArchitecture.PartitionLayout
             InitialzeLanes(iniLanes, boundary);
             CheckObstacles();
             CheckBuildingBoxes();
-      
+
         }
         public List<Polyline> Walls;
         public List<Lane> IniLanes = new List<Lane>();
@@ -55,6 +56,8 @@ namespace ThMEPArchitecture.PartitionLayout
         private Polyline NewBound = new Polyline();
         private List<Curve> NewBoundEdges = new List<Curve>();
         private List<Polyline> PModuleBox = new List<Polyline>();
+        private bool GPillars = false;
+        private List<Polyline> Pillars = new List<Polyline>();
 
         const double DisLaneWidth = 5500;
         const double DisCarLength = 5100;
@@ -149,7 +152,11 @@ namespace ThMEPArchitecture.PartitionLayout
                 e.ColorIndex = colorindex;
                 return e;
             }).AddToCurrentSpace();
-
+            Pillars.Select(e =>
+            {
+                e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
+                return e;
+            }).AddToCurrentSpace();
         }
 
         public void Dispose()
@@ -536,6 +543,7 @@ namespace ThMEPArchitecture.PartitionLayout
             CarSpots.AddRange(pMModlues.GetCarSpots(ref CarSpatialIndex, ObstaclesSpatialIndex, ModuleBox, Boundary));
             length_module_used = pMModlues.Bounds.Count * DisModulus;
         }
+
 
         /// <summary>
         /// Generate the rest car spots of intergral modules in the smallest partition unit. 
