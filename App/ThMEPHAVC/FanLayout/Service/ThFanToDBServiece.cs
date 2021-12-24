@@ -291,6 +291,9 @@ namespace ThMEPHVAC.FanLayout.Service
                 dbText.TextString = strText;
                 dbText.Position = position;
                 dbText.Rotation = angle;
+                dbText.Height = 300.0;
+                dbText.WidthFactor = 0.7;
+                dbText.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                 database.ModelSpace.Add(dbText);
             }
         }

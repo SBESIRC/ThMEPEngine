@@ -264,6 +264,7 @@ namespace ThMEPHVAC.FanConnect.Model
             var allLines = GetLinesFromNode(treeModel);
             var pointModel = new ThFanPointModel();
             pointModel.CntPoint = treeModel.Item.PLine.StartPoint;
+            pointModel.IsFlag = treeModel.Item.IsFlag;
             var rootNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
             InsertNodeFromPipeTree(rootNode, treeModel,ref allLines);
             return rootNode;
@@ -279,7 +280,6 @@ namespace ThMEPHVAC.FanConnect.Model
                     var pointModel = new ThFanPointModel();
                     pointModel.CntPoint = l.EndPoint;
                     pointModel.IsFlag = model.IsFlag;
-                    pointModel.Level = PIPELEVEL.LEVEL1;
                     var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
                     node.InsertChild(pointNode);
                     remLines.Add(l);

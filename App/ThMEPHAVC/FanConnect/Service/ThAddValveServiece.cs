@@ -13,7 +13,24 @@ namespace ThMEPHVAC.FanConnect.Service
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public void AddValve(ThFanTreeModel tree)
         {
-
+            if (tree.RootNode.Children.Count == 0)
+            {
+                return;
+            }
+            //遍历树
+            BianLiTree(tree.RootNode);
+        }
+        public void BianLiTree(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            foreach (var child in node.Children)
+            {
+                BianLiTree(child);
+            }
+            if(node.Item.IsValve)
+            {
+                return;
+            }
+            //找到
         }
     }
 }

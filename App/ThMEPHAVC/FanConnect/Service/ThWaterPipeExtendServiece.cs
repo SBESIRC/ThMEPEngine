@@ -11,6 +11,7 @@ using ThMEPHVAC.FanConnect.ViewModel;
 using ThCADExtension;
 using Linq2Acad;
 using ThMEPHVAC.FanLayout.Service;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -29,13 +30,12 @@ namespace ThMEPHVAC.FanConnect.Service
             //设置方向
             //对当前结点进行扩展
             WaterPipeExtend(t1);
-            //将连接处的线进行补齐并绘制小圆点
+            //将连接处的线进行补齐
             ExtendEnds(node);
             //绘制扩展线
             DrawExLine(node);
             //绘制接点
             DrawContact(node);
-            //
             foreach (var n in node.Children)
             {
                 BianLiTree(n);
@@ -118,12 +118,12 @@ namespace ThMEPHVAC.FanConnect.Service
                                     {
                                         var cline = currentExLines[i];
                                         var pline = parentExLines[i];
-                                        var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
-                                        cline.StartPoint = closPt;
-                                        node.Item.ExPoint.Add(closPt);
+                                        var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth);
+                                        cline.StartPoint = closPt[0];
+                                        node.Item.ExPoint.Add(closPt[0]);
                                         if (node.Item.IsConnect)
                                         {
-                                            pline.EndPoint = closPt;
+                                            pline.EndPoint = closPt[0];
                                         }
                                     }
                                 }
@@ -141,7 +141,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 {
                                                     var cline = currentExLines[i];
                                                     var pline = parentExLines[i];
-                                                    var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
+                                                    var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth)[0];
                                                     cline.StartPoint = closPt;
                                                     node.Item.ExPoint.Add(closPt);
                                                     if (node.Item.IsConnect)
@@ -162,11 +162,11 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var pline4 = parentExLines[3];
                                                 var pline5 = parentExLines[4];
 
-                                                Point3d closPt1 = pline1.GetClosestPointTo(cline1.StartPoint, true);
-                                                Point3d closPt2 = pline2.GetClosestPointTo(cline1.StartPoint, true);
-                                                Point3d closPt3 = pline3.GetClosestPointTo(cline2.StartPoint, true);
-                                                Point3d closPt4 = pline4.GetClosestPointTo(cline2.StartPoint, true);
-                                                Point3d closPt5 = pline5.GetClosestPointTo(cline3.StartPoint, true);
+                                                var closPt1 = pline1.IntersectWithEx(cline1, Intersect.ExtendBoth)[0];
+                                                var closPt2 = pline2.IntersectWithEx(cline1, Intersect.ExtendBoth)[0];
+                                                var closPt3 = pline3.IntersectWithEx(cline2, Intersect.ExtendBoth)[0];
+                                                var closPt4 = pline4.IntersectWithEx(cline2, Intersect.ExtendBoth)[0];
+                                                var closPt5 = pline5.IntersectWithEx(cline3, Intersect.ExtendBoth)[0];
 
                                                 cline1.StartPoint = closPt2;
                                                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
@@ -211,7 +211,7 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             var cline = currentExLines[i];
                             var pline = parentExLines[i];
-                            var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
+                            var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth)[0];
                             cline.StartPoint = closPt;
                             node.Item.ExPoint.Add(closPt);
                             if (node.Item.IsConnect)

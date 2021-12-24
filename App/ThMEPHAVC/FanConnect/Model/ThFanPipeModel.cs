@@ -33,6 +33,7 @@ namespace ThMEPHVAC.FanConnect.Model
     public class ThFanPipeModel
     {
         public int WayCount { set; get; }//是否是四通连接点
+        public bool IsValve { set; get; }//是否添加了阀门
         public bool IsContacted { set; get; }//是否绘制了连接点
         public bool IsFlag { set; get; }//标识位，表示是否反向ExPline顺序
         public bool IsConnect { set; get; }//与父结点是否连接
@@ -46,6 +47,7 @@ namespace ThMEPHVAC.FanConnect.Model
         public ThFanPipeModel(Line line, PIPELEVEL level = PIPELEVEL.LEVEL1,double width = 200)
         {
             WayCount = 2;
+            IsValve = false;
             IsContacted = false;
             IsFlag = false;
             IsConnect = false;
