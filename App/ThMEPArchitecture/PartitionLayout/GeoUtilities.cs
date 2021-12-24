@@ -660,12 +660,46 @@ namespace ThMEPArchitecture.PartitionLayout
         public static Point3dCollection DivideCurveByLength(Curve crv, double length, ref DBObjectCollection segs)
         {
             Point3dCollection pts = new Point3dCollection();
-
             pts = new Point3dCollection(crv.GetPointsByDist(length).ToArray());
-
             segs = crv.GetSplitCurves(pts);
             if (segs.Count == 0) segs.Add(crv);
 
+            return pts;
+        }
+
+        public static Point3dCollection DivideCurveByDifferentLength(Curve crv, ref DBObjectCollection segs, double length_a, int count_a, double length_b, int count_b)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            pts.Add(crv.StartPoint);
+            double t = 0;
+            bool quit = false;
+            while (true)
+            {
+                for (int i = 0; i < count_a + count_b; i++)
+                {
+                    if (i < count_a)
+                    {
+                        t += length_a;
+                    }
+                    else
+                    {
+                        t += length_b;
+                    }
+                    if (t < crv.GetLength())
+                    {
+                        pts.Add(crv.GetPointAtDist(t));
+                    }
+                    else
+                    {
+                        quit = true;
+                        break;
+                    }
+                }
+                if (quit) break;
+            }
+            pts.Add(crv.EndPoint);
+            segs = crv.GetSplitCurves(pts);
+            if (segs.Count == 0) segs.Add(crv);
             return pts;
         }
 
