@@ -96,6 +96,7 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 Outlines.Add(o.Key.Item1);
                 Outlines.Add(o.Key.Item2);
             });
+            results = handleConflict(results);
             SecondaryBeams.ForEach(o =>
             {
                 code = AddText(o, SecondaryBeamsData[o].Item1, SecondaryBeamsData[o].Item2);
@@ -303,6 +304,79 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             });
 
             return results;
+        }
+        private Dictionary<Tuple<Line, Line>, DBText> handleConflict(Dictionary<Tuple<Line, Line>, DBText> mainBeams)
+        {
+            var results = new Dictionary<Tuple<Line, Line>, DBText>();
+            var objs = new DBObjectCollection();
+            mainBeams.ForEach(o => 
+            {
+                objs.Add(o.Key.Item1);
+                objs.Add(o.Key.Item1);
+            });
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            mainBeams.ForEach(o => 
+            {
+                var querysItem1 = spatialIndex.SelectFence(o.Key.Item1);
+                querysItem1.Remove(o.Key.Item1);
+                var querysItem2 = spatialIndex.SelectFence(o.Key.Item2);
+                querysItem2.Remove(o.Key.Item2);
+                var Item1 = o.Key.Item1;
+                var Item2 = o.Key.Item2;
+                var ptsCollection = new List<Point3d>();
+                if (!IsMainBeam(o.Key.Item1))
+                {
+                    querysItem1.Cast<Entity>().ToList().ForEach(i =>
+                    {
+                        var pts = new Point3dCollection();
+                        o.Key.Item1.IntersectWith(i, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                        {
+                            ptsCollection.Add(pts.Cast<Point3d>().First());
+                        }
+                    });
+                    ptsCollection.Add(o.Key.Item1.StartPoint);
+                    ptsCollection.Add(o.Key.Item1.EndPoint);
+                    var Spts = ptsCollection.Where(i => i.DistanceTo(o.Key.Item1.StartPoint) < i.DistanceTo(o.Key.Item1.EndPoint));
+                    var Epts = ptsCollection.Except(Spts);
+                    Point3d centerPt = o.Key.Item1.GetMidpoint();
+                    Item1 = new Line(Spts.OrderBy(i => i.DistanceTo(centerPt)).First(), Epts.OrderBy(i => i.DistanceTo(centerPt)).First());
+                }
+                ptsCollection.Clear();
+                if (!IsMainBeam(o.Key.Item2))
+                {
+                    querysItem2.Cast<Entity>().ToList().ForEach(i =>
+                    {
+                        var pts = new Point3dCollection();
+                        o.Key.Item2.IntersectWith(i, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                        {
+                            ptsCollection.Add(pts.Cast<Point3d>().First());
+                        }
+                    });
+                    ptsCollection.Add(o.Key.Item2.StartPoint);
+                    ptsCollection.Add(o.Key.Item2.EndPoint);
+                    var Spts = ptsCollection.Where(i => i.DistanceTo(o.Key.Item2.StartPoint) < i.DistanceTo(o.Key.Item2.EndPoint));
+                    var Epts = ptsCollection.Except(Spts);
+                    var centerPt = o.Key.Item2.GetMidpoint();
+                    Item2 = new Line(Spts.OrderBy(i => i.DistanceTo(centerPt)).First(), Epts.OrderBy(i => i.DistanceTo(centerPt)).First());
+                }
+                results.Add((Item1, Item2).ToTuple(), o.Value);
+            });
+
+            return results;
+        }
+        private bool IsMainBeam(Line line)
+        {
+            var objs = new DBObjectCollection();
+            Outlines.Cast<Entity>().ForEach(o => 
+            {
+                objs.Add(o);
+            });
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var querys = spatialIndex.SelectFence(line);
+
+            return true;
         }
     }
 }
