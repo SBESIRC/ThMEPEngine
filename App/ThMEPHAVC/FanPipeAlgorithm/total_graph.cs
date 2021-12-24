@@ -56,7 +56,8 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
         //房间-风机索引
         List<List<int>> room_fan_index = new List<List<int>>();
-        Dictionary<int, int> fan_room_index = new Dictionary<int, int>();
+        //Dictionary<int, int> fan_room_index = new Dictionary<int, int>();
+        List<int> fan_room_index = new List<int>();
 
         //子房间
         List<List<int>> room_child = new List<List<int>>();
@@ -197,15 +198,25 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
         public void find_room_relationship(List<ThFanCUModel> end_fanmodel, Point3d real_start_point, List<Polyline> boundary, List<Polyline> hole)
         {
-
+            //占位
             for (int i = 0; i < boundary.Count; i++)
             {
                 room_father.Add(-1);
             }
 
+            for (int i = 0; i < real_end_points.Count; i++)
+            {
+                fan_room_index.Add(-1);
+            }
+
+            for (int i = 0; i < boundary.Count; i++) 
+            {
+                room_fan_index.Add(new List<int>());
+            }
+
+            //
             for (int i = 0; i < boundary.Count; i++)
             {
-
                 //起点
                 if (boundary[i].Contains(real_start_point)) room_have_start = i;
 
@@ -215,12 +226,27 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 {
                     if (boundary[i].Contains(end_fanmodel[j].FanPoint))
                     {
-                        tmp.Add(j);
-                        fan_room_index.Add(j, i);
+                        if (fan_room_index[j] == -1)
+                        {
+                            fan_room_index[j] = i;
+                        }
+                        else 
+                        {
+                            int room_index = fan_room_index[j];
+                            if (boundary[i].Contains(boundary[room_index]))
+                            {
+                                fan_room_index[j] = room_index;
+                            }
+                            else 
+                            {
+                                fan_room_index[j] = i;
+                            }
+                        }                       
                     }
                 }
-                if (tmp.Count != 0) room_have_fan.Add(i);
-                room_fan_index.Add(tmp);
+
+                //if (tmp.Count != 0) room_have_fan.Add(i);
+                //room_fan_index.Add(tmp);
 
                 //框线
                 List<int> tmp2 = new List<int>();
@@ -247,27 +273,15 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 room_hole.Add(tmp3);
             }
 
-            //暂时只考虑一层房中房的情况。
-            /*
-            for (int i = 0; i < room_have_fan.Count; i++) {
-                int index = room_have_fan[i];
 
-                if (room_child[index].Count != 0) 
-                {
-                    for (int j = 0; j < room_child[index].Count; j++)
-                    {
-                        int small_room = room_child[index][j];
-                        for (int k = 0; k < room_fan_index[small_room].Count; k++) {
-                            foreach (int fan in room_fan_index[index]) {
-                                if (room_fan_index[small_room][k] == fan) room_fan_index[index].Remove(fan);
-                            }                       
-                        }                   
-                    }
-                
-                }
-            
+            for (int i = 0; i < fan_room_index.Count; i++) 
+            {
+                int room_index = fan_room_index[i];
+                if (room_have_fan.Contains(room_index) == false) room_have_fan.Add(room_index);
+                room_fan_index[room_index].Add(i);
             }
-            */
+
+         
         }
 
         public void find_room_start()
