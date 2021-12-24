@@ -8,6 +8,12 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.GridOperation;
+using ThCADExtension;
+using ThMEPEngineCore.GridOperation.Model;
 
 namespace ThMEPEngineCore
 {
@@ -105,6 +111,88 @@ namespace ThMEPEngineCore
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
+        }
+
+        [CommandMethod("TIANHUACAD", "THCLEANGRID", CommandFlags.Modal)]
+        public void THTESTCleanGrid()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                // 从外参中提取房间
+                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                var axisEngine = new ThAXISLineRecognitionEngine();
+                axisEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                var retAxisCurves = new List<Curve>();
+                foreach (var item in axisEngine.Elements)
+                {
+                    if (item == null || item.Outline == null)
+                        continue;
+                    if (item.Outline is Curve curve)
+                    {
+                        var copy = (Curve)curve.Clone();
+                        retAxisCurves.Add(copy);
+                    }
+                }
+
+                GetStructureInfo(acadDatabase, frame, out List<Polyline> columns);
+
+                GridLineCleanService gridLineClean = new GridLineCleanService();
+                gridLineClean.CleanGrid(retAxisCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
+                foreach (var item in lineGirds)
+                {
+                    foreach (var line in item.xLines)
+                    {
+                        acadDatabase.ModelSpace.Add(line);
+                    }
+                    foreach (var line in item.yLines)
+                    {
+                        acadDatabase.ModelSpace.Add(line);
+                    }
+                }
+                foreach (var item in arcGrids)
+                {
+                    foreach (var line in item.lines)
+                    {
+                        acadDatabase.ModelSpace.Add(line);
+                    }
+                    foreach (var line in item.arcLines)
+                    {
+                        acadDatabase.ModelSpace.Add(line);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 获取构建信息
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="polyline"></param>
+        /// <param name="columns"></param>
+        /// <param name="beams"></param>
+        /// <param name="walls"></param>
+        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, out List<Polyline> columns)
+        {
+            var ColumnExtractEngine = new ThColumnExtractionEngine();
+            ColumnExtractEngine.Extract(acdb.Database);
+            //ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+            var ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
+
+            ////获取柱
+            columns = new List<Polyline>();
+            columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            var objs = new DBObjectCollection();
+            columns.ForEach(x => objs.Add(x));
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
     }
 }
