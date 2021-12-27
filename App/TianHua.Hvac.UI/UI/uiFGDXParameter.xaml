@@ -1,0 +1,28 @@
+﻿<cus:ThCustomWindow  x:Class="TianHua.Hvac.UI.UI.uiFGDXParameter"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:TianHua.Hvac.UI.UI"
+                     Title="风口参数" SizeToContent="Height" Width="210" mc:Ignorable="d"
+                     Closing ="ThCustomWindow_Closing">
+    <Grid Margin="3">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,3">
+            <Label Content="系统类型：" Margin="12,0,0,0"></Label>
+            <ComboBox x:Name="cbSystemType" Width="100"
+                      ItemsSource="{Binding SystemTypes,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding SystemType,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+            </ComboBox>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,3"
+                    HorizontalAlignment="Right" VerticalAlignment="Bottom">
+            <cus:ImageButton Name="btnInsert" Content="插入" Width="50" Margin="0,0,5,0" Click="btnInsert_Click"></cus:ImageButton>
+            <cus:ImageButton Name="btnCancel" Content="取消" Width="50" Margin="5,0,10,0" Click="btnCancel_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

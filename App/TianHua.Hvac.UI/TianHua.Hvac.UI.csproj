@@ -41,6 +41,12 @@
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacCRFKInsertCmd.cs" />
+    <Compile Include="Command\ThHvacSGDXInsertCmd.cs" />
+    <Compile Include="Command\ThHvacFGDXUiCmd.cs" />
+    <Compile Include="Command\ThHvacFGDXInsertCmd.cs" />
+    <Compile Include="Command\ThHvacFGLGInsertCmd.cs" />
+    <Compile Include="Command\ThHvacRouteCmd.cs" />
     <Compile Include="Command\ThHvacFpmCmd.cs" />
     <Compile Include="Command\ThHvacIndoorFanCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
@@ -48,6 +54,7 @@
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
     <Compile Include="Command\ThHvacSpmCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
+    <Compile Include="Command\ThWaterPipeRouteCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
@@ -142,6 +149,9 @@
     <Compile Include="UI\IndoorFan\uTabRadio.xaml.cs">
       <DependentUpon>uTabRadio.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiAirPortParameter.xaml.cs">
+      <DependentUpon>uiAirPortParameter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiFanCEXHWidget.xaml.cs">
       <DependentUpon>uiFanCEXHWidget.xaml</DependentUpon>
     </Compile>
@@ -156,6 +166,9 @@
     </Compile>
     <Compile Include="UI\uiFanWEXHWidget.xaml.cs">
       <DependentUpon>uiFanWEXHWidget.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiFGDXParameter.xaml.cs">
+      <DependentUpon>uiFGDXParameter.xaml</DependentUpon>
     </Compile>
     <Compile Include="UI\uiIndoorFan.xaml.cs">
       <DependentUpon>uiIndoorFan.xaml</DependentUpon>
@@ -332,6 +345,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\uiAirPortParameter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiFanCEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -351,6 +368,10 @@
     <Page Include="UI\uiFanWEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFGDXParameter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\uiIndoorFan.xaml">
       <Generator>MSBuild:Compile</Generator>

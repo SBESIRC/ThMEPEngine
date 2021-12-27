@@ -21,8 +21,10 @@ namespace ThMEPEngineCore
         public const string FRS = "AI-防火卷帘";
         public const string CENTERLINE = "AI-中心线";
         public const string LANECENTERLINE = "E-LANE-CENTER";
-
-        public static ObjectId CreateAIBeamLayer(this Database database)
+        public const string HAVCRoute = "AI-风管路由";
+        public const string WaterPipeRoute = "AI-水管路由";        
+        public const string Note = "AI-注释";
+        public static ObjectId CreateAIBeamLayer(this Database database)       
         {
             return database.CreateAILayer(BEAM, 6);
         }
@@ -91,10 +93,24 @@ namespace ThMEPEngineCore
         {
             return database.CreateAILayer(CENTERLINE, 2);
         }
-
         public static ObjectId CreateAILaneCenterLineLayer(this Database database)
         {
             return database.CreateAILayer(LANECENTERLINE, 2);
+        }
+
+        public static ObjectId CreateAIHAVCRouteLayer(this Database database)
+        {
+            return database.CreateAILayer(HAVCRoute, 5);
+        }        
+        
+        public static ObjectId CreateAIWaterPipeRouteLayer(this Database database)
+        {
+            return database.CreateAILayer(WaterPipeRoute, 3);
+        }
+
+        public static ObjectId CreateAINoteLayer(this Database database)
+        {
+            return database.CreateAILayer(Note, 6);
         }
 
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)
