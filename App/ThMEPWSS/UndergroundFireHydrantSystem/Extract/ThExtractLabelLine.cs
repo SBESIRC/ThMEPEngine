@@ -149,7 +149,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 
             }
 
-            if(ent.GetRXClass().DxfName.StartsWith("TCH") && ent.GetRXClass().DxfName.Contains("PIPE"))
+            if(ent.IsTCHPipe())
             {
                 try
                 {
@@ -163,9 +163,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                         }
                     }
                 }
-                catch(Exception ex)
+                catch
                 { 
-
+                    //
                 }
             }
             if (ent is Polyline pline)

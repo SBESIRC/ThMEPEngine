@@ -50,6 +50,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否是天正水管
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHPipe(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("PIPE");
+        }
+
+        /// <summary>
         /// 是否是天正配件
         /// </summary>
         /// <param name="entity"></param>
