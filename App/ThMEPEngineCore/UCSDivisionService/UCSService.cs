@@ -20,9 +20,16 @@ namespace ThMEPEngineCore.UCSDivisionService
             return layoutPointDivision.Division(columns, frame);
         }
 
-        public void UcsDivision(List<Curve> girds, Polyline frame)
+        /// <summary>
+        /// 根据轴网进行ucs区域分割
+        /// </summary>
+        /// <param name="girds"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        public List<Polyline> UcsDivision(List<List<Curve>> girds, List<Polyline> walls)
         {
-
+            GridDivision gridDivision = new GridDivision();
+            return gridDivision.Division(girds, walls);
         }
     }
 }

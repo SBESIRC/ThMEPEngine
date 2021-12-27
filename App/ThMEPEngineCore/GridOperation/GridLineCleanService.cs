@@ -41,31 +41,37 @@ namespace ThMEPEngineCore.GridOperation
             arcGridRes = arcSimplifyService.Simplify(arcGroup);
             arcGridRes = GridArcExtendService.ExtendGrid(arcGridRes);
             arcGridRes = GridArcMergeService.MergeArcGrid(arcGridRes, columns);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                //foreach (var item in lineGridRes)
-                //{
-                //    foreach (var ss in item.xLines)
-                //    {
-                //        db.ModelSpace.Add(ss);
-                //    }
-                //    foreach (var ss in item.yLines)
-                //    {
-                //        db.ModelSpace.Add(ss);
-                //    }
-                //}
-                //foreach (var item in arcGridRes)
-                //{
-                //    foreach (var ss in item.arcLines)
-                //    {
-                //        db.ModelSpace.Add(ss);
-                //    }
-                //    foreach (var ss in item.lines)
-                //    {
-                //        db.ModelSpace.Add(ss);
-                //    }
-                //}
-            }
+
+            //处理相近轴网线
+            GridBoundaryExtendService boundaryExtendService = new GridBoundaryExtendService();
+            boundaryExtendService.ExtendGrid(lineGridRes, arcGridRes, out List<LineGridModel> extendLineGrids);
+            lineGridRes = extendLineGrids;
+
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    foreach (var item in extendLineGrids)
+            //    {
+            //        foreach (var ss in item.xLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //        foreach (var ss in item.yLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //    }
+            //    foreach (var item in arcGridRes)
+            //    {
+            //        foreach (var ss in item.arcLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //        foreach (var ss in item.lines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //    }
+            //}
         }
 
         /// <summary>
@@ -78,11 +84,11 @@ namespace ThMEPEngineCore.GridOperation
         {
             lineGrids = new List<Line>();
             arcGrids = new List<Arc>();
-            //清除近乎零长度的对象（length≤10mm（梁线为40））
+            //清除近乎零长度的对象（length≤300mm（梁线为40））
             //Z值归零（当直线夹点Z值不为零时需要处理）
             foreach (var curve in grids)
             {
-                if (curve.GetLength() < 10)
+                if (curve.GetLength() < 300)
                     continue;
                 if (curve is Line line)
                 {

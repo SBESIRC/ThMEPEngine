@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.GridOperation.Model
 {
-    public class LineGridModel
+    public class LineGridModel : GridModel
     {
         public Vector3d vecter 
         {

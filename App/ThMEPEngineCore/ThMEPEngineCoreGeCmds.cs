@@ -14,6 +14,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.GridOperation;
 using ThCADExtension;
 using ThMEPEngineCore.GridOperation.Model;
+using ThMEPEngineCore.Algorithm.ArcAlgorithm;
 
 namespace ThMEPEngineCore
 {
@@ -145,28 +146,38 @@ namespace ThMEPEngineCore
 
                 GridLineCleanService gridLineClean = new GridLineCleanService();
                 gridLineClean.CleanGrid(retAxisCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
-                foreach (var item in lineGirds)
-                {
-                    foreach (var line in item.xLines)
-                    {
-                        acadDatabase.ModelSpace.Add(line);
-                    }
-                    foreach (var line in item.yLines)
-                    {
-                        acadDatabase.ModelSpace.Add(line);
-                    }
-                }
-                foreach (var item in arcGrids)
-                {
-                    foreach (var line in item.lines)
-                    {
-                        acadDatabase.ModelSpace.Add(line);
-                    }
-                    foreach (var line in item.arcLines)
-                    {
-                        acadDatabase.ModelSpace.Add(line);
-                    }
-                }
+
+                //var curves = new List<Curve>(lineGirds.SelectMany(x => x.xLines));
+                //curves.AddRange(lineGirds.SelectMany(x => x.yLines));
+                //curves.AddRange(arcGrids.SelectMany(x => x.lines));
+                //curves.AddRange(arcGrids.SelectMany(x => x.arcLines));
+                //var polygons = ThArcPolygonize.Polygonize(curves, 500);
+                //foreach (var item in polygons)
+                //{
+                //    acadDatabase.ModelSpace.Add(item);
+                //}
+                //foreach (var item in lineGirds)
+                //{
+                //    foreach (var line in item.xLines)
+                //    {
+                //        acadDatabase.ModelSpace.Add(line);
+                //    }
+                //    foreach (var line in item.yLines)
+                //    {
+                //        acadDatabase.ModelSpace.Add(line);
+                //    }
+                //}
+                //foreach (var item in arcGrids)
+                //{
+                //    foreach (var line in item.lines)
+                //    {
+                //        acadDatabase.ModelSpace.Add(line);
+                //    }
+                //    foreach (var line in item.arcLines)
+                //    {
+                //        acadDatabase.ModelSpace.Add(line);
+                //    }
+                //}
             }
         }
 

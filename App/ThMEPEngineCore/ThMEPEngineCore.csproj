@@ -47,6 +47,7 @@
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="AFASRegion\Util\UtilService.cs" />
     <Compile Include="Algorithm\ArcAlgorithm\ThArcGeoUitls.cs" />
+    <Compile Include="Algorithm\ArcAlgorithm\ThArcPolygonize.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AdjustAStarPath.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarLine.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarEntity.cs" />
@@ -171,6 +172,9 @@
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
+    <Compile Include="GridOperation\Utils\GridBoundaryExtendService.cs" />
+    <Compile Include="IO\ExcelService\ExcelHelper.cs" />
+    <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="GridOperation\Model\ArcGridModel.cs" />
     <Compile Include="GridOperation\Model\GridModel.cs" />
     <Compile Include="GridOperation\Model\LineGridModel.cs" />
