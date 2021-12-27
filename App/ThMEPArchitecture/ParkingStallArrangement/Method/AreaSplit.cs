@@ -111,6 +111,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static bool IsCorrectSegLines(Line line, ref List<Polyline> areas)
         {
+            double minArea = 1e8;
             var segLine = line;//分割线
             var breakFlag = false;
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
@@ -122,14 +123,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     foreach(var a in segAreas)
                     {
-                        if(a.Area < 100)
+                        if(a.Area < minArea)
                         {
                             breakFlag = true;
-                            return false;
+                            //return false;
                         }
                     }
                     if (breakFlag)
+                    {
+                        breakFlag = false;
                         continue;
+                    }
                     areas.RemoveAt(k);
                     areas.AddRange(segAreas);
                     return true;
@@ -140,7 +144,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     for (int i = 0; i < 2; i++)
                     {
                         var a = sortedAreas[i];
-                        if (a.Area < 100)
+                        if (a.Area < minArea)
                         {
                             return false;
                         }
@@ -156,6 +160,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static bool IsCorrectSegLines2(Line line, ref List<Polyline> areas)
         {
+            double minArea = 1e8;
             var segLine = line;//分割线
             var middlePt = segLine.GetMiddlePt();
             
@@ -170,7 +175,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     {
                         foreach (var a in segAreas)
                         {
-                            if (a.Area < 100)
+                            if (a.Area < minArea)
                             {
                                 breakFlag = true; 
                                 break;
@@ -188,7 +193,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         for (int i = 0; i < 2; i++)
                         {
                             var a = sortedAreas[i];
-                            if (a.Area < 100)
+                            if (a.Area < minArea)
                             {
                                 breakFlag = true;
                                 continue ;

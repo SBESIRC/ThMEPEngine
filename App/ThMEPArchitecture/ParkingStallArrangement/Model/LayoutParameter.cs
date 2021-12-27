@@ -77,33 +77,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             AreaNumber.Clear();
 
-            foreach (var line in SegLines)
-            {
-                line.Dispose();
-            }
+            SegLines.ForEach(e => e.Dispose());
             SegLines.Clear();
 
-            foreach(var pline in Areas)
-            {
-                pline.Dispose();
-            }
+            Areas.ForEach(e => e.Dispose());
             Areas.Clear();
 
-            foreach(var pline in AreaDic.Values)
-            {
-                pline.Dispose();
-            }
+            AreaDic.ForEach(e => e.Value.Dispose());
             AreaDic.Clear();
 
-            foreach(var blocks in ObstacleDic.Values)
-            {
-                foreach(var block in blocks)
-                {
-                    block.Dispose();
-                }
-                blocks.Clear();
-            }
-            ObstacleDic.Clear();
+            //foreach(var blocks in ObstacleDic.Values)
+            //{
+            //    foreach(var block in blocks)
+            //    {
+            //        block.Dispose();
+            //    }
+            //    blocks.Clear();
+            //}
+            ObstacleDic.Clear();//这个暂时不支持dispose
 
             foreach (var lines in SegLineDic.Values)
             {
@@ -114,6 +105,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 lines.Clear();
             }
             SegLineDic.Clear();
+
+            AreaSegLineDic.Clear();
 
             foreach (var plines in AreaWalls.Values)
             {
@@ -158,7 +151,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 plinesList.Clear();
             }
             ObstaclesList.Clear();
+
+            SubAreaDic.ForEach(e => e.Value.Dispose());
+            SubAreaDic.Clear();
+
+            IntersectPt.Clear();
+
+            SegLineIndexDic.ForEach(e => e.Value.Dispose());
+            SegLineIndexDic.Clear();
         }
+
         public void Clear2()
         {
             AreaNumber.Clear();
@@ -180,11 +182,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             var areas = new List<Polyline>();
             areas.Add(InitialWalls);
-            Clear2();//清空所有参数
+            Clear();//清空所有参数
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
+                var beforeCnt = areas.Count;
                 Split(gene, ref areas);
+                var afterCnt = areas.Count;
+                if(afterCnt != beforeCnt + 1)
+                {
+                    ;
+                }
                 var line = GetSegLine(gene);
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
@@ -207,7 +215,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 AreaDic.Add(i, Areas[i]);
                 var buildings = GetObstacles(Areas[i]);
                 ObstacleDic.Add(i, buildings);
-                SegLineDic.Add(i, GetSegLines(Areas[i], out List<int> lineNums));
+                var segLines = GetSegLines(Areas[i], out List<int> lineNums);
+                if(segLines.Count > 4)
+                {
+                    ;
+                }
+                SegLineDic.Add(i, segLines);
                 AreaSegLineDic.Add(i, lineNums);
                 AreaSegs.Add(i, GetAreaSegs(Areas[i], SegLineDic[i], out List<Polyline> areaWall));
                 AreaWalls.Add(i, areaWall);
@@ -362,14 +375,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 
                 var line = db as Line;
-                var extendLine = line.ExtendLine(-10.0);
-                
-                var rect = extendLine.Buffer(1.0);
-                var rst = areaIndex.SelectCrossingPolygon(rect);
-                if(rst.Count > 0)
+                if(line.IsBoundOf(area))
                 {
                     segLines.Add(line);
                 }
+                //var extendLine = line.ExtendLine(-10.0);
+                
+                //var rect = extendLine.Buffer(1.0);
+                //var rst = areaIndex.SelectCrossingPolygon(rect);
+                //if(rst.Count > 0)
+                //{
+                //    segLines.Add(line);
+                //}
             }
             for (int i = 0; i < SegLineIndexDic.Count; i++)
             {

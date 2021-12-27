@@ -106,7 +106,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch
             {
-
+                ;
             }
             var solution = rst.First();
             histories.Add(rst.First());

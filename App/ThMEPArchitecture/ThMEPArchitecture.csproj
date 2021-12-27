@@ -36,6 +36,7 @@
     <Compile Include="ParkingStallArrangement\General\Utils.cs" />
     <Compile Include="ParkingStallArrangement\Method\AngleTools.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
+    <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
     <Compile Include="ParkingStallArrangement\Model\LinePairs.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
