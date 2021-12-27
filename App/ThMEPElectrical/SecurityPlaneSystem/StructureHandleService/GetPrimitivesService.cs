@@ -151,6 +151,7 @@ namespace ThMEPElectrical.StructureHandleService
                 vmInfo.AddRange(vmLineInfo);
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(vmInfo.ToCollection());
+                spatialIndex.AllowDuplicate = true;
                 var boundary = polyline.Clone() as Polyline;
                 originTransformer.Reset(boundary);
                 var objs = spatialIndex.SelectWindowPolygon(boundary);
