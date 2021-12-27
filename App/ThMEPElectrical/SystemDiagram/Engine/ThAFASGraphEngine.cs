@@ -748,11 +748,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         {
                             if (!SIRule(NextBlk) && !FASRule(NextBlk))
                             {
-                                //过滤掉延伸出去但未进入其他防火分区的问题
-                                if (AlarmPoint.Count > 1)
-                                {
-                                    CrossAlarms.AddRange(AlarmPoint);
-                                }
+                                //新逻辑:只要穿防火分区，就打上标记
+                                CrossAlarms.AddRange(AlarmPoint);
                             }
                             NextElements.Add(NextBlk, sharedPath);
                         }
@@ -764,11 +761,8 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                         {
                             if (!SIRule(NextBlk) && !FASRule(NextBlk))
                             {
-                                //过滤掉延伸出去但未进入其他防火分区的问题
-                                if (AlarmPoint.Count > 1)
-                                {
-                                    CrossAlarms.AddRange(AlarmPoint);
-                                }
+                                //新逻辑:只要穿防火分区，就打上标记
+                                CrossAlarms.AddRange(AlarmPoint);
                             }
                             NextElements.Add(NextBlk, sharedPath);
                         }
@@ -906,6 +900,13 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             using (var dbSwitch = new ThDbWorkingDatabaseSwitch(Database))
             using (AcadDatabase acad = AcadDatabase.Use(Database))
             {
+                //用kdTree做过滤重复点位
+                var kdTree = new ThCADCoreNTSKdTree(1.0);
+                foreach (Point3d pt in CrossAlarms)
+                {
+                    kdTree.InsertPoint(pt);
+                }
+                this.CrossAlarms = kdTree.SelectAll().Cast<Point3d>().ToList();
                 this.CrossAlarms.ForEach(o =>
                 {
                     var newDBText = new DBText() { Height = 800, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "×", Position = o, AlignmentPoint = o, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };
