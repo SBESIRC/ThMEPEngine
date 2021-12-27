@@ -56,12 +56,6 @@ namespace ThMEPLighting
         public const string EmgLightConnectLineType = "HIDDEN";
         public const short EmgLightConnectLayerColor = 4;
 
-        //public static readonly string ALBlockName = "E-BDB001";
-        //public static readonly string ALEBlockName = "E-BDB003";
-
-        //车道线
-        public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
-
         //疏散指示灯
         public const string FEI_EXIT_NAME100 = "E-BFEL100";      //疏散出入口块名100
         public const string FEI_EXIT_NAME101 = "E-BFEL101";      //疏散出入口块名101

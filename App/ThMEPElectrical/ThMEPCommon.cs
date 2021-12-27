@@ -97,7 +97,6 @@ namespace ThMEPElectrical
         public static readonly string GT_PIPE_LAYER_NAME = "E-GTS-WIRE";               //入侵报警系统连管图层
         public static readonly string GT_PIPE_LINETYPE = "ByLayer";                        //入侵报警系统连管线型
         // 图层
-        public const short LANELINE_LAYER_COLORINDEX = 2;
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
 
         // 常量

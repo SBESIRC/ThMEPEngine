@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.ParkingStall.Assistant;
@@ -249,7 +250,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 var objs = new DBObjectCollection();
                 var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
+                .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME);
                 laneLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;

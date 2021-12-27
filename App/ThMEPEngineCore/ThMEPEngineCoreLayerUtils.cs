@@ -20,6 +20,7 @@ namespace ThMEPEngineCore
         public const string FIRECOMPARTMENT = "AI-防火分区";
         public const string FRS = "AI-防火卷帘";
         public const string CENTERLINE = "AI-中心线";
+        public const string LANECENTERLINE = "E-LANE-CENTER";
 
         public static ObjectId CreateAIBeamLayer(this Database database)
         {
@@ -89,6 +90,11 @@ namespace ThMEPEngineCore
         public static ObjectId CreateAICenterLineLayer(this Database database)
         {
             return database.CreateAILayer(CENTERLINE, 2);
+        }
+
+        public static ObjectId CreateAILaneCenterLineLayer(this Database database)
+        {
+            return database.CreateAILayer(LANECENTERLINE, 2);
         }
 
         public static ObjectId CreateAILayer(this Database database, string name, short colorIndex)

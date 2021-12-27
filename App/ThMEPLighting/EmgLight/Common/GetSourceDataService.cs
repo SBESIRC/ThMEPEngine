@@ -18,7 +18,7 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.Common;
-
+using ThMEPEngineCore;
 
 namespace ThMEPLighting.EmgLight.Common
 {
@@ -68,7 +68,7 @@ namespace ThMEPLighting.EmgLight.Common
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
+                .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME);
 
             List<Curve> laneList = laneLines.Select(x => x.WashClone()).ToList();
 
