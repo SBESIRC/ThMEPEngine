@@ -173,8 +173,6 @@
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
     <Compile Include="GridOperation\Utils\GridBoundaryExtendService.cs" />
-    <Compile Include="IO\ExcelService\ExcelHelper.cs" />
-    <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="GridOperation\Model\ArcGridModel.cs" />
     <Compile Include="GridOperation\Model\GridModel.cs" />
     <Compile Include="GridOperation\Model\LineGridModel.cs" />
