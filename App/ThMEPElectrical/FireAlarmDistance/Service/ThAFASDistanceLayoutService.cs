@@ -1,5 +1,4 @@
-﻿#if (ACAD2016 || ACAD2018)
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
@@ -103,4 +102,3 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
         }
     }
 }
-#endif
