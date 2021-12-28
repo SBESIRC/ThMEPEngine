@@ -493,6 +493,27 @@ namespace ThMEPArchitecture.PartitionLayout
             return pt_on_a.DistanceTo(pt_on_b);
         }
 
+        public static bool IsPointInFast(this Polyline poly, Point3d p)
+        {
+            double temp = 0;
+            var points = poly.Vertices();
+            for (int i = 0; i < points.Count; i++)
+            {
+                int j = (i < points.Count - 1) ? (i + 1) : 0;
+                var v1 = points[i].ToPoint2d() - p.ToPoint2d();
+                var v2 = points[j].ToPoint2d() - p.ToPoint2d();
+                temp += v1.MinusPiToPiAngleTo(v2);
+            }
+            if (Math.Abs(Math.Abs(temp) - 2 * Math.PI) < 0.1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        
         public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
         {
             if (!allowOnEdge)
@@ -502,7 +523,7 @@ namespace ThMEPArchitecture.PartitionLayout
             foreach (var p in pls)
             {
                 if (p.Area < 1) continue;
-                if (p.IsPointIn(pt))
+                if (p.IsPointInFast(pt))
                 {
                     return true;
                 }
@@ -770,7 +791,7 @@ namespace ThMEPArchitecture.PartitionLayout
             var splited = SplitCurve(a, new DBObjectCollection() { pl });
             foreach (Line s in splited)
             {
-                if (!pl.IsPointIn(s.GetCenter())) length += s.Length;
+                if (!pl.IsPointInFast(s.GetCenter())) length += s.Length;
             }
             return length;
         }

@@ -461,8 +461,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             Logger?.Information("进行选择");
 
-            //inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
             inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
 
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;
