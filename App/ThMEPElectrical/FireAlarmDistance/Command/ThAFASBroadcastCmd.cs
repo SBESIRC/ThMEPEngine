@@ -1,26 +1,15 @@
 ﻿#if (ACAD2016 || ACAD2018)
 using System;
-using System.Linq;
-using System.IO;
-using System.Collections.Generic;
-
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Features;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
-
 using AcHelper;
 using Linq2Acad;
-using CLI;
-
-using ThCADExtension;
-using ThCADCore.NTS;
+using System.IO;
+using System.Linq;
 using ThMEPEngineCore.IO;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Command;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Model;
@@ -29,6 +18,8 @@ using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmDistance.Model;
 using ThMEPElectrical.FireAlarmDistance.Service;
+
+using CLI;
 
 namespace ThMEPElectrical.FireAlarmDistance
 {
@@ -69,21 +60,9 @@ namespace ThMEPElectrical.FireAlarmDistance
 
         public void ThFABroadcastExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var doclock = Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ////--------------画框，提数据，转数据
-                //var framePts = ThAFASUtils.GetFrameBlk();
-                //if (framePts.Count == 0)
-                //{
-                //    return;
-                //}
-
-                //if (UseUI == false)
-                //{
-                //    SettingNoUI();
-                //}
-
                 var transformer = ThAFASDataPass.Instance.Transformer;
                 var pts = ThAFASDataPass.Instance.SelectPts;
 
@@ -121,13 +100,24 @@ namespace ThMEPElectrical.FireAlarmDistance
                     MountMode = _mode,
                 };
 
+#if DEBUG
+                {
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
+                    File.WriteAllText(path, geojson);
+                }
+#endif
+
+                //--------------处理中
                 var outJson = engine.Place(geojson, context);
-                var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
 
 #if DEBUG
-                string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
-                File.WriteAllText(path, outJson);
-#endif 
+                {
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
+                    File.WriteAllText(path, outJson);
+                }
+#endif
+
+                var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
 
