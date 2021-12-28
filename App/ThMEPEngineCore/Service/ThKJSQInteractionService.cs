@@ -395,11 +395,29 @@ namespace ThMEPEngineCore.Service
             results = Rebuild(results);
             results = builder.PostProcess(results);
 
+            // 过滤与柱、墙等构件重合的面域
+            var components = new DBObjectCollection();
+            components = components.Union(data.Doors);
+            components = components.Union(data.Columns);
+            components = components.Union(data.Windows);
+            components = components.Union(data.ShearWalls);
+            components = components.Union(data.CurtainWalls);
+            components = components.Union(data.ArchitectureWalls);
+            results = Filter(results, components);
+
             // 将生产的面恢复到原位置
             data.Transformer.Reset(results);
             data.Reset();
             return results;
         }
+
+        private DBObjectCollection Filter(DBObjectCollection boundaries,DBObjectCollection components)
+        {
+            var filter = new ThRoomOutlineFilter(boundaries);
+            filter.Filter(components);
+            return filter.Results;
+        }
+
         private Entity CreateHatch(Database database, Entity entity, int colorIndex = 21)
         {
             // 填充
