@@ -21,7 +21,7 @@ namespace TianHua.Hvac.UI.Command
             ActionName = "插风口";
             CommandName = "THCRFK";
             AirPortParameter = airPortParameter;
-            DrawPortService = new ThDuctPortsDrawPort(AirPortLayer, AirPortBlkName);
+            DrawPortService = new ThDuctPortsDrawPort(AirPortLayer, AirPortBlkName, 0);
         }
         public void Dispose()
         {

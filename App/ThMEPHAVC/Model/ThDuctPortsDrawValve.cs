@@ -37,34 +37,31 @@ namespace ThMEPHVAC.Model
                     var textAngle = (angle >= Math.PI * 0.5) ? Math.PI * 0.5 : 0;
                     var p = rootSeg.seg.l.StartPoint + (dirVec * rootSeg.seg.srcShrink);
                     var insertP = p + verticalR * width * 0.5 + srtPoint.GetAsVector();
-                    InsertValve(insertP.ToPoint2D(), width, angle, textAngle);
+                    InsertValve(insertP, width, angle, textAngle);
                 }
             }
         }
-        public void InsertValve(Point2d insertP, double width, double angle, double textAngle)
+        public void InsertValve(Point3d insertP, double width, double angle, double textAngle)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), angle);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP, new Scale3d(), angle);
                 ThDuctPortsDrawService.SetValveDynBlockProperity(obj, width, 250, textAngle, valveVisibility);
             }
         }
-        public void InsertHole(Point2d insertP, double width, double len, double angle)
+        public void InsertHole(Point3d insertP, double width, double len, double angle)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), angle);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP, new Scale3d(), angle);
                 ThDuctPortsDrawService.SetHoleDynBlockProperity(obj, width, len);
             }
         }
-        public void InsertMuffler(Point2d insertP, MufflerModifyParam muffler)
+        public void InsertMuffler(Point3d insertP, MufflerModifyParam muffler)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var insertP3 = new Point3d(insertP.X, insertP.Y, 0);
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP3, new Scale3d(), muffler.rotateAngle);
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(valveLayer, valveName, insertP, new Scale3d(), muffler.rotateAngle);
                 ThDuctPortsDrawService.SetMufflerDynBlockProperity(obj, muffler);
             }
         }

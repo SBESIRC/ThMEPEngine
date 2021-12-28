@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
@@ -113,7 +115,7 @@ namespace ThMEPHVAC.Model
         {
             return new Vector2d(dir_vec.Y, -dir_vec.X);
         }
-        public static Vector3d GetDirVecBySngle3(double angle)
+        public static Vector3d GetDirVecByAngle3(double angle)
         {
             var v = GetDirVecByAngle(angle);
             return new Vector3d(v.X, v.Y, 0);
@@ -516,15 +518,6 @@ namespace ThMEPHVAC.Model
             }
             throw new NotImplementedException("[CheckError]: centerP doesn't connect with l1 or l2");
         }
-        public static double CalcReducingLen(double big, double small)
-        {
-            return 0.5 * Math.Abs(big - small) / Math.Tan(20 * Math.PI / 180);
-        }
-        public static double GetReducingLen(double big, double small)
-        {
-            double reducinglength = 0.5 * Math.Abs(big - small) / Math.Tan(20 * Math.PI / 180);
-            return reducinglength < 200 ? 200 : reducinglength > 1000 ? 1000 : reducinglength;
-        }
         public static double GetLineDis(Line l1, Line l2)
         {
             var coordinate1 = new Coordinate[] { l1.StartPoint.ToNTSCoordinate(), l1.EndPoint.ToNTSCoordinate() };
@@ -640,11 +633,19 @@ namespace ThMEPHVAC.Model
             }
             return new ThCADCoreNTSSpatialIndex(mpObjs);
         }
-        public static Polygon CreatePolygonDetector(Point3d p)
+        public static void SetAttr(ObjectId obj, Dictionary<string, string> attr, double angle)
         {
-            var pl = new Polyline();
-            pl.CreatePolygon(p.ToPoint2D(), 4, 10);
-            return pl.ToNTSPolygon();
+            var block = obj.GetDBObject<BlockReference>();
+            foreach (ObjectId attId in block.AttributeCollection)
+            {
+                // 获取块参照属性对象
+                AttributeReference attRef = attId.GetDBObject<AttributeReference>();
+                //判断属性名是否为指定的属性名
+                if (attr.Any(c => c.Key.Equals(attRef.Tag)))
+                {
+                    attRef.Rotation = angle;
+                }
+            }
         }
     }
 }

@@ -62,18 +62,6 @@
     <Compile Include="fmDuctModify.Designer.cs">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
     </Compile>
-    <Compile Include="fmDuctPorts.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmDuctPorts.Designer.cs">
-      <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="fmFjfFpm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmFjfFpm.Designer.cs">
-      <DependentUpon>fmFjfFpm.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmFpm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -257,12 +245,6 @@
   <ItemGroup>
     <EmbeddedResource Include="fmDuctModify.resx">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmDuctPorts.resx">
-      <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmFjfFpm.resx">
-      <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmFpm.resx">
       <DependentUpon>fmFpm.cs</DependentUpon>

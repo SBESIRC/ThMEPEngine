@@ -204,7 +204,6 @@ namespace ThMEPHVAC.Model
                         var dirVec = ThMEPHVACService.GetEdgeDirection(shrinkedLine);
                         //var firstOftDis = endEndline.Equals(seg) ? 200 : portStep;末端偏移200，中间端居中
                         var p = shrinkedLine.EndPoint - firstOftDis * dirVec;
-                        seg.dirAlignPoint = (seg.portNum == 0) ? Point3d.Origin : p;//无轴网时之画水平的Dimension
                         foreach (var port in seg.portsInfo)
                         {
                             port.position = p;

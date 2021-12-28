@@ -54,10 +54,10 @@ namespace ThMEPHVAC.FanLayout.Engine
                     var ductEngine = new ThFanDuctRecognitionEngine();
                     var ductObjId = ductEngine.GetFanDuctObjectId(polygon);
                     if (!ductObjId.IsValid)
-                    {
                         return false;
-                    }
                     var ductParam = ThHvacAnalysisComponent.GetDuctParamById(ductObjId);
+                    if (ductParam.handle == ObjectId.Null.Handle || ductParam.sp.IsEqualTo(ductParam.ep))
+                        return false;
                     ThFanLayoutDealService.GetDuctWidthAndHeight(ductParam.ductSize, out holeWidth, out holeHeight);
                     info.width = holeWidth;
                     info.height = holeHeight;

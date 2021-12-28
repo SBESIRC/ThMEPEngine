@@ -9,6 +9,7 @@ using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
 using ThMEPEngineCore.Command;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using DotNetARX;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -32,10 +33,11 @@ namespace TianHua.Hvac.UI.Command
                                      out PortParam portParam,
                                      out DBObjectCollection connNotRoomLines,
                                      out Dictionary<string, FanParam> dicFans,
-                                     out Dictionary<string, ThDbModelFan> dicModels);
+                                     out Dictionary<string, ThDbModelFan> dicModels,
+                                     out Dictionary<Polyline, ObjectId> allFansDic);
             if (portParam.param == null)
                 return;
-            DrawBrokenLines(portParam);
+            DrawBrokenLines(portParam, out ObjectIdList brokenLineIds);
             if (!status)
                 return;
             if (isSelectFan)
@@ -48,7 +50,7 @@ namespace TianHua.Hvac.UI.Command
                 {
                     var service = new ThDuctPortsDrawService(portParam.param.scenario, portParam.param.scale);
                     ThNotRoomStartComp.DrawEndLineEndComp(ref anay.fanDucts, startPoint, portParam, service);// 先插入comp
-                    DrawMultiFanMainDuct(anay, knife, startPoint, fanParam, service);           // 会改变线信息
+                    DrawMultiFanMainDuct(anay, knife, startPoint, fanParam, service);                        // 会改变线信息
                 }
                 var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var wallIndex = ThMEPHVACService.CreateRoomOutlineIndex(portParam.srtPoint);
@@ -61,16 +63,17 @@ namespace TianHua.Hvac.UI.Command
                     var wallLines = GetWalls(p, srtP, wallIndex);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
-                        cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag);
+                        cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
                     else
-                        cmdService.NotPressurizedAirSupply(fan, model, wallLines, portParam, flag);
+                        cmdService.NotPressurizedAirSupply(fan, model, wallLines, portParam, flag, allFansDic);
                 }
             }
             else
             {
-                var ductPort = new ThHvacDuctPortsCmd(portParam);
+                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
                 ductPort.Execute();
             }
+            ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
         }
         private DBObjectCollection GetWalls(Point3d p, Point3d srtP, ThCADCoreNTSSpatialIndex index)
         {
@@ -100,10 +103,10 @@ namespace TianHua.Hvac.UI.Command
             return lines;
         }
 
-        private void DrawBrokenLines(PortParam portParam)
+        private void DrawBrokenLines(PortParam portParam, out ObjectIdList ids)
         {
             var mat = Matrix3d.Displacement(portParam.srtPoint.GetAsVector());
-            ThDuctPortsDrawService.DrawLines(portParam.centerLines, mat, "0", out _);
+            ThDuctPortsDrawService.DrawLines(portParam.centerLines, mat, "0", out ids);
         }
 
         private void DrawMultiFanMainDuct(ThFansMainDuctAnalysis anay, ThSepereateFansDuct knife, Point3d startPoint, FanParam fanParam, ThDuctPortsDrawService service)
@@ -144,7 +147,8 @@ namespace TianHua.Hvac.UI.Command
                                  out PortParam portParam,
                                  out DBObjectCollection connNotRoomLines,
                                  out Dictionary<string, FanParam> dicFans,
-                                 out Dictionary<string, ThDbModelFan> dicModels)
+                                 out Dictionary<string, ThDbModelFan> dicModels,
+                                 out Dictionary<Polyline, ObjectId> allFansDic)
         {
             using (var dlg = new fmFpm())
             {
@@ -153,6 +157,7 @@ namespace TianHua.Hvac.UI.Command
                 connNotRoomLines = new DBObjectCollection();
                 dicFans = new Dictionary<string, FanParam>();
                 dicModels = new Dictionary<string, ThDbModelFan>();
+                allFansDic = new Dictionary<Polyline, ObjectId>();
                 isSelectFan = false;
                 if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
                 {
@@ -160,17 +165,19 @@ namespace TianHua.Hvac.UI.Command
                     if (isSelectFan)
                     {
                         dicFans = dlg.fans;
-                        dicModels = dlg.fansDic;
+                        dicModels = dlg.selectFansDic;
                         portParam = dlg.portParam;
                         startPoint = dlg.RoomStartPoint;
                         portParam.srtPoint = startPoint;
                         connNotRoomLines = dlg.connNotRoomLines;
+                        allFansDic = dlg.allFansDic;
                         return true;
                     }
                     else
                     {
                         startPoint = dlg.portParam.srtPoint;
                         portParam = dlg.portParam;
+                        allFansDic = dlg.allFansDic;
                         return true;
                     }
                 }

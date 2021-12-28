@@ -13,11 +13,17 @@ namespace ThMEPHVAC.Model
         {
             toOrgMat = Matrix3d.Displacement(srtP.GetAsVector());
         }
+        public void DrawCrossByCross(EntityModifyParam cross)
+        {
+            DrawCross(cross, toOrgMat);
+        }
+        public void DrawTeeByTee(EntityModifyParam tee)
+        {
+            DrawTee(tee, toOrgMat);
+        }
         public void DrawElbowByElbow(EntityModifyParam elbow)
         {
-            var elbowGeo = CreateElbow(elbow);
-            DrawShape(elbowGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
-            ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Elbow");
+            DrawElbow(elbow, toOrgMat);
         }
         public void DrawReducingByReducing(EntityModifyParam reducing)
         {
@@ -25,17 +31,20 @@ namespace ThMEPHVAC.Model
             DrawShape(reducingGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
             ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, reducing.type);
         }
+        public void DrawTextByText(TextModifyParam text)
+        {
+            textService.DrawTextInfo(text.textString, text.height, text.pos, text.rotateAngle);
+        }
         public void DrawDuctByDuct(DuctModifyParam curDuctParam)
         {
             var w = ThMEPHVACService.GetWidth(curDuctParam.ductSize);
             var DuctGeo = ThDuctPortsFactory.CreateDuct(curDuctParam.sp, curDuctParam.ep, w);
             DrawDuct(DuctGeo, toOrgMat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
-            ThDuctPortsRecoder.CreateGroup(geoIds, flgIds, centerIds, "Duct");
+            ThDuctPortsRecoder.CreateDuctGroup(geoIds, flgIds, centerIds, curDuctParam);
         }
-        
         public static LineGeoInfo CreateReducing(EntityModifyParam reducing)
         {
-            var isAxis = (reducing.type == "Reducing");
+            var isAxis = !(reducing.type == "Reducing");
             var ports = reducing.portWidths;
             var points = ports.Keys.ToList();
             var l = new Line(points[0], points[1]);

@@ -1,55 +1,60 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPortMark
     {
-        public static void InsertMark( ThMEPHVACParam param,
-                                        double port_width,
-                                        double port_height,
-                                        string port_mark_name,
-                                        string port_mark_layer,
-                                        Point3d p)
+        private double textAngle;
+        private string portMarkName;
+        private string portMarkLayer;
+        public ThDuctPortsDrawPortMark(double textAngle, string portMarkName, string portMarkLayer)
         {
-            string port_size = port_width.ToString() + 'x' + port_height.ToString();
-            double h = ThMEPHVACService.GetTextHeight(param.scale);
-            double scale_h = h * 2 / 3;
-            int port_num = param.portNum;
-            if (param.portRange.Contains("侧"))
-                port_num *= 2;
-            double avgAirVolume = param.airVolume / param.portNum;
-            avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
-            var strVolume = avgAirVolume.ToString();
-            if (param.highAirVolume > 0)
-            {
-                double av = param.highAirVolume / param.portNum;
-                av = (Math.Ceiling(av / 10)) * 10;
-                strVolume = av.ToString("0.") + "/" + strVolume;
-            }
+            this.textAngle = textAngle;
+            this.portMarkName = portMarkName;
+            this.portMarkLayer = portMarkLayer;
+        }
+        public void InsertMark(ThMEPHVACParam param, double portWidth, double portHeight, Point3d p)
+        {
             using (var acadDb = AcadDatabase.Active())
             {
-                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(port_mark_layer, port_mark_name, p, new Scale3d(scale_h, scale_h, 1), 0,
-                          new Dictionary<string, string> { { "风口名称", param.portName },
-                                                           { "尺寸", port_size },
-                                                           { "数量", port_num.ToString() },
-                                                           { "风量", strVolume} });
+                string portSize = portWidth.ToString() + 'x' + portHeight.ToString();
+                double h = ThMEPHVACService.GetTextHeight(param.scale);
+                double scaleH = h * 2 / 3;
+                int portNum = param.portNum;
+                if (param.portRange.Contains("侧"))
+                    portNum *= 2;
+                double avgAirVolume = param.airVolume / param.portNum;
+                avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
+                var strVolume = avgAirVolume.ToString();
+                if (param.highAirVolume > 0)
+                {
+                    double av = param.highAirVolume / param.portNum;
+                    av = (Math.Ceiling(av / 10)) * 10;
+                    strVolume = av.ToString("0.") + "/" + strVolume;
+                }
+                var attr = new Dictionary<string, string> { { "风口名称", param.portName },
+                                                            { "尺寸", portSize },
+                                                            { "数量", portNum.ToString() },
+                                                            { "风量", strVolume} };
+                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, 1), textAngle, attr);
+                ThMEPHVACService.SetAttr(obj, attr, textAngle);
             }
         }
-        public static void InsertLeader(Point3d srt_p, Point3d end_p, string port_mark_layer)
+        public void InsertLeader(Point3d srtP, Point3d endP)
         {
-            Leader leader = new Leader { HasArrowHead = true };
-            leader.AppendVertex(srt_p);
-            leader.AppendVertex(end_p);
             using (AcadDatabase adb = AcadDatabase.Active())
             {
+                Leader leader = new Leader { HasArrowHead = true };
+                leader.AppendVertex(srtP);
+                leader.AppendVertex(endP);
                 adb.ModelSpace.Add(leader);
                 leader.SetDatabaseDefaults();
-                leader.Layer = port_mark_layer;
+                leader.Layer = portMarkLayer;
                 leader.ColorIndex = (int)ColorIndex.BYLAYER;
                 leader.Linetype = "ByLayer";
             }

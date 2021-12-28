@@ -64,7 +64,7 @@ namespace TianHua.Hvac.UI.Command
                 ThMEPHVACService.PromptMsg("请使用最新管道生成工具生成XData");
             }
             var groupId = ThDuctPortsReadComponent.GetGroupIdsBySubEntityId(objIds[0]);
-            param = ThHvacAnalysisComponent.AnayDuctparam(list, groupId.Handle);
+            param = ThHvacAnalysisComponent.AnayDuctparam(list, groupId);
             if (param.type == "")
             {
                 ThMEPHVACService.PromptMsg("该管段未包含XData");

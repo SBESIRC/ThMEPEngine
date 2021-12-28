@@ -86,12 +86,12 @@ namespace ThMEPHVAC.CAD
             return false;
         }
         private List<ThValveGroup> GetFireAndHoleWithWall(ThDbModelFan fanmodel,
-                                                         DBObjectCollection wallobjects,
-                                                         DBObjectCollection bypassobjects,
-                                                         double ductWidth,
-                                                         double teeWidth,
-                                                         HashSet<Line> lines,
-                                                         bool isRoom)
+                                                          DBObjectCollection wallobjects,
+                                                          DBObjectCollection bypassobjects,
+                                                          double ductWidth,
+                                                          double teeWidth,
+                                                          HashSet<Line> lines,
+                                                          bool isRoom)
         {
             var valveGroups = new List<ThValveGroup>();
             var walllines = wallobjects.Cast<Line>();
@@ -118,8 +118,9 @@ namespace ThMEPHVAC.CAD
                             FanScenario = fanmodel.scenario,
                             ValveToFanSpacing = 2000,
                         };
-                        var fanFlag = isRoom ? fanmodel.isExhaust : !fanmodel.isExhaust;
-                        var valvegroup = new ThValveGroup(groupparameters, fanFlag, !fanFlag);
+                        // 排烟场景room侧是入风口，非排烟场景room侧是出风口
+                        var isIn = fanmodel.isExhaust ? isRoom : !isRoom;
+                        var valvegroup = new ThValveGroup(groupparameters, fanmodel.isExhaust, isIn);
                         valvegroup.SetFireHoleGroup(fanmodel.Data.BlockLayer);
                         valveGroups.Add(valvegroup);
                     }
@@ -164,7 +165,9 @@ namespace ThMEPHVAC.CAD
                 ValveToFanSpacing = 2000,       // remain enough spaces
             };
             var startOft = CalcStartOft(fanWidth, notRoomWidth, fanmodel, false);
-            var valveGroup = new ThValveGroup(param, fanmodel.Data.BlockLayer, !fanmodel.isExhaust, fanmodel.isExhaust);/*!!!*/
+            // 非服务侧，排风风机对应出风口，非排风风机对应入风口
+            var isIn = fanmodel.isExhaust ? false : true;
+            var valveGroup = new ThValveGroup(param, fanmodel.Data.BlockLayer, isIn, fanmodel.isExhaust);
             CorrectValveOft(valveGroup, dirVec, startOft);
             valvegroups.Add(valveGroup);
             return valvegroups;
@@ -195,7 +198,9 @@ namespace ThMEPHVAC.CAD
                 ValveToFanSpacing = 2000,       // remain enough spaces
             };
             var startOft = CalcStartOft(fanWidth, roomWidth, fanmodel, true);
-            var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer, fanmodel.isExhaust, !fanmodel.isExhaust);/*!!!*/
+            // 服务侧，排风风机对应入风口，非排风风机对应出风口
+            var isIn = fanmodel.isExhaust ? true : false;
+            var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer, isIn, fanmodel.isExhaust);
             CorrectValveOft(valvegroup, dirVec, startOft);
             valvegroups.Add(valvegroup);
             return valvegroups;
@@ -222,7 +227,7 @@ namespace ThMEPHVAC.CAD
         }
         private double CalcReducingLen(bool flag, double fanWidth, double ductWidth)
         {
-            var reducingLen = ThMEPHVACService.GetReducingLen(fanWidth, ductWidth);
+            var reducingLen = ThDuctPortsShapeService.GetReducingLen(fanWidth, ductWidth);
             if (reducingLen > 200)
             {
                 var hoseLen = flag ? 0 : 200;

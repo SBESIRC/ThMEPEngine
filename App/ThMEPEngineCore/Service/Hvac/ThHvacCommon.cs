@@ -131,7 +131,8 @@
         public const string BLOCK_VALVE_VISIBILITY_ELECTRIC = "电动多叶调节风阀";
         public const string BLOCK_VALVE_VISIBILITY_FIRE_MEC = "电/手动排烟阀（电磁、手动、常闭）MEC";
         public const string BLOCK_VALVE_VISIBILITY_FIRE_MECH_280 = "280度电/手动防火阀（电磁，反馈，常闭）MECH";
-        
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_BECH_280 = "280度电/手动防火阀（电磁，反馈，就地手动，常闭）BECH";
+
 
         //风口动态块属性名
         public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "风口长度";
@@ -139,8 +140,11 @@
         public const string BLOCK_DYNAMIC_PORT_RANGE = "风口类型";
 
         //风管立管动态块属性名
-        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_LEN = "风管长度";
         public const string BLOCK_DYNAMIC_VERTICAL_PIPE_WIDTH = "风管宽度";
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_LENGTH = "风管宽度";
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_AIRVOLUME = "风量";
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_CUT_SIZE = "截面尺寸";
+        public const string BLOCK_DYNAMIC_VERTICAL_PIPE_Code = "风管代号";
 
         //风管断线动态块属性名
         public const string BLOCK_DYNAMIC_BROKEN_LEN = "风管宽度";

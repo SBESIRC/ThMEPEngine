@@ -11,7 +11,6 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
-using ThMEPHVAC.Algorithm;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -20,26 +19,6 @@ namespace TianHua.Hvac.UI.Command
         public bool isIntegrate = true;
         public double ioBypassSepDis = 30;
         public ThHvacCmdService() { }
-        public ThHvacCmdService(bool isIntegrate) { this.isIntegrate = isIntegrate; }
-        public DBObjectCollection GetWalls()
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                var wallobjects = new DBObjectCollection();
-                var objIds = GetFromPrompt("请选择房间框线", false);
-                if (objIds.Count == 0)
-                    return new DBObjectCollection();
-                foreach (ObjectId oid in objIds)
-                {
-                    var obj = oid.GetDBObject();
-                    if (obj is Curve curveobj)
-                    {
-                        wallobjects.Add(curveobj);
-                    }
-                }
-                return ThMEPHVACLineProc.PreProc(wallobjects);
-            }
-        }
         public List<ObjectId> GetFans()
         {
             using (var db = AcadDatabase.Active())
@@ -54,27 +33,6 @@ namespace TianHua.Hvac.UI.Command
                 }
                 return fanIds;
             }
-        }
-        public ObjectId GetFan()
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                var objIds = GetFromPrompt("请选择风机", false);
-                foreach (ObjectId oid in objIds)
-                {
-                    var obj = oid.GetDBObject();
-                    return obj.IsRawModel() ? oid : ObjectId.Null;
-                }
-                return ObjectId.Null;
-            }  
-        }
-        public DBObjectCollection GetCenterLines(Point3d p1, Point3d p2)
-        {
-            var centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer("AI-风管路由");
-            centerlines = ThMEPHVACLineProc.PreProc(centerlines);
-            var detector = new ThFanCenterLineDetector(false);
-            detector.getCenterLine(centerlines, p1, p2);
-            return detector.connectLines;
         }
         public ObjectIdCollection GetFromPrompt(string prompt, bool only_able)
         {
@@ -113,9 +71,7 @@ namespace TianHua.Hvac.UI.Command
             if (teePattern == "RBType3")
                 CutMaxBypass(ref bypass, maxBypassLine, type3SepDis);//修改线集里的旁通
         }
-        public void CutMaxBypass(ref DBObjectCollection bypass, 
-                                   Line maxBypass, 
-                                   double type3SepDis)
+        public void CutMaxBypass(ref DBObjectCollection bypass, Line maxBypass, double type3SepDis)
         {
             bypass.Remove(maxBypass);
             double shrinkLen = type3SepDis * 0.5;
@@ -145,7 +101,12 @@ namespace TianHua.Hvac.UI.Command
             }
             return true;
         }
-        public void NotPressurizedAirSupply(FanParam fanParam, ThDbModelFan fan, DBObjectCollection wallLines, PortParam portParam, bool haveMultiFan)
+        public void NotPressurizedAirSupply(FanParam fanParam, 
+                                            ThDbModelFan fan, 
+                                            DBObjectCollection wallLines, 
+                                            PortParam portParam, 
+                                            bool haveMultiFan,
+                                            Dictionary<Polyline, ObjectId> allFansDic)
         {
             var bypassLines = new DBObjectCollection();
             var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
@@ -158,7 +119,7 @@ namespace TianHua.Hvac.UI.Command
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam);
+                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
                 ductPort.Execute();
             }
         }
@@ -168,7 +129,8 @@ namespace TianHua.Hvac.UI.Command
                                          DBObjectCollection wallLines,
                                          PortParam portParam,
                                          ref DBObjectCollection bypassLines,
-                                         bool haveMultiFan)
+                                         bool haveMultiFan,
+                                         Dictionary<Polyline, ObjectId> allFansDic)
 
         {
             ProcBypass(fanParam.bypassPattern, ioBypassSepDis, ref bypassLines, out Line maxBypass);
@@ -188,17 +150,17 @@ namespace TianHua.Hvac.UI.Command
             InsertElectricValve(fanParam, fan, maxBypass, pinter);
             if (fanParam.bypassPattern == "RBType4" || fanParam.bypassPattern == "RBType5")
             {
-                //var vtPinter = new ThDrawVBypass(fan.airVolume, fanParam.scale, fan.scenario, anayRes.moveSrtP, pinter.startId, fanParam.bypassSize, fanParam.roomElevation);
-                //if (fanParam.bypassPattern == "RBType4")
-                //    vtPinter.Draw4VerticalBypass(anayRes.vt.vtElbow, anayRes.inVtPos, anayRes.outVtPos);
-                //else
-                //    vtPinter.Draw5VerticalBypass(anayRes.vt.vtElbow, anayRes.inVtPos, anayRes.outVtPos);
+                var vtPinter = new ThDrawVBypass(fan.airVolume, fanParam.scale, fan.scenario, anayRes.moveSrtP, fanParam.bypassSize, fanParam.roomElevation);
+                if (fanParam.bypassPattern == "RBType4")
+                    vtPinter.Draw4VerticalBypass(anayRes.vt.vtElbow, anayRes.inVtPos, anayRes.outVtPos);
+                else
+                    vtPinter.Draw5VerticalBypass(anayRes.vt.vtElbow, anayRes.inVtPos, anayRes.outVtPos);
             }
             if (isIntegrate)
             {
                 var srtP = portParam.srtPoint;
                 TransFanParamToPortParam(portParam, fanParam, srtP, anayRes.auxLines[0]);
-                var ductPort = new ThHvacDuctPortsCmd(portParam);
+                var ductPort = new ThHvacDuctPortsCmd(portParam, allFansDic);
                 ductPort.Execute();
             }
         }
@@ -237,10 +199,19 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        public static Point3d GetPointFromPrompt(string prompt)
+        public static Point3d? GetPointFromPrompt(string prompt, out Matrix3d ucsMat)
         {
             var startRes = Active.Editor.GetPoint(prompt);
-            return new Point3d(startRes.Value.X, startRes.Value.Y, 0);
+            ucsMat = Active.Editor.CurrentUserCoordinateSystem;
+            if (startRes.Status==PromptStatus.OK)
+            {
+                var wcsPt = startRes.Value.TransformBy(ucsMat);
+                return new Point3d(wcsPt.X, wcsPt.Y, 0);
+            }
+            else
+            {
+                return null;
+            }
         }
         private void InsertValve(bool isExhaust, bool roomEnable, bool notRoomEnable, ThHolesAndValvesEngine valve_hole)
         {
@@ -269,47 +240,47 @@ namespace TianHua.Hvac.UI.Command
                 }
             }
         }
-        private void RecordBypassAlignmentLine(Line max_bypass,
+        private void RecordBypassAlignmentLine(Line maxBypass,
                                                FanParam param,
                                                ThDbModelFan fan,
                                                DBObjectCollection bypass,
-                                               List<TextAlignLine> text_alignment,
-                                               Point3d move_srt_p)
+                                               List<TextAlignLine> textAlignment,
+                                               Point3d moveSrtP)
         {
             if (param.bypassSize == null)
                 return;
-            var dis_mat = Matrix3d.Displacement(-move_srt_p.GetAsVector());
+            var dis_mat = Matrix3d.Displacement(-moveSrtP.GetAsVector());
             if (bypass.Count == 0)
             {
                 var p1 = fan.FanInletBasePoint.TransformBy(dis_mat);
                 var p2 = fan.FanOutletBasePoint.TransformBy(dis_mat);
-                text_alignment.Add(new TextAlignLine() { l = new Line(p1, p2) , ductSize = param.bypassSize , isRoom = true });
+                textAlignment.Add(new TextAlignLine() { l = new Line(p1, p2) , ductSize = param.bypassSize , isRoom = true });
             }
             else
             {
                 if (param.bypassPattern == "RBType3")
                 {
-                    max_bypass.TransformBy(dis_mat);
+                    maxBypass.TransformBy(dis_mat);
                 }
-                text_alignment.Add(new TextAlignLine() { l = max_bypass, ductSize = param.bypassSize , isRoom = true });
+                textAlignment.Add(new TextAlignLine() { l = maxBypass, ductSize = param.bypassSize , isRoom = true });
             }
         }
-        private void InsertElectricValve(FanParam param, ThDbModelFan fan, Line max_bypass, ThFanDraw pinter)
+        private void InsertElectricValve(FanParam param, ThDbModelFan fan, Line maxBypass, ThFanDraw pinter)
         {
-            var dir_vec = (param.bypassPattern == "RBType4" || param.bypassPattern == "RBType5") ?
+            var dirVec = (param.bypassPattern == "RBType4" || param.bypassPattern == "RBType5") ?
                             (fan.FanOutletBasePoint - fan.FanInletBasePoint).GetNormal() :
-                            ThMEPHVACService.GetEdgeDirection(max_bypass);
-            var angle = dir_vec.GetAngleTo(-Vector3d.XAxis);
-            var z = dir_vec.CrossProduct(-Vector3d.XAxis).Z;
+                            ThMEPHVACService.GetEdgeDirection(maxBypass);
+            var angle = dirVec.GetAngleTo(-Vector3d.XAxis);
+            var z = dirVec.CrossProduct(-Vector3d.XAxis).Z;
             if (Math.Abs(z) < 1e-3)
                 z = 0;
             if (z > 0)
                 angle = Math.PI * 2 - angle;
             var l = (param.bypassPattern == "RBType4" || param.bypassPattern == "RBType5") ?
-                     new Line(fan.FanOutletBasePoint, fan.FanInletBasePoint) : max_bypass;
-            var insert_p = ThMEPHVACService.GetMidPoint(l);
+                     new Line(fan.FanOutletBasePoint, fan.FanInletBasePoint) : maxBypass;
+            var insertP = ThMEPHVACService.GetMidPoint(l);
             var width = ThMEPHVACService.GetWidth(param.bypassSize);
-            pinter.InsertElectricValve(insert_p.GetAsVector(), width, angle + 0.5 * Math.PI);
+            pinter.InsertElectricValve(insertP.GetAsVector(), width, angle + 0.5 * Math.PI);
         }
     }
 }
