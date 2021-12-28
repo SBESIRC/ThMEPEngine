@@ -297,6 +297,19 @@ namespace ThMEPHVAC.FanLayout.Service
                 database.ModelSpace.Add(dbText);
             }
         }
+        public void InsertValve(string layer, string blockName,string strType, Point3d position, double angle, Scale3d scale)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                var blkId = InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, scale, angle, attNameValues);
+                var data = new ThBlockReferenceData(blkId);
+                if (data.CustomProperties.Contains("可见性"))
+                {
+                    data.CustomProperties.SetValue("可见性", strType);
+                }
+            }
+        }
         public ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
         {
             Database db = spaceId.Database;//获取数据库对象

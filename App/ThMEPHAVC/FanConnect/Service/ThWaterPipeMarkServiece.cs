@@ -1,7 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -88,7 +90,11 @@ namespace ThMEPHVAC.FanConnect.Service
                 }
             }
 
-            if ( markAg > Math.PI && markAg <= Math.PI * 3.0 / 2.0)
+            var tmpPt1 = node.Parent.Item.CntPoint.TransformBy(Active.Editor.WCS2UCS());
+            var tmpPt2 = node.Item.CntPoint.TransformBy(Active.Editor.WCS2UCS());
+            var tmpVector = tmpPt1.GetVectorTo(tmpPt2).GetNormal();
+            var tmpAg = ThFanConnectUtils.GetVectorAngle(tmpVector);
+            if (tmpAg > Math.PI/2.0 && tmpAg <= Math.PI * 3.0 / 2.0)
             {
                 markAg = markAg + Math.PI;
                 property.Reverse();
@@ -168,7 +174,12 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 markPt = markPt + direct * 300.0;
             }
-            if (markAg > Math.PI && markAg <= Math.PI*2.0)
+
+            var tmpPt1 = node.Parent.Item.CntPoint.TransformBy(Active.Editor.WCS2UCS());
+            var tmpPt2 = node.Item.CntPoint.TransformBy(Active.Editor.WCS2UCS());
+            var tmpVector = tmpPt1.GetVectorTo(tmpPt2).GetNormal();
+            var tmpAg = ThFanConnectUtils.GetVectorAngle(tmpVector);
+            if (tmpAg > Math.PI / 2.0 && tmpAg <= Math.PI*3.0/2.0)
             {
                 markAg = markAg - Math.PI;
             }

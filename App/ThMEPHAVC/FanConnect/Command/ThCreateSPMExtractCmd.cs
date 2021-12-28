@@ -43,6 +43,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-分歧管"));
                 }
+                if (blockDb.Blocks.Contains("AI-水阀"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水阀"));
+                }
                 if (blockDb.Layers.Contains("H-PIPE-DIMS"))
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-DIMS"), true);
@@ -83,10 +87,15 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), true);
                 }
+                if (blockDb.Layers.Contains("H-PAPP-VALV"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PAPP-VALV"), true);
+                }
+                
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-DIMS");
+                ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-DIMS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CR");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-HS");
@@ -96,6 +105,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CHR");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-R");
                 ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-APPE");
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PAPP-VALV");
             }
         }
         public override void SubExecute()
