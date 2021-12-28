@@ -17,6 +17,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public class GetInput
     {
+        public static readonly HashSet<Entity> entities = new HashSet<Entity>();
         public static void GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
             Point3dCollection selectArea, Point3d startPt)
         {
@@ -102,17 +103,29 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
-            var labelLine = labelEngine.CreateLabelLineList(labelDB);//----12s----
-
+            var labelLine = labelEngine.CreateLabelLineList(labelDB);
+            foreach (var ent in labelDB.OfType<Entity>())
+            {
+                entities.Add(ent);
+            }
+            foreach (var ent in labelLine.OfType<Entity>())
+            {
+                entities.Add(ent);
+            }
             double textWidth = 1300;
             string textModel = "";
             var textEngine = new ThExtractLabelText();//提取文字
             var textCollection = textEngine.Extract(acadDatabase.Database, selectArea, ref textWidth, ref textModel);
+            foreach (var ent in textCollection.OfType<Entity>())
+            {
+                entities.Add(ent);
+            }
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textCollection);
             var dbText = ThTextSet.ThText(new Point3d(), textModel);
             if(dbText.TextString.Trim().Count()!=0)
             {
                 textWidth = dbText.GeometricExtents.MaxPoint.X - dbText.GeometricExtents.MinPoint.X;
+                entities.Add(dbText);
             }
             
             var DNLineEngine = new ThExtractPipeDNLine();//提取管径标注线
