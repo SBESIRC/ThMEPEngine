@@ -5,8 +5,10 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
@@ -24,6 +26,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class OneGenerationCmd : ThMEPBaseCommand, IDisposable
     {
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
+
         public OneGenerationCmd()
         {
             CommandName = "-THDXQYFG2";
@@ -39,7 +46,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    CreateAreaSegment(currentDb);
+                    Run(currentDb);
 
                 }
             }
@@ -54,7 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-        public void CreateAreaSegment(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase)
         {       
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
@@ -65,10 +72,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
             var gaPara = new GaParameter(outerBrder.SegLines);
+
             var usedLines = new HashSet<int>();
             var maxVals = new List<double>();
             var minVals = new List<double>();
-            Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            double threshSecond = 20;
+
+            var splitRst = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
+            if (!splitRst)
+            {
+                Logger?.Information("分割线不合理，分区失败！");
+                return;
+            }
             gaPara.Set(sortSegLines, maxVals, minVals);
 
             var segLineDic = new Dictionary<int, Line>();
@@ -91,7 +108,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
             var geneAlgorithm = new GA2(gaPara);
-         
+
             var rst = geneAlgorithm.Run();
 
             layoutPara.Set(rst);

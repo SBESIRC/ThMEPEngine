@@ -7,6 +7,7 @@ using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -38,7 +39,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    CreateAreaSegmentWithoutSeg(currentDb);
+                    Run(currentDb);
                 }
             }
             catch (Exception ex)
@@ -52,7 +53,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-        public void CreateAreaSegmentWithoutSeg(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase)
         {
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
@@ -68,7 +69,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var maxVals = new List<double>();
             var minVals = new List<double>();
             var buildNums = outerBrder.Building.Count;
-            Dfs.dfsSplitWithoutSegline(ref areas, ref sortSegLines, buildLinesSpatialIndex, buildNums, ref maxVals, ref minVals);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            double threshSecond = 20;
+            var splitRst = Dfs.dfsSplitWithoutSegline(ref areas, ref sortSegLines, buildLinesSpatialIndex, buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
+            if(!splitRst)
+            {
+                return;
+            }
             gaPara.Set(sortSegLines, maxVals, minVals);
             foreach (var seg in sortSegLines)
             {

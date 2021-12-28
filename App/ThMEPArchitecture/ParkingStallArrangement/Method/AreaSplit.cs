@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ParkingStallArrangement.General;
+using System.Diagnostics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -362,12 +363,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     }
     public class Dfs
     {
-        public static void dfsSplit(ref HashSet<int> usedLines, ref List<Polyline> areas, ref List<Line> sortSegLines, 
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter, ref List<double> maxVals, ref List<double> minVals)
+        public static bool dfsSplit(ref HashSet<int> usedLines, ref List<Polyline> areas, ref List<Line> sortSegLines, 
+            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter, ref List<double> maxVals, ref List<double> minVals
+            , Stopwatch stopwatch, double thresholdSecond)
         {
             if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
             {
-                return;
+                return true;
+            }
+            if(stopwatch.Elapsed.TotalSeconds > thresholdSecond)
+            {
+                return false;
             }
             for (int i = 0; i < gaParameter.LineCount; i++)
             {
@@ -386,16 +392,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
 
             //递归搜索
-            dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals);
+            return dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals,
+                stopwatch, thresholdSecond);
         }
 
 
-        public static void dfsSplitWithoutSegline(ref List<Polyline> areas, ref List<Line> sortSegLines, 
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals)
+        public static bool dfsSplitWithoutSegline(ref List<Polyline> areas, ref List<Line> sortSegLines, 
+            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch, double threshSecond)
         {
             if (areas.Count == buildNums)//楼层分割完毕, 退出递归
             {
-                return;
+                return true;
+            }
+            if(stopwatch.Elapsed.TotalSeconds > threshSecond)
+            {
+                return false;
             }
             foreach(var area in areas)
             {
@@ -427,7 +438,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
 
             //递归搜索
-            dfsSplitWithoutSegline(ref areas, ref sortSegLines, buildLinesSpatialIndex,  buildNums, ref maxVals, ref minVals);
+            return dfsSplitWithoutSegline(ref areas, ref sortSegLines, buildLinesSpatialIndex,  buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
         }
     }
 }
