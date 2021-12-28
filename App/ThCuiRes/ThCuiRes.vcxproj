@@ -326,6 +326,8 @@
     <Image Include="Images\THCLSC_dark_large.ico" />
     <Image Include="Images\THSXSC_dark_small.ico" />    
     <Image Include="Images\THSXSC_dark_large.ico" />
+    <Image Include="Images\THPTLGBZ_dark_small.ico" />    
+    <Image Include="Images\THPTLGBZ_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />
