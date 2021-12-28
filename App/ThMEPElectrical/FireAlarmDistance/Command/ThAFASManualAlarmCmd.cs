@@ -19,7 +19,7 @@ using ThMEPElectrical.FireAlarmDistance.Service;
 
 using CLI;
 
-namespace ThMEPElectrical.FireAlarmDistance
+namespace ThMEPElectrical.FireAlarmDistance.Command
 {
     public class ThAFASManualAlarmCmd : ThMEPBaseCommand, IDisposable
     {

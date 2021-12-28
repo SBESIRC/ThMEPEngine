@@ -9,22 +9,21 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPElectrical.AFAS;
-using ThMEPElectrical.AFAS.Model;
-using ThMEPElectrical.AFAS.Command;
-using ThMEPElectrical.AFAS.ViewModel;
-using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.Data;
+using ThMEPElectrical.AFAS.Model;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.ViewModel;
 
-using ThMEPElectrical.FireAlarmArea.Command;
-using ThMEPElectrical.FireAlarmArea;
 using ThMEPElectrical.FireAlarmArea.Data;
-using ThMEPElectrical.FireAlarmDistance;
-using ThMEPElectrical.FireAlarmDistance.Data;
+using ThMEPElectrical.FireAlarmArea.Command;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 
 #if (ACAD2016 || ACAD2018)
 using CLI;
+using ThMEPElectrical.AFAS.Command;
+using ThMEPElectrical.FireAlarmDistance.Data;
+using ThMEPElectrical.FireAlarmDistance.Command;
 #endif
 
 namespace ThMEPElectrical
@@ -42,7 +41,7 @@ namespace ThMEPElectrical
                 var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
                 var needConverage = referBeam == true ? true : false;
 
-                var scale = 100;
+                //var scale = 100;
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>();
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -136,9 +135,9 @@ namespace ThMEPElectrical
                 needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）");
             }
 
-            var theta = 0;
-            var floorHight = 2;
-            var layoutType = ThFaSmokeCommon.layoutType.smoke;
+            //var theta = 0;
+            //var floorHight = 2;
+            //var layoutType = ThFaSmokeCommon.layoutType.smoke;
 
             var extractBlkList = ThFaCommon.BlkNameList;
             var cleanBlkName = new List<string>();
