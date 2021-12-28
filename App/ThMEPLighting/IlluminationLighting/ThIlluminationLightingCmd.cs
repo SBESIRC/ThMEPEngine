@@ -17,6 +17,7 @@ using Linq2Acad;
 using ThMEPEngineCore.Command;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmArea;
 using ThMEPElectrical.FireAlarmArea.Data;
@@ -69,6 +70,10 @@ namespace ThMEPLighting.IlluminationLighting
                 _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
                 _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
             }
+            else
+            {
+                SettingNoUI();
+            }
         }
         public override void SubExecute()
         {
@@ -83,19 +88,18 @@ namespace ThMEPLighting.IlluminationLighting
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //画框，提数据，转数据
-                var pts = ThAFASUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
-                if (_UiConfigs == null)
-                {
-                    SettingNoUI();
-                }
+                ////画框，提数据，转数据
+                //var pts = ThAFASUtils.GetFrameBlk();
+                //if (pts.Count == 0)
+                //{
+                //    return;
+                //}
 
+                var transformer = ThAFASDataPass.Instance.Transformer;
+                var pts = ThAFASDataPass.Instance.SelectPts;
 
-                var extractBlkList = ThFaCommon .BlkNameList;
+                //--------------初始图块信息
+                var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>() { ThFaCommon.BlkName_CircleCeiling,
                                                         ThFaCommon.BlkName_DomeCeiling,
                                                         ThFaCommon.BlkName_InductionCeiling,
@@ -109,20 +113,22 @@ namespace ThMEPLighting.IlluminationLighting
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
                 var layoutBlkNameE = ThFaCommon.BlkName_EmergencyLight;
+                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
-                //导入块图层。free图层
-                ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
-                var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false);
+                //--------------提取数据
+                //var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false);
+                var geos = ThAFASUtils.GetAreaLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
-                //转回原点
-                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                //--------------数据转回原点
+                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                ThAFASUtils.TransformToZero(transformer, geos);
 
-                var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
+                //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。定义房间名称类型
+                var dataQuery = new ThAFASAreaDataQueryService(geos, avoidBlkName);
                 //洞,必须先做找到框线
                 dataQuery.AnalysisHoles();
                 //墙，柱，可布区域，避让
@@ -131,12 +137,12 @@ namespace ThMEPLighting.IlluminationLighting
                 dataQuery.ExtendPriority(priorityExtend);
                 var roomType = ThFaIlluminationRoomTypeService.GetIllunimationType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
-                foreach (var frame in dataQuery.FrameList)
-                {
-                    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
-                    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
-                }
+                //foreach (var frame in dataQuery.FrameList)
+                //{
+                //    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
+                //    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
+                //    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
+                //}
 
 
                 var layoutParameter = new ThAFASIlluminationLayoutParameter();
@@ -163,6 +169,7 @@ namespace ThMEPLighting.IlluminationLighting
 
                 //转回到原始位置
                 lightResult.ForEach(x => x.TransformBack(transformer));
+                ThAFASUtils.TransformReset(transformer, geos);
 
                 //打印
                 ThFireAlarmInsertBlk.InsertBlock(lightResult, _scale);
@@ -173,7 +180,7 @@ namespace ThMEPLighting.IlluminationLighting
 
         private void SettingNoUI()
         {
-           
+
             var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
             if (beam.Status != PromptStatus.OK)
             {
