@@ -124,9 +124,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     return;
                 }
 
-
                 //点位
-                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
+                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
         
                 //提取车位
                 var singleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_SingleCar);

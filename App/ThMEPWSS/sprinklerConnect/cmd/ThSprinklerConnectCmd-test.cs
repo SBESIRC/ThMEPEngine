@@ -17,16 +17,21 @@ using ThMEPWSS.SprinklerConnect.Engine;
 using ThMEPWSS.SprinklerConnect.Model;
 using Autodesk.AutoCAD.EditorInput;
 using DotNetARX;
+using Dreambuild.AutoCAD;
+using System;
+using ThMEPWSS.ViewModel;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
-    public class ThSprinklerConnectCmd_test : ThMEPBaseCommand
+    public class ThSprinklerConnectCmd_test : ThMEPBaseCommand, IDisposable
     {
-        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
-
+        public static Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
+        public bool ParameterFromUI { get; set; } 
+        public string LayoutDirection { get; set; }
         public ThSprinklerConnectCmd_test()
         {
-
+            ActionName = "喷头连管布置";
+            CommandName = "THPTLGBZ";            
         }
 
         public override void SubExecute()
@@ -36,123 +41,171 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
         public void SprinklerConnectExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var doclock = Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-
-                var frame = ThSprinklerDataService.GetFrame();
-                if (frame == null || frame.Area < 10)
-                {
-                    return;
-                }
-
-                var options = new PromptKeywordOptions("\n选择连接方式");
-                options.Keywords.Add("垂直车道", "V", "垂直车道(V)");
-                options.Keywords.Add("平行车道", "P", "平行车道(P)");
-                options.Keywords.Default = "垂直车道";
-                var result2 = Active.Editor.GetKeywords(options);
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
+                var frames = ThSprinklerConnectUtils.GetFrames();
                 var isVertical = true;
-                if (result2.StringResult == "平行车道")
+                if(ParameterFromUI)
                 {
-                    isVertical = false;
-                }
-
-                CleanLine("AI-喷淋连管", frame);
-
-                //简略的写提取管子和点位（需要改）
-                var sprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData(frame);
-                var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
-                var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
-
-                if (sprinklerPts.Count == 0 || subMainPipe.Count == 0)
-                {
-                    return;
-                }
-
-                //打散管线
-                ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
-                //DrawUtils.ShowGeometry(mainLine, "l0mainline", 22, 30);
-                //DrawUtils.ShowGeometry(subMainLine, "l0submainline", 142, 30);
-                //DrawUtils.ShowGeometry(allLines, "l0all", 2, 30);
-
-                var sprinklerParameter = new ThSprinklerParameter();
-                sprinklerParameter.SprinklerPt = DistinctSprinkler(sprinklerPts);
-                sprinklerParameter.MainPipe = mainLine;
-                sprinklerParameter.SubMainPipe = subMainLine;
-                sprinklerParameter.AllPipe = allLines;
-
-                var dataset = new ThSprinklerConnectDataFactory();
-                var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
-                var dataQuery = new ThSprinklerDataQueryService(geos);
-                dataQuery.ClassifyData();
-
-                var geometry = new List<Polyline>();
-                var obstacle = new List<Polyline>();
-                geometry.AddRange(dataQuery.ArchitectureWallList);
-                geometry.AddRange(dataQuery.ShearWallList);
-                geometry.AddRange(dataQuery.ColumnList);
-                geometry.AddRange(dataQuery.RoomList);
-                obstacle.AddRange(dataQuery.ShearWallList);
-                obstacle.AddRange(dataQuery.ColumnList);
-
-                var smallRooms = dataQuery.RoomList.Where(r => r.Area < 1.5e8).ToList();
-                var smallRoomsWithSpr = new List<Polyline>();
-                // 将有无喷头的小房间进行分类
-                var sprinklerIndex = new ThCADCoreNTSSpatialIndex(sprinklerParameter.SprinklerPt.Select(pt => new DBPoint(pt)).ToCollection());
-                smallRooms.ForEach(r =>
-                {
-                    var filter = sprinklerIndex.SelectCrossingPolygon(r);
-                    if(filter.Count > 0)
-                    {
-                        smallRoomsWithSpr.Add(r);
-                    }
-                    else
-                    {
-                        obstacle.Add(r);
-                    }
-                });
-
-                //geometry.ForEach(g => acadDatabase.ModelSpace.Add(g));
-
-                //转回原点
-                //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
-
-                var bufferArea = 1.0;
-                var roomsArea = 1.0;
-                if (dataQuery.RoomList.Count > 0)
-                {
-                    var lanelineWidth = 3500.0;
-                    var largestRooms = dataQuery.RoomList.Where(r => r.Area >= 1.5e8).ToList();
-                    roomsArea = largestRooms.Select(r => r.Area).Sum();
-                    var buffer = largestRooms.Select(r => r.Buffer(-lanelineWidth).Buffer(lanelineWidth).OfType<Polyline>()).ToList();
-                    bufferArea = buffer.Select(r => r.Select(room => room.Area).Sum()).Sum();
-                }
-
-                var engine = new ThSprinklerConnectEngine(sprinklerParameter, geometry);
-                if (bufferArea / roomsArea > 0.6)
-                {
-                    //提取车位外包框
-                    //var parkingStallService = new ThSprinklerConnectParkingStallService();
-                    //parkingStallService.BlockNameDict = BlockNameDict;
-                    //var doubleStall = parkingStallService.GetParkingStallOBB(acadDatabase.Database, frame);
-                    //var layerName = "AI-车位排-双排";
-                    //CleanPline(layerName, frame);
-                    //StallPresent(doubleStall, layerName);
-                    var doubleStall = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
-
-                    engine.SprinklerConnectEngine(doubleStall, smallRoomsWithSpr, obstacle, isVertical);
+                    isVertical = LayoutDirection=="垂直";
                 }
                 else
                 {
-                    engine.SprinklerConnectEngine(new List<Polyline>(), smallRoomsWithSpr, obstacle, isVertical);
+                    var options = new PromptKeywordOptions("\n选择连接方式");
+                    options.Keywords.Add("垂直车道", "V", "垂直车道(V)");
+                    options.Keywords.Add("平行车道", "P", "平行车道(P)");
+                    options.Keywords.Default = "垂直车道";
+                    var result2 = Active.Editor.GetKeywords(options);
+                    if (result2.Status != PromptStatus.OK)
+                    {
+                        return;
+                    }
+                    if (result2.StringResult == "平行车道")
+                    {
+                        isVertical = false;
+                    }
                 }
 
-                Active.Editor.Regen();
+                var frameIndex = new ThCADCoreNTSSpatialIndex(frames.ToCollection());
+                var frameClone = frameIndex.SelectAll().OfType<Polyline>();
+
+                // 提取数据
+                var allSprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
+                var dataset = new ThSprinklerConnectDataFactory();
+                var geos = dataset.Create(acadDatabase.Database, new Point3dCollection()).Container;
+                var dataQuery = new ThSprinklerDataQueryService(geos);
+                dataQuery.ClassifyData();
+                var archIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ArchitectureWallList.ToCollection());
+                var shearIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ShearWallList.ToCollection());
+                var columnIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ColumnList.ToCollection());
+                var roomIndex = new ThCADCoreNTSSpatialIndex(dataQuery.RoomList.ToCollection());
+                var geometryWithoutColumn = new List<Polyline>();
+                var obstacle = new List<Polyline>();
+
+                // 提取车位
+                var parkingStallService = new ThSprinklerConnectParkingStallService();
+                parkingStallService.BlockNameDict = BlockNameDict;
+                parkingStallService.ParkingStallExtractor(acadDatabase.Database, new Polyline());
+
+                foreach (var frame in frameClone)
+                {
+                    if (frame == null || frame.Area < 10)
+                    {
+                        continue;
+                    }
+
+                    var room = roomIndex.SelectCrossingPolygon(frame).OfType<Polyline>().ToList();
+                    var exactFrames = new DBObjectCollection
+                    {
+                        frame,
+                    };
+
+                    //简略的写提取管子和点位（需要改）
+                    var sprinklerPts = new List<Point3d>();
+                    room.ToList().ForEach(r =>
+                    {
+                        var difference = r.Difference(frame).OfType<Polyline>().OrderByDescending(o => o.Area).FirstOrDefault();
+                        if (difference == null || difference.Area / r.Area < 0.25)
+                        {
+                            exactFrames.Add(r);
+                            sprinklerPts.AddRange(allSprinklerPts.Where(pt => r.Contains(pt)).ToList());
+                        }
+                    });
+
+                    var exactFrame = exactFrames.Outline().OfType<Polyline>().OrderByDescending(o => o.Area).First();
+                    var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
+                    var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
+                    var mainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
+                    var subMainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
+
+                    //打散管线
+                    ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
+                    mainLine.AddRange(mainPipeLine);
+                    subMainLine.AddRange(subMainPipeLine);
+                    allLines.AddRange(mainPipeLine);
+                    allLines.AddRange(subMainPipeLine);
+
+                    if (sprinklerPts.Count == 0 || subMainPipe.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    var sprinklerParameter = new ThSprinklerParameter
+                    {
+                        SprinklerPt = sprinklerPts.DistinctPoints(),
+                        MainPipe = mainLine,
+                        SubMainPipe = subMainLine,
+                        AllPipe = allLines
+                    };
+
+                    CleanPipe(ThWSSCommon.Sprinkler_Connect_Pipe, exactFrame);
+
+                    geometryWithoutColumn = new List<Polyline>();
+                    obstacle = new List<Polyline>();
+                    var architectureWall = archIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
+                    var shearWall = shearIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
+                    var column = columnIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
+
+                    geometryWithoutColumn.AddRange(architectureWall);
+                    geometryWithoutColumn.AddRange(shearWall);
+                    geometryWithoutColumn.AddRange(room);
+                    obstacle.AddRange(shearWall);
+                    obstacle.AddRange(column);
+
+                    var smallRooms = room.Where(r => r.Area < 1.5e8).ToList();
+                    var smallRoomsWithSpr = new List<Polyline>();
+                    // 将有无喷头的小房间进行分类
+                    var sprinklerIndex = new ThCADCoreNTSSpatialIndex(sprinklerParameter.SprinklerPt.Select(pt => new DBPoint(pt)).ToCollection());
+                    smallRooms.ForEach(r =>
+                    {
+                        var filter = sprinklerIndex.SelectCrossingPolygon(r);
+                        if (filter.Count > 0)
+                        {
+                            smallRoomsWithSpr.Add(r);
+                        }
+                        else
+                        {
+                            obstacle.Add(r);
+                        }
+                    });
+
+                    //转回原点
+                    //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
+
+                    var bufferArea = 1.0;
+                    var roomsArea = 1.0;
+                    if (room.Count() > 0)
+                    {
+                        var lanelineWidth = 3500.0;
+                        var largestRooms = room.Where(r => r.Area >= 1.5e8).ToList();
+                        roomsArea = largestRooms.Select(r => r.Area).Sum();
+                        var buffer = largestRooms.Select(r => r.Buffer(-lanelineWidth).Buffer(lanelineWidth).OfType<Polyline>()).ToList();
+                        bufferArea = buffer.Select(r => r.Select(room => room.Area).Sum()).Sum();
+                    }
+
+                    var engine = new ThSprinklerConnectEngine();
+                    if (bufferArea / roomsArea > 0.6)
+                    {
+                        //提取车位外包框
+                        var reducedFrame = exactFrame.Buffer(-50.0).OfType<Polyline>().OrderByDescending(o => o.Area).First();
+                        var doubleStall = parkingStallService.GetParkingStallOBB(reducedFrame);
+                        var layerName = "AI-车位排-双排";
+                        CleanPline(layerName, reducedFrame);
+                        StallPresent(doubleStall, layerName);
+                        //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(reducedFrame, ThSprinklerConnectCommon.Layer_DoubleCar);
+
+                        engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, doubleStall, smallRoomsWithSpr,
+                            obstacle, column, isVertical);
+                    }
+                    else
+                    {
+                        engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, new List<Polyline>(), smallRoomsWithSpr,
+                            obstacle, column, isVertical);
+                    }
+                }
+
+                //Active.Editor.Regen();
             }
         }
 
@@ -169,14 +222,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             }
         }
 
-        private List<Point3d> DistinctSprinkler(List<Point3d> list)
-        {
-            var kdTree = new ThCADCoreNTSKdTree(1.0);
-            list.ForEach(o => kdTree.InsertPoint(o));
-            return kdTree.SelectAll().OfType<Point3d>().ToList();
-        }
-
-        public void CleanLine(string layerName, Polyline polyline)
+        public void CleanPipe(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -184,13 +230,17 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 acadDatabase.Database.UnLockLayer(layerName);
                 acadDatabase.Database.UnOffLayer(layerName);
 
-                var objs = acadDatabase.ModelSpace
-                    .OfType<Line>()
-                    .Where(o => o.Layer == layerName).ToCollection();
+                var objs = new DBObjectCollection();
+                // 图层上的所有图元
+                acadDatabase.ModelSpace
+                    .OfType<Entity>()
+                    .Where(o => o.Layer == layerName)
+                    .ForEach(o => objs.Add(o));
+
                 var bufferPoly = polyline.Buffer(1)[0] as Polyline;
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 spatialIndex.SelectCrossingPolygon(bufferPoly)
-                            .OfType<Line>()
+                            .OfType<Entity>()
                             .ToList()
                             .ForEach(o =>
                             {
@@ -222,6 +272,11 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                                 o.Erase();
                             });
             }
+        }
+
+        public void Dispose()
+        {
+            //
         }
     }
 }

@@ -148,12 +148,12 @@ namespace ThMEPWSS.SprinklerConnect.Data
             };
         }
 
-        public static List<Point3d> GetSprinklerConnectData(Polyline frame)
+        public static List<Point3d> GetSprinklerConnectData()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
-                recognizeAllEngine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                recognizeAllEngine.RecognizeMS(acadDatabase.Database, new Point3dCollection());
 
 
 
@@ -173,13 +173,28 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 var extractService = new ThExtractPolylineService()
                 {
                     ElementLayer = layer,
-
                 };
                 extractService.Extract(acadDatabase.Database , frame.Vertices());
                 polyList.AddRange(extractService.Polys);
             }
 
             return polyList;
+        }
+
+        public static List<Line> GetPipeLineData(Polyline frame, string layer)
+        {
+            var lineList = new List<Line>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var extractService = new ThExtractLineService()
+                {
+                    ElementLayer = layer,
+                };
+                extractService.Extract(acadDatabase.Database, frame.Vertices());
+                lineList.AddRange(extractService.Lines);
+            }
+
+            return lineList;
 
         }
 

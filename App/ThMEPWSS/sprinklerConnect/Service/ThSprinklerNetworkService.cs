@@ -110,7 +110,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 length = lengthTemp / averageC;
             }
 
-
             return length;
         }
 

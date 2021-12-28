@@ -1,0 +1,42 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.SprinklerConnectionUI"
+             xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
+             xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
+             xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
+                    Title="喷头连管" SizeToContent="Manual" Height="170" 
+                    Width="140" MaxHeight="200" MaxWidth="150"
+             mc:Ignorable="d" Closing="ThCustomWindow_Closing">
+    <Window.Resources>
+        <ResourceDictionary>
+            <converters:CheckSprinklerTypeBooleanConverter x:Key="checkSprinklerTypeConverter"/>
+            <converters:SprinklerRangeBooleanConverter x:Key="sprinklerRangeConverter"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Margin="4">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="35" MinHeight="31"></RowDefinition>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Margin="0,5,0,5" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Width="124">
+            <Button Name="btnDrawMainPipe" Content="绘制不接支管的主管" Margin="0,0,5,0" Width="120" Command="{Binding ThSprinklerDrawPipeCmd}" />
+        </StackPanel>
+        <StackPanel Margin="0,5,0,5" Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center" Width="124">
+            <Button Name="btnDrawSubMainPipe" Content="绘制连接支管的主管" Margin="0,0,5,0" Width="120" Command="{Binding ThSprinklerDrawSubPipeCmd}" />
+        </StackPanel>
+        <StackPanel Margin="0,4,0,0" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Width="122">
+            <TextBlock Text="支管与车道" Height="20"></TextBlock>
+            <ComboBox Margin="5,-4,0,0" x:Name="cbLayoutDirection" Width="55" Height="20"
+                      ItemsSource="{Binding Parameter.LayoutDirections,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      SelectedItem="{Binding Parameter.LayoutDirection,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+        </StackPanel>
+        <StackPanel Margin="0,7,0,12" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Width="124" Grid.RowSpan="4">
+            <Button Name="btnSprinklerConnection" Content="生成支管" Margin="0,0,5,0" Width="120" Command="{Binding ThSprinklerConnectCmd}" />
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

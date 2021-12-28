@@ -70,6 +70,13 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="SprinklerConnect\Cmd\ThSprinklerDrawPipeCmd.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectLayer.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectService.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
+    <Compile Include="SprinklerConnect\ThSprinklerConnectCommon.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
@@ -109,7 +116,6 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerNetworkService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerPipeService.cs" />
-    <Compile Include="SprinklerConnect\ThSprinklerConnectCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
@@ -629,6 +635,7 @@
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
+    <Compile Include="ViewModel\ThSprinklerConnectVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />

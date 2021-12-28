@@ -1,24 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
@@ -28,21 +18,21 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             var frame = new Polyline();
             //画框，提数据，转数据
-            var frameOrig = selectFrame();
+            var frameOrig = SelectFrame();
             if (frame != null)
             {
-                 frame = processFrame(frameOrig);
+                frame = ProcessFrame(frameOrig);
             }
-           
+
             return frame;
         }
 
-        private static Polyline selectFrame()
+        private static Polyline SelectFrame()
         {
             var polyline = new Polyline();
 
             // 获取框线
-            PromptSelectionOptions options = new PromptSelectionOptions()
+            var options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
                 MessageForAdding = "请选择布置区域框线",
@@ -50,8 +40,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             };
             var dxfNames = new string[]
             {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-
+                RXClass.GetClass(typeof(Polyline)).DxfName,
             };
             var layers = new List<string> { "AI-防火分区" };
             var filter = ThSelectionFilterTool.Build(dxfNames, layers.ToArray());
@@ -73,10 +62,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
         }
 
-        private static Polyline processFrame(Polyline frame)
+        private static Polyline ProcessFrame(Polyline frame)
         {
             Polyline nFrame = null;
-            var tol = 1000;
 
             Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
             // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);

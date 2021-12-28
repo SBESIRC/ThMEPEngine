@@ -20,11 +20,12 @@ namespace ThMEPWSS.SprinklerConnect.Data
         {
         }
 
-        public List<Polyline> GetParkingStallOBB(Database database, Polyline pline)
+        public List<Polyline> GetParkingStallOBB(Polyline pline)
         {
-            ParkingStallExtractor(database, pline);
             var parkingStalls = new List<Polyline>();
-            AssortParkingStall(ParkingStalls).ForEach(list =>
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(ParkingStalls);
+            var filter = spatialIndex.SelectCrossingPolygon(pline);
+            AssortParkingStall(filter).ForEach(list =>
             {
                 // 单排车位
                 var singleRow = list.Select(o => Extend(o, 700))
@@ -33,20 +34,45 @@ namespace ThMEPWSS.SprinklerConnect.Data
                     .OfType<Polyline>()
                     .Select(o => o.OBB())
                     .Select(o => Extend(o, -700))
-                    .Where(o => o.Area > 2.8e7);
-                // 双排车位
-                var doubleRow = singleRow.Select(o => o.Buffer(200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
-                    .ToCollection()
-                    .Outline()
-                    .OfType<Polyline>()
-                    .Select(o => o.OBB().Buffer(-200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
+                    .Where(o => o.Area > 2.8e7)
                     .ToList();
-                parkingStalls.AddRange(doubleRow);
+                // 双排车位
+
+                singleRow = singleRow.OrderByDescending(o => o.Area).ToList();
+                if(singleRow.Count() >= 1)
+                {
+                    var singleRowSort = new List<List<Polyline>>();
+                    singleRowSort.Add(new List<Polyline> { singleRow[0] });
+                    for (int i = 1; i < singleRow.Count(); i++)
+                    {
+                        if(singleRow[i].Area > singleRowSort[singleRowSort.Count - 1][0].Area * 0.8)
+                        {
+                            singleRowSort[singleRowSort.Count - 1].Add(singleRow[i]);
+                        }
+                        else
+                        {
+                            singleRowSort.Add(new List<Polyline> { singleRow[i] });
+                        }
+                    }
+
+                    singleRowSort.ForEach(row =>
+                    {
+                        var doubleRow = row.Select(o => o.Buffer(200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
+                        .ToCollection()
+                        .Outline()
+                        .OfType<Polyline>()
+                        .Select(o => o.OBB().Buffer(-200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
+                        .ToList();
+
+                        parkingStalls.AddRange(doubleRow);
+                    });
+                }
+                
             });
             return Normalize(parkingStalls);
         }
 
-        private void ParkingStallExtractor(Database database, Polyline pline)
+        public void ParkingStallExtractor(Database database, Polyline pline)
         {
             //提取停车位
             var parkingStallBlkNames = new List<string>();
@@ -93,17 +119,6 @@ namespace ThMEPWSS.SprinklerConnect.Data
                          &&  Math.Abs(angleList[m] - list[0].Angle) < 183.0 / 180.0 * Math.PI)
                          || Math.Abs(angleList[m] - list[0].Angle) > 357.0 / 180.0 * Math.PI)
                         {
-                            //var vertical = Math.Abs((centerPt - centerPts[m]).DotProduct(list[2].Normal));
-                            //if ((vertical > 500 && vertical < list[2].Length - 10)
-                            //    || vertical > list[2].Length + 500)
-                            //{
-                            //    continue;
-                            //}
-                            //else
-                            //{
-                                
-                            //}
-
                             parkingStallSort[m].Add(stallList[i]);
                             break;
                         }
@@ -125,17 +140,6 @@ namespace ThMEPWSS.SprinklerConnect.Data
                          && Math.Abs(angleList[m] - list[2].Angle) < 183.0 / 180.0 * Math.PI)
                          || Math.Abs(angleList[m] - list[2].Angle) > 357.0 / 180.0 * Math.PI)
                         {
-                            //var vertical = Math.Abs((centerPt - centerPts[m]).DotProduct(list[0].Delta.GetNormal()));
-                            //if ((vertical > 500 && vertical < list[0].Length - 10)
-                            //    || vertical > list[0].Length + 700)
-                            //{
-                            //    continue;
-                            //}
-                            //else
-                            //{
-                                
-                            //}
-
                             parkingStallSort[m].Add(stallList[i]);
                             break;
                         }
