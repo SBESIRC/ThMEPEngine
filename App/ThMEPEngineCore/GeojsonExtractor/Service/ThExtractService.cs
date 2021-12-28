@@ -19,7 +19,7 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
         public ThExtractService()
         {
             ElementLayer = "";
-            TesslateLength = 10.0;
+            TesslateLength = 100.0;
             Types = new List<System.Type>();
         }
         public abstract void Extract(Database db, Point3dCollection pts);

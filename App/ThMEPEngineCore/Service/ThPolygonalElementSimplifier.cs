@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Service
             AREATOLERANCE = 1.0;
             OFFSETDISTANCE = 20.0;
             DISTANCETOLERANCE = 1.0;
-            TESSELLATEARCLENGTH = 10.0;
+            TESSELLATEARCLENGTH = 100.0;
         }
         
         public override DBObjectCollection Simplify(DBObjectCollection objs)
@@ -137,7 +137,7 @@ namespace ThMEPEngineCore.Service
         {
             OFFSETDISTANCE = 20.0;
             DISTANCETOLERANCE = 1.0;
-            TESSELLATEARCLENGTH = 10.0;
+            TESSELLATEARCLENGTH = 100.0;
         }
     }
     public class ThSlabSimplifier : ThPolygonalElementSimplifier

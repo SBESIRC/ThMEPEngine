@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         public ThEStoreyExtractor()
         {
             UseDb3Engine = true;
-            TesslateLength = 200.0;
+            TesslateLength = 500.0;
             Storeys = new List<ThEStoreyInfo>();
             Category = BuiltInCategory.StoreyBorder.ToString();
         }

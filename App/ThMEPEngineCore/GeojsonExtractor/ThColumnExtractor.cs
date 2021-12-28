@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
             Category = BuiltInCategory.Column.ToString();
             Columns = new List<Polyline>();
             Rooms = new List<ThIfcRoom>();
-            TesslateLength = 5.0;
+            TesslateLength = ThMEPEngineCoreCommon.CircularColumnTessellateArcLength;
         }
 
         public override List<ThGeometry> BuildGeometries()

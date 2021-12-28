@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Service
         public double AREATOLERANCE = 1.0;
         public double OFFSETDISTANCE = 30.0;
         public double DISTANCETOLERANCE = 1.0;
-        public double TESSELLATEARCLENGTH = 10.0;
+        public double TESSELLATEARCLENGTH = 100.0;
 
         public virtual DBObjectCollection Simplify(DBObjectCollection curves)
         {

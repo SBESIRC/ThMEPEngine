@@ -12,7 +12,7 @@ namespace ThMEPElectrical.AFAS.Service
         public ThCleanEntityService()
         {
             BufferLength = 25.0;
-            TesslateLength = 10.0;
+            TesslateLength = 100.0;
         }
         public Polyline Clean(Polyline polygon)
         {
