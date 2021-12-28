@@ -53,7 +53,7 @@ namespace ThMEPElectrical.AFAS.Data
             fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
 
             Extractors = new List<ThExtractorBase>()
-                {
+            {
                     new ThAFASArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
@@ -116,7 +116,7 @@ namespace ThMEPElectrical.AFAS.Data
                     new ThAFASCenterLineExtractor()
                     {
                         Transformer = Transformer,
-                        ElementLayer=ThMEPEngineCoreLayerUtils.CENTERLINE,
+                        ElementLayer=ThMEPEngineCoreLayerUtils.LANECENTERLINE,
                     }
             };
 
