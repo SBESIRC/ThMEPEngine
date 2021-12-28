@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPElectrical;
+using ThMEPElectrical.SystemDiagram.Model;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace TianHua.Electrical.UI.SystemDiagram.UI
 {
@@ -17,15 +19,25 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         {
             DynamicCheckBoxs = new ObservableCollection<DynamicCheckBox>();
             DynamicOpenFiles = new ObservableCollection<DynamicCheckBox>();
-            DynamicCheckBoxs.Add(new DynamicCheckBox { Content = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, IsChecked = true, ShowText = ThAutoFireAlarmSystemCommon.FireDistrictByLayer });
-            DynamicCheckBoxs.Add(new DynamicCheckBox { Content = "防火分区", IsChecked = true, ShowText = "防火分区" });
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            if (FireCompartmentParameter.CacheDynamicCheckBoxs.Count > 0)
             {
-                foreach (var layer in acadDatabase.Layers)
+                foreach (var item in FireCompartmentParameter.CacheDynamicCheckBoxs)
                 {
-                    string LayerName = layer.Name;
-                    if (LayerName != ThAutoFireAlarmSystemCommon.FireDistrictByLayer && LayerName != "防火分区" && (LayerName.Contains(ThAutoFireAlarmSystemCommon.FireDistrictByLayer) || LayerName.Contains("防火分区")))
-                        DynamicCheckBoxs.Add(new DynamicCheckBox { Content = LayerName, IsChecked = false, ShowText = AbbreviationString(LayerName) });
+                    DynamicCheckBoxs.Add(item);
+                }
+            }
+            else
+            {
+                DynamicCheckBoxs.Add(new DynamicCheckBox { Content = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, IsChecked = true, ShowText = ThAutoFireAlarmSystemCommon.FireDistrictByLayer });
+                DynamicCheckBoxs.Add(new DynamicCheckBox { Content = "防火分区", IsChecked = true, ShowText = "防火分区" });
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    foreach (var layer in acadDatabase.Layers)
+                    {
+                        string LayerName = layer.Name;
+                        if (LayerName != ThAutoFireAlarmSystemCommon.FireDistrictByLayer && LayerName != "防火分区" && (LayerName.Contains(ThAutoFireAlarmSystemCommon.FireDistrictByLayer) || LayerName.Contains("防火分区")))
+                            DynamicCheckBoxs.Add(new DynamicCheckBox { Content = LayerName, IsChecked = false, ShowText = AbbreviationString(LayerName) });
+                    }
                 }
             }
             RefreshOpenFileList();
@@ -85,7 +97,6 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
 
         public bool AddLayer(string layerName)
         {
-
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 try
@@ -93,7 +104,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                     var layerObj = acadDatabase.Layers.ElementOrDefault(layerName, false);
                     if (layerObj != null && DynamicCheckBoxs.Count(O => O.Content == layerName) == 0)
                     {
-                        DynamicCheckBoxs.Add(new DynamicCheckBox { Content = layerName, IsChecked = true, ShowText = AbbreviationString(layerName) });
+                        DynamicCheckBoxs.Insert(0, new DynamicCheckBox { Content = layerName, IsChecked = true, ShowText = AbbreviationString(layerName) });
                         return true;
                     }
                     else
@@ -119,14 +130,5 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
         public int FireBroadcastingTxt { get; set; }
         public int ControlBusCountTXT { get; set; }
         
-    }
-
-    public class DynamicCheckBox
-    {
-        public string Content { get; set; }
-        //public string GroupName { get; set; }
-        public bool IsChecked { get; set; }
-
-        public string ShowText { get; set; }
     }
 }
