@@ -8,16 +8,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThCADExtension;
 using ThCADCore.NTS;
-
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.OverlayNG;
-
 
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
@@ -28,8 +20,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
     class LayoutOpt
     {
         //input
-      //  public MPolygon mPolygon { get; set; }
-      //  public MPolygon mPolygonShell { get; set; }
+        //  public MPolygon mPolygon { get; set; }
+        //  public MPolygon mPolygonShell { get; set; }
         public MPolygon mRoom { get; set; }
 
         public double radius { get; set; } = 0;
