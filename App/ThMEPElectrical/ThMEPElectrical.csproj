@@ -35,6 +35,7 @@
     <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASDataSetFactoryNew.cs" />
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
+    <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
     <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />

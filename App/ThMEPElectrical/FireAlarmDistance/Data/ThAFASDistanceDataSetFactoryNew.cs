@@ -67,6 +67,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var doorOpeningExtractor = InputExtractors.Where(o => o is ThAFASDoorOpeningExtractor).First() as ThAFASDoorOpeningExtractor;
             var fireProofExtractor = InputExtractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
             var holeExtractor = InputExtractors.Where(o => o is ThAFASHoleExtractor).First() as ThAFASHoleExtractor;
+            var centerLineExtractor = InputExtractors.Where(o => o is ThAFASCenterLineExtractor).First() as ThAFASCenterLineExtractor;
 
             var extractors = new List<ThExtractorBase>()
                             {
@@ -79,6 +80,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                                 doorOpeningExtractor,
                                 fireProofExtractor,
                                 holeExtractor,
+                                centerLineExtractor
                             };
 
             extractors.ForEach(o =>
@@ -137,6 +139,11 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                 placeConverage.Group(fireApartExtractor.FireApartIds);
                 extractors.Add(placeConverage);
             }
+
+            // 造中心线Geo数据
+            var centerLineGeoFactory = new ThAFASCenterLineGeoFactory(centerLineExtractor.CenterLines);
+            centerLineGeoFactory.Produce();
+            centerLineExtractor.Set(centerLineGeoFactory.Geos);
 
             //收集数据
             //最后将楼层框线和防火分区提取器加入，生成Geometries

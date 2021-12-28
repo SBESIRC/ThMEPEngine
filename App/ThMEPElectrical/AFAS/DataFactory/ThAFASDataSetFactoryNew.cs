@@ -1,24 +1,15 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Extension;
-using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPElectrical.AFAS.Service;
-using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Utils;
-using ThMEPElectrical.AFAS.Interface;
+using ThMEPEngineCore;
 
 namespace ThMEPElectrical.AFAS.Data
 {
@@ -122,6 +113,11 @@ namespace ThMEPElectrical.AFAS.Data
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
+                    new ThAFASCenterLineExtractor()
+                    {
+                        Transformer = Transformer,
+                        ElementLayer=ThMEPEngineCoreLayerUtils.CENTERLINE,
+                    }
             };
 
             Extractors.ForEach(o => o.Extract(database, collection));

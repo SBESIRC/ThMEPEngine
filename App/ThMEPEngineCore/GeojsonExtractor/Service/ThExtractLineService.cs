@@ -1,10 +1,12 @@
-﻿using NFox.Cad;
-using Linq2Acad;
-using System.Linq;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Linq;
 using System.Collections.Generic;
+using NFox.Cad;
+using Linq2Acad;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
@@ -27,9 +29,13 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
                     .ToList();
                 if(pts.Count>=3)
                 {
+                    var center = pts.Envelope().CenterPoint();
+                    var transformer = new ThMEPOriginTransformer(center);
+                    var newPts = transformer.Transform(pts);
+                    Lines.ForEach(o => transformer.Transform(o));
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(Lines.ToCollection());
-                    var objs = spatialIndex.SelectCrossingPolygon(pts);
-                    Lines = objs.Cast<Line>().ToList();
+                    Lines = spatialIndex.SelectCrossingPolygon(newPts).Cast<Line>().ToList();
+                    Lines.ForEach(o => transformer.Reset(o));
                 }
             }
         }        
