@@ -30,7 +30,6 @@ namespace ThMEPEngineCore.Engine
         private DBObjectCollection _cornice = new DBObjectCollection(); //仅支持Polyline
         private DBObjectCollection _roomSplitline = new DBObjectCollection();
         private DBObjectCollection _curtainWall = new DBObjectCollection();
-        public ThMEPOriginTransformer Transformer { get; private set; }
         private Action<Database, Point3dCollection> GetData;
         public ThRoomdata(bool isUseOldMode)
         {
@@ -43,6 +42,51 @@ namespace ThMEPEngineCore.Engine
                 GetData = GetNewModeData;
             }
         }
+        #region --------- Properties ----------
+        public DBObjectCollection Doors
+        {
+            get
+            {
+                return _door;
+            }
+        }
+        public DBObjectCollection Columns
+        {
+            get
+            {
+                return _column;
+            }
+        }
+        public DBObjectCollection Windows
+        {
+            get
+            {
+                return _window;
+            }
+        }
+        public DBObjectCollection ShearWalls
+        {
+            get
+            {
+                return _shearWall;
+            }
+        }
+        public DBObjectCollection CurtainWalls
+        {
+            get
+            {
+                return _curtainWall;
+            }
+        }
+        public DBObjectCollection ArchitectureWalls
+        {
+            get
+            {
+                return _architectureWall;
+            }
+        }
+        public ThMEPOriginTransformer Transformer { get; private set; }
+        #endregion
         public void Build(Database database, Point3dCollection polygon)
         {
             GetData(database, polygon);
