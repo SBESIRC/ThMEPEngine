@@ -93,20 +93,6 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            //{
-            //    var subPanel = row.AddNewPanel();
-
-            //    // 地库风平面
-            //    var subRow = subPanel.AddNewRibbonRow();
-            //    subRow.AddNewButton("地库风平面",
-            //        "天华地库风平面",
-            //        "THDKFPM",
-            //        "天华地库风平面",
-            //        "IDI_THCAD_THDKFPM_SMALL",
-            //        "IDI_THCAD_THDKFPM_LARGE",
-            //        RibbonButtonStyle.LargeWithText);
-            //}
-
             {
                 var subPanel = row.AddNewPanel();
 
