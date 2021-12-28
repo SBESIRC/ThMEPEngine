@@ -118,7 +118,6 @@ namespace ThMEPWSS.Command
             GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, ValveDic, fireHydrantSysIn);//支路获取
             fireHydrantSysOut.Draw();//绘制系统图
 
-            GetFireHydrantPipe.DrawPipeLabels(fireHydrantSysOut);
             return null;
         }
     }
