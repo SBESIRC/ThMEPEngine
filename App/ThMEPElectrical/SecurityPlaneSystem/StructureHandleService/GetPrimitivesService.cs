@@ -110,29 +110,34 @@ namespace ThMEPElectrical.StructureHandleService
             var doors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => (x.Clone() as Polyline).FlattenRectangle()).Where(o => o.Area > 25000).ToList();
-
-                //doors.ForEach(x => originTransformer.Transform(x));
-                //var doorExtractEngine = new ThDoorExtractionEngine();
-                //doorExtractEngine.Extract(acdb.Database);
-                //doorExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                //var doorEngine = new ThDoorRecognitionEngine();
-                //doorEngine.Recognize(doorExtractEngine.Results, polyline.Vertices());
-                //doors = doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(doors.ToCollection());
+                var MSdoors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => (x.Clone() as Polyline).FlattenRectangle()).Where(o => o.Area > 25000).ToList();
+                //新逻辑，目的是为了把所有的门做一个去重操作
                 var boundary = polyline.Clone() as Polyline;
                 originTransformer.Reset(boundary);
                 var doorRecognitionEngine = new ThDB3DoorRecognitionEngine();
                 doorRecognitionEngine.Recognize(acdb.Database, boundary.Vertices());
-                foreach (var door in doorRecognitionEngine.Elements)
+                MSdoors = MSdoors.Union(doorRecognitionEngine.Elements.Select(o => o.Outline as Polyline)).ToList();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(MSdoors.ToCollection());
+                while (MSdoors.Count > 0)
                 {
-                    Polyline doorPolyline = door.Outline as Polyline;
-                    var Indentationdoor = doorPolyline.Buffer(10)[0] as Polyline;
-                    if (spatialIndex.SelectWindowPolygon(Indentationdoor).Count < 1)
+                    Polyline door = MSdoors.First();
+                    Polyline doorPolyline = door.Buffer(10)[0] as Polyline;
+                    var objs = spatialIndex.SelectWindowPolygon(doorPolyline);
+                    objs = objs.Cast<Polyline>().Where(o => MSdoors.Contains(o)).ToCollection();
+                    if (objs.Count > 0)
                     {
-                        doors.Add(doorPolyline);
+                        if(objs.Count == 1)
+                        {
+                            doors.Add(objs[0] as Polyline);
+                        }
+                        else
+                        {
+                            var unionDoor = objs.UnionPolygons().Cast<Polyline>().OrderByDescending(o => o.Area).First().GetMinimumRectangle();
+                            doors.Add(unionDoor);
+                        }
+                        MSdoors.RemoveAll(o => objs.Contains(o));
                     }
+                    MSdoors.Remove(door);
                 }
                 doors.ForEach(x => originTransformer.Transform(x));
             }

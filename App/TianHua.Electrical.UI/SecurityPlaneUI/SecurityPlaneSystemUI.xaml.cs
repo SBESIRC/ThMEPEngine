@@ -139,10 +139,8 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         private void CheckDefaultUrl()
         {
             IOOperateService.CreateFolder(configFolderUrl);
-            if (!IOOperateService.FileExist(configFileUrl))
-            {
-                SavaExcel(configFileUrl);
-            }
+            //更新配置文件至ROAMABLEROOTPREFIX
+            SavaExcel(configFileUrl);
         }
 
         /// <summary>
@@ -419,6 +417,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
                 //设置默认值
                 SetDefaultValue();
                 configList.SelectedItem = Path.GetFileName(file);
+                configList_SelectionChanged(null,null);//手动触发configList的configList_SelectionChanged事件，目的是为了导入Excel后刷新一下UI和配置
             }
         }
 

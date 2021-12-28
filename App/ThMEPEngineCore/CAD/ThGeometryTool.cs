@@ -135,11 +135,7 @@ namespace ThMEPEngineCore.CAD
         {
             try
             {
-                using (var acadDatabase = AcadDatabase.Active())
-                {
-                    acadDatabase.ModelSpace.Add(dBText.OBBFrame());
-                    return dBText.OBBFrame();
-                }
+                return dBText.OBBFrame();
             }
             catch
             {

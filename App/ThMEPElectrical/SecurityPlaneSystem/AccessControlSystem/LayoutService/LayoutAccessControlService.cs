@@ -168,7 +168,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                         }
                         else if (roomAInfo.connectType == ConnectType.Normal)
                         {
-                            if (roomB.Tags.Any(x=> roomAInfo.roomB.Contains(x)))
+                            if (roomB.Tags.Any(x=> roomAInfo.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, x))))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;
