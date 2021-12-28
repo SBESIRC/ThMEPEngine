@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using System.Linq;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -24,7 +22,7 @@ namespace ThMEPElectrical.BlockConvert
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
-            if (xclip.IsValid && elements.Count != 0) 
+            if (xclip.IsValid && elements.Count != 0)
             {
                 elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
             }
@@ -58,11 +56,20 @@ namespace ThMEPElectrical.BlockConvert
 
         public override bool IsDistributionElement(Entity entity)
         {
-            if (entity is BlockReference br)
+            try
             {
-                return NameFilter.Contains(ThMEPXRefService.OriginalFromXref(br.GetEffectiveName()));
+                if (entity is BlockReference br)
+                {
+                    return NameFilter.Contains(ThMEPXRefService.OriginalFromXref(br.GetEffectiveName()));
+                }
+                return false;
             }
-            return false;
+            catch
+            {
+                // BlockReference.IsDynamicBlock可能会抛出异常
+                // 这里可以忽略掉这些有异常情况的动态块
+                return false;
+            }
         }
 
         public override bool CheckLayerValid(Entity curve)
