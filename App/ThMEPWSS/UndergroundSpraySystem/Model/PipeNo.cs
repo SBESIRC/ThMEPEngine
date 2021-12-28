@@ -31,7 +31,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 {
                     var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                     dbObjs.Cast<Entity>()
-                        .Where(e => IsTCHText(e))
+                        .Where(e => e.IsTCHPipeText())
                         .ForEach(e => ExplodeTCHText(e, DBObjs));
                 }
             }
@@ -39,11 +39,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         private bool IsTargetLayer(string layer)
         {
             return layer.ToUpper() == "W-FRPT-HYDT-EQPM";
-        }
-        private bool IsTCHText(Entity entity)
-        {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
-            return dxfName.StartsWith("TCH") && dxfName.Contains("PIPETEXT");
         }
         private void ExplodeTCHText(Entity entity, DBObjectCollection DBObjs)
         {

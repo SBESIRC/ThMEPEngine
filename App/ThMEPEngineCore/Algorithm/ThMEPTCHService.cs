@@ -61,6 +61,17 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
+        /// 是否是天正水管文字
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHPipeText(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("PIPETEXT");
+        }
+
+        /// <summary>
         /// 是否是天正配件
         /// </summary>
         /// <param name="entity"></param>
@@ -77,6 +88,17 @@ namespace ThMEPEngineCore.Algorithm
         /// <param name="entity"></param>
         /// <returns></returns>
         public static bool IsTCHSprinkler(this Entity entity)
+        {
+            string dxfName = entity.GetRXClass().DxfName.ToUpper();
+            return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
+        }
+
+        /// <summary>
+        /// 是否为天正设备
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public static bool IsTCHEquipment(this Entity entity)
         {
             string dxfName = entity.GetRXClass().DxfName.ToUpper();
             return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
