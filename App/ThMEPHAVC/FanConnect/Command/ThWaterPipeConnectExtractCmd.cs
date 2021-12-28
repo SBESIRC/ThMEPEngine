@@ -84,17 +84,25 @@ namespace ThMEPHVAC.FanConnect.Command
                         break;
                 }
                 //获取风机设备
+                var startPt = ThFanConnectUtils.SelectPoint();
+                if (startPt.IsEqualTo(new Point3d()))
+                {
+                    return;
+                }
+                //提取水管路由
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                ////水管干路和支干路
+                //var pipes = ThFanConnectUtils.SelectPipes();
+                if (pipes.Count == 0)
+                {
+                    return;
+                }
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 if(fucs.Count == 0)
                 {
                     return;
                 }
-                //水管干路和支干路
-                var pipes = ThFanConnectUtils.SelectPipes();
-                if(pipes.Count == 0)
-                {
-                    return;
-                }
+
                 //获取剪力墙
                 var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
                 //获取结构柱

@@ -160,11 +160,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;
                 pipeMarkServiece.PipeMark(pointTreeModel);
-
-                //插入阀门
-                ThAddValveServiece addValveServiece = new ThAddValveServiece();
-                addValveServiece.ConfigInfo = ConfigInfo;
-                addValveServiece.AddValve(treeModel);
+                if(ConfigInfo.WaterSystemConfigInfo.IsGenerValve && ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                {
+                    //插入阀门
+                    ThAddValveServiece addValveServiece = new ThAddValveServiece();
+                    addValveServiece.ConfigInfo = ConfigInfo;
+                    addValveServiece.AddValve(treeModel);
+                }
             }
         }
     }

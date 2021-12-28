@@ -32,12 +32,12 @@ namespace ThMEPHVAC.FanConnect.Service
             using (var database = AcadDatabase.Active())
             {
                 string layer = "AI-水管路由";
-                var pt = new Point3d(0.0, 0.0, 0.0);
-                var box = ThDrawTool.CreateSquare(startPt, 30.0);
+                var box = ThDrawTool.CreateSquare(startPt.TransformBy(Active.Editor.WCS2UCS()), 50.0);
                 //以pt为中心，做一个矩形
                 //找到改矩形内所有的Entity
                 //遍历Entity找到目标层
-                var psr = AcHelper.Active.Editor.SelectCrossingPolygon(box.Vertices());
+                var psr = Active.Editor.SelectCrossingPolygon(box.Vertices());
+                int colorIndex = 0;
                 if (psr.Status == PromptStatus.OK)
                 {
                     foreach(var id in psr.Value.GetObjectIds())
@@ -46,12 +46,13 @@ namespace ThMEPHVAC.FanConnect.Service
                         if(entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
                         {
                             layer = entity.Layer;
+                            colorIndex = entity.ColorIndex;
                             break;
                         }
                     }
                 }
                 var retLines = new List<Line>();
-                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains(layer)).ToList();
+                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains(layer) && o.ColorIndex == colorIndex).ToList();
                 foreach(var l in tmpLines)
                 {
                     if(l is Line)

@@ -294,6 +294,9 @@ namespace ThMEPHVAC.FanLayout.Service
                 dbText.Height = 300.0;
                 dbText.WidthFactor = 0.7;
                 dbText.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+                dbText.HorizontalMode = TextHorizontalMode.TextCenter;
+                dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
+                dbText.AlignmentPoint = position;
                 database.ModelSpace.Add(dbText);
             }
         }
