@@ -121,17 +121,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 }
                 catch { }
             }
+            int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 int index = layoutPara.AreaNumber[j];
                 layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
                 layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
+                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstacleList);
+                //layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
                 layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
                 layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+
+                List<Polyline> buildingBoxes = new List<Polyline>();
+                var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
+                var obstacleListNew = new List<List<Polyline>>();
+                for (int i = 0; i < obstacleList.Count; i++)
+                {
+                    var pls = obstacleList[i];
+                    obstacleListNew.Add(new List<Polyline>());
+                    foreach (var pl in pls)
+                    {
+                        obstacleListNew[obstacleListNew.Count - 1].AddRange((GeoUtilities.SplitCurve(pl, bound).Where(e => bound.IsPointIn(e.GetCenter())).Select(e =>
+                          {
+                              if (e is Polyline) return (Polyline)e;
+                              else return GeoUtilities.PolyFromLine((Line)e);
+                          })));
+                    }
+                }
+                foreach (var obs in obstacleListNew)
+                {
+                    if (obs.Count == 0) continue;
+                    Extents3d ext = new Extents3d();
+                    foreach (var pl in obs) ext.AddExtents(pl.GeometricExtents);
+                    buildingBoxes.Add(ext.ToRectangle());
+                }
+
                 var obstacles = new List<Polyline>();
-                obstaclesList.ForEach(e => obstacles.AddRange(e));
+                obstacleList.ForEach(e => obstacles.AddRange(e));
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
@@ -157,18 +183,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 fs1.Close();
 #endif
                 inilanes = inilanes.Distinct().ToList();
-                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
                 try
                 {
-                    partition.ProcessAndDisplay(layerNames, 30);
+                    count += partition.ProcessAndDisplay(layerNames, 30);
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ;
                 }
             }
             layoutPara.Dispose();
+            Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
         }
 
         private static Point3dCollection SelectAreas()
