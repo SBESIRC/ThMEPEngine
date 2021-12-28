@@ -102,7 +102,7 @@ namespace ThMEPElectrical.AFAS.Data
                         {
                             Boundary = e,
                             Tags = r.Tags,
-                            Name =r.Name,
+                            Name = r.Name,
                             Uuid = Guid.NewGuid().ToString(),
                         };
                         roomCollector.Add(room);
@@ -117,10 +117,10 @@ namespace ThMEPElectrical.AFAS.Data
             this.Rooms = newRooms;
         }
 
-        private List<ThIfcRoom> FilterInFrames(List<ThIfcRoom> rooms ,
-            DBObjectCollection frames,double edgeTolerance=1.0)
+        private List<ThIfcRoom> FilterInFrames(List<ThIfcRoom> rooms,
+            DBObjectCollection frames, double edgeTolerance = 1.0)
         {
-            var objs = rooms.Select(o=>o.Boundary).ToCollection();
+            var objs = rooms.Select(o => o.Boundary).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var collector = new DBObjectCollection(); // 收集在frames里面的房间
             var bufferService = new ThNTSBufferService();
@@ -130,7 +130,7 @@ namespace ThMEPElectrical.AFAS.Data
                 var inners = spatialIndex.SelectWindowPolygon(newFrame);
                 collector = collector.Union(inners);
             });
-            return rooms.Where(r=> collector.Contains(r.Boundary)).ToList();
+            return rooms.Where(r => collector.Contains(r.Boundary)).ToList();
         }
 
         private DBObjectCollection Intersection(Entity entity, DBObjectCollection objs)
@@ -144,7 +144,7 @@ namespace ThMEPElectrical.AFAS.Data
             return results;
         }
 
-        private DBObjectCollection ClearZeroPolygon(DBObjectCollection objs, double areaTolerance=1.0)
+        private DBObjectCollection ClearZeroPolygon(DBObjectCollection objs, double areaTolerance = 1.0)
         {
             return objs.Cast<Entity>().Where(o =>
             {
@@ -221,7 +221,7 @@ namespace ThMEPElectrical.AFAS.Data
                 //    LayoutContent = "必布区域";
                 //else if (service.CannotLayoutArea(o))
                 //    LayoutContent = "不可布区域";
-                
+
                 geometry.Properties.Add(ThExtractorPropertyNameManager.PrivacyPropertyName, privacyContent);
                 //geometry.Properties.Add(ThExtractorPropertyNameManager.PlacementPropertyName, LayoutContent);
                 geometry.Boundary = o.Boundary;
@@ -255,12 +255,26 @@ namespace ThMEPElectrical.AFAS.Data
                     if (objs.Count > 0)
                     {
                         var fireApart = GetMaximumIntersectFireApart(room.Boundary, objs);
-                        GroupOwner.Add(room.Boundary, new List<string> { groupId[fireApart] });
+                        if (GroupOwner.ContainsKey(room.Boundary) == false)
+                        {
+                            GroupOwner.Add(room.Boundary, new List<string> { groupId[fireApart] });
+                        }
+                        else
+                        {
+                            GroupOwner[room.Boundary] = new List<string> { groupId[fireApart] };
+                        }
                     }
                 }
                 else
                 {
-                    GroupOwner.Add(room.Boundary, ids);
+                    if (GroupOwner.ContainsKey(room.Boundary) == false)
+                    {
+                        GroupOwner.Add(room.Boundary, ids);
+                    }
+                    else
+                    {
+                        GroupOwner[room.Boundary] = ids;
+                    }
                 }
             }
         }

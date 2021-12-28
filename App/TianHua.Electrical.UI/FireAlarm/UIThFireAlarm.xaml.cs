@@ -69,20 +69,22 @@ namespace TianHua.Electrical.UI.FireAlarm
         {
             FireAlarmSetting.Instance.Scale = (double)localVM.ScaleItem.Tag;
             FireAlarmSetting.Instance.Beam = (int)localVM.Beam;
-            FireAlarmSetting.Instance.LayoutItem = (int)localVM.LayoutItem;
+            //FireAlarmSetting.Instance.LayoutItem = (int)localVM.LayoutItem;
 
             FireAlarmSetting.Instance.RoofHight = (int)localVM.RoofHight.Tag;
             FireAlarmSetting.Instance.RoofGrade = (int)localVM.RoofGrade.Tag;
             FireAlarmSetting.Instance.RoofThickness = localVM.RoofThickness;
             FireAlarmSetting.Instance.FixRef = (double)localVM.FixRef.Tag;
 
-            FireAlarmSetting.Instance.BroadcastLayout = (int)localVM.BroadcastLayout;
+            FireAlarmSetting.Instance.BroadcastLayout = (int)localVM.BroadcastLayoutType;
             FireAlarmSetting.Instance.StepLengthBC = localVM.StepLengthBC * 1000;
 
             FireAlarmSetting.Instance.StepLengthMA = (double)localVM.StepLengthMA * 1000;
-            FireAlarmSetting.Instance.ProtectRadius = (double)localVM.ProtectRadius;
+            FireAlarmSetting.Instance.GasProtectRadius = (double)localVM.GasProtectRadius;
             FireAlarmSetting.Instance.DisplayBuilding = (int)localVM.DisplayBuilding;
             FireAlarmSetting.Instance.DisplayBlk = (int)localVM.DisplayBlk;
+
+            SaveLayout(localVM);
         }
 
         void FocusToCAD()
@@ -93,6 +95,43 @@ namespace TianHua.Electrical.UI.FireAlarm
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private static void SaveLayout(FireAlarmViewModel localVM)
+        {
+            FireAlarmSetting.Instance.LayoutItemList.Clear();
+
+            if (localVM.LayoutSmoke == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(0);
+            }
+            if (localVM.LayoutBroadcast  == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(1);
+            }
+            if (localVM.LayoutDisplay  == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(2);
+            }
+            if (localVM.LayoutTel == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(3);
+            }
+            if (localVM.LayoutGas== true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(4);
+            }
+            if (localVM.LayoutManualAlart  == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(5);
+            }
+            if (localVM.LayoutMonitor == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add(6);
+            }
+
+            FireAlarmSetting.Instance.LayoutItemList = FireAlarmSetting.Instance.LayoutItemList.OrderBy(x => x).ToList();
+
         }
     }
 

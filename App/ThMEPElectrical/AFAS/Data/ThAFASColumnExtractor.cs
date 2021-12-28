@@ -124,7 +124,18 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            //Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            foreach (var o in Columns)
+            {
+                if (GroupOwner.ContainsKey(o) == false)
+                {
+                    GroupOwner.Add(o, FindCurveGroupIds(groupId, o));
+                }
+                else
+                {
+                    GroupOwner[o] = FindCurveGroupIds(groupId, o);
+                }
+            }
         }
 
         public void Transform()

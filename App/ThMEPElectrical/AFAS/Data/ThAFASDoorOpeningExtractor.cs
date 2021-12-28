@@ -23,7 +23,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASDoorOpeningExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    public class ThAFASDoorOpeningExtractor : ThExtractorBase, IGroup, ISetStorey, ITransformer
     {
         private List<ThIfcRoom> Rooms { get; set; }
         private List<Polyline> Holes { get; set; }
@@ -283,7 +283,18 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Doors.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+            //Doors.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+            foreach (var o in Doors)
+            {
+                if (GroupOwner.ContainsKey(o.Outline ) == false)
+                {
+                    GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline));
+                }
+                else
+                {
+                    GroupOwner[o.Outline] = FindCurveGroupIds(groupId, o.Outline);
+                }
+            }
         }
 
         public override List<Entity> GetEntities()

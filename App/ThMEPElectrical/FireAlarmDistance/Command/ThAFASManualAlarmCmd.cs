@@ -23,6 +23,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Command;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmDistance.Data;
@@ -32,15 +33,13 @@ namespace ThMEPElectrical.FireAlarmDistance
 {
     public class ThAFASManualAlarmCmd : ThMEPBaseCommand, IDisposable
     {
-        private bool UseUI { get; set; }
         double _scale = 100;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
         double _stepLength = 25000;
         bool _referBeam = false;
 
-        public ThAFASManualAlarmCmd(bool UI)
+        public ThAFASManualAlarmCmd()
         {
-            UseUI = UI;
             InitialCmdInfo();
             InitialSetting();
         }
@@ -53,11 +52,10 @@ namespace ThMEPElectrical.FireAlarmDistance
 
         private void InitialSetting()
         {
-            if (UseUI == true)
-            {
-                _scale = FireAlarmSetting.Instance.Scale;
-                _stepLength = FireAlarmSetting.Instance.StepLengthMA;
-            }
+
+            _scale = FireAlarmSetting.Instance.Scale;
+            _stepLength = FireAlarmSetting.Instance.StepLengthMA;
+
         }
         public void Dispose()
         {
@@ -73,38 +71,44 @@ namespace ThMEPElectrical.FireAlarmDistance
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                ////--------------画框，提数据，转数据
+                //var framePts = ThAFASUtils.GetFrameBlk();
+                //if (framePts.Count == 0)
+                //{
+                //    return;
+                //}
 
-                var framePts = ThAFASUtils.GetFrameBlk();
-                if (framePts.Count == 0)
+                //if (UseUI == false)
+                //{
+                //    SettingNoUI();
+                //}
+
+                var transformer = ThAFASDataPass.Instance.Transformer;
+                var pts = ThAFASDataPass.Instance.SelectPts;
+
+                //--------------初始图块信息!!!!!!避让计算有问题
+                var extractBlkList = ThFaCommon.BlkNameList;
+                var cleanBlkName = ThFaCommon.LayoutBlkList[5];
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                var layoutBlkNameBottom = ThFaCommon.BlkName_ManualAlarm;
+                var layoutBlkNameTop = ThFaCommon.BlkName_SoundLightAlarm;
+                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
+
+                //--------------提取数据
+                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
+                //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, needConverage);
+                if (geos.Count == 0)
                 {
                     return;
                 }
 
-                if (UseUI == false)
-                {
-                    SettingNoUI();
-                }
-
-                var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_ManualAlarm, ThFaCommon.BlkName_SoundLightAlarm };
-                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-                var layoutBlkNameBottom = ThFaCommon.BlkName_ManualAlarm;
-                var layoutBlkNameTop = ThFaCommon.BlkName_SoundLightAlarm;
-
-                //导入块图层。free图层
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
-                //取数据
-                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
-                var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var data = new ThAFASDistanceDataSet(geos, cleanBlkName, avoidBlkName);
-                data.ClassifyData();
-                data.CleanPreviousEquipment();
-                data.ExtendEquipment(cleanBlkName, _scale);
+                var data = new ThAFASDistanceDataQueryService(geos, avoidBlkName);
+                data.ExtendPriority(cleanBlkName, _scale);
                 data.FilterBeam();
                 data.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
 
-                //布置手动报警
+                //--------------布置手动报警
                 var geojson = ThGeoOutput.Output(data.Data);
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
@@ -128,8 +132,8 @@ namespace ThMEPElectrical.FireAlarmDistance
                 var ptDirListTop = ThAFASDistanceLayoutService.FindOutputPtsOnTop(ptDirList, layoutBlkNameTop, _scale);
                 ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
 
-                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop, ThFaCommon.blk_layer[layoutBlkNameTop], true);
-                ThFireAlarmInsertBlk.InsertBlock(ptDirListTop, _scale, layoutBlkNameBottom, ThFaCommon.blk_layer[layoutBlkNameBottom], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkNameTop, ThFaCommon.Blk_Layer[layoutBlkNameTop], true);
+                ThFireAlarmInsertBlk.InsertBlock(ptDirListTop, _scale, layoutBlkNameBottom, ThFaCommon.Blk_Layer[layoutBlkNameBottom], true);
             }
         }
 

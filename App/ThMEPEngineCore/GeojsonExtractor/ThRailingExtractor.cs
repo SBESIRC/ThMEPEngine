@@ -58,7 +58,18 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Railing.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            //Railing.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            foreach (var o in Railing)
+            {
+                if (GroupOwner.ContainsKey(o) == false)
+                {
+                    GroupOwner.Add(o, FindCurveGroupIds(groupId, o));
+                }
+                else
+                {
+                    GroupOwner[o] = FindCurveGroupIds(groupId, o);
+                }
+            }
         }
 
         public void Print(Database database)

@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 
@@ -18,6 +19,15 @@ namespace ThMEPEngineCore.Extension
                     g.Boundary.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
                 }
             });
+        }
+
+        public static void ProjectOntoXYPlane(this Entity geos)
+        {
+            if (geos != null)
+            {
+                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+            }
         }
     }
 }

@@ -18,7 +18,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASPlaceCoverageExtractor : ThExtractorBase, IPrint, ITransformer, IGroup, ISetStorey
+    public class ThAFASPlaceCoverageExtractor : ThExtractorBase, ITransformer, IGroup, ISetStorey
     {
         #region input
         public List<ThIfcRoom> Rooms { get; set; } = new List<ThIfcRoom>();
@@ -114,7 +114,18 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            CanLayoutAreas.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            //CanLayoutAreas.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            foreach (var o in CanLayoutAreas)
+            {
+                if (GroupOwner.ContainsKey(o) == false)
+                {
+                    GroupOwner.Add(o, FindCurveGroupIds(groupId, o));
+                }
+                else
+                {
+                    GroupOwner[o] = FindCurveGroupIds(groupId, o);
+                }
+            }
         }
 
         public void Set(List<ThStoreyInfo> storeyInfos)

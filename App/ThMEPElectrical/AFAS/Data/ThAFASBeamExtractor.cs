@@ -21,7 +21,8 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    //public class ThAFASBeamExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    public class ThAFASBeamExtractor : ThExtractorBase, ITransformer
     {
         public List<ThIfcBeam> Beams { get; private set; }
         private const string SwitchPropertyName = "Switch";
@@ -128,7 +129,19 @@ namespace ThMEPElectrical.AFAS.Data
         }
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Beams.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+            //Beams.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
+
+            foreach (var o in Beams)
+            {
+                if (GroupOwner.ContainsKey(o.Outline) == false)
+                {
+                    GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline));
+                }
+                else
+                {
+                    GroupOwner[o.Outline] = FindCurveGroupIds(groupId, o.Outline);
+                }
+            }
         }
 
         public void Print(Database database)

@@ -46,20 +46,98 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
-        private LayoutItemType _LayoutItem { get; set; }
-        public LayoutItemType LayoutItem
+        //private LayoutItemType _LayoutItem { get; set; }
+        //public LayoutItemType LayoutItem
+        //{
+        //    get
+        //    {
+        //        return _LayoutItem;
+        //    }
+        //    set
+        //    {
+        //        _LayoutItem = value;
+        //        this.RaisePropertyChanged();
+        //    }
+        //}
+
+        private bool _LayoutSmoke { get; set; }
+        public bool LayoutSmoke
         {
-            get
-            {
-                return _LayoutItem;
-            }
+            get { return _LayoutSmoke; }
             set
             {
-                _LayoutItem = value;
+                _LayoutSmoke = value;
                 this.RaisePropertyChanged();
             }
         }
 
+        private bool _LayoutGas { get; set; }
+        public bool LayoutGas
+        {
+            get { return _LayoutGas; }
+            set
+            {
+                _LayoutGas = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _LayoutBroadcast { get; set; }
+        public bool LayoutBroadcast
+        {
+            get { return _LayoutBroadcast; }
+            set
+            {
+                _LayoutBroadcast = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private bool _LayoutManualAlart { get; set; }
+        public bool LayoutManualAlart
+        {
+            get { return _LayoutManualAlart; }
+            set
+            {
+                _LayoutManualAlart = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _LayoutDisplay { get; set; }
+        public bool LayoutDisplay
+        {
+            get { return _LayoutDisplay; }
+            set
+            {
+                _LayoutDisplay = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _LayoutMonitor { get; set; }
+        public bool LayoutMonitor
+        {
+            get { return _LayoutMonitor; }
+            set
+            {
+                _LayoutMonitor = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private bool _LayoutTel { get; set; }
+        public bool LayoutTel
+        {
+            get { return _LayoutTel; }
+            set
+            {
+                _LayoutTel = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+
+        //-------烟温感
         private UListItemData _RoofHight { get; set; }
         public UListItemData RoofHight
         {
@@ -134,21 +212,20 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
-        private BroadcastLayoutType _BroadcastLayout { get; set; }
-        public BroadcastLayoutType BroadcastLayout
+        //-------广播
+        private BroadcastLayoutType _BroadcastLayoutType { get; set; }
+        public BroadcastLayoutType BroadcastLayoutType
         {
             get
             {
-                return _BroadcastLayout;
+                return _BroadcastLayoutType;
             }
             set
             {
-                _BroadcastLayout = value;
+                _BroadcastLayoutType = value;
                 this.RaisePropertyChanged();
             }
         }
-
-
         private double _StepLengthBC { get; set; }
         public double StepLengthBC
         {
@@ -160,6 +237,7 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
+        //-------手报
         private double _StepLengthAM { get; set; }
         public double StepLengthMA
         {
@@ -171,18 +249,19 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
-
-        private double _ProtectRadius { get; set; }
-        public double ProtectRadius
+        //-------可燃气
+        private double _GasProtectRadius { get; set; }
+        public double GasProtectRadius
         {
-            get { return _ProtectRadius; }
+            get { return _GasProtectRadius; }
             set
             {
-                _ProtectRadius = value;
+                _GasProtectRadius = value;
                 this.RaisePropertyChanged();
             }
         }
 
+        //-------楼层显示器
         private DisplayBuildingType _DisplayBuildingType { get; set; }
         public DisplayBuildingType DisplayBuilding
         {
@@ -210,27 +289,39 @@ namespace ThMEPElectrical.AFAS.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        //-------
+
         public FireAlarmViewModel()
         {
+
             SetScale();
             Beam = BeamType.ConsiderBeam;
-            LayoutItem = LayoutItemType.Smoke;
+            //LayoutItem = LayoutItemType.Smoke;
+            ///layout item
+            LayoutSmoke = true;
+            LayoutBroadcast = true;
+            LayoutDisplay = true;
+            LayoutTel = true;
+            LayoutGas = true;
+            LayoutManualAlart = true;
+            LayoutMonitor = true;
+
 
             ///smoke
             SetRoofHight();
             SetRoofGrade();
             RoofThickness = 100;
             SetFixRef();
-            
+
             ///broadcast
-            BroadcastLayout = BroadcastLayoutType.Wall;
+            BroadcastLayoutType = BroadcastLayoutType.Wall;
             StepLengthBC = 25;
 
             ///manual alarm
             StepLengthMA = 25;
 
             ///gas
-            ProtectRadius = 8000;
+            GasProtectRadius = 8000;
 
             ///Floor Display
             DisplayBuilding = DisplayBuildingType.Resident;
@@ -266,7 +357,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
             FixRefList.Add(new UListItemData("1.0", 3, (double)1.0));
             FixRef = FixRefList[3];
         }
-
 
     }
 

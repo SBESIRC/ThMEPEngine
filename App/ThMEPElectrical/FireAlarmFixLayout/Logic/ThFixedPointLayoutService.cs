@@ -15,7 +15,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         public ThFixedPointLayoutService(List<ThGeometry> totalData, List<string> CleanBlkName, List<string> AvoidBlkName)
         {
-            DataQueryWorker = new ThDataQueryService(totalData, CleanBlkName, AvoidBlkName);
+            DataQueryWorker = new ThDataQueryService(totalData, AvoidBlkName);
         }
         public abstract List<KeyValuePair<Point3d, Vector3d>> Layout();
 

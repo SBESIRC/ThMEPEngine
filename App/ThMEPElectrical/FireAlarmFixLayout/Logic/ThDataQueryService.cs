@@ -28,12 +28,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDataQueryService
     {
-        //input
+        ///////input
         private List<ThGeometry> Data { get; set; } = new List<ThGeometry>();
-        private List<string> CleanBlkName { get; set; } = new List<string>();
+        //   private List<string> CleanBlkName { get; set; } = new List<string>();
         private List<string> AvoidBlkNameList { get; set; } = new List<string>();
 
-        //output
+        /////////原始数据
         public List<ThGeometry> Storeys { get; private set; } = new List<ThGeometry>(); //StoreyBorder
         public List<ThGeometry> DoorOpenings { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireAparts { get; private set; } = new List<ThGeometry>();
@@ -44,64 +44,86 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireProofs { get; private set; } = new List<ThGeometry>();
+
+        ///////处理数据
         public List<ThGeometry> Avoidence { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireLinkageRooms { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> CleanEquipments { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> AvoidEquipments { get; private set; } = new List<ThGeometry>();
-        public string floorTag { get; private set; }
+        public string FloorTag { get; private set; }
         private Dictionary<Entity, ThGeometry> GeometryMap { get; set; }
         public List<string> FireApartMap { get; set; } = new List<string>();
 
         //房间配置表属性
-        public string roomConfigUrl = ThCADCommon.RoomConfigPath();
-        public List<RoomTableTree> roomTableConfig = new List<RoomTableTree>();  //房间配置表
-        //public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       //
+        private string RoomConfigUrl = ThCADCommon.RoomConfigPath();
+        public List<RoomTableTree> RoomTableConfig = new List<RoomTableTree>();  //房间配置表
+        //public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       
 
-        public ThDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
+        public ThDataQueryService(List<ThGeometry> data,  List<string> avoidBlkNameList)
         {
             Data = data;
-            CleanBlkName = cleanBlkName;
+            //CleanBlkName = cleanBlkName;
             AvoidBlkNameList = avoidBlkNameList;
 
             PrepareData();
-            CleanPreviousEquipment();
+            //CleanPreviousEquipment();
 
+            //GeometryMap = new Dictionary<Entity, ThGeometry>();
+            //data.ForEach(o =>
+            //{
+            //    if (o.Boundary != null)
+            //    {
+            //        GeometryMap.Add(o.Boundary, o);
+            //    }
+            //});
+
+            for (int i = 0; i < FireAparts.Count; ++i)
+                FireApartMap.Add(FireAparts[i].Properties[ThExtractorPropertyNameManager.IdPropertyName].ToString());
+
+        }
+
+
+        protected void PrepareData()
+        {
+            DoorOpenings = QueryCategory(BuiltInCategory.DoorOpening.ToString());
+            Storeys = QueryCategory(BuiltInCategory.StoreyBorder.ToString());
+            Columns = QueryCategory(BuiltInCategory.Column.ToString());
+            Shearwalls = QueryCategory(BuiltInCategory.ShearWall.ToString());
+            FireAparts = QueryCategory(BuiltInCategory.FireApart.ToString());
+            ArchitectureWalls = QueryCategory(BuiltInCategory.ArchitectureWall.ToString());
+            Windows = QueryCategory(BuiltInCategory.Window.ToString());
+            Rooms = QueryCategory(BuiltInCategory.Room.ToString());
+            Holes = QueryCategory(BuiltInCategory.Hole.ToString());
+            FireProofs = QueryCategory(BuiltInCategory.LaneLine.ToString());
+            var equipments = QueryCategory(BuiltInCategory.Equipment.ToString());
+            // CleanEquipments = equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
+            AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
+            //Avoidence.AddRange(DoorOpenings);
+            //Avoidence.AddRange(Windows);
+            //Avoidence.AddRange(FireProofs);
+            //Avoidence.AddRange(AvoidEquipments);
+            FloorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
+            RoomTableConfig = ThAFASRoomUtils.ReadRoomConfigTable(RoomConfigUrl);
+            GetFireLinkageRooms();
+        }
+
+        public void MapGeometry()
+        {
             GeometryMap = new Dictionary<Entity, ThGeometry>();
-            data.ForEach(o =>
+            Data.ForEach(o =>
             {
                 if (o.Boundary != null)
                 {
                     GeometryMap.Add(o.Boundary, o);
                 }
             });
-            for (int i = 0; i < FireAparts.Count; ++i)
-                FireApartMap.Add(FireAparts[i].Properties[ThExtractorPropertyNameManager.IdPropertyName].ToString());
-
         }
-        protected void PrepareData()
+        public void AddAvoidence()
         {
-            DoorOpenings = QueryC(BuiltInCategory.DoorOpening.ToString());
-            Storeys = QueryC(BuiltInCategory.StoreyBorder.ToString());
-            Columns = QueryC(BuiltInCategory.Column.ToString());
-            Shearwalls = QueryC(BuiltInCategory.ShearWall.ToString());
-            FireAparts = QueryC(BuiltInCategory.FireApart.ToString());
-            ArchitectureWalls = QueryC(BuiltInCategory.ArchitectureWall.ToString());
-            Windows = QueryC(BuiltInCategory.Window.ToString());
-            Rooms = QueryC(BuiltInCategory.Room.ToString());
-            Holes = QueryC(BuiltInCategory.Hole.ToString());
-            FireProofs = QueryC(BuiltInCategory.LaneLine.ToString());
-
-            var equipments = QueryC(BuiltInCategory.Equipment.ToString());
-            CleanEquipments = equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
-            AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
-
             Avoidence.AddRange(DoorOpenings);
             Avoidence.AddRange(Windows);
             Avoidence.AddRange(FireProofs);
             Avoidence.AddRange(AvoidEquipments);
-            floorTag = Storeys[0].Properties[ThExtractorPropertyNameManager.FloorNumberPropertyName].ToString();
-            roomTableConfig = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
-            GetFireLinkageRooms();
         }
 
         private void CleanPreviousEquipment()
@@ -118,13 +140,25 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 obj.DowngradeOpen();
                 dbTrans.Commit();
                 Data.Remove(x);
-
             });
-
-
         }
 
-        private List<ThGeometry> QueryC(string category)
+        public void ExtendEquipment(List<string> cleanBlkName, double scale)
+        {
+            var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, scale);
+
+            //for (int i = 0; i < AvoidEquipments.Count; i++)
+            //{
+            //    if (AvoidEquipments[i].Boundary is Polyline pl)
+            //    {
+            //        AvoidEquipments[i].Boundary = pl.GetOffsetClosePolyline(priorityExtend);
+            //    }
+            //}
+
+            ThAFASUtils.ExtendPriority(AvoidEquipments, priorityExtend);
+        }
+
+        private List<ThGeometry> QueryCategory(string category)
         {
             var result = new List<ThGeometry>();
             foreach (ThGeometry geo in Data)
@@ -159,7 +193,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             List<string> NameCollection = new List<string>();
             foreach (string a in FireLinkageNames)
             {
-                NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(roomTableConfig, a));
+                NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(RoomTableConfig, a));
             }
             foreach (ThGeometry room in Rooms)
             {
@@ -365,6 +399,20 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             }
         }
 
+        public void Print()
+        {
+            DoorOpenings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
+            Storeys.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Storeys", 2));
+            Columns.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
+            Shearwalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 0));
+            FireAparts.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireApart", 112));
+            ArchitectureWalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0archWall", 3));
+            Windows.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Window", 4));
+            Rooms.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0room", 2));
+            Holes.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Hole", 5));
+            FireProofs.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireProofs", 5));
+            AvoidEquipments.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Equipment", 152));
+        }
         ///// <summary>
         ///// 读取房间配置表
         ///// </summary>

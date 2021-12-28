@@ -18,7 +18,7 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    class ThAFASFireCompartmentExtractor : ThExtractorBase, IPrint, IGroup, ITransformer
+    class ThAFASFireCompartmentExtractor : ThExtractorBase, IGroup, ITransformer
     {
         public DBObjectCollection FireCompartments { get; private set; }
 
@@ -83,7 +83,21 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            FireCompartments.OfType<Entity>().ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            //FireCompartments.OfType<Entity>().ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            foreach (var item in FireCompartments)
+            {
+                if (item is Entity o)
+                {
+                    if (GroupOwner.ContainsKey(o) == false)
+                    {
+                        GroupOwner.Add(o, FindCurveGroupIds(groupId, o));
+                    }
+                    else
+                    {
+                        GroupOwner[o] = FindCurveGroupIds(groupId, o);
+                    }
+                }
+            }
         }
 
         public void BuildFireAPartIds()

@@ -23,6 +23,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Model
         public string BlkNameBroadcast = "";
 
         public List<Point3d> StairPartResult { get; set; } = new List<Point3d>();
-        public ThAFASDistanceDataSet Data { get; set; }
+        public ThAFASDistanceDataQueryService Data { get; set; }
     }
 }

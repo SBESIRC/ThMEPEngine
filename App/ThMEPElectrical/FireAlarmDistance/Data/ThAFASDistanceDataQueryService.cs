@@ -30,11 +30,11 @@ using ThMEPElectrical.FireAlarmArea.Service;
 namespace ThMEPElectrical.FireAlarmDistance.Data
 {
 
-    public class ThAFASDistanceDataSet
+    public class ThAFASDistanceDataQueryService
     {
         //input
         public List<ThGeometry> Data { get; private set; }
-        private List<string> CleanBlkName { get; set; } = new List<string>();
+        //private List<string> CleanBlkName { get; set; } = new List<string>();
         private List<string> AvoidBlkNameList { get; set; } = new List<string>();
         private List<RoomTableTree> RoomConfigTree;
         //output
@@ -47,27 +47,29 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
         public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
 
 
-        public ThAFASDistanceDataSet(List<ThGeometry> geom, List<string> cleanBlkName, List<string> avoidBlkNameList)
+        public ThAFASDistanceDataQueryService(List<ThGeometry> geom, List<string> avoidBlkNameList)
         {
             string roomConfigUrl = ThCADCommon.RoomConfigPath();
             RoomConfigTree = ThAFASRoomUtils.ReadRoomConfigTable(roomConfigUrl);
 
             this.Data = geom;
-            CleanBlkName = cleanBlkName;
+           //CleanBlkName = cleanBlkName;
             AvoidBlkNameList = avoidBlkNameList;
+
+            PrepareData();
         }
 
 
-        public void ClassifyData()
+        private void PrepareData()
         {
             Room = QueryCategory(BuiltInCategory.Room.ToString());
-            var AllEquipment = QueryCategory(BuiltInCategory.Equipment.ToString());
-            CleanEquipments = AllEquipment.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
-            AvoidEquipments = AllEquipment.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
             DoorOpenings = QueryCategory(BuiltInCategory.DoorOpening.ToString());
             Windows = QueryCategory(BuiltInCategory.Window.ToString());
-
+            var allEquipments = QueryCategory(BuiltInCategory.Equipment.ToString());
+            //CleanEquipments = allEquipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
+            AvoidEquipments = allEquipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
         }
+
         public List<Polyline> GetRoomBoundary()
         {
             var roomPl = Room.Select(x => x.Boundary as Polyline).ToList();
@@ -90,8 +92,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                 Data.Remove(x);
 
             });
-
-
         }
 
         public void ProcessRoomPlacementLabel(string layoutType)
@@ -114,8 +114,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                 }
             }
 
-            Data.RemoveAll (x=>roomClean.Contains (x));
-            Room.RemoveAll (x=>roomClean.Contains (x));
+            Data.RemoveAll(x => roomClean.Contains(x));
+            Room.RemoveAll(x => roomClean.Contains(x));
 
         }
         private void AddRoomPlacementLabel(string layoutType)
@@ -145,19 +145,19 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             }
         }
 
-
-
-        public void ExtendEquipment(List<string> cleanBlkName, double scale)
+        public void ExtendPriority(List<string> cleanBlkName, double scale)
         {
             var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, scale);
 
-            for (int i = 0; i < AvoidEquipments.Count; i++)
-            {
-                if (AvoidEquipments[i].Boundary is Polyline pl)
-                {
-                    AvoidEquipments[i].Boundary = pl.GetOffsetClosePolyline(priorityExtend);
-                }
-            }
+            //for (int i = 0; i < AvoidEquipments.Count; i++)
+            //{
+            //    if (AvoidEquipments[i].Boundary is Polyline pl)
+            //    {
+            //        AvoidEquipments[i].Boundary = pl.GetOffsetClosePolyline(priorityExtend);
+            //    }
+            //}
+
+            ThAFASUtils.ExtendPriority (AvoidEquipments, priorityExtend);
         }
 
         public void FilterBeam()
@@ -179,7 +179,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             return result;
         }
 
-        public void print()
+        public void Print()
         {
             var archWall = QueryCategory(BuiltInCategory.ArchitectureWall.ToString());
             var shearWall = QueryCategory(BuiltInCategory.ShearWall.ToString());

@@ -88,13 +88,13 @@ namespace ThMEPElectrical.AFAS
                                                                     {BlkName_InductionCeiling, (3,3)},
                                                                     {BlkName_Downlight, (3,3)},
                                                                     {BlkName_EmergencyLight,(2.5,2.5)},
-                                                                    { BlkName_ManualAlarm,(3,3) },
-                                                                    { BlkName_SoundLightAlarm,(5,3) },
-                                                                    { BlkName_Broadcast_Ceiling,(5,3) },
-                                                                    { BlkName_Broadcast_Wall,(5,3) },
+                                                                    {BlkName_ManualAlarm,(3,3) },
+                                                                    {BlkName_SoundLightAlarm,(5,3) },
+                                                                    {BlkName_Broadcast_Ceiling,(5,3) },
+                                                                    {BlkName_Broadcast_Wall,(5,3) },
                                                                 };
 
-        public static Dictionary<string, string> blk_layer = new Dictionary<string, string>()
+        public static Dictionary<string, string> Blk_Layer = new Dictionary<string, string>()
                                                                 {
                                                                     {BlkName_Display_District,"E-FAS-EQPM"},
                                                                     {BlkName_Display_Floor, "E-FAS-EQPM"},
@@ -117,6 +117,16 @@ namespace ThMEPElectrical.AFAS
                                                                     { BlkName_Broadcast_Wall,"E-FAS-DEVC" },
                                                                  };
 
-
+        //烟温感（0）广播（1）楼层显示器（2）消防电话（3）可燃气体探测（4）手动报警按钮（5）防火门监控（6）");
+        public static Dictionary<int, List<string>> LayoutBlkList = new Dictionary<int, List<string>>()
+        {
+            {0, new List<string>() { BlkName_Smoke, BlkName_Heat, BlkName_Smoke_ExplosionProf, BlkName_Heat_ExplosionProf } },
+            {1, new List<string>() { BlkName_Broadcast_Ceiling, BlkName_Broadcast_Wall } },
+            {2, new List<string>() { BlkName_Display_District, BlkName_Display_Floor } },
+            {3, new List<string>() { BlkName_FireTel } },
+            {4, new List<string>() { BlkName_Gas, BlkName_Gas_ExplosionProf } },
+            {5, new List<string>() { BlkName_ManualAlarm, BlkName_SoundLightAlarm } },
+            {6, new List<string>() { BlkName_Monitor } },
+        };
     }
 }

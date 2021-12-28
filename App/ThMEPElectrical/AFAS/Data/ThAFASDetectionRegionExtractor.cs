@@ -81,7 +81,7 @@ namespace ThMEPElectrical.AFAS.Data
 
             //获取探测区域
             var poly = pts.CreatePolyline();
-            DetectionRegion = cmd.DivideRoomWithDetectionRegion (poly);
+            DetectionRegion = cmd.DivideRoomWithDetectionRegion(poly);
             //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
         }
 

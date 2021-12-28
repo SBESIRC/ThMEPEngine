@@ -111,9 +111,9 @@ namespace ThMEPLighting.IlluminationLighting
                 var layoutBlkNameE = ThFaCommon.BlkName_EmergencyLight;
 
                 //导入块图层。free图层
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
+                ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
-                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, false);
+                var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false);
                 if (geos.Count == 0)
                 {
                     return;

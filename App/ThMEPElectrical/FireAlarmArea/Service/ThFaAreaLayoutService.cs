@@ -176,7 +176,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             if (localPts != null && localPts.Count > 0)
             {
                 priority = ThFaAreaLayoutParamterCalculationService.GetPriorityBoundary(localPts, Scale, size);
-                priority = priority.Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+                priority = ThAFASUtils.ExtendPriority(priority, priorityExtend);
             }
             return priority;
         }

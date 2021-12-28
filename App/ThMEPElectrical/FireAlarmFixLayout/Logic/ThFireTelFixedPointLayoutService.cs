@@ -15,15 +15,20 @@ using ThMEPElectrical.FireAlarmFixLayout.Service;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
-    public class ThFireTelFixedPointLayoutService : ThFixedPointLayoutService
+    public class ThFireTelFixedPointLayoutService 
     {
-        public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
+        //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
-        public ThFireTelFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) :base(data, CleanBlkName, AvoidBlkName)
+        //public ThFireTelFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) :base(data, CleanBlkName, AvoidBlkName)
+        //{
+        //}
+        protected ThDataQueryService DataQueryWorker;
+        public ThFireTelFixedPointLayoutService(ThDataQueryService dataQueryWorker)
         {
+            DataQueryWorker = dataQueryWorker;
         }
 
-        public override List<KeyValuePair<Point3d, Vector3d>> Layout()
+        public List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
             int ReservedWidth = 250;//预留宽度
             //var bufferValue = 1.0; // 门扩的buffer值

@@ -130,11 +130,11 @@
                 </StackPanel>
                 <StackPanel Grid.Row="2"  Grid.Column="1" VerticalAlignment="Center"  >
                     <RadioButton GroupName="rbBCCeiling" Content="优先吸顶" 
-                                 IsChecked="{Binding BroadcastLayout,Converter={StaticResource BroadcastConverter},ConverterParameter=0}"/>
+                                 IsChecked="{Binding BroadcastLayoutType,Converter={StaticResource BroadcastConverter},ConverterParameter=0}"/>
                 </StackPanel>
                 <StackPanel Grid.Row="2"  Grid.Column="2" VerticalAlignment="Center"  >
                     <RadioButton GroupName="rbBCCeiling" Content="全部壁装" 
-                                 IsChecked="{Binding BroadcastLayout,Converter={StaticResource BroadcastConverter},ConverterParameter=1}"/>
+                                 IsChecked="{Binding BroadcastLayoutType,Converter={StaticResource BroadcastConverter},ConverterParameter=1}"/>
 
                 </StackPanel>
                 <!--row 3-->
@@ -158,7 +158,7 @@
                 </StackPanel>
                 <StackPanel Grid.Row="5"  Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center"  >
                     <Label  Content ="探测半径："  />
-                    <cus:InputTextBox Width ="70"  TextBoxInputType="InputInteger"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding ProtectRadius , Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                    <cus:InputTextBox Width ="70"  TextBoxInputType="InputInteger"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding GasProtectRadius , Mode=TwoWay, NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                     <Label Content="mm"/>
                 </StackPanel>
                 <!--row 6-->

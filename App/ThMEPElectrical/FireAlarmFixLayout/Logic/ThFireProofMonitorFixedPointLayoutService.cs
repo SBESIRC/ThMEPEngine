@@ -18,7 +18,7 @@ using ThMEPEngineCore.IO.ExcelService;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
-    public class ThFireProofMonitorFixedPointLayoutService : ThFixedPointLayoutService
+    public class ThFireProofMonitorFixedPointLayoutService 
     {
         /// <summary>
         /// 读取房间配置表设置
@@ -30,29 +30,33 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                                             { new Dictionary<int, List<int>>(), new Dictionary<int, List<int>> (),
                                              new Dictionary<int, List<int>> (), new Dictionary<int, List<int>> ()};  //不同楼层路径优先级
 
-        public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) : base(data, CleanBlkName, AvoidBlkName)
+        //public ThFireProofMonitorFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) : base(data, CleanBlkName, AvoidBlkName)
+        //{
+        //}
+
+        protected ThDataQueryService DataQueryWorker;
+
+        public ThFireProofMonitorFixedPointLayoutService(ThDataQueryService dataQueryWorker)
         {
+            DataQueryWorker = dataQueryWorker;
         }
 
-        public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
+        //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
-        public override List<KeyValuePair<Point3d, Vector3d>> Layout()
+        public  List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
 
             //List<int[][]> Priority = new List<int[][]> { undergroundPriority, firstFloorPriority, higherLevelPriority , roof};
 
             int priKey = 0;  //地下优先级
-            if (DataQueryWorker.floorTag.Equals(""))
+            if (DataQueryWorker.FloorTag.Equals(""))
                 priKey = 3;  //大屋面优先级
-            else if (DataQueryWorker.floorTag[0].Equals('1'))
+            else if (DataQueryWorker.FloorTag[0].Equals('1'))
                 priKey = 1;  // 一层
-            else if (!DataQueryWorker.floorTag[0].Equals('B'))
+            else if (!DataQueryWorker.FloorTag[0].Equals('B'))
                 priKey = 2;   //二层及以上
 
             SetConfigTableForMonitor();
-
-
-
 
             //取与防火门相邻房间
             var fireDoorSet = DataQueryWorker.GetFireDoors().Select(x => x.Boundary).ToCollection();
@@ -143,7 +147,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             ReadEvacuationConfig();
             //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
             MonitorRoomNameConfigMap
-                .AddRange(routeMap.Keys.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.roomTableConfig, o)));
+                .AddRange(routeMap.Keys.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.RoomTableConfig, o)));
         }
         /// <summary>
         /// 读取疏散方向判断表
