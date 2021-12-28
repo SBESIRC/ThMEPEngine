@@ -115,6 +115,7 @@ namespace ThMEPElectrical.AFAS.Data
         public ThAFASCenterLineGeoFactory(DBObjectCollection centerlines)
         {
             Centerlines = centerlines;
+            FireApartIds = new Dictionary<Entity, string>();
             Category = BuiltInCategory.CenterLine.ToString();
         }
 

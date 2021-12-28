@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿using System.Linq;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -18,8 +12,6 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Interface;
-using ThMEPElectrical.AFAS.Utils;
-
 
 namespace ThMEPElectrical.FireAlarmDistance.Data
 {
@@ -38,7 +30,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             InputExtractors = new List<ThExtractorBase>();
         }
 
-       
+
         protected override ThMEPDataSet BuildDataSet()
         {
             return new ThMEPDataSet()
@@ -62,7 +54,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var windowExtractor = InputExtractors.Where(o => o is ThAFASWindowExtractor).First() as ThAFASWindowExtractor;
             var roomExtractor = InputExtractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
             //房间元素后期会改，需要clone
-            var roomExtractorClone = ThAFASDataUtils. CloneRoom(roomExtractor);
+            var roomExtractorClone = ThAFASDataUtils.CloneRoom(roomExtractor);
             var beamExtractor = InputExtractors.Where(o => o is ThAFASBeamExtractor).First() as ThAFASBeamExtractor;
             var doorOpeningExtractor = InputExtractors.Where(o => o is ThAFASDoorOpeningExtractor).First() as ThAFASDoorOpeningExtractor;
             var fireProofExtractor = InputExtractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
@@ -141,7 +133,10 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             }
 
             // 造中心线Geo数据
-            var centerLineGeoFactory = new ThAFASCenterLineGeoFactory(centerLineExtractor.CenterLines);
+            var centerLineGeoFactory = new ThAFASCenterLineGeoFactory(centerLineExtractor.CenterLines)
+            {
+                FireApartIds = fireApartExtractor.FireApartIds,
+            };
             centerLineGeoFactory.Produce();
             centerLineExtractor.Set(centerLineGeoFactory.Geos);
 
