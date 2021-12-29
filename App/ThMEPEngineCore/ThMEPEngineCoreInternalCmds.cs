@@ -35,7 +35,7 @@ namespace ThMEPEngineCore
                 var objs = new DBObjectCollection();
                 foreach (var obj in result.Value.GetObjectIds())
                 {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
+                    objs.Add(acadDatabase.Element<Entity>(obj));
                 }
 
                 objs.BufferPolygons(result2.Value)
