@@ -142,10 +142,11 @@ namespace ThMEPLighting.Garage.Engine
             groupLines.ForEach(g =>
             {
                 // 创建1号线
-                var firstSecondEngine = new ThFirstSecondAFactory();
-                var startPt = g.Item1;
-                var centerLines = g.Item2.Keys.ToList();
-                firstSecondEngine.Recognize(g.Item1, centerLines, ArrangeParameter.DoubleRowOffsetDis);
+                var firstSecondEngine = new ThFirstSecondAFactory(
+                    g.Item2.Keys.ToList(), 
+                    ArrangeParameter.DoubleRowOffsetDis,
+                    g.Item1);
+                firstSecondEngine.Produce();
                 firstSecondEngine.CenterSideDict.ForEach(o => CenterSideDicts.Add(o.Key, o.Value));
                 
                 // 对获得1、2号进行Noding

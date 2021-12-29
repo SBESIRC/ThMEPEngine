@@ -12,7 +12,7 @@ namespace ThMEPLighting.Garage.Factory
         /// 记录边线是1号线，还是2号线
         /// </summary>
         protected Dictionary<Line, EdgePattern> SideLineNumberDict { get; set; }
-        public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDict { get; private set; }
+        public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDict { get; protected set; }
         public List<Line> FirstLines
         {
             get

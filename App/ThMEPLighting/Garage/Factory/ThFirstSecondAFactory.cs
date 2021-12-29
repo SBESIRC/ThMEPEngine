@@ -17,7 +17,7 @@ namespace ThMEPLighting.Garage.Factory
     /// <summary>
     /// 利用传递的方式实现1、2号线逻辑
     /// </summary>
-    public class ThFirstSecondAFactory : IDisposable
+    public class ThFirstSecondAFactory : ThFirstSecondFactory,IDisposable
     {
         private Tolerance AccuracyTolerance; // 精确判断精度
         private Tolerance ApproximateTolerance; // 粗略判断精度
@@ -25,36 +25,21 @@ namespace ThMEPLighting.Garage.Factory
         private double ShortLinkLineLength = 100.0;
         
         /// <summary>
-        /// 记录边线是1号线，还是2号线
-        /// </summary>
-        private Dictionary<Line, EdgePattern> SideLineNumberDict { get; set; }
-        /// <summary>
         /// 记录中心线是否被用了
         /// </summary>
         private Dictionary<Line, bool> CenterLineUsedRecordDict { get; set; }
-        /// <summary>
-        /// 记录中心线两边的线
-        /// Line.LineDirection().GetPerpendicularVector()->Value's.Item1
-        /// Line.LineDirection().GetPerpendicularVector().Negate()->Value's.Item2
-        /// </summary>
-        public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDict { get; private set; }
         private ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
-        public List<Line> FirstLines
+        #region----------input----------
+        private double width;
+        private Point3d startPt;
+        private List<Line> centerLines;
+        #endregion
+
+        public ThFirstSecondAFactory(List<Line> centerLines,double width,Point3d startPt)
         {
-            get
-            {
-                return SideLineNumberDict.Where(o => o.Value == EdgePattern.First).Select(o => o.Key).ToList();
-            }
-        }
-        public List<Line> SecondLines
-        {
-            get
-            {
-                return SideLineNumberDict.Where(o => o.Value == EdgePattern.Second).Select(o => o.Key).ToList();
-            }
-        }
-        public ThFirstSecondAFactory()
-        {
+            this.width = width;
+            this.startPt = startPt;
+            this.centerLines = centerLines;
             ApproximateTolerance = new Tolerance(1.0, 1.0);
             AccuracyTolerance = new Tolerance(1e-4, 1e-4);
         }
@@ -62,22 +47,22 @@ namespace ThMEPLighting.Garage.Factory
         {
             //TODO
         }
-        private void Init(List<Line> centerLines, double width)
+        private void Init()
         {
             CenterLineUsedRecordDict = new Dictionary<Line, bool>();
             SideLineNumberDict = new Dictionary<Line, EdgePattern>();
             CenterSpatialIndex = new ThCADCoreNTSSpatialIndex(centerLines.ToCollection());
             centerLines.ForEach(k => CenterLineUsedRecordDict.Add(k, false));
-        }        
-        public void Recognize(Point3d start, List<Line> centerLines, double width)
+        }
+        public override void Produce()
         {
             // 中心线是已经处理过的线
-            if (centerLines.Count==0 || width <= 1.0)
+            if (centerLines.Count == 0 || width <= 1.0)
             {
                 return;
             }
             // 初始化
-            Init(centerLines, width);
+            Init();
 
             // 返回的是中心线和边线的对应关系
             CenterSideDict = FindCenterPair(centerLines, width);
@@ -94,12 +79,11 @@ namespace ThMEPLighting.Garage.Factory
             });
 
             // 根据start找到第一条边
-            var centerFirst = FindCenterFirst(start, centerLines);
+            var centerFirst = FindCenterFirst(startPt, centerLines);
             var upDir = centerFirst.LineDirection().GetAlignedDimensionTextDir();
             UpdateCenterSide(centerFirst, upDir);
             SetLineNumer(centerFirst, CenterSpatialIndex);
         }
-
         private void SetLineNumer(Line center,ThCADCoreNTSSpatialIndex spatialIndex)
         {
             SetLineNumer(center, center.StartPoint, spatialIndex);
