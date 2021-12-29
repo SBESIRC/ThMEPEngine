@@ -138,6 +138,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                 FireApartIds = fireApartExtractor.FireApartIds,
             };
             centerLineGeoFactory.Produce();
+            centerLineGeoFactory.Geos.ForEach(o => Transformer.Reset(o.Boundary));
             centerLineExtractor.Set(centerLineGeoFactory.Geos);
 
             //收集数据
