@@ -12,6 +12,7 @@ using ThMEPEngineCore.Command;
 using ThMEPHVAC;
 using ThMEPHVAC.Service;
 using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -68,7 +69,7 @@ namespace TianHua.Hvac.UI.Command
                         var value = RoomAirVolumeQuery.ConvertToString(volume);
                         if (!string.IsNullOrEmpty(value))
                         {
-                            InsertBlock(wcsPt, 0.0, value);
+                            InsertBlock(wcsPt,value);
                         }
                     }
                 }
@@ -96,13 +97,17 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void InsertBlock(Point3d pos, double angle,string volume)
+        private void InsertBlock(Point3d position, string volume)
         {
-            using (var db = Linq2Acad.AcadDatabase.Active())
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
                 var attNameValues = new Dictionary<string, string> { { AttributeDefinitionName, Format(volume)} };
-                db.ModelSpace.ObjectId.InsertBlockReference(ThMEPEngineCoreLayerUtils.Note, SGDXBlkName, 
-                    pos, new Scale3d(1.0), angle, attNameValues);
+                var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(ThMEPEngineCoreLayerUtils.Note, SGDXBlkName, 
+                    Point3d.Origin, new Scale3d(1.0), 0.0, attNameValues);
+                var blk = acadDb.Element<BlockReference>(blkId);
+                blk.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                var mt = Matrix3d.Displacement(blk.Position.GetVectorTo(position));
+                blk.TransformBy(mt);
             }
         }
 

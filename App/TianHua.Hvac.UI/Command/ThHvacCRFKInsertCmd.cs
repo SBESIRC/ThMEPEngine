@@ -60,7 +60,7 @@ namespace TianHua.Hvac.UI.Command
                 if (ppo.Status == PromptStatus.OK)
                 {
                     var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                    InsertBlock(wcsPt, 0.0);
+                    InsertBlock(wcsPt);
                 }
                 else
                 {
@@ -69,15 +69,14 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void InsertBlock(Point3d position, double rotateAngle)
+        private void InsertBlock(Point3d position)
         {
-            var mt = Matrix3d.Rotation(rotateAngle, Vector3d.ZAxis, position);
-            var vec = Vector3d.XAxis.TransformBy(mt).GetNormal();
-
+            var vec = Vector3d.XAxis.TransformBy(Active.Editor.CurrentUserCoordinateSystem).GetNormal();
+            var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
             for(int i=0;i< AirPortParameter.AirPortNum;i++)
             {
                 var basePt = position + vec.MultiplyBy(i * AirPortParameter.Length);
-                DrawPortService.InsertPort(basePt, rotateAngle,
+                DrawPortService.InsertPort(basePt, angle,
                 AirPortParameter.Length, 
                 AirPortParameter.Width,
                 AirPortParameter.AirPortType, 

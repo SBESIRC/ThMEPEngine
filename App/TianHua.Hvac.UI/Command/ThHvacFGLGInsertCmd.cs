@@ -9,6 +9,7 @@ using ThMEPHVAC;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -41,7 +42,7 @@ namespace TianHua.Hvac.UI.Command
                 if(ppo.Status==PromptStatus.OK)
                 {
                     var wcsPt = ppo.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                    InsertBlock(wcsPt, 0.0);
+                    InsertBlock(wcsPt);
                 }
                 else
                 {
@@ -50,13 +51,17 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void InsertBlock(Point3d position,double rotatAngle)
+        private void InsertBlock(Point3d position)
         {
             using (var acadDb = AcadDatabase.Active())
             {
                 var spaceId = acadDb.ModelSpace.ObjectId;
                 var attrs = new Dictionary<string, string> { { "截面尺寸", "1000x400" },{ "风管编号","EA-01"},{ "风量","3000m3/h"} };
-                spaceId.InsertBlockReference(FGLGLayer, FGLGBlkName, position, new Scale3d(1.0), rotatAngle, attrs);
+                var blkId = spaceId.InsertBlockReference(FGLGLayer, FGLGBlkName, Point3d.Origin, new Scale3d(1.0), 0.0, attrs);
+                var blk = acadDb.Element<BlockReference>(blkId);
+                blk.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                var mt = Matrix3d.Displacement(blk.Position.GetVectorTo(position));
+                blk.TransformBy(mt);
             }
         }
 
