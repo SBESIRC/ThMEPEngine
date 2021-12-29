@@ -74,9 +74,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
         // 有风机的房间入口
         Dictionary<int, Point3d> room_start_points = new Dictionary<int, Point3d>();
-        Dictionary<int, int> room_start_points2 = new Dictionary<int, int>();
-        Dictionary<int, int> room_start_points3 = new Dictionary<int, int>();
         List<Point3d> room_out_points = new List<Point3d>();
+        Dictionary<int, int> room_start_points2 = new Dictionary<int, int>();
+        Dictionary<int, Point3d> room_start_points3 = new Dictionary<int, Point3d>();
+        Dictionary<int, int> room_out_points3 = new Dictionary<int, int>();
 
         //风机属性
         List<double> fan_angle = new List<double>();
@@ -209,7 +210,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 fan_room_index.Add(-1);
             }
 
-            for (int i = 0; i < boundary.Count; i++) 
+            for (int i = 0; i < boundary.Count; i++)
             {
                 room_fan_index.Add(new List<int>());
             }
@@ -230,18 +231,18 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         {
                             fan_room_index[j] = i;
                         }
-                        else 
+                        else
                         {
                             int room_index = fan_room_index[j];
                             if (boundary[i].Contains(boundary[room_index]))
                             {
                                 fan_room_index[j] = room_index;
                             }
-                            else 
+                            else
                             {
                                 fan_room_index[j] = i;
                             }
-                        }                       
+                        }
                     }
                 }
 
@@ -274,14 +275,14 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
 
 
-            for (int i = 0; i < fan_room_index.Count; i++) 
+            for (int i = 0; i < fan_room_index.Count; i++)
             {
                 int room_index = fan_room_index[i];
                 if (room_have_fan.Contains(room_index) == false) room_have_fan.Add(room_index);
                 room_fan_index[room_index].Add(i);
             }
 
-         
+
         }
 
         public void find_room_start()
@@ -469,52 +470,78 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     start_graph.copy_board(start_graph.board_0, ref tmp_dis, start_graph.width, start_graph.height, -1);
                     start_graph.calculate_distance_to_main(start_graph.board_0, ref tmp_dis, main_edge_graph, ref point_in_main, start_graph.end_points[minindex].x, start_graph.end_points[minindex].y);
 
-
+                   
+                    //分两种情况
                     double main_x = start_graph.space_min_x + point_in_main.x * PublicValue.bigcell;
                     double main_y = start_graph.space_min_y + point_in_main.y * PublicValue.bigcell;
 
                     Point3d internal_point = new Point3d(main_x, main_y, 0);
 
-                    if (this.boundary[room_index].Contains(internal_point)) 
+                    if (this.boundary[room_index].Contains(internal_point))
                     {
+                        //处理主干经过有风机的房间的情况
                         int tmp_index = start_graph.real_end_points.Count;
                         start_graph.end_points.Add(point_in_main);
                         start_graph.real_end_points.Add(internal_point);
-                        room_start_points3.Add(room_index, tmp_index);
                         continue;
-                    }
-
-                    List<edge> path = new List<edge>();
-
-                    int index = start_graph.nodes.Count;
-
-                    grid_point tmp = point_in_main;
-                    node test_node = new node(tmp.x, tmp.y);
-                    if (start_graph.indexmap.ContainsKey(test_node) == false)
-                    {
-                        index = start_graph.nodes.Count;
-                        start_graph.add_node(index, tmp);
                     }
                     else
                     {
-                        index = start_graph.indexmap[test_node];
+                        //处理主干不经过有风机的房间的正常情况
+                        List<edge> path = new List<edge>();
+
+                        int index = start_graph.nodes_tmp.Count;
+
+                        //以与主干的交点为原点，建立distance_map
+                        grid_point tmp = point_in_main;
+                        node test_node = new node(tmp.x, tmp.y);
+                        if (start_graph.indexmap_tmp.ContainsKey(test_node) == false)
+                        {
+                            start_graph.add_node_tmp(index, tmp);
+                        }
+                        else
+                        {
+                            index = start_graph.indexmap_tmp[test_node];
+                        }
+
+                        //寻找内部的起点
+                        grid_point tmp_start = new grid_point(0, 0);
+                        grid_point tmp_out = new grid_point(0, 0);
+                        start_graph.find_shortest_path_start(start_graph.end_points[minindex], index,1 , ref tmp_start,ref tmp_out);
+
+                        double tmp_x = start_graph.space_min_x + tmp_start.x * PublicValue.bigcell;
+                        double tmp_y = start_graph.space_min_y + tmp_start.y * PublicValue.bigcell;
+
+                        //调整起点真实位置;
+                        if (tmp_start.y == start_graph.end_points[minindex].y) tmp_y = start_graph.real_end_points[minindex].Y;
+                        if (tmp_start.x == start_graph.end_points[minindex].x) tmp_x = start_graph.real_end_points[minindex].X;
+
+                        Point3d real_entrance = new Point3d(tmp_x, tmp_y, 0);
+                        room_start_points3.Add(room_index, real_entrance);
+
+                        //寻找外部的起点
+                        
+                        //Point3d intersection = boundary[room_index].GetClosePoint(real_entrance);
+                        //processed_edges.Add(new edge(intersection.X,intersection.Y, real_entrance.X, real_entrance.Y));
+
+                        //int end_point_x = (int)(intersection.X - start_graph.space_min_x) / PublicValue.bigcell;
+                        //int end_point_y = (int)(intersection.Y - start_graph.space_min_y) / PublicValue.bigcell;
+
+                        //int out_index = start_graph.real_end_points.Count;
+                        //start_graph.end_points.Add(new grid_point(end_point_x,end_point_y));
+                        //start_graph.real_end_points.Add(intersection);
+
+
+                        double end_x = start_graph.space_min_x + tmp_out.x * PublicValue.bigcell;
+                        double end_y = start_graph.space_min_y + tmp_out.y * PublicValue.bigcell;
+
+                        processed_edges.Add(new edge(end_x, end_y, real_entrance.X, real_entrance.Y));
+                        int out_index = start_graph.real_end_points.Count;
+                        start_graph.end_points.Add(tmp_out);
+                        start_graph.real_end_points.Add(new Point3d(end_x, end_y, 0));
+
+                        room_out_points3.Add(room_index, out_index);
                     }
-
-                    grid_point tmp_start = new grid_point(0, 0);
-                    start_graph.find_shortest_path_start(start_graph.end_points[minindex], index, ref tmp_start);
-
-                    double tmp_x = start_graph.space_min_x + tmp_start.x * PublicValue.bigcell;
-                    double tmp_y = start_graph.space_min_y + tmp_start.y * PublicValue.bigcell;
-
-                    //调整起点真实位置;
-                    if (tmp_start.y == start_graph.end_points[minindex].y) tmp_y = start_graph.real_end_points[minindex].Y;
-                    if (tmp_start.x == start_graph.end_points[minindex].x) tmp_x = start_graph.real_end_points[minindex].X;
-
-                    int start_index = start_graph.real_end_points.Count;
-
-                    start_graph.end_points.Add(tmp_start);
-                    start_graph.real_end_points.Add(new Point3d(tmp_x, tmp_y, 0));
-                    room_start_points3.Add(room_index, start_index);
                 }
             }
         }
@@ -767,24 +794,25 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             PublicValue.CELL = PublicValue.bigcell;
             PublicValue.extension = 0;
             PublicValue.traversable = 1;
-            PublicValue.arrange_mode = 1;
+            PublicValue.arrange_mode = 1; //以后要把整线的单独拎出来
             start_graph = new graph(real_end_points, real_start_point, total_wall, this.hole_wall);
 
-   
-            //print_graph();
-            find_farthest_room();
 
+            print_graph();
+            print_distance();
+            //print_point();
+            find_farthest_room();
 
             //每个房间连接到主干
             if (main_edges.Count != 0)
-            {               
+            {
                 //find_room_start2();
                 find_room_start3();
-                List<int> keylist = new List<int>(room_start_points3.Keys);
+                List<int> keylist = new List<int>(room_out_points3.Keys);
                 for (int i = 0; i < keylist.Count; i++)
                 {
                     if (keylist[i] == main_room) continue;
-                    int fan_index = room_start_points3[keylist[i]];
+                    int fan_index = room_out_points3[keylist[i]];
 
                     List<List<int>> tmp_dis = new List<List<int>>();
                     grid_point point_in_main = new grid_point(-1, -1);
@@ -826,6 +854,28 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     start_graph.find_shortest_path_clear(point_in_main, index, ref path);
 
                     start_graph.long_edges.AddRange(path);
+
+                    for (int n = 0; n < path.Count; n++)
+                    {
+                        int sx = path[n].x1;
+                        int sy = path[n].y1;
+                        int ex = path[n].x2;
+                        int ey = path[n].y2;
+                        if (sy == ey)
+                        {
+                            for (int a = sx; a < ex; a++)
+                            {
+                                main_edge_graph[a][sy] = 1;
+                            }
+                        }
+                        else
+                        {
+                            for (int a = sy; a < ey; a++)
+                            {
+                                main_edge_graph[sx][a] = 1;
+                            }
+                        }
+                    }
                 }
 
                 start_graph.analysis_edge_clear();     //这里有一个严重的问题
@@ -853,7 +903,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 if (room_start_points3.ContainsKey(index) && room_fan_index[index].Count != 0)
                 {
                     List<Point3d> ex_end_points = new List<Point3d>();
-                    Point3d tmp_start = real_end_points[room_start_points3[index]];
+                    Point3d tmp_start = room_start_points3[index];
                     single_room(index, tmp_start, ex_end_points);
                 }
             }
@@ -1006,96 +1056,122 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             //    }
 
 
-                int maxdis = 0;
-                int max_index = -1;
+            int maxdis = 0;
+            int max_index = -1;
 
-                for (int i = 0; i < room_have_fan.Count; i++)
+            for (int i = 0; i < room_have_fan.Count; i++)
+            {
+                int tmp_room = room_have_fan[i];
+                int tmpmindis = 10000000;
+                int tmpminindex = -1;
+
+                for (int j = 0; j < room_fan_index[tmp_room].Count; j++)
                 {
-                    int tmp_room = room_have_fan[i];
-                    int tmpmindis = 10000000;
-                    int tmpminindex = -1;
-
-                    for (int j = 0; j < room_fan_index[tmp_room].Count; j++)
+                    int tmpfanindex = room_fan_index[tmp_room][j];
+                    int x = start_graph.end_points[tmpfanindex].x;
+                    int y = start_graph.end_points[tmpfanindex].y;
+                    if (start_graph.start_distance[x][y] < tmpmindis)
                     {
-                        int tmpfanindex = room_fan_index[tmp_room][j];
-                        int x = start_graph.end_points[tmpfanindex].x;
-                        int y = start_graph.end_points[tmpfanindex].y;
-                        if (start_graph.start_distance[x][y] <tmpmindis)
-                        {
-                            tmpmindis= start_graph.start_distance[x][y];
-                            tmpminindex = tmpfanindex;
-                        }
-                    }
-
-                    if (tmpmindis > maxdis) 
-                    {
-                        maxdis = tmpmindis;
-                        max_index = tmpminindex;
+                        tmpmindis = start_graph.start_distance[x][y];
+                        tmpminindex = tmpfanindex;
                     }
                 }
 
-                 int room_index = fan_room_index[max_index];
-                 main_room = room_index;
-                 int min_index = max_index;
-
-                if (min_index != -1)
+                if (tmpmindis > maxdis)
                 {
-                    //寻找第一个房间的入口 
-                    grid_point tmp_start = new grid_point(0, 0);
-                    start_graph.find_shortest_path_start(start_graph.end_points[min_index], 0, ref tmp_start);
+                    maxdis = tmpmindis;
+                    max_index = tmpminindex;
+                }
+            }
 
-                    double tmp_x = start_graph.space_min_x + tmp_start.x * PublicValue.bigcell;
-                    double tmp_y = start_graph.space_min_y + tmp_start.y * PublicValue.bigcell;
+            int room_index = fan_room_index[max_index];
+            main_room = room_index;
+            int min_index = max_index;
 
-                    int start_index = start_graph.real_end_points.Count;
-                    start_graph.end_points.Add(tmp_start);
-                    start_graph.real_end_points.Add(new Point3d(tmp_x, tmp_y, 0));
-                    room_start_points3.Add(room_index, start_index);
+            if (min_index != -1)
+            {
+                //寻找第一个房间的入口/寻找起点
+                grid_point tmp_start = new grid_point(0, 0);
+                grid_point tmp_out = new grid_point(0, 0);
+                start_graph.find_shortest_path_start(start_graph.end_points[min_index], 0 , 0 ,ref tmp_start ,ref tmp_out);
 
-                    //连线
-                    List<edge> path = new List<edge>();
+                double tmp_x = start_graph.space_min_x + tmp_start.x * PublicValue.bigcell;
+                double tmp_y = start_graph.space_min_y + tmp_start.y * PublicValue.bigcell;
 
-                    start_graph.find_shortest_path_clear(tmp_start, 0, ref path);
-                    start_graph.long_edges.AddRange(path);
+                //调整起点真实位置;
+                if (tmp_start.y == start_graph.end_points[min_index].y) tmp_y = start_graph.real_end_points[min_index].Y;
+                if (tmp_start.x == start_graph.end_points[min_index].x) tmp_x = start_graph.real_end_points[min_index].X;
 
-                    start_graph.analysis_edge_clear();
-                    start_graph.point_to_real();
-                    start_graph.find_point_edge_relation();
-                    start_graph.connect_edge();
-                    start_graph.post_processing();
+                Point3d real_entrance = new Point3d(tmp_x, tmp_y, 0);
+                room_start_points3.Add(room_index, real_entrance);
 
-                    //processed_edges.AddRange(start_graph.long_edges);
-                    main_edges.AddRange(start_graph.long_edges);
+                //寻找外部的起点
 
-                    //记录主干              
-                    start_graph.initialize_board(ref main_edge_graph, start_graph.width, start_graph.height, 0);
-                    for (int i = 0; i < start_graph.long_edges.Count; i++)
+                //Point3d intersection = boundary[room_index].GetClosePoint(real_entrance);
+                //processed_edges.Add(new edge(intersection.X, intersection.Y, real_entrance.X, real_entrance.Y));
+
+                //int end_point_x = (int)(intersection.X - start_graph.space_min_x) / PublicValue.bigcell;
+                //int end_point_y = (int)(intersection.Y - start_graph.space_min_y) / PublicValue.bigcell;
+
+                //int out_index = start_graph.real_end_points.Count;
+                //start_graph.end_points.Add(new grid_point(end_point_x, end_point_y));
+                //start_graph.real_end_points.Add(intersection);
+
+                double end_x = start_graph.space_min_x + tmp_out.x *PublicValue.bigcell;
+                double end_y = start_graph.space_min_y + tmp_out.y * PublicValue.bigcell;
+
+                processed_edges.Add(new edge(end_x, end_y, real_entrance.X, real_entrance.Y));
+                int out_index = start_graph.real_end_points.Count;
+                start_graph.end_points.Add(tmp_out);
+                start_graph.real_end_points.Add(new Point3d(end_x,end_y,0));
+
+                room_out_points3.Add(room_index, out_index);
+
+                //连线
+                List<edge> path = new List<edge>();
+
+                start_graph.find_shortest_path_clear(start_graph.end_points[room_out_points3[room_index]], 0, ref path);
+                start_graph.long_edges.AddRange(path);
+
+                start_graph.analysis_edge_clear();
+                start_graph.point_to_real();
+                start_graph.find_point_edge_relation();
+                start_graph.connect_edge();
+                start_graph.post_processing();
+
+                //processed_edges.AddRange(start_graph.long_edges);
+                main_edges.AddRange(start_graph.long_edges);
+
+                //记录主干              
+                start_graph.initialize_board(ref main_edge_graph, start_graph.width, start_graph.height, 0);
+                for (int i = 0; i < start_graph.long_edges.Count; i++)
+                {
+                    int sx = start_graph.long_edges[i].x1;
+                    int sy = start_graph.long_edges[i].y1;
+                    int ex = start_graph.long_edges[i].x2;
+                    int ey = start_graph.long_edges[i].y2;
+                    if (sy == ey)
                     {
-                        int sx = start_graph.long_edges[i].x1;
-                        int sy = start_graph.long_edges[i].y1;
-                        int ex = start_graph.long_edges[i].x2;
-                        int ey = start_graph.long_edges[i].y2;
-                        if (sy == ey)
+                        for (int n = sx; n < ex; n++)
                         {
-                            for (int n = sx; n < ex; n++)
-                            {
-                                main_edge_graph[n][sy] = 1;
-                            }
-                        }
-                        else
-                        {
-                            for (int n = sy; n < ey; n++)
-                            {
-                                main_edge_graph[sx][n] = 1;
-                            }
+                            main_edge_graph[n][sy] = 1;
                         }
                     }
+                    else
+                    {
+                        for (int n = sy; n < ey; n++)
+                        {
+                            main_edge_graph[sx][n] = 1;
+                        }
+                    }
+                }
 
-                
-                 }
+
+            }
 
         }
 
+        //print 
         public void print_graph()
         {
             using (AcadDatabase acad = AcadDatabase.Active())
@@ -1119,5 +1195,46 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
         }
 
+        public void print_distance()
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                for (int i = Math.Max(0, start_graph.start_point.x - 50); i < Math.Min(start_graph.width, start_graph.start_point.x + 50); i++)
+                {
+                    for (int j = Math.Max(0, start_graph.start_point.y - 50); j < Math.Min(start_graph.height, start_graph.start_point.y + 50); j++)
+                    {
+
+                        double tmp_x = start_graph.space_min_x + i * PublicValue.bigcell;
+                        double tmp_y = start_graph.space_min_y + j * PublicValue.bigcell;
+                        var text = new DBText
+                        {
+                            TextString = start_graph.start_distance[i][j].ToString(),
+
+                            Position = new Point3d(tmp_x + 50, tmp_y + 50, 0),
+                            WidthFactor = 0.7,
+                            Height = 150,
+                        };
+                        acad.CurrentSpace.Add(text);
+                    }
+                }
+            }
+
+
+        }
+
+        public void print_point()
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                double tmp_x = start_graph.space_min_x + 402 * PublicValue.bigcell;
+                double tmp_y = start_graph.space_min_y + 172 * PublicValue.bigcell;
+                var circle = new Circle(new Point3d(tmp_x, tmp_y, 0), new Vector3d(0, 0, 1), 1000);
+
+                acad.CurrentSpace.Add(circle);
+            }
+
+
+
+        }
     }
 }

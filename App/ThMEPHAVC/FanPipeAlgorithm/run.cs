@@ -23,9 +23,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
         //最终输出
         public List<edge> processed_edges = new List<edge>();
 
- 
         public run() {
-
 
         }
 
@@ -49,9 +47,6 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             return edges_to_draw;
         }
-
-       
-
     }
 
 }

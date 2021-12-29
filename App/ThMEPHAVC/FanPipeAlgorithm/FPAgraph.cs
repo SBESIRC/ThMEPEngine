@@ -473,7 +473,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 
                 List<edge> current_path = new List<edge>();
 
-                int direction = find_direction_general(ep_index, x, y);
+                int direction = find_direction_general(ep_index,0, x, y);
                 if (direction == 999) {
                     continue;
                 }
@@ -515,11 +515,32 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         edge_start.x = current_x;
                         edge_start.y = current_y;
 
-                        direction = find_direction_general(ep_index, current_x, current_y);
+                        direction = find_direction_general(ep_index,0, current_x, current_y);
                         if (direction == 999)
                         {
                             break;
                         }
+                    }
+                    else if (board_0[next_x][next_y] == 1) 
+                    {
+                        edge_end.x = current_x;
+                        edge_end.y = current_y;
+                        edge new_edge = new edge(edge_start.x, edge_start.y, edge_end.x, edge_end.y);
+
+                        current_path.Add(new_edge);
+                        edge_start.x = current_x;
+                        edge_start.y = current_y;
+
+                        direction = find_direction_general(ep_index, 0,current_x, current_y);
+
+                        if (direction == 999)
+                        {
+                            break;
+                        }
+
+                        current_x = next_x;
+                        current_y = next_y;
+                        current_distance = nodes[ep_index].distance[current_x][current_y];
                     }
                     else
                     {
@@ -572,7 +593,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 List<edge> current_path = new List<edge>();
 
-                int direction = find_direction_general(ep_index, x, y);
+                int direction = find_direction_general(ep_index,0, x, y);
                 if (direction == 999)
                 {
                     continue;
@@ -615,11 +636,32 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         edge_start.x = current_x;
                         edge_start.y = current_y;
 
-                        direction = find_direction_general(ep_index, current_x, current_y);
+                        direction = find_direction_general(ep_index,0, current_x, current_y);
                         if (direction == 999)
                         {
                             break;
                         }
+                    }
+                    else if (board_0[next_x][next_y] == 1)
+                    {
+                        edge_end.x = current_x;
+                        edge_end.y = current_y;
+                        edge new_edge = new edge(edge_start.x, edge_start.y, edge_end.x, edge_end.y);
+
+                        current_path.Add(new_edge);
+                        edge_start.x = current_x;
+                        edge_start.y = current_y;
+
+                        direction = find_direction_general(ep_index,0, current_x, current_y);
+
+                        if (direction == 999)
+                        {
+                            break;
+                        }
+
+                        current_x = next_x;
+                        current_y = next_y;
+                        current_distance = nodes[ep_index].distance[current_x][current_y];
                     }
                     else
                     {
@@ -652,8 +694,20 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             //nodes[ep_index].father_index = sp_index;    
         }
 
-        public void find_shortest_path_start(grid_point sp_index, int ep_index , ref grid_point room_start)
+        public void find_shortest_path_start(grid_point sp_index, int ep_index , int style ,ref grid_point room_start,ref grid_point room_out)
         {
+            int sx = -1000;
+            int sy = -1000;
+            List<List<int>> distance_map = new List<List<int>>();
+            if (style == 0)
+            {
+                distance_map = nodes[ep_index].distance;
+            }
+            else if (style == 1)
+            {
+                distance_map = nodes_tmp[ep_index].distance;
+            }
+
 
             bool flag = false;
             int x = sp_index.x;
@@ -661,7 +715,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             grid_point tmp_start = new grid_point(0,0);
 
-            if (nodes[ep_index].distance[x][y] == 0)
+            if (distance_map[x][y] == 0)
             {
                 return;
             }
@@ -675,7 +729,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 List<edge> current_path = new List<edge>();
 
-                int direction = find_direction_general(ep_index, x, y);
+                int direction = find_direction_general(ep_index,style, x, y);
                 if (direction == 999)
                 {
                     continue;
@@ -683,7 +737,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 int current_x = x;
                 int current_y = y;
-                int current_distance = nodes[ep_index].distance[current_x][current_y];
+                int current_distance = distance_map[current_x][current_y];
 
                 grid_point edge_start = new grid_point(x, y);
                 grid_point edge_end = new grid_point(0, 0);
@@ -691,39 +745,12 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 while (current_distance > 0)
                 {
-                    if (board_0[current_x][current_y] == 1) 
-                    {
-                        tmp_start.x = current_x;
-                        tmp_start.y = current_y;
-
-                        if (last == 2)
-                        {
-                            tmp_start.x += 1;
-                        }
-                        else if (last == 3)
-                        {
-                            tmp_start.y += 1;
-                        }
-                        else if (last == 1)
-                        {
-                            tmp_start.y -= 1;
-                        }
-                        else if (last == 0)
-                        {
-                            tmp_start.x -= 1;
-                        }
-
-                        //记录start
-                        room_start = tmp_start;
-                        flag = true;
-                        break;
-                    }
 
                     int next_x = current_x, next_y = current_y;
                     if (direction == 2)
                     {
                         next_x -= 1;
-                        last = 2; 
+                        last = 2;
                     }
                     else if (direction == 3)
                     {
@@ -740,43 +767,85 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         next_x += 1;
                         last = 0;
                     }
-
-                    if (next_x < 0 || next_x >= width || next_y < 0 || next_y >= height || nodes[ep_index].distance[next_x][next_y] == -1 || nodes[ep_index].distance[next_x][next_y] >= nodes[ep_index].distance[current_x][current_y])
+                    else 
                     {
-                        edge_end.x = current_x;
-                        edge_end.y = current_y;
-                        edge new_edge = new edge(edge_start.x, edge_start.y, edge_end.x, edge_end.y);
+                        break;
+                    }
 
-                        current_path.Add(new_edge);
-                        edge_start.x = current_x;
-                        edge_start.y = current_y;
-
-                        direction = find_direction_general(ep_index, current_x, current_y);
+                    if (next_x < 0 || next_x >= width || next_y < 0 || next_y >= height || distance_map[next_x][next_y] == -1 || distance_map[next_x][next_y] >= distance_map[current_x][current_y])
+                    {
+                        direction = find_direction_general(ep_index, style , current_x, current_y);
                         if (direction == 999)
                         {
                             break;
                         }
                     }
+                    else if (board_0[next_x][next_y] == 1)
+                    {
+
+                        //找到出口
+                        if (distance_map[current_x][current_y] - distance_map[next_x][next_y] > 45)
+                        {
+                            tmp_start.x = current_x;
+                            tmp_start.y = current_y;
+                            room_start = tmp_start;
+                            room_out = new grid_point(next_x, next_y);
+                            flag = true;
+                            break;
+                        }
+                        else //出口是假的
+                        {
+                            int direction_old = direction;
+                            int iter = 0;
+                            while (direction == direction_old && iter < 999) 
+                            {
+                                direction = find_direction_tabu(ep_index, style, current_x, current_y,direction);
+                                if (direction == 999)
+                                {
+                                    break;
+                                }
+                                iter++;
+                            }
+                        }                                                                                 
+                    }
                     else
                     {
                         current_x = next_x;
                         current_y = next_y;
-                        current_distance = nodes[ep_index].distance[current_x][current_y];
+                        current_distance = distance_map[current_x][current_y];
                     }
                 }
             
             }
+
+            //避免一种非常奇怪的bug，即起点在墙里
+            if (tmp_start.x == 0 && tmp_start.y == 0) 
+            {
+                room_start = sp_index; 
+            }
         }
 
-        public int find_direction_general(int ep_index, int x, int y)
+        public int find_direction_general(int ep_index, int style, int x, int y)
         {
+            
+
+            List<List<int>> distance_map = new List<List<int>>();
+            if (style == 0)
+            {
+                distance_map = nodes[ep_index].distance;
+            }
+            else if (style == 1)
+            {
+                distance_map = nodes_tmp[ep_index].distance;
+            }
+
             int max_shorten = 0;
 
             List<int> directions = new List<int>();
-            if (x >= 1 && nodes[ep_index].distance[x - 1][y] != -1)
+            if (x >= 1 && distance_map[x - 1][y] != -1)
             {
-                int shorten = nodes[ep_index].distance[x][y] - nodes[ep_index].distance[x - 1][y];
-                if ( shorten > 0 )
+                int shorten = distance_map[x][y] - distance_map[x - 1][y];
+                if (shorten == 1 || shorten == 51)
                 {
                     if (shorten > max_shorten)
                     {
@@ -784,16 +853,16 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         directions.Clear();
                         directions.Add(2);
                     }
-                    else if (shorten == max_shorten) 
+                    else if (shorten == max_shorten)
                     {
                         directions.Add(2);
                     }
                 }
             }
-            if (y >= 1 && nodes[ep_index].distance[x][y - 1] != -1)
+            if (y >= 1 && distance_map[x][y - 1] != -1)
             {
-                int shorten = nodes[ep_index].distance[x][y] - nodes[ep_index].distance[x][y-1];
-                if (shorten > 0)
+                int shorten = distance_map[x][y] - distance_map[x][y-1];
+                if (shorten == 1 || shorten == 51)
                 {
                     if (shorten > max_shorten)
                     {
@@ -807,10 +876,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     }
                 }
             }
-            if (x <= width - 2 && nodes[ep_index].distance[x + 1][y] != -1)
+            if (x <= width - 2 && distance_map[x + 1][y] != -1)
             {
-                int shorten = nodes[ep_index].distance[x][y] - nodes[ep_index].distance[x+1][y];
-                if (shorten > 0)
+                int shorten = distance_map[x][y] - distance_map[x+1][y];
+                if (shorten == 1 || shorten == 51)
                 {
                     if (shorten > max_shorten)
                     {
@@ -824,10 +893,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     }
                 }
             }
-            if (y <= height  - 2 && nodes[ep_index].distance[x][y + 1] != -1)
+            if (y <= height  - 2 && distance_map[x][y + 1] != -1)
             {
-                int shorten = nodes[ep_index].distance[x][y] - nodes[ep_index].distance[x][y+1];
-                if (shorten > 0)
+                int shorten = distance_map[x][y] - distance_map[x][y+1];
+                if (shorten == 1 || shorten == 51)
                 {
                     if (shorten > max_shorten)
                     {
@@ -843,6 +912,111 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
 
             if (directions.Count == 0) {
+
+                return 999;
+            }
+
+            int ddd = 0;
+            try
+            {
+                int rand_index = (int)DateTime.Now.Ticks % directions.Count;
+                ddd = directions[rand_index];
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine("random");
+            }
+            return ddd;
+        }
+
+        public int find_direction_tabu(int ep_index, int style , int x, int y ,int tabu)
+        {
+
+            List<List<int>> distance_map = new List<List<int>>();
+            if (style == 0)
+            {
+                distance_map = nodes[ep_index].distance;
+            }
+            else if (style == 1)
+            {
+                distance_map = nodes_tmp[ep_index].distance;
+            }
+
+            int max_shorten = 0;
+
+            List<int> directions = new List<int>();
+            if (x >= 1 && distance_map[x - 1][y] != -1 && tabu!=2)
+            {
+                int shorten = distance_map[x][y] - distance_map[x - 1][y];
+                if (shorten == 1 || shorten == 51)
+                {
+                    if (shorten > max_shorten)
+                    {
+                        max_shorten = shorten;
+                        directions.Clear();
+                        directions.Add(2);
+                    }
+                    else if (shorten == max_shorten)
+                    {
+                        directions.Add(2);
+                    }
+                }
+            }
+            if (y >= 1 && distance_map[x][y - 1] != -1 && tabu != 3)
+            {
+                int shorten = distance_map[x][y] - distance_map[x][y - 1];
+                if (shorten == 1 || shorten == 51)
+                {
+                    if (shorten > max_shorten)
+                    {
+                        max_shorten = shorten;
+                        directions.Clear();
+                        directions.Add(3);
+                    }
+                    else if (shorten == max_shorten)
+                    {
+                        directions.Add(3);
+                    }
+                }
+            }
+            if (x <= width - 2 && distance_map[x + 1][y] != -1 && tabu != 0)
+            {
+                int shorten = distance_map[x][y] - distance_map[x + 1][y];
+                if (shorten == 1 || shorten == 51)
+                {
+                    if (shorten > max_shorten)
+                    {
+                        max_shorten = shorten;
+                        directions.Clear();
+                        directions.Add(0);
+                    }
+                    else if (shorten == max_shorten)
+                    {
+                        directions.Add(0);
+                    }
+                }
+            }
+            if (y <= height - 2 && distance_map[x][y + 1] != -1 && tabu != 1)
+            {
+                int shorten = distance_map[x][y] - distance_map[x][y + 1];
+                if (shorten == 1 || shorten == 51)
+                {
+                    if (shorten > max_shorten)
+                    {
+                        max_shorten = shorten;
+                        directions.Clear();
+                        directions.Add(1);
+                    }
+                    else if (shorten == max_shorten)
+                    {
+                        directions.Add(1);
+                    }
+                }
+            }
+
+            if (directions.Count == 0)
+            {
 
                 return 999;
             }
