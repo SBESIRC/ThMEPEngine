@@ -27,7 +27,7 @@ namespace TianHua.Hvac.UI.UI
     /// </summary>
     public partial class uiIndoorFan : ThCustomWindow
     {
-        IndoorFanViewModel indoorFanViewModel;
+        static IndoorFanViewModel indoorFanViewModel;
         string defaultPath = "";
         string saveExtensionName = "thdata";
         SerializableHelper serializableHelper;
@@ -36,14 +36,18 @@ namespace TianHua.Hvac.UI.UI
             InitializeComponent();
             defaultPath = ThCADCommon.IndoorFanDataTablePath();
             this.MutexName = "THSNJ";
-            indoorFanViewModel = new IndoorFanViewModel();
+            if (null == indoorFanViewModel) 
+            {
+                indoorFanViewModel = new IndoorFanViewModel();
+                //加载数据
+                ReadFileData(defaultPath, true);
+            }
+            
             this.DataContext = indoorFanViewModel;
             wCondRadio.GroupName = indoorFanViewModel.RadioGroupId;
             wCondRadio.TabRadioItemAdd += WCondRadio_TabRadioItemAdd;
             wCondRadio.TabRadioItemDeleted += WCondRadio_TabRadioItemDeleted;
             serializableHelper = new SerializableHelper();
-            //加载数据
-            ReadFileData(defaultPath,true);
         }
         private void WCondRadio_TabRadioItemDeleted(object sender, RoutedEventArgs e)
         {
@@ -177,7 +181,7 @@ namespace TianHua.Hvac.UI.UI
         }
         private void btnMaterialList_Click(object sender, RoutedEventArgs e)
         {
-
+            //材料表
         }
         private void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {
@@ -189,7 +193,6 @@ namespace TianHua.Hvac.UI.UI
             {
                 string fileName = dialog.FileName;
                 var eMsg = ReadSaveFileData(fileName);
-
             }
         }
 
@@ -199,7 +202,7 @@ namespace TianHua.Hvac.UI.UI
             var fileName = "室内机风机数据" + time;
             var fileDialog = new SaveFileDialog();
             fileDialog.Title = "选择保存位置";
-            fileDialog.Filter = "风机模板数据文件(*.thdata)|*.thdata";
+            fileDialog.Filter = string.Format("风机数据文件(*.{0})|*.{0}", saveExtensionName);
             fileDialog.OverwritePrompt = true;
             fileDialog.DefaultExt = saveExtensionName;
             fileDialog.FileName = fileName;
@@ -272,17 +275,11 @@ namespace TianHua.Hvac.UI.UI
                 return "文件路径为空或文件不存在";
             if (CheckFileInHis(filePath))
                 return errorMsg;
-
-            string dirPath = Path.GetDirectoryName(filePath);
-            string fileExt = Path.GetExtension(filePath);
-            string fileName = Path.GetFileNameWithoutExtension(filePath);
-            string tmpFile = string.Format("~{0}{1}", fileName, fileExt);
-            string tempPath = Path.Combine(dirPath, tmpFile);
             try
             {
-                File.Copy(filePath, tempPath, true);
+                string fileName = Path.GetFileNameWithoutExtension(filePath);
                 ExcelHelper excelService = new ExcelHelper();
-                var dataSet = excelService.ReadExcelToDataSet(tempPath);
+                var dataSet = excelService.ReadExcelToDataSet(filePath);
                 if (null == dataSet)
                     return errorMsg;
                 var addFile = new IndoorFanFile(filePath, dataSet, fileName,isDefault);
@@ -298,16 +295,7 @@ namespace TianHua.Hvac.UI.UI
                 throw ex;
             }
             finally 
-            {
-                if (!string.IsNullOrEmpty(tempPath) && File.Exists(tempPath))
-                {
-                    try 
-                    {
-                        File.Delete(tempPath);
-                    }
-                    catch { }
-                }
-            }
+            { }
             return errorMsg;
         }
         private string ReadSaveFileData(string filePath)
@@ -532,6 +520,7 @@ namespace TianHua.Hvac.UI.UI
                 IndoorFanParameter.Instance.PlaceModel = new IndoorFanPlaceModel();
                 //室内机，放置
                 IndoorFanParameter.Instance.PlaceModel.FanType = indoorFanViewModel.SelectFanType;
+                IndoorFanParameter.Instance.PlaceModel.CorrectionFactor = indoorFanViewModel.CorrectionFactor;
                 IndoorFanParameter.Instance.PlaceModel.TargetFanInfo = indoorFanViewModel.SelectIndoorFan;
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THFJFZ");
                 FocusToCAD();
@@ -569,31 +558,123 @@ namespace TianHua.Hvac.UI.UI
             if (preValue != newValue)
             {
                 //工况修改，更新相应的数据
-                UpdataFanWorking();
+                switch (indoorFanViewModel.SelectFanType)
+                {
+                    case EnumFanType.FanCoilUnitFourControls:
+                    case EnumFanType.FanCoilUnitTwoControls:
+                        UpDataCoilFanData();
+                        break;
+                    case EnumFanType.VRFConditioninConduit:
+                    case EnumFanType.VRFConditioninFourSides:
+                        UpdataVRFFanData();
+                        break;
+                    case EnumFanType.IntegratedAirConditionin:
+                        UpdataAirConditionFanWorking();
+                        break;
+                }
             }
         }
-        void UpdataFanWorking() 
+        void UpdataAirConditionFanWorking() 
         {
             //更新数据
-            //var coolWorking = indoorFanViewModel.FanTypeWorkingCodition[0];
-            //var hotWorking = indoorFanViewModel.FanTypeWorkingCodition[1];
-            //foreach (var item in indoorFanViewModel.FanTypeWorkingCodition)
-            //{
-            //    if (item.ShowName.Contains("热"))
-            //        hotWorking = item;
-            //    else
-            //        coolWorking = item;
-            //}
-            ////根据工况信息更新数据
-            //foreach (var fanFile in indoorFanViewModel.IndoorFanFiles) 
-            //{
-            //    if (fanFile.Guid != indoorFanViewModel.SelectInfoFanFile.Guid)
-            //        continue;
-            //    foreach (var fanData in fanFile.FileFanDatas) 
-            //    {
-            //        if(fanData.)
-            //    }
-            //}
+            var coolWorking = HotCoolWorkingData<AirConditioninWorkingData>(out AirConditioninWorkingData hotWorking);
+            var workingId = indoorFanViewModel.SelectWorkingCodition.Id;
+            //根据工况信息更新数据
+            foreach (var fanFile in indoorFanViewModel.IndoorFanFiles)
+            {
+                if (fanFile.Guid != indoorFanViewModel.SelectInfoFanFile.Guid)
+                    continue;
+                foreach (var fanData in fanFile.FileFanDatas)
+                {
+                    if (fanData.ShowWorkingData.WorkingId != workingId)
+                        continue;
+                    foreach (AirConditioninFan item in fanData.FanAllDatas)
+                    {
+                        //修改数据
+                        item.CoolAirInletDryBall = coolWorking.AirInletDryBall;
+                        item.CoolAirInletWetBall = coolWorking.AirInletWetBall;
+                        item.CoolEnterPortWaterTEMP = coolWorking.EnterPortWaterTEMP;
+                        item.CoolExitWaterTEMP = coolWorking.ExitWaterTEMP;
+
+                        item.HotAirInletTEMP = hotWorking.AirInletDryBall;
+                        item.HotEnterPortWaterTEMP = hotWorking.EnterPortWaterTEMP;
+                        item.HotExitWaterTEMP = hotWorking.ExitWaterTEMP;
+                    }
+                    break;
+                }
+            }
+        }
+        void UpDataCoilFanData() 
+        {
+            //风机盘管数据更新，修改了温度、湿度等信息后的修改
+            var coolWorking = HotCoolWorkingData<CoilUnitFanWorkingData>(out CoilUnitFanWorkingData hotWorking);
+            var workingId = indoorFanViewModel.SelectWorkingCodition.Id;
+            //根据工况信息更新数据
+            foreach (var fanFile in indoorFanViewModel.IndoorFanFiles)
+            {
+                if (fanFile.Guid != indoorFanViewModel.SelectInfoFanFile.Guid)
+                    continue;
+                foreach (var fanData in fanFile.FileFanDatas)
+                {
+                    if (fanData.ShowWorkingData.WorkingId != workingId)
+                        continue;
+                    foreach (CoilUnitFan item in fanData.FanAllDatas)
+                    {
+                        //修改数据
+                        item.CoolAirInletDryBall = coolWorking.AirInletDryBall;
+                        item.CoolAirInletHumidity = coolWorking.AirInletHumidity;
+                        item.CoolEnterPortWaterTEMP = coolWorking.EnterPortWaterTEMP;
+                        item.CoolExitWaterTEMP = coolWorking.ExitWaterTEMP;
+
+                        item.HotAirInletDryBall = hotWorking.AirInletDryBall;
+                        item.HotEnterPortWaterTEMP = hotWorking.EnterPortWaterTEMP;
+                        item.HotExitWaterTEMP = hotWorking.ExitWaterTEMP;
+                    }
+                    break;
+                }
+            }
+        }
+        void UpdataVRFFanData() 
+        {
+            var coolWorking = HotCoolWorkingData<VRFFanWorkingData>(out VRFFanWorkingData hotWorking);
+            var workingId = indoorFanViewModel.SelectWorkingCodition.Id;
+            //根据工况信息更新数据
+            foreach (var fanFile in indoorFanViewModel.IndoorFanFiles)
+            {
+                if (fanFile.Guid != indoorFanViewModel.SelectInfoFanFile.Guid)
+                    continue;
+                foreach (var fanData in fanFile.FileFanDatas)
+                {
+                    if (fanData.ShowWorkingData.WorkingId != workingId)
+                        continue;
+                    foreach (VRFFan item in fanData.FanAllDatas)
+                    {
+                        //修改数据
+                        item.CoolAirInletDryBall = coolWorking.AirInletDryBall;
+                        item.CoolAirInletWetBall = coolWorking.AirInletWetBall;
+                        item.CoolOutdoorTemperature = coolWorking.OutdoorTemperature;
+
+                        item.HotAirInletDryBall = hotWorking.AirInletDryBall;
+                        item.HotOutdoorTemperature = hotWorking.OutdoorTemperature;
+                    }
+                    break;
+                }
+            }
+        }
+        T HotCoolWorkingData<T>(out T hotWorking) where T:class
+        {
+            var tempCool = indoorFanViewModel.FanTypeWorkingCodition[0];
+            var tempHot = indoorFanViewModel.FanTypeWorkingCodition[0];
+            foreach (var item in indoorFanViewModel.FanTypeWorkingCodition)
+            {
+                if (item.ShowName.Contains("热"))
+                    tempHot = item;
+                else
+                    tempCool = item;
+            }
+            T coolWorking = tempCool as T;
+            hotWorking = tempHot as T;
+            return coolWorking;
         }
     }
 }

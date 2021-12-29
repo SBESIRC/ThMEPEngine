@@ -38,28 +38,22 @@
                                         <ColumnDefinition Width="6*"></ColumnDefinition>
                                     </Grid.ColumnDefinitions>
                                     <ContentPresenter Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="99" HorizontalAlignment="Center" VerticalAlignment="Center" Content="冷却盘管"/>
-                                    <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="#ccc" Visibility="Visible"/>
+                                    <Rectangle Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="#474747" Visibility="Visible"/>
                                     <ContentPresenter Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Content="全热"/>
-                                    <Rectangle Grid.Row="2" Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#ccc" Visibility="Visible"/>
+                                    <Rectangle Grid.Row="2" Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#474747" Visibility="Visible"/>
                                     <ContentPresenter Grid.Row="2"  Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="显热"/>
 
-                                    <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="#ccc" Visibility="Visible"/>
+                                    <Rectangle Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="99" VerticalAlignment="Stretch" Height="1" Fill="#474747" Visibility="Visible"/>
                                     <ContentPresenter Grid.Row="4" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Content="kW"/>
-                                    <Rectangle Grid.Row="4" Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#ccc" Visibility="Visible"/>
+                                    <Rectangle Grid.Row="4" Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#474747" Visibility="Visible"/>
                                     <ContentPresenter Grid.Row="4"  Grid.Column="2" HorizontalAlignment="Center" VerticalAlignment="Center" Content="kW"/>
                                 </Grid>
-                                <Rectangle Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#ccc" Visibility="Visible"/>
+                                <Rectangle Grid.Column="1" Width="1" VerticalAlignment="Stretch" Fill="#474747" Visibility="Visible"/>
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
-            <!--<Style TargetType="DataGridCell">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                <Setter Property="VerticalAlignment" Value="Center"/>
-                <Setter Property="BorderThickness" Value="0"/>
-            </Style>-->
             <Style TargetType="DataGridColumnHeader">
                 <Setter Property="Height" Value="Auto"/>
                 <Setter Property="FontWeight" Value="Black"/>
@@ -97,9 +91,9 @@
         <StackPanel Orientation="Horizontal" Grid.Row="1">
             <Label Content="布置内容:" VerticalAlignment="Top" Width="65"/>
             <WrapPanel Orientation="Horizontal" MaxWidth="350">
-                <RadioButton Content="两管风机盘管" Width="150" VerticalContentAlignment="Center" GroupName="layerType" Margin="0,5,0,0"
+                <RadioButton Content="两管制风机盘管" Width="150" VerticalContentAlignment="Center" GroupName="layerType" Margin="0,5,0,0"
                              IsChecked="{Binding SelectFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=10}"/>
-                <RadioButton Content="四管风机盘管" Width="150" VerticalContentAlignment="Center" GroupName="layerType" Margin="0,5,0,0"
+                <RadioButton Content="四管制风机盘管" Width="150" VerticalContentAlignment="Center" GroupName="layerType" Margin="0,5,0,0"
                              IsChecked="{Binding SelectFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=11}"/>
                 <RadioButton Content="吊顶一体式空调箱" Width="150" VerticalContentAlignment="Center" GroupName="layerType" 
                              Margin="0,5,0,0" x:Name="rBtnAirConditionin"
@@ -138,31 +132,35 @@
                     </DataGrid>
                     <!--吊顶空调数据-->
                     <DataGrid Grid.Column="1" Height="Auto" 
-                          RowHeight="22" Margin="0,0,10,0"
+                              BeginningEdit="DataGrid_BeginningEdit"
+                              CellEditEnding="DataGrid_CellEditEnding"
+                              RowHeight="22" Margin="0,0,10,0"
                               RowHeaderWidth="0"
                               BorderThickness="1,1,0,0"
-                          Visibility="{Binding ShowFanType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=20}"
-                          ItemsSource="{Binding FanTypeWorkingCodition}" CanUserAddRows="False" AutoGenerateColumns="False">
+                              Visibility="{Binding ShowFanType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=20}"
+                              ItemsSource="{Binding FanTypeWorkingCodition}" CanUserAddRows="False" AutoGenerateColumns="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="工况" Width="60*" Binding="{Binding ShowName}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="进风干球温度&#13;°C" Width="90*" Binding="{Binding AirInletDryBall}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="进风湿球温度&#13;°C" Width="90*" Binding="{Binding AirInletWetBall}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="进口水温&#13;°C" Width="60*" Binding="{Binding EnterPortWaterTEMP}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="出口水温&#13;°C" Width="60*" Binding="{Binding ExitWaterTEMP}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="工况" Width="60*" Binding="{Binding ShowName}" CanUserSort="False" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="进风干球温度&#13;°C" Width="90*" Binding="{Binding AirInletDryBall,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="进风湿球温度&#13;°C" Width="90*" Binding="{Binding AirInletWetBall,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="进口水温&#13;°C" Width="60*" Binding="{Binding EnterPortWaterTEMP,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="出口水温&#13;°C" Width="60*" Binding="{Binding ExitWaterTEMP,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
                         </DataGrid.Columns>
                     </DataGrid>
                     <!--VRF室内机数据-->
-                    <DataGrid Grid.Column="1" Height="Auto" 
-                          RowHeight="22" Margin="0,0,10,0"
+                    <DataGrid Grid.Column="1" Height="Auto"
+                              RowHeight="22" Margin="0,0,10,0"
+                              BeginningEdit="DataGrid_BeginningEdit"
+                              CellEditEnding="DataGrid_CellEditEnding"
                               RowHeaderWidth="0"
                               BorderThickness="1,1,0,0"
                           Visibility="{Binding ShowFanType,Mode=OneWay,Converter={StaticResource enumToVisibility},ConverterParameter=30}"
                           ItemsSource="{Binding FanTypeWorkingCodition}" CanUserAddRows="False" AutoGenerateColumns="False">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="工况" Width="60*" Binding="{Binding ShowName}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="进风干球温度&#13;°C" Width="90*" Binding="{Binding AirInletDryBall}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="进风湿球温度&#13;°C" Width="90*" Binding="{Binding AirInletWetBall}" CanUserSort="False"/>
-                            <DataGridTextColumn Header="室外温度&#13;°C" Width="60*" IsReadOnly="True" Binding="{Binding OutdoorTemperature}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="工况" Width="60*" Binding="{Binding ShowName}" CanUserSort="False" IsReadOnly="True"/>
+                            <DataGridTextColumn Header="进风干球温度&#13;°C" Width="90*" Binding="{Binding AirInletDryBall,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="进风湿球温度&#13;°C" Width="90*" Binding="{Binding AirInletWetBall,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
+                            <DataGridTextColumn Header="室外温度&#13;°C" Width="60*" IsReadOnly="True" Binding="{Binding OutdoorTemperature,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" CanUserSort="False"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -172,10 +170,12 @@
             <cus:ImageButton Width="40"  Content="详细&#13;参数" Height="40" Margin="5,0,0,0" VerticalAlignment="Top" Name="btnDetailed" Click="btnDetailed_Click" />
             <Grid>
                 <!--Start - 风机盘管参数-->
-                <DataGrid Margin="10,0,0,0" ColumnHeaderHeight="60" ItemsSource="{Binding FanInfos}"
-                      MaxHeight="266"  Width="300" RowHeaderWidth="0"
-                      Visibility="{Binding ShowFanType,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True,Converter={StaticResource enumToVisibility},ConverterParameter=10}"
-                      CanUserAddRows="False" AutoGenerateColumns="False" RowHeight="22">
+                <DataGrid Margin="10,0,0,0" ColumnHeaderHeight="60"
+                          ItemsSource="{Binding FanInfos}"
+                          SelectedItem="{Binding SelectIndoorFan,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                          MaxHeight="266"  Width="300" RowHeaderWidth="0"
+                          Visibility="{Binding ShowFanType,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True,Converter={StaticResource enumToVisibility},ConverterParameter=10}"
+                          CanUserAddRows="False" AutoGenerateColumns="False" RowHeight="22">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="设备编号" IsReadOnly="True" Width="60*" CanUserSort="False"> 
                             <DataGridTemplateColumn.CellTemplate>
@@ -190,6 +190,7 @@
                                                      BorderBrush="#0C0CFF"
                                                      Background="Transparent"
                                                      MouseOverBackground="Transparent"
+                                                         Click="ImageButton_Click"
                                                      Content="{Binding FanNumber}"></cus:ImageButton>
                                     </WrapPanel>
                                 </DataTemplate>
@@ -228,10 +229,12 @@
                 <!--End - 风机盘管-->
 
                 <!--Start - VRF室内机-->
-                <DataGrid Margin="10,0,0,0" ColumnHeaderHeight="60" ItemsSource="{Binding FanInfos}"
-                      MaxHeight="266"  Width="300" RowHeaderWidth="0"
-                      Visibility="{Binding ShowFanType,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True,Converter={StaticResource enumToVisibility},ConverterParameter=30}"
-                      CanUserAddRows="False" AutoGenerateColumns="False" RowHeight="22">
+                <DataGrid Margin="10,0,0,0" ColumnHeaderHeight="60" 
+                          SelectedItem="{Binding SelectIndoorFan,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                          ItemsSource="{Binding FanInfos}"
+                          MaxHeight="266"  Width="300" RowHeaderWidth="0"
+                          Visibility="{Binding ShowFanType,Mode=OneWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True,Converter={StaticResource enumToVisibility},ConverterParameter=30}"
+                          CanUserAddRows="False" AutoGenerateColumns="False" RowHeight="22">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="设备编号" IsReadOnly="True" Width="60*" CanUserSort="False">
                             <DataGridTemplateColumn.CellTemplate>
@@ -246,6 +249,7 @@
                                                      BorderBrush="#0C0CFF"
                                                      Background="Transparent"
                                                      MouseOverBackground="Transparent"
+                                                         Click="ImageButton_Click"
                                                      Content="{Binding FanNumber}"></cus:ImageButton>
                                     </WrapPanel>
 
@@ -326,7 +330,7 @@
                 </StackPanel>
                 <Label Content="最大机组型号:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center"/>
                 <StackPanel Margin="10,0,0,0">
-                    <RadioButton Content="自动" Height="22" IsChecked="{Binding MaxFanTypeAuto}" GroupName="maxFanModel" VerticalContentAlignment="Center"/>
+                    <RadioButton Content="自动" Height="22" IsChecked="{Binding MaxFanTypeAuto,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}" GroupName="maxFanModel" VerticalContentAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" Height="22" VerticalAlignment="Center">
                         <RadioButton Content="指定" x:Name="rBtnMax"  GroupName="maxFanModel" VerticalContentAlignment="Center"/>
                         <ComboBox Margin="10,0,0,0" IsEnabled="{Binding ElementName=rBtnMax,Path=IsChecked}" VerticalAlignment="Center" Height="22" Width="80"

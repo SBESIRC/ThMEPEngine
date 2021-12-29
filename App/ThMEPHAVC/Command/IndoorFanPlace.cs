@@ -11,6 +11,7 @@ using System.Linq;
 using ThMEPEngineCore.Command;
 using ThMEPHVAC.IndoorFanLayout;
 using ThMEPHVAC.IndoorFanLayout.Models;
+using ThMEPHVAC.IndoorFanModels;
 using ThMEPHVAC.ParameterService;
 
 namespace ThMEPHVAC.Command
@@ -20,9 +21,11 @@ namespace ThMEPHVAC.Command
     /// </summary>
     class IndoorFanPlace: ThMEPBaseCommand
     {
-        public string FanBlockName { get; set; }
-        public string FanType { get; set; }
-
+        public IndoorFanPlace() 
+        {
+            CommandName = "THFJFZ";
+            ActionName = "THFJFZ";
+        }
         public override void SubExecute()
         {
             if (IndoorFanParameter.Instance.PlaceModel == null)
@@ -30,14 +33,31 @@ namespace ThMEPHVAC.Command
             using (Active.Document.LockDocument())
             using (var acdb = AcadDatabase.Active())
             {
-                LoadFanBlockServices.LoadBlockLayerToDocument(acdb.Database);
+                IndoorFanBlockServices.LoadBlockLayerToDocument(acdb.Database);
             }
-            string layerName = LoadFanBlockServices.AirConditionFanLayerName;
-            string blockName = LoadFanBlockServices.AirConditionFanBlackName;
+            
             var fanData = IndoorFanParameter.Instance.PlaceModel.TargetFanInfo;
-            var fanLoad = new AirConditionFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType,IndoorFanModels.EnumHotColdType.Cold,1);
+            FanLoadBase fanLoad = null;
+            switch (IndoorFanParameter.Instance.PlaceModel.FanType) 
+            {
+                case EnumFanType.FanCoilUnitFourControls:
+                case EnumFanType.FanCoilUnitTwoControls:
+                    fanLoad = new CoilFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    break;
+                case EnumFanType.IntegratedAirConditionin:
+                    fanLoad = new AirConditionFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    break;
+                case EnumFanType.VRFConditioninConduit:
+                case EnumFanType.VRFConditioninFourSides:
+                    fanLoad = new VRFImpellerFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    break;
+            }
             var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
+            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
+
+            string layerName = "";
+            string blockName = "";
+            blockName = IndoorFanBlockServices.GetBlockLayerNameTextAngle(IndoorFanParameter.Instance.PlaceModel.FanType, out layerName, out double textAngle);
 
             var xVector = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
             var angle = Vector3d.XAxis.GetAngleTo(xVector, Vector3d.ZAxis);
@@ -51,9 +71,10 @@ namespace ThMEPHVAC.Command
                     var propmptResult = Active.Editor.GetPoint(opt);
                     if (propmptResult.Status != PromptStatus.OK)
                         break;
+                    var createPoint = propmptResult.Value.TransformBy(Active.Editor.UCS2WCS());
                     var addId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                         layerName, blockName,
-                        propmptResult.Value.TransformBy(Active.Editor.UCS2WCS()),
+                        createPoint,
                         new Scale3d(1, 1, 1),
                         angle,
                         connectorAttrs);
@@ -61,36 +82,9 @@ namespace ThMEPHVAC.Command
                         continue;
                     SetBlockDynAttrs(addId, connectorDynAttrs);
                     ChangeBlockTextAttrAngle(addId, connectorAttrs.Select(c => c.Key).ToList(), angle);
-                    ChangeBlockTextAttrAngle(addId, new List<string> { "设备编号" }, angle + Math.PI / 2);
+                    ChangeBlockTextAttrAngle(addId, new List<string> { "设备编号" }, angle + textAngle);
                 }
             }
-        }
-        private Dictionary<string, string> GetFanBlockAttrDynAttrs(FanLoadBase fanLoad, out Dictionary<string, object> blockDynAttrs)
-        {
-            var blockAttrs = new Dictionary<string, string>();
-            blockDynAttrs = new Dictionary<string, object>();
-            blockAttrs.Add("设备编号", fanLoad.FanNumber);
-            if (fanLoad is CoilFanLoad coilFanLoad)
-            {;
-                string hotColdStr = coilFanLoad.GetCoolHotString(out string waterTempStr);
-                blockAttrs.Add("制冷量/制热量", hotColdStr);
-                blockAttrs.Add("冷水温差/热水温差", waterTempStr);
-            }
-            else if (fanLoad is AirConditionFanLoad airCondition) 
-            {
-                string hotColdStr = airCondition.GetCoolHotString(out string waterTempStr);
-                blockAttrs.Add("制冷量/制热量", hotColdStr);
-                blockAttrs.Add("冷水温差/热水温差", waterTempStr);
-            }
-            else
-            {
-                blockAttrs.Add("制冷量/制热量", string.Format("{0}kW/{1}kW", fanLoad.FanRealCoolLoad, fanLoad.FanRealHotLoad));
-            }
-            blockAttrs.Add("设备电量", string.Format("{0}W", fanLoad.FanPower));
-
-            blockDynAttrs.Add("设备宽度", fanLoad.FanWidth);
-            blockDynAttrs.Add("设备深度", fanLoad.FanLength);
-            return blockAttrs;
         }
         private void SetBlockDynAttrs(ObjectId blockId, Dictionary<string, object> dynAttr)
         {

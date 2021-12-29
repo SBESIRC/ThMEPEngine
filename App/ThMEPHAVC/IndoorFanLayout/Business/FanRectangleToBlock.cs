@@ -84,12 +84,12 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             AddCoilAirPort(acdb, fanPoint, angle, attr, dynAttr);
 
             //添加连接件（风机）
-            string blockName = _enumFanType == EnumFanType.FanCoilUnitTwoControls ? LoadFanBlockServices.CoilFanTwoBlackName : LoadFanBlockServices.CoilFanFourBlackName;
+            string blockName = _enumFanType == EnumFanType.FanCoilUnitTwoControls ? IndoorFanBlockServices.CoilFanTwoBlackName : IndoorFanBlockServices.CoilFanFourBlackName;
             var connectorPoint = baseCenter + layoutRect.FanDirection.MultiplyBy(470 + startSectionLength);
             var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
+            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
             var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                LoadFanBlockServices.CoilFanLayerName,
+                IndoorFanBlockServices.CoilFanLayerName,
                 blockName,
                 connectorPoint,
                 new Scale3d(1),
@@ -125,7 +125,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 var pt1End = pt1 + dir.MultiplyBy(boxLength);
                 var pt2End = pt2 + dir.MultiplyBy(boxLength);
                 var poly = new Polyline();
-                poly.Layer = LoadFanBlockServices.FanBoxLayerName;
+                poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
                 poly.Closed = false;
                 poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
@@ -193,7 +193,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 var pt1End = pt1 + dir.MultiplyBy(boxLength);
                 var pt2End = pt2 + dir.MultiplyBy(boxLength);
                 var poly = new Polyline();
-                poly.Layer = LoadFanBlockServices.FanBoxLayerName;
+                poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
                 poly.Closed = false;
                 poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
@@ -204,10 +204,10 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             //添加连接件（风机）
             var connectorPoint = baseCenter + layoutRect.FanDirection.MultiplyBy(secondSectionLenght + startSectionLength);
             var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
+            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
             var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                LoadFanBlockServices.VRFFanLayerName,
-                LoadFanBlockServices.VRFFanBlackName,
+                IndoorFanBlockServices.VRFFanLayerName,
+                IndoorFanBlockServices.VRFFanBlackName,
                 connectorPoint,
                 new Scale3d(1),
                 angle,
@@ -234,12 +234,12 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return;
             var center = _originTransformer.Reset(layoutRect.CenterPoint);
             var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
+            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
             var angle = Vector3d.YAxis.GetAngleTo(layoutRect.FanDirection, Vector3d.ZAxis);
             angle = angle % (Math.PI * 2);
             var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                LoadFanBlockServices.VRFFanLayerName,
-                LoadFanBlockServices.VRFFanFourSideBlackName,
+                IndoorFanBlockServices.VRFFanLayerName,
+                IndoorFanBlockServices.VRFFanFourSideBlackName,
                 center,
                 new Scale3d(1),
                 angle,
@@ -250,28 +250,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             ChangeBlockTextAttrAngle(connectorId, new List<string> { "制冷量/制热量", "设备电量", "设备编号" }, angle);
         }
 
-        private Dictionary<string, string> GetFanBlockAttrDynAttrs(FanLoadBase fanLoad,out Dictionary<string, object> blockDynAttrs) 
-        {
-            var blockAttrs = new Dictionary<string, string>();
-            blockDynAttrs = new Dictionary<string, object>();
-            blockAttrs.Add("设备编号", fanLoad.FanNumber);
-            if (fanLoad is CoilFanLoad coilFanLoad)
-            {
-                string hotColdStr = coilFanLoad.GetCoolHotString(out string waterTempStr);
-                blockAttrs.Add("制冷量/制热量", hotColdStr);
-                blockAttrs.Add("冷水温差/热水温差", waterTempStr);
-            }
-            else 
-            {
-                blockAttrs.Add("制冷量/制热量", string.Format("{0}kW/{1}kW", fanLoad.FanRealCoolLoad, fanLoad.FanRealHotLoad));
-            }
-            
-            blockAttrs.Add("设备电量", string.Format("{0}W", fanLoad.FanPower));
-            
-            blockDynAttrs.Add("设备宽度", fanLoad.FanWidth);
-            blockDynAttrs.Add("设备深度", fanLoad.FanLength);
-            return blockAttrs;
-        }
+        
         private void AddAirPort(AcadDatabase acdb, FanLoadBase fanLoad, FanLayoutRect layoutRect,double angle) 
         {
             //添加出风口
@@ -295,8 +274,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         private void AddCoilAirPort(AcadDatabase acdb, Point3d createPoint, double angle, Dictionary<string, string> attr, Dictionary<string, object> dynAttr, double textAngleOffSet =0)
         {
             var id = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                LoadFanBlockServices.FanVentLayerName,
-                LoadFanBlockServices.FanVentBlackName,
+                IndoorFanBlockServices.FanVentLayerName,
+                IndoorFanBlockServices.FanVentBlackName,
                 createPoint,
                 new Scale3d(1),
                 angle,

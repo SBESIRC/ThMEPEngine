@@ -45,26 +45,27 @@ namespace ThMEPHVAC.IndoorFanLayout
             }
             return null;
         }
-        public FanRectangle GetFanRectangle(string fanTypeName) 
+        public FanRectangle GetFanRectangle(string fanTypeName, double correctionFactor) 
         {
+            
             FanRectangle fanRectangle =null;
             var fanModel = GetFanModel(fanTypeName);
             switch (IndoorFanParameter.Instance.LayoutModel.FanType) 
             {
                 case EnumFanType.FanCoilUnitTwoControls:
                 case EnumFanType.FanCoilUnitFourControls:
-                    fanRectangle = CoilFanRectangle(fanModel as CoilUnitFan);
+                    fanRectangle = CoilFanRectangle(fanModel as CoilUnitFan, correctionFactor);
                     break;
                 case EnumFanType.VRFConditioninConduit:
-                    fanRectangle = VRFFanRectangle(fanModel as VRFFan);
+                    fanRectangle = VRFFanRectangle(fanModel as VRFFan, correctionFactor);
                     break;
                 case EnumFanType.VRFConditioninFourSides:
-                    fanRectangle = VRFFourSideRectangle(fanModel as VRFFan);
+                    fanRectangle = VRFFourSideRectangle(fanModel as VRFFan, correctionFactor);
                     break;
             }
             return fanRectangle;
         }
-        private FanRectangle CoilFanRectangle(CoilUnitFan coilUnitFan) 
+        private FanRectangle CoilFanRectangle(CoilUnitFan coilUnitFan, double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
@@ -78,7 +79,7 @@ namespace ThMEPHVAC.IndoorFanLayout
                     double.TryParse(coilUnitFan.HotHeat, out load);
                     break;
             }
-            load *= IndoorFanParameter.Instance.LayoutModel.CorrectionFactor;
+            load *= correctionFactor;
             fanRectangle.Load = load;
             fanRectangle.MinLength = 2000;
             fanRectangle.MaxLength = 5000;
@@ -104,7 +105,7 @@ namespace ThMEPHVAC.IndoorFanLayout
             fanRectangle.VentRect.VentMinDistanceToPrevious = 2000;
             return fanRectangle;
         }
-        private FanRectangle VRFFanRectangle(VRFFan fan) 
+        private FanRectangle VRFFanRectangle(VRFFan fan, double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
@@ -118,7 +119,7 @@ namespace ThMEPHVAC.IndoorFanLayout
                     double.TryParse(fan.HotRefrigeratingCapacity, out load);
                     break;
             }
-            load *= IndoorFanParameter.Instance.LayoutModel.CorrectionFactor;
+            load *= correctionFactor;
             fanRectangle.Load = load;
             fanRectangle.MinLength = 2500;
             fanRectangle.MaxLength = 5000;
@@ -144,7 +145,7 @@ namespace ThMEPHVAC.IndoorFanLayout
             fanRectangle.VentRect.VentMinDistanceToPrevious = 1000;
             return fanRectangle;
         }
-        private FanRectangle VRFFourSideRectangle(VRFFan fan) 
+        private FanRectangle VRFFourSideRectangle(VRFFan fan, double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
@@ -158,7 +159,7 @@ namespace ThMEPHVAC.IndoorFanLayout
                     double.TryParse(fan.HotRefrigeratingCapacity, out load);
                     break;
             }
-            load *= IndoorFanParameter.Instance.LayoutModel.CorrectionFactor;
+            load *= correctionFactor;
             fanRectangle.Load = load;
             fanRectangle.MinLength = 840;
             fanRectangle.MaxLength = 840;

@@ -234,16 +234,20 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         void LayoutFanRectFirstStep()
         {
             var orientation = _groupYVector.Negate();
+            bool changeDir = false;
             for (int j = _firstGroupIndex; j >= 0; j--)
             {
                 var curretnPoint = _allGroupCenterOrders[j];
                 var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(curretnPoint) < 1).First().Key;
+                int layoutCount = 0;
                 foreach (var item in _roomIntersectAreas)
                 {
                     if (item.GroupId != currentGroupId)
                         continue;
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation);
+                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation, changeDir);
+                    layoutCount += item.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
                 }
+                changeDir = j == _firstGroupIndex && layoutCount < 1;
             }
             for (int j = _firstGroupIndex + 1; j < _allGroupCenterOrders.Count; j++)
             {
@@ -253,7 +257,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 {
                     if (item.GroupId != currentGroupId)
                         continue;
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation);
+                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation, changeDir);
                 }
             }
         }
@@ -532,7 +536,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         
 
-        void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, Vector3d vector)
+        void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, Vector3d vector,bool isChangeLayoutDir)
         {
             var fanCount = divisionArea.NeedFanCount;
             if (fanCount < 1)
@@ -601,7 +605,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 foreach (var pline in calcResult)
                 {
                     var fanPline = new FanLayoutRect(pline, _fanRectangle.Width, vector);
-                    fanPline.FanDirection = layoutDivision.LayoutDir;
+                    fanPline.FanDirection = isChangeLayoutDir? layoutDivision.LayoutDir.Negate():layoutDivision.LayoutDir;
                     thisRowFans.Add(fanPline);
                 }
                 nearFans.Clear();

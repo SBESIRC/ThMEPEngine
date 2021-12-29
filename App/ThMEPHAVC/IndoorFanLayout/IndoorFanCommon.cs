@@ -9,6 +9,7 @@ namespace ThMEPHVAC.IndoorFanLayout
 {
     class IndoorFanCommon
     {
+        public const double FanSpaceMinDistance = 800;
         public const double RoomBufferOffSet = -500.0;
         public static Point3d PolylinCenterPoint(Polyline polyline) 
         {

@@ -50,6 +50,7 @@
     <Compile Include="IndoorFanLayout\Business\CalcLayoutArea.cs" />
     <Compile Include="IndoorFanLayout\Business\CalcRegionAdjacent.cs" />
     <Compile Include="IndoorFanLayout\Business\FanRectangleToBlock.cs" />
+    <Compile Include="IndoorFanLayout\Business\LayoutResultCheck.cs" />
     <Compile Include="IndoorFanLayout\Business\RectAreaLayoutFan.cs" />
     <Compile Include="IndoorFanLayout\Business\RoomLayoutFanBase.cs" />
     <Compile Include="IndoorFanLayout\CalcFanRectFormFanData.cs" />
@@ -57,7 +58,7 @@
     <Compile Include="IndoorFanLayout\DataEngine\LoadTableRead.cs" />
     <Compile Include="IndoorFanLayout\DataEngine\ThIndoorFanData.cs" />
     <Compile Include="IndoorFanLayout\IndoorFanCommon.cs" />
-    <Compile Include="IndoorFanLayout\LoadFanBlockServices.cs" />
+    <Compile Include="IndoorFanLayout\IndoorFanBlockServices.cs" />
     <Compile Include="IndoorFanLayout\Models\AreaRegionType.cs" />
     <Compile Include="IndoorFanLayout\Models\DivisionArea.cs" />
     <Compile Include="IndoorFanLayout\Models\FanLayoutModels.cs" />

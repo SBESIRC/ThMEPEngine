@@ -118,6 +118,8 @@ namespace ThMEPHVAC
             var resPolys = new List<Polyline>();
             foreach (var frame in frameLst)
             {
+                if (frame.Area < 10)
+                    continue;
                 if (frame is Polyline poly && poly.Closed)
                 {
                     resPolys.Add(poly);

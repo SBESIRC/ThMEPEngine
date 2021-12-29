@@ -286,7 +286,7 @@ namespace TianHua.Hvac.UI.ViewModels
         {
             if (_indoorFanFile == null)
                 return;
-            SelectFanType = EnumFanType.FanCoilUnitFourControls;
+            SelectFanType = EnumFanType.FanCoilUnitTwoControls;
         }
         private void SelectFanTypeChange() 
         {

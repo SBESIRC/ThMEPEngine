@@ -16,6 +16,36 @@ namespace ThMEPHVAC.IndoorFanLayout.DataEngine
         {
             _originTransformer = originTransformer;
         }
+        /// <summary>
+        /// 获取块信息，这里面不进行坐标系转换，应为复制后，块名称会丢失，后面的需要用到名称，
+        /// 这里将原信息返回，后面的判断需要偏移后判断
+        /// </summary>
+        /// <returns></returns>
+        public List<BlockReference> GetIndoorFanBlocks() 
+        {
+            List<string> fanBlockNames = new List<string>()
+            {
+                IndoorFanBlockServices.CoilFanFourBlackName,
+                IndoorFanBlockServices.CoilFanTwoBlackName,
+                IndoorFanBlockServices.VRFFanBlackName,
+                IndoorFanBlockServices.VRFFanFourSideBlackName,
+            };
+            var retBlocks = new List<BlockReference>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                foreach (var block in blocks) 
+                {
+                    if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                        continue;
+                    var blockName = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
+                    if (!fanBlockNames.Any(c => c == blockName))
+                        continue;
+                    retBlocks.Add(block);
+                }
+            }
+            return retBlocks;
+        }
         public List<Curve> GetAllAxisCurves()
         {
             var retAxisCurves = new List<Curve>();

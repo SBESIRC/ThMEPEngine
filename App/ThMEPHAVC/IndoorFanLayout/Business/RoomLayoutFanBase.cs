@@ -330,37 +330,20 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return nearAreas;
         }
-        //protected List<DivisionRoomArea> GetNearDivisionAreasByRadius(DivisionArea division, double radius, Point3d center,bool dirChange)
-        //{
-        //    var nearAreas = new List<DivisionRoomArea>();
-        //    var nearKeyValue = _divisionAreaNearIds.Where(c => c.Key == division.Uid).FirstOrDefault().Value;
-        //    var divisionAngle = Vector3d.XAxis.GetAngleTo(division.CenterPoint - center, Vector3d.ZAxis);
-        //    if (nearKeyValue == null || nearKeyValue.Count < 1)
-        //        return nearAreas;
-        //    foreach (var item in _roomIntersectAreas)
-        //    {
-        //        if (!nearKeyValue.Any(c => item.divisionArea.Uid == c))
-        //            continue;
-        //        var centerRadius = item.divisionArea.CenterPoint.DistanceTo(center);
-        //        var centerAngle = Vector3d.XAxis.GetAngleTo(item.divisionArea.CenterPoint - center, Vector3d.ZAxis);
-        //        if (Math.Abs(centerRadius - radius) > 1000)
-        //            continue;
-        //        //找顺时针
-        //        if((centerAngle>divisionAngle))
-        //            nearAreas.Add(item);
-        //    }
-        //    return nearAreas;
-        //}
         protected List<DivisionRoomArea> GetNearDivisionAreasByRadius(DivisionArea division, Point3d center, bool dir)
         {
             var nearAreas = new List<DivisionRoomArea>();
             var nearKeyValue = _divisionAreaNearIds.Where(c => c.Key == division.Uid).FirstOrDefault().Value;
+            var divisionRadius = division.CenterPoint.DistanceTo(center);
             var divisionAngle = Vector3d.XAxis.GetAngleTo(division.CenterPoint - center, Vector3d.ZAxis);
             if (nearKeyValue == null || nearKeyValue.Count < 1)
                 return nearAreas;
             foreach (var item in _roomIntersectAreas)
             {
                 if (!nearKeyValue.Any(c => item.divisionArea.Uid == c))
+                    continue;
+                var centerRadius = item.divisionArea.CenterPoint.DistanceTo(center);
+                if (Math.Abs(divisionRadius - centerRadius) > 1000)
                     continue;
                 var centerAngle = Vector3d.XAxis.GetAngleTo(item.divisionArea.CenterPoint - center, Vector3d.ZAxis);
                 //dir为true，找顺时针（右边）；dir为false，找逆时针（左边）
@@ -524,7 +507,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var splitAreas = SpliteAreasByVertical(divisionAreaFan, columnCount);
             for(int i = 0; i < columnCount; i++)
             {
-                var dir = i % 2 == 0 ? divisionAreaFan.GroupDir.RotateBy(Math.PI / 2, Vector3d.ZAxis) : divisionAreaFan.GroupDir.RotateBy(-Math.PI / 2, Vector3d.ZAxis);
+                var dir = i % 2 == 0 ? divisionAreaFan.GroupDir : divisionAreaFan.GroupDir.Negate();
                 var areas = splitAreas[i];
                 var fanArealayout = new DivisionLayoutArea(areas);
                 fanArealayout.LayoutDir = dir;
@@ -562,16 +545,17 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var spAngle = arcXVector.GetAngleTo((orderPoints.First() - center).GetNormal(), arcNormal);
             var epAngle = arcXVector.GetAngleTo((orderPoints.Last() - center).GetNormal(), arcNormal);
             var maxAngle = epAngle - spAngle;
+            var disAngle = 200 / innerRadius;//相邻区域间距角
             //角度步长
             var moveAngle = maxAngle / columnCount;
             for(int i = 0; i < columnCount; i++)
             {
                 var thisColumnPlines = new List<Polyline>();
-                var startVector = arcXVector.RotateBy(spAngle + moveAngle * i, arcNormal);
-                var endVector = arcXVector.RotateBy(spAngle + moveAngle * (i + 1), arcNormal);
+                var startVector = arcXVector.RotateBy(spAngle + moveAngle * i + (i > 0 ? disAngle : 0), arcNormal);
+                var endVector = arcXVector.RotateBy(spAngle + moveAngle * (i + 1) + (i < columnCount - 1 ? -disAngle : 0), arcNormal);
                 //一列的两条直边
-                var sLine = new Line(center + startVector.MultiplyBy(innerRadius), center + startVector.MultiplyBy(outRadius));
-                var eLine = new Line(center + endVector.MultiplyBy(innerRadius), center + endVector.MultiplyBy(outRadius));
+                var sLine = new Line(center + startVector.MultiplyBy(innerRadius*0.8), center + startVector.MultiplyBy(outRadius*1.2));
+                var eLine = new Line(center + endVector.MultiplyBy(innerRadius*0.8), center + endVector.MultiplyBy(outRadius)*1.2);
                 var curves = new List<Curve>();
                 foreach (var pline in divisionArea.RoomLayoutAreas)
                 {
