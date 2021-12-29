@@ -926,7 +926,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <param name="vec"></param>
         /// <param name="cont"></param>
         /// <param name="skip"></param>
-        private void generate_cars_in_single_dir(Line offset, Vector3d vec, ref bool cont, ref bool skip, double length_offset,double length_divided)
+        private void generate_cars_in_single_dir(Line offset, Vector3d vec, ref bool cont, ref bool skip, double length_offset, double length_divided)
         {
             var disstart = ClosestPointInVertCurves(offset.StartPoint, offset, IniLaneLines);
             var disend = ClosestPointInVertCurves(offset.EndPoint, offset, IniLaneLines);
@@ -984,11 +984,11 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset, bool judge_lanebox = true,
             bool judge_carmodulebox = true, bool reverse_dividesequence = false, bool adjust_pillar_edge = false, bool judge_modulebox = false,
-            bool gfirstpillar = false, bool allow_pillar_in_wall = false, bool judge_in_obstacles = false)
+            bool gfirstpillar = false, bool allow_pillar_in_wall = false, bool judge_in_obstacles = false, bool glastpillar = true)
         {
             if (allow_pillar_in_wall)
             {
-                line =new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-Vector(line).GetNormal()*DisPillarLength)),line.EndPoint);
+                line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-Vector(line).GetNormal() * DisPillarLength)), line.EndPoint);
             }
             var segobjs = new DBObjectCollection();
             Line[] segs;
@@ -1010,8 +1010,11 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             segs = segobjs.Cast<Line>().Where(e => Math.Abs(e.Length - length_divided) < 1).ToArray();
             var precar = new Polyline();
+            int segscount = segs.Count();
+            int c = 0;
             foreach (var seg in segs)
             {
+                c++;
                 var s = Line(seg);
                 s.TransformBy(Matrix3d.Displacement(vec.GetNormal() * (length_offset)));
                 var car = PolyFromPoints(new Point3d[] { seg.StartPoint, seg.EndPoint, s.EndPoint, s.StartPoint });
@@ -1037,11 +1040,19 @@ namespace ThMEPArchitecture.PartitionLayout
                               && CheckCarLegal(car);
                 if (judge_carmodulebox) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), CarModuleBox));
                 if (judge_modulebox) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), ModuleBox));
-                if(judge_in_obstacles) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), Obstacles));
+                if (judge_in_obstacles) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), Obstacles));
                 if (cond)
                 {
                     AddToSpatialIndex(car, ref CarSpatialIndex);
                     CarSpots.Add(car);
+                    if (Pillars.Count > 0)
+                    {
+                        if (car.GeometricExtents.IsPointIn(Pillars[Pillars.Count - 1].GetRecCentroid()))
+                        {
+                            Pillars.RemoveAt(Pillars.Count - 1);
+                        }
+
+                    }
                     if (precar.Area == 0)
                     {
                         if (gfirstpillar)
@@ -1103,6 +1114,34 @@ namespace ThMEPArchitecture.PartitionLayout
                         }
                         else { }
                         precar = car;
+                    }
+                    if (glastpillar && c == segscount)
+                    {
+                        var ed = seg;
+                        if (adjust_pillar_edge)
+                        {
+                            ed = s;
+                            vec = -vec;
+                        }
+                        var pp = ed.EndPoint.TransformBy(Matrix3d.Displacement(Vector(ed).GetNormal() * DisPillarLength));
+                        var li = new Line(pp, ed.EndPoint);
+                        var lf = Line(li);
+                        lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
+                        var pillar = PolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
+                        if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
+                        {
+                            bool condg = true;
+                            if (CarSpots.Count > 1 && CarSpots[CarSpots.Count - 1].IsPointInFast(pillar.GetRecCentroid()))
+                                condg = false;
+                            if (condg)
+                            {
+                                Pillars.Add(pillar);
+                            }
+                        }
+                        if (adjust_pillar_edge)
+                        {
+                            vec = -vec;
+                        }
                     }
                 }
                 carsc.Dispose();
