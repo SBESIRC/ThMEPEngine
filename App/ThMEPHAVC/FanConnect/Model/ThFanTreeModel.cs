@@ -188,6 +188,10 @@ namespace ThMEPHVAC.FanConnect.Model
             var basVector = node.Item.PLine.LineDirection().GetNormal();
             foreach (var l in conlines)
             {
+                if(l.Length.Equals(0.0))
+                {
+                    continue;
+                }
                 bool isFlag = false;
                 var tmpVector = l.LineDirection().GetNormal();
                 var croVector = basVector.CrossProduct(tmpVector).GetNormal();
@@ -219,6 +223,10 @@ namespace ThMEPHVAC.FanConnect.Model
             var neaLines = FindNearLine(node.Item.PLine,ref lines);
             foreach (var l in neaLines)
             {
+                if (l.Length.Equals(0.0))
+                {
+                    continue;
+                }
                 bool isFlag = false;
                 var tmpVector = l.LineDirection().GetNormal();
                 var croVector = basVector.CrossProduct(tmpVector).GetNormal();

@@ -38,6 +38,7 @@
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
     <Compile Include="FanConnect\Service\ThAddValveServiece.cs" />
+    <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
     <Compile Include="IndoorFanLayout\Business\ArcAreaLayoutFan.cs" />
     <Compile Include="IndoorFanLayout\Business\ArcAreaLayoutFanByVertical.cs" />
     <Compile Include="IndoorFanLayout\Business\AreaLayoutFan.cs" />

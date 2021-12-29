@@ -1,4 +1,5 @@
-﻿using DotNetARX;
+﻿using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
@@ -48,29 +49,38 @@ namespace ThMEPHVAC.FanConnect.Command
                 ImportBlockFile();
                 //获取起点
                 var startPt = ThFanConnectUtils.SelectPoint();
+                if (startPt.IsEqualTo(new Point3d()))
+                {
+                    return;
+                }
                 //获取风机设备
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
-                //水管干路和支干路
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                if (fucs.Count == 0)
+                {
+                    return;
+                }
+                //获取剪力墙
+                var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
+                //获取结构柱
+                var columns = ThBuildElementExtractServiece.GetColumns();
                 //获取房间框线
                 var rooms = ThBuildElementExtractServiece.GetBuildRooms();
-                ////AI洞口
-                var holes = ThBuildElementExtractServiece.GetAIHole();
-
-                double pipeWidth = 300.0;
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeStartPt = startPt;
-                pipeService.PipeWidth = pipeWidth;
+                pipeService.PipeWidth = 300.0;
                 pipeService.EquipModel = fucs;
-                pipeService.TrunkLines = pipes;
+                foreach (var wall in shearWalls)
+                {
+                    pipeService.AddObstacleHole(wall.Outline);
+                }
+                foreach (var column in columns)
+                {
+                    pipeService.AddObstacleHole(column.Outline);
+                }
                 foreach (var room in rooms)
                 {
                     pipeService.AddObstacleRoom(room);
-                }
-                foreach (var hole in holes)
-                {
-                    pipeService.AddObstacleHole(hole);
                 }
                 var plines = pipeService.CreatePipeLine(1);
                 var toDbServiece = new ThFanToDBServiece();

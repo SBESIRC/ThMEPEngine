@@ -98,12 +98,12 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retLine;
             }
         }
-        public static List<Entity> GetPipeDims()
+        public static List<Entity> GetPipeDims(string layer)
         {
             using (var database = AcadDatabase.Active())
             {
                 var retData = new List<Entity>();
-                var tmpEntity = database.ModelSpace.OfType<Entity>().Where(o => IsSPMLayer(o, "H-PIPE-DIMS")).ToList();
+                var tmpEntity = database.ModelSpace.OfType<Entity>().Where(o => IsSPMLayer(o, layer)).ToList();
                 foreach(var ent in tmpEntity)
                 {
                     if(ent is Circle)
@@ -122,12 +122,12 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retData;
             }
         }
-        public static List<Entity> GetPipeMarkes()
+        public static List<Entity> GetPipeMarkes(string layer)
         {
             using (var database = AcadDatabase.Active())
             {
                 var retData = new List<Entity>();
-                var tmpEntity = database.ModelSpace.OfType<Entity>().Where(o => IsSPMLayer(o, "H-PIPE-DIMS")).ToList();
+                var tmpEntity = database.ModelSpace.OfType<Entity>().Where(o => IsSPMLayer(o, layer)).ToList();
                 foreach (var ent in tmpEntity)
                 {
                     if (ent is DBText)
@@ -146,7 +146,6 @@ namespace ThMEPHVAC.FanConnect.Service
                 return retData;
             }
         }
-
         private static bool IsSPMLayer(Entity entity, string layer)
         {
             if(entity.Layer.Contains(layer))
