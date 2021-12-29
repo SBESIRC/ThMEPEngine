@@ -495,6 +495,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static bool IsPointInFast(this Polyline poly, Point3d p)
         {
+            return poly.IsPointIn(p);
             double temp = 0;
             var points = poly.Vertices();
             for (int i = 0; i < points.Count; i++)
@@ -513,7 +514,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 return false;
             }
         }
-        
+
         public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
         {
             if (!allowOnEdge)
