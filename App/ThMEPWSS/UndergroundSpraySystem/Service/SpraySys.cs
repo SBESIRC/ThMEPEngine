@@ -205,9 +205,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
 
             sprayIn.CreateTermPt(textSpatialIndex);//针对存在缺省立管的标注
 
-            var alarmValve = new AlarmValve();
+            var alarmValve = new AlarmValveTCH();
             var alarmPts = alarmValve.Extract(database, selectArea);
-            pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
+            //pipeLines.PipeLineAutoConnect(sprayIn, alarmPts);//自动连接
 
             DicTools.CreatePtTypeDic1(alarmPts, "AlarmValve", ref sprayIn);
 
