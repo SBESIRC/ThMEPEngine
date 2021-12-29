@@ -68,6 +68,10 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public LayoutMode LayoutMode { get; set; } = LayoutMode.ColumnSpan;
         /// <summary>
+        /// 双排布置版本
+        /// </summary>
+        public ArrangeEdition ArrangeEdition { get; set; } = ArrangeEdition.Third;
+        /// <summary>
         /// 柱子靠近车道线的距离
         /// </summary>
         public double NearByDistance { get; set; } = 5400;
@@ -112,7 +116,7 @@ namespace ThMEPLighting.Garage.Model
         /// 建筑车道线图层
         /// </summary>
         public List<string> LaneLineLayers { get; set; } = new List<string>();
-     }
+    }
     public enum InstallWay
     {
         /// <summary>
@@ -153,5 +157,11 @@ namespace ThMEPLighting.Garage.Model
         /// 弧线连接
         /// </summary>
         CircularArc,
+    }
+    public enum ArrangeEdition
+    {
+        First,
+        Second,
+        Third,
     }
 }

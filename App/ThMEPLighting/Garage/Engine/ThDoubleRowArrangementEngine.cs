@@ -1,19 +1,19 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Factory;
 using ThMEPLighting.Garage.Service.Number;
 using ThMEPLighting.Garage.Service.LayoutPoint;
-using ThMEPLighting.Garage.Factory;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -54,17 +54,23 @@ namespace ThMEPLighting.Garage.Engine
             // 预处理
             Preprocess(regionBorder);
 
-            if(true)
+            switch(ArrangeParameter.ArrangeEdition)
             {
-                NewArrange(regionBorder);
-            }
-            else
-            {
-                OldArrange(regionBorder);
+                case ArrangeEdition.First:
+                    FirstEdtionArrange(regionBorder);
+                    break;
+                    case ArrangeEdition.Second:
+                    SecondEdtionArrange(regionBorder);
+                    break;
+                case ArrangeEdition.Third:
+                    ThirdEdtionArrange(regionBorder);
+                    break;
+                default:
+                    return;
             }
         }
 
-        private void OldArrange(ThRegionBorder regionBorder)
+        private void FirstEdtionArrange(ThRegionBorder regionBorder)
         {
             // 识别内外圈
             // 产品对1、2号线的提出了新需求（1号线延伸到1号线，2号线延伸到2号线 -> ToDO
@@ -130,8 +136,8 @@ namespace ThMEPLighting.Garage.Engine
             //secondGraphs.ForEach(g => Service.Print.ThPrintService.Print(g));
             Graphs.AddRange(secondGraphs);
         }
-        
-        public void NewArrange(ThRegionBorder regionBorder)
+
+        private void SecondEdtionArrange(ThRegionBorder regionBorder)
         {
             // 按连通性对中心线分组
             var groupLines = FindConnectedLine(regionBorder.DxCenterLines);
@@ -162,6 +168,66 @@ namespace ThMEPLighting.Garage.Engine
 
             // 计算回路数量
             int lightNumber = firstSeondEdges.Sum(o => o.Item1.SelectMany(a1 => a1.LightNodes).Count() + 
+            o.Item2.SelectMany(a2 => a2.LightNodes).Count());
+            base.LoopNumber = GetLoopNumber(lightNumber);
+
+            firstSeondEdges.ForEach(o =>
+            {
+                // 建图
+                var firstGraphs = CreateGraphs(o.Item1);
+
+                // 建立1、2的配对查询
+                var firstSecondPairService = new ThFirstSecondPairService(o.Item1.Select(e => e.Edge).ToList(),
+                        o.Item2.Select(e => e.Edge).ToList(), ArrangeParameter.DoubleRowOffsetDis);
+
+                // 为1号线编号,传递到2号线
+                firstGraphs.ForEach(f =>
+                {
+                    f.Number(base.LoopNumber, false, base.DefaultStartNumber);
+                    PassFirstNumberToSecond(f.GraphEdges, o.Item2, firstSecondPairService, base.LoopNumber);
+                });
+
+                // 对于2号线未编号的,再编号
+                ReNumberSecondEdges(o.Item2);
+
+                // 对2号线建图
+                var secondGraphs = CreateGraphs(o.Item2);
+                Graphs.AddRange(firstGraphs);
+                Graphs.AddRange(secondGraphs);
+            });
+        }
+
+        private void ThirdEdtionArrange(ThRegionBorder regionBorder)
+        {
+            // 按连通性对中心线分组
+            var groupLines = FindConnectedLine(regionBorder.DxCenterLines);
+            CenterGroupLines = groupLines; // 返回用于创建十字型线槽
+
+            // 分组+创建边
+            var firstSeondEdges = new List<Tuple<List<ThLightEdge>, List<ThLightEdge>>>();
+            groupLines.ForEach(g =>
+            {
+                // 创建1号线
+                var firstSecondEngine = new ThFirstSecondAFactory(
+                    g.Item2.Keys.ToList(),
+                    ArrangeParameter.DoubleRowOffsetDis,
+                    g.Item1);
+                firstSecondEngine.Produce();
+                firstSecondEngine.CenterSideDict.ForEach(o => CenterSideDicts.Add(o.Key, o.Value));
+
+                // 对获得1、2号进行Noding
+                var firstLines = firstSecondEngine.FirstLines.Preprocess();
+                var secondLines = firstSecondEngine.SecondLines.Preprocess();
+                //firstLines.OfType<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 1);
+                //secondLines.OfType<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 6);
+
+                // 通过1、2号线布点，返回带点的边
+                var edges = CreateDistributePointEdges(regionBorder, firstLines, secondLines);
+                firstSeondEdges.Add(edges);
+            });
+
+            // 计算回路数量
+            int lightNumber = firstSeondEdges.Sum(o => o.Item1.SelectMany(a1 => a1.LightNodes).Count() +
             o.Item2.SelectMany(a2 => a2.LightNodes).Count());
             base.LoopNumber = GetLoopNumber(lightNumber);
 
