@@ -61,6 +61,7 @@ namespace TianHua.Hvac.UI.Command
                     var model = dicModels[key];
                     var p = model.FanInletBasePoint.TransformBy(mat);
                     var wallLines = GetWalls(p, srtP, wallIndex);
+                    //var points = GetWallPoints(wallLines);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
                         cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
@@ -74,6 +75,20 @@ namespace TianHua.Hvac.UI.Command
                 ductPort.Execute();
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
+        }
+
+        private Point3dCollection GetWallPoints(DBObjectCollection lines)
+        {
+            var set = new HashSet<Point3d>();
+            foreach (Line l in lines)
+            {
+                set.Add(ThMEPHVACService.RoundPoint(l.StartPoint, 6));
+                set.Add(ThMEPHVACService.RoundPoint(l.EndPoint, 6));
+            }
+            var points = new Point3dCollection();
+            foreach (var p in set)
+                points.Add(p);
+            return points;
         }
         private DBObjectCollection GetWalls(Point3d p, Point3d srtP, ThCADCoreNTSSpatialIndex index)
         {
