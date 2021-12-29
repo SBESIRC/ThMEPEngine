@@ -273,7 +273,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiRoomOutline);
         }
 
-
+        /// <summary>
+        /// 喷头连管标注
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THPTLGBZ", CommandFlags.Modal)]
         public void THSprinkConnUICmd()
         {

@@ -438,6 +438,14 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THPLPT_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
+            row.AddNewButton("喷头连管标注",
+                "天华喷头连管标注",
+                "THPTLGBZ",
+                "天华喷头连管标注",
+                "IDI_THCAD_THPTLGBZ_SMALL",
+                "IDI_THCAD_THPTLGBZ_LARGE",
+                RibbonButtonStyle.LargeWithText);
+
             row.AddNewButton("喷头校核",
                 "天华喷头校核",
                 "THPTJH",
