@@ -150,7 +150,7 @@
     <Compile Include="Garage\Service\ThMergeLightLineService.cs" />
     <Compile Include="Garage\Service\ThQueryLightWireService.cs" />
     <Compile Include="Garage\Service\ThCableTrayBuilder.cs" />
-    <Compile Include="Garage\Engine\ThFirstSecondRecognitionEngine.cs" />
+    <Compile Include="Garage\Factory\ThFirstSecondAFactory.cs" />
     <Compile Include="Garage\Model\ThCableTrayGroupParameter.cs" />
     <Compile Include="Garage\Model\ThLightNodeLink.cs" />
     <Compile Include="Garage\Service\ThQueryPointService.cs" />

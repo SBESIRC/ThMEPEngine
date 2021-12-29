@@ -12,9 +12,12 @@ using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Garage.Engine
+namespace ThMEPLighting.Garage.Factory
 {
-    public class ThFirstSecondRecognitionEngine:IDisposable
+    /// <summary>
+    /// 利用传递的方式实现1、2号线逻辑
+    /// </summary>
+    public class ThFirstSecondAFactory : IDisposable
     {
         private Tolerance AccuracyTolerance; // 精确判断精度
         private Tolerance ApproximateTolerance; // 粗略判断精度
@@ -50,7 +53,7 @@ namespace ThMEPLighting.Garage.Engine
                 return SideLineNumberDict.Where(o => o.Value == EdgePattern.Second).Select(o => o.Key).ToList();
             }
         }
-        public ThFirstSecondRecognitionEngine()
+        public ThFirstSecondAFactory()
         {
             ApproximateTolerance = new Tolerance(1.0, 1.0);
             AccuracyTolerance = new Tolerance(1e-4, 1e-4);

@@ -13,6 +13,7 @@ using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service.Number;
 using ThMEPLighting.Garage.Service.LayoutPoint;
+using ThMEPLighting.Garage.Factory;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -141,7 +142,7 @@ namespace ThMEPLighting.Garage.Engine
             groupLines.ForEach(g =>
             {
                 // 创建1号线
-                var firstSecondEngine = new ThFirstSecondRecognitionEngine();
+                var firstSecondEngine = new ThFirstSecondAFactory();
                 var startPt = g.Item1;
                 var centerLines = g.Item2.Keys.ToList();
                 firstSecondEngine.Recognize(g.Item1, centerLines, ArrangeParameter.DoubleRowOffsetDis);
