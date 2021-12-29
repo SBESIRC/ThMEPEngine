@@ -31,43 +31,5 @@ namespace ThMEPHVAC.ViewModel
                 }
             }  
         } 
-
-        public void UpdateByTotalAirVolume()
-        {
-            CalculateSingleAirPortAirVolume();
-        }
-
-        public void UpdateByAirPortNum()
-        {
-            CalculateSingleAirPortAirVolume(); 
-        }
-
-        public void UpdateBySingleAirPortAirVolume()
-        {
-           var size = ThMEPHAVCDataManager.CalculateAirPortSize(
-                Parameter.SingleAirPortAirVolume, Parameter.AirPortType);
-            if(size!=null)
-            {
-                Parameter.Length = size.Item1;
-                Parameter.Width = size.Item2;
-            }
-        }
-
-        public void UpdateBySystemType()
-        {
-            var initAirPortType = ThMEPHAVCDataManager.GetInitAirportType(Parameter.SystemType);
-            if (!string.IsNullOrEmpty(initAirPortType))
-            {
-                Parameter.AirPortType = initAirPortType;
-            }
-        }
-
-        private void CalculateSingleAirPortAirVolume()
-        {
-            if (Parameter.AirPortNum != 0)
-            {
-                Parameter.SingleAirPortAirVolume = Parameter.TotalAirVolume / Parameter.AirPortNum;
-            }
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using AcHelper;
 using DotNetARX;
@@ -12,6 +13,26 @@ namespace ThMEPHVAC
 {
     public static class ThMEPHAVCCommon
     {
+        public static double MmToMeter(this int length)
+        {
+            return (length*1.0).MmToMeter();
+        }
+
+        public static double MmToMeter(this double length)
+        {
+            return length / 1000.0;
+        }
+
+        public static double GetArea(double length,double width)
+        {
+            return length * width;
+        }
+
+        public static double GetArea(double radius)
+        {
+            return Math.PI* radius * radius;
+        }
+
         public static void FocusToCAD()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html

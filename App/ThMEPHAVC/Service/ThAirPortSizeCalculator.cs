@@ -25,22 +25,30 @@ namespace ThMEPHVAC.Service
         /// <returns></returns>
         public static Tuple<int,int> CalculateAirPortSize(double singleAirPortAirVolume,double airSpeedUpperLimitedValue,double lwRatio)
         {
-            if(singleAirPortAirVolume<=0.0)
+           if(singleAirPortAirVolume<=0.0)
             {
                 return Tuple.Create(0, 0);
             }
+            double aMin = singleAirPortAirVolume / (3600 * airSpeedUpperLimitedValue);
             // 单风口风量 单位：m3/h , 风速上限值<=2.2m/s
             var sizes = ThMEPHAVCDataManager.GetRectangleSizes().OrderBy(o=>o).ToList();
             var specs = GetSpecs(sizes);
-            var options = specs.Where(o=> IsAirPortAreaValid(
-                o.Item1,o.Item2,singleAirPortAirVolume, airSpeedUpperLimitedValue)).ToList();
-            options = options
-                .Where(o => LengthWidthRatio(o.Item1, o.Item2)<= lwRatio)
-                .OrderBy(o=> LengthWidthRatio(o.Item1, o.Item2))
-                .ToList();
-            return options.Count > 0 ? options.First() : Tuple.Create(0,0);
-        }
 
+            // 用"单个风口风量/(3600*截面面积)",筛选符合条件的风管规格
+            var options = specs
+                .Where(o => IsAirPortAreaValid(o.Item1, o.Item2, singleAirPortAirVolume, airSpeedUpperLimitedValue))
+                .ToList();
+            // 用[aMin,1.3*aMin],筛选符合条件的风管规格
+            options = options.Where(o => GetArea(o.Item1, o.Item2) >= aMin && GetArea(o.Item1, o.Item2) <= 1.3 * aMin).ToList();
+
+            // 用长宽比，筛选
+            options = options
+                .Where(o => LengthWidthRatio(o.Item1, o.Item2) <= lwRatio)
+                .OrderByDescending(o=> LengthWidthRatio(o.Item1, o.Item2))
+                .ToList();
+
+            return options.Count>0? options.First():Tuple.Create(sizes.FirstOrDefault(), sizes.FirstOrDefault());
+        }
 
         private static bool IsAirPortAreaValid(int length, int width,
             double singleAirPortAirVolume,double upperLimitedValue)
@@ -57,9 +65,9 @@ namespace ThMEPHVAC.Service
         private static List<Tuple<int, int>> GetSpecs(List<int> sizes)
         {
             var results = new List<Tuple<int, int>>();
-            for (int i = 1; i < sizes.Count; i++)
+            for (int i = 0; i < sizes.Count; i++)
             {
-                for (int j = i - 1; j >= 0; j--)
+                for (int j = i ; j >= 0; j--)
                 {
                     results.Add(Tuple.Create(sizes[i], sizes[j]));
                 }
@@ -83,9 +91,11 @@ namespace ThMEPHVAC.Service
             var specs = GetSpecs(sizes);
             var minArea = CalculateMinArea(singleAirPortAirVolume);
             var maxArea = CalculateMaxArea(singleAirPortAirVolume);
-            specs = specs.Where(o => GetArea(o.Item1, o.Item2) >= minArea && GetArea(o.Item1, o.Item2) <= maxArea).ToList();
-            specs = specs.OrderBy(o => GetArea(o.Item1, o.Item2)).ToList();
-            return specs.Count > 0 ? specs.First() : Tuple.Create(0, 0);
+            var options = specs
+                .Where(o => GetArea(o.Item1, o.Item2) >= minArea && GetArea(o.Item1, o.Item2) <= maxArea)
+                .OrderBy(o => GetArea(o.Item1, o.Item2))
+                .ToList();
+            return options.Count > 0 ? options.First() : Tuple.Create(sizes.FirstOrDefault(), sizes.FirstOrDefault());
         }
 
         private static List<Tuple<int, int>> GetSpecs(List<int> sizes)
@@ -124,14 +134,16 @@ namespace ThMEPHVAC.Service
             {
                 return Tuple.Create(0, 0);
             }
-            // 单风口风量 单位：m3/h , 风速上限值<=2.2m/s
-            var sizes = ThMEPHAVCDataManager.GetCircleSizes().OrderBy(o => o).ToList();
+            // 单风口风量 单位：m3/h , 风速上限值<=2.2m/s            
             var minArea = CalculateMinArea(singleAirPortAirVolume);
             var maxArea = CalculateMaxArea(singleAirPortAirVolume);
-            sizes = sizes
-                .Where(o => GetArea(o) >= minArea && GetArea(o) <= maxArea)
-                .OrderBy(o => GetArea(o)).ToList();
-            return sizes.Count > 0 ? Tuple.Create(sizes.First(), sizes.First()) : Tuple.Create(0, 0);
+
+            var sizes = ThMEPHAVCDataManager.GetCircleSizes().OrderBy(o => o).ToList();
+            var options = sizes
+                .Where(o => GetArea(o/2) >= minArea && GetArea(o/2) <= maxArea)
+                .OrderBy(o => GetArea(o/2)).ToList();
+            return options.Count > 0 ? Tuple.Create(options.First(), options.First()) : 
+                Tuple.Create(sizes.FirstOrDefault(), sizes.FirstOrDefault());
         }
 
         private static List<Tuple<int, int>> GetSpecs(List<int> sizes)

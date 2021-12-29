@@ -77,6 +77,7 @@
     <Compile Include="Model\ThFGDXParameter.cs" />
     <Compile Include="ParameterService\IndoorFanParameter.cs" />
     <Compile Include="Service\ThAirPortSizeCalculator.cs" />
+    <Compile Include="Service\ThAirSpeedCalculator.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
     <Compile Include="Service\ThMEPHAVCDataManager.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />

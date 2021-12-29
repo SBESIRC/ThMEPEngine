@@ -48,21 +48,6 @@ namespace TianHua.Hvac.UI.UI
             e.Cancel = true;
         }
 
-        private void tbTotalAirVolume_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.UpdateByTotalAirVolume();
-        }
-
-        private void tbAirPortNum_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.UpdateByAirPortNum();
-        }
-
-        private void tbSingleAirPortVolume_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            ViewModel.UpdateBySingleAirPortAirVolume();
-        }
-
         private void cbAirPortType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ViewModel.Parameter.AirPortType == "圆形风口")

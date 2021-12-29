@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.EditorInput;
 using ThMEPHVAC;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using System.Collections.Generic;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -54,7 +55,8 @@ namespace TianHua.Hvac.UI.Command
             using (var acadDb = AcadDatabase.Active())
             {
                 var spaceId = acadDb.ModelSpace.ObjectId;
-                spaceId.InsertBlockReference(FGLGLayer, FGLGBlkName, position, new Scale3d(1.0), rotatAngle);
+                var attrs = new Dictionary<string, string> { { "截面尺寸", "1000x400" },{ "风管编号","EA-01"},{ "风量","3000m3/h"} };
+                spaceId.InsertBlockReference(FGLGLayer, FGLGBlkName, position, new Scale3d(1.0), rotatAngle, attrs);
             }
         }
 

@@ -48,6 +48,7 @@ namespace ThMEPHVAC.Model
             {
                 airPortType = value;
                 RaisePropertyChanged("AirPortType");
+                UpdateAirportSize();
             }
         }
 
@@ -62,6 +63,7 @@ namespace ThMEPHVAC.Model
             {
                 totalAirVolume = value;
                 RaisePropertyChanged("TotalAirVolume");
+                CalculateSingleAirPortAirVolume();
             }
         }
 
@@ -76,6 +78,7 @@ namespace ThMEPHVAC.Model
             {
                 airPortNum = value;
                 RaisePropertyChanged("AirPortNum");
+                CalculateSingleAirPortAirVolume();
             }
         }
 
@@ -90,6 +93,8 @@ namespace ThMEPHVAC.Model
             {
                 singleAirPortAirVolume = value;
                 RaisePropertyChanged("SingleAirPortAirVolume");
+                UpdateAirSpeed();
+                UpdateAirportSize();
             }
         }
 
@@ -104,6 +109,7 @@ namespace ThMEPHVAC.Model
             {
                 length = value;
                 RaisePropertyChanged("Length");
+                UpdateAirSpeed();
             }
         }
 
@@ -118,6 +124,68 @@ namespace ThMEPHVAC.Model
             {
                 width = value;
                 RaisePropertyChanged("Width");
+                UpdateAirSpeed();
+            }
+        }
+        private string airSpeed = "0.0m/s";
+        public string AirSpeed
+        {
+            get
+            {
+                return airSpeed;
+            }
+            set
+            {
+                airSpeed = value;
+                RaisePropertyChanged("AirSpeed");
+            }
+        }
+
+        private void UpdateAirSpeed()
+        {
+            AirSpeed = CalculateAirSpeed();
+        }
+
+        private void UpdateAirportSize()
+        {
+            var size = ThMEPHAVCDataManager.CalculateAirPortSize(
+                 SingleAirPortAirVolume, AirPortType);
+            if (size != null)
+            {
+                Length = size.Item1;
+                Width = size.Item2;
+            }
+        }
+
+        private string CalculateAirSpeed()
+        {
+            double airSpeed = 0.0;
+            switch (airPortType)
+            {
+                case "下送风口":
+                case "下回风口":
+                case "侧送风口":
+                case "侧回风口":
+                case "方形散流器":
+                    if(Length>0.0 && Width>0.0 && SingleAirPortAirVolume>0.0)
+                    {
+                        airSpeed = ThAirSpeedCalculator.RecAirPortSpeed(SingleAirPortAirVolume, Length, Width);
+                    }
+                    break;
+                case "圆形风口":
+                    if(Length > 0.0 && SingleAirPortAirVolume > 0.0)
+                    {
+                        airSpeed = ThAirSpeedCalculator.CircleAirPortSpeed(SingleAirPortAirVolume, Length);
+                    }
+                    break;
+            }
+            return airSpeed.ToString("0.0")+"m/s";
+        }
+        private void CalculateSingleAirPortAirVolume()
+        {
+            if (AirPortNum != 0)
+            {
+                SingleAirPortAirVolume = TotalAirVolume / AirPortNum;
             }
         }
     }
