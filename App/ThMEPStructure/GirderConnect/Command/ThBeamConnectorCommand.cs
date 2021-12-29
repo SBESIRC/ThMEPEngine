@@ -62,6 +62,10 @@ namespace ThMEPStructure.GirderConnect.Command
                 ThBeamGeometryPreprocessor.Z0Curves(ref buildings);
                 var mainBuildings = buildings.OfType<Entity>().ToList();
 
+                //columns.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
+                //shearwalls.OfType<Entity>().ToList().CreateGroup(acdb.Database, 5);
+                //buildings.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
+
                 // 分组 
                 var columnGroupService = new ThGroupService(mainBuildings, columns);
                 var columnGroupDict = columnGroupService.Groups;

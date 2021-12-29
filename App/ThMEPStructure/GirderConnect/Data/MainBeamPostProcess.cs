@@ -33,7 +33,8 @@ namespace ThMEPStructure.GirderConnect.Data
                 lines.ForEach(line =>
                 {
                     line.Layer = BeamConfig.MainBeamLayerName;
-                    line.ColorIndex = (int)ColorIndex.BYLAYER;
+                    if (line.Length > 9000) { line.ColorIndex = 7; }
+                    else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
                     line.Linetype = "ByLayer";
                     acdb.ModelSpace.Add(line);
                 });

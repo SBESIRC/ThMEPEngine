@@ -10,7 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
 {
-    class LayerDealer
+    public class LayerDealer
     {
         /// <summary>
         /// 输出结果，转换结果作为次梁输入
