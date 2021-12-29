@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
+using AcHelper;
 using Linq2Acad;
-using CLI;
+using System.Linq;
 using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
 using ThMEPElectrical.FireAlarmArea.Command;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
-using ThMEPElectrical.AFAS.Command;
 using ThMEPElectrical.AFAS.Model;
 
 #if (ACAD2016 || ACAD2018)
+using CLI;
+using ThMEPElectrical.AFAS.Command;
 using ThMEPElectrical.FireAlarmDistance.Command;
 #endif
 
