@@ -324,7 +324,7 @@ namespace ThMEPHVAC.Command
             //根据房间的内部的闭合区域计算可以使用哪一种风机
             var oneAreaLoad = maxArea* roomUnitLoad;
             var fanCount = new Dictionary<string, int>();
-            bool haveMaxFan = !IndoorFanParameter.Instance.LayoutModel.MaxFanTypeIsAuto;
+            bool haveMaxFan = IndoorFanParameter.Instance.LayoutModel.MaxFanTypeIsAuto != EnumMaxFanNumber.Auto;
             var maxFanStr = IndoorFanParameter.Instance.LayoutModel.MaxFanType;
             bool isBreak = false;
             foreach (var item in _allFanLoad) 
@@ -343,7 +343,7 @@ namespace ThMEPHVAC.Command
         {
             //根据房间负荷计算风机
             var fanCount = new Dictionary<string, int>();
-            bool haveMaxFan = !IndoorFanParameter.Instance.LayoutModel.MaxFanTypeIsAuto;
+            bool haveMaxFan = IndoorFanParameter.Instance.LayoutModel.MaxFanTypeIsAuto != EnumMaxFanNumber.Auto;
             var maxFanStr = IndoorFanParameter.Instance.LayoutModel.MaxFanType;
             bool isBreak = false;
             foreach (var item in _allFanLoad)

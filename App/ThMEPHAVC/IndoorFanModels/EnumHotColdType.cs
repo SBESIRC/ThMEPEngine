@@ -12,4 +12,15 @@ namespace ThMEPHVAC.IndoorFanModels
         [Description("热量")]
         Hot = 2,
     }
+
+    /// <summary>
+    /// 风机最大型号
+    /// </summary>
+    public enum EnumMaxFanNumber 
+    {
+        [Description("自动")]
+        Auto = 1,
+        [Description("指定")]
+        Appoint = 2,
+    }
 }

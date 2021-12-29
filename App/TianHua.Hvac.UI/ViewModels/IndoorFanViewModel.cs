@@ -28,7 +28,7 @@ namespace TianHua.Hvac.UI.ViewModels
             indoorFanModel.HotColdType = EnumHotColdType.Cold;
             indoorFanModel.FanType = EnumFanType.FanCoilUnitTwoControls;
             indoorFanModel.AirReturnType = EnumAirReturnType.AirReturnPipe;
-            indoorFanModel.MaxFanTypeIsAuto = true;
+            indoorFanModel.MaxFanTypeIsAuto = EnumMaxFanNumber.Auto;
             indoorFanModel.CorrectionFactor = 1;
             _indoorFanFiles = new ObservableCollection<IndoorFanFile>();
             _fanTypeWorkingCodition = new ObservableCollection<WoringConditonBase>();
@@ -180,7 +180,7 @@ namespace TianHua.Hvac.UI.ViewModels
         /// <summary>
         /// 最大机组型号是否自动
         /// </summary>
-        public bool MaxFanTypeAuto
+        public EnumMaxFanNumber MaxFanType
         {
             get { return indoorFanModel.MaxFanTypeIsAuto; }
             set

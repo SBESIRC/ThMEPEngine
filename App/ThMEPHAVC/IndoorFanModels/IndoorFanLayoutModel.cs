@@ -36,7 +36,7 @@ namespace ThMEPHVAC.IndoorFanModels
         /// <summary>
         /// 最大风机型号自动
         /// </summary>
-        public bool MaxFanTypeIsAuto { get; set; }
+        public EnumMaxFanNumber MaxFanTypeIsAuto { get; set; }
         /// <summary>
         /// 指定的最大风机型号
         /// </summary>

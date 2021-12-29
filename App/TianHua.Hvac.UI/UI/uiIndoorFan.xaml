@@ -330,9 +330,13 @@
                 </StackPanel>
                 <Label Content="最大机组型号:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center"/>
                 <StackPanel Margin="10,0,0,0">
-                    <RadioButton Content="自动" Height="22" IsChecked="{Binding MaxFanTypeAuto,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}" GroupName="maxFanModel" VerticalContentAlignment="Center"/>
+                    <RadioButton Content="自动" Height="22" 
+                                 IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"
+                                 GroupName="maxFanModel" VerticalContentAlignment="Center"/>
                     <StackPanel Orientation="Horizontal" Height="22" VerticalAlignment="Center">
-                        <RadioButton Content="指定" x:Name="rBtnMax"  GroupName="maxFanModel" VerticalContentAlignment="Center"/>
+                        <RadioButton Content="指定" x:Name="rBtnMax" 
+                                     IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"
+                                     GroupName="maxFanModel" VerticalContentAlignment="Center"/>
                         <ComboBox Margin="10,0,0,0" IsEnabled="{Binding ElementName=rBtnMax,Path=IsChecked}" VerticalAlignment="Center" Height="22" Width="80"
                                   ItemsSource="{Binding LayoutMaxFanInfos}" DisplayMemberPath="FanNumber" 
                                   SelectedItem="{Binding LayoutMaxFan,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
