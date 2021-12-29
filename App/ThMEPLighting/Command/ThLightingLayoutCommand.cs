@@ -42,7 +42,7 @@ namespace ThMEPLighting.Command
                 {
                     ThAFASDataPass.Instance = new ThAFASDataPass();
 
-                    var selectPts = ThAFASUtils.GetFrameBlk();
+                    var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
                     if (selectPts.Count == 0)
                     {
                         return;
