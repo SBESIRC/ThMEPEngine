@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Model;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
@@ -22,8 +23,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         //public ThFireTelFixedPointLayoutService(List<ThGeometry> data, List<string> CleanBlkName, List<string> AvoidBlkName) :base(data, CleanBlkName, AvoidBlkName)
         //{
         //}
-        protected ThDataQueryService DataQueryWorker;
-        public ThFireTelFixedPointLayoutService(ThDataQueryService dataQueryWorker)
+        protected ThAFASFixDataQueryService DataQueryWorker;
+        public ThFireTelFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker)
         {
             DataQueryWorker = dataQueryWorker;
         }

@@ -18,6 +18,7 @@ using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
@@ -81,7 +82,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 ThAFASUtils.TransformToZero(transformer, geos);
 
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。
-                var dataQuery = new ThDataQueryService(geos, avoidBlkName);
+                var dataQuery = new ThAFASFixDataQueryService(geos, avoidBlkName);
                 dataQuery.ExtendEquipment(cleanBlkName, _scale);
                 dataQuery.AddAvoidence();
                 dataQuery.MapGeometry();

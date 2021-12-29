@@ -16,13 +16,14 @@ using ThMEPEngineCore.IO;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
+
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
     public class ThDisplayDeviceFixedPointLayoutService
     {
         public BuildingType BuildingType;
 
-        protected ThDataQueryService DataQueryWorker;
+        protected ThAFASFixDataQueryService DataQueryWorker;
 
 
         //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
@@ -31,7 +32,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         //{
         //}
 
-        public ThDisplayDeviceFixedPointLayoutService(ThDataQueryService dataQueryWorker, BuildingType buildingType )
+        public ThDisplayDeviceFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker, BuildingType buildingType )
         {
             DataQueryWorker = dataQueryWorker;
             BuildingType = buildingType;

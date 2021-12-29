@@ -31,6 +31,7 @@
   <ItemGroup>
     <Compile Include="AFAS\Command\ThAFASCommand.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASBusinessDataSetFactory.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataQueryService.cs" />
     <Compile Include="AFAS\Model\ThAFASDataPass.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASDataSetFactoryNew.cs" />
@@ -38,6 +39,7 @@
     <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
     <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />
+    <Compile Include="AFAS\Utils\ThAFASSelectFrameUtil.cs" />
     <Compile Include="AFAS\Utils\ThAFASUtils.cs" />
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="BlockConvert\ThBConvertBlockReferenceDataExtension.cs" />
@@ -133,6 +135,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
+    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactoryNew.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
@@ -166,7 +169,7 @@
     <Compile Include="FireAlarmFixLayout\Data\BuildingType.cs" />
     <Compile Include="AFAS\Data\ThAFASPlaceCoverageExtractor.cs" />
     <Compile Include="AFAS\Data\ThFireAlarmBlkExtractor.cs" />
-    <Compile Include="FireAlarmFixLayout\Logic\ThDataQueryService.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixDataQueryService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireTelFixedPointLayoutService.cs" />

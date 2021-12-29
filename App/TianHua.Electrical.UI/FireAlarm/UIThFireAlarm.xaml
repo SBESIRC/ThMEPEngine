@@ -13,7 +13,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <local:BeamConverter x:Key="BeamConverter"/>
-            <local:LayoutConverter x:Key="LayoutConverter"/>
+            <!--<local:LayoutConverter x:Key="LayoutConverter"/>-->
         </ResourceDictionary>
     </Window.Resources>
     <Grid>

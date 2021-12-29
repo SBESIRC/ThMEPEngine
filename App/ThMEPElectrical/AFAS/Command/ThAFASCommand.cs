@@ -34,7 +34,7 @@ namespace ThMEPElectrical.AFAS.Command
             {
                 ThAFASDataPass.Instance = new ThAFASDataPass();
 
-                var selectPts = ThAFASUtils.GetFrameBlk();
+                var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
                 if (selectPts.Count == 0)
                 {
                     return;
@@ -71,44 +71,44 @@ namespace ThMEPElectrical.AFAS.Command
                     var layout = FireAlarmSetting.Instance.LayoutItemList[i];
                     switch (layout)
                     {
-                        case 0:
+                        case (int)ThFaCommon.LayoutItemType.Smoke:
                             {
                                 ////加\n自动回车 否则用户要敲回车键。
                                 ////CommandHandlerBase.ExecuteFromCommandLine(false, "THFASmoke") 是异步，这里不适用
                                 ////sendCommand同步调用。cmd cammand flag需要是session。
-                                document.SendCommand("THFASmoke" + "\n"); 
+                                document.SendCommand("THFASmoke" + "\n");
                                 break;
                             }
-                        case 1:
+                        case (int)ThFaCommon.LayoutItemType.Broadcast:
                             {
-                               
+
                                 //Active.Editor.Command(new Object[] { "THFABroadcast" });
                                 document.SendCommand("THFABroadcast" + "\n");
                                 break;
                             }
-                        case 2:
+                        case (int)ThFaCommon.LayoutItemType.Display:
                             {
                                 document.SendCommand("THFADisplay" + "\n");
                                 break;
                             }
-                        case 3:
+                        case (int)ThFaCommon.LayoutItemType.Tel:
                             {
                                 document.SendCommand("THFATel" + "\n");
                                 break;
                             }
-                        case 4:
+                        case (int)ThFaCommon.LayoutItemType.Gas:
                             {
                                 document.SendCommand("THFAGas" + "\n");
                                 break;
                             }
 
-                        case 5:
+                        case (int)ThFaCommon.LayoutItemType.ManualAlarm:
                             {
                                 document.SendCommand("THFAManualAlarm" + "\n");
                                 break;
                             }
 
-                        case 6:
+                        case (int)ThFaCommon.LayoutItemType.Monitor:
                             {
                                 document.SendCommand("THFAMonitor" + "\n");
                                 break;

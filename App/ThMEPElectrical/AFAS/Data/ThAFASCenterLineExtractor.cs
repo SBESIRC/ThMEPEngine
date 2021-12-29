@@ -75,20 +75,6 @@ namespace ThMEPElectrical.AFAS.Data
             return polys.Select(p => p.TessellatePolylineWithArc(length)).ToList();
         }
 
-        private DBObjectCollection Clip(Entity polygon, DBObjectCollection objs, bool inverted = false)
-        {
-            // Clip的结果中可能有点（DBPoint)，这里可以忽略点
-            var results = new DBObjectCollection();
-            if (polygon is Polyline polyline)
-            {
-                results = ThCADCoreNTSGeometryClipper.Clip(polyline, objs, inverted);
-            }
-            else if (polygon is MPolygon mPolygon)
-            {
-                results = ThCADCoreNTSGeometryClipper.Clip(mPolygon, objs, inverted);
-            }
-            return results.OfType<Curve>().ToCollection();
-        }
 
         public void Transform()
         {

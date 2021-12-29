@@ -120,13 +120,24 @@ namespace ThMEPElectrical.AFAS
         //烟温感（0）广播（1）楼层显示器（2）消防电话（3）可燃气体探测（4）手动报警按钮（5）防火门监控（6）");
         public static Dictionary<int, List<string>> LayoutBlkList = new Dictionary<int, List<string>>()
         {
-            {0, new List<string>() { BlkName_Smoke, BlkName_Heat, BlkName_Smoke_ExplosionProf, BlkName_Heat_ExplosionProf } },
-            {1, new List<string>() { BlkName_Broadcast_Ceiling, BlkName_Broadcast_Wall } },
-            {2, new List<string>() { BlkName_Display_District, BlkName_Display_Floor } },
-            {3, new List<string>() { BlkName_FireTel } },
-            {4, new List<string>() { BlkName_Gas, BlkName_Gas_ExplosionProf } },
-            {5, new List<string>() { BlkName_ManualAlarm, BlkName_SoundLightAlarm } },
-            {6, new List<string>() { BlkName_Monitor } },
+            {(int)LayoutItemType.Smoke , new List<string>() { BlkName_Smoke, BlkName_Heat, BlkName_Smoke_ExplosionProf, BlkName_Heat_ExplosionProf } },
+            {(int)1, new List<string>() { BlkName_Broadcast_Ceiling, BlkName_Broadcast_Wall } },
+            {(int)2, new List<string>() { BlkName_Display_District, BlkName_Display_Floor } },
+            {(int)3, new List<string>() { BlkName_FireTel } },
+            {(int)4, new List<string>() { BlkName_Gas, BlkName_Gas_ExplosionProf } },
+            {(int)5, new List<string>() { BlkName_ManualAlarm, BlkName_SoundLightAlarm } },
+            {(int)6, new List<string>() { BlkName_Monitor } },
         };
+
+        public enum LayoutItemType
+        {
+            Smoke = 0,
+            Broadcast = 1,
+            Display = 2,
+            Tel= 3,
+            Gas= 4,
+            ManualAlarm= 5,
+            Monitor= 6,
+        }
     }
 }

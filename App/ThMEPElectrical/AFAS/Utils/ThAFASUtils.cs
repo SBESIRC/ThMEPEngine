@@ -50,173 +50,28 @@ namespace ThMEPElectrical.AFAS.Utils
             vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
         }
 
-        public static Point3dCollection GetFrame()
+
+        public static List<ThGeometry> GetAreaLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
         {
-            Point3dCollection pts = new Point3dCollection();
+
+            var geos = new List<ThGeometry>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
 
-                var frame = ThMEPEngineCore.CAD.ThWindowInteraction.GetPolyline(
-                    PointCollector.Shape.Window, new List<string> { "请框选一个范围" });
-
-                if (frame.Area > 1e-4)
+                var datasetFactory = new ThAFASAreaDataSetFactory()
                 {
-                    pts = frame.Vertices();
-                }
-
-                return pts;
-            }
-        }
-
-        public static Point3dCollection GetFrameBlk()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                Point3dCollection pts = new Point3dCollection();
-
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
+                    ReferBeam = referBeam,
+                    WallThick = wallThick,
+                    NeedDetective = needDetective,
+                    BlkNameList = extractBlkList,
                 };
-                var dxfNames = new string[]
-                {
-                RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return pts;
-                }
+                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+                geos.AddRange(dataset.Container);
 
-
-                List<BlockReference> frameLst = new List<BlockReference>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
-                }
-
-                List<Polyline> frames = new List<Polyline>();
-                foreach (var frameBlock in frameLst)
-                {
-                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame != null)
-                    {
-                        frames.Add(frame);
-                    }
-                }
-
-                var frameL = frames.OrderByDescending(x => x.Area).FirstOrDefault();
-
-                if (frameL != null && frameL.Area > 10)
-                {
-                    frameL = ProcessFrame(frameL);
-                }
-                if (frameL != null && frameL.Area > 10)
-                {
-                    pts = frameL.Vertices();
-                }
-
-                return pts;
             }
+
+            return geos;
         }
-
-        public static Point3dCollection GetRoomFrame()
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                Point3dCollection pts = new Point3dCollection();
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "请选择框线",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return pts;
-                }
-
-                var frameList = new List<Polyline>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    //获取外包框
-                    var frameTemp = acdb.Element<Polyline>(obj);
-                    var nFrame = ProcessFrame(frameTemp);
-                    if (nFrame.Area < 1)
-                    {
-                        continue;
-                    }
-
-                    frameList.Add(nFrame);
-                }
-                var frame = frameList.OrderByDescending(x => x.Area).First();
-                pts = frame.Vertices();
-                return pts;
-            }
-        }
-
-        private static Polyline ProcessFrame(Polyline frame)
-        {
-            Polyline nFrame = null;
-            Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
-            if (nFrameNormal.Area > 10)
-            {
-                nFrameNormal = nFrameNormal.DPSimplify(1);
-                nFrame = nFrameNormal;
-            }
-            return nFrame;
-        }
-
-        private static List<Entity> GetBlockInfo(BlockReference blockReference)
-        {
-            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var results = new List<Entity>();
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                foreach (var objId in blockTableRecord)
-                {
-                    var dbObj = acadDatabase.Element<Entity>(objId).Clone() as Entity;
-                    dbObj.TransformBy(matrix);
-                    results.Add(dbObj);
-                }
-                return results;
-            }
-        }
-
-        //public static List<ThGeometry> GetAreaLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
-        //{
-
-        //    var geos = new List<ThGeometry>();
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-
-        //        var datasetFactory = new ThAFASAreaDataSetFactory()
-        //        {
-        //            ReferBeam = referBeam,
-        //            WallThick = wallThick,
-        //            NeedDetective = needDetective,
-        //            BlkNameList = extractBlkList,
-        //        };
-        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-        //        geos.AddRange(dataset.Container);
-
-        //    }
-
-        //    return geos;
-        //}
 
         //public static List<ThGeometry> GetFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
         //{
@@ -394,32 +249,46 @@ namespace ThMEPElectrical.AFAS.Utils
                 return geos;
             }
         }
-
         /// <summary>
-        /// 将数据转回原点。同时返回transformer
+        /// for test get all data
         /// </summary>
-        /// <param name="geos"></param>
+        /// <param name="dataPass"></param>
+        /// <param name="extractBlkList"></param>
+        /// <param name="referBeam"></param>
+        /// <param name="wallThick"></param>
         /// <returns></returns>
-        public static ThMEPOriginTransformer TransformToOrig(Point3dCollection pts, List<ThGeometry> geos)
+        public static List<ThGeometry> GetAllData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThick)
         {
-            ThMEPOriginTransformer transformer = null;
-
-            if (pts.Count > 0)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                transformer = GetTransformer(pts);
-            }
+                var geos = new List<ThGeometry>();
+                var extractors = dataPass.Extractors;
+                var selectPts = dataPass.SelectPts;
+                var transformer = dataPass.Transformer;
 
-            foreach (var o in geos)
-            {
-                if (o.Boundary != null)
+                ///////////处理原始建筑数据,已转回原位置附近////////
+                var localDataFactory = new ThAFASAllSetTestDataFactory ()
                 {
-                    transformer.Transform(o.Boundary);
-                }
+                    ReferBeam = referBeam,
+                    WallThick = wallThick,
+                    InputExtractors = extractors,
+                };
+                localDataFactory.SetTransformer(transformer);
+                var localdataset = localDataFactory.Create(acadDatabase.Database, selectPts);
+                geos.AddRange(localdataset.Container);
+
+                ///////////获取图块数据,已转回原位置附近////////
+                var previousEquipmentData = new ThAFASBusinessDataSetFactory()
+                {
+                    BlkNameList = extractBlkList,
+                    InputExtractors = extractors,
+                };
+                previousEquipmentData.SetTransformer(transformer);
+                var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
+                geos.AddRange(localEquipmentData.Container);
+
+                return geos;
             }
-
-            geos.ProjectOntoXYPlane();
-
-            return transformer;
         }
 
         public static void TransformToZero(ThMEPOriginTransformer transformer, List<ThGeometry> geos)
@@ -470,13 +339,6 @@ namespace ThMEPElectrical.AFAS.Utils
             extend = extend * scale / 2;
             return extend;
         }
-
-        //public static List<Polyline> ExtendPriority(List<Polyline> AvoidEquipment, List<string> layoutBlkNameList, double scale)
-        //{
-        //    var priorityExtend = GetPriorityExtendValue(layoutBlkNameList, scale);
-        //    var extendAvoid = ExtendPriority(AvoidEquipment, priorityExtend);
-        //    return extendAvoid;
-        //}
 
         public static List<Polyline> ExtendPriority(List<Polyline> AvoidEquipment, double priorityExtend)
         {
@@ -568,11 +430,11 @@ namespace ThMEPElectrical.AFAS.Utils
             {
                 options.Keywords.Add(item.Key, item.Value.Item1, item.Value.Item2);
             }
-            if (defualt !="")
+            if (defualt != "")
             {
                 options.Keywords.Default = defualt;
             }
-            
+
             //options.Keywords.Add(strResident, "R", "住宅(R)");
             //options.Keywords.Add(strPublic, "P", "公建(P)");
 
@@ -584,5 +446,6 @@ namespace ThMEPElectrical.AFAS.Utils
 
             return ans;
         }
+
     }
 }

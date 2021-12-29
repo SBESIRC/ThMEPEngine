@@ -24,9 +24,9 @@ using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
 
-namespace ThMEPElectrical.FireAlarmFixLayout.Logic
+namespace ThMEPElectrical.FireAlarmFixLayout.Data
 {
-    public class ThDataQueryService
+    public class ThAFASFixDataQueryService
     {
         ///////input
         private List<ThGeometry> Data { get; set; } = new List<ThGeometry>();
@@ -44,6 +44,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> FireProofs { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> Railings { get; private set; } = new List<ThGeometry>();
 
         ///////处理数据
         public List<ThGeometry> Avoidence { get; private set; } = new List<ThGeometry>();
@@ -59,7 +60,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         public List<RoomTableTree> RoomTableConfig = new List<RoomTableTree>();  //房间配置表
         //public List<List<string>> MonitorRoomNameMap = new List<List<string>>();       
 
-        public ThDataQueryService(List<ThGeometry> data,  List<string> avoidBlkNameList)
+        public ThAFASFixDataQueryService(List<ThGeometry> data, List<string> avoidBlkNameList)
         {
             Data = data;
             //CleanBlkName = cleanBlkName;
@@ -79,23 +80,23 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
             for (int i = 0; i < FireAparts.Count; ++i)
                 FireApartMap.Add(FireAparts[i].Properties[ThExtractorPropertyNameManager.IdPropertyName].ToString());
-
         }
-
 
         protected void PrepareData()
         {
-            DoorOpenings = QueryCategory(BuiltInCategory.DoorOpening.ToString());
-            Storeys = QueryCategory(BuiltInCategory.StoreyBorder.ToString());
-            Columns = QueryCategory(BuiltInCategory.Column.ToString());
-            Shearwalls = QueryCategory(BuiltInCategory.ShearWall.ToString());
-            FireAparts = QueryCategory(BuiltInCategory.FireApart.ToString());
-            ArchitectureWalls = QueryCategory(BuiltInCategory.ArchitectureWall.ToString());
-            Windows = QueryCategory(BuiltInCategory.Window.ToString());
-            Rooms = QueryCategory(BuiltInCategory.Room.ToString());
-            Holes = QueryCategory(BuiltInCategory.Hole.ToString());
-            FireProofs = QueryCategory(BuiltInCategory.LaneLine.ToString());
-            var equipments = QueryCategory(BuiltInCategory.Equipment.ToString());
+            DoorOpenings = ThAFASUtils.QueryCategory(Data, BuiltInCategory.DoorOpening.ToString());
+            Storeys = ThAFASUtils.QueryCategory(Data, BuiltInCategory.StoreyBorder.ToString());
+            Columns = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Column.ToString());
+            Shearwalls = ThAFASUtils.QueryCategory(Data, BuiltInCategory.ShearWall.ToString());
+            FireAparts = ThAFASUtils.QueryCategory(Data, BuiltInCategory.FireApart.ToString());
+            ArchitectureWalls = ThAFASUtils.QueryCategory(Data, BuiltInCategory.ArchitectureWall.ToString());
+            Windows = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Window.ToString());
+            Rooms = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Room.ToString());
+            Holes = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Hole.ToString());
+            FireProofs = ThAFASUtils.QueryCategory(Data, BuiltInCategory.FireproofShutter.ToString());
+            Railings = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Railing.ToString());
+
+            var equipments = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Equipment.ToString());
             // CleanEquipments = equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
             AvoidEquipments = equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
             //Avoidence.AddRange(DoorOpenings);
@@ -123,6 +124,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             Avoidence.AddRange(DoorOpenings);
             Avoidence.AddRange(Windows);
             Avoidence.AddRange(FireProofs);
+            Avoidence.AddRange(Railings);
             Avoidence.AddRange(AvoidEquipments);
         }
 
@@ -158,18 +160,18 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             ThAFASUtils.ExtendPriority(AvoidEquipments, priorityExtend);
         }
 
-        private List<ThGeometry> QueryCategory(string category)
-        {
-            var result = new List<ThGeometry>();
-            foreach (ThGeometry geo in Data)
-            {
-                if (geo.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString() == category)
-                {
-                    result.Add(geo);
-                }
-            }
-            return result;
-        }
+        //private List<ThGeometry> QueryCategory(string category)
+        //{
+        //    var result = new List<ThGeometry>();
+        //    foreach (ThGeometry geo in Data)
+        //    {
+        //        if (geo.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString() == category)
+        //        {
+        //            result.Add(geo);
+        //        }
+        //    }
+        //    return result;
+        //}
         public List<ThGeometry> GetFireDoors()
         {
             return DoorOpenings
@@ -401,16 +403,17 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         public void Print()
         {
-            DoorOpenings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
             Storeys.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Storeys", 2));
-            Columns.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
-            Shearwalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 0));
             FireAparts.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireApart", 112));
-            ArchitectureWalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0archWall", 3));
+            ArchitectureWalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0archWall", 1));
+            Shearwalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 3));
+            Columns.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
             Windows.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Window", 4));
-            Rooms.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0room", 2));
-            Holes.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Hole", 5));
-            FireProofs.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireProofs", 5));
+            Rooms.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0room", 30));
+            DoorOpenings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
+            FireProofs.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0FireProofs", 4));
+            Railings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Railings", 4));
+            Holes.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Hole", 150));
             AvoidEquipments.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Equipment", 152));
         }
         ///// <summary>

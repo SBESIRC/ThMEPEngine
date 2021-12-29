@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 
 using AcHelper;
-
+using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.AFAS.Command;
 
@@ -103,31 +103,31 @@ namespace TianHua.Electrical.UI.FireAlarm
 
             if (localVM.LayoutSmoke == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(0);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Smoke);
             }
-            if (localVM.LayoutBroadcast  == true)
+            if (localVM.LayoutBroadcast == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(1);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Broadcast);
             }
-            if (localVM.LayoutDisplay  == true)
+            if (localVM.LayoutDisplay == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(2);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
             }
             if (localVM.LayoutTel == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(3);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Tel);
             }
-            if (localVM.LayoutGas== true)
+            if (localVM.LayoutGas == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(4);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Gas);
             }
-            if (localVM.LayoutManualAlart  == true)
+            if (localVM.LayoutManualAlart == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(5);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);
             }
             if (localVM.LayoutMonitor == true)
             {
-                FireAlarmSetting.Instance.LayoutItemList.Add(6);
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Monitor);
             }
 
             FireAlarmSetting.Instance.LayoutItemList = FireAlarmSetting.Instance.LayoutItemList.OrderBy(x => x).ToList();
@@ -154,22 +154,22 @@ namespace TianHua.Electrical.UI.FireAlarm
         }
     }
 
-    public class LayoutConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            LayoutItemType s = (LayoutItemType)value;
-            return s == (LayoutItemType)int.Parse(parameter.ToString());
-        }
+    //public class LayoutConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        LayoutItemType s = (LayoutItemType)value;
+    //        return s == (LayoutItemType)int.Parse(parameter.ToString());
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            bool isChecked = (bool)value;
-            if (!isChecked)
-            {
-                return null;
-            }
-            return (LayoutItemType)int.Parse(parameter.ToString());
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        bool isChecked = (bool)value;
+    //        if (!isChecked)
+    //        {
+    //            return null;
+    //        }
+    //        return (LayoutItemType)int.Parse(parameter.ToString());
+    //    }
+    //}
 }

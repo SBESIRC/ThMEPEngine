@@ -367,16 +367,16 @@ namespace ThMEPElectrical.AFAS.ViewModel
 
     }
 
-    public enum LayoutItemType
-    {
-        Smoke = 0,
-        Broadcast = 1,
-        FloorDisplay = 2,
-        FireTel = 3,
-        Gas = 4,
-        ManualAlarm = 5,
-        FireProofMonitor = 6,
-    }
+    //public enum LayoutItemType
+    //{
+    //    Smoke = 0,
+    //    Broadcast = 1,
+    //    FloorDisplay = 2,
+    //    FireTel = 3,
+    //    Gas = 4,
+    //    ManualAlarm = 5,
+    //    FireProofMonitor = 6,
+    //}
 
     public enum BroadcastLayoutType
     {

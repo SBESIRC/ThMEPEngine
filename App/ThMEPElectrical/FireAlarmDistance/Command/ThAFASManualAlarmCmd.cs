@@ -58,7 +58,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
         public void ThFaManualAlarmExecute()
         {
-            using (var doclock = Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var transformer = ThAFASDataPass.Instance.Transformer;
@@ -84,7 +84,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 var data = new ThAFASDistanceDataQueryService(geos, avoidBlkName);
                 data.ExtendPriority(cleanBlkName, _scale);
                 data.FilterBeam();
-                data.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
+                data.ProcessRoomPlacementLabel(ThFaDistCommon.ManualAlartTag);
 
                 //--------------布置手动报警
                 var geojson = ThGeoOutput.Output(data.Data);

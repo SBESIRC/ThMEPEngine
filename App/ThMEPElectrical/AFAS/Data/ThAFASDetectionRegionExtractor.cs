@@ -4,6 +4,8 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
@@ -83,6 +85,32 @@ namespace ThMEPElectrical.AFAS.Data
             var poly = pts.CreatePolyline();
             DetectionRegion = cmd.DivideRoomWithDetectionRegion(poly);
             //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
+        }
+
+        public void Fix()
+        {
+            var newItems = new List<Polyline>();
+
+            for (int i = DetectionRegion.Count - 1; i >= 0; i--)
+            {
+                var detect = DetectionRegion[i];
+                Polyline framePolyline = new Polyline();
+                if (detect is Polyline pl)
+                {
+                    framePolyline = pl;
+                }
+                else if (detect is MPolygon mpl)
+                {
+                    framePolyline = mpl.Shell();
+
+                }
+
+                var plList = ThMEPFrameService. FixDuplicatePointPolyline(framePolyline);
+                newItems.AddRange(plList);
+            }
+
+            DetectionRegion.Clear();
+            DetectionRegion.AddRange(newItems);
         }
 
         public void Print(Database database)

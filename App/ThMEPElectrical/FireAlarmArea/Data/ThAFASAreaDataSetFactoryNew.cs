@@ -29,7 +29,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
         public bool NeedDetective { get; set; } = false;
         public bool ReferBeam { get; set; } = true;
         public double WallThick { get; set; } = 100;
-        public List<ThExtractorBase > InputExtractors { get; set; }
+        public List<ThExtractorBase> InputExtractors { get; set; }
         /////output
         private List<ThGeometry> Geos { get; set; }
 
@@ -127,6 +127,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             };
 
             detectionRegionExtract.Extract(null, new Point3dCollection());
+            detectionRegionExtract.Fix();
 
             return detectionRegionExtract;
         }

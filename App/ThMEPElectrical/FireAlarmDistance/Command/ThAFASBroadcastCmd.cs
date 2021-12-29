@@ -60,7 +60,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
         public void ThFABroadcastExecute()
         {
-            using (var doclock = Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var transformer = ThAFASDataPass.Instance.Transformer;

@@ -15,6 +15,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.IO.ExcelService;
 
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
@@ -34,9 +35,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         //{
         //}
 
-        protected ThDataQueryService DataQueryWorker;
+        protected ThAFASFixDataQueryService DataQueryWorker;
 
-        public ThFireProofMonitorFixedPointLayoutService(ThDataQueryService dataQueryWorker)
+        public ThFireProofMonitorFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker)
         {
             DataQueryWorker = dataQueryWorker;
         }

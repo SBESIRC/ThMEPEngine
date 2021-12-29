@@ -60,7 +60,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             var fireProofExtractor = InputExtractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
             var holeExtractor = InputExtractors.Where(o => o is ThAFASHoleExtractor).First() as ThAFASHoleExtractor;
             var centerLineExtractor = InputExtractors.Where(o => o is ThAFASCenterLineExtractor).First() as ThAFASCenterLineExtractor;
-
+            var railingExtractor = InputExtractors.Where(o => o is ThAFASRailingExtractor).First() as ThAFASRailingExtractor;
+            
             var extractors = new List<ThExtractorBase>()
                             {
                                 archiWallExtractor,
@@ -72,6 +73,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
                                 doorOpeningExtractor,
                                 fireProofExtractor,
                                 holeExtractor,
+                                railingExtractor,
                                 centerLineExtractor
                             };
 
