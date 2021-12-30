@@ -342,6 +342,8 @@
     <Image Include="Images\THSNJ_light_large.ico" />
     <Image Include="Images\THSPM_light_small.ico" />    
     <Image Include="Images\THSPM_light_large.ico" />
+    <Image Include="Images\THXHSBH_light_small.ico" />    
+    <Image Include="Images\THXHSBH_light_large.ico" />
     <Image Include="Images\THALIGN_bottom_light_small.ico" />
     <Image Include="Images\THALIGN_bottom_light_large.ico" />
     <Image Include="Images\THALIGN_horizontal_light_small.ico" />
