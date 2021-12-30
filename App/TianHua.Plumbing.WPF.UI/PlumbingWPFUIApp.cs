@@ -292,8 +292,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(SprinklerConnectionUI.Instance);
         }
 
-        [CommandMethod("TIANHUACAD", "THPTLGZG", CommandFlags.Modal)]
-        public void THSprinkConnCmd()
+        [CommandMethod("TIANHUACAD", "-THPTLGBZ", CommandFlags.Modal)]
+        public void THSprinkConnCLICmd()
         {
             var cmd = new ThSprinklerConnectCmd_test();
             ThSprinklerConnectCmd_test.BlockNameDict =

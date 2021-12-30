@@ -16,7 +16,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
         public bool DrawPipe { get; set; } = true;
         public ThSprinklerConnectUICmd()
         {
-            ActionName = "喷头连管布置";
+            ActionName = "绘制主管";
             CommandName = "THPTLGBZ";
         }
         public void Dispose()
@@ -64,7 +64,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 Active.Editor.WriteMessage($"请绘制连接支管的主管");
                 Active.Document.SendStringToExecute("_Polyline ", true, false, true);
             }
-
         }
     }
 }

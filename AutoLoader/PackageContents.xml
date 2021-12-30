@@ -466,6 +466,7 @@
                 <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
+                <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -493,6 +494,7 @@
                 <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
+                <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -520,6 +522,7 @@
                 <Command Local="THFJKX" Global="THFJKX" />
                 <Command Local="THXHSBH" Global="THXHSBH" />
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
+                <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
             </Commands>
         </ComponentEntry>
     </Components>

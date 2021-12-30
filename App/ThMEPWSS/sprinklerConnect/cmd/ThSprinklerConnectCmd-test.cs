@@ -30,8 +30,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
         public string LayoutDirection { get; set; }
         public ThSprinklerConnectCmd_test()
         {
-            ActionName = "喷头连管布置";
-            CommandName = "THPTLGBZ";            
+            ActionName = "生成支管";
+            CommandName = "THPTLGBZ";       
         }
 
         public override void SubExecute()
