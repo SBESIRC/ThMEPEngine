@@ -10,6 +10,10 @@ panels:
         items:
           - text: "专业切换"
             attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "帮助文档"
+            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
   - UID: "pnlPRECONDITION"
     name: "PRECONDITION"

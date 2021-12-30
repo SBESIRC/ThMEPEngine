@@ -1,12 +1,13 @@
 ﻿using System;
 using AcHelper;
 using System.IO;
+using ThMEPIdentity;
 using ThCADExtension;
+using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using ThMEPIdentity;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -152,6 +153,12 @@ namespace TianHua.AutoCAD.ThCui
                 default:
                     return;
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMEPHELP", CommandFlags.Modal)]
+        public void ThMEPHelp()
+        {
+            Process.Start(ThCADCommon.OnlineHelpUrl);
         }
 
         private void LoadPartialCui(bool bLoad = true)

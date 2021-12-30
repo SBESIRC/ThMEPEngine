@@ -25,7 +25,6 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -34,7 +33,6 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -43,7 +41,6 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
     </Components>
