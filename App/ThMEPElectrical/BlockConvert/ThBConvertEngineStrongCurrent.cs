@@ -296,6 +296,10 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var position = srcBlockData.Position;
                 double rotation = srcBlockData.Rotation;
+                if (srcBlockData.Normal == new Vector3d(0, 0, -1))
+                {
+                    rotation = -rotation;
+                }
                 if (srcBlockData.EffectiveName.Contains("潜水泵"))
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));

@@ -14,6 +14,7 @@ namespace ThCADExtension
         public string EffectiveName { get; set; }
         public Database Database { get; set; }
         public ObjectId ObjId { get; set; }
+        public Vector3d Normal { get; set; }
         public Matrix3d OwnerSpace2WCS { get; set; }
         public Matrix3d BlockTransform { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
@@ -24,6 +25,7 @@ namespace ThCADExtension
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
+            Normal = blockRef.GetBlockNormal();
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();
@@ -38,6 +40,7 @@ namespace ThCADExtension
             Database = blockRef.Database;
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
+            Normal = blockRef.GetBlockNormal();
             ScaleFactors = blockRef.GetScaleFactors();
             BlockLayer = blockRef.GetBlockLayer();
             EffectiveName = blockRef.GetBlockName();

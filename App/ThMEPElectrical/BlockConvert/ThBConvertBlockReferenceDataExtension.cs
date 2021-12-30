@@ -1,12 +1,16 @@
-﻿using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+
+using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -65,6 +69,59 @@ namespace ThMEPElectrical.BlockConvert
                 return entities.GeometricExtents().ToRectangle();
             }
             return new Polyline();
+        }
+
+        public static Point3d GetBottomCenter(this ThBlockReferenceData data)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(data.Database))
+            {
+                var entities = new DBObjectCollection();
+                var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                blkref.ExplodeWithVisible(entities);
+                var name = data.EffectiveName;
+                if (name.Contains("室内消火栓平面"))
+                {
+                    var lines = new List<Line>();
+                    lines = entities.OfType<Line>()
+                        .Where(e => e.Layer == "0")
+                        .ToList();
+                    lines = lines.OrderByDescending(o => o.Length).ToList();
+                    for (int i = 0; i < lines.Count; i++)
+                    {
+                        var distance = lines[i].DistanceTo(data.Position, false);
+                        if (distance < 1.0)
+                        {
+                            return GetLineCenter(lines[i].StartPoint, lines[i].EndPoint);
+                        }
+                    }
+                }
+                else if (name.Contains("E-BFAS610"))
+                {
+                    var centerLine = entities.OfType<Line>().Where(line => line.Layer.Contains("E-UNIV-EL")).First();
+                    var centerPtTidal = GetLineCenter(centerLine.StartPoint, centerLine.EndPoint);
+                    var pline = entities.OfType<Polyline>().Where(line => line.Layer.Contains("0")).First();
+                    var outlines = new DBObjectCollection();
+                    pline.Explode(outlines);
+                    var closeDist = -1.0;
+                    var closePt = new Point3d();
+                    outlines.OfType<Line>().ForEach(line =>
+                    {
+                        var lineCenter = GetLineCenter(line.StartPoint, line.EndPoint);
+                        var distance = centerPtTidal.DistanceTo(lineCenter);
+                        if (closeDist < 0 || distance < closeDist + 1.0)
+                        {
+                            closeDist = distance;
+                            closePt = lineCenter;
+                        }
+                    });
+                    return closePt;
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+                return new Point3d();
+            }
         }
 
         public static void AdjustLoadLabel(this BlockReference targetBlock)
@@ -152,6 +209,11 @@ namespace ThMEPElectrical.BlockConvert
                     }
                 }
             }
+        }
+
+        private static Point3d GetLineCenter(Point3d first, Point3d second)
+        {
+            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, 0);
         }
     }
 }

@@ -33,6 +33,20 @@ namespace ThCADExtension
                 return 0.0;
         }
 
+        /// <summary>
+        /// 获取块引用的正方向
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public static Vector3d GetBlockNormal(this ObjectId id)
+        {
+            BlockReference bref = id.GetObject(OpenMode.ForRead) as BlockReference;
+            if (bref != null)//如果是块参照
+                return bref.Normal;
+            else
+                return new Vector3d(0, 0, 1);
+        }
+
         public static Point3d GetBlockPosition(this ObjectId id)
         {
             BlockReference bref = id.GetObject(OpenMode.ForRead) as BlockReference;
