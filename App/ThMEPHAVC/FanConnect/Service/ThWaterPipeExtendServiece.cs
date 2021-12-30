@@ -12,6 +12,7 @@ using ThCADExtension;
 using Linq2Acad;
 using ThMEPHVAC.FanLayout.Service;
 using ThMEPEngineCore.CAD;
+using ThMEPHVAC.FanConnect.Command;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -118,7 +119,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                     {
                                         var cline = currentExLines[i];
                                         var pline = parentExLines[i];
-                                        var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth);
+                                        var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth);
                                         cline.StartPoint = closPt[0];
                                         node.Item.ExPoint.Add(closPt[0]);
                                         if (node.Item.IsConnect)
@@ -141,7 +142,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 {
                                                     var cline = currentExLines[i];
                                                     var pline = parentExLines[i];
-                                                    var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth)[0];
+                                                    var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
                                                     cline.StartPoint = closPt;
                                                     node.Item.ExPoint.Add(closPt);
                                                     if (node.Item.IsConnect)
@@ -162,11 +163,11 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var pline4 = parentExLines[3];
                                                 var pline5 = parentExLines[4];
 
-                                                var closPt1 = pline1.IntersectWithEx(cline1, Intersect.ExtendBoth)[0];
-                                                var closPt2 = pline2.IntersectWithEx(cline1, Intersect.ExtendBoth)[0];
-                                                var closPt3 = pline3.IntersectWithEx(cline2, Intersect.ExtendBoth)[0];
-                                                var closPt4 = pline4.IntersectWithEx(cline2, Intersect.ExtendBoth)[0];
-                                                var closPt5 = pline5.IntersectWithEx(cline3, Intersect.ExtendBoth)[0];
+                                                var closPt1 = ThFanConnectUtils.IntersectWithEx(pline1,cline1, Intersect.ExtendBoth)[0];
+                                                var closPt2 = ThFanConnectUtils.IntersectWithEx(pline2,cline1, Intersect.ExtendBoth)[0];
+                                                var closPt3 = ThFanConnectUtils.IntersectWithEx(pline3,cline2, Intersect.ExtendBoth)[0];
+                                                var closPt4 = ThFanConnectUtils.IntersectWithEx(pline4,cline2, Intersect.ExtendBoth)[0];
+                                                var closPt5 = ThFanConnectUtils.IntersectWithEx(pline5,cline3, Intersect.ExtendBoth)[0];
 
                                                 cline1.StartPoint = closPt2;
                                                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
@@ -211,7 +212,7 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             var cline = currentExLines[i];
                             var pline = parentExLines[i];
-                            var closPt = pline.IntersectWithEx(cline, Intersect.ExtendBoth)[0];
+                            var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
                             cline.StartPoint = closPt;
                             node.Item.ExPoint.Add(closPt);
                             if (node.Item.IsConnect)

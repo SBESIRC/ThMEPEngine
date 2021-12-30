@@ -107,9 +107,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
                 else if (l.EndPoint.DistanceTo(pt) < 10)
                 {
-                    //var tmpPt = l.StartPoint;
-                    //l.StartPoint = l.EndPoint;
-                    //l.EndPoint = tmpPt;
                     l.EndPoint = l.StartPoint;
                     l.StartPoint = pt;
                     retLines.Add(l);
@@ -118,9 +115,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 else if(l.GetDistToPoint(pt) < 10)
                 {
                     //将l在pt处打断
-                    //var closPt = l.GetClosestPointTo(pt,false);
-                    //var line1 = new Line(closPt, l.StartPoint);
-                    //var line2 = new Line(closPt, l.EndPoint);
                     var line1 = new Line(pt, l.StartPoint);
                     var line2 = new Line(pt, l.EndPoint);
                     retLines.Add(line1);
@@ -141,7 +135,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 var endPt = l.EndPoint;
                 double startDist = line.GetDistToPoint(startPt);
                 double endDist = line.GetDistToPoint(endPt);
-                if(startDist < 10.0)
+                if (startDist < 10.0)
                 {
                     var closPt = line.GetClosestPointTo(l.StartPoint, false);
                     l.StartPoint = closPt;
@@ -156,9 +150,9 @@ namespace ThMEPHVAC.FanConnect.Model
                     retLines.Add(l);
                     remLines.Add(l);
                 }
-                else if(line.IsIntersects(l))
+                else if (ThFanConnectUtils.IsIntersects(line, l))
                 {
-                    var pts = l.IntersectWithEx(line);
+                    var pts = ThFanConnectUtils.IntersectWithEx(line,l);
                     //将l在交点位置打断
                     if (pts.Count > 0)
                     {

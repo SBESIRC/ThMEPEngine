@@ -473,5 +473,24 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
             }
         }
+        public static bool IsIntersects( Entity firstEnt, Entity secondEnt)
+        {
+            return IntersectWithEx(firstEnt,secondEnt).Count > 0 ? true : false;
+        }
+        public static Point3dCollection IntersectWithEx(Entity firstEntity, Entity secondEntity, Intersect intersectType = Intersect.OnBothOperands)
+        {
+            Entity e1 = firstEntity.Clone() as Entity;
+            Entity e2 = secondEntity.Clone() as Entity;
+            Point3d basePt = Point3d.Origin;
+            if(e1.GeometricExtents!=null)
+            {
+                basePt = e1.GeometricExtents.CenterPoint(); 
+            }
+            var mt = Matrix3d.Displacement(basePt - Point3d.Origin);
+            e1.TransformBy(mt);
+            e2.TransformBy(mt);
+            var pts = ThGeometryTool.IntersectWithEx(e1, e2, intersectType);
+            return pts.OfType<Point3d>().Select(p => p.TransformBy(mt.Inverse())).ToCollection();
+        }
     }
 }
