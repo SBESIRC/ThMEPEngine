@@ -14,6 +14,8 @@ using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -86,7 +88,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
             layoutPara.Set(Genome);
-            int result = GetParkingNums(layoutPara);
+            //int result = GetParkingNums(layoutPara);
+            Thread.Sleep(3);
+            int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             Count = result;
             return result;
         }
