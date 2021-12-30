@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
 using static ThMEPArchitecture.PartitionLayout.Utitlties;
 
@@ -58,6 +59,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<Polyline> PModuleBox = new List<Polyline>();
         private bool GPillars = false;
         private List<Polyline> Pillars = new List<Polyline>();
+        public ThCADCoreNTSSpatialIndex ObstaclesMPolygonSpatialIndex;
 
         const double DisPillarLength = 400;
         const double DisPillarDepth = 500;
@@ -155,6 +157,7 @@ namespace ThMEPArchitecture.PartitionLayout
             Obstacles.ForEach(e => e.Dispose());
             Boundary.Dispose();
             ObstaclesSpatialIndex.Dispose();
+            ObstaclesMPolygonSpatialIndex.Dispose();
             CarModuleBox.ForEach(e => e.Dispose());
             MoudleSpatialIndex.Dispose();
             IntegralModules.ForEach(e => e.Box.Dispose());
@@ -657,7 +660,14 @@ namespace ThMEPArchitecture.PartitionLayout
             //RemoveDuplicatePts(points);
             carindexes.Dispose();
             var res = GetSplitLine(line, points).Where(e => e.Length > DisCarWidth - 1).ToList();
-            res = res.Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles)).ToList();
+            //res = res.Where(e => !IsInAnyPolys(e.GetCenter(),Obstacles)).ToList();
+            res = res.Where(e =>
+            {
+                var pltmp = PolyFromPoint(e.GetCenter());
+                var resin = ObstaclesMPolygonSpatialIndex.SelectCrossingPolygon(pltmp).Count == 0;
+                pltmp.Dispose();
+                return resin;
+            }).ToList();
             return res;
         }
 
@@ -1025,22 +1035,30 @@ namespace ThMEPArchitecture.PartitionLayout
                     bool condbox = false;
                     foreach (var box in Laneboxes)
                     {
-                        if (carsc.Intersect(box, Intersect.OnBothOperands).Count > 0)
+                        if (box.GetClosestPointTo(carsc.GetRecCentroid(), false).DistanceTo(carsc.GetRecCentroid()) < DisCarLength)
                         {
-                            condbox = true;
-                            break;
+                            if (carsc.Intersect(box, Intersect.OnBothOperands).Count > 0)
+                            {
+                                condbox = true;
+                                break;
+                            }
                         }
                     }
                     if (condbox) continue;
                 }
+                bool intersectedWithBound = false;
+                if (Boundary.GetClosestPointTo(carsc.GetRecCentroid(), false).DistanceTo(carsc.GetRecCentroid()) < DisCarLength)
+                {
+                    if (carsc.Intersect(Boundary, Intersect.OnBothOperands).Count > 0) intersectedWithBound = true;
+                }
                 var cond = CarSpatialIndex.SelectCrossingPolygon(carsc).Count == 0
                               && ObstaclesSpatialIndex.SelectCrossingPolygon(carsc).Count == 0
                               && (!IsInAnyPolys(carsc.Centroid(), Laneboxes))
-                              && carsc.Intersect(Boundary, Intersect.OnBothOperands).Count == 0
+                              && !intersectedWithBound
                               && CheckCarLegal(car);
                 if (judge_carmodulebox) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), CarModuleBox));
                 if (judge_modulebox) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), ModuleBox));
-                if (judge_in_obstacles) cond = cond && (!IsInAnyPolys(carsc.GetRecCentroid(), Obstacles));
+                if (judge_in_obstacles) cond = cond && ObstaclesMPolygonSpatialIndex.SelectCrossingPolygon(carsc).Count == 0;
                 if (cond)
                 {
                     AddToSpatialIndex(car, ref CarSpatialIndex);
@@ -1405,7 +1423,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         break;
                     }
                 }
-            }
+            }           
         }
 
         /// <summary>
@@ -1414,16 +1432,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private void RemoveCarsIntersectedWithBoundary()
         {
             var obspls = Obstacles.Where(e => e.Closed).Where(e => e.Area > DisCarLength * DisLaneWidth * 5).ToList();
-            for (int i = 0; i < CarSpots.Count; i++)
-            {
-                var pl = CarSpots[i];
-                var pt = pl.GetRecCentroid();
-                if (!IniBoundary.IsPointInFast(pt) || IsInAnyPolys(pt, obspls))
-                {
-                    CarSpots.RemoveAt(i);
-                    i--;
-                }
-            }
+            CarSpots = CarSpots.Where(e => IniBoundary.Contains(e.GetRecCentroid()) && !IsInAnyPolys(e.GetRecCentroid(), obspls)).ToList();
         }
 
         /// <summary>
@@ -1514,7 +1523,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var tb = Line(b);
                 //UnifyLaneDirection(ref tb, IniLanes);
                 tb.TransformBy(Matrix3d.Displacement(Vector(b).GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(tb, -vec, DisCarWidth, DisCarLength, false, false, true, true,false,true);
+                GenerateCarsAndPillarsForEachLane(tb, -vec, DisCarWidth, DisCarLength, false, false, true, true, false, true);
                 var plb = Line(b);
                 plb.TransformBy(Matrix3d.Displacement(-vec.GetNormal() * DisCarAndHalfLane));
                 var plbp = PolyFromPoints(new Point3d[] { b.StartPoint, b.EndPoint, plb.EndPoint, plb.StartPoint });

@@ -154,12 +154,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
                     var obstacles = new List<Polyline>();
                     obstaclesList.ForEach(e => obstacles.AddRange(e));
-
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                    var CuttersM = new DBObjectCollection();
+                    obstacles.ForEach(e => CuttersM.Add(e.ToNTSPolygon().ToDbMPolygon()));
+                    var ObstaclesMpolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(CuttersM);
                     PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                    partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
                     partition.ProcessAndDisplay(layerNames, 30);
                 }
             }

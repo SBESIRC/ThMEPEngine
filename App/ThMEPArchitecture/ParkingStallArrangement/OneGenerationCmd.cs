@@ -161,6 +161,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var Cutters = new DBObjectCollection();
                 obstacles.ForEach(e => Cutters.Add(e));
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                var CuttersM = new DBObjectCollection();
+                obstacles.ForEach(e => CuttersM.Add(e.ToNTSPolygon().ToDbMPolygon()));
+                var ObstaclesMpolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(CuttersM);
 
                 string w = "";
                 string l = "";
@@ -185,6 +188,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 inilanes = inilanes.Distinct().ToList();
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
                 try
                 {
                     count += partition.ProcessAndDisplay(layerNames, 30);

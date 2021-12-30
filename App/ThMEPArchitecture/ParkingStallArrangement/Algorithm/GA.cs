@@ -165,8 +165,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 obstacles.ForEach(e => Cutters.Add(e));
                 var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
                 var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                var CuttersM = new DBObjectCollection();
+                obstacles.ForEach(e => CuttersM.Add(e.ToNTSPolygon().ToDbMPolygon()));
+                var ObstaclesMpolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(CuttersM);
                 PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
                 partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
                 if (partition.Validate())
                 {
                     try

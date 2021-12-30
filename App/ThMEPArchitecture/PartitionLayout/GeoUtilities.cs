@@ -180,6 +180,13 @@ namespace ThMEPArchitecture.PartitionLayout
             return p;
         }
 
+        public static Polyline PolyFromPoint(Point3d point)
+        {
+            Polyline p = new Polyline();
+            p.AddVertexAt(0, point.ToPoint2d(), 0, 0, 0);
+            return p;
+        }
+
         public static Polyline PolyFromPoints(Point3d[] points, bool closed = true)
         {
             Polyline p = new Polyline();
@@ -521,12 +528,21 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 if (ClosestPointInCurves(pt, pls) < 1) return false;
             }
+            pls.OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
             foreach (var p in pls)
             {
                 if (p.Area < 1) continue;
-                if (p.IsPointInFast(pt))
+                if (p.Vertices().Count == 5)
                 {
-                    return true;
+                    if (p.GeometricExtents.IsPointIn(pt))
+                        return true;
+                }
+                else
+                {
+                    if (/*p.IsPointInFast(pt)*/p.Contains(pt))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
