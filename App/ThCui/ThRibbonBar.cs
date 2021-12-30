@@ -72,12 +72,69 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THXFJ_SMALL",
                 "IDI_THCAD_THXFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            // 室内风机布置
+            row.AddNewButton("室内风机\r\n布置",
+                "天华室内风机布置",
+                "THSNJ",
+                "天华室内风机布置",
+                "IDI_THCAD_THSNJ_SMALL",
+                "IDI_THCAD_THSNJ_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateHVACPlanPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("HVACPLAN", "平面图");
             var row = panel.AddNewRibbonRow();
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 风管路由
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("风管路由",
+                    "天华风管路由",
+                    "THFGLY",
+                    "天华风管路由",
+                    "IDI_THCAD_THFGLY_SMALL",
+                    "IDI_THCAD_THFGLY_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 插风管立管
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("插风管立管",
+                    "天华插风管立管",
+                    "THFGLG",
+                    "天华插风管立管",
+                    "IDI_THCAD_THFGLG_SMALL",
+                    "IDI_THCAD_THFGLG_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 插风口
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("插风口",
+                    "天华插风口",
+                    "THCRFK",
+                    "天华插风口",
+                    "IDI_THCAD_THCRFK_SMALL",
+                    "IDI_THCAD_THCRFK_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 插风管断线
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("插风管断线",
+                    "天华插风管断线",
+                    "THFGDX",
+                    "天华插风管断线",
+                    "IDI_THCAD_THFGDX_SMALL",
+                    "IDI_THCAD_TTHFGDX_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
 
             {
                 var subPanel = row.AddNewPanel();
@@ -115,6 +172,48 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THFGLD_SMALL",
                     "IDI_THCAD_THFGLD_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 水管路由
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("水管路由",
+                    "天华水管路由",
+                    "THSGLY",
+                    "天华水管路由",
+                    "IDI_THCAD_THSGLY_SMALL",
+                    "IDI_THCAD_THSGLY_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 插水管断线
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("插水管断线",
+                    "天华插水管断线",
+                    "THSGDX",
+                    "天华插水管断线",
+                    "IDI_THCAD_THSGDX_SMALL",
+                    "IDI_THCAD_TTHSGDX_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 水平面
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("水平面",
+                    "天华水平面",
+                    "THSPM",
+                    "天华水平面",
+                    "IDI_THCAD_THSPM_SMALL",
+                    "IDI_THCAD_THSPM_LARGE",
+                    RibbonButtonStyle.LargeWithText);
             }
         }
 

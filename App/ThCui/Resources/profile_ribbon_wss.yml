@@ -129,11 +129,25 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "小风机"
           attributes: { "IsVisible": true, "IsEnabled": true }
+        - text: "室内风机\r\n布置"
+          attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACPLAN"
     name: "HVACPLAN"
     title: "平面图"
     rowPanels:
+      - text: ""
+        items:
+          - text: "风管路由"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "插风管立管"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "插风口"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "插风管断线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
       - text: ""
         items:
           - text: "风平面"
@@ -143,6 +157,18 @@ panels:
           - text: "风管修改"
             attributes: { "IsVisible": true, "IsEnabled": true }
           - text: "风管留洞"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "水管路由"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "插水管断线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "水平面"
             attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlEGENERAL"
