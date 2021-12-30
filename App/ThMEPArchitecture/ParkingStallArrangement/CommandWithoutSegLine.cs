@@ -19,6 +19,7 @@ using ThMEPArchitecture.PartitionLayout;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
+using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -138,22 +139,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    int index = layoutPara.AreaNumber[j];
-                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                    layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                    var obstacles = new List<Polyline>();
-                    obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-                    var Cutters = new DBObjectCollection();
-                    obstacles.ForEach(e => Cutters.Add(e));
-                    var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                    PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
-                    partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                    partition.ProcessAndDisplay(layerNames, 30);
+                    PartitionV3 partition = new PartitionV3();
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
+                    {
+                        try
+                        {
+                            partition.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            partition.Dispose();
+                        }
+                    }
                 }
             }
 

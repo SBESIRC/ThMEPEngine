@@ -20,16 +20,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var lines = polygon.ToLines();
             lines.Add(line);
 
+
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
             var areas = extendLines.PolygonsEx();
-
-
+            foreach (DBObject e in extendLines)
+            {
+                e.Dispose();
+            }
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                lines[i].Dispose();
+            }
+            lines.Clear();
             var rst = new List<Polyline>();
             foreach (var area in areas)
             {
                 rst.Add(area as Polyline);
             }
-
             return rst;
         }
 
@@ -43,7 +50,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
             var areas = extendLines.PolygonsEx();
-
+            lines.ForEach(e => e.Dispose());
+            lines.Clear();
+            foreach (DBObject e in extendLines)
+            {
+                e.Dispose();
+            }
             var rst = new List<Polyline>();
             foreach (var area in areas)
             {

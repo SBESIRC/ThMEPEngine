@@ -39,6 +39,7 @@
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
     <Compile Include="ParkingStallArrangement\Model\LinePairs.cs" />
+    <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA2.cs" />
     <Compile Include="PartitionLayout\GeoUtilitiesOptimized.cs" />

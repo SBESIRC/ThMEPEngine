@@ -16,6 +16,11 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public class PartitionV3
     {
+        public PartitionV3()
+        {
+
+        }
+
         public PartitionV3(List<Polyline> walls, List<Line> iniLanes,
         List<Polyline> obstacles, Polyline boundary, List<Polyline> buildingBox, bool gpillars = true)
         {
@@ -996,7 +1001,7 @@ namespace ThMEPArchitecture.PartitionLayout
             bool judge_carmodulebox = true, bool reverse_dividesequence = false, bool adjust_pillar_edge = false, bool judge_modulebox = false,
             bool gfirstpillar = false, bool allow_pillar_in_wall = false, bool judge_in_obstacles = false, bool glastpillar = true)
         {
-            if (allow_pillar_in_wall)
+            if (allow_pillar_in_wall && GPillars)
             {
                 line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-Vector(line).GetNormal() * DisPillarLength)), line.EndPoint);
             }
@@ -1073,7 +1078,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                     if (precar.Area == 0)
                     {
-                        if (gfirstpillar)
+                        if (gfirstpillar && GPillars)
                         {
                             var ed = seg;
                             if (adjust_pillar_edge)
@@ -1107,7 +1112,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else
                     {
                         var dist = car.GetRecCentroid().DistanceTo(precar.GetRecCentroid());
-                        if (Math.Abs(dist - length_divided-DisPillarLength) < 1)
+                        if (Math.Abs(dist - length_divided-DisPillarLength) < 1 && GPillars)
                         {
                             var ed = seg;
                             if (adjust_pillar_edge)
@@ -1133,7 +1138,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         else { }
                         precar = car;
                     }
-                    if (glastpillar && c == segscount)
+                    if (glastpillar && c == segscount && GPillars)
                     {
                         var ed = seg;
                         if (adjust_pillar_edge)

@@ -12,6 +12,8 @@ using Serilog;
 using System.Diagnostics;
 using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
+using Dreambuild.AutoCAD;
+using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -130,48 +132,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                int index = layoutPara.AreaNumber[j];
-                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                var obstacles = new List<Polyline>();
-                obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-                List<Polyline> pls = walls;
-                string w = "";
-                string l = "";
-                foreach (var e in pls)
-                {
-                    foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
-                        w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
-                }
-                foreach (var e in inilanes)
-                {
-                    l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
-                        + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
-                }
-#if DEBUG
-                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs1);
-                sw.WriteLine(w);
-                sw.WriteLine(l);
-                sw.Close();
-                fs1.Close();
-#endif
-                var Cutters = new DBObjectCollection();
-                obstacles.ForEach(e => Cutters.Add(e));
-                var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
-                var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                var CuttersM = new DBObjectCollection();
-                obstacles.ForEach(e => CuttersM.Add(e.ToNTSPolygon().ToDbMPolygon()));
-                var ObstaclesMpolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(CuttersM);
-                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
-                partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
-                if (partition.Validate())
+                PartitionV3 partition = new PartitionV3();
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
                 {
                     try
                     {
@@ -182,10 +144,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         Logger.Error(ex.Message);
                         partition.Dispose();
                     }
-                }
-                else
-                {
-                    Logger.Error("数据无效, wall: " + w + "lanes: " + l + "Boundary: " + GeoUtilities.AnalysisPoly(boundary));
                 }
             }
             return count;
