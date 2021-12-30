@@ -486,7 +486,7 @@ namespace ThMEPHVAC.FanConnect.Command
             {
                 basePt = e1.GeometricExtents.CenterPoint(); 
             }
-            var mt = Matrix3d.Displacement(basePt - Point3d.Origin);
+            var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
             e1.TransformBy(mt);
             e2.TransformBy(mt);
             var pts = ThGeometryTool.IntersectWithEx(e1, e2, intersectType);
