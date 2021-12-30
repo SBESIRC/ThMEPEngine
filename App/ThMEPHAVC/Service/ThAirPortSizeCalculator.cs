@@ -38,8 +38,8 @@ namespace ThMEPHVAC.Service
             var options = specs
                 .Where(o => IsAirPortAreaValid(o.Item1, o.Item2, singleAirPortAirVolume, airSpeedUpperLimitedValue))
                 .ToList();
-            // 用[aMin,1.3*aMin],筛选符合条件的风管规格
-            options = options.Where(o => GetArea(o.Item1, o.Item2) >= aMin && GetArea(o.Item1, o.Item2) <= 1.3 * aMin).ToList();
+            // 用[aMin,1.5*aMin],筛选符合条件的风管规格
+            options = options.Where(o => GetArea(o.Item1, o.Item2) >= aMin && GetArea(o.Item1, o.Item2) <= 1.5 * aMin).ToList();
 
             // 用长宽比，筛选
             options = options

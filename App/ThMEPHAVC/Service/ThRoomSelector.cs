@@ -2,6 +2,7 @@
 using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
+using ThCADExtension;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -9,6 +10,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Runtime;
 
 namespace ThMEPHVAC.Service
 {
@@ -31,9 +33,18 @@ namespace ThMEPHVAC.Service
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                var pso = new PromptSelectionOptions();
-                pso.MessageForAdding = "\n请选择房间框线";
-                var psr = Active.Editor.GetSelection(pso);
+                var pso = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "\n请选择房间框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                 {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                 };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var psr = Active.Editor.GetSelection(pso, filter);
                 if (psr.Status == PromptStatus.OK)
                 {
                     return psr.Value.GetObjectIds()
