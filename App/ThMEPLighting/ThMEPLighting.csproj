@@ -129,6 +129,7 @@
     <Compile Include="FEI\ThEmgPilotLamp\ThFEILineExtension.cs" />
     <Compile Include="Garage\Engine\ThLaneLineExtractionEngine.cs" />
     <Compile Include="Garage\Engine\ThLaneLineExtractionVisitor.cs" />
+    <Compile Include="Garage\Factory\ThFirstSecondBFactory.cs" />
     <Compile Include="Garage\Factory\ThFirstSecondFactory.cs" />
     <Compile Include="Garage\Service\LayoutPoint\ThLayoutPointOptimizeService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThArcDrawTool.cs" />

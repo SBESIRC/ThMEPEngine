@@ -28,17 +28,21 @@ namespace ThMEPLighting.Garage.Factory
         /// 记录中心线是否被用了
         /// </summary>
         private Dictionary<Line, bool> CenterLineUsedRecordDict { get; set; }
-        private ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
+        protected ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
         #region----------input----------
-        private double width;
+        protected double width;
         private Point3d startPt;
-        private List<Line> centerLines;
+        protected List<Line> centerLines;
         #endregion
 
         public ThFirstSecondAFactory(List<Line> centerLines,double width,Point3d startPt)
+            :this(centerLines, width)
+        {
+            this.startPt = startPt;
+        }
+        protected ThFirstSecondAFactory(List<Line> centerLines, double width)
         {
             this.width = width;
-            this.startPt = startPt;
             this.centerLines = centerLines;
             ApproximateTolerance = new Tolerance(1.0, 1.0);
             AccuracyTolerance = new Tolerance(1e-4, 1e-4);
@@ -65,7 +69,7 @@ namespace ThMEPLighting.Garage.Factory
             Init();
 
             // 返回的是中心线和边线的对应关系
-            CenterSideDict = FindCenterPair(centerLines, width);
+            CenterSideDict = ThFindCenterPairService.Find(centerLines,width);
             //Print();
 
             HandleCenterSideDict(width);
@@ -222,11 +226,11 @@ namespace ThMEPLighting.Garage.Factory
             UpdateCenterLineUsedRecordDict(center);
         }
 
-        private void UpdateSideLineNumberDict(List<Line> sideLines,EdgePattern edgePattern)
+        protected void UpdateSideLineNumberDict(List<Line> sideLines,EdgePattern edgePattern)
         {
             sideLines.ForEach(l => SideLineNumberDict[l] = edgePattern);
         }
-        private void AddSideLineNumberDict(Line sideLine, EdgePattern edgePattern)
+        protected void AddSideLineNumberDict(Line sideLine, EdgePattern edgePattern)
         {
             if(!SideLineNumberDict.ContainsKey(sideLine))
             {
@@ -234,7 +238,7 @@ namespace ThMEPLighting.Garage.Factory
             }
         }
 
-        private EdgePattern GetSideLineNumber(Line sideLine)
+        protected EdgePattern GetSideLineNumber(Line sideLine)
         {
             return SideLineNumberDict[sideLine];
         }
@@ -307,7 +311,7 @@ namespace ThMEPLighting.Garage.Factory
             return instane.FindSides();
         }
 
-        private void HandleCenterSideDict(double width)
+        protected void HandleCenterSideDict(double width)
         {
             //目前只处理在T型处，产生的短线分配长的一边
             CenterSideDict.ForEach(c =>
