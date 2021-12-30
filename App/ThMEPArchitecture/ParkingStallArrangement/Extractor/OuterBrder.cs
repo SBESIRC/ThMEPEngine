@@ -18,7 +18,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         public List<Line> SegLines = new List<Line>();//分割线
         public List<BlockReference> Building = new List<BlockReference>();//建筑物block
         public Polyline WallLine = new Polyline();//外框线
-        public void Extract(Database database, Point3dCollection polygon)
+        public bool Extract(Database database, Point3dCollection polygon)
         {
             var objs = new DBObjectCollection();
             using (var acadDatabase = AcadDatabase.Use(database))
@@ -29,7 +29,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                    .Where(o => o is BlockReference);
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-
+                if(dbObjs.Count != 1)
+                {
+                    return false;
+                }
+                if(!(dbObjs[0] is BlockReference))
+                {
+                    return false;
+                }
                 dbObjs.Cast<Entity>()
                       .ForEach(e => Explode(e));
 
@@ -52,6 +59,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                     break;
                 }
             }
+            return true;
         }
 
         private bool IsOuterLayer(string layer)

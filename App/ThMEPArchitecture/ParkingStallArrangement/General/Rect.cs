@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
@@ -46,6 +47,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             var minPt = br.GeometricExtents.MinPoint;
             var maxPt = br.GeometricExtents.MaxPoint;
             return GetRect(minPt, maxPt);
+        }
+        public static Polyline GetRectExtend(this BlockReference br, double dist = 1.0)
+        {
+            var minPt = br.GeometricExtents.MinPoint;
+            var maxPt = br.GeometricExtents.MaxPoint;
+            return GetRect(minPt.OffSetXY(-dist,-dist), maxPt.OffSetXY(dist, dist));
         }
     }
 }
