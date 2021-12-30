@@ -30,8 +30,8 @@ namespace ThMEPHVAC.Command
         CalcFanRectFormFanData fanRectFormFanData;
         public IndoorFanLayoutCmd(Dictionary<Polyline, List<Polyline>> selectRoomLines,Vector3d xAxis,Vector3d yAxis) 
         {
-            CommandName = "THFJBZ";
-            ActionName = "THFJBZ";
+            CommandName = "THSNJBZ";
+            ActionName = "室内机布置";
 
             _selectPLines = new Dictionary<Polyline, List<Polyline>>();
             if (null == selectRoomLines || selectRoomLines.Count < 1)
@@ -208,7 +208,6 @@ namespace ThMEPHVAC.Command
                     if (string.IsNullOrEmpty(fanName))
                         continue;
                     var rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
-                    int roomNeedFanCount = (int)Math.Ceiling(roomLoad / rectangle.Load);
                     var fanLayout = new AreaLayoutFan(nearRelation, _xAxis, _yAxis.Negate());
                     fanLayout.InitRoomData(layoutAreas,pline.Key, pline.Value, roomLoad);
                     var layoutRectRes = fanLayout.GetLayoutFanResult(rectangle);
@@ -258,7 +257,7 @@ namespace ThMEPHVAC.Command
                         if (canUseFans.Count < 1)
                             continue;
                         fanName = canUseFans.First();
-                        var newRect = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
                         var addFans = fanLayout.GetRoomCenterFan(rectangle, roomLoad);
                         foreach (var fan in addFans)
                         {
@@ -267,7 +266,7 @@ namespace ThMEPHVAC.Command
                         }
                         thisAreaCount = addFans.Count;
                     }
-                    
+                    int roomNeedFanCount = (int)Math.Ceiling(roomLoad / rectangle.Load);
                     var createPoint = IndoorFanCommon.PolylinCenterPoint(pline.Key);
                     string msg1 = string.Format("{0}kW/{1}kW ={2}台 排{3}台", roomLoad, rectangle.Load, roomNeedFanCount, thisAreaCount);
                     var color = Color.FromRgb(255,255,255);

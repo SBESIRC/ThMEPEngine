@@ -23,8 +23,8 @@ namespace ThMEPHVAC.Command
     {
         public IndoorFanPlace() 
         {
-            CommandName = "THFJFZ";
-            ActionName = "THFJFZ";
+            CommandName = "THSNJFZ";
+            ActionName = "室内机放置";
         }
         public override void SubExecute()
         {

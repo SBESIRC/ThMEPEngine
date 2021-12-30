@@ -15,7 +15,7 @@ namespace ThMEPHVAC
 {
     class ThHAVCIndoorFanCmds
     {
-        [CommandMethod("TIANHUACAD", "THFJBZ", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THSNJBZ", CommandFlags.Modal)]
         public void THIndoorFanLayout()
         {
             //Step1 选择房间框线 获取房间内外轮廓信息
@@ -24,7 +24,7 @@ namespace ThMEPHVAC
             var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis);
             indoorFanLayout.Execute();
         }
-        [CommandMethod("TIANHUACAD", "THFJFZ", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THSNJFZ", CommandFlags.Modal)]
         public void THIndoorFanPlace() 
         {
             var placeFan = new IndoorFanPlace();
@@ -35,7 +35,7 @@ namespace ThMEPHVAC
             var selectPLines = new Dictionary<Polyline, List<Polyline>>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                // 获取框线
+                // 获取房间框线
                 var options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -46,7 +46,11 @@ namespace ThMEPHVAC
                 {
                     RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var layerNames = new string[]
+                {
+                    "AI-房间框线",
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
                 var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status != PromptStatus.OK)
                 {

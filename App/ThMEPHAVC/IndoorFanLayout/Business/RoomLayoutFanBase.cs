@@ -291,6 +291,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     var dis = tempPoints[0].DistanceTo(tempPoints[1]);
                     if (dis < minLength)
                         continue;
+                    if (lineSeg.Any(c => c.Key.DistanceTo(tempPoints[0]) < 1))
+                        continue;
                     lineSeg.Add(tempPoints[0], tempPoints[1]);
                 }
             }

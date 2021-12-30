@@ -161,7 +161,7 @@ namespace TianHua.Hvac.UI.UI
                 FormUtil.DisableForm(gridForm);
                 //设置参数，发送命令
                 IndoorFanParameter.Instance.LayoutModel = indoorFanViewModel.FanLayoutModel;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBZ");
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THSNJBZ");
                 FocusToCAD();
             }
             catch (Exception ex)
@@ -522,7 +522,7 @@ namespace TianHua.Hvac.UI.UI
                 IndoorFanParameter.Instance.PlaceModel.FanType = indoorFanViewModel.SelectFanType;
                 IndoorFanParameter.Instance.PlaceModel.CorrectionFactor = indoorFanViewModel.CorrectionFactor;
                 IndoorFanParameter.Instance.PlaceModel.TargetFanInfo = indoorFanViewModel.SelectIndoorFan;
-                CommandHandlerBase.ExecuteFromCommandLine(false, "THFJFZ");
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THSNJFZ");
                 FocusToCAD();
             }
             catch (Exception ex)

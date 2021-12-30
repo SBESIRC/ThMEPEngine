@@ -76,10 +76,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             {
                 startPoint = roomCenter + otherDir.MultiplyBy((fanRectangle.Width/2 + IndoorFanCommon.FanSpaceMinDistance / 2) * a);
             }
+            startPoint = startPoint + layoutDir.MultiplyBy(fanRectangle.MaxLength / 2);
             var stepLength = fanRectangle.Width + IndoorFanCommon.FanSpaceMinDistance;
             for (int i = 0; i < fanCount; i++) 
             {
-                var fanCenterPoint = startPoint - layoutDir.MultiplyBy(stepLength*i);
+                var fanCenterPoint = startPoint - otherDir.MultiplyBy(stepLength*i);
                 var fanRect = CenterToRect(fanCenterPoint, layoutDir, fanRectangle.MaxLength, otherDir, fanRectangle.Width);
                 var fanLayoutRect = new FanLayoutRect(fanRect, fanRectangle.Width, layoutDir);
                 fanLayoutRect.FanDirection = layoutDir;
