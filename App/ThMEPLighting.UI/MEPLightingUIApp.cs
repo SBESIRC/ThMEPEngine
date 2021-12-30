@@ -21,8 +21,8 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
-            AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
-            AcadApp.DocumentManager.DocumentBecameCurrent += DocumentManager_DocumentBecameCurrent;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
+            //AcadApp.DocumentManager.DocumentBecameCurrent += DocumentManager_DocumentBecameCurrent;
         }
 
         public void Terminate()
@@ -31,8 +31,8 @@ namespace ThMEPLighting.UI
             uiConnect = null;
             uiEmgLightLayout = null;
             uiEmgLightConnect = null;
-            AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
-            AcadApp.DocumentManager.DocumentBecameCurrent -= DocumentManager_DocumentBecameCurrent;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
+            //AcadApp.DocumentManager.DocumentBecameCurrent -= DocumentManager_DocumentBecameCurrent;
         }
         private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
