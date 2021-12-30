@@ -209,5 +209,24 @@ namespace ThCADExtension
             // https://forums.autodesk.com/t5/autocad-forum/how-to-find-whether-an-arc-is-clockwise-or-counter-clockwise-in/td-p/7657875
             return arc.Normal.DotProduct(Vector3d.ZAxis) < 0;
         }
+
+        // 根据三点创建弧
+        public static Arc CreateArcWith3Points(Point3d firstPoint, Point3d secondPoint, Point3d thirdPoint)
+        {
+            // https://www.theswamp.org/index.php?topic=40382.0
+            CircularArc3d cArc =
+                firstPoint.GetVectorTo(secondPoint).CrossProduct(secondPoint.GetVectorTo(thirdPoint)).Z < 0.0 ?
+                new CircularArc3d(thirdPoint, secondPoint, firstPoint) : // if points are clockwise
+                new CircularArc3d(firstPoint, secondPoint, thirdPoint); // if points are counterclockwise
+            double angle = cArc.ReferenceVector.AngleOnPlane(new Plane(cArc.Center, cArc.Normal));
+            return new Arc()
+            {
+                Normal = cArc.Normal,
+                Radius = cArc.Radius,
+                Center = cArc.Center,
+                EndAngle = cArc.EndAngle + angle,
+                StartAngle = cArc.StartAngle + angle,
+            };
+        }
     }
 }
