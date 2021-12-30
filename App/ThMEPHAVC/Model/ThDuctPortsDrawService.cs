@@ -15,6 +15,7 @@ namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawService
     {
+        public string zeroLayer;
         public string geoLayer;
         public string flgLayer;
         public string portLayer;
@@ -143,6 +144,7 @@ namespace ThMEPHVAC.Model
                     break;
                 default:throw new NotImplementedException("No such scenior!");
             }
+            zeroLayer = "0";
             startLayer = "AI-风管起点";
             fireValveLayer = "H-DAPP-FDAMP";
             electrycityValveLayer = "H-DAPP-FDAMP";
@@ -152,6 +154,7 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase currentDb = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(zeroLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(geoLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(flgLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(portLayer));
@@ -179,6 +182,7 @@ namespace ThMEPHVAC.Model
         {
             using (AcadDatabase db = AcadDatabase.Active())
             {
+                GetCurLayer(db, zeroLayer);
                 GetCurLayer(db, geoLayer);
                 GetCurLayer(db, flgLayer);
                 GetCurLayer(db, portLayer);

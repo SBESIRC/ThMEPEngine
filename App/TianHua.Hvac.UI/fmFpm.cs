@@ -547,12 +547,12 @@ namespace TianHua.Hvac.UI
             ExcludeBypass(ref centerlines);
             var linesDic = SepLineByColor();
             var procLines = new List<DBObjectCollection>();
+            var mat = Matrix3d.Displacement(-p.GetAsVector());
             foreach (var pair in linesDic)
             {
-                var lines = ThMEPHVACLineProc.PreProc(pair.Value);
-                var mat = Matrix3d.Displacement(-p.GetAsVector());
-                foreach (Line l in lines)
+                foreach (Curve l in pair.Value)
                     l.TransformBy(mat);
+                var lines = ThMEPHVACLineProc.PreProc(pair.Value);
                 procLines.Add(lines);
             }
             linesDic.Clear();

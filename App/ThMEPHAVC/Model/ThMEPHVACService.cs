@@ -628,6 +628,7 @@ namespace ThMEPHVAC.Model
             var mpObjs = new DBObjectCollection();
             foreach (Polyline pl in wallBounds)
             {
+                pl.DPSimplify(1);
                 pl.TransformBy(mat);
                 mpObjs.Add(pl.ToNTSPolygon().ToDbMPolygon());
             }
