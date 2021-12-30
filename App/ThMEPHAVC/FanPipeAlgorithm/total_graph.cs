@@ -535,6 +535,9 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                         double end_x = start_graph.space_min_x + tmp_out.x * PublicValue.bigcell;
                         double end_y = start_graph.space_min_y + tmp_out.y * PublicValue.bigcell;
 
+                        if (tmp_start.y == tmp_out.y) end_y = tmp_y;
+                        if (tmp_start.x == tmp_out.x) end_x = tmp_x;
+
                         processed_edges.Add(new edge(end_x, end_y, real_entrance.X, real_entrance.Y));
                         int out_index = start_graph.real_end_points.Count;
                         start_graph.end_points.Add(tmp_out);
@@ -1088,7 +1091,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             main_room = room_index;
             int min_index = max_index;
 
-            if (min_index != -1)
+            if (min_index != -1 && main_room !=  room_have_start)
             {
                 //寻找第一个房间的入口/寻找起点
                 grid_point tmp_start = new grid_point(0, 0);
@@ -1119,6 +1122,9 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 double end_x = start_graph.space_min_x + tmp_out.x *PublicValue.bigcell;
                 double end_y = start_graph.space_min_y + tmp_out.y * PublicValue.bigcell;
+
+                if (tmp_start.y == tmp_out.y) end_y = tmp_y;
+                if (tmp_start.x == tmp_out.x) end_x = tmp_x;
 
                 processed_edges.Add(new edge(end_x, end_y, real_entrance.X, real_entrance.Y));
                 int out_index = start_graph.real_end_points.Count;

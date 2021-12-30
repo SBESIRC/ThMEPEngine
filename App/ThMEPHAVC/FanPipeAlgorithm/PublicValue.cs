@@ -24,6 +24,9 @@ namespace ThMEPHVAC.FanPipeAlgorithm
         //mode 0：基础整线
         //mode 1：终点不要附加线条
         public static int arrange_mode = 0;
+
+        //线条位置,是否居中
+        public static int juzhong = 0;
         
         
         //方向定义  SSS

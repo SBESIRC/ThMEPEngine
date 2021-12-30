@@ -276,6 +276,15 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     tool0.Swap(ref bound[i].rx1, ref bound[i].rx2);
                     tool0.Swap(ref bound[i].ry1, ref bound[i].ry2);
                 }
+
+
+                //测试用
+                //int test = 0;
+                //if (bound[i].rx1 <= 1260078) 
+                //{ 
+                //    test = 1; 
+                //} 
+
                 int start_x = (int)(bound[i].rx1 - space_min_x) / PublicValue.CELL;
                 int start_y = (int)(bound[i].ry1 - space_min_y) / PublicValue.CELL;
                 int end_x = (int)(bound[i].rx2 - space_min_x) / PublicValue.CELL;
@@ -284,9 +293,12 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 double length = Math.Sqrt(Math.Pow((bound[i].ry2 - bound[i].ry1),2)+ Math.Pow((bound[i].rx2 - bound[i].rx1), 2));
                 int step = PublicValue.line_step;
                 bool is_vertical = false;
-                if ((bound[i].rx2 - bound[i].rx1) < 0.1) is_vertical = true;
+                if ((bound[i].rx2 - bound[i].rx1) < 50) is_vertical = true;
 
                 if (is_vertical) {
+
+                    if(end_y < start_y) tool0.Swap(ref end_y, ref start_y);
+
                     for (int j = start_y; j <= end_y; j++)
                     {
                         board_0[start_x][j] = value;
@@ -1391,7 +1403,12 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             for (int i = 0; i < long_edges.Count; i++)
             {
+
+                
+
                 edge tmp_e = long_edges[i];
+
+                if (tmp_e.x1 == tmp_e.x2 && tmp_e.y1 == tmp_e.y2) continue;
 
                 if (tmp_e.x1 == tmp_e.x2)
                 {
