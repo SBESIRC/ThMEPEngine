@@ -1,12 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Operation.Buffer;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.SprinklerConnect.Model;
@@ -386,57 +388,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     hasScatter = true;
                 }
             }
-        }
-
-        public static void HandleSecondRow(List<ThSprinklerRowConnect> rowConnection, List<ThSprinklerRowConnect> secRowConnection,
-            List<Point3d> sprinklerSearched)
-        {
-            var lines = rowConnection.Select(row => row.Base).ToCollection();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines);
-
-            var dict = new Dictionary<Point3d, List<ThSprinklerRowConnect>>();
-            secRowConnection.ForEach(row =>
-            {
-                var filter = spatialIndex.SelectCrossingPolygon(row.Base.ExtendLine(-10.0).Buffer(1.0));
-                if (filter.Count == 0)
-                {
-                    rowConnection.Add(row);
-                    row.OrderDict.Values.ForEach(o => sprinklerSearched.AddRange(o));
-
-                    // 更新索引
-                    spatialIndex.Update(new DBObjectCollection { row.Base }, new DBObjectCollection());
-                }
-                else if (filter.Count == 1)
-                {
-                    var startPoint = filter.OfType<Line>().First().StartPoint;
-                    if (dict.ContainsKey(startPoint))
-                    {
-                        dict[startPoint].Add(row);
-                    }
-                    else
-                    {
-                        dict.Add(startPoint, new List<ThSprinklerRowConnect> { row });
-                    }
-                }
-            });
-
-            rowConnection.ForEach(row =>
-            {
-                if (dict.ContainsKey(row.Base.StartPoint))
-                {
-                    var secRowCount = dict[row.Base.StartPoint].Select(row => row.Count).Sum();
-                    if (secRowCount > row.Count)
-                    {
-                        rowConnection.Remove(row);
-                        row.OrderDict.Values.ForEach(o => o.ForEach(pt => sprinklerSearched.Remove(pt)));
-                        dict[row.Base.StartPoint].ForEach(row =>
-                        {
-                            rowConnection.Add(row);
-                            row.OrderDict.Values.ForEach(o => sprinklerSearched.AddRange(o));
-                        });
-                    }
-                }
-            });
         }
 
         /// <summary>

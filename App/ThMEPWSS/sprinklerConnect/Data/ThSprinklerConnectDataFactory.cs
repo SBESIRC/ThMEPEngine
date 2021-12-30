@@ -1,42 +1,26 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
-using DotNetARX;
-
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 
 using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-
-
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Engine;
-
 using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.SprinklerConnect.Data
 {
-
-
-    class ThSprinklerConnectDataFactory : ThMEPDataSetFactory
+    public class ThSprinklerConnectDataFactory : ThMEPDataSetFactory
     {
         private List<ThGeometry> Geos { get; set; }
         public ThSprinklerConnectDataFactory()
@@ -174,7 +158,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 {
                     ElementLayer = layer,
                 };
-                extractService.Extract(acadDatabase.Database , frame.Vertices());
+                extractService.Extract(acadDatabase.Database, frame.Vertices());
                 polyList.AddRange(extractService.Polys);
             }
 
@@ -213,7 +197,6 @@ namespace ThMEPWSS.SprinklerConnect.Data
             }
             polyList.ForEach(x => x.Closed = true);
             return polyList;
-
         }
     }
 }

@@ -1,31 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NetTopologySuite.Operation.Relate;
-
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-
-using ThMEPWSS.DrainageSystemDiagram;
-using ThMEPWSS.SprinklerConnect.Model;
-using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Engine;
-
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
@@ -36,9 +14,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var tol = new Tolerance(10, 10);
             var connLines = lineList.Where(x => x.StartPoint.IsEqualTo(pt, tol) ||
                                                 x.EndPoint.IsEqualTo(pt, tol)).ToList();
-
             return connLines;
-
         }
 
         public static List<Point3d> LineListToPtList(List<Line> lines)
@@ -134,9 +110,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public static List<Line> GetLineFromList(List<Line> lines, Point3d SP, Point3d EP)
         {
             var tol = new Tolerance();
-          
-           var lineSelect = lines.Where(x => (x.StartPoint.IsEqualTo(SP, tol) && x.EndPoint.IsEqualTo(EP, tol)) ||
-                                       (x.EndPoint.IsEqualTo(SP, tol) && x.StartPoint.IsEqualTo(EP, tol))).ToList();
+
+            var lineSelect = lines.Where(x => (x.StartPoint.IsEqualTo(SP, tol) && x.EndPoint.IsEqualTo(EP, tol)) ||
+                                        (x.EndPoint.IsEqualTo(SP, tol) && x.StartPoint.IsEqualTo(EP, tol))).ToList();
 
 
             return lineSelect;

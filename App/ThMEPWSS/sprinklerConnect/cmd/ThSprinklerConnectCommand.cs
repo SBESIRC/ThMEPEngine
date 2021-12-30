@@ -1,37 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 
-using ThCADExtension;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
-using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.SprinklerConnect.Engine;
 using ThMEPWSS.SprinklerConnect.Model;
-using Autodesk.AutoCAD.EditorInput;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using System;
-using ThMEPWSS.ViewModel;
+using ThMEPWSS.SprinklerConnect.Service;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
-    public class ThSprinklerConnectCmd_test : ThMEPBaseCommand, IDisposable
+    public class ThSprinklerConnectCommand : ThMEPBaseCommand, IDisposable
     {
         public static Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
-        public bool ParameterFromUI { get; set; } 
+        public bool ParameterFromUI { get; set; }
         public string LayoutDirection { get; set; }
-        public ThSprinklerConnectCmd_test()
+        public ThSprinklerConnectCommand()
         {
             ActionName = "生成支管";
-            CommandName = "THPTLGBZ";       
+            CommandName = "THPTLGBZ";
         }
 
         public override void SubExecute()
@@ -46,9 +45,9 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             {
                 var frames = ThSprinklerConnectUtils.GetFrames();
                 var isVertical = true;
-                if(ParameterFromUI)
+                if (ParameterFromUI)
                 {
-                    isVertical = LayoutDirection=="垂直";
+                    isVertical = LayoutDirection == "垂直";
                 }
                 else
                 {
@@ -204,8 +203,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                             obstacle, column, isVertical);
                     }
                 }
-
-                //Active.Editor.Regen();
             }
         }
 

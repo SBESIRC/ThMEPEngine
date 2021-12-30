@@ -1,10 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.FlushPoint.Data;
@@ -18,6 +20,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
 
         public ThSprinklerConnectParkingStallService()
         {
+            //
         }
 
         public List<Polyline> GetParkingStallOBB(Polyline pline)
@@ -39,13 +42,13 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 // 双排车位
 
                 singleRow = singleRow.OrderByDescending(o => o.Area).ToList();
-                if(singleRow.Count() >= 1)
+                if (singleRow.Count() >= 1)
                 {
                     var singleRowSort = new List<List<Polyline>>();
                     singleRowSort.Add(new List<Polyline> { singleRow[0] });
                     for (int i = 1; i < singleRow.Count(); i++)
                     {
-                        if(singleRow[i].Area > singleRowSort[singleRowSort.Count - 1][0].Area * 0.8)
+                        if (singleRow[i].Area > singleRowSort[singleRowSort.Count - 1][0].Area * 0.8)
                         {
                             singleRowSort[singleRowSort.Count - 1].Add(singleRow[i]);
                         }
@@ -67,7 +70,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
                         parkingStalls.AddRange(doubleRow);
                     });
                 }
-                
+
             });
             return Normalize(parkingStalls);
         }
@@ -78,7 +81,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
             var parkingStallBlkNames = new List<string>();
             parkingStallBlkNames.AddRange(QueryBlkNames("机械车位"));
             parkingStallBlkNames.AddRange(QueryBlkNames("非机械车位"));
-            if(parkingStallBlkNames.Count == 0)
+            if (parkingStallBlkNames.Count == 0)
             {
                 return;
             }
@@ -115,8 +118,8 @@ namespace ThMEPWSS.SprinklerConnect.Data
                     for (; m < angleList.Count; m++)
                     {
                         if (Math.Abs(angleList[m] - list[0].Angle) < 3.0 / 180.0 * Math.PI
-                         || (Math.Abs(angleList[m] - list[0].Angle) > 177.0 / 180.0 * Math.PI 
-                         &&  Math.Abs(angleList[m] - list[0].Angle) < 183.0 / 180.0 * Math.PI)
+                         || (Math.Abs(angleList[m] - list[0].Angle) > 177.0 / 180.0 * Math.PI
+                         && Math.Abs(angleList[m] - list[0].Angle) < 183.0 / 180.0 * Math.PI)
                          || Math.Abs(angleList[m] - list[0].Angle) > 357.0 / 180.0 * Math.PI)
                         {
                             parkingStallSort[m].Add(stallList[i]);
@@ -127,7 +130,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
                     {
                         angleList.Add(list[0].Angle);
                         centerPts.Add(centerPt);
-                        parkingStallSort.Add(new List<Polyline>{ stallList[i] });
+                        parkingStallSort.Add(new List<Polyline> { stallList[i] });
                     }
                 }
                 else
@@ -200,7 +203,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
         private Polyline Extend(Polyline srcPoly, double value)
         {
             var pts = srcPoly.Vertices();
-            if(pts.Count == 5)
+            if (pts.Count == 5)
             {
                 var targetPoly = new Polyline
                 {

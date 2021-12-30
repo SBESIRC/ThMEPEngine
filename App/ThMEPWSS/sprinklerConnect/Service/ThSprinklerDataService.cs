@@ -12,7 +12,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    class ThSprinklerDataService
+    public class ThSprinklerDataService
     {
         public static Polyline GetFrame()
         {
@@ -76,35 +76,5 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             return nFrame;
         }
-
-        /// <summary>
-        /// 将数据转回原点。同时返回transformer
-        /// </summary>
-        /// <param name="geos"></param>
-        /// <returns></returns>
-        //public static ThMEPOriginTransformer transformToOrig(Point3dCollection pts, List<ThGeometry> geos)
-        //{
-        //    ThMEPOriginTransformer transformer = null;
-
-        //    if (pts.Count > 0)
-        //    {
-        //        var center = pts.Envelope().CenterPoint();
-        //        transformer = new ThMEPOriginTransformer(center);
-        //    }
-
-        //    foreach (var o in geos)
-        //    {
-        //        if (o.Boundary != null)
-        //        {
-        //            transformer.Transform(o.Boundary);
-        //        }
-        //    }
-
-        //    ThFireAlarmUtils.MoveToXYPlane(geos);
-
-        //    return transformer;
-        //}
-
-
     }
 }

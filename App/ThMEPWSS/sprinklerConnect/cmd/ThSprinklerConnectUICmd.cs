@@ -1,10 +1,11 @@
-﻿using AcHelper;
+﻿using System;
+
+using AcHelper;
 using Autodesk.AutoCAD.ApplicationServices;
 using DotNetARX;
 using Linq2Acad;
-using System;
+
 using ThMEPEngineCore.Command;
-using ThMEPWSS.Sprinkler.Service;
 using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.ViewModel;
 

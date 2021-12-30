@@ -1,8 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
 
 namespace ThMEPWSS.SprinklerConnect.Model
 {
@@ -17,7 +18,7 @@ namespace ThMEPWSS.SprinklerConnect.Model
         public List<Line> ConnectLines { get; set; } = new List<Line>();
         public Line Base
         {
-            get{ return new Line(StartPoint, EndPoint);}
+            get { return new Line(StartPoint, EndPoint); }
         }
 
         public object Clone()

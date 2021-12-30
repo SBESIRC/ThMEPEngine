@@ -1,31 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
-
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Operation.Relate;
 
 using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
-
-using ThMEPWSS.DrainageSystemDiagram;
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Engine;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
@@ -70,10 +58,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             dtOrthogonalSeg = dtOrthogonalSeg.Distinct().ToList();
             dtSeg = dtLinesAll.Distinct().ToList();
-
-            //DrawUtils.ShowGeometry(dtSeg, "l0DT", 154);
-            //DrawUtils.ShowGeometry(dtOrthogonalSeg, "l0DTO", 241);
-
             return dtOrthogonalSeg;
         }
 
@@ -197,8 +181,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     {
                         var angleChecker = Math.Abs(lineList[n].LineDirection().DotProduct(newLine.LineDirection())) > 0.998;
                         // 如果存在两条线段overlap，则退出循环
-                        if(angleChecker 
-                            && newLine.DistanceTo(lineList[n].StartPoint, false) < 1.0 
+                        if (angleChecker
+                            && newLine.DistanceTo(lineList[n].StartPoint, false) < 1.0
                             && newLine.DistanceTo(lineList[n].EndPoint, false) < 1.0)
                         {
                             break;
@@ -208,28 +192,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     // 当dtLines中没有重合线时
                     if (n == lineList.Count)
                     {
-                        //var m = 0;
-                        //for (; m < newAddedline.Count; m++)
-                        //{
-                        //    var angleChecker = Math.Abs(newAddedline[m].Delta.GetNormal().DotProduct(newLine.Delta.GetNormal())) > 0.998;
-                        //    // 如果存在两条线段overlap，且新线短于旧线，则进行替换
-                        //    if (angleChecker
-                        //        && newAddedline[m].DistanceTo(newLine.StartPoint, false) < 1.0
-                        //        && newAddedline[m].DistanceTo(newLine.EndPoint, false) < 1.0)
-                        //    {
-                        //        // 新生成的线短于原线，则进行替换
-                        //        if(newAddedline[m].Length - newLine.Length > 1.0)
-                        //        {
-                        //            newAddedline[m] = newLine;
-                        //        }
-                        //        break;
-                        //    }
-                        //}
-
                         // 添加新线
-                        //if (m == newAddedline.Count && AddLineToGroup(newLine, ref groupList, angleTol))
                         if (AddLineToGroup(newLine, ref groupList, angleTol))
-                            {
+                        {
                             newAddedline.Add(newLine);
                             lineList.Add(newLine);
                         }
@@ -244,7 +209,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="dtSeg"></param>
         /// <param name="groupList"></param>
         /// <param name="lengthTol"></param>
-        public static void AddShortLineToGroup(List<KeyValuePair<double, List<Line>>> groupList, 
+        public static void AddShortLineToGroup(List<KeyValuePair<double, List<Line>>> groupList,
             List<Point3d> pts, List<Line> subMainPipe, double lengthTol)
         {
             if (subMainPipe.Count == 0)
@@ -319,15 +284,15 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             var tempGroup = new List<KeyValuePair<double, List<Line>>>();
 
-            if (net.ptsGraph.Count > 1)
+            if (net.PtsGraph.Count > 1)
             {
                 var regroup = RegroupNetByDist(net, distTol);
 
-                tempGroup.AddRange ( SeparateNet(net, regroup));
+                tempGroup.AddRange(SeparateNet(net, regroup));
             }
             else
             {
-                tempGroup.Add(new KeyValuePair<double, List<Line>>(net.angle, net.GetGraphLines(0)));
+                tempGroup.Add(new KeyValuePair<double, List<Line>>(net.Angle, net.GetGraphLines(0)));
             }
 
             return tempGroup;
@@ -341,10 +306,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public static void FilterGroupNetByConvexHull(ref List<ThSprinklerNetGroup> netList)
         {
             var newNetList = new List<ThSprinklerNetGroup>();
-            netList = netList.OrderByDescending(x => x.pts.Count).ToList();
+            netList = netList.OrderByDescending(x => x.Pts.Count).ToList();
             var convexList = new List<Polyline>();
 
-            for (int i = 0; i < netList[0].ptsGraph.Count; i++)
+            for (int i = 0; i < netList[0].PtsGraph.Count; i++)
             {
                 var convex = GraphConvexHull(netList[0], i);
                 convexList.Add(convex);
@@ -358,10 +323,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var net = netList[i];
                 var lineList = new List<Line>();
 
-                for (int j = net.ptsGraph.Count - 1; j >= 0; j--)
+                for (int j = net.PtsGraph.Count - 1; j >= 0; j--)
                 {
                     var convex = GraphConvexHull(net, j);
-                    if(convex.Area < 1.0)
+                    if (convex.Area < 1.0)
                     {
                         continue;
                     }
@@ -376,7 +341,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
                 if (lineList.Count > 0)
                 {
-                    var newNet = ThSprinklerNetGraphService.CreateNetwork(net.angle, lineList);
+                    var newNet = ThSprinklerNetGraphService.CreateNetwork(net.Angle, lineList);
                     newNetList.Add(newNet);
                 }
             }
@@ -388,7 +353,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             var convexPl = new Polyline();
             var netI = net.GetGraphPts(graphIdx);
-            if(netI.Count < 3)
+            if (netI.Count < 3)
             {
                 return new Polyline();
             }
@@ -396,7 +361,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var netI2d = netI.Select(x => x.ToPoint2d()).ToList();
             //netI.ForEach(x => DrawUtils.ShowGeometry(x, "l4ConvexPts", 42, 30));
 
-            if(netI2d.Select(o => o.X).Distinct().Count() > 1 && netI2d.Select(o => o.Y).Distinct().Count() > 1)
+            if (netI2d.Select(o => o.X).Distinct().Count() > 1 && netI2d.Select(o => o.Y).Distinct().Count() > 1)
             {
                 var convex = netI2d.GetConvexHull();
                 for (int j = 0; j < convex.Count; j++)
@@ -413,7 +378,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var longLine = new Line(netI.First(), netI[netI.Count - 1]);
                 return longLine.Buffer(1.0);
             }
-                
+
         }
 
         /// <summary>
@@ -427,10 +392,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var distGroup = new Dictionary<int, List<int>>();
             distGroup.Add(0, new List<int> { 0 });
 
-            for (int i = 0; i < net.ptsGraph.Count; i++)
+            for (int i = 0; i < net.PtsGraph.Count; i++)
             {
                 var netPs = net.GetGraphPts(i);
-                for (int j = i + 1; j < net.ptsGraph.Count; j++)
+                for (int j = i + 1; j < net.PtsGraph.Count; j++)
                 {
                     var netNextPs = net.GetGraphPts(j);
                     var minDist = NearDist(netPs, netNextPs);
@@ -513,42 +478,18 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="net"></param>
         public static List<KeyValuePair<double, List<Line>>> SeparateNet(ThSprinklerNetGroup net, Dictionary<int, List<int>> group)
         {
-            var newGroup =new List<KeyValuePair<double, List<Line>>>();
+            var newGroup = new List<KeyValuePair<double, List<Line>>>();
 
             for (int i = 0; i < group.Count; i++)
             {
-                var groupTemp = new KeyValuePair<double, List<Line>>(net.angle, new List<Line>());
+                var groupTemp = new KeyValuePair<double, List<Line>>(net.Angle, new List<Line>());
                 var groupIdx = group.ElementAt(i).Value;
                 groupIdx.ForEach(x => groupTemp.Value.AddRange(net.GetGraphLines(x)));
-                newGroup.Add (groupTemp); 
+                newGroup.Add(groupTemp);
             }
 
             return newGroup;
 
-        }
-
-        /// <summary>
-        /// 检查A B是否是overlap或contains关系
-        /// </summary>
-        /// <param name="A"></param>
-        /// <param name="B"></param>
-        /// <returns></returns>
-        private static bool OverlapLine(Line A, Line B)
-        {
-            var bReturn = false;
-            var matrix = RelateOp.Relate(A.ToNTSLineString(), B.ToNTSLineString());
-            var r1 = matrix.IsCrosses(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
-            var r2 = matrix.IsOverlaps(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
-            var r3 = matrix.IsContains();
-            var r4 = matrix.IsCoveredBy();
-            //var r5 = matrix.IsTouches(NetTopologySuite.Geometries.Dimension.Surface, NetTopologySuite.Geometries.Dimension.Surface);
-
-            if (r1 == false && (r2 || r3 || r4))
-            {
-                bReturn = true;
-            }
-
-            return bReturn;
         }
 
         /// <summary>
@@ -625,7 +566,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="tol"></param>
         /// <param name="closePt"></param>
         /// <returns></returns>
-        public  static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList, bool extend = false)
+        public static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, out List<Point3d> ptList, bool extend = false)
         {
             ptList = new List<Point3d>();
             for (int i = 0; i < subMainPipe.Count; i++)
@@ -633,13 +574,13 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var closePt = subMainPipe[i].GetClosestPointTo(pt, false);
                 if (Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].LineDirection())) > 0.05)
                 {
-                    if(!extend || Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].LineDirection())) < 0.998)
+                    if (!extend || Math.Abs((closePt - pt).GetNormal().DotProduct(subMainPipe[i].LineDirection())) < 0.998)
                     {
                         continue;
                     }
                 }
                 var dist = closePt.DistanceTo(pt);
-                if(dist < tol)
+                if (dist < tol)
                 {
                     ptList.Add(closePt);
                 }

@@ -49,7 +49,7 @@ namespace ThMEPWSS.ViewModel
         private void ConnectClick()
         {
             SetFocusToDwgView();
-            using (var cmd = new ThSprinklerConnectCmd_test 
+            using (var cmd = new ThSprinklerConnectCommand
             {
                 ParameterFromUI=true,
                 LayoutDirection= Parameter .LayoutDirection

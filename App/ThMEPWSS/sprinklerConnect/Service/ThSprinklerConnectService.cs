@@ -1,10 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.SprinklerConnect.Model;
@@ -30,7 +32,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public List<ThSprinklerRowConnect> GraphPtsConnect(ThSprinklerNetGroup net, int graphIdx, List<Point3d> pipeScatters, bool isVertical = true)
         {
             // 给定索引所对应的图
-            var graph = net.ptsGraph[graphIdx];
+            var graph = net.PtsGraph[graphIdx];
             // 虚拟点
             var virtualPts = net.GetVirtualPts(graphIdx).OrderBy(pt => pt.X).ThenBy(pt => pt.Y).ToList();
             // 虚拟点在pts中的索引集
@@ -83,7 +85,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var edgeNode = virtualNode.FirstEdge;
                         while (edgeNode != null)
                         {
-                            var firstPt = net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
+                            var firstPt = net.Pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
                             if (SprinklerSearched.Contains(firstPt)
                                 || sprinklerSearched.Contains(firstPt)
                                 || pipeScatters.Contains(firstPt)
@@ -94,7 +96,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             }
 
                             // 图中虚拟点所在的线段
-                            var edge = new Line(net.pts[virtualNode.NodeIndex], firstPt);
+                            var edge = new Line(net.Pts[virtualNode.NodeIndex], firstPt);
                             if (!edge.IsOrthogonal(SprinklerParameter.SubMainPipe))
                             {
                                 edgeNode = edgeNode.Next;
@@ -112,7 +114,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 realPtsSearchedTemp.Add(firstPt);
                                 // 记录点位及其对应的顺序
                                 var order = 0;
-                                var virtualPt = net.pts[virtualNode.NodeIndex];
+                                var virtualPt = net.Pts[virtualNode.NodeIndex];
                                 var rowConnect = new ThSprinklerRowConnect();
                                 rowConnect.OrderDict.Add(order++, new List<Point3d> { virtualPt });
                                 rowConnect.OrderDict.Add(order++, new List<Point3d> { firstPt });
@@ -214,7 +216,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     rowConnect.IsStallArea = false;
                                 }
 
-                                var edgeIndex = graph.SearchNodeIndex(net.pts.IndexOf(realPts[i]));
+                                var edgeIndex = graph.SearchNodeIndex(net.Pts.IndexOf(realPts[i]));
                                 while (KeepSearching1(graph, net, edgeIndex, SprinklerParameter.SprinklerPt, graphPts, out var newIdx,
                                     realPtsSearchedTemp, sprinklerSearched, dirction, virtualPts, virtualPt, rowConnect, order))
                                 {
@@ -269,9 +271,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 var edgeNode = virtualNode.FirstEdge;
                                 while (edgeNode != null)
                                 {
-                                    var firstPt = net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
+                                    var firstPt = net.Pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
                                     // 图中虚拟点所在的线段
-                                    var edge = new Line(net.pts[virtualNode.NodeIndex], firstPt);
+                                    var edge = new Line(net.Pts[virtualNode.NodeIndex], firstPt);
                                     if (!edge.IsOrthogonal(SprinklerParameter.SubMainPipe))
                                     {
                                         edgeNode = edgeNode.Next;
@@ -298,11 +300,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     realPtsSearchedTemp.Add(firstPt);
                                     // 记录点位及其对应的顺序
                                     var order = 0;
-                                    var virtualPt = net.pts[virtualNode.NodeIndex];
+                                    var virtualPt = net.Pts[virtualNode.NodeIndex];
                                     rowConnect.OrderDict.Add(order++, new List<Point3d> { virtualPt });
                                     rowConnect.OrderDict.Add(order++, new List<Point3d> { firstPt });
                                     rowConnect.Count++;
-                                    rowConnect.StartPoint = net.pts[virtualNode.NodeIndex];
+                                    rowConnect.StartPoint = net.Pts[virtualNode.NodeIndex];
                                     rowConnect.EndPoint = firstPt;
 
                                     var edgeIndex = edgeNode.EdgeIndex;
@@ -368,9 +370,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 var edgeNode = virtualNode.FirstEdge;
                                 while (edgeNode != null)
                                 {
-                                    var firstPt = net.pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
+                                    var firstPt = net.Pts[graph.SprinklerVertexNodeList[edgeNode.EdgeIndex].NodeIndex];
                                     // 图中虚拟点所在的线段
-                                    var edge = new Line(net.pts[virtualNode.NodeIndex], firstPt);
+                                    var edge = new Line(net.Pts[virtualNode.NodeIndex], firstPt);
                                     if (!edge.IsOrthogonal(SprinklerParameter.SubMainPipe))
                                     {
                                         edgeNode = edgeNode.Next;
@@ -400,11 +402,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                         realPtsSearchedTemp.Add(firstPt);
                                         // 记录点位及其对应的顺序
                                         var order = 0;
-                                        var virtualPt = net.pts[virtualNode.NodeIndex];
+                                        var virtualPt = net.Pts[virtualNode.NodeIndex];
                                         rowConnect.OrderDict.Add(order++, new List<Point3d> { virtualPt });
                                         rowConnect.OrderDict.Add(order++, new List<Point3d> { firstPt });
                                         rowConnect.Count++;
-                                        rowConnect.StartPoint = net.pts[virtualNode.NodeIndex];
+                                        rowConnect.StartPoint = net.Pts[virtualNode.NodeIndex];
                                         rowConnect.EndPoint = firstPt;
 
                                         var edgeIndex = edgeNode.EdgeIndex;
@@ -672,7 +674,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
         }
 
-
         public List<ThSprinklerRowConnect> RowSeparation(List<ThSprinklerRowConnect> connection, bool isVertical = true)
         {
             var results = new List<ThSprinklerRowConnect>();
@@ -924,7 +925,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             List<ThSprinklerRowConnect> rowConnection, List<Point3d> pipeScatters, List<Polyline> smallRooms, List<Polyline> obstacle)
         {
             // 给定索引所对应的图
-            var graph = net.ptsGraph[graphIdx];
+            var graph = net.PtsGraph[graphIdx];
             // 图中的所有点位，包括虚拟点
             var graphPts = net.GetGraphPts(graphIdx);
             // 虚拟点
@@ -960,14 +961,14 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         continue;
                     }
 
-                    var edgeIndex = graph.SearchNodeIndex(net.pts.IndexOf(realPts[i]));
+                    var edgeIndex = graph.SearchNodeIndex(net.Pts.IndexOf(realPts[i]));
                     var vertexNode = graph.SprinklerVertexNodeList[edgeIndex];
-                    var ptNext = net.pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
+                    var ptNext = net.Pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
 
                     var node = vertexNode.FirstEdge;
 
                     var vaildNode = 0;
-                    if (!net.ptsVirtual.Contains(ptNext) && !seachedPts.Contains(ptNext) && !SprinklerSearched.Contains(ptNext))
+                    if (!net.PtsVirtual.Contains(ptNext) && !seachedPts.Contains(ptNext) && !SprinklerSearched.Contains(ptNext))
                     {
                         vaildNode++;
                     }
@@ -975,8 +976,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     while (node.Next != null)
                     {
                         node = node.Next;
-                        var ptNextTemp = net.pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
-                        if (!net.ptsVirtual.Contains(ptNextTemp) && !seachedPts.Contains(ptNextTemp) && !SprinklerSearched.Contains(ptNextTemp))
+                        var ptNextTemp = net.Pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+                        if (!net.PtsVirtual.Contains(ptNextTemp) && !seachedPts.Contains(ptNextTemp) && !SprinklerSearched.Contains(ptNextTemp))
                         {
                             vaildNode++;
                             ptNext = ptNextTemp;
@@ -1008,7 +1009,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     while (KeepSearching3(graph, net, startDirection, seachedPts, ptList, ref ptNextIndex,
                         pipeScatters, pipeScattersTemp, virtualPts, ref scatterCount))
                     {
-                        edge = new Line(realPts[i], net.pts[graph.SprinklerVertexNodeList[ptNextIndex].NodeIndex]);
+                        edge = new Line(realPts[i], net.Pts[graph.SprinklerVertexNodeList[ptNextIndex].NodeIndex]);
                     }
 
                     if (scatterCount > 1)
@@ -1149,8 +1150,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             // 返回是否退出当前索引的循环
             // 搜索下一个点位
             var vertexNode = graph.SprinklerVertexNodeList[edgeIndex];
-            var originalPt = net.pts[vertexNode.NodeIndex];
-            var ptNext = net.pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
+            var originalPt = net.Pts[vertexNode.NodeIndex];
+            var ptNext = net.Pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
             var edgeNext = new Line(originalPt, ptNext);
             var node = vertexNode.FirstEdge;
             newIdx = vertexNode.FirstEdge.EdgeIndex;
@@ -1164,7 +1165,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 if (node.Next != null)
                 {
                     node = node.Next;
-                    ptNext = net.pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+                    ptNext = net.Pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
                     edgeNext = new Line(originalPt, ptNext);
                     newIdx = node.EdgeIndex;
                 }
@@ -1178,7 +1179,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     if (ptSearched && !virtualPtSearched)
                     {
                         ptNext = firstPt;
-                        newIdx = graph.SearchNodeIndex(net.pts.IndexOf(ptNext));
+                        newIdx = graph.SearchNodeIndex(net.Pts.IndexOf(ptNext));
                         if (newIdx == -1
                             || SprinklerSearched.Contains(ptNext)
                             || sprinklerSearched.Contains(ptNext)
@@ -1202,7 +1203,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         if (firstPt.DistanceTo(originalPt) < firstVirtualPt.DistanceTo(originalPt))
                         {
                             ptNext = firstPt;
-                            newIdx = graph.SearchNodeIndex(net.pts.IndexOf(ptNext));
+                            newIdx = graph.SearchNodeIndex(net.Pts.IndexOf(ptNext));
                             if (SprinklerSearched.Contains(ptNext) || sprinklerSearched.Contains(ptNext) || realPtsSearchedTemp.Contains(ptNext))
                             {
                                 return false;
@@ -1280,8 +1281,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             // 返回是否退出当前索引的循环
             // 搜索下一个点位
             var vertexNode = graph.SprinklerVertexNodeList[edgeIndex];
-            var originalPt = net.pts[vertexNode.NodeIndex];
-            var ptNext = net.pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
+            var originalPt = net.Pts[vertexNode.NodeIndex];
+            var ptNext = net.Pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
             var edgeNext = new Line(originalPt, ptNext);
             var node = vertexNode.FirstEdge;
             newIdx = vertexNode.FirstEdge.EdgeIndex;
@@ -1294,7 +1295,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 if (node.Next != null)
                 {
                     node = node.Next;
-                    ptNext = net.pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+                    ptNext = net.Pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
                     edgeNext = new Line(originalPt, ptNext);
                     newIdx = node.EdgeIndex;
                 }
@@ -1307,7 +1308,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     if (ptSearched && !virtualPtSearched)
                     {
                         ptNext = firstPt;
-                        newIdx = graph.SearchNodeIndex(net.pts.IndexOf(ptNext));
+                        newIdx = graph.SearchNodeIndex(net.Pts.IndexOf(ptNext));
                         if (newIdx == -1
                             || realPtsSearchedTemp.Contains(ptNext))
                         {
@@ -1329,7 +1330,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         if (firstPt.DistanceTo(originalPt) < firstVirtualPt.DistanceTo(originalPt))
                         {
                             ptNext = firstPt;
-                            newIdx = graph.SearchNodeIndex(net.pts.IndexOf(ptNext));
+                            newIdx = graph.SearchNodeIndex(net.Pts.IndexOf(ptNext));
                             if (realPtsSearchedTemp.Contains(ptNext))
                             {
                                 return false;
@@ -1390,8 +1391,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             // tag
             var vertexNode = graph.SprinklerVertexNodeList[ptNextIndex];
-            var startPoint = net.pts[vertexNode.NodeIndex];
-            var ptNext = net.pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
+            var startPoint = net.Pts[vertexNode.NodeIndex];
+            var ptNext = net.Pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
             var edge = new Line(startPoint, ptNext);
             var node = vertexNode.FirstEdge;
 
@@ -1403,7 +1404,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 if (node.Next != null)
                 {
                     node = node.Next;
-                    ptNext = net.pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
+                    ptNext = net.Pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
                     edge = new Line(startPoint, ptNext);
                 }
                 else
@@ -2052,7 +2053,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             List<ThSprinklerRowConnect> rowConnection, List<Polyline> smallRooms, List<Point3d> pipeScatters, List<Polyline> obstacle)
         {
             // 给定索引所对应的图
-            var graph = net.ptsGraph[graphIdx];
+            var graph = net.PtsGraph[graphIdx];
             // 图中的所有点位，包括虚拟点
             var graphPts = net.GetGraphPts(graphIdx);
             // 虚拟点

@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.ComponentModel;
-using ThMEPWSS.Sprinkler.Analysis;
+﻿using System.ComponentModel;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 
@@ -12,7 +10,7 @@ namespace ThMEPWSS.SprinklerConnect.Model
 
         public ThSprinklerConnectUIModel()
         {
-            var items = new List<string>{ "垂直","平行"};
+            var items = new List<string> { "垂直", "平行" };
             LayoutDirections = new ObservableCollection<string>(items);
             layoutDirection = items[0];
         }

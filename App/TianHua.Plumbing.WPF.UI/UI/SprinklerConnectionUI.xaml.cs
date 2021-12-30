@@ -1,7 +1,4 @@
-﻿using System.Windows.Input;
-using ThControlLibraryWPF.CustomControl;
-
-using ThMEPWSS;
+﻿using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -14,11 +11,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             Instance = new SprinklerConnectionUI();
         }
-        
+
         private SprinklerConnectionUI()
         {
             InitializeComponent();
-            if(VM==null)
+            if (VM == null)
             {
                 VM = new ThSprinklerConnectVM();
             }

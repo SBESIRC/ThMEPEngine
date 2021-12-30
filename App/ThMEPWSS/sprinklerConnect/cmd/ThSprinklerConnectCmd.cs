@@ -1,50 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-
 using NetTopologySuite.Operation.Relate;
-using AcHelper;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 
-using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Command;
-
 using ThMEPWSS.DrainageSystemDiagram;
-
-using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Data;
-using ThMEPWSS.SprinklerConnect.Engine;
-using ThMEPWSS.SprinklerConnect.Model;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
 
     public partial class ThSprinklerConnectNoUICmd
     {
-        [CommandMethod("TIANHUACAD", "THSprinkConn", CommandFlags.Modal)]
-        public void THSprinkConnCmd()
-        {
-            var cmd = new ThSprinklerConnectCmd();
-            cmd.Execute();
-        }
-
-
         [CommandMethod("TIANHUACAD", "testLineOverlap", CommandFlags.Modal)]
         public void TestLineOverlap()
         {
-
             var aa = new Line(new Point3d(100, 0, 0), new Point3d(200, 0, 0));
             var ab = new Line(new Point3d(250, 0, 0), new Point3d(150, 0, 0));
 
@@ -91,84 +62,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var an9 = am.IsTouches(NetTopologySuite.Geometries.Dimension.Curve, NetTopologySuite.Geometries.Dimension.Curve);
                 var an10 = am.IsWithin();
             }
-
         }
-
-
-    }
-
-
-    public class ThSprinklerConnectCmd : ThMEPBaseCommand
-    {
-        public Dictionary<string, List<string>> BlockNameDict { get; set; } = new Dictionary<string, List<string>>();
-
-        public ThSprinklerConnectCmd()
-        {
-
-        }
-
-        public override void SubExecute()
-        {
-            SprinklerConnectExecute();
-        }
-
-        public void SprinklerConnectExecute()
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-
-                var frame = ThSprinklerDataService.GetFrame();
-                if (frame == null || frame.Area < 10)
-                {
-                    return;
-                }
-
-                //点位
-                var SprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
-        
-                //提取车位
-                var singleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_SingleCar);
-                var doubleCarParking = ThSprinklerConnectDataFactory.GetCarData(frame, ThSprinklerConnectCommon.Layer_DoubleCar);
-                //DrawUtils.ShowGeometry(singleCarParking, "l0singleCar", 22, 30);
-                //DrawUtils.ShowGeometry(doubleCarParking, "l0doubleCar", 22, 30);
-
-                //提取管子
-                //var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_MainPipe);
-                //var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(frame, ThSprinklerConnectCommon.Layer_SubMainPipe);
-
-               
-                if (SprinklerPts.Count == 0)
-                {
-                    return;
-                }
-
-                //var dataset = new ThSprinklerConnectDataFactory();
-                //   var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
-                //   var dataQuery = new ThSprinklerDataQueryService(geos);
-                //   dataQuery.ClassifyData();
-                
-                //转回原点
-                //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
-
-                //打散管线
-                //ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
-                //DrawUtils.ShowGeometry(mainLine, "l0mainline", 22, 30);
-                //DrawUtils.ShowGeometry(subMainLine, "l0submainline", 142, 30);
-                //DrawUtils.ShowGeometry(allLines, "l0all", 2, 30);
-
-
-                var sprinklerParameter = new ThSprinklerParameter();
-                sprinklerParameter.SprinklerPt = SprinklerPts;
-                //sprinklerParameter.MainPipe = mainLine;
-                //sprinklerParameter.SubMainPipe = subMainLine;
-                //sprinklerParameter.AllPipe = allLines;
-
-                //ThSprinklerConnectEngine.SprinklerConnectEngine(sprinklerParameter);
-
-            }
-        }
-
-
     }
 }

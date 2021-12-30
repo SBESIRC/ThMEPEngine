@@ -14,7 +14,6 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using ThMEPWSS.Service;
 using ThMEPEngineCore;
 
 namespace ThMEPWSS.SprinklerConnect.Service

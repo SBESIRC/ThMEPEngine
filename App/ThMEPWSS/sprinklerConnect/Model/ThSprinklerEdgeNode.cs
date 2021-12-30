@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.SprinklerConnect.Model
@@ -37,8 +33,8 @@ namespace ThMEPWSS.SprinklerConnect.Model
         public ThSprinklerGraph()
         {
             this.SprinklerVertexNodeList = new List<ThSprinklerVertexNode>();
-
         }
+
         public void AddVertex(int ptIndex)
         {
             if (SearchNodeIndex(ptIndex) == -1)
@@ -75,30 +71,6 @@ namespace ThMEPWSS.SprinklerConnect.Model
 
                 }
             }
-
-        }
-
-        public List<Line> print(List<Point3d> pts)
-        {
-            var lines = new List<Line>();
-
-            for (int i = 0; i < SprinklerVertexNodeList.Count; i++)
-            {
-                var node = SprinklerVertexNodeList[i].FirstEdge;
-                while (node != null)
-                {
-                    var l = new Line(pts[SprinklerVertexNodeList[i].NodeIndex], pts[SprinklerVertexNodeList[node.EdgeIndex].NodeIndex]);
-
-           
-
-                    if (containLine(l, lines) == false)
-                    {
-                        lines.Add(l);
-                    }
-                    node = node.Next;
-                }
-            }
-            return lines;
         }
 
         /// <summary>
@@ -117,20 +89,5 @@ namespace ThMEPWSS.SprinklerConnect.Model
 
             return idx;
         }
-
-        private bool containLine(Line l, List<Line> lList)
-        {
-            var tol = new Tolerance(10, 10);
-            var bReturn = false;
-            var contains = lList.Where(x => (x.StartPoint.IsEqualTo(l.StartPoint, tol) && x.EndPoint.IsEqualTo(l.EndPoint, tol)) ||
-                                           (x.EndPoint.IsEqualTo(l.StartPoint, tol) && x.StartPoint.IsEqualTo(l.EndPoint, tol)));
-            if (contains.Count() > 0)
-            {
-                bReturn = true;
-            }
-
-            return bReturn;
-        }
-
     }
 }

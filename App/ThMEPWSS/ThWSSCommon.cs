@@ -82,7 +82,5 @@
         public static string Sprinkler_Connect_MainPipe = "W-喷淋-不接支管主管";
         public static string Sprinkler_Connect_SubMainPipe = "W-喷淋-连接支管主管";
         public static string Sprinkler_Connect_Pipe = "W-FRPT-SPRL-PIPE";
-
-        
     }
 }

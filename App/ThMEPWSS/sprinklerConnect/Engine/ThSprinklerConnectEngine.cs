@@ -1,15 +1,15 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 
-using ThCADExtension;
 using ThCADCore.NTS;
+using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPEngineCore;
 
 namespace ThMEPWSS.SprinklerConnect.Engine
 {
@@ -45,7 +45,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             for (int i = 0; i < netList.Count; i++)
             {
                 // < netList[i].ptsGraph.Count
-                for (int j = 0; j < netList[i].ptsGraph.Count; j++)
+                for (int j = 0; j < netList[i].PtsGraph.Count; j++)
                 {
                     rowConnection.AddRange(service.GraphPtsConnect(netList[i], j, pipeScatters, isVertical));
                 }
@@ -65,7 +65,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             for (int i = 0; i < netList.Count; i++)
             {
                 // < netList[i].ptsGraph.Count
-                for (int j = 0; j < netList[i].ptsGraph.Count; j++)
+                for (int j = 0; j < netList[i].PtsGraph.Count; j++)
                 {
                     service.HandleConsequentScatter(netList[i], j, rowConnection, pipeScatters, smallRooms, obstacle);
                 }
@@ -79,7 +79,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             for (int i = 0; i < netList.Count; i++)
             {
                 // < netList[i].ptsGraph.Count
-                for (int j = 0; j < netList[i].ptsGraph.Count; j++)
+                for (int j = 0; j < netList[i].PtsGraph.Count; j++)
                 {
                     service.HandleSprinklerInSmallRoom(netList[i], j, rowConnection, smallRooms, pipeScatters, obstacle);
                 }
@@ -96,7 +96,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             Present(results);
         }
 
-        private static List<Line> GetLaneLine(List<Polyline> doubleStall)
+        private List<Line> GetLaneLine(List<Polyline> doubleStall)
         {
             var laneLine = new List<Line>();
             doubleStall.ForEach(o =>
@@ -108,7 +108,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             return laneLine;
         }
 
-        private static void Present(List<Line> results)
+        private void Present(List<Line> results)
         {
             using (var acadDatabase = AcadDatabase.Active())
             {

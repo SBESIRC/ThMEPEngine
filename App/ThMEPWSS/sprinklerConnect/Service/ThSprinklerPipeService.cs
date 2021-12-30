@@ -6,13 +6,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
 using ThCADExtension;
-
 using ThMEPWSS.DrainageSystemDiagram;
-
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    internal class ThSprinklerPipeService
+    public class ThSprinklerPipeService
     {
         /// <summary>
         /// 打散干管和支干管。
@@ -55,7 +53,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
 
         }
-
 
         public static void ThSprinklerPipeToLine2(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine, out List<Line> allLine)
         {
@@ -115,10 +112,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             if (ThSprinklerLineService.IsParallelAngle(A.Angle, B.Angle, angelTol))
             {
                 var i = 0;
-
-                i = i + Convert.ToInt16(B.IsPointOnCurve(A.StartPoint, tol));
-                i = i + Convert.ToInt16(B.IsPointOnCurve(A.EndPoint, tol));
-
+                i += Convert.ToInt16(B.IsPointOnCurve(A.StartPoint, tol));
+                i += Convert.ToInt16(B.IsPointOnCurve(A.EndPoint, tol));
                 if (i == 2)
                 {
                     bReturn = true;
@@ -127,7 +122,5 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             return bReturn;
         }
-
-
     }
 }

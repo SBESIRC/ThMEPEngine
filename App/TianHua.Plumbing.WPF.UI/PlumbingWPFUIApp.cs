@@ -279,7 +279,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THPTLGBZ", CommandFlags.Modal)]
         public void THSprinkConnUICmd()
         {
-            ThSprinklerConnectCmd_test.BlockNameDict =
+            ThSprinklerConnectCommand.BlockNameDict =
                 uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             if (null != SprinklerConnectionUI.Instance && SprinklerConnectionUI.Instance.IsLoaded)
             {
@@ -295,8 +295,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "-THPTLGBZ", CommandFlags.Modal)]
         public void THSprinkConnCLICmd()
         {
-            var cmd = new ThSprinklerConnectCmd_test();
-            ThSprinklerConnectCmd_test.BlockNameDict =
+            var cmd = new ThSprinklerConnectCommand();
+            ThSprinklerConnectCommand.BlockNameDict =
                 uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             cmd.SprinklerConnectExecute();
         }
