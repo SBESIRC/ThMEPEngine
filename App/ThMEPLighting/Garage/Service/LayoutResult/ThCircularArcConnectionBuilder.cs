@@ -38,11 +38,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = Wires.Union(jumpWire);
 
             // 创建T型路口的连线
-            var threewayJumpWire = CreateThreeWayJumpWire();
+            //var threewayJumpWire = CreateThreeWayJumpWire();
+            var threewayJumpWire = new DBObjectCollection();
             Wires = Wires.Union(threewayJumpWire);
 
             // 创建十字路口的连线
-            var crossJumpWire = CreateCrossJumpWire();
+            //var crossJumpWire = CreateCrossJumpWire();
+            var crossJumpWire = new DBObjectCollection();
             Wires = Wires.Union(crossJumpWire);
 
             // 与灯具避梁
