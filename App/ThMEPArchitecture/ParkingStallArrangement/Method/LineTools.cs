@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,6 +80,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return true;
             }
             return false;
+        }
+
+        public static Point3d GetCenterPt(this Line line)
+        {
+            var spt = line.StartPoint;
+            var ept = line.EndPoint;
+            return PtTools.GetMiddlePt(spt, ept);
+        }
+
+        public static bool EqualsTo(this List<Line> lines1, List<Line> lines2)
+        {
+            var sortLines1 = lines1.OrderBy(l => l.GetCenterPt().X).ThenByDescending(l => l.GetCenterPt().Y).ToList();//从左向右，从上到下
+            var sortLines2 = lines2.OrderBy(l => l.GetCenterPt().X).ThenByDescending(l => l.GetCenterPt().Y).ToList();//从左向右，从上到下
+            for (int i =0; i < sortLines1.Count; i++)
+            {
+                if(!sortLines1[i].EqualsTo(sortLines2[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
