@@ -33,14 +33,17 @@ namespace ThMEPEngineCore.ConnectWiring
     {
         public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false)
         {
+            //获取所有的块
+            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
+            if(!allConfigBlocks.Any())
+            {
+                return;
+            }
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
             {
                 return;
             }
-
-            //获取所有的块
-            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
             ThBlockPointsExtractor thBlockPointsExtractor = new ThBlockPointsExtractor(allConfigBlocks);
             using (AcadDatabase db = AcadDatabase.Active())
             {
@@ -50,7 +53,14 @@ namespace ThMEPEngineCore.ConnectWiring
             BranchConnectingService branchConnecting = new BranchConnectingService();
             //BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
-            var data = GetData(holes, outFrame, block, wall, column);
+            var data = GetData(holes, outFrame, block, !wall, !column);
+
+            var CenterLine = new List<ThGeometry>();
+            //CenterLine.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
+            //CenterLine.AddRange(GetUCSPolylines(outFrame,objs));
+            //string path = @"D:\LogFile\Data{0}.geojson";
+            //string path1 = @"D:\LogFile\ReData{0}.geojson";
+            //int index = 0;
             foreach (var info in configInfo)
             {
                 var blockInfos = info.loopInfoModels.First().blocks;
@@ -76,12 +86,14 @@ namespace ThMEPEngineCore.ConnectWiring
                         MaxLoopCount = maxNum,
                     };
                     var allDatas = new List<ThGeometry>(data);
+                    allDatas.AddRange(CenterLine);
+                    
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
-                    //allDatas.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
-                    //allDatas.AddRange(GetUCSPolylines(objs));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
                     var res = thCableRouter.RouteCable(dataGeoJson, context);
+                    //ThMEPGeoJSONService.Export2File(dataGeoJson, string.Format(path, ++index));
+                    //ThMEPGeoJSONService.Export2File(res, string.Format(path1, index));
                     if (!res.Contains("error"))
                     {
                         var lines = new List<Polyline>();
@@ -314,6 +326,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var resPoly = ThMPolygonTool.CreateMPolygon(o, polys.Cast<Curve>().ToList());
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.UCSPolyline.ToString());
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.VectorName, new Vector3d(1,0,0).ToString());
                     geometry.Boundary = resPoly;
                     geos.Add(geometry);
                 });
@@ -322,8 +335,41 @@ namespace ThMEPEngineCore.ConnectWiring
             return geos;
         }
 
+        private List<ThGeometry> GetUCSPolylines(Polyline frame, DBObjectCollection centerPolygon)
+        {
+            var geos = new List<ThGeometry>();
+            List<Entity> allUCSPolys = new List<Entity>();
+            var objs = frame.DifferenceMP(centerPolygon);
+            if (objs.Count > 0)
+            {
+                foreach (Entity entity in objs)
+                {
+                    if(entity is Polyline polyline)
+                    {
+                        if (polyline.Area < 10000)
+                            continue;
+                    }
+                    else if(entity is MPolygon mPolygon)
+                    {
+                        if (mPolygon.Area < 10000)
+                            continue;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.UCSPolyline.ToString());
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.VectorName, new Vector3d(1, 0, 0).ToString());
+                    geometry.Boundary = entity;
+                    geos.Add(geometry);
+                }
+            }
+            return geos;
+        }
+
         /// <summary>
-        /// 获取ucs框线
+        /// 获取中心线区域框线
         /// </summary>
         /// <returns></returns>
         private List<ThGeometry> GetCenterLinePolylines(out DBObjectCollection objs)

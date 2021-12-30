@@ -53,7 +53,7 @@ namespace ThMEPEngineCore.IO.GeoJSON
                 }
                 else if (Geometry is DBPoint dbPoint)
                 {
-                    var geo = new Point(dbPoint.Position.ToNTSCoordinate());
+                    var geo = dbPoint.ToNTSPoint();
                     var attributesTable = new AttributesTable(Attributes);
                     var feature = new Feature(geo, attributesTable);
                     return feature;

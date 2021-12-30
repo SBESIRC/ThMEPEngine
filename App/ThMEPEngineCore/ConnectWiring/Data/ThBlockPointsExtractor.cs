@@ -132,11 +132,19 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                             {
                                 continue;
                             }
-
-                            var resBlock = dbObj.Clone() as BlockReference;
-                            resBlock.TransformBy(matrix);
-                            var mcs2wcs = resBlock.BlockTransform.PreMultiplyBy(matrix);
-                            results.AddRange(DoExtract(resBlock, mcs2wcs, acadDatabase));
+                            try
+                            {
+                                var resBlock = dbObj.Clone() as BlockReference;
+                                resBlock.TransformBy(matrix);
+                                var mcs2wcs = resBlock.BlockTransform.PreMultiplyBy(matrix);
+                                results.AddRange(DoExtract(resBlock, mcs2wcs, acadDatabase));
+                            }
+                            catch
+                            {
+                                // 可能遇到NonUniform Scaling异常
+                                // 暂时忽略掉这样的图块
+                                continue;
+                            }
                         }
                     }
                 }

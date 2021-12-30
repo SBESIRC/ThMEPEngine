@@ -82,14 +82,15 @@ namespace ThMEPEngineCore.ConnectWiring.Service
             var resWirings = new List<Polyline>();
             foreach (var block in loopBlocks)
             {
-                if (!allPath.Keys.Contains(block.Position))
+                var point = allPath.FirstOrDefault(o => o.Key.DistanceTo(block.Position) < 1E-15).Key;
+                if (point.Equals(Point3d.Origin))
                 {
                     continue;
                 }
-                var path = allPath[block.Position];
+                var path = allPath[point];
                 if (path != null)
                 {
-                    var loopWiring = wirings.Where(x => path.Any(y => y.IsEqualTo(x.StartPoint, new Tolerance(1, 1))) 
+                    var loopWiring = wirings.Where(x => path.Any(y => y.IsEqualTo(x.StartPoint, new Tolerance(1, 1)))
                         && path.Any(y => y.IsEqualTo(x.EndPoint, new Tolerance(1, 1)))).ToList();
                     resWirings.AddRange(loopWiring);
                 }

@@ -4,10 +4,11 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPLighting.ServiceModels
 {
-    public class LoopConfig
+    public class LoopConfig 
     {
         /// <summary>
         /// 系统类型
@@ -23,7 +24,7 @@ namespace ThMEPLighting.ServiceModels
         public ObservableCollection<ConfigModel> configModels { get; set; }
     }
 
-    public class ConfigModel
+    public class ConfigModel : NotifyPropertyChangedBase
     {
         public static string loopTypeColumn = "连线内容";
         public static string layerTypeColumn = "图层";
@@ -64,6 +65,8 @@ namespace ThMEPLighting.ServiceModels
             set
             {
                 check = value;
+                
+                this.RaisePropertyChanged();
             }
         }
     }

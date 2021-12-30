@@ -46,6 +46,7 @@ namespace ThMEPLighting.UI.WiringConnecting
             {
                 ThMEPLightingService.Instance.AFASParameter = new List<ThFireAlarmModel>();
                 ThMEPLightingService.Instance.AFASParameter = ThMEPLightingService.ConvertToFireAlarmModel(ThWiringSettingUI.settingVM.configLst);
+                ThMEPLightingService.Instance.AvoidColumnChecked =ThWiringSettingUI.settingVM.AvoidColumnChecked.Value;
 
                 //聚焦到CAD
                 SetFocusToDwgView();
