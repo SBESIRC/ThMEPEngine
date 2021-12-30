@@ -271,11 +271,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outline"></param>
         /// <param name="toleranceDegree"></param>
         /// <returns></returns>
-        public static Point3d BestConnectPt(Point3d basePt, Point3d verticalPt, List<Point3d> fstPts, List<Point3d> thdPts, 
-            HashSet<Polyline> walls, Line closetLine, double toleranceDegree = Math.PI / 4)
+        public static Point3d BestConnectPt(Point3d basePt, Point3d verticalPt, List<Point3d> fstPts, List<Point3d> thdPts,
+            HashSet<Polyline> walls, Line closetLine, double toleranceDegree = Math.PI / 4, double MaxBeamLength = 13000)
         {
             double baseRadius = basePt.DistanceTo(verticalPt) / Math.Cos(toleranceDegree);
-            baseRadius = baseRadius > 13000 ? 13000 : baseRadius;
+            baseRadius = baseRadius > MaxBeamLength ? MaxBeamLength : baseRadius;
             double curDis;
             Point3d tmpPt = verticalPt;
             double minDis = baseRadius;
@@ -716,7 +716,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 将点的连接增加至4个
         /// </summary>
         /// <param name="dicTuples"></param>
-        public static void AddConnectUpToFour(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, HashSet<Point3d> itcNearPts = null)
+        public static void AddConnectUpToFour(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection basePts, HashSet<Point3d> itcNearPts = null, double MaxBeamLength = 13000)
         {
             double partice = Math.PI / 36;
             foreach (Point3d basePt in basePts)
@@ -735,7 +735,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         var baseVector = (nowCntPts[0] - basePt).GetNormal();
                         for (int i = 1; i <= 3; ++i)
                         {
-                            var ansPt = GetObject.GetPointByDirectionB(basePt ,baseVector.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis), basePts, partice * 5, 13000);
+                            var ansPt = GetObject.GetPointByDirectionB(basePt ,baseVector.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis), basePts, partice * 5, MaxBeamLength);
                             AddLineTodicTuples(basePt, ansPt, ref dicTuples);
                         }
                     }
@@ -746,23 +746,23 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         double baseAngel = vecA.GetAngleTo(vecB);
                         if (baseAngel > partice * 18 && baseAngel < partice * 22)
                         {
-                            var ansPtA = GetObject.GetPointByDirectionB(basePt, -vecA, basePts, partice * 5, 13000);
+                            var ansPtA = GetObject.GetPointByDirectionB(basePt, -vecA, basePts, partice * 5, MaxBeamLength);
                             AddLineTodicTuples(basePt, ansPtA, ref dicTuples);
-                            var ansPtB = GetObject.GetPointByDirectionB(basePt, -vecB, basePts, partice * 5, 13000);
+                            var ansPtB = GetObject.GetPointByDirectionB(basePt, -vecB, basePts, partice * 5, MaxBeamLength);
                             AddLineTodicTuples(basePt, ansPtB, ref dicTuples);
                         }
                         else if(baseAngel > Math.PI - partice * 4)
                         {
-                            var ansPtA = GetObject.GetPointByDirectionB(basePt, vecA + vecB, basePts, partice * 5, 13000);
+                            var ansPtA = GetObject.GetPointByDirectionB(basePt, vecA + vecB, basePts, partice * 5, MaxBeamLength);
                             AddLineTodicTuples(basePt, ansPtA, ref dicTuples);
-                            var ansPtB = GetObject.GetPointByDirectionB(basePt, -vecA - vecB, basePts, partice * 5, 13000);
+                            var ansPtB = GetObject.GetPointByDirectionB(basePt, -vecA - vecB, basePts, partice * 5, MaxBeamLength);
                             AddLineTodicTuples(basePt, ansPtB, ref dicTuples);
                         }
                     }
                     else if(cnt == 3)
                     {
                         var findVec = GetObject.GetDirectionByThreeVecs(basePt, nowCntPts[0], nowCntPts[1], nowCntPts[2]);
-                        var ansPt = GetObject.GetPointByDirectionB(basePt, findVec, basePts, partice * 5, 13000);
+                        var ansPt = GetObject.GetPointByDirectionB(basePt, findVec, basePts, partice * 5, MaxBeamLength);
                         AddLineTodicTuples(basePt, ansPt, ref dicTuples);
                     }
                 }
@@ -1052,10 +1052,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                     var value = dicTuples[key];
                     int n = value.Count;
-                    //if (cnt <= 1)
-                    //{
-                    //    break;
-                    //}
                     List<Point3d> cntPts = value.ToList();
                     Vector3d baseVec = cntPts[0] - key;
                     cntPts = cntPts.OrderBy(pt => (pt - key).GetAngleTo(baseVec, Vector3d.ZAxis)).ToList();
@@ -1318,7 +1314,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     dicTuples.Remove(ptA);
                 }
             }
-
             if (dicTuples.ContainsKey(ptB) && dicTuples[ptB].Contains(ptA))
             {
                 dicTuples[ptB].Remove(ptA);
@@ -1420,8 +1415,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 AddLineTodicTuples(o.Key, pt, ref dicTuples);
             }));
 
-            //ReduceSimilarLine(ref dicTuples, tolerance);
-            //ReduceSimilarLine(ref priority1stDicTuples, tolerance);
             ReduceSimilarLine(ref dicTuples, priority1stDicTuples, tolerance);
             RemoveIntersectLines(ref dicTuples);
             var newOutline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();

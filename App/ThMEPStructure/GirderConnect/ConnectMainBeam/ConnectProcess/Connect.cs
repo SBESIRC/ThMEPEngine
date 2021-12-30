@@ -9,30 +9,25 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using DotNetARX;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 {
     public class Connect
     {
+        public const double SimilarAngle = Math.PI / 8;
+        public const double SimilarPointsDis = 500;
+        public const double SamePointsDis = 1;
+        public const double MaxBeamLength = 13000;
+
         private  Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
-        
         private  Dictionary<Polyline, HashSet<Polyline>> outlineWallsMerged = new Dictionary<Polyline, HashSet<Polyline>>();
-        
         private  Dictionary<Polyline, List<Point3d>> outline2ZeroPts = new Dictionary<Polyline, List<Point3d>>();
-        
         private  Dictionary<Polyline, Point3dCollection> outlineNearPts = new Dictionary<Polyline, Point3dCollection>();
-        
         private  Point3dCollection allPts = new Point3dCollection();
-        
         private  HashSet<Point3d> borderPts = new HashSet<Point3d>();
-
         private  List<Point3d> zeroPts = new List<Point3d>();
-
         private  HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
-
         private  Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
-
         private  Dictionary<Point3d, Point3d> closeBorderLines = new Dictionary<Point3d, Point3d>();
 
         public Connect()
@@ -100,7 +95,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 }
             }
             //1.3:DT/VDconnect points with borderPoints and clumnPoints
-            allPts = PointsDealer.PointsDistinct(allPts, 1);
+            allPts = PointsDealer.PointsDistinct(allPts, SamePointsDis);
+            zeroPts = PointsDealer.PointsDistinct(zeroPts, SamePointsDis);
             //tuples = StructureBuilder.DelaunayTriangulationConnect(allPts);
             tuples = StructureBuilder.VoronoiDiagramConnect(allPts);
             dicTuples = LineDealer.TuplesStandardize(tuples, allPts);
@@ -126,26 +122,21 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.DeleteDiffClassLine(borderPts, clumnPts, ref dicTuples);
             LineDealer.AddSpecialLine(outline2BorderNearPts, ref dicTuples);
 
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
 
-
-            //2.1、delete similar connect
-            SimplifyDicTuples(zeroPts, 500, Math.PI / 12);
-            //2.2 close border
-
+            //2.0 Split & Merge areas
             closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
-
-            //3.0 Split & Merge areas
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, Math.PI / 12);
             dicTuples = SplitAndMerge(dicTuples, allPts, closeBorderLines);
             var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts); //这步可能outliborder错导致dictupe多添加一遍
             LineDealer.DeleteSameClassLine(itcBorderPts, ref dicTuples);
             LineDealer.DeleteDiffClassLine(itcBorderPts, borderPts, ref dicTuples);
             LineDealer.AddSpecialLine(outline2BorderNearPts, ref dicTuples);
-            LineDealer.DicTuplesStandardize(ref dicTuples, allPts, 500);
 
-
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle * 2);
             StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
             PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
-            //delete to four
             StructureDealer.DeleteConnectUpToFourB(ref dicTuples, ref outline2BorderNearPts);
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
@@ -161,20 +152,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                     }
                 }
             }
-
-            SimplifyDicTuples(zeroPts, 500, Math.PI / 12);
-
             dicTuples.Keys.ForEach(o => allPts.Add(o));
-            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
+            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts, MaxBeamLength);
 
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
+            //去除相交线，获得辅助外框
             StructureDealer.RemoveIntersectLines(ref dicTuples);
             List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
-            
             closebdLines.ForEach(o => StructureDealer.DeleteFromDicTuples(o.Item1, o.Item2, ref dicTuples));
 
-            SimplifyDicTuples(zeroPts, 500);
-
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
             PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
             itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outline2BorderNearPts.Keys.ToList(), ref outline2BorderNearPts);
             itcBorderPts = PointsDealer.PointsDistinct(itcBorderPts);
@@ -191,9 +179,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             PointsDealer.VoronoiDiagramNearPoints(clumnPts, outlineNearPts);
             //2、获取“BorderPt与NearPt的连接”
             Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
-            StructureBuilder.PriorityBorderPoints(outlineNearPts, outlineWallsMerged, outlineClumns, ref outline2BorderNearPts, ref outline2ZeroPts, ref priority1stDicTuples);
+            StructureBuilder.PriorityBorderPoints(outlineNearPts, outlineWallsMerged, outlineClumns, ref outline2BorderNearPts, ref outline2ZeroPts, ref priority1stDicTuples, MaxBeamLength, SimilarAngle);
             //3、删减无用的“BorderPt与NearPt的连接”
-            outline2BorderNearPts = StructureDealer.UpdateBorder2NearPts(outline2BorderNearPts, priority1stDicTuples);
+            outline2BorderNearPts = StructureDealer.UpdateBorder2NearPts(outline2BorderNearPts, priority1stDicTuples, SimilarAngle * 2);
         }
 
         /// <summary>
@@ -201,10 +189,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// </summary>
         private Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
         {
-            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
             //Split & Merge
-            //LineDealer.DicTuplesStandardize(ref dicTuples, allPts);.
-            SimplifyDicTuples(zeroPts, 500, Math.PI / 12);
+            //LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
             var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
             StructureBuilder.BuildPolygons(dicTuples, ref findPolylineFromLines);
             //splic polyline
@@ -239,7 +225,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
                 oriPtsB.AddRange(pts);
             }
             //oriPtsB = StructureDealer.ReduceSimilarPoints(oriPtsB, zeroPts);
-            Dictionary<Point3d, Point3d> closeBorderLineB = StructureDealer.CloseBorderA(outerWalls.Keys.ToHashSet(), oriPtsB);//oriPtsB
+            Dictionary<Point3d, Point3d> closeBorderLineB = StructureDealer.CloseBorderA(outerWalls.Keys.ToHashSet(), oriPtsB);
             Dictionary<Point3d, HashSet<Point3d>> newdicTuples = LineDealer.TuplesStandardize(closeBorderLineB, dicTuples.Keys.ToList());
             var unifiedTyples = MainBeamPostProcess.UnifyTuples(newdicTuples);
             foreach (var unifiedTyple in unifiedTyples)

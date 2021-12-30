@@ -536,18 +536,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// Update structure Outline2BorderNearPts
         /// </summary>
         /// <param name="outline2BorderNearPts"></param>
-        /// <param name="allConnects"></param>
         public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> connects)
         {
-            foreach(var outline2BorderNearPt in outline2BorderNearPts)
+            foreach (var outline2BorderNearPt in outline2BorderNearPts)
             {
                 var outline = outline2BorderNearPt.Key;
-                foreach(var border2NearPts in outline2BorderNearPt.Value)
+                foreach (var border2NearPts in outline2BorderNearPt.Value)
                 {
                     var borderPt = border2NearPts.Key;
                     if (connects.ContainsKey(borderPt))
                     {
-                        foreach(var pt in connects[borderPt])
+                        foreach (var pt in connects[borderPt])
                         {
                             if (!outline2BorderNearPt.Value.ContainsKey(pt) && !border2NearPts.Value.Contains(pt))
                             {

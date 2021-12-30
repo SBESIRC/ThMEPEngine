@@ -223,7 +223,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outline2BorderNearPts">Input and Output</param>
         public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
             Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts,
-            ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts, ref Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples)
+            ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts, ref Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples, 
+            double MaxBeamLength = 13000, double SimilarAngle = Math.PI / 8)
         {
             List<Point3d> fstPtsS = new List<Point3d>();
             List<Point3d> fstPts = new List<Point3d>();
@@ -254,7 +255,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     foreach (Point3d borderPt in outlineClumns[curOutline])
                     {
-                        Point3d cntNearPt = GetObject.GetPointByDirection(borderPt, curOutline.GetClosePoint(borderPt), outlineNearPt.Value, Math.PI / 6, 13000);//可能需要重写这个算法
+                        Point3d cntNearPt = GetObject.GetPointByDirection(borderPt, curOutline.GetClosePoint(borderPt), outlineNearPt.Value, Math.PI / 6, MaxBeamLength);
                         if (cntNearPt == borderPt)
                         {
                             continue;//说明从这个边框内柱点找不到外部相连的近点
@@ -300,6 +301,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 PointsDealer.RemovePointsFarFromOutline(ref fstPts, curOutline);
                 PointsDealer.RemovePointsFarFromOutline(ref thdPts, curOutline);
                 outline2ZeroPts[curOutline].AddRange(fstPts);
+                Point3d curBorderPt;
                 foreach (Point3d nearPt in tmpNearPts)
                 {
                     Point3d outlinePt = curOutline.GetClosePoint(nearPt);
@@ -307,10 +309,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     for (int i = 0; i < 4; ++i)
                     {
                         Vector3d aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis);
-                        double toleranceDegree = Math.PI / 8;
                         //Get VerticalPoint
-                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, 13000, curOutline);
-                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > 13000) 
+                        Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, MaxBeamLength, curOutline);
+                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > MaxBeamLength) 
                         {
                             continue;
                         }
@@ -320,21 +321,24 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             continue;
                         }
+                        //找到近点nearPt最佳的边界连接点
                         if (i == 0)
                         {
-                            toleranceDegree = Math.PI / 4;
+                            curBorderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, SimilarAngle * 2, MaxBeamLength);
                         }
-                        //找到近点nearPt最佳的边界连接点
-                        Point3d borderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, toleranceDegree);
-                        if(borderPt.DistanceTo(nearPt) > 13000)
+                        else
+                        {
+                            curBorderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, SimilarAngle, MaxBeamLength);
+                        }
+                        if(curBorderPt.DistanceTo(nearPt) > MaxBeamLength)
                         {
                             continue;
                         }
-                        if (!outline2BorderNearPts[curOutline].ContainsKey(borderPt))
+                        if (!outline2BorderNearPts[curOutline].ContainsKey(curBorderPt))
                         {
-                            outline2BorderNearPts[curOutline].Add(borderPt, new HashSet<Point3d>());
+                            outline2BorderNearPts[curOutline].Add(curBorderPt, new HashSet<Point3d>());
                         }
-                        outline2BorderNearPts[curOutline][borderPt].Add(nearPt);
+                        outline2BorderNearPts[curOutline][curBorderPt].Add(nearPt);
                     }
                 }
             }
@@ -560,11 +564,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             findPolylineFromLines.Remove(l);
                         }
                         findPolylineFromLines.Add(l, splitedPolyline);
-                        //var reverseL = new Tuple<Point3d, Point3d>(l.Item2, l.Item1);
-                        //if (findPolylineFromLines.ContainsKey(reverseL))
-                        //{
-                        //    findPolylineFromLines.Remove(reverseL);
-                        //}
                     }
                 }
             }
