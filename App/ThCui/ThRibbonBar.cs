@@ -712,19 +712,19 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
-            {
-                var subPanel = row.AddNewPanel();
+            //{
+            //    var subPanel = row.AddNewPanel();
 
-                // 帮助文档
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("帮助文档",
-                    "天华帮助文档",
-                    "THMEPHELP",
-                    "获取帮助文档",
-                    "IDI_THCAD_THHLP_SMALL",
-                    "IDI_THCAD_THHLP_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            //    // 帮助文档
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    subRow.AddNewButton("帮助文档",
+            //        "天华帮助文档",
+            //        "THMEPHELP",
+            //        "获取帮助文档",
+            //        "IDI_THCAD_THHLP_SMALL",
+            //        "IDI_THCAD_THHLP_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
+            //}
         }
     }
 }
