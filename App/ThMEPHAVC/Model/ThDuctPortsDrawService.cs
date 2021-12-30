@@ -154,7 +154,6 @@ namespace ThMEPHVAC.Model
             using (AcadDatabase currentDb = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(zeroLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(geoLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(flgLayer));
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(portLayer));
