@@ -329,44 +329,65 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
 
-        public static void DrawPipeLabels(FireHydrantSystemOut fireHydrantSysOut)
+        public static void DrawPipeLabels(FireHydrantSystemIn fireHydrantSysIn, FireHydrantSystemOut fireHydrantSysOut)
         {
             var angleStep = 15;
             var radiusStep = 200;
             var radiusStart = 800;
             var radiusEnd = 5000;
-            using var adb = AcadDatabase.Active();
-            var results = adb.ModelSpace.OfType<Entity>().ToCollection();
-            var thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(results);
-            foreach (var dbtext in fireHydrantSysOut.DNList)
+            using (var adb = AcadDatabase.Active())
             {
-                var center = dbtext.Position;
-                var ok = false;
-                for (double angleDegree = 0; angleDegree < 360; angleDegree += angleStep)
+                foreach (var ent in GetInput.entities)
                 {
-                    var angle = angleDegree.AngleFromDegree();
-                    for (double radius = radiusStart; radius <= radiusEnd; radius += radiusStep)
+                    if (ent.ObjectId.IsValid)
                     {
-                        var areaObjs = thCADCoreNTSSpatialIndex.SelectCrossingWindow(center.OffsetXY(-radius, -radius), center.OffsetXY(radius, radius));
-                        var areaObjsSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
-                        var e = new MLeader { MText = new MText() { Contents = dbtext.TextString, TextHeight = 100, ColorIndex = 40, } };
-                        e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
-                        var rets = areaObjsSpatialIndex.SelectCrossingPolygon(e);
-                        if (rets.Count == 0)//没撞到别的东西
-                        {
-                            adb.ModelSpace.Add(e);
-                            ok = true;
-                            break;
-                        }
+                        adb.Element<Entity>(ent.ObjectId, true).Erase();
                     }
-                    if (ok) break;
                 }
-                if (!ok)//躲不开了，就这样吧
+                GetInput.entities.Clear();
+            }
+            using (var adb = AcadDatabase.Active())
+            {
+                var results = adb.ModelSpace.OfType<Entity>().ToCollection();
+                var thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(results);
+                foreach (var pt in fireHydrantSysIn.TermPointDic.Values)
                 {
-                    var radius = 800;
-                    var angle = 30.0.AngleFromDegree();
-                    var e = new MLeader { MText = new MText() { Contents = dbtext.TextString, TextHeight = 100, ColorIndex = 40, } };
-                    e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
+                    var center = pt.PtEx._pt;
+                    {
+                        var radius = 800;
+                        var angle = 30.0.AngleFromDegree();
+                        var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
+                        e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
+                        adb.ModelSpace.Add(e);
+                    }
+                    var ok = false;
+                    for (double angleDegree = 0; angleDegree < 360; angleDegree += angleStep)
+                    {
+                        var angle = angleDegree.AngleFromDegree();
+                        for (double radius = radiusStart; radius <= radiusEnd; radius += radiusStep)
+                        {
+                            var areaObjs = thCADCoreNTSSpatialIndex.SelectCrossingWindow(center.OffsetXY(-radius, -radius), center.OffsetXY(radius, radius));
+                            var areaObjsSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
+                            var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
+                            e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
+                            var rets = areaObjsSpatialIndex.SelectCrossingPolygon(e);
+                            if (rets.Count == 0)//没撞到别的东西
+                            {
+                                adb.ModelSpace.Add(e);
+                                ok = true;
+                                break;
+                            }
+                        }
+                        if (ok) break;
+                    }
+                    if (!ok)//躲不开了，就这样吧
+                    {
+                        var radius = 800;
+                        var angle = 30.0.AngleFromDegree();
+                        var e = new MLeader { MText = new MText() { Contents = pt.PipeNumber, TextHeight = 100, ColorIndex = 40, } };
+                        e.SetLastVertex(e.AddLeaderLine(center), center.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle)));
+                        adb.ModelSpace.Add(e);
+                    }
                 }
             }
         }

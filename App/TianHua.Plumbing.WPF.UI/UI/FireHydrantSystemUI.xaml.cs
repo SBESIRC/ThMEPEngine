@@ -77,7 +77,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.UI
             this.DataContext = vm;
             this.vm = vm;
         }
-
+        static FireHydrantSystemUI singleton;
+        public static FireHydrantSystemUI TryCreateSingleton()
+        {
+            if (singleton == null)
+            {
+                singleton = new FireHydrantSystemUI(FireHydrantSystemUIViewModel.Singleton);
+                singleton.Closed += (s, e) => { singleton = null; };
+                return singleton;
+            }
+            return null;
+        }
         private void btnLabelRing_Click(object sender, RoutedEventArgs e)
         {
             try

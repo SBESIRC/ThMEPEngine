@@ -770,7 +770,7 @@ namespace ThMEPWSS.Uitl
         public double StartAngle;
         public double EndAngle;
         public bool IsClockWise;
-        public GArc(double x, double y, double radius, double startAngle, double endAngle,bool isClockWise)
+        public GArc(double x, double y, double radius, double startAngle, double endAngle, bool isClockWise)
         {
             X = x;
             Y = y;
@@ -1258,6 +1258,28 @@ namespace ThMEPWSS.Uitl
         public static GCircle ToGCircle(this Circle x)
         {
             return new GCircle(x.Center.X, x.Center.Y, x.Radius);
+        }
+        public static void Erase(this Entity ent, AcadDatabase adb)
+        {
+            adb.Element<Entity>(ent.ObjectId, true).Erase();
+        }
+        public static LineString ToLineString(this Line line)
+        {
+            return new LineString(new Coordinate[] { line.StartPoint.ToNTSCoordinate(), line.EndPoint.ToNTSCoordinate() });
+        }
+        public static LineString ToLineString(this Polyline line)
+        {
+            if (line.NumberOfVertices == 0) return new LineString(new Coordinate[] { });
+            if (line.Closed)
+            {
+                var cords = line.Vertices().OfType<Point3d>().Select(x => x.ToNTSCoordinate()).ToList();
+                cords.Add(cords[0]);
+                return new LinearRing(cords.ToArray());
+            }
+            else
+            {
+                return new LineString(line.Vertices().OfType<Point3d>().Select(x => x.ToNTSCoordinate()).ToArray());
+            }
         }
         public static GLineSegment ToGLineSegment(this Line line)
         {

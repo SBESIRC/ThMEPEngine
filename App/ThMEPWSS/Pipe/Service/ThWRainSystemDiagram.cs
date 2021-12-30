@@ -755,7 +755,7 @@ namespace ThMEPWSS.FlatDiagramNs
                                                 if (pps.All(pp => !pp.Intersects(GeoFac.CreateGeometry(lines)))) return;
                                                 draw(THESAURUSDEPLORE, bufGeo, overWrite: THESAURUSOBSTINACY);
                                                 {
-                                                    var lnsf = GeoFac.CreateIntersectsSelector(lines.SelectMany(GeoFac.GetLines).Select(x => x.ToLineString()).ToList());
+                                                    var lnsf = GeoFac.CreateIntersectsSelector(GeoFac.GetManyLineStrings(lines).ToList());
                                                     if (pps.Any(pp => fl0s.Contains(pp)))
                                                     {
                                                         foreach (var fd in fds)
@@ -857,7 +857,7 @@ namespace ThMEPWSS.FlatDiagramNs
                                                     }
                                                     if (stPts.Count == THESAURUSSTAMPEDE)
                                                     {
-                                                        _lines = _lines.Except(GeoFac.CreateIntersectsSelector(_lines.Select(x => x.ToLineString()).ToList())(GeoFac.CreateGeometry(addPts.Select(x => x.ToPoint2d().ToGRect(UNCONSEQUENTIAL).ToPolygon()))).SelectMany(GeoFac.GetLines)).ToList();
+                                                        _lines = _lines.Except(GeoFac.CreateIntersectsSelector(_lines.Select(x => x.ToLineString()).ToList())(GeoFac.CreateGeometry(addPts.Select(x => x.ToPoint2d().ToGRect(UNCONSEQUENTIAL).ToPolygon()))).SelectMany(geo => GeoFac.GetLines(geo))).ToList();
                                                         addPts.Clear();
                                                         var lines = _lines.Select(x => x.ToLineString()).ToList();
                                                         var linesf = GeoFac.CreateIntersectsSelector(lines);
@@ -1060,7 +1060,7 @@ namespace ThMEPWSS.FlatDiagramNs
             }
             foreach (var info in mlInfos)
             {
-                if (info.Text == THESAURUSDEPLORE) info.Text = THESAURUSOUTWARD;
+                if (info.Text == THESAURUSDEPLORE) info.Text = THESAURUSIMPETUOUS;
             }
             foreach (var info in mlInfos)
             {
@@ -1151,7 +1151,6 @@ namespace ThMEPWSS.FlatDiagramNs
         public const string THESAURUSJOURNAL = "CP";
         public const int THESAURUSEVERLASTING = 25;
         public const string QUOTATIONPELVIC = "PipeDN100";
-        public const string THESAURUSOUTWARD = "DNXXX";
         public const int THESAURUSABANDON = 14;
         public const int THESAURUSFINALITY = 10000;
         public const string THESAURUSBOTTOM = "PL-";
@@ -1161,6 +1160,7 @@ namespace ThMEPWSS.FlatDiagramNs
         public const int PERICARDIOCENTESIS = 49;
         public const double QUOTATIONLUCANIAN = 5.1;
         public const double PHOTOCONDUCTION = 400.0;
+        public const string THESAURUSIMPETUOUS = "DNXXX";
         const string MLeaderLayer = ARGENTIMACULATUS;
         public static MLeader DrawMLeader(string content, Point2d p1, Point2d p2)
         {
@@ -2197,7 +2197,7 @@ namespace ThMEPWSS.FlatDiagramNs
             }
             foreach (var info in mlInfos)
             {
-                if (info.Text == THESAURUSDEPLORE) info.Text = THESAURUSOUTWARD;
+                if (info.Text == THESAURUSDEPLORE) info.Text = THESAURUSIMPETUOUS;
             }
             foreach (var info in mlInfos)
             {

@@ -9,6 +9,8 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.CADExtensionsNs;
+using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
@@ -26,7 +28,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                var DBObjs = spatialIndex.SelectWindowPolygon(polygon.ToGRect().ToPolygon().ToDbEntity());
 
                 DbTextCollection = new DBObjectCollection();
 

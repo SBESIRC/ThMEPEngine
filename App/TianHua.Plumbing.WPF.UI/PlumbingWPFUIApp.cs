@@ -112,7 +112,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THXHSBH", CommandFlags.Modal)]
         public void THXHSBH()
         {
-            var ui = new FireHydrantSystemUI(FireHydrantSystemUIViewModel.Singleton);
+            var ui = FireHydrantSystemUI.TryCreateSingleton();
+            if (ui is null) return;
             AcadApp.ShowModelessWindow(ui);
         }
         /// <summary>
