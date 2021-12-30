@@ -72,7 +72,7 @@ namespace ThCADCore.NTS
             {
                 results.AddRange(o.ToDbObjects());
             });
-            return results.ToCollection<DBObject>();
+            return results.ToCollection();
         }
 
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)

@@ -219,11 +219,12 @@ namespace ThMEPEngineCore
                         ThMEPPolygonService.CenterLine(e)
                         .ToCollection()
                         .LineMerge()
-                        .OfType<Entity>()
+                        .OfType<Polyline>()
                         .ForEach(o =>
                         {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.Layer = ThMEPEngineCoreLayerUtils.CENTERLINE;
+                            var centerline =  o.TPSimplify(1.0);
+                            acadDatabase.ModelSpace.Add(centerline);
+                            centerline.Layer = ThMEPEngineCoreLayerUtils.CENTERLINE;
                         });
                     });
             }
