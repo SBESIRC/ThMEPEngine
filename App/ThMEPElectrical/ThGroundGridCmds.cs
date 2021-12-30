@@ -15,6 +15,7 @@ using ThMEPEngineCore.Engine;
 using System.Linq;
 using ThMEPEngineCore.GridOperation;
 using ThMEPEngineCore.GridOperation.Model;
+using ThMEPEngineCore.UCSDivisionService.DivisionMethod;
 
 namespace ThMEPElectrical
 {
@@ -118,12 +119,15 @@ namespace ThMEPElectrical
 
                 var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
                 curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
-
-                UCSService uCSService = new UCSService();
-                var ucsPolygons = uCSService.UcsDivision(curves, walls);
+                GridDivision gridDivision = new GridDivision();
+                var ucsPolygons = gridDivision.DivisionGridRegions(curves);
                 foreach (var item in ucsPolygons)
                 {
-                    acadDatabase.ModelSpace.Add(item);
+                    acadDatabase.ModelSpace.Add(item.GridPolygon);
+                    foreach (var s in item.regions)
+                    {
+                        acadDatabase.ModelSpace.Add(s);
+                    }
                 }
             }
         }

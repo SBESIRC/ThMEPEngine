@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.GridOperation.Model;
 
-namespace ThMEPEngineCore.GridOperation.Utils    //(暂时不考虑)
+namespace ThMEPEngineCore.GridOperation.Utils    
 {
     public static class GridArcExtendService
     {

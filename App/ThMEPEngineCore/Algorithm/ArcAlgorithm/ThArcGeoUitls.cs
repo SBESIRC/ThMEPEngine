@@ -1,4 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -118,6 +120,58 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
             {
                 return Math.Abs(arc.Radius - otherArc.Radius);
             }
+        }
+
+        /// <summary>
+        /// 去掉arc上多余的点
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline ArcSimplify(this Polyline polyline)
+        {
+            var polylineSegments = new PolylineSegmentCollection(polyline);
+            Polyline simplifyPoly = new Polyline() { Closed = true };
+            Point3d? centerPt = null;
+            Point3d prePt = Point3d.Origin;
+            for (int i = 0; i < polylineSegments.Count; i++)
+            {
+                var segment = polylineSegments[i];
+                double bulge = 0;
+                if (!segment.IsLinear)
+                {
+                    var arcSegment = segment.ToCircularArc();
+                    if (centerPt == null)
+                    {
+                        prePt = new Point3d(segment.StartPoint.X, segment.StartPoint.Y, 0);
+                        centerPt = new Point3d(arcSegment.Center.X, arcSegment.Center.Y, 0);
+                        continue;
+                    }
+                    else
+                    {
+                        if (new Point3d(arcSegment.Center.X, arcSegment.Center.Y, 0).DistanceTo(centerPt.Value) < 10)
+                        {
+                            continue;
+                        }
+                        else
+                        {
+                            var dir1 = (prePt - centerPt.Value).GetNormal();
+                            var dir2 = (polyline.GetPoint3dAt(i % polyline.NumberOfVertices) - centerPt.Value).GetNormal();
+                            var angle = Math.Abs(dir1.GetAngleTo(dir2));
+                            bulge = Math.Tan(angle / 4);
+                            if (angle > Math.PI)
+                            {
+                                bulge = -bulge;
+                            }
+                            centerPt = null;
+                            simplifyPoly.AddVertexAt(simplifyPoly.NumberOfVertices, segment.StartPoint, bulge, 0, 0);
+                        }
+                    }
+                }
+
+                simplifyPoly.AddVertexAt(simplifyPoly.NumberOfVertices, segment.EndPoint, bulge, 0, 0);
+            }
+
+            return simplifyPoly;
         }
     }
 }

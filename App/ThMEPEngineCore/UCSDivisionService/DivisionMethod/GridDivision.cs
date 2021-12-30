@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm.ArcAlgorithm;
+using ThMEPEngineCore.GridOperation;
+using ThMEPEngineCore.GridOperation.Model;
 using ThMEPEngineCore.UCSDivisionService.Utils;
 
 namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
@@ -21,24 +23,90 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
             thWallNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(walls.ToCollection());
 
             //将所有轴网打成line
-            var gridLines = grids.Select(x => GeoUtils.ConvertToLine(x, 500)).ToList();
+            var gridLines = grids.ToDictionary(x => GeoUtils.ConvertToLine(x, 500), y => CheckService.GetGridType(y));
 
             //获得所有轴网的网格区域
-            var gridAreas = GetGridArea(gridLines.SelectMany(x => x).ToList());
+            var gridAreas = GetGridArea(gridLines.SelectMany(x => x.Key).ToList());
 
             //获得每个轴网的凸包
-            var gridHulls = gridLines.ToDictionary(x => x, y => GetGridHull(y));
+            var gridHulls = gridLines.ToDictionary(x => x.Key, y => GetGridHull(y.Key));
 
             //获得每个轴网本来所占区域
-            var gridRegion = gridLines.ToDictionary(x => x, y => GetGridRegion(y));
+            var gridRegion = gridLines.ToDictionary(x => x.Key, y => GetGridRegion(y.Key));
 
             //划分轴网属于哪个区域
-            var gridDics = ClassifyGridArea(gridAreas, gridHulls, gridRegion);
+            var gridDics = ClassifyGridArea(gridAreas, gridHulls, gridRegion, gridLines);
 
             //还原出ucs的polygon
             var polygons = GetUCSPolygons(gridDics, grids.SelectMany(x => x).ToList());
+            //polygons = polygons.Select(x => x.ArcSimplify()).ToList();
 
-            return polygons;//gridRegion.Values.ToList();//
+            return polygons.Values.ToList();
+        }
+
+        public List<GridModel> DivisionGridRegions(List<List<Curve>> grids)
+        {
+            //将所有轴网打成line
+            var gridLines = grids.ToDictionary(x => GeoUtils.ConvertToLine(x, 500), y => y);
+
+            //将所有轴网打成line
+            var gridTypes = gridLines.ToDictionary(x => x.Key, y => CheckService.GetGridType(y.Value));
+
+            //获得所有轴网的网格区域
+            var gridAreas = GetGridArea(gridLines.SelectMany(x => x.Key).ToList());
+            
+            //获得每个轴网的凸包
+            var gridHulls = gridTypes.ToDictionary(x => x.Key, y => GetGridHull(y.Key));
+
+            //获得每个轴网本来所占区域
+            var gridRegion = gridTypes.ToDictionary(x => x.Key, y => GetGridRegion(y.Key));
+
+            //划分轴网属于哪个区域
+            var gridDics = ClassifyGridArea(gridAreas, gridHulls, gridRegion, gridTypes);
+            
+            //还原出ucs的polygon
+            var polygons = GetUCSPolygons(gridDics, grids.SelectMany(x => x).ToList());
+
+            //分割小轴网区域
+            var regionInfos = CalCutGridRegions(polygons, gridLines, gridTypes);
+
+            return regionInfos;
+        }
+
+        /// <summary>
+        /// 分割轴网区域
+        /// </summary>
+        /// <param name="polygons"></param>
+        /// <param name="gridLines"></param>
+        /// <param name="gridTypes"></param>
+        /// <returns></returns>
+        private List<GridModel> CalCutGridRegions(Dictionary<List<Line>, Polyline> polygons, Dictionary<List<Line>, List<Curve>> gridLines,
+            Dictionary<List<Line>, GridType> gridTypes)
+        {
+            List<GridModel> resGirds = new List<GridModel>();
+            CutGridRegionService cutGridRegionService = new CutGridRegionService();
+            foreach (var polygon in polygons)
+            {
+                var regions = cutGridRegionService.CutRegion(polygon.Value, gridLines[polygon.Key], gridTypes[polygon.Key]);
+                GridModel gridModel = new GridModel();
+                gridModel.allLines = gridLines[polygon.Key];
+                gridModel.regions = regions;
+                gridModel.GridPolygon = polygon.Value;
+                if (gridTypes[polygon.Key] == GridType.ArcGrid)
+                {
+                    gridModel.gridType = GridType.ArcGrid;
+                    gridModel.centerPt = (gridLines[polygon.Key].First(x => x is Arc) as Arc).Center;
+                }
+                else if (gridTypes[polygon.Key] == GridType.LineGrid)
+                {
+                    gridModel.gridType = GridType.LineGrid;
+                    var firLine = gridLines[polygon.Key].First(x => x is Line) as Line;
+                    gridModel.vector =(firLine.EndPoint - firLine.StartPoint).GetNormal();
+                }
+                resGirds.Add(gridModel);
+            }
+
+            return resGirds;
         }
 
         /// <summary>
@@ -47,18 +115,20 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <param name="gridDics"></param>
         /// <param name="curves"></param>
         /// <returns></returns>
-        private List<Polyline> GetUCSPolygons(Dictionary<List<Line>, DBObjectCollection> gridDics, List<Curve> curves)
+        private Dictionary<List<Line>, Polyline> GetUCSPolygons(Dictionary<List<Line>, DBObjectCollection> gridDics, List<Curve> curves)
         {
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatial = new ThCADCoreNTSSpatialIndex(curves.ToCollection());
-            var ucsPolys = new List<Polyline>();
+            var ucsPolys = new Dictionary<List<Line>, Polyline>();
             foreach (var dics in gridDics)
             {
-                var bufferPolys = dics.Value.Cast<Polyline>().SelectMany(x => x.Buffer(10).Cast<Polyline>()).ToList();
-                var polygons = bufferPolys.ToCollection().UnionPolygons().Cast<Polyline>().SelectMany(x => x.Buffer(-10).Cast<Polyline>()).Where(x => x.Area > 10).ToList();
+                var bufferPolys = dics.Value.Cast<Polyline>()
+                    .SelectMany(x => x.Buffer(-2).Cast<Polyline>())
+                    .SelectMany(x => x.Buffer(5).Cast<Polyline>())
+                    .ToList();
+                var polygons = bufferPolys.ToCollection().UnionPolygons().Cast<Polyline>().SelectMany(x => x.Buffer(-5).Cast<Polyline>()).Where(x => x.Area > 10).ToList();
                 foreach (var poly in polygons)
                 {
                     var ucsPolygon = poly.ResetArcPolygon(curves);
-                    ucsPolys.Add(ucsPolygon);
+                    ucsPolys.Add(dics.Key, ucsPolygon);
                 }
             }
 
@@ -72,7 +142,8 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <param name="gridHulls"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        private Dictionary<List<Line>, DBObjectCollection> ClassifyGridArea(List<Polyline> areas, Dictionary<List<Line>, Polyline> gridHulls, Dictionary<List<Line>, Polyline> gridRegions)
+        private Dictionary<List<Line>, DBObjectCollection> ClassifyGridArea(List<Polyline> areas, Dictionary<List<Line>, Polyline> gridHulls,
+            Dictionary<List<Line>, Polyline> gridRegions, Dictionary<List<Line>, GridType> GridTypes)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(areas.ToCollection());
             Dictionary<List<Line>, DBObjectCollection> areaDic = new Dictionary<List<Line>, DBObjectCollection>();
@@ -101,7 +172,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                 }
                 if (intersectHulls.Count() > 1)
                 {
-                    var belongPoly = CheckAreaBelong(area, intersectHulls);
+                    var belongPoly = CheckAreaBelong(area, intersectHulls, GridTypes);
                     areaDic[belongPoly].Add(area);
                 }
                 else if (intersectHulls.Count == 1)
@@ -119,41 +190,53 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <param name="area"></param>
         /// <param name="gridArea"></param>
         /// <returns></returns>
-        private List<Line> CheckAreaBelong(Polyline area, Dictionary<List<Line>, Polyline> gridArea)
+        private List<Line> CheckAreaBelong(Polyline area, Dictionary<List<Line>, Polyline> gridArea, Dictionary<List<Line>, GridType> GridTypes)
         {
-            var walls = thWallNTSSpatialIndex.SelectCrossingPolygon(area);
-            if (walls.Count > 0)
+            var gridTypes = GridTypes.Where(x => gridArea.Keys.Any(y => y == x.Key)).ToDictionary(x => x.Key, y => y.Value);
+            var arcDics = gridTypes.Where(x => x.Value == GridType.ArcGrid).ToDictionary(x => x.Key, y => y.Value);
+            if (arcDics.Count > 0)
             {
-                walls = area.Intersection(walls);
-                var dir = GetWallDir(walls.Cast<Polyline>().ToList());
-                foreach (var gArea in gridArea)
-                {
-                    var gAreaDir = GetAreaDir(gArea.Value);
-                    if (dir.IsParallelTo(gAreaDir, new Tolerance(0.01, 0.01)) || Math.Abs(gAreaDir.DotProduct(dir)) < 0.01)  //优先归入与墙方向一致的区域
-                    {
-                        return gArea.Key;
-                    }
-                }
+                return arcDics.First().Key;
             }
+            else
+            {
+                return gridTypes.Except(arcDics).First().Key;
+            }
+            #region 暂时不要
+            //var walls = thWallNTSSpatialIndex.SelectCrossingPolygon(area);
+            //if (walls.Count > 0)
+            //{
+            //    walls = area.Intersection(walls);
+            //    var dir = GetWallDir(walls.Cast<Polyline>().ToList());
+            //    foreach (var gArea in gridArea)
+            //    {
+            //        var gAreaDir = GetAreaDir(gArea.Value);
+            //        if (dir.IsParallelTo(gAreaDir, new Tolerance(0.01, 0.01)) || Math.Abs(gAreaDir.DotProduct(dir)) < 0.01)  //优先归入与墙方向一致的区域
+            //        {
+            //            return gArea.Key;
+            //        }
+            //    }
+            //}
 
-            var areaDir = GetAreaDir(area);
-            foreach (var gArea in gridArea)   //后归入方向将近一致的区域
-            {
-                var gAreaDir = GetAreaDir(gArea.Value);
-                if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
-                {
-                    return gArea.Key;
-                }
-            }
+            //var areaDir = GetAreaDir(area);
+            //foreach (var gArea in gridArea)   //后归入方向将近一致的区域
+            //{
+            //    var gAreaDir = GetAreaDir(gArea.Value);
+            //    if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
+            //    {
+            //        return gArea.Key;
+            //    }
+            //}
 
-            Dictionary<List<Line>, double> belongDic = new Dictionary<List<Line>, double>();
-            foreach (var gArea in gridArea)   //最后归入占比最多的区域
-            {
-                var intersectArea = area.GeometryIntersection(gArea.Value).Cast<Polyline>().ToList();
-                belongDic.Add(gArea.Key, intersectArea.Sum(x => x.Area) / area.Area);
-            }
-            var belongPoly = belongDic.OrderBy(x => x.Value).First().Key;
-            return belongPoly;
+            //Dictionary<List<Line>, double> belongDic = new Dictionary<List<Line>, double>();
+            //foreach (var gArea in gridArea)   //最后归入占比最多的区域
+            //{
+            //    var intersectArea = area.GeometryIntersection(gArea.Value).Cast<Polyline>().ToList();
+            //    belongDic.Add(gArea.Key, intersectArea.Sum(x => x.Area) / area.Area);
+            //}
+            //var belongPoly = belongDic.OrderByDescending(x => x.Value).ThenBy(x => x.Key.GetHashCode()).First().Key;
+            //return belongPoly;
+            #endregion
         }
 
         /// <summary>
@@ -216,7 +299,14 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <returns></returns>
         private List<Polyline> GetGridArea(List<Line> gridLines)
         {
-            return gridLines.ToCollection().PolygonsEx().Cast<Polyline>().ToList();
+            var gridCollections = new DBObjectCollection();
+            foreach (var line in gridLines)
+            {
+                var dir = (line.EndPoint - line.StartPoint).GetNormal();
+                var newLine = new Line(line.StartPoint - dir * 5, line.EndPoint + dir * 5);
+                gridCollections.Add(newLine);
+            }
+            return gridCollections.PolygonsEx().Cast<Polyline>().Where(x => x.Area > 1).ToList();
         }
 
         /// <summary>
@@ -237,7 +327,14 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <returns></returns>
         private Polyline GetGridRegion(List<Line> gridLines)
         {
-            return gridLines.ToCollection().PolygonsEx().UnionPolygons().Cast<Polyline>().First().Buffer(-10)[0] as Polyline;
+            var gridCollections = new DBObjectCollection();
+            foreach (var line in gridLines)
+            {
+                var dir = (line.EndPoint - line.StartPoint).GetNormal();
+                var newLine = new Line(line.StartPoint - dir * 5, line.EndPoint + dir * 5);
+                gridCollections.Add(newLine);
+            }
+            return gridCollections.PolygonsEx().UnionPolygons().Cast<Polyline>().First().Buffer(-10)[0] as Polyline;
         }
     }
 }

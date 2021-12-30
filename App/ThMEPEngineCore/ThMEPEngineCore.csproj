@@ -170,6 +170,7 @@
     <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
+    <Compile Include="GridOperation\CutGridRegionService.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
     <Compile Include="GridOperation\Utils\GridBoundaryExtendService.cs" />
@@ -651,6 +652,7 @@
     <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\LayoutPointDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />
+    <Compile Include="UCSDivisionService\Utils\CheckService.cs" />
     <Compile Include="UCSDivisionService\Utils\GeoUtils.cs" />
     <Compile Include="UCSDivisionService\Utils\StructPolyService.cs" />
     <Compile Include="UCSDivisionService\Utils\StructUtils.cs" />
