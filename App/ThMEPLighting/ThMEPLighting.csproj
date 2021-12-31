@@ -132,6 +132,7 @@
     <Compile Include="Garage\Factory\ThFirstSecondBFactory.cs" />
     <Compile Include="Garage\Factory\ThFirstSecondFactory.cs" />
     <Compile Include="Garage\Service\Arrange\ThArrangeService.cs" />
+    <Compile Include="Garage\Service\Arrange\ThLightEdgeDistributePointService.cs" />
     <Compile Include="Garage\Service\Arrange\ThSecondwayArrangeService.cs" />
     <Compile Include="Garage\Service\Arrange\ThFirstwayArrangeService.cs" />
     <Compile Include="Garage\Service\Arrange\ThThirdwayArrangeService.cs" />
@@ -149,7 +150,9 @@
     <Compile Include="Garage\Service\LayoutResult\ThLightNodeSameLinkService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLineRoadQueryService.cs" />
     <Compile Include="Garage\Engine\ThGarageLightingEngine.cs" />
+    <Compile Include="Garage\Service\Number\ThPassNumberService.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
+    <Compile Include="Garage\Service\ThDirectionLightGraphService.cs" />
     <Compile Include="Garage\Service\ThDxLineDirectionTransfer.cs" />
     <Compile Include="Garage\Service\ThFindCenterPairService.cs" />
     <Compile Include="Garage\Service\ThLightSideLineHandler.cs" />
