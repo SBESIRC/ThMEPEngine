@@ -55,6 +55,10 @@ namespace ThMEPLighting.Garage.Service
             graph.Links.ForEach(l => l.Edges.ForEach(p => numOfLights += p.LightNodes.Count));
             return numOfLights;
         }
+        public static int CalculateLightNumber(this List<ThLightEdge> edges)
+        {
+            return edges.Sum(e => e.LightNodes.Count);
+        }
         public static List<ThLightGraphService> CreateGraphs(this List<Line> lines)
         {
             var lightEdges = lines.Select(l => new ThLightEdge(l)).ToList();
@@ -86,6 +90,51 @@ namespace ThMEPLighting.Garage.Service
                 results.Add(newLightGraph);
             }
             return results;
+        }
+        public static List<ThLightGraphService> CreateGraphs(this List<ThLightEdge> lightEdges)
+        {
+            // 传入的Edges是
+            var results = new List<ThLightGraphService>();
+            while (lightEdges.Count > 0)
+            {
+                if (lightEdges.Where(o => o.IsDX).Count() == 0)
+                {
+                    break;
+                }
+                Point3d findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
+                var priorityStart = lightEdges.Select(o => o.Edge).ToList().FindPriorityStart(ThGarageLightCommon.RepeatedPointDistance);
+                if (priorityStart != null)
+                {
+                    findSp = priorityStart.Item2;
+                }
+                //对灯线边建图,创建从findSp开始可以连通的图
+                var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
+                lightGraph.Build();
+
+                var traversedLightEdges = lightGraph.GraphEdges;
+
+                //找到从ports中的点出发拥有最长边的图
+                var centerEdges = traversedLightEdges.Select(e => new ThLightEdge(e.Edge)).ToList();
+                var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
+
+                // 使用珣若算的最优起点重新建图
+                traversedLightEdges.ForEach(e => e.IsTraversed = false);
+                var newLightGraph = new ThCdzmLightGraphService(traversedLightEdges, centerStart);
+                newLightGraph.Build();
+                //newLightGraph.Print();
+
+                lightEdges = lightEdges.Where(o => o.IsTraversed == false).ToList();
+                results.Add(newLightGraph);
+            }
+            return results;
+        }
+        public static List<ThLightGraphService> CreateDirectionGraphs(this List<ThLightEdge> lightEdges)
+        {
+            // 双排布置：侧边的方向由中心线的方向传递的
+            // 形成的路径是没有分支的，
+            var directionGraph = new ThDirectionLightGraphService(lightEdges);
+            directionGraph.Build();
+            return directionGraph.Graphs;
         }
     }
 }
