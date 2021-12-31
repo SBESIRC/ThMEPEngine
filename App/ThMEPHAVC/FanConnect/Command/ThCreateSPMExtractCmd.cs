@@ -126,20 +126,31 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //提取水管路由
+                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
-                
+                foreach(var p in pipes)
+                {
+                    p.TransformBy(mt);
+                }
                 //提取水管连接点
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
+                if(fcus.Count == 0)
+                {
+                    return;
+                }
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
                 var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-
                 var tmpLines = new List<Line>();
                 foreach (var l in lineColl)
                 {
                     tmpLines.Add(l as Line);
                 }
                 var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
+                foreach(var l in lines)
+                {
+                    l.TransformBy(mt.Inverse());
+                }
                 double space = 300.0;
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {

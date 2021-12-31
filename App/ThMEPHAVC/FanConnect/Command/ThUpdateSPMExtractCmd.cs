@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
@@ -116,8 +117,17 @@ namespace ThMEPHVAC.FanConnect.Command
                 ImportBlockFile();
                 //选择起点
                 var startPt = ThFanConnectUtils.SelectPoint();
+                if (startPt.IsEqualTo(new Point3d()))
+                {
+                    return;
+                }
+                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                 //提取水管路由
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                foreach(var p in pipes)
+                {
+                    p.TransformBy(mt);
+                }
                 //提取风机
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
@@ -127,7 +137,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 var tmpLines = new List<Line>();
                 foreach (var l in lineColl)
                 {
-                    tmpLines.Add(l as Line);
+                    var line = l as Line;
+                    line.TransformBy(mt.Inverse());
+                    tmpLines.Add(line);
                 }
                 var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
                 double space = 300.0;

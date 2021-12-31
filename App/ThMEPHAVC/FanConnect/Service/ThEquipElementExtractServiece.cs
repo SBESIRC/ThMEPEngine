@@ -57,7 +57,8 @@ namespace ThMEPHVAC.FanConnect.Service
                 {
                     if(l is Line)
                     {
-                        retLines.Add(l as Line);
+                        var line = (l as Line).Clone() as Line;
+                        retLines.Add(line);
                     }
                     else if(l is Polyline)
                     {

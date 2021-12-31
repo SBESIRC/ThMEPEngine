@@ -91,7 +91,12 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //提取水管路由
+                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                foreach(var p in pipes)
+                {
+                    p.TransformBy(mt);
+                }
                 //水管干路和支干路
                 if (pipes.Count == 0)
                 {
@@ -104,7 +109,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 var tmpLines = new List<Line>();
                 foreach (var l in lineColl)
                 {
-                    tmpLines.Add(l as Line);
+                    var line = l as Line;
+                    line.TransformBy(mt.Inverse());
+                    tmpLines.Add(line);
                 }
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 if(fucs.Count == 0)
