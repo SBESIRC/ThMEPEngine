@@ -11,7 +11,6 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.FlushPoint.Data;
 using ThMEPWSS.SprinklerConnect.Cmd;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -67,7 +66,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (tianHuaUserConfig != null)
                 {
                     tianHuaUserConfig.Hide();
-                }                
+                }
             }
         }
         private void DocumentBeginClose(object sender, DocumentBeginCloseEventArgs e)
@@ -377,10 +376,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
         /// <summary>
-        /// 设置提取梁的开关
+        /// 全局参数设置
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THUC", CommandFlags.Modal)]
-        public void ThBeamSet()
+        [CommandMethod("TIANHUACAD", "THMEPOPTIONS", CommandFlags.Modal)]
+        public void ThMEPOptions()
         {
             if (tianHuaUserConfig == null)
             {

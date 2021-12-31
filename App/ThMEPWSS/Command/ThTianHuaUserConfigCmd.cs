@@ -12,9 +12,9 @@ namespace ThMEPWSS.Command
         private ThTianHuaUserConfigVM VM { get; set; }
         public ThTianHuaUserConfigCmd(ThTianHuaUserConfigVM vm)
         {
-            CommandName = "THUC";
-            ActionName = "参数配置";
             this.VM = vm;
+            ActionName = "参数配置";
+            CommandName = "THMEPOPTIONS";
         }
         public void Dispose()
         {
