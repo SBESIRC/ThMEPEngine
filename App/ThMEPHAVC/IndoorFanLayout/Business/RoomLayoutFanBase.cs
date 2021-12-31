@@ -29,6 +29,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         protected List<Point3d> _allGroupCenterOrders;
         protected double _midFanSpace = 800.0;
         protected double _minStartDistane = 500;
+        protected bool _changeLayoutDir = false;
         //一个区域内有可能会有多个UCS,不进行坐标系转换到XOY平面
         public RoomLayoutFanBase(Dictionary<string, List<string>> divisionAreaNearIds,Vector3d xAxis,Vector3d yAxis)
         {
@@ -354,9 +355,9 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return nearAreas;
         }
-        void CalcLayoutArea(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d vector)
+        protected void CalcLayoutArea(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d vector,bool calcFanCount =true)
         {
-            var fanCount = (int)Math.Ceiling(divisionAreaFan.NeedLoad / fanRectangle.Load);
+            var fanCount = calcFanCount?(int)Math.Ceiling(divisionAreaFan.NeedLoad / fanRectangle.Load):divisionAreaFan.NeedFanCount;
             divisionAreaFan.NeedFanCount = fanCount;
             if (fanCount < 1)
                 return;
@@ -377,10 +378,6 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return;
             bool isContinue = true;
             int columnCount = fanCount;
-            if (fanCount > 3) 
-            {
-            
-            }
             while (isContinue)
             {
                 if (columnCount < 1)
@@ -467,7 +464,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return rowPolylines;
         }
-        void CalcLayoutAreaByVertical(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d yAxis)
+        protected void CalcLayoutAreaByVertical(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d yAxis)
         {
             //该分割区域需要布置的风机数
             var fanCount = (int)Math.Ceiling(divisionAreaFan.NeedLoad / fanRectangle.Load);

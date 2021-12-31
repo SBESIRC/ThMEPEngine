@@ -1,4 +1,4 @@
-﻿using AcHelper.Commands;
+﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -214,8 +214,8 @@ namespace ThMEPHVAC.Command
                     if (null == layoutRectRes || layoutRectRes.Count < 1)
                         continue;
                     int thisAreaCount = 0;
-                    var layoutResultCheck = new LayoutResultCheck(layoutRectRes, roomLoad, rectangle.Load);
-                    var delFanIds = layoutResultCheck.GetDeleteFan();
+                    //var layoutResultCheck = new LayoutResultCheck(layoutRectRes, roomLoad, rectangle.Load);
+                    //var delFanIds = layoutResultCheck.GetDeleteFanByMinArea();
                     foreach (var item in layoutRectRes)
                     {
                         //showCurves.Add(item.divisionArea.AreaPolyline);
@@ -238,10 +238,10 @@ namespace ThMEPHVAC.Command
                         {
                             foreach (var fan in fanLayoutArea.FanLayoutResult)
                             {
-                                if (delFanIds.Any(c => c == fan.FanId))
-                                {
-                                    continue;
-                                }
+                                //if (delFanIds.Any(c => c == fan.FanId))
+                                //{
+                                //    continue;
+                                //}
                                 thisAreaCount += 1;
                                 fan.FanLayoutName = fanName;
                                 fanLayoutRects.Add(fan);
@@ -357,7 +357,6 @@ namespace ThMEPHVAC.Command
             }
             return fanCount.OrderBy(c => c.Value).ThenBy(c => c.Key).Select(c => c.Key).ToList();
         }
-
         bool RoomLoadTableReadLoad(Table roomTable,out double roomArea,out double roomLoad) 
         {
             var roomLoadTable = new LoadTableRead();
@@ -386,9 +385,11 @@ namespace ThMEPHVAC.Command
             }
             return true;
         }
-
         void ShowTestLineText(List<Curve> showCurves,List<DBText> showTexts) 
         {
+            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
+            if (!debugSwitch)
+                return;
             using (var acdb = AcadDatabase.Active())
             {
                 foreach (var region in showCurves)
@@ -411,7 +412,6 @@ namespace ThMEPHVAC.Command
                 }
             }
         }
-    
         string IndoorFanBlockName (EnumFanType fanType)
         {
             var blockName = "";
@@ -435,7 +435,5 @@ namespace ThMEPHVAC.Command
             }
             return blockName;
         }
-    
-        
     }
 }

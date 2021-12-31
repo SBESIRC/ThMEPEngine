@@ -83,11 +83,23 @@ namespace ThMEPHVAC.Common
             }
             return leadCurves;
         }
-        public List<Table> GetRoomInnerTables(Polyline roomPLine,List<Table> targetLoadTables) 
+        public List<Table> GetRoomInnerTables(Polyline roomPLine, List<Table> targetLoadTables)
+        {
+            var tables = new List<Table>();
+            foreach (var item in targetLoadTables) 
+            {
+                var point = item.Position;
+                point = new Point3d(point.X,point.Y,0);
+                if(roomPLine.Contains(point))
+                    tables.Add(item);
+            }
+            return tables;
+        }
+        public List<Table> GetRoomIntersectsTables(Polyline roomPLine, List<Table> targetLoadTables)
         {
             var tableDic = targetLoadTables.ToDictionary(key => GetTableRectangle(key), value => value);
             var tables = new List<Table>();
-            foreach (var table in tableDic) 
+            foreach (var table in tableDic)
             {
                 if (roomPLine.Intersects(table.Key))
                     tables.Add(table.Value);
@@ -102,9 +114,6 @@ namespace ThMEPHVAC.Common
             {
                 var sp = curve.StartPoint;
                 var ep = curve.EndPoint;
-                //var dir = (ep - sp).GetNormal();
-                //sp = sp - dir.MultiplyBy(100);
-                //ep = ep + dir.MultiplyBy(100);
                 var checkPoint = sp;
                 if (roomPLine.Contains(sp))
                     checkPoint = ep;

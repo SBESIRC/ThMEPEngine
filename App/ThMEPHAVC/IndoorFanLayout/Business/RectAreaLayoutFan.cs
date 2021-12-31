@@ -24,7 +24,21 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             CalcRoomLoad(layoutGroup);
             if (_roomIntersectAreas.Count < 1)
                 return _roomIntersectAreas;
-            LayoutFanRectFirstStep();
+            LayoutFanRectFirstStep(true);
+            //排布完成后，进行检查删除逻辑
+            CheckAndRemoveLayoutFan();
+            //判断是否需要更改方向
+            if (_changeLayoutDir) 
+            {
+                foreach (var areaCell in _roomIntersectAreas) 
+                {
+                    foreach (var item in areaCell.FanLayoutAreaResult) 
+                    {
+                        foreach (var fan in item.FanLayoutResult)
+                            fan.FanDirection = fan.FanDirection.Negate();
+                    }
+                }
+            }
             while (true)
             {
                 bool haveChange = false;
@@ -213,6 +227,46 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return haveChange;
         }
+        void CheckAndRemoveLayoutFan() 
+        {
+            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, _roomLoad, _fanRectangle.Load);
+            var calcDelFans = layoutResultCheck.GetDeleteFanByRow();
+            if (calcDelFans.Count < 1)
+                return;
+            foreach (var areaCell in _roomIntersectAreas) 
+            {
+                if (!calcDelFans.Any(c => c.CellId == areaCell.divisionArea.Uid))
+                    continue;
+                int delCount = 0;
+                foreach (var item in areaCell.FanLayoutAreaResult) 
+                {
+                    var delFans = new List<FanLayoutRect>();
+                    foreach (var fan in item.FanLayoutResult) 
+                    {
+                        if (calcDelFans.Any(c => c.FanId == fan.FanId))
+                            delFans.Add(fan);
+                    }
+                    if (delFans.Count < 1)
+                        continue;
+                    delCount += delFans.Count;
+                    foreach (var del in delFans)
+                        item.FanLayoutResult.Remove(del);
+                }
+                if (delCount < 1)
+                    continue;
+                areaCell.NeedFanCount -= delCount;
+            }
+            //有删除重新进行排布计算
+            foreach (var area in _roomIntersectAreas)
+            {
+                if (!calcDelFans.Any(c => c.CellId == area.divisionArea.Uid))
+                    continue;
+                area.FanLayoutAreaResult.Clear();
+                CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                OneDivisionAreaCalcFanRectangle(area, _fanRectangle, _groupYVector.Negate());
+            }
+            //LayoutFanRectFirstStep(false);
+        }
         List<FanLayoutRect> GetDirNearFans(DivisionRoomArea divisionAreaFan, Vector3d checkDir) 
         {
             var nearAreas = GetNearDivisionAreas(divisionAreaFan.divisionArea, checkDir);
@@ -231,37 +285,62 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             return nearFans;
         }
 
-        void LayoutFanRectFirstStep()
+        void LayoutFanRectFirstStep(bool checkLoad)
         {
-            var orientation = _groupYVector.Negate();
-            bool changeDir = false;
+            _changeLayoutDir = false;
+            _roomIntersectAreas = _roomIntersectAreas.OrderByDescending(c => c.RealIntersectAreas.Sum(x => x.Area)).ToList();
             for (int j = _firstGroupIndex; j >= 0; j--)
             {
-                var curretnPoint = _allGroupCenterOrders[j];
-                var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(curretnPoint) < 1).First().Key;
-                int layoutCount = 0;
-                foreach (var item in _roomIntersectAreas)
-                {
-                    if (item.GroupId != currentGroupId)
-                        continue;
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation, changeDir);
-                    layoutCount += item.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
-                }
-                changeDir = j == _firstGroupIndex && layoutCount < 1;
+                CalcRowAreaLayoutFans(j, checkLoad);
             }
             for (int j = _firstGroupIndex + 1; j < _allGroupCenterOrders.Count; j++)
             {
-                var curretnPoint = _allGroupCenterOrders[j];
-                var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(curretnPoint) < 1).First().Key;
-                foreach (var item in _roomIntersectAreas)
-                {
-                    if (item.GroupId != currentGroupId)
-                        continue;
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation, changeDir);
-                }
+                CalcRowAreaLayoutFans(j, checkLoad);
             }
         }
-
+        void CalcRowAreaLayoutFans(int rowNum,bool checkLoad) 
+        {
+            var orientation = _groupYVector.Negate();
+            var curretnPoint = _allGroupCenterOrders[rowNum];
+            var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(curretnPoint) < 1).First().Key;
+            int layoutCount = 0;
+            double rowNeedLoad = 0.0;
+            foreach (var item in _roomIntersectAreas)
+            {
+                if (item.GroupId != currentGroupId)
+                    continue;
+                rowNeedLoad += item.NeedLoad;
+                OneDivisionAreaCalcFanRectangle(item, _fanRectangle, orientation);
+                layoutCount += item.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
+            }
+            var readLoad = layoutCount * _fanRectangle.Load;
+            if (checkLoad && rowNeedLoad > readLoad)
+            {
+                var needCount = (int)Math.Ceiling(rowNeedLoad / _fanRectangle.Load);
+                var addCount = needCount - layoutCount;
+                layoutCount = 0;
+                //该行负荷不够，清除该行的历史，修改区域所需风机个数，重新进行排布
+                foreach (var area in _roomIntersectAreas)
+                {
+                    if (area.GroupId != currentGroupId)
+                        continue;
+                    if (addCount < 1)
+                        break;
+                    int thisCount = area.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
+                    if (thisCount > 0 && addCount > 0)
+                    {
+                        area.NeedFanCount += 1;
+                        addCount -= 1;
+                    }
+                    area.FanLayoutAreaResult.Clear();
+                    CalcLayoutArea(area, _fanRectangle, _groupYVector,false);
+                    OneDivisionAreaCalcFanRectangle(area, _fanRectangle, orientation);
+                    layoutCount += area.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
+                }
+            }
+            if (rowNum == _firstGroupIndex)
+                _changeLayoutDir = layoutCount < 1;
+        }
         void AdjustmentFanRectSize()
         {
             var allGroupIds = _allGroupPoints.Select(c => c.Key).ToList();
@@ -536,7 +615,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         
 
-        void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, Vector3d vector,bool isChangeLayoutDir)
+        void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, Vector3d vector)
         {
             var fanCount = divisionArea.NeedFanCount;
             if (fanCount < 1)
@@ -605,7 +684,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 foreach (var pline in calcResult)
                 {
                     var fanPline = new FanLayoutRect(pline, _fanRectangle.Width, vector);
-                    fanPline.FanDirection = isChangeLayoutDir? layoutDivision.LayoutDir.Negate():layoutDivision.LayoutDir;
+                    fanPline.FanDirection = layoutDivision.LayoutDir;
                     thisRowFans.Add(fanPline);
                 }
                 nearFans.Clear();
