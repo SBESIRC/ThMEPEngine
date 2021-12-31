@@ -159,7 +159,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             //return mapFrame[0] as Polyline;
             Polyline polyLine = new Polyline();
             polyLine.AddVertexAt(0, pts[0].ToPoint2D(), 0, 0, 0);
-            polyLine.AddVertexAt(0, pts[1].ToPoint2D(), 0, 0, 0);
+            polyLine.AddVertexAt(1, pts[1].ToPoint2D(), 0, 0, 0);
             var objcet = polyLine.BufferPL(expandLength)[0];
             return objcet as Polyline;
         }

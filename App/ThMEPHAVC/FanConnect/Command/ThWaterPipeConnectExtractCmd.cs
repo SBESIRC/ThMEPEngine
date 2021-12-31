@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -96,6 +97,15 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     return;
                 }
+                //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 if(fucs.Count == 0)
                 {
@@ -111,7 +121,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeWidth = pipeWidth;
                 pipeService.EquipModel = fucs;
-                pipeService.TrunkLines = pipes;
+                pipeService.TrunkLines = tmpLines;
                 foreach(var wall in shearWalls)
                 {
                     pipeService.AddObstacleHole(wall.Outline);

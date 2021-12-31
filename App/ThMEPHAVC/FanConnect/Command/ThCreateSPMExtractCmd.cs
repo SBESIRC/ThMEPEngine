@@ -10,6 +10,11 @@ using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
 using DotNetARX;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
+using NFox.Cad;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.FanConnect.Command
 {
@@ -122,10 +127,19 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 //提取水管路由
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                
                 //提取水管连接点
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                var lines = ThFanConnectUtils.CleanLaneLines(pipes);
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
                 double space = 300.0;
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
