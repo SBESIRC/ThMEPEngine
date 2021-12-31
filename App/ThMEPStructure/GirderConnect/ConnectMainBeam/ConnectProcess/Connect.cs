@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 {
@@ -42,7 +43,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
         public Dictionary<Point3d, HashSet<Point3d>> Calculate(Point3dCollection clumnPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
-            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
+            Dictionary<Polyline, HashSet<Point3d>> outlineClumns, Dictionary<Polyline, HashSet<Polyline>> outerWalls,
+            ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts, ThMEPOriginTransformer transformer)
         {
             if(clumnPts.Count == 0)
             {
@@ -135,7 +137,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             LineDealer.AddSpecialLine(outline2BorderNearPts, ref dicTuples);
 
             SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle * 2);
-            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts);
+            StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts, MaxBeamLength);
             PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
             StructureDealer.DeleteConnectUpToFourB(ref dicTuples, ref outline2BorderNearPts);
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
@@ -158,7 +160,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
             //去除相交线，获得辅助外框
             StructureDealer.RemoveIntersectLines(ref dicTuples);
-            List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples);
+            List<Tuple<Point3d, Point3d>> closebdLines = BorderPtsConnect(outlineWalls, outerWalls, olCrossPts, ref dicTuples, transformer);
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
             closebdLines.ForEach(o => StructureDealer.DeleteFromDicTuples(o.Item1, o.Item2, ref dicTuples));
 
@@ -206,13 +208,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// 分情况连接边界上的点
         /// </summary>
         private List<Tuple<Point3d, Point3d>> BorderPtsConnect(Dictionary<Polyline, HashSet<Polyline>> outlineWalls, 
-            Dictionary<Polyline, HashSet<Polyline>> outerWalls, Dictionary<Polyline, HashSet<Point3d>> olCrossPts, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+            Dictionary<Polyline, HashSet<Polyline>> outerWalls, Dictionary<Polyline, HashSet<Point3d>> olCrossPts, 
+            ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, ThMEPOriginTransformer transformer)
         {
             List<Tuple<Point3d, Point3d>> closeBorderLines = new List<Tuple<Point3d, Point3d>>();
             Dictionary<Point3d, Point3d> closeBorderLineA = StructureDealer.CloseBorderA(outlineWalls.Keys.ToHashSet(), dicTuples.Keys.ToList());
+
             string outlineLayerA = "TH_AI_HOUSEBOUND";
             LayerDealer.AddLayer(outlineLayerA, 1);
-            LayerDealer.Output(closeBorderLineA, outlineLayerA);
+            LayerDealer.Output(closeBorderLineA, outlineLayerA, transformer);
             LayerDealer.HiddenLayer(outlineLayerA);
             foreach (var dic in closeBorderLineA)
             {
@@ -235,7 +239,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             }
             string outlineLayerB = "TH_AI_WALLBOUND";
             LayerDealer.AddLayer(outlineLayerB, 2);
-            LayerDealer.Output(unifiedTyples, outlineLayerB);
+            LayerDealer.Output(unifiedTyples, outlineLayerB, transformer);
             LayerDealer.HiddenLayer(outlineLayerB);
             return closeBorderLines;
         }

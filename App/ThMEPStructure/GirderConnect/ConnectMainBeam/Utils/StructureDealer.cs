@@ -536,8 +536,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             break;
                         }
                     }
-                    if (flag == true)
-                    //if (flag == true || dicTuples[rmPt].Count <= 4)
+                    //if (flag == true)
+                    if (flag == true || dicTuples[rmPt].Count <= 2)
                     {
                         continue;
                     }
@@ -744,6 +744,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         var vecA = (nowCntPts[0] - basePt).GetNormal();
                         var vecB = (nowCntPts[1] - basePt).GetNormal();
                         double baseAngel = vecA.GetAngleTo(vecB);
+                        if (baseAngel > Math.PI / 4 * 3)
+                        {
+
+                        }
+                        else
+                        {
+
+                        }
                         if (baseAngel > partice * 18 && baseAngel < partice * 22)
                         {
                             var ansPtA = GetObject.GetPointByDirectionB(basePt, -vecA, basePts, partice * 5, MaxBeamLength);

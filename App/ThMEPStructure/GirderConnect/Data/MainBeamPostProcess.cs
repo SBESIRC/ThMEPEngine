@@ -16,12 +16,11 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <summary>
         /// 对主梁连接算法结果的后续处理
         /// </summary>
-        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
+        public static List<Line> MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
         {
             //var unifiedTyples = UnifyTuples(dicTuples);
             var tuples = LineDealer.DicTuplesToTuples(dicTuples);
-            var lines = TuplesToLines(tuples);
-            Output(lines);
+            return TuplesToLines(tuples);
         }
         public static void Output(List<Line> lines)
         {

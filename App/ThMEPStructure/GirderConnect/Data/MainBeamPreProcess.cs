@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Data.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data
@@ -17,8 +18,9 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <param name="outlineClumns"></param>
-        public static void MPreProcess(List<Entity> outsideColumns, Dictionary<Entity, HashSet<Entity>> shearwallGroupDict, Dictionary<Entity, HashSet<Entity>> columnGroupDict, List<Entity> outsideShearwall, Point3dCollection clumnPts, 
-            ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
+        public static void MPreProcess(List<Entity> outsideColumns, Dictionary<Entity, HashSet<Entity>> shearwallGroupDict, Dictionary<Entity, HashSet<Entity>> columnGroupDict,
+            List<Entity> outsideShearwall, Point3dCollection clumnPts, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls, Dictionary<Polyline, HashSet<Point3d>> outlineClumns, 
+            ref Dictionary<Polyline, HashSet<Polyline>> outerWalls, ref Dictionary<Polyline, HashSet<Point3d>> olCrossPts)
         {
             //0、内部柱分类
             //columnGroupDict->outlineWalls/outlinePlColumns
