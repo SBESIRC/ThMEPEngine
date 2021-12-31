@@ -331,7 +331,6 @@
     <Compile Include="ViewModel\WiringConnectingViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="EmgLight\Assistant\" />
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
