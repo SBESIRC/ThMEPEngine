@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -634,6 +635,7 @@
     <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
     <Compile Include="ViewModel\ThSprinklerConnectVM.cs" />
+    <Compile Include="ViewModel\ThTianHuaUserConfigVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />

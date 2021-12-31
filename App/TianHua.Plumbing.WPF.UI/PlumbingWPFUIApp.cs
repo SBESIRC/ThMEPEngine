@@ -24,6 +24,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         SprinklerCheckersUI uiSprinklerCheckers;
         SprinklerConnectionUI uiSprinklerConnection;
         RoomOutlineUI uiRoomOutline;
+        static uiUserConfig tianHuaUserConfig;
         public void Initialize()
         {
             uiFireHydrant = null;
@@ -47,13 +48,13 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 ThSprinklerConnectUICmd.SprinklerConnectVM = new ThSprinklerConnectVM();
             }
 
-            AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose += DocumentBeginClose;
-            AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
+            //AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose += DocumentBeginClose;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
         }
 
         public void Terminate()
         {
-            AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
         }
         private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
@@ -63,6 +64,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     SprinklerConnectionUI.Instance.Hide();
                 }
+                if (tianHuaUserConfig != null)
+                {
+                    tianHuaUserConfig.Hide();
+                }                
             }
         }
         private void DocumentBeginClose(object sender, DocumentBeginCloseEventArgs e)
@@ -369,6 +374,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     parkingStallExtractor.ParkingStalls.Cast<Entity>().ToList().CreateGroup(acadDb.Database, 1);
                 }
             }
+        }
+
+        /// <summary>
+        /// 设置提取梁的开关
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THUC", CommandFlags.Modal)]
+        public void ThBeamSet()
+        {
+            if (tianHuaUserConfig == null)
+            {
+                tianHuaUserConfig = new uiUserConfig();
+            }
+            AcadApp.ShowModelessWindow(tianHuaUserConfig);
         }
     }
 }
