@@ -8,11 +8,10 @@ namespace ThMEPHVAC.ViewModel
     public class AirPortParameterVM
     {
         public ThAirPortParameter Parameter { get; set; }
-        private ThQueryRoomAirVolumeService ReadVolumeService;
+        
         public AirPortParameterVM()
         {
             Parameter = new ThAirPortParameter();
-            ReadVolumeService = new ThQueryRoomAirVolumeService();
         }
 
         public void ReadRoomAirVolume()
@@ -25,9 +24,10 @@ namespace ThMEPHVAC.ViewModel
                 selector.Select();
                 if (selector.Rooms.Count==1)
                 {
+                    var readVolumeService = new ThQueryRoomAirVolumeService();
                     var keyWord = ThMEPHAVCDataManager.GetAirVolumeQueryKeyword(Parameter.SystemType);
-                    var volume = ReadVolumeService.Query(selector.Rooms[0], keyWord);
-                    Parameter.TotalAirVolume = ReadVolumeService.ConvertToDouble(volume);
+                    var volume = readVolumeService.Query(selector.Rooms[0], keyWord);
+                    Parameter.TotalAirVolume = readVolumeService.ConvertToDouble(volume);
                 }
             }  
         } 
