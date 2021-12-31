@@ -78,7 +78,6 @@
     <Compile Include="EmgLightConnect\Service\SingleSideBlockService.cs" />
     <Compile Include="EmgLightConnect\Service\orderSingleSideLaneService.cs" />
     <Compile Include="EmgLightConnect\Service\MergeSideService.cs" />
-    <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
     <Compile Include="EmgLight\EmgLightCommon.cs" />
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
     <Compile Include="EmgLight\Model\ThLane.cs" />
@@ -332,6 +331,7 @@
     <Compile Include="ViewModel\WiringConnectingViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="EmgLight\Assistant\" />
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>

@@ -130,9 +130,10 @@ namespace ThMEPLighting.IlluminationLighting
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。定义房间名称类型
                 var dataQuery = new ThAFASAreaDataQueryService(geos, avoidBlkName);
                 //洞,必须先做找到框线
-                dataQuery.AnalysisHoles();
-                //墙，柱，可布区域，避让
-                dataQuery.ClassifyData();
+                //dataQuery.AnalysisHoles();
+                //dataQuery.ClassifyData();
+                dataQuery.AddMRoomDict();
+                dataQuery.ClassifyDataNew();//先分房间再扩大
                 var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, _scale);
                 dataQuery.ExtendPriority(priorityExtend);
                 var roomType = ThFaIlluminationRoomTypeService.GetIllunimationType(dataQuery.Rooms, dataQuery.RoomFrameDict);

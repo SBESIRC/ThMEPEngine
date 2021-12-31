@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

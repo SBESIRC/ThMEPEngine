@@ -10,7 +10,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Model;
@@ -114,8 +114,8 @@ namespace ThMEPElectrical
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var pts = ThAFASSelectFrameUtil.GetFrame();
-            //var pts = ThAFASUtils.GetRoomFrame();
+            //var pts = ThAFASSelectFrameUtil.GetFrame();
+            var pts = ThAFASSelectFrameUtil.GetRoomFrame();
 
             if (pts.Count == 0)
             {
@@ -126,8 +126,10 @@ namespace ThMEPElectrical
 
             var data = new ThAFASAreaDataQueryService(geos, avoidBlkName);
             data.Print();
-            data.AnalysisHoles();
-            data.ClassifyData();
+            //data.AnalysisHoles();
+            //data.ClassifyData();
+            data.AddMRoomDict();
+            data.ClassifyDataNew();//先分房间再扩大
             var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
 
             foreach (var frame in data.FrameList)
@@ -200,8 +202,10 @@ namespace ThMEPElectrical
                     return;
                 }
 
-                var transformer = ThAFASUtils.GetTransformer(selectPts);
+                //var transformer = ThAFASUtils.GetTransformer(selectPts);
+                var transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
                 var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+                ThAFASDataPass.Instance = new ThAFASDataPass();
                 ThAFASDataPass.Instance.Extractors = extractors;
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
@@ -224,7 +228,7 @@ namespace ThMEPElectrical
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
                 ThGeoOutput.Output(geos, path, fileInfo.Name + "New");
-
+                ThAFASDataPass.Instance = null;
             }
 #endif
         }
@@ -247,8 +251,10 @@ namespace ThMEPElectrical
                     return;
                 }
 
-                var transformer = ThAFASUtils.GetTransformer(selectPts);
+                //var transformer = ThAFASUtils.GetTransformer(selectPts);
+                var transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
                 var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+                ThAFASDataPass.Instance = new ThAFASDataPass();
                 ThAFASDataPass.Instance.Extractors = extractors;
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
@@ -262,6 +268,7 @@ namespace ThMEPElectrical
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
                 ThGeoOutput.Output(geos, path, fileInfo.Name + "New");
+                ThAFASDataPass.Instance = null;
             }
         }
 
@@ -291,8 +298,9 @@ namespace ThMEPElectrical
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var selectPts = ThAFASSelectFrameUtil.GetFrame();
-            //var pts = ThAFASUtils.GetRoomFrame();
+            //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+            var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
 
             if (selectPts.Count == 0)
             {
@@ -301,8 +309,9 @@ namespace ThMEPElectrical
 
             //var transformer = ThAFASUtils.GetTransformer(selectPts);
             var transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
-
             var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             ThAFASDataPass.Instance.Extractors = extractors;
             ThAFASDataPass.Instance.Transformer = transformer;
             ThAFASDataPass.Instance.SelectPts = selectPts;
@@ -311,8 +320,10 @@ namespace ThMEPElectrical
 
             var data = new ThAFASAreaDataQueryService(geos, avoidBlkName);
             data.Print();
-            data.AnalysisHoles();
-            data.ClassifyData();
+            //data.AnalysisHoles();
+            //data.ClassifyData();
+            data.AddMRoomDict();
+            data.ClassifyDataNew();
             var roomType = FireAlarmArea.Service.ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
             foreach (var frame in data.FrameList)
             {
@@ -322,13 +333,24 @@ namespace ThMEPElectrical
 
                 var type = bIsAisleArea == true ? "centerline" : "grid";
                 var centPt = frame.GetCentroidPoint();
-                DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
-                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l4lastInfo", 3, 25, 200);
+
+                DrawUtils.ShowGeometry(frame, string.Format("l0roomFrame"), 30);
+                DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0FrameHole"), 150);
+                DrawUtils.ShowGeometry(data.FrameColumnList[frame], string.Format("l0FrameColumn"), 1);
+                DrawUtils.ShowGeometry(data.FrameWallList[frame], string.Format("l0FrameWall"), 1);
+                data.FrameLayoutList[frame].ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0Framelayout"), 6));
+                DrawUtils.ShowGeometry(data.FrameDetectAreaList[frame], string.Format("l0FrameDetec"), 91);
+                DrawUtils.ShowGeometry(data.FramePriorityList [frame], string.Format("l0FrameEquipment"), 152);
+
+                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l0lastInfo", 3, 25, 200);
+
+
             }
 
             var fileInfo = new FileInfo(Active.Document.Name);
             var path = fileInfo.Directory.FullName;
             ThGeoOutput.Output(geos, path, fileInfo.Name + "New");
+            ThAFASDataPass.Instance = null;
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -362,8 +384,9 @@ namespace ThMEPElectrical
 
                 //var transformer = ThAFASUtils.GetTransformer(selectPts);
                 var transformer = new ThMEPEngineCore.Algorithm.ThMEPOriginTransformer(new Point3d(0, 0, 0));
-
                 var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+
+                ThAFASDataPass.Instance = new ThAFASDataPass();
                 ThAFASDataPass.Instance.Extractors = extractors;
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
@@ -377,71 +400,9 @@ namespace ThMEPElectrical
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;
                 ThGeoOutput.Output(geos, path, fileInfo.Name + "New");
+                ThAFASDataPass.Instance = null;
             }
         }
-
-
-
-
-
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        public void ThCleanDebugLayer()
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                ClearDrawing();
-            }
-
-        }
-        public static void ClearDrawing()
-        {
-            System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex(@"l[0-9]+");
-
-            using (var db = AcadDatabase.Active())
-            {
-                foreach (var layer in db.Layers)
-                {
-
-                    if (rx.IsMatch(layer.Name))
-                    {
-                        ClearDrawing(layer.Name);
-                    }
-                }
-            }
-        }
-
-        private static void ClearDrawing(string layerName)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                LayerTable lt = (LayerTable)acadDatabase.Database.LayerTableId.GetObject(OpenMode.ForRead);
-                if (lt.Has(layerName))
-                {
-
-                    DotNetARX.LayerTools.UnFrozenLayer(acadDatabase.Database, layerName);
-                    DotNetARX.LayerTools.UnLockLayer(acadDatabase.Database, layerName);
-                    DotNetARX.LayerTools.UnOffLayer(acadDatabase.Database, layerName);
-
-                    var items = acadDatabase.ModelSpace
-                        .OfType<Entity>()
-                        .Where(o => o.Layer == layerName);
-
-                    foreach (var line in items)
-                    {
-                        line.UpgradeOpen();
-                        line.Erase();
-                    }
-
-                    DotNetARX.LayerTools.DeleteLayer(acadDatabase.Database, layerName);
-                }
-            }
-        }
-
-
 
     }
 }

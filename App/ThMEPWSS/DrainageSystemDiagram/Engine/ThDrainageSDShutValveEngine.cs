@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
 using NFox.Cad;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

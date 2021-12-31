@@ -21,6 +21,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Config;
+using ThMEPEngineCore.Diagnostics;
 using NetTopologySuite.Geometries;
 
 using ThMEPElectrical.AFAS;

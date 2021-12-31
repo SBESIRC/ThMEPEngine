@@ -233,8 +233,12 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Smoke);
 
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts ==null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASSmokeCmd())
             {
                 cmd.Execute();
@@ -250,9 +254,12 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.DisplayBuilding = rst;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASDisplayDeviceLayoutCmd())
             {
                 cmd.Execute();
@@ -266,9 +273,12 @@ namespace ThMEPElectrical
         {
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Monitor);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASFireProofMonitorLayoutCmd())
             {
                 cmd.Execute();
@@ -281,9 +291,12 @@ namespace ThMEPElectrical
         {
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Tel);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASFireTelLayoutCmd())
             {
                 cmd.Execute();
@@ -300,9 +313,12 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.GasProtectRadius = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Gas);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASGasCmd())
             {
                 cmd.Execute();
@@ -328,9 +344,12 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.StepLengthBC = stepDistanceP;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Broadcast);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASBroadcastCmd())
             {
                 cmd.Execute();
@@ -349,9 +368,12 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.StepLengthMA = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);
-
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             GetData();
-
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
             using (var cmd = new ThAFASManualAlarmCmd())
             {
                 cmd.Execute();
@@ -370,6 +392,7 @@ namespace ThMEPElectrical
                 ThAFASDataPass.Instance = new ThAFASDataPass();
 
                 var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+                //var selectPts = ThAFASSelectFrameUtil.GetFrame();
                 if (selectPts.Count == 0)
                 {
                     return;

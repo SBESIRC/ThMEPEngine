@@ -17,6 +17,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.IO.ExcelService;
 using ThMEPElectrical.Service;
 

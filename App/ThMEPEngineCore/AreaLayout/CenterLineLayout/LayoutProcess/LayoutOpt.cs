@@ -10,7 +10,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.OverlayNG;
-
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return new List<Point3d>();
             }
 
-            //pointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
+            pointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
 
             List<Point3d> fstPoints = FstStep(); //1、初选
             fstPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l1ptFirst", 3, 25, 30));

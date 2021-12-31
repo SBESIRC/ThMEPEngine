@@ -17,6 +17,7 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
@@ -67,8 +68,26 @@ namespace ThMEPElectrical.FireAlarmArea
                         ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameSmokePrf);
                     }
                 }
-                catch
+                catch (System.Exception ex)
                 {
+                    //var pt = frame.GetPoint3dAt(0);
+
+                    //var ptOri = ThAFASDataPass.Instance.Transformer.Reset(pt);
+                    //var err = string.Format("{0}-point:{1},{2}{3} point Ori:{4},{5}{6}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), pt.X, pt.Y, System.Environment.NewLine,
+                    //                                    ptOri.X, ptOri.Y, System.Environment.NewLine);
+
+                    //err = System.Environment.NewLine + err + ex.StackTrace.ToString() + System.Environment.NewLine;
+                    //string path = Path.Combine(Active.DocumentDirectory, string.Format("log-{0}-{1}.txt", Active.DocumentName, DateTime.Now.ToString("yyyyMMdd")));
+
+                    //if (File.Exists(path) == false)
+                    //{
+                    //    File.WriteAllText(path, err);
+                    //}
+                    //else
+                    //{
+                    //    File.AppendAllText(path, err);
+                    //}
+
                     continue;
                 }
             }
@@ -83,7 +102,7 @@ namespace ThMEPElectrical.FireAlarmArea
             var blindType = BlindType.CoverArea;
             var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, layoutParameter.FloorHightIdx, layoutParameter.RootThetaIdx, layoutType);//to do...frame.area need to remove hole's area
             //区域类型
-            var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(dataQuery.FrameLayoutList[frame], radius);       
+            var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(dataQuery.FrameLayoutList[frame], radius);
             var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, dataQuery.FrameHoleList[frame], beamGridWidth, layoutParameter.AisleAreaThreshold);
 
             if (bIsAisleArea == false)
@@ -105,16 +124,20 @@ namespace ThMEPElectrical.FireAlarmArea
             var stype = type == ThFaSmokeCommon.layoutType.heat ? "heat" : "smoke";
             var sCenterLine = isCenterLine == false ? "grid" : "cl";
 
+            DrawUtils.ShowGeometry(frame, string.Format("l0roomFrame"), 30);
+
             var pt = frame.GetCentroidPoint();
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
             DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", stype, sCenterLine), "l0Info", 3, 25, 200);
 
-            DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0wall"), 10);
-            DrawUtils.ShowGeometry(dataQuery.FrameColumnList[frame], string.Format("l0column"), 3);
-            DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), string.Format("l0layoutArea"), 200);
-            DrawUtils.ShowGeometry(dataQuery.FramePriorityList[frame], string.Format("l0priority"), 60);
-            DrawUtils.ShowGeometry(dataQuery.FrameDetectAreaList[frame], string.Format("l0DetectArea"), 96);
+
+            DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 150);
+            DrawUtils.ShowGeometry(dataQuery.FrameWallList[frame], string.Format("l0wall"), 1);
+            DrawUtils.ShowGeometry(dataQuery.FrameColumnList[frame], string.Format("l0column"), 1);
+            DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), string.Format("l0layoutArea"), 6);
+            DrawUtils.ShowGeometry(dataQuery.FramePriorityList[frame], string.Format("l0priority"), 152);
+            DrawUtils.ShowGeometry(dataQuery.FrameDetectAreaList[frame], string.Format("l0DetectArea"), 91);
 
         }
         private static void DebugShowResult(Dictionary<Point3d, Vector3d> layoutPts, List<Polyline> blinds, ThFaSmokeCommon.layoutType type, bool isCenterLine)

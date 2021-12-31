@@ -11,10 +11,10 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Common;
 using ThMEPLighting.EmgLight.Service;
-using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect;
 using ThMEPLighting.EmgLightConnect.Service;
 

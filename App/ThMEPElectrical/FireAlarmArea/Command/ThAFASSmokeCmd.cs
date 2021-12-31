@@ -132,17 +132,13 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。定义房间名称类型
                 //var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
                 var dataQuery = new ThAFASAreaDataQueryService(geos, avoidBlkName);
-                dataQuery.AnalysisHoles();
-                dataQuery.ClassifyData();//先分房间再扩大
+                //dataQuery.AnalysisHoles();
+                //dataQuery.ClassifyData();//先分房间再扩大
+                dataQuery.AddMRoomDict();
+                dataQuery.ClassifyDataNew();
                 var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, _scale);
                 dataQuery.ExtendPriority(priorityExtend);
                 var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
-
-                //foreach (var frame in dataQuery.FrameList)
-                //{
-                //    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                //    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
-                //}
 
                 //--------------定义传数据
                 var layoutParameter = new ThAFASSmokeLayoutParameter();

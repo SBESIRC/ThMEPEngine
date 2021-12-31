@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 
 using CLI;
-
+using ThMEPEngineCore.Diagnostics;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.IO;

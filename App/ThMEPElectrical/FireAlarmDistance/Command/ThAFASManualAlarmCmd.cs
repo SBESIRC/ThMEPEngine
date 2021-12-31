@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;

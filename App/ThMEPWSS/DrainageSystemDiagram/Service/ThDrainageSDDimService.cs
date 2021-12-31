@@ -8,6 +8,7 @@ using Dreambuild.AutoCAD;
 using NFox.Cad;
 using ThCADExtension;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

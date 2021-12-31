@@ -12,7 +12,7 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
-
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmArea.Data
@@ -185,6 +185,105 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             FramePriorityList = ClassifyData(AvoidEquipments);
             FrameDetectAreaList = ClassifyData(DetectArea);
         }
+
+
+        public void AddMRoomDict()
+        {
+            for (int i = 0; i < Rooms.Count; i++)
+            {
+                Polyline frame = null;
+                List<Polyline> holes = new List<Polyline>();
+                if (Rooms[i].Boundary is MPolygon mPolygon)
+                {
+                    frame = mPolygon.Shell();
+                    holes.AddRange(mPolygon.Holes());
+                }
+                else if (Rooms[i].Boundary is Polyline polyline)
+                {
+                    frame = polyline;
+                }
+
+                FrameHoleList.Add(frame, holes);
+                FrameList.Add(frame);
+                RoomFrameDict.Add(Rooms[i], frame);
+            }
+        }
+
+        public void ClassifyDataNew()
+        {
+            var geomDict = new Dictionary<Entity, ThGeometry>();
+            var objs = new DBObjectCollection();
+            ArchitectureWalls.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Shearwalls.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Columns.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Holes.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            PlaceArea.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            AvoidEquipments.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            DetectArea.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+
+            var spetialIdx = new ThCADCoreNTSSpatialIndex(objs);
+            for (int i = 0; i < Rooms.Count; i++)
+            {
+                var room = Rooms[i];
+
+                FrameWallList[RoomFrameDict[room]] = new List<Polyline> { };
+                FrameColumnList[RoomFrameDict[room]] = new List<Polyline> { };
+                FrameLayoutList[RoomFrameDict[room]] = new List<MPolygon> { };
+                FrameDetectAreaList[RoomFrameDict[room]] = new List<Polyline> { };
+                FramePriorityList[RoomFrameDict[room]] = new List<Polyline> { };
+
+                var filterobjs = spetialIdx.SelectCrossingPolygon(Rooms[i].Boundary);
+                for (int j = 0; j < filterobjs.Count; j++)
+                {
+                    var obj = filterobjs[j];
+                    geomDict.TryGetValue(obj as Entity, out var geom);
+                    if (geom != null)
+                    {
+                        Polyline geomPl = null;
+                        MPolygon geomMpl = null;
+
+                        if (geom.Boundary is Polyline pl)
+                        {
+                            geomMpl = ThMPolygonTool.CreateMPolygon(pl);
+                            geomPl = pl;
+                        }
+                        else if (geom.Boundary is MPolygon mpl)
+                        {
+                            geomMpl = mpl;
+                            geomPl = mpl.Shell();
+                        }
+                        var catogary = geom.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString();
+
+                        if (catogary == BuiltInCategory.ArchitectureWall.ToString() ||
+                            catogary == BuiltInCategory.ShearWall.ToString())
+                        {
+                            FrameWallList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Column.ToString())
+                        {
+                            FrameColumnList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Hole.ToString())
+                        {
+                            FrameHoleList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == "PlaceCoverage")
+                        {
+                            FrameLayoutList[RoomFrameDict[room]].Add(geomMpl);
+                        }
+                        else if (catogary == "DetectionRegion")
+                        {
+                            FrameDetectAreaList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Equipment.ToString())
+                        {
+                            FramePriorityList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                    }
+                }
+            }
+        }
+
         private Dictionary<Polyline, List<Polyline>> ClassifyData(List<ThGeometry> polyList)
         {
             var polyDict = new Dictionary<Polyline, List<Polyline>>();

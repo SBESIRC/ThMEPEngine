@@ -16,7 +16,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.Common;
 using ThMEPEngineCore;
 

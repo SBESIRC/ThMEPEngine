@@ -8,10 +8,9 @@ using Dreambuild.AutoCAD;
 using ThCADExtension;
 using NFox.Cad;
 using ThCADCore.NTS;
-using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm;
-
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

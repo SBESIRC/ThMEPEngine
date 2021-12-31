@@ -173,7 +173,6 @@
     <Compile Include="FireAlarmFixLayout\Logic\ThDisplayDeviceFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireProofMonitorFixedPointLayoutService.cs" />
     <Compile Include="FireAlarmFixLayout\Logic\ThFireTelFixedPointLayoutService.cs" />
-    <Compile Include="AFAS\Utils\DrawUtils.cs" />
     <Compile Include="AFAS\Utils\ThFireAlarmInsertBlk.cs" />
     <Compile Include="AFAS\Service\ThIsExteriorDoorService.cs" />
     <Compile Include="AFAS\Service\ThQueryHoleTextInfoService.cs" />

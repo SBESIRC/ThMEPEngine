@@ -12,8 +12,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
-
-using ThMEPElectrical.AFAS.Utils;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
 
@@ -70,7 +69,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
             foreach (Polyline room in rooms)
             {
-                DrawUtils.ShowGeometry(room, "l0Room", 3);
                 var avoidenceSet = spatialAvoidenceIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
                 List<Polyline> doorWall = new List<Polyline>(); //有门的墙
                 var avoidencePt = DataQueryWorker.GetAvoidPoints(room, avoidenceSet);

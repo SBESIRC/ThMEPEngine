@@ -278,7 +278,6 @@
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRoomExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\ThDrainageSDCommon.cs" />
-    <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDConnectCoolSupplyEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilet.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtService.cs" />

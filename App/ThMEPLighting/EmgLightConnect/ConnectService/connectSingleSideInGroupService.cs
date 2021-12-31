@@ -5,9 +5,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Assistant;
-
-
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

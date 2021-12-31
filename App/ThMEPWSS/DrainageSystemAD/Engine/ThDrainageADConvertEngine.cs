@@ -12,6 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

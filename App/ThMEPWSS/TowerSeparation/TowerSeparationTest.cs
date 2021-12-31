@@ -4,6 +4,7 @@ using Linq2Acad;
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.TowerSeparation.TowerExtract;
