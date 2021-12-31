@@ -11,10 +11,11 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.Command
 {
@@ -61,7 +62,7 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
-                acadDatabase.Database.CreateLaneLineLayer();
+                acadDatabase.Database.CreateAILaneCenterLineLayer();
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);

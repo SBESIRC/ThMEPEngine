@@ -1,4 +1,7 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.BoundaryRepresentation;
 
@@ -269,6 +272,76 @@ namespace ThCADExtension
                 }
             }
             return res;
+        }
+
+        /// <summary>
+        /// Gets the curves constituting the boundaries of the region.
+        /// </summary>
+        /// <param name="region">The region this method applies to.</param>
+        /// <returns>Curve collection.</returns>
+        /// https://www.theswamp.org/index.php?topic=31865.30
+        public static IEnumerable<Curve> GetCurves(this Region region)
+        {
+            using (var brep = new Brep(region))
+            {
+                var loops = brep.Complexes
+                    .SelectMany(complex => complex.Shells)
+                    .SelectMany(shell => shell.Faces)
+                    .SelectMany(face => face.Loops);
+                foreach (var loop in loops)
+                {
+                    var curves3d = loop.Edges.Select(edge => ((ExternalCurve3d)edge.Curve).NativeCurve);
+                    if (1 < curves3d.Count())
+                    {
+                        if (curves3d.All(curve3d => curve3d is CircularArc3d || curve3d is LineSegment3d))
+                        {
+                            var pline = (Polyline)Curve.CreateFromGeCurve(new CompositeCurve3d(curves3d.ToOrderedArray()));
+                            pline.Closed = true;
+                            yield return pline;
+                        }
+                        else
+                        {
+                            foreach (Curve3d curve3d in curves3d)
+                            {
+                                yield return Curve.CreateFromGeCurve(curve3d);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        yield return Curve.CreateFromGeCurve(curves3d.First());
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Order the collection by contiguous curves ([n].EndPoint equals to [n+1].StartPoint)
+        /// </summary>
+        /// <param name="source">Collection this method applies to.</param>
+        /// <returns>Ordered array of Curve3d.</returns>
+        /// https://www.theswamp.org/index.php?topic=31865.30
+        public static Curve3d[] ToOrderedArray(this IEnumerable<Curve3d> source)
+        {
+            var list = source.ToList();
+            int count = list.Count;
+            var array = new Curve3d[count];
+            int i = 0;
+            array[0] = list[0];
+            list.RemoveAt(0);
+            int index;
+            while (i < count - 1)
+            {
+                var pt = array[i++].EndPoint;
+                if ((index = list.FindIndex(c => c.StartPoint.IsEqualTo(pt))) != -1)
+                    array[i] = list[index];
+                else if ((index = list.FindIndex(c => c.EndPoint.IsEqualTo(pt))) != -1)
+                    array[i] = list[index].GetReverseParameterCurve();
+                else
+                    throw new ArgumentException("Not contiguous curves.");
+                list.RemoveAt(index);
+            }
+            return array;
         }
     }
 }

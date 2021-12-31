@@ -12,6 +12,8 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
+using ThMEPEngineCore.Diagnostics;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPElectrical.FireAlarmArea.Data
 {
@@ -19,7 +21,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
     {
         //input
         private List<ThGeometry> Data { get; set; } = new List<ThGeometry>();
-        private List<string> CleanBlkName { get; set; } = new List<string>();
+        //private List<string> CleanBlkName { get; set; } = new List<string>();
         private List<string> AvoidBlkNameList { get; set; } = new List<string>();
 
         //class use
@@ -28,22 +30,17 @@ namespace ThMEPElectrical.FireAlarmArea.Data
         public List<ThGeometry> Columns { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Holes { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> Rooms { get; private set; } = new List<ThGeometry>();
-        public List<ThGeometry> LayoutArea { get; private set; } = new List<ThGeometry>();
+        public List<ThGeometry> PlaceArea { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> DetectArea { get; private set; } = new List<ThGeometry>();
         public List<ThGeometry> AvoidEquipments { get; set; } = new List<ThGeometry>();
-        public List<ThGeometry> CleanEquipments { get; set; } = new List<ThGeometry>();
-        public List<ThGeometry> Equipments { get; set; } = new List<ThGeometry>();
+        //public List<ThGeometry> CleanEquipments { get; set; } = new List<ThGeometry>();
+        // public List<ThGeometry> Equipments { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> DoorOpenings { get; set; } = new List<ThGeometry>();
         public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
 
 
         //output
-        //public List<Polyline> wallList { get; private set; } = new List<Polyline>();
-        //public List<Polyline> columnList { get; private set; } = new List<Polyline>();
-        //public List<Polyline> layoutList { get; private set; } = new List<Polyline>();
-        //public List<Polyline> priorityList { get; private set; } = new List<Polyline>();
         public List<Polyline> FrameList { get; private set; } = new List<Polyline>();
-        // public List<ThGeometry> FrameGeomList { get; private set; } = new List<ThGeometry>();
         public Dictionary<Polyline, List<Polyline>> FrameHoleList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<Polyline, List<Polyline>> FrameWallList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<Polyline, List<Polyline>> FrameColumnList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
@@ -51,75 +48,73 @@ namespace ThMEPElectrical.FireAlarmArea.Data
         public Dictionary<Polyline, List<Polyline>> FramePriorityList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<Polyline, List<Polyline>> FrameDetectAreaList { get; private set; } = new Dictionary<Polyline, List<Polyline>>();
         public Dictionary<ThGeometry, Polyline> RoomFrameDict { get; set; } = new Dictionary<ThGeometry, Polyline>();
-        public ThAFASAreaDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
+
+        //public ThAFASAreaDataQueryService(List<ThGeometry> data, List<string> cleanBlkName, List<string> avoidBlkNameList)
+        //{
+        //    Data = data;
+        //    //CleanBlkName = cleanBlkName;
+        //    AvoidBlkNameList = avoidBlkNameList;
+
+        //    PrepareData();
+        //    //CleanPreviousEquipment();
+        //}
+
+        public ThAFASAreaDataQueryService(List<ThGeometry> data, List<string> avoidBlkNameList)
         {
             Data = data;
-            CleanBlkName = cleanBlkName;
+            //CleanBlkName = cleanBlkName;
             AvoidBlkNameList = avoidBlkNameList;
 
             PrepareData();
-            SetAvoidEquipment();
-            CleanPreviousEquipment();
+            //CleanPreviousEquipment();
         }
 
-        protected void PrepareData()
+        private void PrepareData()
         {
-            Columns = QueryC(BuiltInCategory.Column.ToString());
-            Shearwalls = QueryC(BuiltInCategory.ShearWall.ToString());
-            ArchitectureWalls = QueryC(BuiltInCategory.ArchitectureWall.ToString());
-            Holes = QueryC(BuiltInCategory.Hole.ToString());
-            Rooms = QueryC(BuiltInCategory.Room.ToString());
-            LayoutArea = QueryC("PlaceCoverage");
-            Equipments = QueryC(BuiltInCategory.Equipment.ToString());
-            DetectArea = QueryC("DetectionRegion");
-            DoorOpenings = QueryC(BuiltInCategory.DoorOpening.ToString());
-            Windows = QueryC(BuiltInCategory.Window.ToString());
+            Columns = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Column.ToString());
+            Shearwalls = ThAFASUtils.QueryCategory(Data, BuiltInCategory.ShearWall.ToString());
+            ArchitectureWalls = ThAFASUtils.QueryCategory(Data, BuiltInCategory.ArchitectureWall.ToString());
+            Holes = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Hole.ToString());
+            Rooms = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Room.ToString());
+            PlaceArea = ThAFASUtils.QueryCategory(Data, "PlaceCoverage");
+            DetectArea = ThAFASUtils.QueryCategory(Data, "DetectionRegion");
+            DoorOpenings = ThAFASUtils.QueryCategory(Data, BuiltInCategory.DoorOpening.ToString());
+            Windows = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Window.ToString());
+            var allEquipments = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Equipment.ToString());
+            AvoidEquipments = allEquipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
+            //CleanEquipments = allEquipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
         }
 
-        public void SetAvoidEquipment()
-        {
-            if (AvoidBlkNameList != null)
-            {
-                AvoidEquipments = Equipments.Where(x => AvoidBlkNameList.Contains(x.Properties["Name"].ToString())).ToList();
-            }
+        //public void CleanPreviousEquipment()
+        //{
+        //    CleanEquipments.ForEach(x =>
+        //    {
+        //        var handle = x.Properties[ThExtractorPropertyNameManager.HandlerPropertyName].ToString();
 
-        }
+        //        var dbTrans = new DBTransaction();
+        //        var objId = dbTrans.GetObjectId(handle);
+        //        var obj = dbTrans.GetObject(objId, OpenMode.ForWrite, false);
+        //        obj.UpgradeOpen();
+        //        obj.Erase();
+        //        obj.DowngradeOpen();
+        //        dbTrans.Commit();
+        //        Data.Remove(x);
 
-        public void CleanPreviousEquipment()
-        {
-            if (CleanBlkName != null)
-            {
-                CleanEquipments = Equipments.Where(x => CleanBlkName.Contains(x.Properties["Name"].ToString())).ToList();
-            }
+        //    });
+        //}
 
-            CleanEquipments.ForEach(x =>
-            {
-                var handle = x.Properties[ThExtractorPropertyNameManager.HandlerPropertyName].ToString();
-
-                var dbTrans = new DBTransaction();
-                var objId = dbTrans.GetObjectId(handle);
-                var obj = dbTrans.GetObject(objId, OpenMode.ForWrite, false);
-                obj.UpgradeOpen();
-                obj.Erase();
-                obj.DowngradeOpen();
-                dbTrans.Commit();
-                Data.Remove(x);
-
-            });
-        }
-
-        public List<ThGeometry> QueryC(string category)
-        {
-            var result = new List<ThGeometry>();
-            foreach (ThGeometry geo in Data)
-            {
-                if (geo.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString() == category)
-                {
-                    result.Add(geo);
-                }
-            }
-            return result;
-        }
+        //private List<ThGeometry> QueryCategory(string category)
+        //{
+        //    var result = new List<ThGeometry>();
+        //    foreach (ThGeometry geo in Data)
+        //    {
+        //        if (geo.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString() == category)
+        //        {
+        //            result.Add(geo);
+        //        }
+        //    }
+        //    return result;
+        //}
 
         public void AnalysisHoles()
         {
@@ -186,10 +181,109 @@ namespace ThMEPElectrical.FireAlarmArea.Data
 
             FrameWallList = ClassifyData(wallList);
             FrameColumnList = ClassifyData(Columns);
-            FrameLayoutList = ClassifyLayoutArea(LayoutArea);
+            FrameLayoutList = ClassifyLayoutArea(PlaceArea);
             FramePriorityList = ClassifyData(AvoidEquipments);
             FrameDetectAreaList = ClassifyData(DetectArea);
         }
+
+
+        public void AddMRoomDict()
+        {
+            for (int i = 0; i < Rooms.Count; i++)
+            {
+                Polyline frame = null;
+                List<Polyline> holes = new List<Polyline>();
+                if (Rooms[i].Boundary is MPolygon mPolygon)
+                {
+                    frame = mPolygon.Shell();
+                    holes.AddRange(mPolygon.Holes());
+                }
+                else if (Rooms[i].Boundary is Polyline polyline)
+                {
+                    frame = polyline;
+                }
+
+                FrameHoleList.Add(frame, holes);
+                FrameList.Add(frame);
+                RoomFrameDict.Add(Rooms[i], frame);
+            }
+        }
+
+        public void ClassifyDataNew()
+        {
+            var geomDict = new Dictionary<Entity, ThGeometry>();
+            var objs = new DBObjectCollection();
+            ArchitectureWalls.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Shearwalls.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Columns.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            Holes.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            PlaceArea.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            AvoidEquipments.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+            DetectArea.ForEach(x => { geomDict[x.Boundary] = x; objs.Add(x.Boundary); });
+
+            var spetialIdx = new ThCADCoreNTSSpatialIndex(objs);
+            for (int i = 0; i < Rooms.Count; i++)
+            {
+                var room = Rooms[i];
+
+                FrameWallList[RoomFrameDict[room]] = new List<Polyline> { };
+                FrameColumnList[RoomFrameDict[room]] = new List<Polyline> { };
+                FrameLayoutList[RoomFrameDict[room]] = new List<MPolygon> { };
+                FrameDetectAreaList[RoomFrameDict[room]] = new List<Polyline> { };
+                FramePriorityList[RoomFrameDict[room]] = new List<Polyline> { };
+
+                var filterobjs = spetialIdx.SelectCrossingPolygon(Rooms[i].Boundary);
+                for (int j = 0; j < filterobjs.Count; j++)
+                {
+                    var obj = filterobjs[j];
+                    geomDict.TryGetValue(obj as Entity, out var geom);
+                    if (geom != null)
+                    {
+                        Polyline geomPl = null;
+                        MPolygon geomMpl = null;
+
+                        if (geom.Boundary is Polyline pl)
+                        {
+                            geomMpl = ThMPolygonTool.CreateMPolygon(pl);
+                            geomPl = pl;
+                        }
+                        else if (geom.Boundary is MPolygon mpl)
+                        {
+                            geomMpl = mpl;
+                            geomPl = mpl.Shell();
+                        }
+                        var catogary = geom.Properties[ThExtractorPropertyNameManager.CategoryPropertyName].ToString();
+
+                        if (catogary == BuiltInCategory.ArchitectureWall.ToString() ||
+                            catogary == BuiltInCategory.ShearWall.ToString())
+                        {
+                            FrameWallList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Column.ToString())
+                        {
+                            FrameColumnList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Hole.ToString())
+                        {
+                            FrameHoleList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == "PlaceCoverage")
+                        {
+                            FrameLayoutList[RoomFrameDict[room]].Add(geomMpl);
+                        }
+                        else if (catogary == "DetectionRegion")
+                        {
+                            FrameDetectAreaList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                        else if (catogary == BuiltInCategory.Equipment.ToString())
+                        {
+                            FramePriorityList[RoomFrameDict[room]].Add(geomPl);
+                        }
+                    }
+                }
+            }
+        }
+
         private Dictionary<Polyline, List<Polyline>> ClassifyData(List<ThGeometry> polyList)
         {
             var polyDict = new Dictionary<Polyline, List<Polyline>>();
@@ -264,8 +358,24 @@ namespace ThMEPElectrical.FireAlarmArea.Data
         {
             foreach (var frame in FrameList)
             {
-                FramePriorityList[frame] = FramePriorityList[frame].Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+                FramePriorityList[frame] = ThAFASUtils.ExtendPriority(FramePriorityList[frame], priorityExtend);
             }
+        }
+
+        public void Print()
+        {
+            ArchitectureWalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0archWall", 1));
+            Shearwalls.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0shearWall", 3));
+            Columns.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Column", 1));
+            Windows.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Window", 4));
+            Rooms.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0room", 30));
+            var beam = ThAFASUtils.QueryCategory(Data, BuiltInCategory.Beam.ToString());
+            beam.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0beam", 190));
+            DoorOpenings.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DoorOpening", 4));
+            Holes.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Hole", 150));
+            PlaceArea.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0PlaceCoverage", 6));
+            DetectArea.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0DetectArea", 91));
+            AvoidEquipments.ForEach(x => DrawUtils.ShowGeometry(x.Boundary, "l0Equipment", 152));
         }
     }
 }

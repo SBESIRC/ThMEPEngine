@@ -78,5 +78,9 @@
         public const string Duct_Checker_LayerName = "AI-喷头校核-宽度大于1200的风管";
         public const string Duct_Blind_Zone_LayerName = "AI-喷头校核-风管下喷盲区";
         public const string Sprinkler_So_Dense_LayerName = "AI-喷头校核-区域喷头过密";
+
+        public static string Sprinkler_Connect_MainPipe = "W-喷淋-不接支管主管";
+        public static string Sprinkler_Connect_SubMainPipe = "W-喷淋-连接支管主管";
+        public static string Sprinkler_Connect_Pipe = "W-FRPT-SPRL-PIPE";
     }
 }

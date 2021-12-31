@@ -11,7 +11,6 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.FlushPoint.Data;
 using ThMEPWSS.SprinklerConnect.Cmd;
 using ThMEPWSS.UndergroundFireHydrantSystem.UI;
-using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -22,7 +21,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
         FlushPointUI uiFlushPoint;
         uiDrainageSysAboveGround uiAGSysDrain;
         SprinklerCheckersUI uiSprinklerCheckers;
+        SprinklerConnectionUI uiSprinklerConnection;
         RoomOutlineUI uiRoomOutline;
+        static uiUserConfig tianHuaUserConfig;
         public void Initialize()
         {
             uiFireHydrant = null;
@@ -41,14 +42,33 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 ThSprinklerCheckCmd.SprinklerCheckerVM = new ThSprinklerCheckerVM();
             }
+            if (ThSprinklerConnectUICmd.SprinklerConnectVM == null)
+            {
+                ThSprinklerConnectUICmd.SprinklerConnectVM = new ThSprinklerConnectVM();
+            }
 
-            AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose += DocumentBeginClose;
+            //AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose += DocumentBeginClose;
+            //AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
         }
 
         public void Terminate()
         {
+            //AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
         }
-
+        private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
+        {
+            if (AcadApp.DocumentManager.Count == 1)
+            {
+                if (SprinklerConnectionUI.Instance != null)
+                {
+                    SprinklerConnectionUI.Instance.Hide();
+                }
+                if (tianHuaUserConfig != null)
+                {
+                    tianHuaUserConfig.Hide();
+                }
+            }
+        }
         private void DocumentBeginClose(object sender, DocumentBeginCloseEventArgs e)
         {
             AcadApp.DocumentManager.MdiActiveDocument.BeginDocumentClose -= DocumentBeginClose;
@@ -96,7 +116,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THXHSBH", CommandFlags.Modal)]
         public void THXHSBH()
         {
-            var ui = new FireHydrantSystemUI(FireHydrantSystemUIViewModel.Singleton);
+            var ui = FireHydrantSystemUI.TryCreateSingleton();
+            if (ui is null) return;
             AcadApp.ShowModelessWindow(ui);
         }
         /// <summary>
@@ -257,13 +278,31 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiRoomOutline);
         }
 
-        [CommandMethod("TIANHUACAD", "THSprinkConn1", CommandFlags.Modal)]
-        public void THSprinkConnCmd()
+        /// <summary>
+        /// 喷头连管标注
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THPTLGBZ", CommandFlags.Modal)]
+        public void THSprinkConnUICmd()
         {
-            var cmd = new ThSprinklerConnectCmd_test
+            ThSprinklerConnectCommand.BlockNameDict =
+                uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
+            if (null != SprinklerConnectionUI.Instance && SprinklerConnectionUI.Instance.IsLoaded)
             {
-                BlockNameDict = uiBlockNameConfig.staticUIBlockName.GetBlockNameList()
-            };
+                if (!SprinklerConnectionUI.Instance.IsVisible)
+                {
+                    SprinklerConnectionUI.Instance.Show();
+                }
+                return;
+            }
+            AcadApp.ShowModelessWindow(SprinklerConnectionUI.Instance);
+        }
+
+        [CommandMethod("TIANHUACAD", "-THPTLGBZ", CommandFlags.Modal)]
+        public void THSprinkConnCLICmd()
+        {
+            var cmd = new ThSprinklerConnectCommand();
+            ThSprinklerConnectCommand.BlockNameDict =
+                uiBlockNameConfig.staticUIBlockName.GetBlockNameList();
             cmd.SprinklerConnectExecute();
         }
 
@@ -334,6 +373,19 @@ namespace TianHua.Plumbing.WPF.UI.UI
                     parkingStallExtractor.ParkingStalls.Cast<Entity>().ToList().CreateGroup(acadDb.Database, 1);
                 }
             }
+        }
+
+        /// <summary>
+        /// 全局参数设置
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THMEPOPTIONS", CommandFlags.Modal)]
+        public void ThMEPOptions()
+        {
+            if (tianHuaUserConfig == null)
+            {
+                tianHuaUserConfig = new uiUserConfig();
+            }
+            AcadApp.ShowModelessWindow(tianHuaUserConfig);
         }
     }
 }

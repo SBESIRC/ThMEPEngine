@@ -75,6 +75,24 @@ namespace ThMEPLighting.ViewModel
                 {
                     configLst.ForEach(x => x.configModels.ForEach(y => y.isCheck = true));
                 }
+                this.RaisePropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// 躲避柱
+        /// </summary>
+        private bool? avoidColumnChecked = false;
+        public bool? AvoidColumnChecked
+        {
+            get
+            {
+                return avoidColumnChecked;
+            }
+            set
+            {
+                avoidColumnChecked = value;
+                this.RaisePropertyChanged();
             }
         }
 

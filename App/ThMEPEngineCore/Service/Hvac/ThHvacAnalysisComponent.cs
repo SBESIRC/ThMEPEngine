@@ -22,34 +22,37 @@ namespace ThMEPEngineCore.Service.Hvac
         {
             var ids = new ObjectId[] { id };
             var ductList = GetValueList(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return AnayDuctparam(ductList, id.Handle);
+            return AnayDuctparam(ductList, id);
         }
         public static EntityModifyParam GetConnectorParamById(ObjectId id)
         {
             var ids = new ObjectId[] { id };
             var entityList = GetValueList(ids, ThHvacCommon.RegAppName_Duct_Info);
-            return AnayConnectorparam(entityList, id.Handle);
+            return AnayConnectorparam(entityList, id);
         }
         public static TypedValueList GetValueList(IEnumerable<ObjectId> gIds, string regAppName)
         {
-            var list = new TypedValueList();
-            foreach (var gId in gIds)
+            using (var db = AcadDatabase.Active())
             {
-                list = gId.GetXData(regAppName);
-                if (list == null)
-                    continue;
-                break;
+                var list = new TypedValueList();
+                foreach (var gId in gIds)
+                {
+                    list = gId.GetXData(regAppName);
+                    if (list == null)
+                        continue;
+                    break;
+                }
+                return list;
             }
-            return list;
         }
-        public static DuctModifyParam AnayDuctparam(TypedValueList list, Handle groupHandle)
+        public static DuctModifyParam AnayDuctparam(TypedValueList list, ObjectId groupId)
         {
             using (var db = AcadDatabase.Active())
             {
-                return AnayDuctparam(list, groupHandle, db.Database);
+                return AnayDuctparam(list, groupId, db.Database);
             }
         }
-        public static DuctModifyParam AnayDuctparam(TypedValueList list, Handle groupHandle, Database database)
+        public static DuctModifyParam AnayDuctparam(TypedValueList list, ObjectId groupId, Database database)
         {
             using (var db = AcadDatabase.Use(database))
             {
@@ -60,83 +63,43 @@ namespace ThMEPEngineCore.Service.Hvac
                 if (values.Count() != 4)
                     return param;
                 int inc = 0;
-                param.handle = groupHandle;
-
+                param.handle = groupId.Handle;
                 param.type = (string)values.ElementAt(inc++).Value;
                 if (param.type != "Duct" && param.type != "Vertical_bypass")
                     return param;
                 param.airVolume = Double.Parse((string)values.ElementAt(inc++).Value);
                 param.elevation = Double.Parse((string)values.ElementAt(inc++).Value);
                 param.ductSize = (string)values.ElementAt(inc++).Value;
-                var groupId = db.Database.GetObjectId(false, groupHandle, 0);
                 var group = db.Element<Group>(groupId);
                 var allEntityIds = group.GetAllEntityIds();
-                if (allEntityIds.Count() == 0)
+                if (allEntityIds.Count() != 5)
                     return param;
-                var ids = allEntityIds[0].GetGroups();
-                if (ids == null)
+                var centerLineId = allEntityIds[4];
+                if (centerLineId == null)
                     return param;
-                //var centerline = GetDuctGroupsCenterLine(ids);
-                //param.sp = centerline.StartPoint;
-                //param.ep = centerline.EndPoint;
+                var centerline = db.Element<Line>(centerLineId);
+                param.sp = centerline.StartPoint;
+                param.ep = centerline.EndPoint;
                 return param;
             }
         }
-        public static Line GetDuctGroupsCenterLine(IEnumerable<ObjectId> objIds)
-        {
-            var dic = GetLinesRes(objIds);
-            foreach (var lines in dic.Values)
-            {
-                if (lines.Count == 2)
-                {
-                    var l1 = lines[0];
-                    var l2 = lines[1];
-                    return new Line(GetMidPoint(l1), GetMidPoint(l2));
-                }
-            }
-            throw new NotImplementedException("一定能从管道组中找到中心线");
-        }
-        private static Point3d GetMidPoint(Line l)
-        {
-            var sp = l.StartPoint;
-            var ep = l.EndPoint;
-            return new Point3d((sp.X + ep.X) * 0.5, (sp.Y + ep.Y) * 0.5, 0);
-        }
-        private static Dictionary<int, List<Line>> GetLinesRes(IEnumerable<ObjectId> objIds)
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                var dic = new Dictionary<int, List<Line>>();
-                foreach (var id in objIds)
-                {
-                    var l = db.Element<Line>(id);
-                    int len = (int)l.Length;
-                    if (dic.ContainsKey(len))
-                    {
-                        var ll = dic[len];
-                        ll.Add(l);
-                    }
-                    else
-                        dic.Add(len, new List<Line>() { l });
-                }
-                return dic;
-            }
-        }
-        private static EntityModifyParam AnayConnectorparam(TypedValueList list, Handle groupHandle)
+        private static EntityModifyParam AnayConnectorparam(TypedValueList list, ObjectId groupId)
         {
             var param = new EntityModifyParam();
             if (list.Count > 0)
             {
                 var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
                 int inc = 0;
-                param.handle = groupHandle;
+                param.handle = groupId.Handle;
                 param.type = (string)values.ElementAt(inc++).Value;
                 if (!values.Any() || param.type == "Duct")
                     return param;
                 using (var db = AcadDatabase.Active())
                 {
-                    var id = db.Database.GetObjectId(false, groupHandle, 0);
-                    var ids = id.GetGroups();
+                    var g = db.Element<Group>(groupId);
+                    var ids = g.GetAllEntityIds();
+                    if (ids.IsNull())
+                        return param;
                     var idxInfo = GetGroupStartIdxByType(param.type, ids.Count());
                     var centerLines = GetConnectorCenterLine(ids, idxInfo);
                     var portWidths = GetConnectorPortWidth(ids, idxInfo);
@@ -157,8 +120,11 @@ namespace ThMEPEngineCore.Service.Hvac
                 dic.Add(centerLines[0].StartPoint, portWidths[0]);
                 dic.Add(centerLines[0].EndPoint, portWidths[1]);
             }
-            for (int i = 0; i < portWidths.Count; ++i)
-                dic.Add(centerLines[i].EndPoint, portWidths[i]);
+            else
+            {
+                for (int i = 0; i < portWidths.Count; ++i)
+                    dic.Add(centerLines[i].EndPoint, portWidths[i]);
+            }
             return dic;
         }
         

@@ -48,7 +48,7 @@
                         <RadioButton x:Name="radioButton2" Content="异程" Margin="0,0,32,0"
                          IsChecked="{Binding HorizontalType,Converter={StaticResource layoutTypeConverter},ConverterParameter=0}"
                          />
-                        <RadioButton x:Name="radioButton3" Content="同程"
+                        <RadioButton x:Name="radioButton3" Content="同程" IsEnabled="False"
                          IsChecked="{Binding HorizontalType,Converter={StaticResource layoutTypeConverter},ConverterParameter=1}"
                          />
                     </WrapPanel>
@@ -69,13 +69,13 @@
                     <WrapPanel Orientation="Vertical"  Margin="20,0,0,0">
                         <CheckBox x:Name="checkBox" Content="空调冷热水管" Margin="0,0,0,5" IsChecked="{Binding IsCodeAndHotPipe}"/>
                         <CheckBox x:Name="checkBox1" Content="冷凝水管" Margin="0,0,0,5" IsChecked="{Binding IsCWPipe}"/>
-                        <CheckBox x:Name="checkBox2" Content="空调冷却水管" IsChecked="{Binding IsCoolPipe}"/>
+                        <CheckBox x:Name="checkBox2" Content="空调冷却水管" IsEnabled="False" IsChecked="{Binding IsCoolPipe}"/>
                     </WrapPanel>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Grid.Row="4">
                     <Label x:Name="label4" Content="空调水比摩阻控制："/>
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
-                        <ComboBox x:Name="comboBox" Width="70" ItemsSource="{Binding Source={StaticResource CoeffList}}" SelectedIndex="0" SelectedValue="{Binding FrictionCoeff}"/>
+                        <ComboBox x:Name="comboBox" Width="70" ItemsSource="{Binding Source={StaticResource CoeffList}}" SelectedIndex="1" SelectedValue="{Binding FrictionCoeff}"/>
                         <Label x:Name="label5" Content="Pa/m"/>
                     </WrapPanel>
                 </StackPanel>
@@ -90,8 +90,10 @@
                 <StackPanel Orientation="Vertical" Grid.Row="6">
                     <CheckBox x:Name="checkBox3" Content="穿框线处生成阀门" IsChecked="{Binding IsGenerValve}"/>
                     <WrapPanel Orientation="Horizontal"  Margin="20,0,0,0">
-                        <Label x:Name="label9" Content="已选：10个框线" Margin="0,0,10,0"/>
-                        <Button x:Name="button2" Content="选择" Width="35"/>
+                        <Label x:Name="label9" Content="已选："/>
+                        <Label x:Name="label13" Content="{Binding RoomCount,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                        <Label x:Name="label14" Content="个房间框线" Margin="0,0,0,0"/>
+                        <Button x:Name="btnSelectRoom" Content="选择" Width="35" Click="btnSelectRoom_Click"/>
                     </WrapPanel>
                 </StackPanel>
             </Grid>
@@ -107,37 +109,54 @@
                 <StackPanel Orientation="Vertical" Grid.Row="0">
                     <Label x:Name="label10" Content="供水管："/>
                     <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
-                        <ListBox x:Name="listBox" Height="80" Width="70">
+                        <ListBox x:Name="SuppLeftListBox" Height="80" Width="70">
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="闸阀"></ListBoxItem>
                             <ListBoxItem Content="球阀"></ListBoxItem>
-                            <ListBoxItem Content="柱塞阀"></ListBoxItem>
-                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="快开阀"></ListBoxItem>
+                            <ListBoxItem Content="蝶阀"></ListBoxItem>
+                            <ListBoxItem Content="止回阀"></ListBoxItem>
+                            <ListBoxItem Content="碟式止回阀"></ListBoxItem>
+                            <ListBoxItem Content="静态平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="定流量阀"></ListBoxItem>
+                            <ListBoxItem Content="定压差阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动调节阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动二通调节阀"></ListBoxItem>
                         </ListBox>
                         <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
-                            <Button x:Name="button3" Content="->" Width="25" Margin="0,15,0,10"/>
-                            <Button x:Name="button4" Content="&lt;-" Width="25"/>
+                            <Button x:Name="SuppAddBtn" Content="->" Width="25" Margin="0,15,0,10" Click="SuppAddBtn_Click"/>
+                            <Button x:Name="SuppCanBtn" Content="&lt;-" Width="25" Click="SuppCanBtn_Click"/>
                         </WrapPanel>
-                        <ListBox x:Name="listBox1" Height="80" Width="70">
+                        <ListBox x:Name="SuppRightListBox" Height="80" Width="70">
                         </ListBox>
                     </WrapPanel>
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Grid.Row="1">
                     <Label x:Name="label11" Content="回水管："/>
                     <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
-                        <ListBox x:Name="listBox2" Height="80" Width="70">
+                        <ListBox x:Name="BackLeftListBox" Height="80" Width="70">
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="闸阀"></ListBoxItem>
                             <ListBoxItem Content="球阀"></ListBoxItem>
-                            <ListBoxItem Content="住塞阀"></ListBoxItem>
-                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="快开阀"></ListBoxItem>
-                            <ListBoxItem Content="平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="蝶阀"></ListBoxItem>
+                            <ListBoxItem Content="止回阀"></ListBoxItem>
+                            <ListBoxItem Content="碟式止回阀"></ListBoxItem>
+                            <ListBoxItem Content="静态平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="定流量阀"></ListBoxItem>
+                            <ListBoxItem Content="定压差阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动调节阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动二通调节阀"></ListBoxItem>
                         </ListBox>
                         <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
-                            <Button x:Name="button5" Content="->" Width="25" Margin="0,15,0,10"/>
-                            <Button x:Name="button6" Content="&lt;-" Width="25"/>
+                            <Button x:Name="BackAddBtn" Content="->" Width="25" Margin="0,15,0,10" Click="BackAddBtn_Click"/>
+                            <Button x:Name="BackCanBtn" Content="&lt;-" Width="25" Click="BackCanBtn_Click"/>
                         </WrapPanel>
-                        <ListBox x:Name="listBox3" Height="80" Width="70">
+                        <ListBox x:Name="BackRightListBox" Height="80" Width="70">
                         </ListBox>
                     </WrapPanel>
                 </StackPanel>

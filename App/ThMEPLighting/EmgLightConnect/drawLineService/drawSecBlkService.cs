@@ -9,8 +9,7 @@ using ThCADExtension;
 using NFox.Cad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLightConnect.Model;
 
 namespace ThMEPLighting.EmgLightConnect.Service

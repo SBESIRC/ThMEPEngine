@@ -2,16 +2,19 @@
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDrawPort
     {
+        public double textAngle;
         public string portName;
         public string portLayer;
-        public ThDuctPortsDrawPort(string portLayer, string portName)
+        public ThDuctPortsDrawPort(string portLayer, string portName, double textAngle)
         {
             this.portName = portName;
+            this.textAngle = textAngle;
             this.portLayer = portLayer;
         }
         public void DrawPorts(EndlineSegInfo info, string portRange, Vector3d orgDisVec, double portWidth, double portHeight, double avgAirVolume)
@@ -34,20 +37,28 @@ namespace ThMEPHVAC.Model
                         pL += orgDisVec;
                         pR += orgDisVec;
                         if (pos.haveRight)
-                            InsertPort(pR, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume);
+                            InsertPort(pR, angle - Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
                         if (pos.haveLeft)
-                            InsertPort(pL, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume);
+                            InsertPort(pL, angle + Math.PI * 0.5, portWidth, portHeight, portRange, avgAirVolume * 0.5);
                     }
                 }
             }
+        }
+        public void InsertPort(PortModifyParam param)
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            {
+                InsertPort(param.pos, param.rotateAngle, param.portWidth, param.portHeight, param.portRange, param.portAirVolume);
+            };
         }
         public void InsertPort(Point3d pos, double angle, double portWidth, double portHeight, string portRange, double portAirVolume)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var attNameValues = new Dictionary<string, string> { { "风量", portAirVolume.ToString() + "m3/h" } };
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attNameValues);
-                ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange);
+                var attr = new Dictionary<string, string> { { "风量", portAirVolume.ToString() + "m3/h" } };
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attr);
+                ThMEPHVACService.SetAttr(obj, attr, angle);
+                ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange, textAngle, attr);
             }
         }
         public static void GetSidePortInsertPos(Vector3d dirVec, Point3d pos, double ductWidth, out Point3d pL, out Point3d pR)

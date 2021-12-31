@@ -5,9 +5,8 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight.Model;
-
 
 namespace ThMEPLighting.EmgLight.Service
 {

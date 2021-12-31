@@ -52,13 +52,12 @@ namespace ThMEPHVAC.Model
         {
             using (AcadDatabase db = AcadDatabase.Active())
             {
-                if (seg.dirAlignPoint.IsEqualTo(Point3d.Origin, new Tolerance(1e-3, 1e-3)))
-                    return;
-                var layerId = db.Layers.ElementOrDefault(dimensionLayer).ObjectId;
-                InsertDirWallPoint(seg);
+                if (!seg.dirAlignPoint.IsEqualTo(Point3d.Origin, new Tolerance(1e-3, 1e-3)))
+                    InsertDirWallPoint(seg);
                 var disVec = startPos.GetAsVector();
                 var dirVec = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
                 var verticalVec = GetDimensionVerticalVec(dirVec);
+                var layerId = db.Layers.ElementOrDefault(dimensionLayer).ObjectId;
                 for (int i = 1; i < seg.portsInfo.Count(); ++i)
                 {
                     var portsInfo = seg.portsInfo;

@@ -24,6 +24,14 @@ namespace ThMEPArchitecture
                 cmd.Execute();
             }
         }
+        [CommandMethod("TIANHUACAD", "-THDXQYFG3", CommandFlags.Modal)]
+        public void ThArrangeParkingStall3()
+        {
+            using (var cmd = new WithoutSegLineCmd())
+            {
+                cmd.Execute();
+            }
+        }
         [CommandMethod("TIANHUACAD", "-THExtractTestData", CommandFlags.Modal)]
         public void THExtractTestData()
         {

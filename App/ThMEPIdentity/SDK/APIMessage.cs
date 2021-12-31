@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Linq;
-using RestSharp;
+﻿using RestSharp;
 
 namespace ThAnalytics.SDK
 {
@@ -23,9 +20,7 @@ namespace ThAnalytics.SDK
             request.AddHeader("JWT-AUD", "THMEP");
             request.AddHeader("Authorization", m_Config.Token);
             request.AddJsonBody(sessions);
-            client.ExecuteAsync(request, response => {
-                //Console.WriteLine(response.Content);
-            });
+            client.ExecuteAsync(request);
         }
 
         public static void CADOperation(InitiConnection initiConnection)
@@ -36,9 +31,7 @@ namespace ThAnalytics.SDK
             request.AddHeader("JWT-AUD", "THMEP");
             request.AddHeader("Authorization", m_Config.Token);
             request.AddJsonBody(initiConnection);
-            client.ExecuteAsync(request, response => {
-                //Console.WriteLine(response.Content);
-            });
+            client.ExecuteAsync(request);
         }
     }
 }

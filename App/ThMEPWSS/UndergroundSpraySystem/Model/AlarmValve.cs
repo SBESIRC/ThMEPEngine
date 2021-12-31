@@ -42,7 +42,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             }
         }
 
-
         private DBObjectCollection ExtractBlocks(Database db)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>

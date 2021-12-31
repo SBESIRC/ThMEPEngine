@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight.Model;
 using ThMEPLighting.EmgLight.Common;
 

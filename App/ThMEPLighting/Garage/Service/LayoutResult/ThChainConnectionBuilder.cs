@@ -52,10 +52,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
 
             // 创建T字型路口的线
-            var threewayJumpWireRes = CreateThreeWayJumpWire();
+            // var threewayJumpWireRes = CreateThreeWayJumpWire();
+            var threewayJumpWireRes = new DBObjectCollection();
 
             // 创建十字路口的线
-            var crossJumpWireRes = CreateCrossJumpWire();
+            // var crossJumpWireRes = CreateCrossJumpWire();
+            var crossJumpWireRes = new DBObjectCollection();
 
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);

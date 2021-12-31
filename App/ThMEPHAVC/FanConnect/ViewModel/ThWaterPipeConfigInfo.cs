@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,22 +25,24 @@ namespace ThMEPHVAC.FanConnect.ViewModel
             PipeSystemType = 0;
             IsCodeAndHotPipe = true;
             IsCWPipe = true;
-            IsCoolPipe = true;
+            IsCoolPipe = false;
             IsGenerValve = true;
-            FrictionCoeff = "150";
+            FrictionCoeff = "200";
             MarkHeigth = 3.0;
         }
     }
     public class ThWaterValveConfigInfo
     {
-        public string FeedPipeValve { set; get; }//给水管阀门
-        public string ReturnPipeValeve { set; get; }//回水管阀门
+        public List<string> FeedPipeValves { set; get; }//给水管阀门
+        public List<string> ReturnPipeValeves { set; get; }//回水管阀门
         public string MapScale { set; get; }//出图比例
+        public List<Entity> RoomObb { set; get; }//房间框线
         public ThWaterValveConfigInfo()
         {
-            FeedPipeValve = "截止阀";
-            ReturnPipeValeve = "截止阀";
+            FeedPipeValves = new List<string>();
+            ReturnPipeValeves = new List<string>();
             MapScale = "1:100";
+            RoomObb = new List<Entity>();
         }
     }
 

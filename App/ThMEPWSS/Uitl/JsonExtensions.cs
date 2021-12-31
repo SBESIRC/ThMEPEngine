@@ -255,6 +255,17 @@ namespace ThMEPWSS.CADExtensionsNs
         {
             return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
         }
+        public static LinearRing ToLinearRing2(this GRect r, Matrix3d matrix)
+        {
+            if (r.IsNull) return null;
+            if (!r.IsValid) return null;
+            if (matrix == Matrix3d.Identity) return r.ToLinearRing();
+            var p1 = r.LeftTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p2 = r.LeftButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p3 = r.RightButtom.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            var p4 = r.RightTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
+            return new LinearRing(new Coordinate[] { p1, p2, p3, p4, p1 });
+        }
         public static LineString ToLineString(this IList<Point3d> pts)
         {
             var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();

@@ -3,6 +3,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 
@@ -74,7 +75,7 @@ namespace ThMEPEngineCore.Algorithm
                 LineExtendDistance = extendLength,
             };
             roomOutlineBuilder.Build(objs);
-            if (roomOutlineBuilder.Areas.Count>0)
+            if (roomOutlineBuilder.Areas.Count > 0)
             {
                 return roomOutlineBuilder.Areas.OfType<Polyline>().OrderByDescending(o => o.Area).First();
             }
@@ -94,6 +95,25 @@ namespace ThMEPEngineCore.Algorithm
         {
             // 支持真实闭合或视觉闭合
             return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= tolerance);
+        }
+        /// <summary>
+        /// 处理NTS difference以后造成的闭合polyline有重复点修复。
+        /// 有可能将一个闭合polyline破成多个polyline。
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <returns></returns> 
+        public static List<Polyline> FixDuplicatePointPolyline(Polyline frame)
+        {
+            Polyline framePolyline = new Polyline();
+            var objs = new DBObjectCollection();
+            objs.Add(frame);
+            objs = objs.BufferPolygons(-1);
+            objs = objs.BufferPolygons(1);
+
+            var plList = objs.OfType<Polyline>().ToList();
+            plList = plList.Select(x => ThMEPFrameService.Normalize(x)).ToList();
+
+            return plList;
         }
     }
 }

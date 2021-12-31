@@ -5,8 +5,10 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
@@ -19,11 +21,17 @@ using ThMEPArchitecture.PartitionLayout;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
+using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class OneGenerationCmd : ThMEPBaseCommand, IDisposable
     {
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
+
         public OneGenerationCmd()
         {
             CommandName = "-THDXQYFG2";
@@ -39,7 +47,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    CreateAreaSegment(currentDb);
+                    Run(currentDb);
 
                 }
             }
@@ -54,21 +62,35 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-        public void CreateAreaSegment(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase)
         {       
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
-            outerBrder.Extract(database, selectArea);//提取多段线
+            var extractRst = outerBrder.Extract(database, selectArea);//提取多段线
+            if (!extractRst)
+            {
+                return;
+            }
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
             var gaPara = new GaParameter(outerBrder.SegLines);
+
             var usedLines = new HashSet<int>();
             var maxVals = new List<double>();
             var minVals = new List<double>();
-            Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            double threshSecond = 20;
+
+            var splitRst = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
+            if (!splitRst)
+            {
+                Logger?.Information("分割线不合理，分区失败！");
+                return;
+            }
             gaPara.Set(sortSegLines, maxVals, minVals);
 
             var segLineDic = new Dictionary<int, Line>();
@@ -89,10 +111,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 directionList.Add(num, flag);//默认给全横向
             }
 
-
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
             var geneAlgorithm = new GA2(gaPara);
-         
+
             var rst = geneAlgorithm.Run();
 
             layoutPara.Set(rst);
@@ -105,54 +126,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 }
                 catch { }
             }
+            int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                int index = layoutPara.AreaNumber[j];
-                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                var obstacles = new List<Polyline>();
-                obstaclesList.ForEach(e => obstacles.AddRange(e));
-                var Cutters = new DBObjectCollection();
-                obstacles.ForEach(e => Cutters.Add(e));
-                var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-
-                string w = "";
-                string l = "";
-                foreach (var e in walls)
+                PartitionV3 partition = new PartitionV3();
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
                 {
-                    foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
-                        w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
-                }
-                foreach (var e in inilanes)
-                {
-                    l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
-                        + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
-                }
-#if DEBUG
-                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs1);
-                sw.WriteLine(w);
-                sw.WriteLine(l);
-                sw.Close();
-                fs1.Close();
-#endif
-                inilanes = inilanes.Distinct().ToList();
-                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
-                partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                try
-                {
-                    partition.ProcessAndDisplay(layerNames, 30);
-                }
-                catch(Exception ex)
-                {
-                    ;
+                    try
+                    {
+                        count += partition.ProcessAndDisplay(layerNames, 30);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Error(ex.Message);
+                        partition.Dispose();
+                    }
                 }
             }
             layoutPara.Dispose();
+            Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
         }
 
         private static Point3dCollection SelectAreas()

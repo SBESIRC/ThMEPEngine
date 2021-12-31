@@ -13,7 +13,7 @@ namespace ThMEPLighting.ParkingStall.CAD
     {
         static List<string> layerNames = new List<string>()
         {
-            ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME
+            ParkingStallCommon.PARK_LIGHT_CONNECT_LAYER
         };
         public static void LoadBlockLayerToDocument(Database database)
         {

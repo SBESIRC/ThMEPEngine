@@ -7,62 +7,35 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Algorithm;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model.Hvac;
+using NFox.Cad;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsReadComponent
     {
-        public static Dictionary<Polyline, ObjectId> ReadAllComponent()
+        public static Dictionary<Polyline, Handle> ReadAllComponent(Point3d srtP)
         {
-            var bounds2IdDic = new Dictionary<Polyline, ObjectId>();
             using (var db = AcadDatabase.Active())
             {
-                var groups = db.Groups;
-                foreach (var g in groups)
-                {
-                    var list = g.ObjectId.GetXData(ThHvacCommon.RegAppName_Duct_Info);
-                    if (g.NumEntities != 0 && list != null)
-                    {
-                        var poly = new Polyline();
-                        GetGroupBound(g, out Point3d lowLeftP, out Point3d highRightP);
-                        poly.CreateRectangle(lowLeftP.ToPoint2D(), highRightP.ToPoint2D());
-                        bounds2IdDic.Add(poly, g.ObjectId);
-                    }
-                }
+                var bounds2IdDic = new Dictionary<Polyline, Handle>();
+                var connector = ReadGroupId2geoDic(srtP);
+                foreach (var c in connector)
+                    bounds2IdDic.Add(c.Value, c.Key.Handle);
+                GetDuctBounds(srtP, out _, out Dictionary<Polyline, DuctModifyParam> ductsDic);
+                foreach (var d in ductsDic)
+                    bounds2IdDic.Add(d.Key, d.Value.handle);
                 return bounds2IdDic;
             }
         }
-        private static void GetGroupBound(Group g, out Point3d lowLeftP, out Point3d highRightP)
+        public static Dictionary<ObjectId, Polyline> ReadGroupId2geoDic(Point3d srtP)
         {
-            Extents3d? groupExtents = null;
             using (var db = AcadDatabase.Active())
             {
-                lowLeftP = highRightP = Point3d.Origin;
-                var gIds = g.GetAllEntityIds();
-                foreach (var id in gIds)
-                {
-                    var e = db.Element<Entity>(id);
-                    if (groupExtents == null)
-                    {
-                        groupExtents = e.Bounds;
-                        lowLeftP = groupExtents.Value.MinPoint;
-                        highRightP = groupExtents.Value.MaxPoint;
-                    }
-                    else
-                    {
-                        var cur_bound = (Extents3d)e.Bounds;
-                        lowLeftP = ThMEPHVACService.GetMinPoint(lowLeftP, cur_bound.MinPoint);
-                        highRightP = ThMEPHVACService.GetMaxPoint(highRightP, cur_bound.MaxPoint);
-                    }
-                }
-            }
-        }
-        public static Dictionary<ObjectId, Polyline> ReadGroupId2geoDic()
-        {
-            var dic = new Dictionary<ObjectId, Polyline>();
-            using (var db = AcadDatabase.Active())
-            {
+                var dic = new Dictionary<ObjectId, Polyline>();
                 var groups = db.Groups;
+                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
@@ -76,20 +49,23 @@ namespace ThMEPHVAC.Model
                             var entitys = GetGroupEntitys(g);
                             var pl = ThMEPHAVCBounds.GetConnectorBounds(entitys, 1);
                             if (pl.Bounds != null)
+                            {
+                                pl.TransformBy(mat);
                                 dic.Add(id, pl);
+                            }
                         }
                     }
                 }
+                return dic;
             }
-            return dic;
         }
         private static DBObjectCollection GetGroupEntitys(Group g)
         {
             var entityIds = g.GetAllEntityIds();
             var entitys = new DBObjectCollection();
-            foreach (var e_id in entityIds)
+            foreach (var eId in entityIds)
             {
-                var e = e_id.GetDBObject();
+                var e = eId.GetDBObject();
                 if (!(e is Line))
                     continue;
                 entitys.Add(e);
@@ -98,24 +74,26 @@ namespace ThMEPHVAC.Model
         }
         public static List<ObjectId> ReadGroupIdsByType(string range)
         {
-            var ids = new List<ObjectId>();
             using (var db = AcadDatabase.Active())
             {
+                var ids = new List<ObjectId>();
                 var groups = db.Groups;
                 foreach (var g in groups)
                 {
                     var id = g.ObjectId;
+                    var current = db.Element<Group>(g.ObjectId);
                     var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)
                     {
+                        var allEntityIds = g.GetAllEntityIds();
                         var values = list.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
                         var type = (string)values.ElementAt(0).Value;
                         if (type == range)
                             ids.Add(id);
                     }
                 }
+                return ids;
             }
-            return ids;
         }
 
         public static List<ObjectId> ReadPortComponents()
@@ -181,9 +159,9 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        public static List<ObjectId> ReadBlkIdsByName(string blk_name)
+        public static List<ObjectId> ReadBlkIdsByName(string blkName)
         {
-            return ReadBlkByName(blk_name).Select(o => o.ObjectId).ToList();
+            return ReadBlkByName(blkName).Select(o => o.ObjectId).ToList();
         }
         public static List<DBText> ReadDuctTexts()
         {
@@ -284,32 +262,266 @@ namespace ThMEPHVAC.Model
                     return g.ObjectId;
                 }
             }
-
             return ObjectId.Null;
+        }
+        public static int GetColor(DBObjectCollection lines)
+        {
+            // 只用于移到原点的线集
+            var index = new ThCADCoreNTSSpatialIndex(lines);
+            var pl = new Polyline();
+            pl.CreatePolygon(Point2d.Origin, 4, 10);
+            var res = index.SelectCrossingPolygon(pl);
+            var l = res[0] as Line;
+            return l.ColorIndex;
         }
         public static DBObjectCollection GetCenterlineByLayer(string layerName)
         {
             using (var db = AcadDatabase.Active())
             {
-                var center_lines = new DBObjectCollection();
-                var lines = db.ModelSpace.OfType<Line>();
+                var centerLines = new DBObjectCollection();
+                var lines = db.ModelSpace.OfType<Curve>();
                 foreach (var l in lines)
                     if (l.Layer == layerName)
-                        center_lines.Add(l.Clone() as Line);
-                return center_lines;
+                        centerLines.Add(l.Clone() as Curve);
+                return centerLines;
             }
         }
         public static DBObjectCollection GetBoundsByLayer(string layerName)
         {
             using (var db = AcadDatabase.Active())
             {
-                var center_lines = new DBObjectCollection();
+                var centerLines = new DBObjectCollection();
                 var lines = db.ModelSpace.OfType<Polyline>();
                 foreach (var l in lines)
                     if (l.Layer == layerName)
-                        center_lines.Add(l.Clone() as Polyline);
-                return center_lines;
+                        centerLines.Add(l.Clone() as Polyline);
+                return centerLines;
             }
+        }
+        public static void GetPortBounds(Point3d srtP, out Dictionary<Polyline, PortModifyParam> dicPlToPort)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+                dicPlToPort = new Dictionary<Polyline, PortModifyParam>();
+                var portIds = ReadBlkIdsByName(ThHvacCommon.AI_PORT);
+                foreach (var id in portIds)
+                {
+                    ThDuctPortsDrawService.GetPortDynBlockProperity(id, out Point3d pos, out string portRange, out double portHeight, out double portWidth, out double rotateAngle);
+                    var p = pos.TransformBy(mat);
+                    var pl = new Polyline();
+                    if (portRange.Contains("侧"))
+                    {
+                        // 侧风口脚长为100
+                        pl.CreatePolygon(p.ToPoint2D(), 4, 110);
+                    }
+                    else
+                    {
+                        pl.CreatePolygon(p.ToPoint2D(), 4, 10);
+                    }
+                    var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量"));
+                    dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
+                }
+            }
+        }
+        private static void GetDuctBounds(Point3d srtP, out ThCADCoreNTSSpatialIndex ductsIndex, out Dictionary<Polyline, DuctModifyParam> ductsDic)
+        {
+            var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+            ThDuctPortsInterpreter.GetDucts(out List<DuctModifyParam> ducts);// 管段外包框到管段参数的映射
+            ductsDic = new Dictionary<Polyline, DuctModifyParam>();
+            foreach (var d in ducts)
+            {
+                d.sp = ThMEPHVACService.RoundPoint(d.sp.TransformBy(mat), 6);
+                d.ep = ThMEPHVACService.RoundPoint(d.ep.TransformBy(mat), 6);
+                var l = new Line(d.sp, d.ep);
+                var w = ThMEPHVACService.GetWidth(d.ductSize) * 0.5;
+                var pl = l.Buffer(w);
+                ductsDic.Add(pl, d);
+            }
+            ductsIndex = new ThCADCoreNTSSpatialIndex(ductsDic.Keys.ToCollection());
+        }
+        // 用于仅读取风口数量时，将侧风口和下送风口的外包框都映射到中心线上
+        private static void GetDuctVerticalOft(DuctModifyParam duct, out Vector3d lVec, out Vector3d rVec, out Vector3d dirVec)
+        {
+            var w = ThMEPHVACService.GetWidth(duct.ductSize) * 0.5 + 100;// 侧风口脚长为100
+            dirVec = (duct.ep - duct.sp).GetNormal();
+            lVec = -ThMEPHVACService.GetLeftVerticalVec(dirVec) * w;
+            rVec = -ThMEPHVACService.GetRightVerticalVec(dirVec) * w;
+        }
+        private static bool AdjustSidePortPos(ref Point3d p, ThCADCoreNTSSpatialIndex ductsIndex, Dictionary<Polyline, DuctModifyParam> ductsDic)
+        {
+            // 侧风口脚长为100
+            var pl = new Polyline();
+            pl.CreatePolygon(p.ToPoint2D(), 4, 150);
+            var res = ductsIndex.SelectCrossingPolygon(pl);
+            if (res.Count == 1)
+            {
+                var duct = ductsDic[res[0] as Polyline];
+                GetDuctVerticalOft(duct, out Vector3d lRegressVec, out Vector3d rRegressVec, out Vector3d dirVec);
+                var vec = (p - duct.sp).GetNormal();
+                if (dirVec.CrossProduct(vec).Z > 0)
+                    p += lRegressVec;
+                else
+                    p += rRegressVec;
+                p = ThMEPHVACService.RoundPoint(p, 6);
+                return true;
+            }
+            return false;
+        }
+        public static void GetCenterPortBounds(PortParam portParam, 
+                                               out Dictionary<Polyline, PortModifyParam> dicPlToPort,
+                                               out Dictionary<Point3d, List<Handle>> sidePortHandle)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var srtP = portParam.srtPoint;
+                var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+                dicPlToPort = new Dictionary<Polyline, PortModifyParam>();
+                var portIds = ReadBlkIdsByName(ThHvacCommon.AI_PORT);
+                GetDuctBounds(srtP, out ThCADCoreNTSSpatialIndex ductsIndex, out Dictionary<Polyline, DuctModifyParam> ductsDic);
+                sidePortHandle = new Dictionary<Point3d, List<Handle>>();
+                foreach (var id in portIds)
+                {
+                    ThDuctPortsDrawService.GetPortDynBlockProperity(id, out Point3d pos, out string portRange, out double portHeight, out double portWidth, out double rotateAngle);
+                    var p = pos.TransformBy(mat);
+                    var pl = new Polyline();
+                    if (portRange.Contains("侧"))
+                    {
+                        // p 只保留6位小数
+                        if (!AdjustSidePortPos(ref p, ductsIndex, ductsDic))
+                            continue;
+                        if (!sidePortHandle.ContainsKey(p))
+                        {
+                            pl.CreatePolygon(p.ToPoint2D(), 4, 10);
+                            var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量")) * 2;
+                            dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
+                            sidePortHandle.Add(p, new List<Handle>() { id.Handle });
+                        }
+                        else
+                            sidePortHandle[p].Add(id.Handle);
+                    }
+                    else
+                    {
+                        pl.CreatePolygon(p.ToPoint2D(), 4, 10);
+                        var airVolume = GetAirVolume(id.GetAttributeInBlockReference("风量"));
+                        dicPlToPort.Add(pl, new PortModifyParam() { portAirVolume = airVolume, pos = p, portRange = portRange, portHeight = portHeight, portWidth = portWidth, rotateAngle = rotateAngle, handle = id.Handle });
+                    }
+                }
+            }
+        }
+        public static DBObjectCollection GetPortBoundsByPortAirVolume(PortParam portParam, out Dictionary<int, PortInfo> dicPlToAirVolume)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var portBounds = new DBObjectCollection();
+                dicPlToAirVolume = new Dictionary<int, PortInfo>();
+                var portIds = ReadPortComponents();
+
+                var portsBlk = portIds.Select(o => db.Element<BlockReference>(o)).ToList();
+                if (portParam.param.portRange.Contains("下"))
+                    GetDownPortBoundsByPortAirVolume(portParam, portBounds, portsBlk, dicPlToAirVolume);
+                else
+                    GetSidePortBoundsByPortAirVolume(portParam, portBounds, portsBlk, dicPlToAirVolume);
+                return portBounds;
+            }
+        }
+        private static void GetDownPortBoundsByPortAirVolume(PortParam portParam, DBObjectCollection portBounds, List<BlockReference> portsBlk, Dictionary<int, PortInfo> dicPlToAirVolume)
+        {
+            foreach (var port in portsBlk)
+            {
+                var blkName = GetEffectiveBlkByName(port);
+                if (blkName == ThHvacCommon.AI_PORT)
+                {
+                    var centerP = ThMEPHAVCBounds.GetDownPortCenterPoint(port, portParam);
+                    var portBound = new Polyline();
+                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
+                    portBounds.Add(portBound);
+                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
+                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
+                }
+                else
+                    AddPortCompToDic(portParam, port, dicPlToAirVolume, portBounds);
+            }
+        }
+        private static void GetSidePortBoundsByPortAirVolume(PortParam portParam, DBObjectCollection portBounds, List<BlockReference> portsBlk, Dictionary<int, PortInfo> dicPlToAirVolume)
+        {
+            var ductBounds = GetDuctInfo(out Dictionary<int, double> dicDuctInfo);
+            var ductIndex = new ThCADCoreNTSSpatialIndex(ductBounds);
+            foreach (var port in portsBlk)
+            {
+                // 使用侧回风口的OBB
+                var blkName = GetEffectiveBlkByName(port);
+                if (blkName == ThHvacCommon.AI_PORT)
+                {
+                    var portPl = new Polyline();
+                    portPl.CreateRectangle(port.Bounds.Value.MinPoint.ToPoint2D(), port.Bounds.Value.MaxPoint.ToPoint2D());
+                    var res = ductIndex.SelectCrossingPolygon(portPl);
+                    if (res.Count == 0)
+                        continue;
+                    if (res.Count != 1)
+                        throw new NotImplementedException("[CheckError]: port cross with multi duct!");
+                    var ductWidth = dicDuctInfo[(res[0] as Polyline).GetHashCode()];
+                    var centerP = ThMEPHAVCBounds.GetSidePortCenterPoint(port, portParam.srtPoint, portParam.param.portSize, ductWidth);
+                    var portBound = new Polyline();
+                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
+                    portBounds.Add(portBound);
+                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量")) * 2; // 一对侧风口
+                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
+                }
+                else
+                    AddPortCompToDic(portParam, port, dicPlToAirVolume, portBounds);
+            }
+        }
+
+        private static void AddPortCompToDic(PortParam portParam, BlockReference blk, Dictionary<int, PortInfo> dicPlToAirVolume, DBObjectCollection portBounds)
+        {
+            var blkName = GetEffectiveBlkByName(blk);
+            var bound = new Polyline();
+            var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
+            if (blkName == ThHvacCommon.AI_BROKEN_LINE || blkName == ThHvacCommon.AI_VERTICAL_PIPE)
+            {
+                var p = blk.Position.TransformBy(mat);
+                double len = 10;
+                if (blkName == ThHvacCommon.AI_VERTICAL_PIPE)
+                {
+                    ThDuctPortsDrawService.GetVerticalPipeDynBlockProperity(blk.Id, out double pipeWidth, out double pipeHeight);
+                    len = Math.Max(pipeWidth, pipeHeight) * 0.5 + 10;
+                }
+                bound.CreatePolygon(p.ToPoint2D(), 4, len); // 断线可能需要小一点，但这边统一用200
+                var strVolume = blk.Id.GetAttributeInBlockReference("风量");
+                double airVolume = GetAirVolume(strVolume);
+                portBounds.Add(bound);
+                dicPlToAirVolume.Add(bound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = p });
+            }
+            else
+            {
+                // 不处理
+            }
+        }
+
+        private static DBObjectCollection GetDuctInfo(out Dictionary<int, double> dicDuctInfo)
+        {
+            dicDuctInfo = new Dictionary<int, double>();
+            var ductIds = ThHvacGetComponent.ReadDuctIds();
+            var bounds = new DBObjectCollection();
+            foreach (var id in ductIds)
+            {
+                var param = ThHvacAnalysisComponent.GetDuctParamById(id);
+                if (param.handle == ObjectId.Null.Handle || param.sp.IsEqualTo(param.ep))
+                    continue;
+                var w = ThMEPHVACService.GetWidth(param.ductSize);
+                var dirVec = (param.ep - param.sp).GetNormal();
+                // 线长前后缩1方便与中心线相交，管宽扩1方便与侧回风口相交
+                var pl = ThMEPHVACService.GetLineExtend(param.sp + dirVec, param.ep - dirVec, w + 2);
+                bounds.Add(pl);
+                dicDuctInfo.Add(pl.GetHashCode(), w);
+            }
+            return bounds;
+        }
+        private static double GetAirVolume(string s)
+        {
+            var str = s.Split('m');
+            return Double.Parse(str[0]);
         }
     }
 }

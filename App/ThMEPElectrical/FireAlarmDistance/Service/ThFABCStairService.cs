@@ -45,7 +45,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
                 obstacle.AddRange(layoutParameter.Data.DoorOpenings.Select(x => x.Boundary as Polyline).ToList());
                 obstacle.AddRange(layoutParameter.Data.Windows.Select(x => x.Boundary as Polyline).ToList());
 
-                var stairBoundary = FindStairRoomBoundary(layoutParameter.Data.Room);
+                var stairBoundary = FindStairRoomBoundary(layoutParameter.Data.Rooms);
                
                 var stairEngine = new ThStairEquimentLayout();
                 var stairFireDetector = stairEngine.StairBroadcast(acadDatabase.Database, stairBoundary, obstacle, pts, scale);
@@ -82,7 +82,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
 
         public static void CleanStairRoom(ThAFASBCLayoutParameter layoutParameter)
         {
-            var Room = layoutParameter.Data.Room;
+            var Room = layoutParameter.Data.Rooms;
             var tempClean = new List<ThGeometry>();
             for (int i = 0; i < Room.Count; i++)
             {

@@ -8,10 +8,8 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Assistant;
-
-
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

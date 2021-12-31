@@ -31,8 +31,8 @@ namespace ThMEPHVAC.CAD
     
     public class BypassTee
     {
-        public Line l1;
-        public Line l2;
+        public Line inLine;
+        public Line otherLine;
         public Line bypass;
         public Point3d crossP;
     }
@@ -44,10 +44,11 @@ namespace ThMEPHVAC.CAD
         public FanParam fanParam;
         public ThDbModelFan fan;
         public PortParam portParam;
-        public List<Line> auxLines;          // 风机进出口到起始搜索点的线段
+        public List<SegInfo> UpDownVertivalPipe;          // 上下翻立管
+        public List<Line> auxLines;                       // 风机进出口到起始搜索点的线段
         public HashSet<Line> roomLines;
         public HashSet<Line> notRoomLines;
-        public Dictionary<int, SegInfo> centerLines;    // 不直接用Line是因为src和dst的shrink是不同时间获得的
+        public Dictionary<int, SegInfo> centerLines;      // 不直接用Line是因为src和dst的shrink是不同时间获得的
         public List<LineGeoInfo> reducings;
         public List<TextAlignLine> textRoomAlignment;
         public List<TextAlignLine> textNotRoomAlignment;
@@ -73,32 +74,48 @@ namespace ThMEPHVAC.CAD
             Init(ioBypassSepDis, fan, param, bypass, portParam);
             MoveToZero(fan.FanInletBasePoint, fan.FanOutletBasePoint, param.centerLines, wallLines, out Point3d roomP, out Point3d notRoomP);
             MergeBypassCenterLine(ref param.centerLines, bypass);
-            GetBypassCrossPoint(param.centerLines, bypass);
             UpdateSearchPoint(roomP, notRoomP, param, ref param.centerLines, out Point3d iRoomP, out Point3d iNotRoomP, out Line roomLine, out Line notRoomLine);
             auxLines = new List<Line>() { new Line(roomP, iRoomP) , new Line(notRoomP, iNotRoomP) };
             spatialIndex = new ThCADCoreNTSSpatialIndex(param.centerLines);
             PreSearchConnLines(iRoomP, roomLine, iNotRoomP, notRoomLine, param.roomEnable, param.notRoomEnable);
+            var buffer = BufferCenterLine(roomLine, notRoomLine);
             SeperateFanInsideAndOutSide(wallLines, iRoomP, roomP);
-            if (bypass.Count == 0 && wallLines.Count == 0)
-            {
-                roomLines.Clear();// 无旁通和墙线时风机房内服务侧的管段用风平面工具生成(否则风机房生成管段重叠)
-            }
+            ClearRoomLines(wallLines.Count);
             SearchConnectors(iRoomP, roomLine, iNotRoomP, notRoomLine, param.roomEnable, param.notRoomEnable);
             CollectLines();
             ShrinkDuct();
-            MergeBypass();
-            if (bypass.Count == 0 && param.bypassSize != null)
-            {
-                GetVtElbowPos(iRoomP, iNotRoomP);
-                vt = new ThVTee(inVtPos, outVtPos, param.bypassSize);
-            }
+            MergeBrokenBypass();
             MoveToOrg();
             if (!haveMultiFan)
                 AddNotRoomEndComp();
             AddTextAlignLine(haveMultiFan);
+            if (bypass.Count == 0 && param.bypassSize != null)
+            {
+                GetVtElbowPos(iRoomP, iNotRoomP, buffer);
+                vt = new ThVTee(inVtPos, outVtPos, param.bypassSize);
+            }
             param.centerLines.Clear();
             param.centerLines = outCenterLine;
             portParam.srtPoint = fanBreakP;
+        }
+
+        private DBObjectCollection BufferCenterLine(Line roomLine, Line notRoomLine)
+        {
+            // 将更新后的线也加进来，会多两条线，但是保证找
+            var lines = new DBObjectCollection
+            {
+                roomLine,
+                notRoomLine
+            };
+            return lines;
+        }
+
+        private void ClearRoomLines(int wallCount)
+        {
+            if (bypass.Count == 0 && wallCount == 0)
+            {
+                roomLines.Clear();// 无旁通和墙线时风机房内服务侧的管段用风平面工具生成(否则风机房生成管段重叠)
+            }
         }
         private void AddTextAlignLine(bool haveMultiFan)
         {
@@ -137,6 +154,7 @@ namespace ThMEPHVAC.CAD
             reducings = new List<LineGeoInfo>();
             centerLines = new Dictionary<int, SegInfo>();
             outCenterLine = new DBObjectCollection();
+            UpDownVertivalPipe = new List<SegInfo>();
             specialShapesInfo = new List<EntityModifyParam>();
         }
         private void AddNotRoomEndComp()
@@ -218,34 +236,7 @@ namespace ThMEPHVAC.CAD
                 centerLine.Add(l.Clone() as Line);
             centerLine = ThMEPHVACLineProc.PreProc(centerLine);
         }
-        private void GetBypassCrossPoint(DBObjectCollection centerLines, DBObjectCollection bypassLines)
-        {
-            var bypassCrossPoints = new HashSet<Point3d>();
-            var bypassIndex = new ThCADCoreNTSSpatialIndex(bypassLines);
-            foreach (Line l in centerLines)
-            {
-                foreach (Line shadow in centerLines)
-                {
-                    if (l.Equals(shadow))
-                        continue;
-                    var p = ThMEPHVACService.IntersectPoint(l, shadow);
-                    if (!p.IsEqualTo(Point3d.Origin, tor))
-                    {
-                        var intersect = ThMEPHVACService.RoundPoint(p, 6);
-                        var pl = new Polyline();
-                        pl.CreatePolygon(intersect.ToPoint2D(), 4, 10);
-                        var res = bypassIndex.SelectCrossingPolygon(pl);
-                        if (res.Count == 1)
-                        {
-                            var bypass = res[0] as Line;
-                            if (bypassCrossPoints.Add(intersect))
-                                bypassTees.Add(new BypassTee() { crossP = intersect, bypass = bypass, l1= l, l2 = shadow });
-                        }
-                    }
-                }
-            }
-        }
-        private void MergeBypass()
+        private void MergeBrokenBypass()
         {
             if (fanParam.bypassPattern == "RBType3")
             {
@@ -290,7 +281,7 @@ namespace ThMEPHVAC.CAD
             var height = ThMEPHVACService.GetHeight(ductSize);
             var sp = srtP - (dir_vec * height);
             var l = new Line(sp, srtP);
-            centerLines.Add(l.GetHashCode(), new SegInfo() {l = l, ductSize = ductSize });
+            UpDownVertivalPipe.Add(new SegInfo() { l = l, ductSize = ductSize });
         }
         private void MoveToOrg()
         {
@@ -335,23 +326,23 @@ namespace ThMEPHVAC.CAD
                 notRoomP = fanOutletP.TransformBy(disMat);
             }
         }
-        private void GetVtElbowPos(Point3d inSearchPoint, Point3d outSearchPoint)
+        private void GetVtElbowPos(Point3d inSearchPoint, Point3d outSearchPoint, DBObjectCollection lines)
         {
-            inVtPos = RecordVtElbowPos(inSearchPoint);
-            outVtPos = RecordVtElbowPos(outSearchPoint);
+            inVtPos = RecordVtElbowPos(inSearchPoint, lines);
+            outVtPos = RecordVtElbowPos(outSearchPoint, lines);
         }
-        private Point3d RecordVtElbowPos(Point3d searchPoint)
+        private Point3d RecordVtElbowPos(Point3d searchPoint, DBObjectCollection lines)
         {
-            foreach (var seg in centerLines.Values)
+            foreach (Line l in lines)
             {
-                if (seg.l.StartPoint.IsEqualTo(searchPoint, tor))
+                if (l.StartPoint.IsEqualTo(searchPoint, tor))
                 {
-                    var line = seg.GetShrinkedLine();
-                    var mid_p = ThMEPHVACService.GetMidPoint(line);
-                    var dis = searchPoint.DistanceTo(mid_p);
+                    //var line = seg.GetShrinkedLine();
+                    var midP = ThMEPHVACService.GetMidPoint(l);
+                    var dis = searchPoint.DistanceTo(midP);
                     if (dis > 2000)
                         dis = 2000;
-                    var dirVec = ThMEPHVACService.GetEdgeDirection(seg.l);
+                    var dirVec = ThMEPHVACService.GetEdgeDirection(l);
                     return searchPoint + (dirVec * dis);
                 }
             }
@@ -444,7 +435,7 @@ namespace ThMEPHVAC.CAD
         private void RecordShapeParameter(Point3d centerP, Line inLine, DBObjectCollection outLines, string ductSize)
         {
             var portWidths = new Dictionary<Point3d, double>();
-            var shape_port_widths = new List<double>();
+            var shapePortWidths = new List<double>();
             var otherP = ThMEPHVACService.GetOtherPoint(inLine, centerP, tor);
             var ductWidth = ThMEPHVACService.GetWidth(ductSize);
             var bypassWidth = ThMEPHVACService.GetWidth(fanParam.bypassSize);
@@ -455,7 +446,7 @@ namespace ThMEPHVAC.CAD
             {
                 string size = ductSize;
                 w = IsBypass(l) ? bypassWidth : ductWidth;
-                shape_port_widths.Add(w);
+                shapePortWidths.Add(w);
                 otherP = centerP.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
                 portWidths.Add(otherP, w);
             }
@@ -470,7 +461,6 @@ namespace ThMEPHVAC.CAD
                 foreach (var line in roomLines)
                     outCenterLine.Add(line);
                 roomLines.Clear();
-                //roomLines.Add(new Line(roomP, iRoomP));
             }
             else
             {
@@ -502,7 +492,7 @@ namespace ThMEPHVAC.CAD
             foreach (Line l in roomLines)
                 lines.Add(l);
             var detector = new ThFanCenterLineDetector(false);
-            detector.searchCenterLine(lines, p, SearchBreakType.breakWithEndline);
+            detector.SearchCenterLine(lines, p, SearchBreakType.breakWithEndline);
             foreach (Line l in detector.connectLines)
             {
                 outCenterLine.Add(l);
@@ -544,9 +534,9 @@ namespace ThMEPHVAC.CAD
         // p->出与旁通相交的三通后第一条线的末端点
         private void GetTeeInfo(BypassTee t, Point3d iRoomP, out TeeType teeType, out Point3d p)
         {
-            teeType = ThDuctPortsShapeService.GetTeeType(t.l1, t.l2);
-            var p1 = t.crossP.IsEqualTo(t.l1.StartPoint, tor) ? t.l1.EndPoint : t.l1.StartPoint;
-            var p2 = t.crossP.IsEqualTo(t.l2.StartPoint, tor) ? t.l2.EndPoint : t.l2.StartPoint;
+            teeType = ThDuctPortsShapeService.GetTeeType(t.bypass, t.otherLine);
+            var p1 = t.crossP.IsEqualTo(t.inLine.StartPoint, tor) ? t.inLine.EndPoint : t.inLine.StartPoint;
+            var p2 = t.crossP.IsEqualTo(t.otherLine.StartPoint, tor) ? t.otherLine.EndPoint : t.otherLine.StartPoint;
             p = p1.DistanceTo(iRoomP) > p2.DistanceTo(iRoomP) ? p1 : p2; // Direction
         }
         private void UpdateCenterLine(BypassTee t, Point3d p)
@@ -569,10 +559,9 @@ namespace ThMEPHVAC.CAD
         private void UpdateBreakPoint(BypassTee t, TeeType teeType, Point3d p)
         {
             var dir_vec = (p - t.crossP).GetNormal();
-            var duct_width = ThMEPHVACService.GetWidth(fanParam.roomDuctSize);
-            var bypass_width = ThMEPHVACService.GetWidth(fanParam.bypassSize);
-            var dis = (teeType == TeeType.BRANCH_COLLINEAR_WITH_OTTER) ?
-                      duct_width + 50 : bypass_width * 0.5 + 100;
+            var ductWidth = ThMEPHVACService.GetWidth(fanParam.roomDuctSize);
+            var bypassWidth = ThMEPHVACService.GetWidth(fanParam.bypassSize);
+            var dis = (teeType == TeeType.BRANCH_COLLINEAR_WITH_OTTER) ? ductWidth + 50 : bypassWidth * 0.5 + 100;
             fanBreakP = t.crossP + (dir_vec * dis);
         }
         private void UpdateWallBreakPoint(DBObjectCollection wallLines, Line crossLine)
@@ -605,6 +594,22 @@ namespace ThMEPHVAC.CAD
                 lines.Add(line);
                 return;
             }
+            if (res.Count == 2)
+            {
+                // 三通
+                if (IsBypass(res[0] as Line))
+                {
+                    var bypass = res[0] as Line;
+                    var other = res[1] as Line;
+                    bypassTees.Add(new BypassTee() { crossP = searchPoint, bypass = bypass, inLine = currentLine, otherLine = other });
+                }
+                else if (IsBypass(res[1] as Line))
+                {
+                    var bypass = res[1] as Line;
+                    var other = res[0] as Line;
+                    bypassTees.Add(new BypassTee() { crossP = searchPoint, bypass = bypass, inLine = currentLine, otherLine = other });
+                }
+            }
             foreach (Line l in res)
             {
                 var step_p = searchPoint.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
@@ -621,7 +626,7 @@ namespace ThMEPHVAC.CAD
             res.Remove(current_line);
             return res;
         }
-        private void UpdateSearchPoint(Point3d room_p,
+        private void UpdateSearchPoint(Point3d roomP,
                                        Point3d notRoomP,
                                        FanParam info, 
                                        ref DBObjectCollection centerLine,
@@ -630,7 +635,7 @@ namespace ThMEPHVAC.CAD
                                        out Line roomLine,
                                        out Line notRoomLine)
         {
-            iRoomP = ThMEPHVACService.RoundPoint(room_p, 6);
+            iRoomP = ThMEPHVACService.RoundPoint(roomP, 6);
             iNotRoomP = ThMEPHVACService.RoundPoint(notRoomP, 6);
             centerLine = GetStartLine(iRoomP, iNotRoomP, centerLine, out roomLine, out notRoomLine);
             
@@ -694,18 +699,10 @@ namespace ThMEPHVAC.CAD
             if (shrinkDis < 0)
                 return;
             var dirVec = ThMEPHVACService.GetEdgeDirection(startLine);
-            srtP = startLine.StartPoint + dirVec * shrinkDis;
+            srtP = startLine.StartPoint + dirVec * shrinkDis;// reducing长度一定大于软接长度
             var hoseLen = (fan.scenario == "消防补风" || fan.scenario == "消防排烟" || fan.scenario == "消防加压送风") ? 0 : 200;
-            if (shrinkDis < hoseLen)
-            {
-                srtP += (dirVec * hoseLen);//需要添加软接距离来消除变径反向
-            }
+            //srtP = startLine.StartPoint + dirVec * (shrinkDis + hoseLen);// ThDuctPortsAnaylysis.cs Line:253
             var reducing = new Line(startLine.StartPoint + (dirVec * hoseLen), srtP);
-            if (reducing.Length < 200)
-            {
-                reducing = new Line(reducing.StartPoint, reducing.StartPoint + (200 * dirVec));
-                srtP = reducing.EndPoint;
-            }
             var isAxis = (fan.Name.Contains("轴流风机"));
             reducings.Add(ThDuctPortsFactory.CreateReducing(reducing, fanWidth, ductWidth, isAxis));
             lines.Remove(startLine);
@@ -717,7 +714,7 @@ namespace ThMEPHVAC.CAD
             ductWidth = ThMEPHVACService.GetWidth(ductSize);
             var bigWidth = Math.Max(ductWidth, fanWidth);
             var smallWidth = Math.Min(ductWidth, fanWidth);
-            return ThMEPHVACService.GetReducingLen(bigWidth, smallWidth);
+            return ThDuctPortsShapeService.GetReducingLen(bigWidth, smallWidth);
         }
         private DBObjectCollection GetStartLine(Point3d iRoomP, 
                                                 Point3d iNotRoomP, 
@@ -728,18 +725,18 @@ namespace ThMEPHVAC.CAD
             roomLine = new Line();
             notRoomLine = new Line();
             var newLines = new DBObjectCollection();
-            var start_p_tor = new Tolerance(200, 200);
+            var startPTor = new Tolerance(1.5, 1.5);
             foreach (Line l in lines)
             {
-                if (iRoomP.IsEqualTo(l.StartPoint, start_p_tor) || iRoomP.IsEqualTo(l.EndPoint, start_p_tor))
+                if (iRoomP.IsEqualTo(l.StartPoint, startPTor) || iRoomP.IsEqualTo(l.EndPoint, startPTor))
                 {
-                    var otherP = iRoomP.IsEqualTo(l.StartPoint, start_p_tor) ? l.EndPoint : l.StartPoint;
+                    var otherP = iRoomP.IsEqualTo(l.StartPoint, startPTor) ? l.EndPoint : l.StartPoint;
                     roomLine = new Line(iRoomP, otherP);
                     newLines.Add(roomLine);
                 }
-                else if (iNotRoomP.IsEqualTo(l.StartPoint, start_p_tor) || iNotRoomP.IsEqualTo(l.EndPoint, start_p_tor))
+                else if (iNotRoomP.IsEqualTo(l.StartPoint, startPTor) || iNotRoomP.IsEqualTo(l.EndPoint, startPTor))
                 {
-                    var otherP = iNotRoomP.IsEqualTo(l.StartPoint, start_p_tor) ? l.EndPoint : l.StartPoint;
+                    var otherP = iNotRoomP.IsEqualTo(l.StartPoint, startPTor) ? l.EndPoint : l.StartPoint;
                     notRoomLine = new Line(iNotRoomP, otherP);
                     newLines.Add(notRoomLine);
                 }

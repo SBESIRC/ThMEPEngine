@@ -1,14 +1,14 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
+
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.TowerSeparation.TowerExtract;
 using ThMEPWSS.DrainageSystemDiagram;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
@@ -43,7 +43,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     return;
                 }
 
-
                 var dataset = new ThSprinklerConnectDataFactory();
                 var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
                 var dataQuery = new ThSprinklerDataQueryService(geos);
@@ -58,12 +57,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 //    l.ColorIndex = 5;
                 //}
                 //acadDatabase.ModelSpace.Add(shearWalls);
-
-
-
             }
         }
-
-
     }
 }

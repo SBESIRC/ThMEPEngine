@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLightConnect.Model;
 
 namespace ThMEPLighting.EmgLightConnect.Service

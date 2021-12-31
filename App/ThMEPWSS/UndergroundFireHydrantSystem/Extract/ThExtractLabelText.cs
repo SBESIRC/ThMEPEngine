@@ -166,8 +166,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 //}
                 return;
             }
-            if(ent.GetRXClass().DxfName.StartsWith("TCH") && ent.GetRXClass().DxfName.Contains("PIPE"))
-            //if (ent.GetRXClass().DxfName.StartsWith("TCH"))
+            if(ent.IsTCHPipe())
             {
                 var dbObjs = new DBObjectCollection();
                 ent.Explode(dbObjs);
@@ -177,7 +176,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     {
                         ExplodeText(ent1, dBObjects, ref textWidth, ref textModel);
                     }
-                    
                 }    
             }
             try
@@ -192,12 +190,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                 }
             }
-            catch (Exception)
+            catch
             {
-
+                //
             }
         }
-
 
         private DBText CreateText(Point3d insertPt, string text)
         {

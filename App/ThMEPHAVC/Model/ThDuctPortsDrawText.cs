@@ -123,6 +123,10 @@ namespace ThMEPHVAC.Model
         public void DrawTextInfo(string s, string scale, Point3d p)
         {
             double h = ThMEPHVACService.GetTextHeight(scale);
+            DrawTextInfo(s, h, p, 0);
+        }
+        public void DrawTextInfo(string s, double h, Point3d p, double rotation)
+        {
             using (var db = AcadDatabase.Active())
             {
                 var id = Dreambuild.AutoCAD.DbHelper.GetTextStyleId(ductSizeStyle);
@@ -130,7 +134,7 @@ namespace ThMEPHVAC.Model
                 {
                     Height = h,
                     Oblique = 0,
-                    Rotation = 0,
+                    Rotation = rotation,
                     WidthFactor = 0.7,
                     TextStyleId = id,
                     TextString = s,

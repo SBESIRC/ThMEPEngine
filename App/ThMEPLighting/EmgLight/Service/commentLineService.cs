@@ -11,7 +11,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThCADExtension;
 using ThCADCore.NTS;
 
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {

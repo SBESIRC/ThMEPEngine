@@ -53,6 +53,7 @@ namespace ThMEPLighting
         /// 火灾报警
         /// </summary>
         public List<ThFireAlarmModel> AFASParameter = ConvertToFireAlarmModel(new WiringConnectingViewModel().configLst);
+        public bool AvoidColumnChecked = false;
         public static List<ThFireAlarmModel> ConvertToFireAlarmModel(ObservableCollection<LoopConfig> configLst)
         {
             List<ThFireAlarmModel> thFireAlarms = new List<ThFireAlarmModel>();
@@ -63,11 +64,14 @@ namespace ThMEPLighting
             }
             foreach (var model in fireAlarmModel.configModels)
             {
-                ThFireAlarmModel config = new ThFireAlarmModel();
-                config.loopType = model.loopType;
-                config.layerType = model.layerType;
-                config.pointNum = model.pointNum;
-                thFireAlarms.Add(config);
+                if (model.isCheck)
+                {
+                    ThFireAlarmModel config = new ThFireAlarmModel();
+                    config.loopType = model.loopType;
+                    config.layerType = model.layerType;
+                    config.pointNum = model.pointNum;
+                    thFireAlarms.Add(config);
+                }
             }
             return thFireAlarms;
         }

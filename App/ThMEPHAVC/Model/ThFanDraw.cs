@@ -22,6 +22,7 @@ namespace ThMEPHVAC.Model
             DrawCenterLine(anayRes);
             service.DrawSpecialShape(anayRes.specialShapesInfo, disMat);
             service.DrawDuct(anayRes.centerLines.Values.ToList(), disMat);
+            service.DrawDuct(anayRes.UpDownVertivalPipe, disMat);
             service.DrawReducing(anayRes.reducings, disMat);
             service.DrawSideDuctText(anayRes, anayRes.moveSrtP, fanParam);
             DrawHose(roomEnable, notRoomEnable);

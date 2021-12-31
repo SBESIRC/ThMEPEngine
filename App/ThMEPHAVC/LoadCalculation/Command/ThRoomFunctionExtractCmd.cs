@@ -20,6 +20,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using AcHelper;
+using NFox.Cad;
 
 namespace ThMEPHVAC.LoadCalculation.Command
 {
@@ -102,6 +103,8 @@ namespace ThMEPHVAC.LoadCalculation.Command
                 rooms.ForEach(o => originTransformer.Transform(o.Boundary));
                 LogicService logicService = new LogicService();
                 var roomfunctions = logicService.InsertRoomFunctionBlk(rooms, roomFunctionBlocks, ThLoadCalculationUIService.Instance.Parameter.TQHasPrefix, ThLoadCalculationUIService.Instance.Parameter.TQPerfixContent, StartingNo);
+                //移回原点
+                originTransformer.Reset(roomFunctionBlocks.ToCollection());
                 foreach (var item in roomfunctions)
                 {
                     InsertBlockService.InsertRoomFunctionBlock(item.Item3, item.Item2, originTransformer.Reset(item.Item1));

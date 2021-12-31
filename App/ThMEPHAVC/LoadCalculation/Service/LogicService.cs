@@ -80,17 +80,17 @@ namespace ThMEPHVAC.LoadCalculation.Service
                                         Polyline tableBoundary = tableobjs[0] as Polyline;
                                         Table existedTable = tableDic[tableBoundary];
                                         var table = FillTableData(roomBoundary, roomFunction, summerVentilationT, winterVentilationT, existedTable.Position);
-                                        int addRowCount = table.Rows.Count - existedTable.Rows.Count;
-                                        if (addRowCount != 0)
-                                        {
-                                            var connectpoint = tableBoundary.Contains(curve.EndPoint) ? curve.EndPoint : curve.StartPoint;
-                                            if (Math.Abs(connectpoint.Y - existedTable.Position.Y) > existedTable.Height / 2)
-                                            {
-                                                table.Position = table.Position + new Vector3d(0, addRowCount * 440, 0);
-                                            }
-                                        }
                                         if (!table.IsNull())
                                         {
+                                            int addRowCount = table.Rows.Count - existedTable.Rows.Count;
+                                            if (addRowCount != 0)
+                                            {
+                                                var connectpoint = tableBoundary.Contains(curve.EndPoint) ? curve.EndPoint : curve.StartPoint;
+                                                if (Math.Abs(connectpoint.Y - existedTable.Position.Y) > existedTable.Height / 2)
+                                                {
+                                                    table.Position = table.Position + new Vector3d(0, addRowCount * 440, 0);
+                                                }
+                                            }
                                             Deprecatedtables.Add(existedTable);
                                             result.Add(table);
                                         }

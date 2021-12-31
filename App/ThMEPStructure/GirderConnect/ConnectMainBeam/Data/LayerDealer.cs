@@ -7,23 +7,25 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
 {
-    class LayerDealer
+    public class LayerDealer
     {
         /// <summary>
         /// 输出结果，转换结果作为次梁输入
         /// </summary>
         /// <param name="tuples"></param>
         /// <param name="layerName"></param>
-        public static void Output(HashSet<Tuple<Point3d, Point3d>> tuples, string layerName)
+        public static void Output(HashSet<Tuple<Point3d, Point3d>> tuples, string layerName, ThMEPOriginTransformer transformer)
         {
             using (var acdb = AcadDatabase.Active())
             {
                 tuples.ForEach(o =>
                 {
                     var line = new Line(o.Item1, o.Item2);
+                    transformer.Reset(line);
                     line.Layer = layerName;
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;
@@ -32,13 +34,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 });
             }
         }
-        public static void Output(Dictionary<Point3d, Point3d> tuples, string layerName)
+        public static void Output(Dictionary<Point3d, Point3d> tuples, string layerName, ThMEPOriginTransformer transformer)
         {
             using (var acdb = AcadDatabase.Active())
             {
                 tuples.ForEach(o =>
                 {
                     var line = new Line(o.Key, o.Value);
+                    transformer.Reset(line);
                     line.Layer = layerName;
                     {
                         line.ColorIndex = (int)ColorIndex.BYLAYER;

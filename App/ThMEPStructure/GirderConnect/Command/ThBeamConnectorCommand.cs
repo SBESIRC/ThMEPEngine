@@ -20,6 +20,7 @@ using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPStructure.GirderConnect.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.Command
 {
@@ -57,10 +58,21 @@ namespace ThMEPStructure.GirderConnect.Command
                 var shearwalls = dataFactory.Shearwalls;
                 var buildings = dataFactory.MainBuildings;
 
+                // 支持超远，将输入数据移动到近似原点处
+                var center = pts.Envelope().CenterPoint();
+                var transformer = new ThMEPOriginTransformer(center);
+                transformer.Transform(columns);
+                transformer.Transform(shearwalls);
+                transformer.Transform(buildings);
+
                 ThBeamGeometryPreprocessor.Z0Curves(ref columns);
                 ThBeamGeometryPreprocessor.Z0Curves(ref shearwalls);
                 ThBeamGeometryPreprocessor.Z0Curves(ref buildings);
                 var mainBuildings = buildings.OfType<Entity>().ToList();
+
+                //columns.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
+                //shearwalls.OfType<Entity>().ToList().CreateGroup(acdb.Database, 5);
+                //buildings.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
 
                 // 分组 
                 var columnGroupService = new ThGroupService(mainBuildings, columns);
@@ -84,7 +96,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 //计算
                 var connectService = new Connect();
 
-                var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts);
+                var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts, transformer);
 
                 DBObjectCollection intersectCollection = new DBObjectCollection();
                 outlineWalls.ForEach(o => intersectCollection.Add(o.Key));
@@ -92,11 +104,18 @@ namespace ThMEPStructure.GirderConnect.Command
                 outerWalls.ForEach(o => intersectCollection.Add(o.Key));
                 outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
 
-                //导入主梁信息
-                ImportService.ImportMainBeamInfo();
-
                 //处理算法输出
-                MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
+                var lines = MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
+
+                //  还原到原始位置
+                lines.ForEach(o => transformer.Reset(o));
+                transformer.Reset(columns);
+                transformer.Reset(shearwalls);
+                transformer.Reset(buildings);
+
+                // 打印到Cad                
+                ImportService.ImportMainBeamInfo(); //导入主梁信息
+                MainBeamPostProcess.Output(lines);
             }
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");

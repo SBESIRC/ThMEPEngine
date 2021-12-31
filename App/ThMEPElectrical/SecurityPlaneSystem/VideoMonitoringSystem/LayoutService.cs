@@ -13,6 +13,8 @@ using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
 using ThMEPEngineCore.Config;
 using ThMEPElectrical.SecurityPlaneSystem.VideoMonitoringSystem.VMExitLayoutService;
+using System;
+using ThMEPEngineCore.AFASRegion.Utls;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
@@ -52,10 +54,20 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 }
                 else if (connectRooms.Count == 1)
                 {
-                    Polyline minimumRectangle = (connectRooms.First().Boundary as Polyline).GetMinimumRectangle();
-                    if (minimumRectangle.Contains(door))
+                    var pts = door.GetAllLinesInPolyline().OrderByDescending(o => o.Length).Take(2).Select(o => new Point3d((o.StartPoint.X + o.EndPoint.X)/2, (o.StartPoint.Y + o.EndPoint.Y) / 2, 0)).ToList();
+                    if (connectRooms.First().Boundary is Polyline polyline)
                     {
-                        continue;
+                        if (pts.All(o => polyline.Contains(o)))
+                        {
+                            continue;
+                        }
+                    }
+                    if (connectRooms.First().Boundary is MPolygon mPolygon)
+                    {
+                        if (pts.All(o => mPolygon.Contains(o)))
+                        {
+                            continue;
+                        }
                     }
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                     SetVideaoInRoom(vmInfos, connectRooms[0], DoLayout(layoutType, connectRooms[0], door, columns, walls, doors));

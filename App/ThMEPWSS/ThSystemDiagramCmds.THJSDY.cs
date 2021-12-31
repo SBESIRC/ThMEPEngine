@@ -15,6 +15,7 @@ using GeometryExtensions;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.Diagnostics;
 using ThCADExtension;
 
 using ThMEPWSS.DrainageSystemDiagram;

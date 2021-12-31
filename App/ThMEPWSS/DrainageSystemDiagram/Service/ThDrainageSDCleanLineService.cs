@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.Geometry;
 
 using ThCADCore.NTS;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.DrainageSystemDiagram
 {

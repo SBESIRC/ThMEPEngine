@@ -28,12 +28,62 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\ThBaryCentric.cs" />
     <Compile Include="Algorithm\ThFanCenterLineDetector.cs" />
     <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
+    <Compile Include="Algorithm\ThPointJudger.cs" />
+    <Compile Include="Algorithm\ThPolygonlizerCurveLine.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
+    <Compile Include="Command\IndoorFanLayoutCmd.cs" />
+    <Compile Include="Command\IndoorFanPlace.cs" />
+    <Compile Include="Common\ThRoomLoadTable.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
+    <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
+    <Compile Include="FanConnect\Service\ThAddValveServiece.cs" />
+    <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
+    <Compile Include="IndoorFanLayout\Business\ArcAreaLayoutFan.cs" />
+    <Compile Include="IndoorFanLayout\Business\ArcAreaLayoutFanByVertical.cs" />
+    <Compile Include="IndoorFanLayout\Business\AreaLayoutFan.cs" />
+    <Compile Include="IndoorFanLayout\Business\AreaLayoutGroup.cs" />
+    <Compile Include="IndoorFanLayout\Business\AxisArcSimpleRegion.cs" />
+    <Compile Include="IndoorFanLayout\Business\AxisLineGroup.cs" />
+    <Compile Include="IndoorFanLayout\Business\AxisLineSimpleRegion.cs" />
+    <Compile Include="IndoorFanLayout\Business\AxisSimpleRegion.cs" />
+    <Compile Include="IndoorFanLayout\Business\CalcLayoutArea.cs" />
+    <Compile Include="IndoorFanLayout\Business\CalcRegionAdjacent.cs" />
+    <Compile Include="IndoorFanLayout\Business\FanRectangleToBlock.cs" />
+    <Compile Include="IndoorFanLayout\Business\LayoutResultCheck.cs" />
+    <Compile Include="IndoorFanLayout\Business\RectAreaLayoutFan.cs" />
+    <Compile Include="IndoorFanLayout\Business\RoomLayoutFanBase.cs" />
+    <Compile Include="IndoorFanLayout\CalcFanRectFormFanData.cs" />
+    <Compile Include="IndoorFanLayout\CircleArcUtil.cs" />
+    <Compile Include="IndoorFanLayout\DataEngine\LoadTableRead.cs" />
+    <Compile Include="IndoorFanLayout\DataEngine\ThIndoorFanData.cs" />
+    <Compile Include="IndoorFanLayout\IndoorFanCommon.cs" />
+    <Compile Include="IndoorFanLayout\IndoorFanBlockServices.cs" />
+    <Compile Include="IndoorFanLayout\Models\AreaRegionType.cs" />
+    <Compile Include="IndoorFanLayout\Models\DivisionArea.cs" />
+    <Compile Include="IndoorFanLayout\Models\FanLayoutModels.cs" />
+    <Compile Include="IndoorFanLayout\Models\FanLoad.cs" />
+    <Compile Include="IndoorFanLayout\Models\FanRectangle.cs" />
+    <Compile Include="IndoorFanModels\AirConditioninFan.cs" />
+    <Compile Include="IndoorFanModels\CoilUnitFan.cs" />
+    <Compile Include="IndoorFanModels\EnumAirReturnType.cs" />
+    <Compile Include="IndoorFanModels\EnumFanDirction.cs" />
+    <Compile Include="IndoorFanModels\EnumFanType.cs" />
+    <Compile Include="IndoorFanModels\EnumHotColdType.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanBase.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanLayoutModel.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
+    <Compile Include="IndoorFanModels\VRFFan.cs" />
+    <Compile Include="Model\ThAirPortParameter.cs" />
+    <Compile Include="Model\ThFGDXParameter.cs" />
+    <Compile Include="ParameterService\IndoorFanParameter.cs" />
+    <Compile Include="Service\ThAirPortSizeCalculator.cs" />
+    <Compile Include="Service\ThAirSpeedCalculator.cs" />
     <Compile Include="Service\ThLoadCalculationService.cs" />
+    <Compile Include="Service\ThMEPHAVCDataManager.cs" />
     <Compile Include="Service\ThMEPHVACDrawService.cs" />
     <Compile Include="FanConnect\Command\ThCreateSPMExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThFanConnectUtils.cs" />
@@ -117,7 +167,7 @@
     <Compile Include="Model\ThDuctPortsReadComponent.cs" />
     <Compile Include="Model\ThDuctPortsRecoder.cs" />
     <Compile Include="Model\ThDuctPortsModifyDuct.cs" />
-    <Compile Include="Model\ThDuctPortsModifyPort.cs" />
+    <Compile Include="Model\ThModifyPortClear.cs" />
     <Compile Include="Model\ThDuctPortsReDrawFactory.cs" />
     <Compile Include="Model\ThDuctPortsShapeService.cs" />
     <Compile Include="Model\ThFanAnalysis.cs" />
@@ -150,10 +200,14 @@
     <Compile Include="IO\ThDuctJsonReader.cs" />
     <Compile Include="IO\ThDuctParameterJsonReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
+    <Compile Include="Service\ThRoomSelector.cs" />
+    <Compile Include="ThHAVCIndoorFanCmds.cs" />
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
     <Compile Include="ThModelExtractionVisitor.cs" />
+    <Compile Include="ViewModel\AirPortParameterVM.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

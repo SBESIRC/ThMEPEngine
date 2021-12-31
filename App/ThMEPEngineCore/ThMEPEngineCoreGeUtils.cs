@@ -94,7 +94,7 @@ namespace ThMEPEngineCore
             //{
             //    if (obj is Entity pl)
             //    {
-            //        ThMEPEngineCore.AreaLayout.CenterLineLayout.DrawUtils.ShowGeometry(pl, "l1shrink", 2);
+            //        DrawUtils.ShowGeometry(pl, "l1shrink", 2);
             //    }
             //}
 
@@ -105,7 +105,7 @@ namespace ThMEPEngineCore
             //{
             //    if (obj is Entity pl)
             //    {
-            //        ThMEPEngineCore.AreaLayout.CenterLineLayout.DrawUtils.ShowGeometry(pl, "l2bufferShrink", 3);
+            //        DrawUtils.ShowGeometry(pl, "l2bufferShrink", 3);
             //    }
             //}
 

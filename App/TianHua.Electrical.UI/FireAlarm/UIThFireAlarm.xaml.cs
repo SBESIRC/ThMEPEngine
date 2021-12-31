@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 
 using AcHelper;
-
+using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.AFAS.Command;
 
@@ -69,20 +69,22 @@ namespace TianHua.Electrical.UI.FireAlarm
         {
             FireAlarmSetting.Instance.Scale = (double)localVM.ScaleItem.Tag;
             FireAlarmSetting.Instance.Beam = (int)localVM.Beam;
-            FireAlarmSetting.Instance.LayoutItem = (int)localVM.LayoutItem;
+            //FireAlarmSetting.Instance.LayoutItem = (int)localVM.LayoutItem;
 
             FireAlarmSetting.Instance.RoofHight = (int)localVM.RoofHight.Tag;
             FireAlarmSetting.Instance.RoofGrade = (int)localVM.RoofGrade.Tag;
             FireAlarmSetting.Instance.RoofThickness = localVM.RoofThickness;
             FireAlarmSetting.Instance.FixRef = (double)localVM.FixRef.Tag;
 
-            FireAlarmSetting.Instance.BroadcastLayout = (int)localVM.BroadcastLayout;
+            FireAlarmSetting.Instance.BroadcastLayout = (int)localVM.BroadcastLayoutType;
             FireAlarmSetting.Instance.StepLengthBC = localVM.StepLengthBC * 1000;
 
             FireAlarmSetting.Instance.StepLengthMA = (double)localVM.StepLengthMA * 1000;
-            FireAlarmSetting.Instance.ProtectRadius = (double)localVM.ProtectRadius;
+            FireAlarmSetting.Instance.GasProtectRadius = (double)localVM.GasProtectRadius;
             FireAlarmSetting.Instance.DisplayBuilding = (int)localVM.DisplayBuilding;
             FireAlarmSetting.Instance.DisplayBlk = (int)localVM.DisplayBlk;
+
+            SaveLayout(localVM);
         }
 
         void FocusToCAD()
@@ -93,6 +95,43 @@ namespace TianHua.Electrical.UI.FireAlarm
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private static void SaveLayout(FireAlarmViewModel localVM)
+        {
+            FireAlarmSetting.Instance.LayoutItemList.Clear();
+
+            if (localVM.LayoutSmoke == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Smoke);
+            }
+            if (localVM.LayoutBroadcast == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Broadcast);
+            }
+            if (localVM.LayoutDisplay == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
+            }
+            if (localVM.LayoutTel == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Tel);
+            }
+            if (localVM.LayoutGas == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Gas);
+            }
+            if (localVM.LayoutManualAlart == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);
+            }
+            if (localVM.LayoutMonitor == true)
+            {
+                FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Monitor);
+            }
+
+            FireAlarmSetting.Instance.LayoutItemList = FireAlarmSetting.Instance.LayoutItemList.OrderBy(x => x).ToList();
+
         }
     }
 
@@ -115,22 +154,22 @@ namespace TianHua.Electrical.UI.FireAlarm
         }
     }
 
-    public class LayoutConverter : IValueConverter
-    {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            LayoutItemType s = (LayoutItemType)value;
-            return s == (LayoutItemType)int.Parse(parameter.ToString());
-        }
+    //public class LayoutConverter : IValueConverter
+    //{
+    //    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        LayoutItemType s = (LayoutItemType)value;
+    //        return s == (LayoutItemType)int.Parse(parameter.ToString());
+    //    }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        {
-            bool isChecked = (bool)value;
-            if (!isChecked)
-            {
-                return null;
-            }
-            return (LayoutItemType)int.Parse(parameter.ToString());
-        }
-    }
+    //    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    //    {
+    //        bool isChecked = (bool)value;
+    //        if (!isChecked)
+    //        {
+    //            return null;
+    //        }
+    //        return (LayoutItemType)int.Parse(parameter.ToString());
+    //    }
+    //}
 }

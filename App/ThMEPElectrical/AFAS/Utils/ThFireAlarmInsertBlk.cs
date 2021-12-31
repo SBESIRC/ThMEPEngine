@@ -73,7 +73,7 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
-        public static void prepareInsert(List<string> blkName, List<string> layerName)
+        public static void PrepareInsert(List<string> blkName, List<string> layerName)
         {
             using (var db = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -99,7 +99,7 @@ namespace ThMEPElectrical.AFAS.Utils
                     var pt = ptInfo.Pt;
                     double rotateAngle = Vector3d.YAxis.GetAngleTo(ptInfo.Dir, Vector3d.ZAxis);
                     var attNameValues = new Dictionary<string, string>() { };
-                    var layerName = ThFaCommon.blk_layer[blkName];
+                    var layerName = ThFaCommon.Blk_Layer[blkName];
                     db.ModelSpace.ObjectId.InsertBlockReference(
                                             layerName,
                                             blkName,
@@ -121,7 +121,7 @@ namespace ThMEPElectrical.AFAS.Utils
                     double rotateAngle = ptInfo.Angle;
                     var blkName = ptInfo.BlkName;
                     var attNameValues = new Dictionary<string, string>() { };
-                    var layerName = ThFaCommon.blk_layer[blkName];
+                    var layerName = ThFaCommon.Blk_Layer[blkName];
                     db.ModelSpace.ObjectId.InsertBlockReference(
                                             layerName,
                                             blkName,

@@ -10,7 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThCADCore.NTS;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
-using ThMEPElectrical.AFAS.Utils;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Model;

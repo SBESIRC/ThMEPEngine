@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Colors;
 using ThCADCore.NTS;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight.Model;
 using ThMEPLighting.EmgLight.Common;
 

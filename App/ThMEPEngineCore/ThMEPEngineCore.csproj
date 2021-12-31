@@ -22,6 +22,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -45,6 +46,8 @@
     <Compile Include="AFASRegion\Service\MergeDetectionRegionScoringService.cs" />
     <Compile Include="AFASRegion\ThAFASCmd.cs" />
     <Compile Include="AFASRegion\Util\UtilService.cs" />
+    <Compile Include="Algorithm\ArcAlgorithm\ThArcGeoUitls.cs" />
+    <Compile Include="Algorithm\ArcAlgorithm\ThArcPolygonize.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AdjustAStarPath.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarLine.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\AStarModel\AStarEntity.cs" />
@@ -124,7 +127,6 @@
     <Compile Include="Algorithm\ThMEPOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
-    <Compile Include="AreaLayout\CenterLineLayout\DrawUtils.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Command\FireAlarmSystemLayoutCommand.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\DeletePoints.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\LayoutOpt.cs" />
@@ -162,15 +164,27 @@
     <Compile Include="ConnectWiring\Service\MultiLoopService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
+    <Compile Include="Diagnostics\DrawUtils.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
+    <Compile Include="GridOperation\CutGridRegionService.cs" />
     <Compile Include="GridOperation\GridLineCleanService.cs" />
     <Compile Include="GridOperation\GridService.cs" />
+    <Compile Include="GridOperation\Utils\GridBoundaryExtendService.cs" />
+    <Compile Include="GridOperation\Model\ArcGridModel.cs" />
+    <Compile Include="GridOperation\Model\GridModel.cs" />
+    <Compile Include="GridOperation\Model\LineGridModel.cs" />
+    <Compile Include="GridOperation\Utils\GridArcExtendService.cs" />
+    <Compile Include="GridOperation\Utils\GridArcMergeService.cs" />
+    <Compile Include="GridOperation\Utils\GridArcSimplifyService.cs" />
     <Compile Include="GridOperation\Utils\GridLineExtendService.cs" />
-    <Compile Include="GridOperation\Utils\GridMergeService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineMergeService.cs" />
+    <Compile Include="GridOperation\Utils\GridLineSimplifyService.cs" />
+    <Compile Include="IO\ExcelService\ExcelHelper.cs" />
+    <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />
     <Compile Include="Service\ThMEPDuctExtractor.cs" />
@@ -638,6 +652,7 @@
     <Compile Include="UCSDivisionService\DivisionMethod\GridDivision.cs" />
     <Compile Include="UCSDivisionService\DivisionMethod\LayoutPointDivision.cs" />
     <Compile Include="UCSDivisionService\UCSService.cs" />
+    <Compile Include="UCSDivisionService\Utils\CheckService.cs" />
     <Compile Include="UCSDivisionService\Utils\GeoUtils.cs" />
     <Compile Include="UCSDivisionService\Utils\StructPolyService.cs" />
     <Compile Include="UCSDivisionService\Utils\StructUtils.cs" />

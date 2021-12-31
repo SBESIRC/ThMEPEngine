@@ -37,6 +37,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="BlockNameConfig\Cmd.cs" />
+    <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFireHydrantButterValveVisitor.cs" />
@@ -70,6 +71,12 @@
     <Compile Include="Hydrant\Engine\ThFirePipeRecognitionEngine.cs" />
     <Compile Include="Hydrant\Engine\ThFirePipeVisitor.cs" />
     <Compile Include="Hydrant\Service\ThHydrantPolygonCleanService.cs" />
+    <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectUICmd.cs" />
+    <Compile Include="SprinklerConnect\Model\ThSprinklerConnectUIModel.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectLayer.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectService.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectTools.cs" />
+    <Compile Include="SprinklerConnect\Service\ThSprinklerConnectUtils.cs" />
     <Compile Include="TowerSeparation\DBScanPoints.cs" />
     <Compile Include="TowerSeparation\TowerSeparation.cs" />
     <Compile Include="Command\ThSprinklerCheckCmd.cs" />
@@ -93,8 +100,7 @@
     <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
     <Compile Include="Hydrant\ThFireHydrantDiagram.cs" />
     <Compile Include="OutsideFrameRecognition\ThRecogniseOutsideFrame.cs" />
-    <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectCmd-test.cs" />
-    <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectCmd.cs" />
+    <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectCommand.cs" />
     <Compile Include="SprinklerConnect\Data\ThSprinklerConnectDataFactory.cs" />
     <Compile Include="SprinklerConnect\Data\ThSprinklerConnectParkingStallService.cs" />
     <Compile Include="SprinklerConnect\Data\ThSprinklerDataQueryService.cs" />
@@ -109,7 +115,6 @@
     <Compile Include="SprinklerConnect\Service\ThSprinklerNetworkService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerLineService.cs" />
     <Compile Include="SprinklerConnect\Service\ThSprinklerPipeService.cs" />
-    <Compile Include="SprinklerConnect\ThSprinklerConnectCommon.cs" />
     <Compile Include="Sprinkler\Analysis\ThSprinklerBeamChecker.cs" />
     <Compile Include="Pipe\Model\DrainageSystemDiagramViewModel.cs" />
     <Compile Include="Pipe\Model\RainSystemDiagramViewModel.cs" />
@@ -274,7 +279,6 @@
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\Data\ThDrainageSDRoomExtractor.cs" />
     <Compile Include="DrainageSystemDiagram\ThDrainageSDCommon.cs" />
-    <Compile Include="DrainageSystemDiagram\Assistant\DrawUtil.cs" />
     <Compile Include="DrainageSystemDiagram\Engine\ThDrainageSDConnectCoolSupplyEngine.cs" />
     <Compile Include="DrainageSystemDiagram\Model\ThTerminalToilet.cs" />
     <Compile Include="DrainageSystemDiagram\Service\ThDrainageSDCoolPtService.cs" />
@@ -582,6 +586,7 @@
     <Compile Include="UndergroundSpraySystem\Method\TermPtDeal.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmText.cs" />
     <Compile Include="UndergroundSpraySystem\Model\AlarmValve.cs" />
+    <Compile Include="UndergroundSpraySystem\Model\AlarmValveTCH.cs" />
     <Compile Include="UndergroundSpraySystem\Model\DNLine.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Floor.cs" />
     <Compile Include="UndergroundSpraySystem\Model\FlowIndicator.cs" />
@@ -629,6 +634,8 @@
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\PressureDrainageSystemDiagramVieModel.cs" />
     <Compile Include="ViewModel\ThFireHydrantVM.cs" />
+    <Compile Include="ViewModel\ThSprinklerConnectVM.cs" />
+    <Compile Include="ViewModel\ThTianHuaUserConfigVM.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractionEngine.cs" />
     <Compile Include="WaterSupplyPipeSystem\Data\ThWaterRoomMarkExtractVisitor.cs" />
@@ -662,7 +669,6 @@
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />
-    <Compile Include="Uitl\ThWTangentService.cs" />
     <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>
   <ItemGroup>

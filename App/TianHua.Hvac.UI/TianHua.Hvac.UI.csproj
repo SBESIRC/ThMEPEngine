@@ -18,6 +18,7 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -36,34 +37,31 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThCutCurveTestCmd.cs" />
     <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
+    <Compile Include="Command\ThHvacCRFKInsertCmd.cs" />
+    <Compile Include="Command\ThHvacSGDXInsertCmd.cs" />
+    <Compile Include="Command\ThHvacFGDXUiCmd.cs" />
+    <Compile Include="Command\ThHvacFGDXInsertCmd.cs" />
+    <Compile Include="Command\ThHvacFGLGInsertCmd.cs" />
+    <Compile Include="Command\ThHvacRouteCmd.cs" />
     <Compile Include="Command\ThHvacFpmCmd.cs" />
+    <Compile Include="Command\ThHvacIndoorFanCmd.cs" />
     <Compile Include="Command\ThHvacLoadCalculationCmd.cs" />
     <Compile Include="Command\ThHvacRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacOutdoorVentilationCmd.cs" />
     <Compile Include="Command\ThHvacSpmCmd.cs" />
     <Compile Include="Command\ThHvacXfjCmd.cs" />
+    <Compile Include="Command\ThWaterPipeRouteCmd.cs" />
     <Compile Include="Convertor\FanLayoutIntToBool.cs" />
     <Compile Include="fmDuctModify.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="fmDuctModify.Designer.cs">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
-    </Compile>
-    <Compile Include="fmDuctPorts.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmDuctPorts.Designer.cs">
-      <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="fmFjfFpm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmFjfFpm.Designer.cs">
-      <DependentUpon>fmFjfFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="fmFpm.cs">
       <SubType>Form</SubType>
@@ -72,6 +70,10 @@
       <DependentUpon>fmFpm.cs</DependentUpon>
     </Compile>
     <Compile Include="HvacUiApp.cs" />
+    <Compile Include="IndoorFanModels\EnumShowFanType.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanFile.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanSaveModel.cs" />
+    <Compile Include="IndoorFanModels\WorkingCondition.cs" />
     <Compile Include="LoadCalculation\DoubleConvert.cs" />
     <Compile Include="LoadCalculation\LoadCalculationViewModel.cs" />
     <Compile Include="LoadCalculation\SerializableHelper.cs" />
@@ -116,6 +118,29 @@
     <Compile Include="UI\FanConnect\uiWaterPipeConnectWidget.xaml.cs">
       <DependentUpon>uiWaterPipeConnectWidget.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\IndoorFan\RadioButtonItem.cs" />
+    <Compile Include="UI\IndoorFan\ReadFanData.cs" />
+    <Compile Include="UI\IndoorFan\TabRadioButton.cs" />
+    <Compile Include="UI\IndoorFan\TabRadioControlViewModel.cs" />
+    <Compile Include="UI\IndoorFan\TabRadioItem.cs" />
+    <Compile Include="UI\IndoorFan\uiAirFanParameter.xaml.cs">
+      <DependentUpon>uiAirFanParameter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IndoorFan\uiFanCoilParameter.xaml.cs">
+      <DependentUpon>uiFanCoilParameter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IndoorFan\uiIndoorFanCheck.xaml.cs">
+      <DependentUpon>uiIndoorFanCheck.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IndoorFan\uiVRFFanParameter.xaml.cs">
+      <DependentUpon>uiVRFFanParameter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\IndoorFan\uTabRadio.xaml.cs">
+      <DependentUpon>uTabRadio.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiAirPortParameter.xaml.cs">
+      <DependentUpon>uiAirPortParameter.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UI\uiFanCEXHWidget.xaml.cs">
       <DependentUpon>uiFanCEXHWidget.xaml</DependentUpon>
     </Compile>
@@ -131,6 +156,14 @@
     <Compile Include="UI\uiFanWEXHWidget.xaml.cs">
       <DependentUpon>uiFanWEXHWidget.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiFGDXParameter.xaml.cs">
+      <DependentUpon>uiFGDXParameter.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="UI\uiIndoorFan.xaml.cs">
+      <DependentUpon>uiIndoorFan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ViewModels\FanDataShowViewModel.cs" />
+    <Compile Include="ViewModels\IndoorFanViewModel.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -214,12 +247,6 @@
     <EmbeddedResource Include="fmDuctModify.resx">
       <DependentUpon>fmDuctModify.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="fmDuctPorts.resx">
-      <DependentUpon>fmDuctPorts.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="fmFjfFpm.resx">
-      <DependentUpon>fmFjfFpm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmFpm.resx">
       <DependentUpon>fmFpm.cs</DependentUpon>
     </EmbeddedResource>
@@ -277,6 +304,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="UI\IndoorFan\FanParameterRes.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\IndoorFan\uiAirFanParameter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\IndoorFan\uiFanCoilParameter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\IndoorFan\uiIndoorFanCheck.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\IndoorFan\uiVRFFanParameter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\IndoorFan\uTabRadio.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiAirPortParameter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\uiFanCEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -296,6 +351,14 @@
     <Page Include="UI\uiFanWEXHWidget.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFGDXParameter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="UI\uiIndoorFan.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

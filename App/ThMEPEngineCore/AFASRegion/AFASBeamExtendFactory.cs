@@ -253,7 +253,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
                     selectedBeam.Add(o);
                 }
             });
-            
+
             //房间边梁过滤边界
             Beams.Where(o => intersectbeams.Contains(o.BeamBoundary)).ForEach(o =>
             {
@@ -269,7 +269,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             DBObjectCollection DetectionAreaLines = new DBObjectCollection();
             frame.ToNTSPolygonalGeometry().ToDbPolylines().ForEach(o => DetectionAreaLines.Add(o));//添加房间框线
             obstacles.ForEach(o => DetectionAreaLines.Add(o));//添加障碍物
-            extendBeam.Where(o=>o.BeamType==BeamType.HighBeam).ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
+            extendBeam.Where(o => o.BeamType == BeamType.HighBeam).ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
             var polygons = DetectionAreaLines.PolygonsEx();
 
             var obstacleBufferArea = obstacles.Cast<Polyline>().Select(o => o.Buffer(10)[0] as Polyline);//障碍物空间（柱，剪力墙,结构墙)
@@ -277,11 +277,11 @@ namespace ThMEPEngineCore.AFASRegion.Service
             var IsMPolygonRoom = false;
             var Holes = new List<Polyline>();
             var RoomBoundary = new Polyline();
-            if(frame is Polyline plspace)
+            if (frame is Polyline plspace)
             {
                 RoomBoundary = plspace.Buffer(10)[0] as Polyline;
             }
-            else if(frame is MPolygon space)
+            else if (frame is MPolygon space)
             {
                 IsMPolygonRoom = true;
                 Holes = space.Holes().Select(o => o.Buffer(10)[0] as Polyline).ToList();
@@ -294,6 +294,10 @@ namespace ThMEPEngineCore.AFASRegion.Service
             {
                 if (item is Polyline polyline && RoomBoundary.Contains(polyline))
                 {
+                    if (polyline.Area <= 100)
+                    {
+                        continue;
+                    }
                     if (obstacleBufferArea.Any(o => o.Contains(polyline)))
                     {
                         //过滤掉墙，柱

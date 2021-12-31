@@ -1,7 +1,6 @@
 ﻿using System;
 using Linq2Acad;
 using DotNetARX;
-using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
@@ -55,6 +54,10 @@ namespace ThMEPElectrical.BlockConvert
             {
                 TransformByPosition(blkRef, srcBlockData);
             }
+            else if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
+            {
+                TransformHYDT(blkRef, srcBlockData);
+            }
             else
             {
                 TransformByCenter(blkRef, srcBlockData);
@@ -105,6 +108,19 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
+        private void TransformHYDT(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
+            {
+                var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
+                var targetBlockData = new ThBlockReferenceData(blkRef);
+                var targetCentriodPoint = targetBlockData.GetBottomCenter().TransformBy(targetBlockData.OwnerSpace2WCS);
+                var scrCentriodPoint = srcBlockData.GetBottomCenter().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
+                blockReference.TransformBy(Matrix3d.Displacement(offset));
+            }
+        }
+
         public override void Rotate(ObjectId blkRef, ThBlockReferenceData srcBlockData)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -112,6 +128,10 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var position = srcBlockData.Position;
                 double rotation = srcBlockData.Rotation;
+                if (srcBlockData.Normal == new Vector3d(0, 0, -1))
+                {
+                    rotation = -rotation;
+                }
                 if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
                 {
                     blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));

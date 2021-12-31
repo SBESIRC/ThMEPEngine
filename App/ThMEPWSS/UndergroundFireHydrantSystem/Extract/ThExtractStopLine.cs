@@ -6,6 +6,7 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
@@ -25,7 +26,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
                 dbObjs.Cast<Entity>()
-                      .Where(e => IsTCHequipment(e))
+                      .Where(e => e.IsTCHEquipment())
                       .ForEach(e => objs.Add(Explode(e)));
 
                 var pts = new List<Point3dEx>();
@@ -33,11 +34,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     .ForEach(e => pts.Add(new Point3dEx((e as BlockReference).Position)));
                 return pts;
             }
-        }
-        private bool IsTCHequipment(Entity entity)
-        {
-            string dxfName = entity.GetRXClass().DxfName.ToUpper();
-            return dxfName.StartsWith("TCH") && dxfName.Contains("EQUIPMENT");
         }
         private DBObject Explode(Entity entity)
         {

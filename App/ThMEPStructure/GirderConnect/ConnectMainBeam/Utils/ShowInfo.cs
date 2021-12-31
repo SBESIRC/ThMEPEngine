@@ -15,12 +15,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="geometry"></param>
         /// <param name="colerIndex"></param>
-        public void ShowGeometry(NetTopologySuite.Geometries.Geometry geometry, int colerIndex = 1)
+        public static void ShowGeometry(NetTopologySuite.Geometries.Geometry geometry, int colerIndex = 1)
         {
             foreach (Entity obj in geometry.ToDbCollection())
             {
                 obj.ColorIndex = colerIndex;
-                //obj.Layer = infoLayer;
                 HostApplicationServices.WorkingDatabase.AddToModelSpace(obj);
             }
         }
@@ -30,11 +29,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// </summary>
         /// <param name="pt">设备位置</param>
         /// <param name="radius">设备可覆盖半径</param>
-        public void ShowArea(Point3d pt, double radius, int colorIndex = 90)
+        public static void ShowArea(Point3d pt, double radius, int colorIndex = 90)
         {
             Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
-            //circle.Layer = infoLayer;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(circle);
         }
 
@@ -46,7 +44,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
-            //circle.Layer = infoLayer;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(circle);
         }
 
@@ -185,6 +182,20 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 foreach(var pt in dicTuple.Value)
                 {
                     DrawLine(dicTuple.Key, pt, color);
+                }
+            }
+        }
+
+        public static void ShowBorderConnectNearLines(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, int color = 1)
+        {
+            foreach(var dicKVpair in outline2BorderNearPts.Values)
+            {
+                foreach(var KVpair in dicKVpair)
+                {
+                    foreach(var pt in KVpair.Value)
+                    {
+                        DrawLine(KVpair.Key, pt, color);
+                    }
                 }
             }
         }

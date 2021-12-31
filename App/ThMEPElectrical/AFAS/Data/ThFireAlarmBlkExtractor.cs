@@ -28,8 +28,8 @@ namespace ThMEPElectrical.AFAS.Data
         public ThMEPOriginTransformer Transformer { get => transformer; set => transformer = value; }
         public List<string> BlkNameList { get; set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
-        private Dictionary<BlockReference, Point3d> BlkCenterDict = new Dictionary<BlockReference, Point3d> ();
-        
+        private Dictionary<BlockReference, Point3d> BlkCenterDict = new Dictionary<BlockReference, Point3d>();
+
         public ThFireAlarmBlkExtractor()
         {
             Category = BuiltInCategory.Equipment.ToString();
@@ -46,10 +46,10 @@ namespace ThMEPElectrical.AFAS.Data
                 geometry.Properties.Add(ThExtractorPropertyNameManager.NamePropertyName, o.Key.GetEffectiveName());
                 geometry.Properties.Add(ThExtractorPropertyNameManager.HandlerPropertyName, o.Key.Handle.ToString());
 
-                var parentId = BuildString(GroupOwner, o.Key );
+                var parentId = BuildString(GroupOwner, o.Key);
                 if (string.IsNullOrEmpty(parentId))
                 {
-                    var storeyInfo = Query(o.Value );
+                    var storeyInfo = Query(o.Value);
                     parentId = storeyInfo.Id;
                 }
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
@@ -97,7 +97,7 @@ namespace ThMEPElectrical.AFAS.Data
         {
             Transformer.Reset(Equipment.Values.ToCollection());
         }
-        
+
         public ThStoreyInfo Query(Entity entity)
         {
             //ToDo
@@ -112,11 +112,23 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            
-            Equipment.ForEach(o =>
+
+            //Equipment.ForEach(o =>
+            //{
+            //    GroupOwner.Add(o.Key , FindCurveGroupIds(groupId, o.Value));
+            //});
+
+            foreach (var o in Equipment)
             {
-                GroupOwner.Add(o.Key , FindCurveGroupIds(groupId, o.Value));
-            });
+                if (GroupOwner.ContainsKey(o.Key) == false)
+                {
+                    GroupOwner.Add(o.Key, FindCurveGroupIds(groupId, o.Value));
+                }
+                else
+                {
+                    GroupOwner[o.Key] = FindCurveGroupIds(groupId, o.Value);
+                }
+            }
         }
     }
 }

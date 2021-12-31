@@ -93,7 +93,7 @@
 
                 <Label Grid.Row="3" Grid.Column="0" Content="消火栓类型"></Label>
                 <ComboBox Grid.Row="3"  Grid.Column="1" Grid.ColumnSpan="2" Height="22" 
-                           HorizontalAlignment="Stretch"
+                          HorizontalAlignment="Stretch"
                           ItemsSource="{Binding FireTypes,Mode=OneWay,NotifyOnSourceUpdated=True}"
                           SelectedItem="{Binding ComBoxFireTypeSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
                 <Label Grid.Row="2" Grid.Column="2"  Content="个" Margin="5,0,0,0"></Label>

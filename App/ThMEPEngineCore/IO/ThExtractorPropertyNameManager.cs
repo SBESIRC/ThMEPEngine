@@ -32,5 +32,6 @@
         public readonly static string NeibourFireApartIdsPropertyName = "NeibourFireApartIds";
         public readonly static string TagPropertyName = "Tag";
         public readonly static string HandlerPropertyName = "Handler";
+        public readonly static string VectorName = "Vector";
     }
 }

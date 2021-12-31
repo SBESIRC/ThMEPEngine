@@ -10,7 +10,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Config;
-
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS;
 
@@ -76,7 +76,8 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                     }
                 }
 
-                //如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
+                ////如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
+                ////update : 没有就不布置
                 if (typeInt == ThFaSmokeCommon.layoutType.noName)
                 {
                     typeInt = ThFaSmokeCommon.layoutType.smoke;

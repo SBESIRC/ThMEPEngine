@@ -93,7 +93,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             DBObjectCollection objs = new DBObjectCollection();
             if (result.Status == PromptStatus.OK)
             {
-                //anoother way
                 result.Value.GetObjectIds().Select(o => acdb.Element<Entity>(o)).Where(o => o is Polyline)
                    .Cast<Polyline>().ToList();
                 //result.Value.GetObjectIds().Select(o => acdb.Element<Polyline>(o)).ToList();
@@ -218,7 +217,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             {
                 double curRotate = aimDirection.GetAngleTo(curPt - fromPt);
                 double curDis = fromPt.DistanceTo(curPt);
-                double curCross = curRotate * curDis;
+                double curCross = curRotate * curDis * curDis;
+                //double curCross = curRotate * curDis;
                 if (curRotate < tolerance && curDis < constrain && curDis > 200)
                 {
                     if (curDis < constrain / 2)
@@ -255,13 +255,30 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             {
                 return ansSndPt;
             }
-            else if (ansThdPt != fromPt)
+            else
             {
                 return ansThdPt;
             }
-            return fromPt;
         }
-
+        public static Point3d GetPointByDirectionB(Point3d fromPt, Vector3d aimDirection, Point3dCollection basePts, double tolerance = Math.PI / 12, double constrain = 9000)
+        {
+            Point3d ansPt = fromPt;
+            double minDis = double.MaxValue;
+            foreach (Point3d curPt in basePts)
+            {
+                double curRotate = aimDirection.GetAngleTo(curPt - fromPt);
+                double curDis = fromPt.DistanceTo(curPt);
+                if (curRotate < tolerance && curDis < constrain && curDis > 200)
+                {
+                    if(curDis < minDis)
+                    {
+                        ansPt = curPt;
+                        minDis = curDis;
+                    }
+                }
+            }
+            return ansPt;
+        }
         /// <summary>
         /// Get Closest Point By Direction On a Polyline
         /// </summary>
@@ -403,12 +420,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             double absAB180 = Math.Abs(angelAB - Math.PI);
             double absCA180 = Math.Abs(angelCA - Math.PI);
             double absBC180 = Math.Abs(angelBC - Math.PI);
-            double min90;// = double.MaxValue;
-            double min180;// = double.MaxValue;
-            //Point3d pt9X, pt9Y, pt9Z;
-            //Point3d pt18X, pt18Y, pt18Z;
+            double min90;
+            double min180;
             Vector3d vec9X, vec9Y, vec9Z;
-            Vector3d vec18X, vec18Y;//, vec18Z;
+            Vector3d vec18X, vec18Y;
             if (absAB90 <= absCA90 && absAB90 <= absBC90)
             {
                 min90 = absAB90;
@@ -435,21 +450,18 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 min180 = absAB180;
                 vec18X = vecA;
                 vec18Y = vecB;
-                //vec18Z = vecC;
             }
             else if (absCA180 <= absBC180)
             {
                 min180 = absCA180;
                 vec18X = vecC;
                 vec18Y = vecA;
-                //vec18Z = vecB;
             }
             else
             {
                 min180 = absBC180;
                 vec18X = vecB;
                 vec18Y = vecC;
-                //vec18Z = vecA;
             }
             if(min90 < min180)
             {

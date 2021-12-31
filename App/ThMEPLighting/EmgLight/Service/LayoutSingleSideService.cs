@@ -19,8 +19,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.LaneLine;
 using NetTopologySuite.Geometries;
-
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight.Model;
 using ThMEPLighting.EmgLight.Common;
 

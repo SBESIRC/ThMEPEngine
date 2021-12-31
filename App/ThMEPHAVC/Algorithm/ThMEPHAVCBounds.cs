@@ -27,7 +27,7 @@ namespace ThMEPHVAC.Algorithm
         }
         public static Polyline GetValveBounds(BlockReference valve, ValveModifyParam param)
         {
-            var dirVec = ThMEPHVACService.GetDirVecBySngle3(valve.Rotation);
+            var dirVec = ThMEPHVACService.GetDirVecByAngle3(valve.Rotation);
             var rightDirVec = ThMEPHVACService.GetRightVerticalVec(dirVec);
             var points = new Point3dCollection();
             var basePos = valve.Position;
@@ -43,7 +43,7 @@ namespace ThMEPHVAC.Algorithm
         }
         public static Polyline GetHoseBounds(BlockReference hose, double len, double width)
         {
-            var dirVec = ThMEPHVACService.GetDirVecBySngle3(hose.Rotation);
+            var dirVec = ThMEPHVACService.GetDirVecByAngle3(hose.Rotation);
             var rightDirVec = ThMEPHVACService.GetRightVerticalVec(dirVec);
             var points = new Point3dCollection();
             var basePos = hose.Position;
@@ -69,9 +69,9 @@ namespace ThMEPHVAC.Algorithm
             var mat = Matrix3d.Displacement(-srtP.GetAsVector());
             var rotation = port.Rotation;
             var position = port.Position.TransformBy(mat);
-            var dir_vec = ThMEPHVACService.GetDirVecByAngle(rotation);
-            var l_vec = ThMEPHVACService.GetLeftVerticalVec(dir_vec);
-            var disVec = dir_vec * 0.5 * portWidth + l_vec * 0.5 * ductWidth;
+            var dirVec = ThMEPHVACService.GetDirVecByAngle(rotation);
+            var lVec = ThMEPHVACService.GetLeftVerticalVec(dirVec);
+            var disVec = dirVec * 0.5 * portWidth + lVec * 0.5 * ductWidth;
             var p = position.ToPoint2D() + disVec;
             return new Point3d(Math.Round(p.X, 6), Math.Round(p.Y, 6), 0);
         }

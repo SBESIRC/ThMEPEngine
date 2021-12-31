@@ -1,17 +1,8 @@
-﻿using System;
+﻿using AcHelper;
+using Autodesk.AutoCAD.EditorInput;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPElectrical.SystemDiagram.Service;
 
@@ -109,7 +100,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                     PublicSectionType = 3;
 
 
-                if(commondType==1 && viewModel.SelectCheckFiles == null || viewModel.SelectCheckFiles.Count == 0)
+                if (commondType==1 && viewModel.SelectCheckFiles == null || viewModel.SelectCheckFiles.Count == 0)
                 {
                     MessageBox.Show("数据错误：未获取到至少一张要统计的图纸，无法进行后续操作,请重新选择", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
@@ -136,13 +127,13 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
             {
                 MessageBox.Show("错误：数据转换出错,请注意输入格式", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-            
+
         }
 
         private void AddLayerButton_Click(object sender, RoutedEventArgs e)
         {
             string layerName = AddLayerTxt.Text;
-            if(viewModel.AddLayer(layerName))
+            if (viewModel.AddLayer(layerName))
             {
                 MessageBox.Show("添加成功！");
             }
@@ -162,7 +153,7 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 DrawingList.Visibility = Visibility.Visible;
                 DistinguishByCircuit.Visibility = Visibility.Visible;
             }
-            else if(SelectF.IsChecked.Value)
+            else if (SelectF.IsChecked.Value)
             {
                 DrawingList.Visibility = Visibility.Collapsed;
                 DistinguishByCircuit.Visibility = Visibility.Visible;
@@ -172,6 +163,41 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                 DrawingList.Visibility = Visibility.Collapsed;
                 DistinguishByCircuit.Visibility = Visibility.Collapsed;
                 DistinguishByFireCompartment.IsChecked = true;
+            }
+        }
+
+        private void PickLayerButton_Click(object sender, RoutedEventArgs e)
+        {
+            using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择Polyline");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Autodesk.AutoCAD.DatabaseServices.Entity entity = acad.Element<Autodesk.AutoCAD.DatabaseServices.Entity>(result.ObjectId);
+                if (entity is Autodesk.AutoCAD.DatabaseServices.Polyline polyline)
+                {
+                    string layerName = polyline.Layer;
+                    if (viewModel.AddLayer(layerName))
+                    {
+                        MessageBox.Show("添加成功！");
+                    }
+                    else
+                    {
+                        MessageBox.Show("添加失败！请检查是否重复添加！");
+                    }
+                    AddLayerTxt.Text = "";
+                }
+            }
+        }
+
+        private void ThCustomWindow_Closed(object sender, EventArgs e)
+        {
+            FireCompartmentParameter.CacheDynamicCheckBoxs = new List<ThMEPElectrical.SystemDiagram.Model.DynamicCheckBox>();
+            foreach (var item in viewModel.DynamicCheckBoxs)
+            {
+                FireCompartmentParameter.CacheDynamicCheckBoxs.Add(item);
             }
         }
     }

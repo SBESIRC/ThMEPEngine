@@ -13,7 +13,7 @@
     <Window.Resources>
         <ResourceDictionary>
             <local:BeamConverter x:Key="BeamConverter"/>
-            <local:LayoutConverter x:Key="LayoutConverter"/>
+            <!--<local:LayoutConverter x:Key="LayoutConverter"/>-->
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
@@ -123,33 +123,44 @@
                 <Label Content="请选择需要布置内容"/>
             </StackPanel>
             <StackPanel Grid.Row="6" Grid.Column="0">
-                <RadioButton GroupName="rbFunction" Content="烟感温感" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=0}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="烟感温感" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=0}"/>-->
+                <CheckBox  Content="烟感温感"  IsChecked="{Binding LayoutSmoke,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
             <StackPanel Grid.Row="6" Grid.Column="1">
-                <RadioButton GroupName="rbFunction" Content="可燃气体" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=4}"/>
-
+                <!--<RadioButton GroupName="rbFunction" Content="可燃气体" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=4}"/>-->
+                <CheckBox  Content="可燃气体"  IsChecked="{Binding LayoutGas,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
             <StackPanel Grid.Row="7" Grid.Column="0">
-                <RadioButton GroupName="rbFunction" Content="消防广播"
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=1}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="消防广播"
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=1}"/>-->
+                <CheckBox  Content="消防广播"  IsChecked="{Binding LayoutBroadcast,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
             </StackPanel>
             <StackPanel Grid.Row="7" Grid.Column="1">
-                <RadioButton GroupName="rbFunction" Content="手报声光" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=5}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="手报声光" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=5}"/>-->
+                <CheckBox  Content="手报声光"  IsChecked="{Binding LayoutManualAlart,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
             </StackPanel>
             <StackPanel Grid.Row="8" Grid.Column="0">
-                <RadioButton GroupName="rbFunction" Content="楼层显示" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=2}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="楼层显示" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=2}"/>-->
+                <CheckBox  Content="楼层显示"  IsChecked="{Binding LayoutDisplay,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
             </StackPanel>
             <StackPanel Grid.Row="8" Grid.Column="1">
-                <RadioButton GroupName="rbFunction" Content="防火门监控" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=6}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="防火门监控" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=6}"/>-->
+                <CheckBox  Content="防火门监控"  IsChecked="{Binding LayoutMonitor,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
             </StackPanel>
             <StackPanel Grid.Row="9" Grid.Column="0">
-                <RadioButton GroupName="rbFunction" Content="消防电话" 
-                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=3}"/>
+                <!--<RadioButton GroupName="rbFunction" Content="消防电话" 
+                             IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=3}"/>-->
+                <CheckBox  Content="消防电话"  IsChecked="{Binding LayoutTel,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
             </StackPanel>
             <!---->
 

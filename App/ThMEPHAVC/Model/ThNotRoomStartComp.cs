@@ -30,7 +30,7 @@ namespace ThMEPHVAC.Model
                 service.endCompService.InsertFlipDown45(insertP, w, h, -roAngle);
                 var disVec = dirVec * 1000 + new Vector3d(0, -1000, 0);
                 var markP = insertP + disVec;
-                ThDuctPortsDrawPortMark.InsertLeader(insertP, markP, service.portMarkLayer);
+                service.markService.InsertLeader(insertP, markP);
                 service.textService.DrawTextInfo("45°下翻，加防虫网", portParam.param.scale, markP);
             }
             else if (portParam.endCompType == EndCompType.RainProofShutter)
@@ -43,7 +43,7 @@ namespace ThMEPHVAC.Model
             {
                 UpdateVerticalPipe(dirVec, h, ref insertP);
                 insertP += (startPoint.GetAsVector());
-                service.endCompService.InsertVerticalPipe(insertP, w, h, roAngle);
+                service.endCompService.InsertVerticalPipe(insertP, w, h, roAngle, rootDuct.airVolume);
             }
         }
         public static void UpdateVerticalPipe(Vector3d dirVec, double h, ref Point3d insertP)

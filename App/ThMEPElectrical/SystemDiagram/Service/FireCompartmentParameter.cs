@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.SystemDiagram.Model;
 
 namespace ThMEPElectrical.SystemDiagram.Service
 {
@@ -13,6 +14,8 @@ namespace ThMEPElectrical.SystemDiagram.Service
     {
         public static List<string> LayerNames { get; set; } = new List<string>() { ThAutoFireAlarmSystemCommon.FireDistrictByLayer };
         public static List<string> ChoiseFileNames { get; set; } = new List<string>();
+
+        public static List<DynamicCheckBox> CacheDynamicCheckBoxs = new List<DynamicCheckBox>();
 
         /// <summary>
         /// 控制总线计数模块

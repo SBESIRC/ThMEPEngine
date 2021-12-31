@@ -107,9 +107,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
                 else if (l.EndPoint.DistanceTo(pt) < 10)
                 {
-                    //var tmpPt = l.StartPoint;
-                    //l.StartPoint = l.EndPoint;
-                    //l.EndPoint = tmpPt;
                     l.EndPoint = l.StartPoint;
                     l.StartPoint = pt;
                     retLines.Add(l);
@@ -118,9 +115,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 else if(l.GetDistToPoint(pt) < 10)
                 {
                     //将l在pt处打断
-                    //var closPt = l.GetClosestPointTo(pt,false);
-                    //var line1 = new Line(closPt, l.StartPoint);
-                    //var line2 = new Line(closPt, l.EndPoint);
                     var line1 = new Line(pt, l.StartPoint);
                     var line2 = new Line(pt, l.EndPoint);
                     retLines.Add(line1);
@@ -141,7 +135,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 var endPt = l.EndPoint;
                 double startDist = line.GetDistToPoint(startPt);
                 double endDist = line.GetDistToPoint(endPt);
-                if(startDist < 10.0)
+                if (startDist < 10.0)
                 {
                     var closPt = line.GetClosestPointTo(l.StartPoint, false);
                     l.StartPoint = closPt;
@@ -156,9 +150,9 @@ namespace ThMEPHVAC.FanConnect.Model
                     retLines.Add(l);
                     remLines.Add(l);
                 }
-                else if(line.IsIntersects(l))
+                else if (ThFanConnectUtils.IsIntersects(line, l))
                 {
-                    var pts = l.IntersectWithEx(line);
+                    var pts = ThFanConnectUtils.IntersectWithEx(line,l);
                     //将l在交点位置打断
                     if (pts.Count > 0)
                     {
@@ -188,6 +182,10 @@ namespace ThMEPHVAC.FanConnect.Model
             var basVector = node.Item.PLine.LineDirection().GetNormal();
             foreach (var l in conlines)
             {
+                if(l.Length.Equals(0.0))
+                {
+                    continue;
+                }
                 bool isFlag = false;
                 var tmpVector = l.LineDirection().GetNormal();
                 var croVector = basVector.CrossProduct(tmpVector).GetNormal();
@@ -219,6 +217,10 @@ namespace ThMEPHVAC.FanConnect.Model
             var neaLines = FindNearLine(node.Item.PLine,ref lines);
             foreach (var l in neaLines)
             {
+                if (l.Length.Equals(0.0))
+                {
+                    continue;
+                }
                 bool isFlag = false;
                 var tmpVector = l.LineDirection().GetNormal();
                 var croVector = basVector.CrossProduct(tmpVector).GetNormal();
@@ -264,6 +266,7 @@ namespace ThMEPHVAC.FanConnect.Model
             var allLines = GetLinesFromNode(treeModel);
             var pointModel = new ThFanPointModel();
             pointModel.CntPoint = treeModel.Item.PLine.StartPoint;
+            pointModel.IsFlag = treeModel.Item.IsFlag;
             var rootNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
             InsertNodeFromPipeTree(rootNode, treeModel,ref allLines);
             return rootNode;
@@ -279,7 +282,6 @@ namespace ThMEPHVAC.FanConnect.Model
                     var pointModel = new ThFanPointModel();
                     pointModel.CntPoint = l.EndPoint;
                     pointModel.IsFlag = model.IsFlag;
-                    pointModel.Level = PIPELEVEL.LEVEL1;
                     var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
                     node.InsertChild(pointNode);
                     remLines.Add(l);

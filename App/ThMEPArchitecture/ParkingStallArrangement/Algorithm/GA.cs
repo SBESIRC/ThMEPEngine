@@ -12,6 +12,10 @@ using Serilog;
 using System.Diagnostics;
 using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
+using Dreambuild.AutoCAD;
+using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -84,12 +88,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
             layoutPara.Set(Genome);
-            int result = GetParkingNums(layoutPara);
+            //int result = GetParkingNums(layoutPara);
+            Thread.Sleep(3);
+            int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             Count = result;
             return result;
         }
 
-        private int GetParkingNums(LayoutParameter layoutPara)
+        public int GetMaximumNumberFast(LayoutParameter layoutPara, GaParameter gaPara)
+        {
+            layoutPara.Set(Genome);
+            int result = GetParkingNumsFast(layoutPara);
+            Count = result;
+            return result;
+        }
+
+        private int GetParkingNumsFast(LayoutParameter layoutPara)
         {
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
@@ -103,35 +117,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
                 var obstacles = new List<Polyline>();
                 obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-                List<Polyline> pls = walls;
-                string w = "";
-                string l = "";
-                foreach (var e in pls)
-                {
-                    foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
-                        w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
-                }
-                foreach (var e in inilanes)
-                {
-                    l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
-                        + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
-                }
-#if DEBUG
-                FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
-                StreamWriter sw = new StreamWriter(fs1);
-                sw.WriteLine(w);
-                sw.WriteLine(l);
-                sw.Close();
-                fs1.Close();
-#endif
-                var Cutters = new DBObjectCollection();
-                obstacles.ForEach(e => Cutters.Add(e));
                 var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
-                var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
-                partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                if (partition.Validate())
+                PartitionFast partition = new PartitionFast(walls, inilanes, obstacles, bound, buildingBoxes);
+                try
+                {
+                    count += partition.CalCarSpotsFastly();
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
+            }
+            return count;
+        }
+
+        private int GetParkingNums(LayoutParameter layoutPara)
+        {
+            int count = 0;
+            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            {
+                PartitionV3 partition = new PartitionV3();
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
                 {
                     try
                     {
@@ -142,10 +148,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         Logger.Error(ex.Message);
                         partition.Dispose();
                     }
-                }
-                else
-                {
-                    Logger.Error("数据无效, wall: " + w + "lanes: " + l + "Boundary: " + GeoUtilities.AnalysisPoly(boundary));
                 }
             }
             return count;
@@ -242,7 +244,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return genome;
         }
 
-        public List<Chromosome> Run(List<Chromosome> histories)
+        public List<Chromosome> Run(List<Chromosome> histories, bool recordprevious)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
@@ -263,7 +265,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var curIteration = 0;
                 int maxCount = 0;
                 int maxNums = 0;
-
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
@@ -272,7 +273,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     //Active.Editor.WriteMessage(strCurIterIndex);
                     Logger?.Information(strCurIterIndex);
                     selected = Selection(pop, out int curNums);
-                    histories.Add(selected.First());
+                    if (recordprevious)
+                    {
+                        histories.Add(selected.First());
+                    }
                     if (maxNums == curNums)
                     {
                         maxCount++;
@@ -424,6 +428,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information("进行选择");
 
             inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
 
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;

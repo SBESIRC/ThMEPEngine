@@ -7,8 +7,8 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLightConnect.Service;
-using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
 using ThMEPLighting.EmgLight.Common;
 

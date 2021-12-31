@@ -5,36 +5,62 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.GridOperation.Model;
 
 namespace ThMEPEngineCore.GridOperation.Utils
 {
     public static class GridLineExtendService
     {
-        public static Dictionary<Vector3d, List<Line>> ExtendGrid(Dictionary<Vector3d, List<Line>> lineGroup)
+        /// <summary>
+        /// 延申轴网
+        /// </summary>
+        /// <param name="lineGroup"></param>
+        /// <returns></returns>
+        public static List<LineGridModel> ExtendGrid(List<LineGridModel> lineGroup)
         {
-            var resGroup = new Dictionary<Vector3d, List<Line>>();
+            var resGroup = new List<LineGridModel>();
             foreach (var group in lineGroup)
             {
-                var extendLine = ExtendGroup(group, lineGroup);
-                resGroup.Add(extendLine.Key, extendLine.Value);
+                var extendLine = ExtendGroup(group);
+                resGroup.Add(extendLine);
             }
             return resGroup;
         }
 
-        private static KeyValuePair<Vector3d, List<Line>> ExtendGroup(KeyValuePair<Vector3d, List<Line>> group, Dictionary<Vector3d, List<Line>> lineGroup)
+        /// <summary>
+        /// 组内延伸线
+        /// </summary>
+        /// <param name="group"></param>
+        /// <returns></returns>
+        private static LineGridModel ExtendGroup(LineGridModel group)
         {
-            var otherGroups = lineGroup.Where(x => x.Key != group.Key).ToDictionary(x => x.Key, y => y.Value);
-            var resDics = new KeyValuePair<Vector3d, List<Line>>(group.Key , new List<Line>());
-            foreach (var line in group.Value)
+            var resDics = new LineGridModel()
             {
-                var extendLine = ExtendLine(line, otherGroups);
-                resDics.Value.Add(extendLine);
+                vecter = group.vecter,
+                xLines = new List<Line>(),
+                yLines = new List<Line>(),
+            };
+            foreach (var line in group.xLines)
+            {
+                var extendLine = ExtendLine(line, group.yLines);
+                resDics.xLines.Add(extendLine);
+            }
+            foreach (var line in group.yLines)
+            {
+                var extendLine = ExtendLine(line, group.xLines);
+                resDics.yLines.Add(extendLine);
             }
 
             return resDics;
         }
 
-        private static Line ExtendLine(Line line, Dictionary<Vector3d, List<Line>> lineGroup) 
+        /// <summary>
+        /// 延申一根线搭到最近的线上
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="lineGroup"></param>
+        /// <returns></returns>
+        private static Line ExtendLine(Line line, List<Line> lineGroup) 
         {
             Ray sRay = new Ray();
             sRay.BasePoint = line.StartPoint;
@@ -56,32 +82,36 @@ namespace ThMEPEngineCore.GridOperation.Utils
             return new Line(sPt.Value, ePt.Value);
         }
 
-        private static Point3d? GetIntersectPts(Ray Ray, Dictionary<Vector3d, List<Line>> lineGroup)
+        /// <summary>
+        /// 获取相交点
+        /// </summary>
+        /// <param name="Ray"></param>
+        /// <param name="lineGroup"></param>
+        /// <returns></returns>
+        private static Point3d? GetIntersectPts(Ray Ray, List<Line> lineGroup)
         {
-            var resPt = new List<Point3d>();
-            foreach (var group in lineGroup)
+            var intersectPts = lineGroup.Select(x =>
             {
-                var intersectPt = group.Value.Select(x =>
+                Point3dCollection point3DCollection = new Point3dCollection();
+                x.IntersectWith(Ray, Intersect.OnBothOperands, point3DCollection, (IntPtr)0, (IntPtr)0);
+                if (point3DCollection.Count > 0)
                 {
-                    Point3dCollection point3DCollection = new Point3dCollection();
-                    x.IntersectWith(Ray, Intersect.ExtendArgument, point3DCollection, (IntPtr)0, (IntPtr)0);
-                    if (point3DCollection.Count > 0)
-                    {
-                        return point3DCollection[0] as Point3d?;
-                    }
-                    return null;
-                })
-                    .Where(x => x != null)
-                    .Select(x => x.Value)
-                    .OrderBy(x => x.DistanceTo(Ray.BasePoint))
-                    .FirstOrDefault();
-                if (intersectPt != null)
-                {
-                    resPt.Add(intersectPt);
+                    return point3DCollection[0] as Point3d?;
                 }
+                return null;
+            })
+            .Where(x => x != null)
+            .ToList();
+            if (intersectPts.Count <= 0)
+            {
+                return null;
             }
 
-            return resPt.OrderByDescending(x => x.DistanceTo(Ray.BasePoint)).FirstOrDefault();
+            var intersectPt = intersectPts.Select(x => x.Value)
+            .OrderBy(x => x.DistanceTo(Ray.BasePoint))
+            .FirstOrDefault();
+
+            return intersectPt;
         }
     }
 }

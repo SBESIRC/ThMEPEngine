@@ -1,16 +1,12 @@
-﻿using AcHelper.Commands;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using ThMEPEngineCore.Command;
 using TianHua.Hvac.UI.UI.FanConnect;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 
 namespace TianHua.Hvac.UI.Command
 {
-    public class ThHvacSpmCmd : IAcadCommand, IDisposable
+    public class ThHvacSpmCmd : ThMEPBaseCommand, IDisposable
     {
         private static uiWaterPipeConnectWidget Widget;
         public static uiWaterPipeConnectWidget GetWidgetInstance()
@@ -21,10 +17,17 @@ namespace TianHua.Hvac.UI.Command
             }
             return Widget;
         }
+        public ThHvacSpmCmd()
+        {
+            ActionName = "水平面";
+            CommandName = "THSPM";
+        }
+
         public void Dispose()
         {
+            //
         }
-        public void Execute()
+        public override void SubExecute()
         {
             AcadApp.ShowModelessWindow(GetWidgetInstance());
         }

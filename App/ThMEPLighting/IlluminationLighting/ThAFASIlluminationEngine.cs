@@ -17,9 +17,9 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Model;
-using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.FireAlarmArea.Data;
 using ThMEPElectrical.FireAlarmArea.Service;
 using ThMEPLighting.IlluminationLighting.Model;

@@ -167,10 +167,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     var transformer = new ThMEPOriginTransformer(centerPt);
                     transformer.Transform(objs);
                     transformer.Transform(nFrame);
-
-                    var curves = ThLaneLineSimplifier.Simplify(objs, 1500);
-                    objs = ThCADCoreNTSGeometryClipper.Clip(nFrame, curves.ToCollection());
-                    transformer.Reset(objs);
+                    transformer.Reset(Clip(nFrame, objs));
 
                     //处理车道线
                     resLines = ThMEPLineExtension.TransCurveToLine(objs, 500);
@@ -190,6 +187,13 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                 geos.Add(geometry);
             });
             return geos;
+        }
+
+        private DBObjectCollection Clip(Polyline frame, DBObjectCollection objs)
+        {
+            var curves = ThLaneLineSimplifier.Simplify(objs, 1500);
+            var results = ThCADCoreNTSGeometryClipper.Clip(frame, curves.ToCollection());
+            return results.OfType<Curve>().ToCollection();
         }
     }
 }

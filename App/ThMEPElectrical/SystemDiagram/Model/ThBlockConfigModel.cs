@@ -448,7 +448,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockName = "E-BFAS520",
                 BlockNameRemark = "弱电间弱电系统消防联动",
                 HasAlias = true,
-                AliasList = new List<string>() { "E-BACS01", "E-BACS41" },
+                AliasList = new List<string>() { "E-BACS01", "E-BACS41" , "E-BACS110", "E-BACS111" },
                 Index = 12,
                 Position = new Point3d(1500, 1500, 0),
                 ShowQuantity = true,

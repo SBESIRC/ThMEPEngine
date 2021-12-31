@@ -11,9 +11,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Connect a random order line list to ordered: connect this line tail and another line start
         /// </summary>
-        /// <param name="tuples">lines</param>
         public static List<Tuple<Point3d, Point3d>> OrderTuples(List<Tuple<Point3d, Point3d>> tuples, double tolerance = 1.0)
         {
+            if(tuples.Count == 0)
+            {
+                return new List<Tuple<Point3d, Point3d>>();
+            }
             List<Tuple<Point3d, Point3d>> ansTuples = new List<Tuple<Point3d, Point3d>>();
             var tmpPt = tuples[0].Item1;
             for (int i = 0; i < tuples.Count; ++i)
@@ -34,8 +37,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Convert style: polyline -> tuple list
         /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
         public static List<Tuple<Point3d, Point3d>> Polyline2Tuples(Polyline polyline, double tolerance = 1.0)
         {
             List<Tuple<Point3d, Point3d>> tuples = new List<Tuple<Point3d, Point3d>>();
@@ -61,8 +62,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Convert style: tuple list -> polyline
         /// </summary>
-        /// <param name="tuples"></param>
-        /// <returns></returns>
         public static Polyline Tuples2Polyline(List<Tuple<Point3d, Point3d>> tuples, double tolerance = 1.0)
         {
             Polyline polyline = new Polyline();
@@ -107,7 +106,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="bSt">line B start</param>
         /// <param name="bEd">line B end</param>
         /// <returns></returns>
-        public static bool IsIntersect(Point3d aSt, Point3d aEd, Point3d bSt, Point3d bEd) // copy
+        public static bool IsIntersect(Point3d aSt, Point3d aEd, Point3d bSt, Point3d bEd)
         {
             double EPS3 = 1.0e-3f;
             var dir = bEd - bSt;
@@ -124,8 +123,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Delete lines who connect with eachother with same class in a line set
         /// </summary>
-        /// <param name="points">same class points</param>
-        /// <param name="tuples"></param>
         public static void DeleteSameClassLine(HashSet<Point3d> points, HashSet<Tuple<Point3d, Point3d>> tuples, double deviation = 0.001)
         {
             List<Tuple<Point3d, Point3d>> tmpTuples = tuples.ToList();
@@ -150,7 +147,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
-        public static void DeleteSameClassLine(HashSet<Point3d> points, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 1)
+        public static void DeleteSameClassLine(HashSet<Point3d> points, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 1)
         {
             HashSet<Point3d> pts = new HashSet<Point3d>();
             HashSet<Point3d> classPts = new HashSet<Point3d>();
@@ -200,11 +197,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    if (dicTuples[tuple.Item1].Count == 0)
-                    {
-                        dicTuples.Remove(tuple.Item1);
-                    }
+                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
         }
@@ -213,11 +206,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// Delete lines who connect with eachother with different classes in a line set
         /// (based by tuples)
         /// </summary>
-        /// <param name="ptClassA">points with class A</param>
-        /// <param name="ptClassB">points with class B</param>
-        /// <param name="dicTuples"></param>
-        /// <param name="deviation"></param>
-        public static void DeleteDiffClassLine(HashSet<Point3d> ptClassA, Point3dCollection ptClassB, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
+        public static void DeleteDiffClassLine(HashSet<Point3d> ptClassA, Point3dCollection ptClassB, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
         {
             List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
             foreach (var dic in dicTuples)
@@ -248,11 +237,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    if (dicTuples[tuple.Item1].Count == 0)
-                    {
-                        dicTuples.Remove(tuple.Item1);
-                    }
+                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
             //delete line from B to A
@@ -273,17 +258,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         ++cnt;
                     }
                 }
-                if (cnt >= 2 && dicTuples.ContainsKey(tuple.Item1) && dicTuples[tuple.Item1].Contains(tuple.Item2))
+                if (cnt >= 2)
                 {
-                    dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    if (dicTuples[tuple.Item1].Count == 0)
-                    {
-                        dicTuples.Remove(tuple.Item1);
-                    }
+                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
         }
-        public static void DeleteDiffClassLine(HashSet<Point3d> ptClassA, HashSet<Point3d> ptClassB, Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
+        public static void DeleteDiffClassLine(HashSet<Point3d> ptClassA, HashSet<Point3d> ptClassB, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, double deviation = 0.001)
         {
             List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
             foreach (var dic in dicTuples)
@@ -314,11 +295,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    if (dicTuples[tuple.Item1].Count == 0)
-                    {
-                        dicTuples.Remove(tuple.Item1);
-                    }
+                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
             //delete line from B to A
@@ -341,18 +318,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    if (!dicTuples.ContainsKey(tuple.Item1))
-                    {
-                        continue;
-                    }
-                    if (dicTuples[tuple.Item1].Contains(tuple.Item2))
-                    {
-                        dicTuples[tuple.Item1].Remove(tuple.Item2);
-                    }
-                    if (dicTuples[tuple.Item1].Count == 0)
-                    {
-                        dicTuples.Remove(tuple.Item1);
-                    }
+                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
         }
@@ -360,9 +326,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Merge very close points to one whithout change structure
         /// </summary>
-        /// <param name="outline2BorderNearPts"></param>
-        /// <param name="outPts">constrains & assists</param>
-        public static void SimplifyLineConnect(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, List<Point3d> outPts)
+        public static void SimplifyLineConnect(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, List<Point3d> outPts, double tolerance = 600)
         {
             List<Point3d> borderPts = new List<Point3d>();
             foreach (var dic in outline2BorderNearPts.Values)
@@ -386,14 +350,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             {
                                 stayPt = borderPtA;
                                 deletePt = borderPtB;
-                                minDis = curDis < 600 ? curDis : 600; //changable parameter
+                                minDis = curDis < tolerance ? curDis : tolerance; //changable parameter
                             }
                             curDis = borderPtB.DistanceTo(outPt);
                             if (curDis < minDis)
                             {
                                 stayPt = borderPtB;
                                 deletePt = borderPtA;
-                                minDis = curDis < 600 ? curDis : 600; //changable parameter
+                                minDis = curDis < tolerance ? curDis : tolerance; //changable parameter
                             }
                         }
                         foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
@@ -415,16 +379,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Add lines to a line set who does not have them brfore
         /// </summary>
-        /// <param name="outline2BorderNearPts">from</param>
-        /// <param name="tuples">to</param>
-        public static void AddSpecialLine(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, HashSet<Tuple<Point3d, Point3d>> tuples)
+        public static void AddSpecialLine(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref HashSet<Tuple<Point3d, Point3d>> tuples)
         {
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt2NearPt in borderPt2NearPts)
                 {
                     var borderPt = borderPt2NearPt.Key;
-                    foreach (var nearPt in borderPt2NearPt.Value) //loops no more than three times
+                    foreach (var nearPt in borderPt2NearPt.Value)
                     {
                         tuples.Add(new Tuple<Point3d, Point3d>(borderPt, nearPt));
                         tuples.Add(new Tuple<Point3d, Point3d>(nearPt, borderPt));
@@ -432,34 +394,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
         }
-        public static void AddSpecialLine(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> dicTuples)
+        public static void AddSpecialLine(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
-            List<Tuple<Point3d, Point3d>> tmpTuples = new List<Tuple<Point3d, Point3d>>();
-            foreach (var dic in dicTuples)
-            {
-                foreach (Point3d pt in dic.Value)
-                {
-                    tmpTuples.Add(new Tuple<Point3d, Point3d>(dic.Key, pt));
-                }
-            }
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
                 foreach (var borderPt2NearPt in borderPt2NearPts)
                 {
                     var borderPt = borderPt2NearPt.Key;
-                    foreach (var nearPt in borderPt2NearPt.Value) //loops no more than three times
+                    foreach (var nearPt in borderPt2NearPt.Value)
                     {
-                        if (!dicTuples.ContainsKey(borderPt))
-                        {
-                            dicTuples.Add(borderPt, new HashSet<Point3d>());
-                        }
-                        dicTuples[borderPt].Add(nearPt);
-
-                        if (!dicTuples.ContainsKey(nearPt))
-                        {
-                            dicTuples.Add(nearPt, new HashSet<Point3d>());
-                        }
-                        dicTuples[nearPt].Add(borderPt);
+                        StructureDealer.AddLineTodicTuples(borderPt, nearPt, ref dicTuples);
                     }
                 }
             }
@@ -471,7 +415,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="firstEntity"></param>
         /// <param name="secondEntity"></param>
         /// <returns></returns>
-        public static Point3dCollection IntersectWith(Entity firstEntity, Entity secondEntity) // copy
+        public static Point3dCollection IntersectWith(Entity firstEntity, Entity secondEntity)
         {
             Point3dCollection pts = new Point3dCollection();
             Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
@@ -503,7 +447,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         break;
                     }
                 }
-                if (flag == 0)//profs there is no nearest point
+                if (flag == 0)
                 {
                     tmpPtA = tuple.Item1;
                 }
@@ -522,19 +466,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         break;
                     }
                 }
-                //foreach(var ptinA in dicTuples[tmpPtA])
-                //{
-                //    if(ptinA.DistanceTo(tuple.Item2) < deviation)
-                //    {
-                //        flag = 3;
-                //        break;
-                //    }
-                //}
-                //if(flag == 3)
-                //{
-                //    continue;
-                //}
-                if (flag == 0)//no nearest point
+                if (flag == 0)
                 {
                     tmpPtB = tuple.Item2;
                 }
@@ -562,7 +494,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         break;
                     }
                 }
-                if (flag == 0)//profs there is no nearest point
+                if (flag == 0)
                 {
                     tmpPtA = tuple.Key;
                 }
@@ -581,7 +513,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         break;
                     }
                 }
-                if (flag == 0)//no nearest point
+                if (flag == 0)
                 {
                     tmpPtB = tuple.Value;
                 }
@@ -608,6 +540,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             {
                 newDicTuples.Add(dicTuple.Key, dicTuple.Value);
             }
+            dicTuples.Clear();
             foreach (var dicTuple in newDicTuples)
             {
                 var hashpts = dicTuple.Value.ToList();
@@ -623,7 +556,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             break;
                         }
                     }
-                    if (flag == 0)//profs there is no nearest point
+                    if (flag == 0)
                     {
                         tmpPtA = dicTuple.Key;
                     }
@@ -637,12 +570,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             break;
                         }
                     }
-                    if (flag == 0)//no nearest point
+                    if (flag == 0)
                     {
                         tmpPtB = edPt;
                     }
                     StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
-                    StructureDealer.AddLineTodicTuples(tmpPtB, tmpPtA, ref dicTuples);
                 }
             }
         }
@@ -655,6 +587,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             {
                 newDicTuples.Add(dicTuple.Key, dicTuple.Value);
             }
+            dicTuples.Clear();
             foreach (var dicTuple in newDicTuples)
             {
                 var hashpts = dicTuple.Value.ToList();
@@ -689,7 +622,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         tmpPtB = edPt;
                     }
                     StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
-                    StructureDealer.AddLineTodicTuples(tmpPtB, tmpPtA, ref dicTuples);
                 }
             }
         }
@@ -697,9 +629,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <summary>
         /// Get AngleCount which is bigger than 180
         /// </summary>
-        /// <param name="tuples"></param>
-        /// <param name="tolerance"></param>
-        /// <returns></returns>
         public static int ObtuseAngleCount(List<Tuple<Point3d, Point3d>> tuples, double tolerance = Math.PI / 18 * 19)
         {
             int cnt = 0;
@@ -737,5 +666,16 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return tuples;
         }
+
+        public static Tuple<Point3d, Point3d> ReduceTuple(Tuple<Point3d, Point3d> tuple, double length)
+        {
+            var direction = (tuple.Item2 - tuple.Item1).GetNormal();
+            return new Tuple<Point3d, Point3d>(tuple.Item1 + direction * length, tuple.Item2 - direction * length);
+        }
+        //public static Dictionary<Point3d, Point3d> TuplesListToDic(List<Tuple<Point3d, Point3d>> closebdLines)
+        //{
+        //    Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
+        //    foreach(var )
+        //}
     }
 }

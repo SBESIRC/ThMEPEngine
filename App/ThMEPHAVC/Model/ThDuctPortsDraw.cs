@@ -61,10 +61,12 @@ namespace ThMEPHVAC.Model
             service.DrawDuct(anayRes.breakedDucts, orgDisMat);
             service.DrawReducing(anayRes.reducings, orgDisMat);
             service.DrawSideDuctText(anayRes.textAlignment, portParam.srtPoint, portParam.param);
-            if (portParam.genStyle == GenerationStyle.Auto)
+            if (portParam.genStyle != GenerationStyle.GenerationWithPortVolume)
+            {
                 DrawPort(anayRes.endLinesInfos);
-            // 画Dimension需要插入风口，所以必须先画风口再画Dimension
-            service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
+                // 画Dimension需要插入风口，所以必须先画风口再画Dimension
+                service.dimService.DrawDimension(anayRes.endLinesInfos, portParam.srtPoint);
+            }
         }
 
         private void DrawPort(List<EndlineInfo> endLinesInfos)
@@ -93,8 +95,8 @@ namespace ThMEPHVAC.Model
                 }
             }
             var markP = p + new Vector3d(1500, 2000, 0) + orgDisVec;
-            ThDuctPortsDrawPortMark.InsertMark(portParam.param, portWidth, portHeight, service.portMarkName, service.portMarkLayer, markP);
-            ThDuctPortsDrawPortMark.InsertLeader(p + orgDisVec, markP, service.portMarkLayer);
+            service.markService.InsertMark(portParam.param, portWidth, portHeight, markP);
+            service.markService.InsertLeader(p + orgDisVec, markP);
         }
         private void DrawMainlines(Dictionary<int, SegInfo> mainLinesInfos)
         {

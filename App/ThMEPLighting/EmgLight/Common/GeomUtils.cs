@@ -3,8 +3,8 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Colors;
 using System.Collections.Generic;
+using ThMEPEngineCore.Diagnostics;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting.EmgLight.Common
 {

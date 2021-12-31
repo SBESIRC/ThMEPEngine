@@ -8,22 +8,29 @@ using ThMEPHVAC.Model;
 using ThMEPHVAC.Algorithm;
 using TianHua.FanSelection.Function;
 using TianHua.Hvac.UI.Command;
+using NFox.Cad;
+using ThCADCore.NTS;
 
 namespace TianHua.Hvac.UI
 {
     public partial class fmFpm : Form
     {
         public bool isSelectFan;// 选择风机还是选择起点
+        public bool isSelectAllFans = false;
         public PortParam portParam;
         public Point3d RoomStartPoint;
         public Point3d notRoomStartPoint;
         public Dictionary<string, FanParam> fans;
-        public Dictionary<string, ThDbModelFan> fansDic;
-        public DBObjectCollection centerlines;// 已经转到原点附近
-        public DBObjectCollection connNotRoomLines;// 已经转到原点附近
+        public Dictionary<string, ThDbModelFan> selectFansDic;
+        public DBObjectCollection centerlines;                 // 已经转到原点附近
+        public DBObjectCollection connNotRoomLines;            // 已经转到原点附近
+        // 风机外包框到文字参数的映射( 选择起点时填充此参数)
+        public Dictionary<Polyline, ObjectId> allFansDic;      // 外包框移动到原点附近
+        private Dictionary<Polyline, ObjectId> shadowFansDic;  // 用于用户反复选取起始点
         private bool initFlag;
         private bool isExhaust;
         private Point3d srtPoint;
+        private Matrix3d ucsMat;
         private ThHvacCmdService cmdService;
         private string preKey;//fan的listBox选项更新时需要延迟一下选择
         
@@ -35,10 +42,12 @@ namespace TianHua.Hvac.UI
             isExhaust = true;
             cmdService = new ThHvacCmdService();
             fans = new Dictionary<string, FanParam>();
-            fansDic = new Dictionary<string, ThDbModelFan>();
+            selectFansDic = new Dictionary<string, ThDbModelFan>();
             bypassEnable();
             scenarioCombox.SelectedItem = "平时排风";
             comboScale.SelectedItem = "1:100";
+            ThDuctPortsInterpreter.GetFanDic(out shadowFansDic);
+            allFansDic = new Dictionary<Polyline, ObjectId>();
         }
 
         private void btnSelectFan_Click(object sender, EventArgs e)
@@ -56,11 +65,11 @@ namespace TianHua.Hvac.UI
                     continue;
                 var item = fan.Data.Attributes["设备符号"] + "-" + fan.Data.Attributes["楼层-编号"];
                 listBox1.Items.Add(item);
-                if (!fansDic.ContainsKey(item))
+                if (!selectFansDic.ContainsKey(item))
                 {
-                    fansDic.Add(item, fan);
-                    textAirVolume.Text = fansDic[item].airVolume.ToString();
-                    scenarioCombox.Text = fansDic[item].scenario;
+                    selectFansDic.Add(item, fan);
+                    textAirVolume.Text = selectFansDic[item].airVolume.ToString();
+                    scenarioCombox.Text = selectFansDic[item].scenario;
                 }
                 var param = RecordFanParam(item);
                 if (!fans.ContainsKey(item))
@@ -117,7 +126,7 @@ namespace TianHua.Hvac.UI
             {
                 var fanParam = fans[key];
                 scenarioCombox.Text = fanParam.scenario;
-                fanParam.airVolume = fansDic[key].airVolume;
+                fanParam.airVolume = selectFansDic[key].airVolume;
                 textAirVolume.Text = fanParam.airVolume.ToString();
                 var speed = ThFanSelectionUtils.GetDefaultAirSpeed(fanParam.scenario);
                 textAirSpeed.Text = speed.ToString();
@@ -523,12 +532,12 @@ namespace TianHua.Hvac.UI
             if (listBox1.Items.Count > 0)
             {
                 var key = listBox1.SelectedItem.ToString();
-                var fanModel = fansDic[key];
+                var fanModel = selectFansDic[key];
                 notRoomStartPoint = fanModel.isExhaust ? fanModel.FanOutletBasePoint : fanModel.FanInletBasePoint;
                 notRoomStartPoint = notRoomStartPoint.TransformBy(mat);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索全部的线
-                notRoomDetector.searchCenterLine(centerlines, notRoomStartPoint, SearchBreakType.breakWithEndline);
+                notRoomDetector.SearchCenterLine(centerlines, notRoomStartPoint, SearchBreakType.breakWithEndline);
                 connNotRoomLines = notRoomDetector.connectLines;
             }
         }
@@ -536,10 +545,43 @@ namespace TianHua.Hvac.UI
         {
             centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer("AI-风管路由");
             ExcludeBypass(ref centerlines);
-            centerlines = ThMEPHVACLineProc.PreProc(centerlines);
+            var linesDic = SepLineByColor();
+            var procLines = new List<DBObjectCollection>();
             var mat = Matrix3d.Displacement(-p.GetAsVector());
-            foreach (Line l in centerlines)
-                l.TransformBy(mat);
+            foreach (var pair in linesDic)
+            {
+                foreach (Curve l in pair.Value)
+                    l.TransformBy(mat);
+                var lines = ThMEPHVACLineProc.PreProc(pair.Value);
+                procLines.Add(lines);
+            }
+            linesDic.Clear();
+            centerlines.Clear();
+            var tor = new Tolerance(1.5, 1.5);
+            foreach (var lines in procLines)
+            {
+                foreach (Line l in lines)
+                {
+                    // 此处一定有包含原点的线，所以就不做容差
+                    if (Point3d.Origin.IsEqualTo(l.StartPoint, tor) || Point3d.Origin.IsEqualTo(l.EndPoint, tor))
+                    {
+                        centerlines = lines;
+                        return;
+                    }
+                }
+            }
+        }
+        private Dictionary<int, DBObjectCollection> SepLineByColor()
+        {
+            var dic = new Dictionary<int, DBObjectCollection>();
+            foreach (Curve l in centerlines)
+            {
+                if (dic.ContainsKey(l.ColorIndex))
+                    dic[l.ColorIndex].Add(l);
+                else
+                    dic.Add(l.ColorIndex, new DBObjectCollection() { l });
+            }
+            return dic;
         }
         private void GetFanConnectLine()
         {
@@ -550,17 +592,17 @@ namespace TianHua.Hvac.UI
             foreach (string key in listBox1.Items)
             {
                 var fan = fans[key];
-                var fanModel = fansDic[key];
+                var fanModel = selectFansDic[key];
                 var roomPoint = fanModel.isExhaust ? fanModel.FanInletBasePoint : fanModel.FanOutletBasePoint;
                 var roomNotPoint = fanModel.isExhaust ? fanModel.FanOutletBasePoint : fanModel.FanInletBasePoint;
                 roomPoint = roomPoint.TransformBy(mat);
                 roomNotPoint = roomNotPoint.TransformBy(mat);
                 var roomDetector = new ThFanCenterLineDetector(false);
                 // 服务侧搜索全部的线
-                roomDetector.searchCenterLine(centerlines, roomPoint, SearchBreakType.breakWithEndline);
+                roomDetector.SearchCenterLine(centerlines, roomPoint, SearchBreakType.breakWithEndline);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索截至到三通和四通的线
-                notRoomDetector.searchCenterLine(centerlines, roomNotPoint, SearchBreakType.breakWithTeeAndCross);
+                notRoomDetector.SearchCenterLine(centerlines, roomNotPoint, SearchBreakType.breakWithTeeAndCross);
                 if (fan.scenario == "消防加压送风")
                 {
                     foreach (Line l in fan.bypassLines)
@@ -623,7 +665,7 @@ namespace TianHua.Hvac.UI
         {
             foreach (string key in listBox1.Items)
             {
-                var fanModel = fansDic[key];
+                var fanModel = selectFansDic[key];
                 return fanModel.isExhaust ? fanModel.FanInletBasePoint : fanModel.FanOutletBasePoint;
             }
             throw new NotImplementedException("No fan was selected!");
@@ -749,15 +791,40 @@ namespace TianHua.Hvac.UI
         private void btnSelectSrtPoint_Click(object sender, EventArgs e)
         {
             Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
-            srtPoint = ThHvacCmdService.GetPointFromPrompt("选择起点");
-            isSelectFan = false;
-            checkBoxRoom.Checked = true;
-            checkBoxNotRoom.Checked = false;
-            splitContainer6.Panel1.Enabled = false;
-            splitContainer5.Panel1.Enabled = true;
-            textAirVolume.Enabled = true;
-            GetAirVolume(out double airVolume, out _);
-            FillDuctSize(airVolume);
+            var ptRes = ThHvacCmdService.GetPointFromPrompt("选择起点", out Matrix3d ucsMat);
+            this.ucsMat = ucsMat;
+            if (ptRes.HasValue)
+            {
+                srtPoint = ptRes.Value;
+                isSelectFan = false;
+                checkBoxRoom.Checked = true;
+                checkBoxNotRoom.Checked = false;
+                splitContainer6.Panel1.Enabled = false;
+                splitContainer5.Panel1.Enabled = true;
+                textAirVolume.Enabled = true;
+                DetectCrossFan();
+                GetAirVolume(out double airVolume, out _);
+                FillDuctSize(airVolume);
+            }
+        }
+        private void DetectCrossFan()
+        {
+            var toZeroMat = Matrix3d.Displacement(-srtPoint.GetAsVector());
+            allFansDic.Clear();
+            foreach (var fan in shadowFansDic)
+                allFansDic.Add(fan.Key, fan.Value);
+            foreach (Polyline b in allFansDic.Keys.ToCollection())
+                b.TransformBy(toZeroMat);
+            var fanIndex = new ThCADCoreNTSSpatialIndex(allFansDic.Keys.ToCollection());
+            var pl = ThMEPHVACService.CreateDetector(Point3d.Origin);
+            var res = fanIndex.SelectCrossingPolygon(pl);
+            if (res.Count == 1)
+            {
+                var id = allFansDic[res[0] as Polyline];
+                var fan = new ThDbModelFan(id);
+                textAirVolume.Text = fan.airVolume.ToString();
+                scenarioCombox.Text = fan.scenario;
+            }
         }
         private void btnOK_Click(object sender, EventArgs e)
         {
@@ -789,7 +856,7 @@ namespace TianHua.Hvac.UI
             var mat = Matrix3d.Displacement(-p.GetAsVector());
             var searchP = p.TransformBy(mat);
             var detector = new ThFanCenterLineDetector(false);
-            detector.searchCenterLine(centerlines, searchP, SearchBreakType.breakWithEndline);
+            detector.SearchCenterLine(centerlines, searchP, SearchBreakType.breakWithEndline);
             portParam.centerLines = detector.connectLines;
         }
         private void RecordPortParam()
@@ -898,7 +965,6 @@ namespace TianHua.Hvac.UI
         }
         private void UpdateUIPortInfo(bool status)
         {
-            comboPortRange.Enabled = status;
             textPortNum.Enabled = status;
             textPortWidth.Enabled = status;
             textPortHeight.Enabled = status;
@@ -919,8 +985,10 @@ namespace TianHua.Hvac.UI
             {
                 RecordPortParam();
                 GetCenterlinesAndTrans(srtPoint);
+                if (centerlines.Count == 0)
+                    return;
                 var detector = new ThFanCenterLineDetector(false);
-                detector.searchCenterLine(centerlines, Point3d.Origin, SearchBreakType.breakWithEndline);
+                detector.SearchCenterLine(centerlines, Point3d.Origin, SearchBreakType.breakWithEndline);
                 portParam.centerLines = detector.connectLines;
                 var anay = new ThDuctPortsAnalysis();
                 var airVolume = anay.CalcAirVolume(portParam);

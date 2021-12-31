@@ -5,11 +5,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Algorithm;
-using Linq2Acad;
 using NFox.Cad;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -31,12 +30,13 @@ namespace ThMEPHVAC.Model
         // 存放每一条endline，Collection的第一条线是最末端线，最后一条是最靠近主路的线
         private List<DBObjectCollection> endLines;
         private DBObjectCollection excludeLines;
+        private Dictionary<Polyline, ObjectId> allFansDic;
         // start_point_ == (0,0,0) -> center_lines_ is near (0,0,0)
         // start_point_ != (0,0,0) -> center_lines_ need to move
         public ThDuctPortsAnalysis() { }
-        public ThDuctPortsAnalysis(PortParam portParam, DBObjectCollection excludeLines)
+        public ThDuctPortsAnalysis(PortParam portParam, DBObjectCollection excludeLines, Dictionary<Polyline, ObjectId> allFansDic)
         {
-            Init(portParam, excludeLines);
+            Init(portParam, excludeLines, allFansDic);
             GetMainLineAndEndLine();
             if (portParam.genStyle == GenerationStyle.Auto)
                 AutoDistributePort();
@@ -52,12 +52,13 @@ namespace ThMEPHVAC.Model
             else if (portParam.genStyle == GenerationStyle.GenerationByPort)
             {
                 // 2.风口上是平均风量
-                DeleteOrgGraph();
-                CountWithAveragePortAirVolume();
+                var conns = DeleteOrgGraph();
+                CountWithAveragePortAirVolume(conns);
                 AccumMainDuctAirVolume();
                 SetFirstDuctSize();
                 SetMainDuctSize();
                 SetEndlinePortDuctSize();
+                ThDuctPortsDrawService.ClearGraphs(conns);
             }
             SetLinesShrink();
             SetNoPortDuctInfo();
@@ -69,7 +70,7 @@ namespace ThMEPHVAC.Model
         public double CalcAirVolume(PortParam portParam)
         {
             // 用于UI上读带风量的风口
-            Init(portParam, new DBObjectCollection());
+            Init(portParam, new DBObjectCollection(), new Dictionary<Polyline, ObjectId>());
             GetMainLineAndEndLine();
             CountWithPortAirVolume();
             AccumMainDuctAirVolume();
@@ -84,13 +85,10 @@ namespace ThMEPHVAC.Model
                 return firstDuct.totalAirVolume;
             }
         }
-        private void DeleteOrgGraph()
+        private List<Handle> DeleteOrgGraph()
         {
-            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllComponent();
+            var bounds2IdDic = ThDuctPortsReadComponent.ReadAllComponent(portParam.srtPoint);
             var groupBounds = bounds2IdDic.Keys.ToCollection();
-            var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
-            foreach (Polyline pl in groupBounds)
-                pl.TransformBy(mat);
             var index = new ThCADCoreNTSSpatialIndex(groupBounds);
             var conns = new List<Handle>();
             var centerLines = new DBObjectCollection();
@@ -104,10 +102,14 @@ namespace ThMEPHVAC.Model
                 var pl = CreateLineBound(l);
                 var res = index.SelectCrossingPolygon(pl);
                 foreach (Polyline p in res)
-                    conns.Add(bounds2IdDic[p].Handle);
+                    conns.Add(bounds2IdDic[p]);
             }
-            ThDuctPortsDrawService.ClearGraphs(conns);
-            ThDuctPortsModifyPort.DeleteTextDimValve(portParam.srtPoint, centerLines);
+            var detector = ThMEPHVACService.CreateDetector(Point3d.Origin);
+            var detectorRes = index.SelectCrossingPolygon(detector);
+            if (detectorRes.Count > 0)
+                conns.Add(bounds2IdDic[detectorRes[0] as Polyline]);
+            ThModifyPortClear.DeleteTextDimValve(portParam.srtPoint, centerLines);
+            return conns;
         }
         public void AutoDistributePort()
         {
@@ -139,15 +141,6 @@ namespace ThMEPHVAC.Model
 
         public void CreatePortDuctGeo()
         {
-            if (endLinesInfos.Count == 1 && endLinesInfos.FirstOrDefault().endlines.Count == 1)
-            {
-                // 只有一段时不变径
-                var seg = endLinesInfos.FirstOrDefault().endlines.FirstOrDefault().Value;
-                var shrinkedLine = seg.seg.GetShrinkedLine();
-                var newSeg = new SegInfo() { l = shrinkedLine, ductSize = seg.seg.ductSize, airVolume = seg.seg.airVolume, elevation = seg.seg.elevation };
-                breakedDucts.Add(newSeg);
-                return;
-            }
             foreach (var info in endLinesInfos)
             {
                 foreach (var seg in info.endlines.Values)
@@ -172,6 +165,7 @@ namespace ThMEPHVAC.Model
             var nextEndP = shrinkedLine.EndPoint;
             var ductSize = seg.portsInfo[0].ductSize;
             var lastIdx = seg.portNum - 1;
+            var mainHeight = ThMEPHVACService.GetHeight(portParam.param.inDuctSize);
             for (int i = 1; i < seg.portNum; ++i)
             {
                 if (ductSize != seg.portsInfo[i].ductSize)
@@ -185,8 +179,9 @@ namespace ThMEPHVAC.Model
                         var midP = ThMEPHVACService.GetMidPoint(curInfo.position, preInfo.position);
                         var curSrtP = midP + dirVec * 500;//缩一半
                         var l = new Line(curSrtP, nextEndP);
-                        var elevation = seg.seg.elevation;
-                        var info = new SegInfo() { l = l, ductSize = preInfo.ductSize, airVolume = preInfo.portAirVolume, elevation = elevation };
+                        double ductHeight = ThMEPHVACService.GetHeight(preInfo.ductSize);
+                        double num = (portParam.param.elevation * 1000 + mainHeight - ductHeight) / 1000;
+                        var info = new SegInfo() { l = l, ductSize = preInfo.ductSize, airVolume = preInfo.portAirVolume, elevation = num.ToString() };
                         textAlignment.Add(new TextAlignLine() { l =  l, ductSize = ductSize, isRoom = true });
                         breakedDucts.Add(info);
                         nextEndP = midP - dirVec * 500;
@@ -233,8 +228,68 @@ namespace ThMEPHVAC.Model
             // shrinkService必须到此处再初始化
             shrinkService = new ThShrinkDuct(endLinesInfos, reducingInfos, mainLinesInfos);
             shrinkService.SetLinesShrink(centerlines, dic);
+            ShrinkLineWithFan(centerlines);
         }
 
+        private void ShrinkLineWithFan(DBObjectCollection centerlines)
+        {
+            if (portParam.genStyle == GenerationStyle.GenerationByPort)
+            {
+                var pl = ThMEPHVACService.CreateDetector(Point3d.Origin);
+                var fanIndex = new ThCADCoreNTSSpatialIndex(allFansDic.Keys.ToCollection());
+                var res = fanIndex.SelectCrossingPolygon(pl);
+                if (res.Count == 1)
+                {
+                    // 起点与风机相交
+                    var centerLineIndex = new ThCADCoreNTSSpatialIndex(centerlines);
+                    var crossLines = centerLineIndex.SelectCrossingPolygon(pl);
+                    if (crossLines.Count == 1)
+                    {
+                        var fan = new ThDbModelFan(allFansDic[res[0] as Polyline]);
+                        var hoseLen = (fan.scenario == "消防补风" || fan.scenario == "消防排烟" || fan.scenario == "消防加压送风") ? 0 : 200;
+                        var l = crossLines[0] as Line;
+                        var fanWidth = GetFanConnWidth(fan);
+                        var ductWidth = ThMEPHVACService.GetWidth(portParam.param.inDuctSize);
+                        var reducingLen = ThDuctPortsShapeService.GetReducingLen(ductWidth, fanWidth);
+                        var shrinkLen = reducingLen;// ThFanAnalysis.cs Line: 704(要改一起改)
+                        var isAxis = (fan.Name.Contains("轴流风机"));
+                        if (mainLinesInfos.ContainsKey(l.GetHashCode()))
+                        {
+                            mainLinesInfos[l.GetHashCode()].srcShrink = shrinkLen;
+                            AddFanReducing(mainLinesInfos[l.GetHashCode()], hoseLen, reducingLen, ductWidth, fanWidth, isAxis);
+                        }
+                        else
+                        {
+                            foreach (var endlines in endLinesInfos)
+                                if (endlines.endlines.ContainsKey(l.GetHashCode()))
+                                {
+                                    endlines.endlines[l.GetHashCode()].seg.srcShrink = shrinkLen;
+                                    AddFanReducing(endlines.endlines[l.GetHashCode()].seg, hoseLen, reducingLen, ductWidth, fanWidth, isAxis);
+                                }
+                        }
+                    }
+                    else
+                        throw new NotImplementedException("[CheckError]: centerline doesn't contain Point3d.Origin!");
+                }
+            }
+        }
+        private void AddFanReducing(SegInfo firstSeg, double hoseLen, double reducingLen, double ductWidth, double fanWidth, bool isAxis)
+        {
+            var dirVec = ThMEPHVACService.GetEdgeDirection(firstSeg.l);
+            var srtP = firstSeg.l.StartPoint + dirVec * hoseLen;
+            var endP = firstSeg.l.StartPoint + dirVec * reducingLen;
+            var reducingLine = new Line(endP, srtP);
+            reducings.Add(ThDuctPortsFactory.CreateReducing(reducingLine, ductWidth, fanWidth, isAxis));
+        }
+        private double GetFanConnWidth(ThDbModelFan fan)
+        {
+            var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
+            var inP = fan.FanInletBasePoint.TransformBy(mat);
+            var outP = fan.FanOutletBasePoint.TransformBy(mat);
+            var inLen = inP.DistanceTo(Point3d.Origin);
+            var outLen = outP.DistanceTo(Point3d.Origin);
+            return (inLen < outLen) ? fan.fanInWidth : fan.fanOutWidth;
+        }
         private DBObjectCollection CreateMainEndlineIndex(out Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
             var lines = new DBObjectCollection();
@@ -275,15 +330,6 @@ namespace ThMEPHVAC.Model
                 firstSeg.seg.ductSize = portParam.param.inDuctSize;
                 if (firstSeg.portsInfo.Count > 0)
                     firstSeg.portsInfo[firstSeg.portNum - 1].ductSize = portParam.param.inDuctSize;
-            }
-            if (endLinesInfos.Count == 1 && endLinesInfos.FirstOrDefault().endlines.Count == 1)
-            {
-                // 只有一段时不变径
-                var seg = endLinesInfos.FirstOrDefault().endlines.FirstOrDefault().Value;
-                foreach (var port in seg.portsInfo)
-                    port.ductSize = seg.seg.ductSize;
-                textAlignment.Add(new TextAlignLine() { l = seg.seg.l, ductSize = seg.seg.ductSize, isRoom = true });
-                return;
             }
             foreach (var endlines in endLinesInfos)
             {
@@ -330,8 +376,8 @@ namespace ThMEPHVAC.Model
             }
             else
             {
-                var ductInfo = new ThDuctParameter(endlines.totalAirVolume, portParam.param.scenario);
-                return ductInfo.DuctSizeInfor.RecommendOuterDuctSize;
+                var rootSeg = endlines.endlines.Values.LastOrDefault();
+                return rootSeg.seg.ductSize;
             }
         }
         private string CalcElevation(string ductSize)
@@ -358,19 +404,59 @@ namespace ThMEPHVAC.Model
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
                 if (size == favorite)
                     return size;
-            foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
-            {
-                var w = ThMEPHVACService.GetWidth(size);
-                if (Math.Abs(inW - w) < 1e-3)
-                    return size;
-            }
+            //foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
+            //{
+            //    var w = ThMEPHVACService.GetWidth(size);
+            //    if (Math.Abs(inW - w) < 1e-3)
+            //        return size;
+            //}
+            string s = String.Empty;
+            double minRatio = Double.MaxValue;
+            var r = GetWHRatio(airVolume, portParam.param.scenario);
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
             {
                 ThMEPHVACService.GetWidthAndHeight(size, out double w, out double h);
+                var ratio = w / h;
                 if (h <= inH && w < inW)
-                    return size;
+                {
+                    var t = Math.Abs(ratio - r);
+                    if (t < minRatio)
+                    {
+                        minRatio = t;
+                        s = size;
+                    }
+                }
             }
-            return ductInfo.DuctSizeInfor.RecommendOuterDuctSize;
+            return (!s.IsNullOrEmpty()) ? s : ductInfo.DuctSizeInfor.RecommendOuterDuctSize;
+        }
+        public double GetWHRatio(double airVolume, string scenario)
+        {
+            if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")
+            {
+                if (airVolume >= 100000) { return 6; }
+                else if (airVolume >= 80000) { return 5; }
+                else if (airVolume >= 50000) { return 3; }
+                else if (airVolume >= 8000) { return 2.5; }
+                else { return 2; }
+            }
+            else if (scenario == "厨房排油烟")
+            {
+                if (airVolume >= 60000) { return 6; }
+                else if (airVolume >= 50000) { return 5; }
+                else if (airVolume >= 40000) { return 4; }
+                else if (airVolume >= 30000) { return 3; }
+                else if (airVolume >= 5000) { return 2.5; }
+                else { return 2; }
+            }
+            else
+            {
+                if (airVolume >= 40000) { return 6; }
+                else if (airVolume >= 35000) { return 5; }
+                else if (airVolume >= 30000) { return 4; }
+                else if (airVolume >= 12000) { return 3; }
+                else if (airVolume >= 2000) { return 2.5; }
+                else { return 2; }
+            }
         }
         private void SetFirstDuctSize()
         {
@@ -481,16 +567,33 @@ namespace ThMEPHVAC.Model
                 DistributePortByStep();
             }
         }
-
-        private void CountWithAveragePortAirVolume()
+        private void RecordPortInfo(int portNum,
+                                    List<Handle> deleteList,
+                                    List<Polyline> crossPortBounds,
+                                    Dictionary<Polyline, PortModifyParam> dicPlToPort,
+                                    Dictionary<Point3d, List<Handle>> sidePortHandle)
         {
-            var portBounds = GetPortBoundsByPortAirVolume(out Dictionary<int, PortInfo> dicPlToAirVolume);
-            var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
-            int portNum = CountAirVolume(portIndex);
+            portParam.param.portNum = portNum;
             double avgAirVolume = portParam.param.airVolume / portNum;
             avgAirVolume = (Math.Ceiling(avgAirVolume / 10)) * 10;
-            foreach (var port in dicPlToAirVolume.Values)
+            foreach (Polyline crossPorts in crossPortBounds)
+            {
+                var port = dicPlToPort[crossPorts];
                 port.portAirVolume = avgAirVolume;
+                portParam.param.portRange = port.portRange;
+                var p = ThMEPHVACService.RoundPoint(crossPorts.GetCentroidPoint(), 6);
+                if (sidePortHandle.ContainsKey(p))
+                    deleteList.AddRange(sidePortHandle[p]);
+            }
+        }
+        private void CountWithAveragePortAirVolume(List<Handle> deleteList)
+        {
+            ThDuctPortsReadComponent.GetCenterPortBounds(portParam, 
+                                                        out Dictionary <Polyline, PortModifyParam> dicPlToPort,
+                                                        out Dictionary<Point3d, List<Handle>> sidePortHandle);
+            var portIndex = new ThCADCoreNTSSpatialIndex(dicPlToPort.Keys.ToCollection());
+            int portNum = CountAirVolume(portIndex, out List<Polyline> crossPortBounds);
+            RecordPortInfo(portNum, deleteList, crossPortBounds, dicPlToPort, sidePortHandle);
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -503,12 +606,12 @@ namespace ThMEPHVAC.Model
                     p.seg = new SegInfo() { l = l };
                     p.portsInfo = new List<PortInfo>();
                     // 最末端的风口放在第一个，方便累加风量
-                    var sortedDis = SortByDistance(l.EndPoint, res, dicPlToAirVolume, out Dictionary<string, PortInfo> dic);
+                    var sortedDis = SortByDistance(l.EndPoint, res, dicPlToPort, out Dictionary<string, PortModifyParam> dic);
                     foreach (var dis in sortedDis)
                     {
                         var info = dic[dis.ToString()];
                         totalAirVolume += info.portAirVolume;
-                        p.portsInfo.Add(new PortInfo() { portAirVolume = totalAirVolume });
+                        p.portsInfo.Add(new PortInfo() { portAirVolume = totalAirVolume, position = info.pos });
                     }
                     p.seg.airVolume = totalAirVolume;
                     endline.Add(l.GetHashCode(), p);
@@ -517,15 +620,17 @@ namespace ThMEPHVAC.Model
             }
 
         }
-        private int CountAirVolume(ThCADCoreNTSSpatialIndex portIndex)
+        private int CountAirVolume(ThCADCoreNTSSpatialIndex portIndex, out List<Polyline> crossPortBounds)
         {
             int count = 0;
+            crossPortBounds = new List<Polyline>();
             foreach (DBObjectCollection lines in endLines)
             {
                 foreach (Line l in lines)
                 {
                     var pl = CreateLineBound(l);
                     var res = portIndex.SelectCrossingPolygon(pl);
+                    crossPortBounds.AddRange(res.Cast<Polyline>());
                     count += res.Count;
                 }
             }
@@ -533,7 +638,7 @@ namespace ThMEPHVAC.Model
         }
         private double CountWithPortAirVolume()
         {
-            var portBounds = GetPortBoundsByPortAirVolume(out Dictionary<int, PortInfo> dicPlToAirVolume);
+            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out Dictionary<int, PortInfo> dicPlToAirVolume);
             var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
             double allTotalAirVolume = 0;
             foreach (DBObjectCollection lines in endLines)
@@ -567,10 +672,11 @@ namespace ThMEPHVAC.Model
         {
             var dirVec = ThMEPHVACService.GetEdgeDirection(l);
             var extLine = new Line(l.StartPoint - dirVec, l.EndPoint + dirVec);
-            return extLine.Buffer(1);
+            var w = ThMEPHVACService.GetWidth(portParam.param.inDuctSize) * 0.5;
+            return extLine.Buffer(w);
         }
         private List<double> SortByDistance(Point3d baseP,
-                                            DBObjectCollection res, 
+                                            DBObjectCollection res,
                                             Dictionary<int, PortInfo> dicPlToAirVolume,
                                             out Dictionary<string, PortInfo> dic)
         {
@@ -586,108 +692,22 @@ namespace ThMEPHVAC.Model
             distances.Sort();
             return distances;
         }
-        private DBObjectCollection GetPortBoundsByPortAirVolume(out Dictionary<int, PortInfo> dicPlToAirVolume)
+        private List<double> SortByDistance(Point3d baseP,
+                                            DBObjectCollection res, 
+                                            Dictionary<Polyline, PortModifyParam> dicPlToAirVolume,
+                                            out Dictionary<string, PortModifyParam> dic)
         {
-            using (var db = AcadDatabase.Active())
+            var distances = new List<double>();
+            dic = new Dictionary<string, PortModifyParam>();
+            foreach (Polyline pl in res)
             {
-                var portBounds = new DBObjectCollection();
-                dicPlToAirVolume = new Dictionary<int, PortInfo>();
-                var portComponents = ThDuctPortsReadComponent.ReadPortComponents();
-                var portsBlk = portComponents.Select(o => db.Element<BlockReference>(o)).ToList();
-                if (portParam.param.portRange.Contains("下"))
-                {
-                    GetDownPortBoundsByPortAirVolume(portBounds, portsBlk, dicPlToAirVolume);
-                }
-                else
-                {
-                    GetSidePortBoundsByPortAirVolume(portBounds, portsBlk, dicPlToAirVolume);
-                }
-                return portBounds;
+                var info = dicPlToAirVolume[pl];
+                var dis = info.pos.DistanceTo(baseP);
+                dic.Add(dis.ToString(), info);
+                distances.Add(dis);
             }
-        }
-        private void GetSidePortBoundsByPortAirVolume(DBObjectCollection portBounds, List<BlockReference> portsBlk, Dictionary<int, PortInfo> dicPlToAirVolume)
-        {
-            var ductBounds = GetDuctInfo(out Dictionary<int, double> dicDuctInfo);
-            var ductIndex = new ThCADCoreNTSSpatialIndex(ductBounds);
-            foreach (var port in portsBlk)
-            {
-                // 使用侧回风口的OBB
-                var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(port);
-                if (blkName == ThHvacCommon.AI_PORT)
-                {
-                    var portPl = new Polyline();
-                    portPl.CreateRectangle(port.Bounds.Value.MinPoint.ToPoint2D(), port.Bounds.Value.MaxPoint.ToPoint2D());
-                    var res = ductIndex.SelectCrossingPolygon(portPl);
-                    if (res.Count == 0)
-                        continue;
-                    if (res.Count != 1)
-                        throw new NotImplementedException("[CheckError]: port cross with multi duct!");
-                    var ductWidth = dicDuctInfo[(res[0] as Polyline).GetHashCode()];
-                    var centerP = ThMEPHAVCBounds.GetSidePortCenterPoint(port, portParam.srtPoint, portParam.param.portSize, ductWidth);
-                    var portBound = new Polyline();
-                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
-                    portBounds.Add(portBound);
-                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量")) * 2; // 一对侧风口
-                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
-                }
-                else
-                    AddPortCompToDic(port, dicPlToAirVolume, portBounds);
-            }
-        }
-        private void GetDownPortBoundsByPortAirVolume(DBObjectCollection portBounds, List<BlockReference> portsBlk, Dictionary<int, PortInfo> dicPlToAirVolume)
-        {
-            foreach (var port in portsBlk)
-            {
-                var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(port);
-                if (blkName == ThHvacCommon.AI_PORT)
-                {
-                    var centerP = ThMEPHAVCBounds.GetDownPortCenterPoint(port, portParam);
-                    var portBound = new Polyline();
-                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
-                    portBounds.Add(portBound);
-                    var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
-                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
-                }
-                else
-                    AddPortCompToDic(port, dicPlToAirVolume, portBounds);
-            }
-        }
-        private void AddPortCompToDic(BlockReference blk, Dictionary<int, PortInfo> dicPlToAirVolume, DBObjectCollection portBounds)
-        {
-            var blkName = ThDuctPortsReadComponent.GetEffectiveBlkByName(blk);
-            var bound = new Polyline();
-            var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
-            if (blkName == ThHvacCommon.AI_BROKEN_LINE || blkName == ThHvacCommon.AI_VERTICAL_PIPE)
-            {
-                var p = blk.Position.TransformBy(mat);
-                bound.CreatePolygon(p.ToPoint2D(), 4, 210); // 断线可能需要小一点，但这边统一用200
-                var strVolume = blk.Id.GetAttributeInBlockReference("风量");
-                double airVolume = GetAirVolume(strVolume);
-                portBounds.Add(bound);
-                dicPlToAirVolume.Add(bound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = p });
-            }
-            else
-            {
-                // 不处理
-            }
-        }
-
-        private DBObjectCollection GetDuctInfo(out Dictionary<int, double> dicDuctInfo)
-        {
-            dicDuctInfo = new Dictionary<int, double>();
-            var ductIds = ThHvacGetComponent.ReadDuctIds();
-            var bounds = new DBObjectCollection();
-            foreach (var id in ductIds)
-            {
-                var param = ThHvacAnalysisComponent.GetDuctParamById(id);
-                var w = ThMEPHVACService.GetWidth(param.ductSize);
-                var dirVec = (param.ep - param.sp).GetNormal();
-                // 线长前后缩1方便与中心线相交，管宽扩1方便与侧回风口相交
-                var pl = ThMEPHVACService.GetLineExtend(param.sp + dirVec, param.ep - dirVec, w + 2);
-                bounds.Add(pl);
-                dicDuctInfo.Add(pl.GetHashCode(), w);
-            }
-            return bounds;
+            distances.Sort();
+            return distances;
         }
         private void DistributePortByStep()
         {
@@ -770,16 +790,17 @@ namespace ThMEPHVAC.Model
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
+                var airVolume = portParam.param.airVolume;
                 foreach (Line l in lines)
                 {
                     var p = new EndlineSegInfo() { portNum = 0 };
                     p.seg = new SegInfo() { l = l };
                     p.portsInfo = new List<PortInfo>();
                     p.seg.ductSize = portParam.param.inDuctSize;
-
+                    p.seg.airVolume = airVolume;
                     endline.Add(l.GetHashCode(), p);
                 }
-                endLinesInfos.Add(new EndlineInfo() { endlines = endline, totalAirVolume = portParam.param.airVolume });
+                endLinesInfos.Add(new EndlineInfo() { endlines = endline, totalAirVolume = airVolume });
             }
         }
         private void DistributePort(double totalLen, out int distributePortNum)
@@ -854,13 +875,13 @@ namespace ThMEPHVAC.Model
             var pointDetector = new ThFanCenterLineDetector(false);
             // portParam.srtDisVec ThHvacCmdService.cs Line : 239更新
             var srtP = Point3d.Origin + portParam.srtDisVec;// 有上下翻时需要更新起始点
-            pointDetector.searchCenterLine(portParam.centerLines, srtP, SearchBreakType.breakWithEndline);
+            pointDetector.SearchCenterLine(portParam.centerLines, srtP, SearchBreakType.breakWithEndline);
             startLine = pointDetector.srtLine;
             foreach (var p in pointDetector.endPoints.Keys)
             {
                 var endLineDetector = new ThFanCenterLineDetector(true);// 保持原线的走向
                 // 搜索末端点到三通四通的所有点
-                endLineDetector.searchCenterLine(pointDetector.connectLines, p, SearchBreakType.breakWithTeeAndCross);
+                endLineDetector.SearchCenterLine(pointDetector.connectLines, p, SearchBreakType.breakWithTeeAndCross);
                 var set = new DBObjectCollection();
                 for (int i = endLineDetector.connectLines.Count - 1; i >= 0; --i)
                 {
@@ -875,10 +896,11 @@ namespace ThMEPHVAC.Model
             mainLines = pointDetector.connectLines;
             endPoints = pointDetector.endPoints;
         }
-        private void Init(PortParam portParam, DBObjectCollection excludeLines)
+        private void Init(PortParam portParam, DBObjectCollection excludeLines, Dictionary<Polyline, ObjectId> allFansDic)
         {
             tor = new Tolerance(1.5, 1.5);
             this.portParam = portParam;
+            this.allFansDic = allFansDic;
             this.excludeLines = excludeLines;
             breakedDucts = new List<SegInfo>();
             reducings = new List<LineGeoInfo>();
@@ -886,11 +908,6 @@ namespace ThMEPHVAC.Model
             reducingInfos = new List<ReducingInfo>();
             mainLinesInfos = new Dictionary<int, SegInfo>();
             textAlignment = new List<TextAlignLine>();
-        }
-        private double GetAirVolume(string s)
-        {
-            var str = s.Split('m');
-            return Double.Parse(str[0]);
         }
     }
 }

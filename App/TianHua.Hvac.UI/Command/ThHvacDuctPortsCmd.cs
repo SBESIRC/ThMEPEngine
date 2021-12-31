@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using Linq2Acad;
 using AcHelper;
 using AcHelper.Commands;
@@ -13,10 +14,12 @@ namespace TianHua.Hvac.UI.Command
     public class ThHvacDuctPortsCmd : IAcadCommand, IDisposable
     {
         private PortParam portParam;
+        private Dictionary<Polyline, ObjectId> allFansDic;
         public ThHvacDuctPortsCmd() { }
-        public ThHvacDuctPortsCmd(PortParam portParam)
+        public ThHvacDuctPortsCmd(PortParam portParam, Dictionary<Polyline, ObjectId> allFansDic)
         {
             this.portParam = portParam;
+            this.allFansDic = allFansDic;
         }
         public void Dispose() { }
 
@@ -27,8 +30,8 @@ namespace TianHua.Hvac.UI.Command
                 ThMEPHVACService.PromptMsg("无用于布置风口的中心线");
                 return;
             }
-            var excludeLines = GetExcludeLine();            
-            var anayRes = new ThDuctPortsAnalysis(portParam, excludeLines);
+            var excludeLines = GetExcludeLine();
+            var anayRes = new ThDuctPortsAnalysis(portParam, excludeLines, allFansDic);
             _ = new ThPortsDistribute(portParam, anayRes.endLinesInfos);
             anayRes.CreatePortDuctGeo();// 获得风口位置后再调用(同时获得管段间变径)
             anayRes.CreateReducing();

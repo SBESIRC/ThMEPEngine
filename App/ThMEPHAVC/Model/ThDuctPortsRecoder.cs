@@ -38,8 +38,8 @@ namespace ThMEPHVAC.Model
                 if (ids.Count == 0)
                     return ObjectId.Null.Handle;
                 var id = GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), ids);
-                var value_list = new TypedValueList { { (int)DxfCode.ExtendedDataAsciiString, type} };
-                id.AddXData(ThHvacCommon.RegAppName_Duct_Info, value_list);
+                var valueList = new TypedValueList { { (int)DxfCode.ExtendedDataAsciiString, type} };
+                id.AddXData(ThHvacCommon.RegAppName_Duct_Info, valueList);
 
                 return id.Handle;
             }

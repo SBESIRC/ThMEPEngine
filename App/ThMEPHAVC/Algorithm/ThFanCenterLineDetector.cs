@@ -33,29 +33,33 @@ namespace ThMEPHVAC.Algorithm
             endPoints = new Dictionary<Point3d, Point3d>();
             connectLines = new DBObjectCollection();
         }
-        public void getCenterLine(DBObjectCollection centerlines, Point3d p1, Point3d p2)
+        private void FixFirstLine(Point3d startPoint, DBObjectCollection res, DBObjectCollection lines)
         {
-            var mat = Matrix3d.Displacement(-p1.GetAsVector());
-            foreach (Line l in centerlines)
-                l.TransformBy(mat);
-            searchCenterLine(centerlines, p1.TransformBy(mat), SearchBreakType.breakWithEndline);
-            searchCenterLine(centerlines, p2.TransformBy(mat), SearchBreakType.breakWithEndline);
-            mat = Matrix3d.Displacement(p1.GetAsVector());
-            foreach (Line l in connectLines)
-                l.TransformBy(mat);
+            var l = res[0] as Line;
+            srtLine = l;
+            if (!startPoint.IsEqualTo(l.StartPoint, tor) && !startPoint.IsEqualTo(l.EndPoint, tor))
+            {
+                // 需要更新
+                lines.Remove(l);
+                var updateLine = (startPoint.DistanceTo(l.StartPoint) > startPoint.DistanceTo(l.EndPoint)) ?
+                    new Line(startPoint, l.StartPoint) : new Line(startPoint, l.EndPoint);
+                lines.Add(updateLine);
+                srtLine = updateLine;
+                index = new ThCADCoreNTSSpatialIndex(lines);
+            }
         }
-        public void searchCenterLine(DBObjectCollection lines, Point3d startPoint, SearchBreakType type)
+        public void SearchCenterLine(DBObjectCollection lines, Point3d startPoint, SearchBreakType type)
         {
             index = new ThCADCoreNTSSpatialIndex(lines);
             var pl = new Polyline();
-            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 1);
+            // 起始搜索点容差为100
+            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 100);
             var res = index.SelectCrossingPolygon(pl);
             if (res.Count != 1)
                 return;
-            var l = res[0] as Line;
-            srtLine = l;
-            var detectPoint = ThMEPHVACService.GetOtherPoint(l, startPoint, tor);
-            if (identifier.Add(l.GetHashCode()))
+            FixFirstLine(startPoint, res, lines);
+            var detectPoint = ThMEPHVACService.GetOtherPoint(srtLine, startPoint, tor);
+            if (identifier.Add(srtLine.GetHashCode()))
             {
                 //if (isOrigine)
                 //    connectLines.Add(l);
@@ -66,14 +70,14 @@ namespace ThMEPHVAC.Algorithm
                 return; // The fan's in & out line is connected
             switch (type)
             {
-                case SearchBreakType.breakWithEndline: searchConnLine(detectPoint, l);break;
-                case SearchBreakType.breakWithElbow: searchConnLineBreakByElbow(detectPoint, l); break;
-                case SearchBreakType.breakWithTee: searchConnLineBreakByTee(detectPoint, l); break;
-                case SearchBreakType.breakWithCross: searchConnLineBreakByCross(detectPoint, l); break;
-                case SearchBreakType.breakWithTeeAndCross: searchConnLineBreakByTeeAndCross(detectPoint, l); break;
+                case SearchBreakType.breakWithEndline: searchConnLine(detectPoint, srtLine);break;
+                case SearchBreakType.breakWithElbow: searchConnLineBreakByElbow(detectPoint, srtLine); break;
+                case SearchBreakType.breakWithTee: searchConnLineBreakByTee(detectPoint, srtLine); break;
+                case SearchBreakType.breakWithCross: searchConnLineBreakByCross(detectPoint, srtLine); break;
+                case SearchBreakType.breakWithTeeAndCross: searchConnLineBreakByTeeAndCross(detectPoint, srtLine); break;
             }
             if (isOrigine)
-                connectLines.Add(l);
+                connectLines.Add(srtLine);
             else
                 connectLines.Add(new Line(startPoint, detectPoint));
         }

@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.AreaLayout.GridLayout.Command;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Command;
@@ -176,7 +177,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             if (localPts != null && localPts.Count > 0)
             {
                 priority = ThFaAreaLayoutParamterCalculationService.GetPriorityBoundary(localPts, Scale, size);
-                priority = priority.Select(x => x.GetOffsetClosePolyline(priorityExtend)).ToList();
+                priority = ThAFASUtils.ExtendPriority(priority, priorityExtend);
             }
             return priority;
         }

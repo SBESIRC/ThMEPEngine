@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-
+﻿using NFox.Cad;
 using AcHelper;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
-using NFox.Cad;
-
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPLighting.EmgLight;
-using ThMEPLighting.EmgLight.Assistant;
-using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLight.Common;
+using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLightConnect;
 using ThMEPLighting.EmgLightConnect.Service;
 
@@ -315,91 +310,13 @@ namespace ThMEPLighting
         private static Polyline processFrame(Polyline frame)
         {
             Polyline nFrame = null;
-            var tol = 1000;
-
             Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
-            // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
             if (nFrameNormal.Area > 10)
             {
                 nFrameNormal = nFrameNormal.DPSimplify(1);
                 nFrame = nFrameNormal;
             }
-
             return nFrame;
         }
-
-        //private static Polyline processFrame(Polyline frame, ThMEPOriginTransformer transformer)
-        //{
-        //    var tol = 1000;
-        //    //获取外包框
-        //    var frameClone = frame.WashClone() as Polyline;
-        //    //处理外包框
-        //    transformer.Transform(frameClone);
-        //    Polyline nFrame = ThMEPFrameService.NormalizeEx(frameClone, tol);
-
-        //    return nFrame;
-
-        //}
-
-        //[CommandMethod("TIANHUACAD", "THtestIntersection", CommandFlags.Modal)]
-        //public void thTestIntersection()
-        //{
-        //    var a = new Polyline();
-        //    a.AddVertexAt(a.NumberOfVertices, new Point2d(100, 0), 0, 0, 0);
-        //    a.AddVertexAt(a.NumberOfVertices, new Point2d(200, 100), 0, 0, 0);
-        //    a.AddVertexAt(a.NumberOfVertices, new Point2d(0, 100), 0, 0, 0);
-        //    a.Closed = true;
-        //    DrawUtils.ShowGeometry(a, "l0test", 3);
-
-        //    //0.000001行 但0.00001找不到
-        //    var b = new Polyline();
-        //    b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 100), 0, 0, 0);
-        //    b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 100), 0, 0, 0);
-        //    b.AddVertexAt(b.NumberOfVertices, new Point2d(150, 150), 0, 0, 0);
-        //    b.AddVertexAt(b.NumberOfVertices, new Point2d(50, 150), 0, 0, 0);
-        //    b.Closed = true;
-        //    DrawUtils.ShowGeometry(b, "l0test", 4);
-
-        //    var intpts = a.Intersect(b, Intersect.OnBothOperands);
-        //    intpts.ForEach(x => DrawUtils.ShowGeometry(x, "l0test", 4, 25, 10));
-
-        //    var intpts2 = b.Intersect(a, Intersect.OnBothOperands);
-        //    intpts2.ForEach(x => DrawUtils.ShowGeometry(x, "l0test", 4, 25, 10, "S"));
-
-        //    var interC = a.Intersection(new DBObjectCollection() { b });
-        //    var interCE = interC.Cast<Entity>().ToList();
-        //    DrawUtils.ShowGeometry(interCE, "l0test", 7);
-
-        //    var interC2 = b.Intersection(new DBObjectCollection() { a });
-        //    var interCE2 = interC2.Cast<Entity>().ToList();
-        //    DrawUtils.ShowGeometry(interCE2, "l0test", 1);
-
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //[CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        //public void ThCleanDebugLayer()
-        //{
-        //    // 调试按钮关闭且图层不是保护半径有效图层
-        //    var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-        //    if (debugSwitch)
-        //    {
-        //        RemoveBlockService.ClearDrawing();
-        //    }
-
-        //}
-
-        //[System.Diagnostics.Conditional("DEBUG")]
-        //[CommandMethod("TIANHUACAD", "CleanDebugConnect", CommandFlags.Modal)]
-        //public void ThCleanDebugConnectLayer()
-        //{
-        //    // 调试按钮关闭且图层不是保护半径有效图层
-        //    var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-        //    if (debugSwitch)
-        //    {
-        //        RemoveBlockService.ClearEmgConnect();
-        //    }
-
-        //}
     }
 }

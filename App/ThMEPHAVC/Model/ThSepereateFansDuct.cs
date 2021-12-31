@@ -69,17 +69,7 @@ namespace ThMEPHVAC.Model
             int idx = 0;
             if (dicFans.Count == 1)
             {
-                // 只有一台风机时无法通过支路合并风量
-                while (connNotRoomLines.Count != 0)
-                {
-                    foreach (Line l in connNotRoomLines)
-                    {
-                        var shadow = SearchCenterLine(l);
-                        dicLineParam.Add(l.GetHashCode(), dicLineParam[shadow.GetHashCode()]);
-                        TransNotRoomLineToCenterLine(l, shadow);
-                        break;
-                    }
-                }
+                ProcWithSingleFan();
             }
             while (connNotRoomLines.Count != 0)
             {
@@ -99,9 +89,12 @@ namespace ThMEPHVAC.Model
                     else if (srtCrossNum + endCrossNum == 0)
                     {
                         // 只有一条线
-                        dicLineParam.Add(l.GetHashCode(), dicLineParam[shadow.GetHashCode()]);
-                        dicLineParam.Remove(shadow.GetHashCode());
-                        TransNotRoomLineToCenterLine(l);
+                        if (shadow.Length > 0)
+                        {
+                            dicLineParam.Add(l.GetHashCode(), dicLineParam[shadow.GetHashCode()]);
+                            dicLineParam.Remove(shadow.GetHashCode());
+                            TransNotRoomLineToCenterLine(l);
+                        }
                     }
                     else
                         idx++;
@@ -110,7 +103,36 @@ namespace ThMEPHVAC.Model
                     idx = 0;
             }
         }
-
+        private void ProcWithSingleFan()
+        {
+            // 只有一台风机时无法通过支路合并风量
+            var fanParam = dicFans.Values.FirstOrDefault();
+            while (connNotRoomLines.Count != 0)
+            {
+                foreach (Line l in connNotRoomLines)
+                {
+                    var shadow = SearchCenterLine(l);
+                    if (dicLineParam.ContainsKey(shadow.GetHashCode()))
+                    {
+                        dicLineParam.Add(l.GetHashCode(), dicLineParam[shadow.GetHashCode()]);
+                        connNotRoomLines.Remove(l);
+                        centerlines.Remove(shadow);
+                        centerlines.Add(l);
+                        dicLineParam.Remove(shadow.GetHashCode());
+                    }
+                    else
+                    {
+                        // 有问题
+                        dicLineParam.Add(l.GetHashCode(), fanParam);
+                        fanParam.centerLines.Add(l);
+                        connNotRoomLines.Remove(l);
+                        centerlines.Add(l);
+                    }
+                    break;
+                }
+            }
+            index = new ThCADCoreNTSSpatialIndex(centerlines);
+        }
         // shadow 是 detectLine 在centerline中的线
         private bool TogetherDetect(Point3d detectPoint, Line detectLine, Line shadow, out int crossNum)
         {
@@ -153,14 +175,6 @@ namespace ThMEPHVAC.Model
                 if (ThMEPHVACService.IsSameLine(l, detectLine))
                     return l;
             return new Line();
-        }
-        private void TransNotRoomLineToCenterLine(Line l, Line shadow)
-        {
-            connNotRoomLines.Remove(l);
-            centerlines.Remove(shadow);
-            centerlines.Add(l);
-            dicLineParam.Remove(shadow.GetHashCode());
-            index = new ThCADCoreNTSSpatialIndex(centerlines);
         }
         private void TransNotRoomLineToCenterLine(Line l)
         {

@@ -413,10 +413,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
             pts.Add(ept.ToPoint2D()); // high right
             pts.Add(spt.ToPoint2D()); // low left
             pl.CreatePolyline(pts);
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            {
-                currentDb.CurrentSpace.Add(pl);
-            }
+            //using (AcadDatabase currentDb = AcadDatabase.Active())
+            //{
+            //    currentDb.CurrentSpace.Add(pl);
+            //}
             return pl;
         }
     }

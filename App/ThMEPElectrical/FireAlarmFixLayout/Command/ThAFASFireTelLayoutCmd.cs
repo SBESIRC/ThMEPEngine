@@ -14,19 +14,19 @@ using Linq2Acad;
 using ThMEPEngineCore.Command;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmFixLayout.Logic;
+using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
     class ThAFASFireTelLayoutCmd : ThMEPBaseCommand, IDisposable
     {
-        private bool UseUI { get; set; }
         private double _scale = 100;
-        public ThAFASFireTelLayoutCmd(bool UI)
+        public ThAFASFireTelLayoutCmd()
         {
-            UseUI = UI;
             InitialCmdInfo();
             InitialSetting();
         }
@@ -37,10 +37,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void InitialSetting()
         {
-            if (UseUI == true)
-            {
-                _scale = FireAlarmSetting.Instance.Scale;
-            }
+            _scale = FireAlarmSetting.Instance.Scale;
         }
 
         public override void SubExecute()
@@ -55,35 +52,47 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //画框，提数据，转数据
-                //var pts = ThAFASUtils.GetFrame();
-                var pts = ThAFASUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
+                ////------------画框，提数据，转数据
+                //var pts = ThAFASUtils.GetFrameBlk();
+                //if (pts.Count == 0)
+                //{
+                //    return;
+                //}
 
+                //------------
+                var transformer = ThAFASDataPass.Instance.Transformer;
+                var pts = ThAFASDataPass.Instance.SelectPts;
+
+                //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_FireTel };
-                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkName = ThFaCommon.BlkName_FireTel;
+                var cleanBlkName = ThFaCommon.LayoutBlkList[3];
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
-                //导入块图层。free图层
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
-                var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
+                //--------------提取数据
+                //var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
+                var geos = ThAFASUtils.GetFixLayoutData2(ThAFASDataPass.Instance, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
-                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                //------------转回原点
+                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                ThAFASUtils.TransformToZero(transformer, geos);
 
-                ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThFireTelFixedPointLayoutService(geos, cleanBlkName, avoidBlkName);
+                //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。
+                var dataQuery = new ThAFASFixDataQueryService(geos, avoidBlkName);
+                dataQuery.ExtendEquipment(cleanBlkName, _scale);
+                dataQuery.AddAvoidence();
+                dataQuery.MapGeometry();
 
+                //------------布置
+                ThFireTelFixedPointLayoutService layoutService = null;
+                layoutService = new ThFireTelFixedPointLayoutService(dataQuery);
                 var results = layoutService.Layout();
 
-                // 对结果的重设
+                //------------对对结果的重设
                 var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
                 results.ForEach(p =>
                 {
@@ -92,8 +101,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName], true);
-
+                //------------对插入真实块
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
+                ThAFASUtils.TransformReset(transformer, geos);
                 ////Print
                 //pairs.ForEach(p =>
                 //{

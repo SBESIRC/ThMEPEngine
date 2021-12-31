@@ -116,20 +116,21 @@ namespace ThMEPHVAC.Model
     {
         public List<ThValve> ValvesInGroup { get; set; }
         public ThValveGroupParameters Parameters { get; set; }
+        private bool isIn;
         private bool isExhaust;
-        private bool CheckValveFlag;
-        public ThValveGroup(ThValveGroupParameters parameters, bool isExhaust, bool CheckValveFlag)
+        
+        public ThValveGroup(ThValveGroupParameters parameters, bool isExhaust, bool isIn)
         {
+            this.isIn = isIn;
             Parameters = parameters;
             this.isExhaust = isExhaust;
-            this.CheckValveFlag = CheckValveFlag;
-            ValvesInGroup = new List<ThValve>(); ;
+            ValvesInGroup = new List<ThValve>();
         }
-        public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool isExhaust, bool CheckValveFlag)
+        public ThValveGroup(ThValveGroupParameters parameters, string fanlayer, bool isIn, bool isExhaust)
         {
+            this.isIn = isIn;
             Parameters = parameters;
             this.isExhaust = isExhaust;
-            this.CheckValveFlag = CheckValveFlag;
             ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
         }
         private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
@@ -137,7 +138,7 @@ namespace ThMEPHVAC.Model
             List<ThValve> valves = new List<ThValve>();
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == Parameters.FanScenario).InnerRoomDuctType;
-            if (isExhaust)
+            if (isIn)
                 return SetInnerValveGroup(fanlayer);
             else
                 return SetOuterValveGroup(fanlayer);
@@ -202,7 +203,7 @@ namespace ThMEPHVAC.Model
             if (Parameters.ValveToFanSpacing > checkvalve.Length + silencer.Length)
             {
                 silencer.ValveOffsetFromCenter = 0;
-                checkvalve.ValveOffsetFromCenter = (CheckValveFlag) ? (silencer.Length) : 
+                checkvalve.ValveOffsetFromCenter = isExhaust ? (silencer.Length) :
                                                    (-(checkvalve.Length + silencer.Length));// 翻转180°
             }
             //机房外空间放不下防火阀加止回阀加消音器
@@ -286,7 +287,7 @@ namespace ThMEPHVAC.Model
             {
                 Length = 200,
                 Width = Parameters.DuctWidth,
-                RotationAngle = CheckValveFlag ? angle : angle + Math.PI,
+                RotationAngle = isExhaust ? angle : angle + Math.PI,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
                 ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),

@@ -1,48 +1,38 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 using AcHelper;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Command;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    class ThSprinklerDataService
+    public class ThSprinklerDataService
     {
         public static Polyline GetFrame()
         {
             var frame = new Polyline();
             //画框，提数据，转数据
-            var frameOrig = selectFrame();
+            var frameOrig = SelectFrame();
             if (frame != null)
             {
-                 frame = processFrame(frameOrig);
+                frame = ProcessFrame(frameOrig);
             }
-           
+
             return frame;
         }
 
-        private static Polyline selectFrame()
+        private static Polyline SelectFrame()
         {
             var polyline = new Polyline();
 
             // 获取框线
-            PromptSelectionOptions options = new PromptSelectionOptions()
+            var options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
                 MessageForAdding = "请选择布置区域框线",
@@ -50,8 +40,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             };
             var dxfNames = new string[]
             {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-
+                RXClass.GetClass(typeof(Polyline)).DxfName,
             };
             var layers = new List<string> { "AI-防火分区" };
             var filter = ThSelectionFilterTool.Build(dxfNames, layers.ToArray());
@@ -73,10 +62,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
         }
 
-        private static Polyline processFrame(Polyline frame)
+        private static Polyline ProcessFrame(Polyline frame)
         {
             Polyline nFrame = null;
-            var tol = 1000;
 
             Polyline nFrameNormal = ThMEPFrameService.Normalize(frame);
             // Polyline nFrameNormal = ThMEPFrameService.NormalizeEx(frame, tol);
@@ -88,35 +76,5 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             return nFrame;
         }
-
-        /// <summary>
-        /// 将数据转回原点。同时返回transformer
-        /// </summary>
-        /// <param name="geos"></param>
-        /// <returns></returns>
-        //public static ThMEPOriginTransformer transformToOrig(Point3dCollection pts, List<ThGeometry> geos)
-        //{
-        //    ThMEPOriginTransformer transformer = null;
-
-        //    if (pts.Count > 0)
-        //    {
-        //        var center = pts.Envelope().CenterPoint();
-        //        transformer = new ThMEPOriginTransformer(center);
-        //    }
-
-        //    foreach (var o in geos)
-        //    {
-        //        if (o.Boundary != null)
-        //        {
-        //            transformer.Transform(o.Boundary);
-        //        }
-        //    }
-
-        //    ThFireAlarmUtils.MoveToXYPlane(geos);
-
-        //    return transformer;
-        //}
-
-
     }
 }

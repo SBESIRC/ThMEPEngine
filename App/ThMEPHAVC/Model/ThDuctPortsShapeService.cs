@@ -110,6 +110,19 @@ namespace ThMEPHVAC.Model
                 return Math.Abs(K * width * Math.Tan(0.5 * (Math.PI - openAngle))) + 50;
         }
         public static Dictionary<int, double> GetCrossShrink(Line curLine,
+                                                             Tuple<double, string> curParam,
+                                                             List<Line> otherLines,
+                                                             List<Tuple<double, string>> otherParams)
+        {
+            var otherLine1 = otherLines[0];
+            var otherLine2 = otherLines[1];
+            var otherLine3 = otherLines[2];
+            var param1 = otherParams[0];
+            var param2 = otherParams[1];
+            var param3 = otherParams[2];
+            return GetCrossShrink(curLine, otherLine1, otherLine2, otherLine3, curParam, param1, param2, param3);
+        }
+        public static Dictionary<int, double> GetCrossShrink(Line curLine,
                                                              Line otherLine1,
                                                              Line otherLine2,
                                                              Line otherLine3,
@@ -195,6 +208,18 @@ namespace ThMEPHVAC.Model
             var para1 = new Tuple<double, string>(param1.airVolume, param1.notRoomDuctSize);
             var para2 = new Tuple<double, string>(param2.airVolume, param2.notRoomDuctSize);
             return GetTeeShrink(curLine, otherLine1, otherLine2, curPara, para1, para2);
+        }
+
+        public static Dictionary<int, double> GetTeeShrink(Line curLine,
+                                                           Tuple<double, string> curParam,
+                                                           List<Line> otherLines,
+                                                           List<Tuple<double, string>> otherParams)
+        {
+            var otherLine1 = otherLines[0];
+            var otherLine2 = otherLines[1];
+            var param1 = otherParams[0];
+            var param2 = otherParams[1];
+            return GetTeeShrink(curLine, otherLine1, otherLine2, curParam, param1, param2);
         }
         public static Dictionary<int, double> GetTeeShrink(Line curLine, 
                                                            Line otherLine1, 
@@ -304,6 +329,11 @@ namespace ThMEPHVAC.Model
                 directions.Add(dirVec);
             }
             return directions;
+        }
+        public static double GetReducingLen(double big, double small)
+        {
+            double reducinglength = 0.5 * Math.Abs(big - small) / Math.Tan(20 * Math.PI / 180);
+            return reducinglength < 200 ? 200 : reducinglength > 1000 ? 1000 : reducinglength;
         }
     }
 }

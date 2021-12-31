@@ -87,7 +87,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                 }
                 return;
             }
-            if (ent.GetRXClass().DxfName.StartsWith("TCH") && ent.GetRXClass().DxfName.Contains("PIPE"))
+            if (ent.IsTCHPipe())
             {
                 var dbObjs = new DBObjectCollection();
                 ent.Explode(dbObjs);

@@ -1,35 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-using AcHelper;
-using NFox.Cad;
-using Linq2Acad;
-using Dreambuild.AutoCAD;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NetTopologySuite.Operation.Relate;
-
-using ThCADExtension;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
 
 using ThMEPWSS.DrainageSystemDiagram;
 using ThMEPWSS.SprinklerConnect.Model;
-using ThMEPWSS.SprinklerConnect.Service;
-using ThMEPWSS.SprinklerConnect.Engine;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
-    internal class ThSprinklerNetGraphService
+    public class ThSprinklerNetGraphService
     {
         /// <summary>
         /// 一组线转成图组
@@ -47,7 +28,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             lines.AddRange(groupLine);
 
             var net = new ThSprinklerNetGroup();
-            net.angle = angle;
+            net.Angle = angle;
             var alreadyAdded = new List<Line>();
             while (pts.Count > 0)
             {
@@ -56,17 +37,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                 var p = pts[0];
                 CreateGraph(p, lines, alreadyAdded, net, graph);
-                pts.RemoveAll(x => IsContains(x, net.pts));
+                pts.RemoveAll(x => IsContains(x, net.Pts));
             }
 
-            
-            net.ptsGraph.AddRange(graphListTemp.OrderByDescending(x => x.SprinklerVertexNodeList.Count).ToList());
-
-
-
-
+            net.PtsGraph.AddRange(graphListTemp.OrderByDescending(x => x.SprinklerVertexNodeList.Count).ToList());
             return net;
-
         }
 
         /// <summary>
@@ -120,7 +95,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             var idxPt = net.AddPt(p);
             var idxPtO = net.AddPt(ptOther);
-            net.lines.Add(l);
+            net.Lines.Add(l);
 
 
             graph.AddVertex(idxPt);
@@ -130,65 +105,17 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
         }
 
-        /// <summary>
-        /// 根据干管支干管打断图
-        /// </summary>
-        /// <param name="netGroup"></param>
-        /// <param name="mainPipe"></param>
-        /// <param name="subMainPipe"></param>
-        public static void CreatePartGroup(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
+        public static ThSprinklerNetGroup CreatePartGroup(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
         {
-
             var lineList = new List<Line>();
-            lineList.AddRange(netGroup.lines);
-
-            DrawUtils.ShowGeometry(lineList, "l1origLines", 3, 30);
-            var deleteList = RemoveLineIntersectWithMain(lineList, mainPipe);
-            BreakLineIntersectWithSub(lineList, subMainPipe, out var breakLine, out var breakPoint);
-
-            DrawUtils.ShowGeometry(deleteList, "l1removeLines", 3, 25);
-            DrawUtils.ShowGeometry(breakLine, "l1breakLines", 211, 25);
-            DrawUtils.ShowGeometry(lineList, "l1afterLines", 110, 25);
-            breakPoint.ForEach(x => DrawUtils.ShowGeometry(x, "l1breakPts", 3, 30, 125));
-
-
-            var newNetGroup = CreateNetwork(netGroup.angle, lineList);
-            for (int j = 0; j < newNetGroup.ptsGraph.Count; j++)
-            {
-                var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
-                DrawUtils.ShowGeometry(lines, string.Format("l2graph0-{0}", j), j % 7);
-            }
-
-
-            AddBreakLineToGraph(newNetGroup, breakLine, breakPoint);
-            for (int j = 0; j < newNetGroup.ptsGraph.Count; j++)
-            {
-                var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
-                DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
-            }
-        }
-
-        public static ThSprinklerNetGroup CreatePartGroup_test(ThSprinklerNetGroup netGroup, List<Line> mainPipe, List<Line> subMainPipe)
-        {
-
-            var lineList = new List<Line>();
-            lineList.AddRange(netGroup.lines);
+            lineList.AddRange(netGroup.Lines);
             RemoveLineIntersectWithMain(lineList, mainPipe);
 
             BreakLineIntersectWithSub(lineList, subMainPipe, out var breakLine, out var breakPoint);
-            var newNetGroup = CreateNetwork(netGroup.angle, lineList);
+            var newNetGroup = CreateNetwork(netGroup.Angle, lineList);
 
             AddBreakLineToGraph(newNetGroup, breakLine, breakPoint);
-
-            for (int j = 0; j < newNetGroup.ptsGraph.Count; j++)
-            {
-                var lines = newNetGroup.ptsGraph[j].print(newNetGroup.pts);
-                //DrawUtils.ShowGeometry(lines, string.Format("l3graph0-{0}", j), j % 7);
-            }
-
             return newNetGroup;
-
-
         }
 
         /// <summary>
@@ -216,8 +143,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
 
             lineList.RemoveAll(x => removeList.Contains(x));
-
-
             return removeList;
         }
 
@@ -273,16 +198,16 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="breakPoint"></param>
         private static void AddBreakLineToGraph(ThSprinklerNetGroup net, List<Line> breakLine, List<Point3d> breakPoint)
         {
-            net.ptsVirtual.AddRange(breakPoint);
+            net.PtsVirtual.AddRange(breakPoint);
 
-            for (int i = 0; i < net.ptsGraph.Count; i++)
+            for (int i = 0; i < net.PtsGraph.Count; i++)
             {
-                var graph = net.ptsGraph[i];
+                var graph = net.PtsGraph[i];
 
                 for (int j = breakLine.Count - 1; j >= 0; j--)
                 {
                     var bkL = breakLine[j];
-                    var ptIdx = net.pts.IndexOf(bkL.StartPoint);
+                    var ptIdx = net.Pts.IndexOf(bkL.StartPoint);
                     var VertexIdx = graph.SearchNodeIndex(ptIdx);
                     if (VertexIdx != -1)
                     {
@@ -298,7 +223,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                 var graph = new ThSprinklerGraph();
                 AddEdge(bkL.StartPoint, bkL, net, graph);
-                net.ptsGraph.Add(graph);
+                net.PtsGraph.Add(graph);
 
                 breakLine.RemoveAt(i);
             }
@@ -308,7 +233,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         {
             var tol = new Tolerance(10, 10);
             var i = 0;
-            for (;i<ptList.Count;i++)
+            for (; i < ptList.Count; i++)
             {
                 if (pt.IsEqualTo(ptList[i], tol))
                 {

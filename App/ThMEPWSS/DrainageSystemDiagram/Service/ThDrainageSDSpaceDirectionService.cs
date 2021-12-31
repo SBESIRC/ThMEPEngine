@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.LaneLine;

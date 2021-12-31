@@ -259,5 +259,12 @@ namespace ThMEPEngineCore.CAD
                 .Select(e => e.Clone() as Entity)
                 .ToCollection();
         }
+        public static string GetCurrentLayer(this Database database)
+        {
+            using (var acdb = AcadDatabase.Use(database))
+            {
+                return acdb.Element<LayerTableRecord>(acdb.Database.Clayer).Name;
+            }
+        }
     }
 }

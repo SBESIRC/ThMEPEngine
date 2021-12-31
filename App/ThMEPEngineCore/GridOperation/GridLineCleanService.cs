@@ -5,36 +5,90 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.GridOperation.Model;
 using ThMEPEngineCore.GridOperation.Utils;
 
 namespace ThMEPEngineCore.GridOperation
 {
     public class GridLineCleanService
     {
-        double gridLength = 10;
-        double mergeSpacing = 3500;
+        double arcCenterTol = 100;
         /// <summary>
         /// 清洗轴网线
         /// </summary>
         /// <param name="grids">轴网（直线或者弧）</param>
         /// <param name="columns"></param>
-        public void CleanGrid(List<Curve> grids, List<Polyline> columns)
+        public void CleanGrid(List<Curve> grids, List<Polyline> columns, out List<LineGridModel> lineGridRes, out List<ArcGridModel> arcGridRes)
         {
             FilterLines(grids, out List<Line> lineGrids, out List<Arc> arcGrids);
-            var lineGridGroup = LineGridGroup(lineGrids);
-            var extendGrids = GridLineExtendService.ExtendGrid(lineGridGroup);
-            //GridLineExtendService
+            
+            //分组弧形轴网和直线轴网
+            CalGridGroup(lineGrids, arcGrids, out List<LineGridModel> lineGroup, out List<ArcGridModel> arcGroup);
+            lineGroup = lineGroup.Where(x => !(x.xLines == null || x.xLines.Count <= 0 || x.yLines == null || x.yLines.Count <= 0))
+                .Where(x => x.xLines.Any(y => x.yLines.Any(z => z.IsIntersects(y)))).ToList();
+            arcGroup = arcGroup.Where(x => !(x.lines == null || x.lines.Count <= 0 || x.arcLines == null || x.arcLines.Count <= 0)).ToList();
+            
+            //处理直线轴网
+            GridLineSimplifyService simplifyService = new GridLineSimplifyService();
+            lineGridRes = simplifyService.Simplify(lineGroup);
+            lineGridRes = GridLineExtendService.ExtendGrid(lineGridRes);
+            lineGridRes = GridLineMergeService.MergeLine(lineGridRes, columns);
+
+            //处理弧形轴网
+            GridArcSimplifyService arcSimplifyService = new GridArcSimplifyService();
+            arcGridRes = arcSimplifyService.Simplify(arcGroup);
+            arcGridRes = GridArcExtendService.ExtendGrid(arcGridRes);
+            arcGridRes = GridArcMergeService.MergeArcGrid(arcGridRes, columns);
+
+            //处理相近轴网线
+            GridBoundaryExtendService boundaryExtendService = new GridBoundaryExtendService();
+            boundaryExtendService.ExtendGrid(lineGridRes, arcGridRes, out List<LineGridModel> extendLineGrids);
+            lineGridRes = extendLineGrids;
+
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    foreach (var item in extendLineGrids)
+            //    {
+            //        foreach (var ss in item.xLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //        foreach (var ss in item.yLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //    }
+            //    foreach (var item in arcGridRes)
+            //    {
+            //        foreach (var ss in item.arcLines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //        foreach (var ss in item.lines)
+            //        {
+            //            db.ModelSpace.Add(ss);
+            //        }
+            //    }
+            //}
         }
 
+        /// <summary>
+        /// 简单过滤杂线
+        /// </summary>
+        /// <param name="grids"></param>
+        /// <param name="lineGrids"></param>
+        /// <param name="arcGrids"></param>
         private void FilterLines(List<Curve> grids, out List<Line> lineGrids, out List<Arc> arcGrids)
         {
             lineGrids = new List<Line>();
             arcGrids = new List<Arc>();
-            //清除近乎零长度的对象（length≤10mm（梁线为40））
+            //清除近乎零长度的对象（length≤300mm（梁线为40））
             //Z值归零（当直线夹点Z值不为零时需要处理）
             foreach (var curve in grids)
             {
-                if (curve.GetLength() < 10)
+                if (curve.GetLength() < 300)
                     continue;
                 if (curve is Line line)
                 {
@@ -53,48 +107,81 @@ namespace ThMEPEngineCore.GridOperation
             }
         }
 
-        private Dictionary<Vector3d, List<Line>> LineGridMerge(List<Line> lines, List<Polyline> columns)
+        /// <summary>
+        /// 分组轴网线（弧轴网/直线轴网，弧轴网根据圆心细分组，直线轴网根据方向细分组）
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="ArcLines"></param>
+        /// <param name="lineGroup"></param>
+        /// <param name="arcGroup"></param>
+        private void CalGridGroup(List<Line> lines, List<Arc> ArcLines, out List<LineGridModel> lineGroup, out List<ArcGridModel> arcGroup)
         {
-            Dictionary<Vector3d, List<Line>> lineGroup = new Dictionary<Vector3d, List<Line>>();
-            foreach (var line in lines)
+            lineGroup = new List<LineGridModel>();
+            arcGroup = new List<ArcGridModel>();
+            foreach (var arc in ArcLines)
             {
-                var dir = (line.EndPoint - line.StartPoint).GetNormal();
-                var compareKey = lineGroup.Keys.Where(x => x.IsParallelTo(dir, new Tolerance(0.01, 0.01))).FirstOrDefault();
-                if (compareKey != null)
+                var compareKey = arcGroup.Where(x => x.centerPt.DistanceTo(arc.Center) < arcCenterTol).FirstOrDefault();
+                if (compareKey == null)
                 {
-                    lineGroup[compareKey].Add(line);
+                    ArcGridModel arcGrid = new ArcGridModel() { centerPt = arc.Center };
+                    arcGrid.arcLines = new List<Arc>() { arc };
+                    arcGroup.Add(arcGrid);
                 }
                 else
                 {
-                    var valueLines = new List<Line>() { line };
-                    lineGroup.Add(dir, valueLines);
+                    arcGroup.First(x => x == compareKey).arcLines.Add(arc);
                 }
             }
 
-
-
-            return lineGroup;
-        }
-
-        private static Dictionary<Vector3d, List<Line>> LineGridGroup(List<Line> lines)
-        {
-            Dictionary<Vector3d, List<Line>> lineGroup = new Dictionary<Vector3d, List<Line>>();
             foreach (var line in lines)
             {
-                var dir = (line.EndPoint - line.StartPoint).GetNormal();
-                var compareKey = lineGroup.Keys.Where(x => x.IsParallelTo(dir, new Tolerance(0.01, 0.01))).FirstOrDefault();
-                if (compareKey != null)
+                var compareValue = arcGroup.Where(x => line.GetClosestPointTo(x.centerPt, true).DistanceTo(x.centerPt) < arcCenterTol)
+                    .Where(x => x.arcLines.Any(y => y.IsIntersects(line)))
+                    .FirstOrDefault();
+                if (compareValue != null)
                 {
-                    lineGroup[compareKey].Add(line);
+                    var arcLine = arcGroup.First(x => x == compareValue);
+                    if (arcLine.lines != null)
+                    {
+                        arcLine.lines.Add(line);
+                    }
+                    else
+                    {
+                        arcLine.lines = new List<Line>() { line };
+                    }
                 }
                 else
                 {
-                    var valueLines = new List<Line>() { line };
-                    lineGroup.Add(dir, valueLines);
+                    var dir = (line.EndPoint - line.StartPoint).GetNormal();
+                    var compareKey = lineGroup.Where(x => x.vecter.IsParallelTo(dir, new Tolerance(0.1, 0.1)) || Math.Abs(x.vecter.DotProduct(dir)) < 0.1).FirstOrDefault();
+                    if (compareKey != null)
+                    {
+                        var lineKey = lineGroup.First(x => x == compareKey);
+                        if (lineKey.vecter.IsParallelTo(dir, new Tolerance(0.1, 0.1)))
+                        {
+                            lineKey.xLines.Add(line);
+                        }
+                        else
+                        {
+                            if (lineKey.yLines != null)
+                            {
+                                lineKey.yLines.Add(line);
+                            }
+                            else
+                            {
+                                lineKey.yLines = new List<Line>() { line };
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LineGridModel lineGrid = new LineGridModel();
+                        lineGrid.vecter = dir;
+                        lineGrid.xLines = new List<Line>() { line };
+                        lineGroup.Add(lineGrid);
+                    }
                 }
             }
-
-            return lineGroup;
         }
     }
 }

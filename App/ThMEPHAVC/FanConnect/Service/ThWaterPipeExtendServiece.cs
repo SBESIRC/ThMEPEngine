@@ -11,6 +11,8 @@ using ThMEPHVAC.FanConnect.ViewModel;
 using ThCADExtension;
 using Linq2Acad;
 using ThMEPHVAC.FanLayout.Service;
+using ThMEPEngineCore.CAD;
+using ThMEPHVAC.FanConnect.Command;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -29,13 +31,12 @@ namespace ThMEPHVAC.FanConnect.Service
             //设置方向
             //对当前结点进行扩展
             WaterPipeExtend(t1);
-            //将连接处的线进行补齐并绘制小圆点
+            //将连接处的线进行补齐
             ExtendEnds(node);
             //绘制扩展线
             DrawExLine(node);
             //绘制接点
             DrawContact(node);
-            //
             foreach (var n in node.Children)
             {
                 BianLiTree(n);
@@ -118,12 +119,12 @@ namespace ThMEPHVAC.FanConnect.Service
                                     {
                                         var cline = currentExLines[i];
                                         var pline = parentExLines[i];
-                                        var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
-                                        cline.StartPoint = closPt;
-                                        node.Item.ExPoint.Add(closPt);
+                                        var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth);
+                                        cline.StartPoint = closPt[0];
+                                        node.Item.ExPoint.Add(closPt[0]);
                                         if (node.Item.IsConnect)
                                         {
-                                            pline.EndPoint = closPt;
+                                            pline.EndPoint = closPt[0];
                                         }
                                     }
                                 }
@@ -141,7 +142,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 {
                                                     var cline = currentExLines[i];
                                                     var pline = parentExLines[i];
-                                                    var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
+                                                    var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
                                                     cline.StartPoint = closPt;
                                                     node.Item.ExPoint.Add(closPt);
                                                     if (node.Item.IsConnect)
@@ -162,11 +163,11 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var pline4 = parentExLines[3];
                                                 var pline5 = parentExLines[4];
 
-                                                Point3d closPt1 = pline1.GetClosestPointTo(cline1.StartPoint, true);
-                                                Point3d closPt2 = pline2.GetClosestPointTo(cline1.StartPoint, true);
-                                                Point3d closPt3 = pline3.GetClosestPointTo(cline2.StartPoint, true);
-                                                Point3d closPt4 = pline4.GetClosestPointTo(cline2.StartPoint, true);
-                                                Point3d closPt5 = pline5.GetClosestPointTo(cline3.StartPoint, true);
+                                                var closPt1 = ThFanConnectUtils.IntersectWithEx(pline1,cline1, Intersect.ExtendBoth)[0];
+                                                var closPt2 = ThFanConnectUtils.IntersectWithEx(pline2,cline1, Intersect.ExtendBoth)[0];
+                                                var closPt3 = ThFanConnectUtils.IntersectWithEx(pline3,cline2, Intersect.ExtendBoth)[0];
+                                                var closPt4 = ThFanConnectUtils.IntersectWithEx(pline4,cline2, Intersect.ExtendBoth)[0];
+                                                var closPt5 = ThFanConnectUtils.IntersectWithEx(pline5,cline3, Intersect.ExtendBoth)[0];
 
                                                 cline1.StartPoint = closPt2;
                                                 if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
@@ -211,7 +212,7 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             var cline = currentExLines[i];
                             var pline = parentExLines[i];
-                            var closPt = pline.GetClosestPointTo(cline.StartPoint, true);
+                            var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
                             cline.StartPoint = closPt;
                             node.Item.ExPoint.Add(closPt);
                             if (node.Item.IsConnect)
@@ -358,7 +359,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                     {
                                         var pt = node.Item.ExPoint[i];
                                         var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                        DrawCircle(circle, "H-PIPE-DIMS");
+                                        DrawCircle(circle, "H-PIPE-APPE");
                                     }
                                     if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                                     {
@@ -366,7 +367,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         {
                                             var pt = node.Item.ExPoint.Last();
                                             var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                            DrawCircle(circle, "H-PIPE-APPE");
                                         }
                                     }
                                 }
@@ -378,7 +379,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         {
                                             var pt = node.Item.ExPoint[node.Item.ExPoint.Count/2];
                                             var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                            DrawCircle(circle, "H-PIPE-APPE");
                                         }
                                     }
                                 }
@@ -393,7 +394,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         {
                                             var pt = node.Item.ExPoint[i];
                                             var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                            DrawCircle(circle, "H-PIPE-APPE");
                                         }
                                         if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                                         {
@@ -401,7 +402,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                             {
                                                 var pt = node.Item.ExPoint.Last();
                                                 var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                                DrawCircle(circle, "H-PIPE-DIMS");
+                                                DrawCircle(circle, "H-PIPE-APPE");
                                             }
                                         }
                                     }
@@ -413,7 +414,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                             {
                                                 var pt = node.Item.ExPoint[node.Item.ExPoint.Count/2];
                                                 var circle = new Circle(pt, new Vector3d(0.0, 0.0, 1.0), 50);
-                                                DrawCircle(circle, "H-PIPE-DIMS");
+                                                DrawCircle(circle, "H-PIPE-APPE");
                                             }
                                         }
                                     }
@@ -447,10 +448,10 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 tmpPt = node.Item.ExPoint[0] - direction * 100;
                                             }
                                             node.Item.ExPline[0].StartPoint = tmpPt;
-                                            toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
+                                            toDbServiece.InsertBlockReference("H-PIPE-APPE", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
 
                                             var circle = new Circle(node.Item.ExPoint[2], new Vector3d(0.0, 0.0, 1.0), 50);
-                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                            DrawCircle(circle, "H-PIPE-APPE");
                                         }
                                         else
                                         {
@@ -462,7 +463,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 tmpPt = node.Item.ExPoint[1] - direction * 100;
                                             }
                                             node.Item.ExPline[1].StartPoint = tmpPt;
-                                            toDbServiece.InsertBlockReference("H-PIPE-R", "AI-分歧管", node.Item.ExPoint[1], angle, scale);
+                                            toDbServiece.InsertBlockReference("H-PIPE-APPE", "AI-分歧管", node.Item.ExPoint[1], angle, scale);
                                         }
                                     }
                                     else
@@ -470,7 +471,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                         if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                                         {
                                             var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
-                                            DrawCircle(circle, "H-PIPE-DIMS");
+                                            DrawCircle(circle, "H-PIPE-APPE");
                                         }
                                     }
                                 }
@@ -493,10 +494,10 @@ namespace ThMEPHVAC.FanConnect.Service
                                                     tmpPt = node.Item.ExPoint[0] - direction * 100;
                                                 }
                                                 node.Item.ExPline[0].StartPoint = tmpPt;
-                                                toDbServiece.InsertBlockReference("H-PIPE-DIMS", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
+                                                toDbServiece.InsertBlockReference("H-PIPE-APPE", "AI-分歧管", node.Item.ExPoint[0], angle, scale);
 
                                                 var circle = new Circle(node.Item.ExPoint[2], new Vector3d(0.0, 0.0, 1.0), 50);
-                                                DrawCircle(circle, "H-PIPE-DIMS");
+                                                DrawCircle(circle, "H-PIPE-APPE");
                                             }
                                             else
                                             {
@@ -508,7 +509,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                                     tmpPt = node.Item.ExPoint[1] - direction * 100;
                                                 }
                                                 node.Item.ExPline[1].StartPoint = tmpPt;
-                                                toDbServiece.InsertBlockReference("H-PIPE-DIMS", "AI-分歧管", node.Item.ExPoint[1], angle, scale);
+                                                toDbServiece.InsertBlockReference("H-PIPE-APPE", "AI-分歧管", node.Item.ExPoint[1], angle, scale);
                                             }
 
                                         }
@@ -517,7 +518,7 @@ namespace ThMEPHVAC.FanConnect.Service
                                             if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                                             {
                                                 var circle = new Circle(node.Item.ExPoint[1], new Vector3d(0.0, 0.0, 1.0), 50);
-                                                DrawCircle(circle, "H-PIPE-DIMS");
+                                                DrawCircle(circle, "H-PIPE-APPE");
                                             }
                                         }
 

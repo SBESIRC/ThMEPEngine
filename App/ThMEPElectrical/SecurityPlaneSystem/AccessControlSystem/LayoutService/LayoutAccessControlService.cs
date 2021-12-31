@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.Model;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
+using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
@@ -32,10 +34,20 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                 }
                 else if (connectRooms.Count == 1)
                 {
-                    Polyline minimumRectangle = (connectRooms.First().Boundary as Polyline).GetMinimumRectangle();
-                    if (minimumRectangle.Contains(bufferDoor))
+                    var pts = door.GetAllLinesInPolyline().OrderByDescending(o => o.Length).Take(2).Select(o => new Point3d((o.StartPoint.X + o.EndPoint.X)/2, (o.StartPoint.Y + o.EndPoint.Y) / 2, 0)).ToList();
+                    if (connectRooms.First().Boundary is Polyline polyline)
                     {
-                        continue;
+                        if (pts.All(o => polyline.Contains(o)))
+                        {
+                            continue;
+                        }
+                    }
+                    if (connectRooms.First().Boundary is MPolygon mPolygon)
+                    {
+                        if (pts.All(o => mPolygon.Contains(o)))
+                        {
+                            continue;
+                        }
                     }
                     var layoutType = CalNoCennectRoom(connectRooms[0], floor.StoreyTypeString);
                     models.AddRange(DoLayout(layoutType, connectRooms[0], null, door, columns, walls));
@@ -156,7 +168,7 @@ namespace ThMEPElectrical.SecurityPlaneSystem.AccessControlSystem.LayoutService
                         }
                         else if (roomAInfo.connectType == ConnectType.Normal)
                         {
-                            if (roomB.Tags.Any(x=> roomAInfo.roomB.Contains(x)))
+                            if (roomB.Tags.Any(x=> roomAInfo.roomB.Any(z => RoomConfigTreeService.CompareRoom(z, x))))
                             {
                                 roomAType = roomAInfo.roomAHandle;
                                 roomBType = roomAInfo.roomBHandle;

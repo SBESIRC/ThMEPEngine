@@ -10,6 +10,11 @@ using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
 using DotNetARX;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
+using NFox.Cad;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHVAC.FanConnect.Command
 {
@@ -42,6 +47,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 if (blockDb.Blocks.Contains("AI-分歧管"))
                 {
                     acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-分歧管"));
+                }
+                if (blockDb.Blocks.Contains("AI-水阀"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水阀"));
                 }
                 if (blockDb.Layers.Contains("H-PIPE-DIMS"))
                 {
@@ -79,10 +88,19 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-R"), true);
                 }
+                if (blockDb.Layers.Contains("H-PIPE-APPE"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), true);
+                }
+                if (blockDb.Layers.Contains("H-PAPP-VALV"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PAPP-VALV"), true);
+                }
+                
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-DIMS");
+                ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-DIMS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CR");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-HS");
@@ -91,6 +109,8 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CHS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CHR");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-R");
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-APPE");
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PAPP-VALV");
             }
         }
         public override void SubExecute()
@@ -106,15 +126,35 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //提取水管路由
+                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                foreach(var p in pipes)
+                {
+                    p.TransformBy(mt);
+                }
                 //提取水管连接点
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
+                if(fcus.Count == 0)
+                {
+                    return;
+                }
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                var lines = ThFanConnectUtils.CleanLaneLines(pipes);
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
+                foreach(var l in lines)
+                {
+                    l.TransformBy(mt.Inverse());
+                }
                 double space = 300.0;
                 if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
-                    space = 100.0;
+                    space = 150.0;
                 }
                 //构建Tree
                 ThFanTreeModel treeModel = new ThFanTreeModel(startPt, lines, space);
@@ -145,6 +185,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;
                 pipeMarkServiece.PipeMark(pointTreeModel);
+                if(ConfigInfo.WaterSystemConfigInfo.IsGenerValve && ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                {
+                    //插入阀门
+                    ThAddValveServiece addValveServiece = new ThAddValveServiece();
+                    addValveServiece.ConfigInfo = ConfigInfo;
+                    addValveServiece.AddValve(treeModel);
+                }
             }
         }
     }

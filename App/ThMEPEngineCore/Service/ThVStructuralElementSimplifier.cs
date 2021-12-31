@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Service
     {
         private const double OFFSET_DISTANCE = 30.0;
         private const double DISTANCE_TOLERANCE = 1.0;
-        private const double TESSELLATE_ARC_LENGTH = 10.0;
+        private const double TESSELLATE_ARC_LENGTH = 100.0;
         private const double DECOMPOSE_OFFSET_DISTANCE = 151.0;
         private const double SIMILARITY_MEASURE_TOLERANCE = 0.99;
 

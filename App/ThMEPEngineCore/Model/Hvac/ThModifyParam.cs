@@ -4,17 +4,14 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model.Hvac
 {
-    public class FanModifyParam
-    {
-        public string fanName;
-    }
     public class PortModifyParam
     {
-        public Point2d pos;
+        public Point3d pos;
         public Handle handle;
         public string portRange;
         public double portWidth;
         public double portHeight;
+        public double portAirVolume;
         public double rotateAngle;
     }
     public class TextModifyParam
@@ -30,7 +27,7 @@ namespace ThMEPEngineCore.Model.Hvac
         public Handle handle;
         public string holeName;
         public string holeLayer;
-        public Point2d insertP;
+        public Point3d insertP;
         public double rotateAngle;
         public double len;
         public double width;
@@ -40,7 +37,7 @@ namespace ThMEPEngineCore.Model.Hvac
         public Handle handle;
         public string name;
         public string mufflerLayer;
-        public Point2d insertP;
+        public Point3d insertP;
         public string mufflerVisibility;
         public double len;
         public double width;
@@ -54,7 +51,7 @@ namespace ThMEPEngineCore.Model.Hvac
         public string valveName;
         public string valveLayer;
         public string valveVisibility;
-        public Point2d insertP;
+        public Point3d insertP;
         public double rotateAngle;
         public double width;
         public double height;

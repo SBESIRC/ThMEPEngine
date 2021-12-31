@@ -3,11 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using NFox.Cad;
 using Linq2Acad;
-using AcHelper;
-using DotNetARX;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
@@ -19,12 +16,11 @@ namespace ThMEPStructure.GirderConnect.Data
         /// <summary>
         /// 对主梁连接算法结果的后续处理
         /// </summary>
-        public static void MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
+        public static List<Line> MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
         {
             //var unifiedTyples = UnifyTuples(dicTuples);
             var tuples = LineDealer.DicTuplesToTuples(dicTuples);
-            var lines = TuplesToLines(tuples);
-            Output(lines);
+            return TuplesToLines(tuples);
         }
         public static void Output(List<Line> lines)
         {
@@ -33,7 +29,8 @@ namespace ThMEPStructure.GirderConnect.Data
                 lines.ForEach(line =>
                 {
                     line.Layer = BeamConfig.MainBeamLayerName;
-                    line.ColorIndex = (int)ColorIndex.BYLAYER;
+                    if (line.Length > 9000) { line.ColorIndex = 7; }
+                    else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
                     line.Linetype = "ByLayer";
                     acdb.ModelSpace.Add(line);
                 });

@@ -10,6 +10,7 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess;

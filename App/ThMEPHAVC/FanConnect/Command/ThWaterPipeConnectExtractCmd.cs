@@ -12,6 +12,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -42,7 +43,9 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                DbHelper.EnsureLayerOn("AI-水管路由");
+                acadDb.Database.UnFrozenLayer("AI-水管路由");
+                acadDb.Database.UnLockLayer("AI-水管路由");
+                acadDb.Database.UnOffLayer("AI-水管路由");
             }
         }
         public override void SubExecute()
@@ -82,14 +85,36 @@ namespace ThMEPHVAC.FanConnect.Command
                         break;
                 }
                 //获取风机设备
-                var fucs = ThFanConnectUtils.SelectFanCUModel();
-                if(fucs.Count == 0)
+                var startPt = ThFanConnectUtils.SelectPoint();
+                if (startPt.IsEqualTo(new Point3d()))
                 {
                     return;
                 }
+                //提取水管路由
+                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                foreach(var p in pipes)
+                {
+                    p.TransformBy(mt);
+                }
                 //水管干路和支干路
-                var pipes = ThFanConnectUtils.SelectPipes();
-                if(pipes.Count == 0)
+                if (pipes.Count == 0)
+                {
+                    return;
+                }
+                //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    var line = l as Line;
+                    line.TransformBy(mt.Inverse());
+                    tmpLines.Add(line);
+                }
+                var fucs = ThFanConnectUtils.SelectFanCUModel();
+                if(fucs.Count == 0)
                 {
                     return;
                 }
@@ -103,7 +128,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeWidth = pipeWidth;
                 pipeService.EquipModel = fucs;
-                pipeService.TrunkLines = pipes;
+                pipeService.TrunkLines = tmpLines;
                 foreach(var wall in shearWalls)
                 {
                     pipeService.AddObstacleHole(wall.Outline);

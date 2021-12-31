@@ -31,16 +31,21 @@ namespace ThMEPHVAC.Model
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var attNameValues = new Dictionary<string, string> { { "风量", airVolume.ToString() + "m3/h" } };
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(layer, brokenLine, insertP, new Scale3d(), angle, attNameValues);
+                var attr = new Dictionary<string, string> { { "风量", airVolume.ToString() + "m3/h" } };
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(layer, brokenLine, insertP, new Scale3d(), angle, attr);
+                ThMEPHVACService.SetAttr(obj, attr, angle);
                 ThDuctPortsDrawService.SetBrokenLineDynBlockProperity(obj, width);
             }
         }
-        public void InsertVerticalPipe(Point3d insertP, double width, double height, double angle)
+        public void InsertVerticalPipe(Point3d insertP, double width, double height, double angle, double airVolume)
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var obj = db.ModelSpace.ObjectId.InsertBlockReference(layer, verticalPipe, insertP, new Scale3d(), angle);
+                var attr = new Dictionary<string, string> { { "风量", airVolume.ToString() + "m3/h" },
+                                                                     { "截面尺寸", width.ToString() + "x" + height.ToString() },
+                                                                     { "风管代号", "EA"} };
+                var obj = db.ModelSpace.ObjectId.InsertBlockReference(layer, verticalPipe, insertP, new Scale3d(), angle, attr);
+                ThMEPHVACService.SetAttr(obj, attr, angle);
                 ThDuctPortsDrawService.SetVerticalPipeDynBlockProperity(obj, width, height);
             }
         }

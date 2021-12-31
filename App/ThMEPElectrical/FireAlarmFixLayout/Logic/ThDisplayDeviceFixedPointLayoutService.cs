@@ -12,29 +12,45 @@ using ThCADExtension;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO;
-
-using ThMEPElectrical.AFAS.Utils;
+using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
+
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
-    public class ThDisplayDeviceFixedPointLayoutService : ThFixedPointLayoutService
+    public class ThDisplayDeviceFixedPointLayoutService
     {
-        public BuildingType BuildingType { get; set; }
+        public BuildingType BuildingType;
+
+        protected ThAFASFixDataQueryService DataQueryWorker;
+
 
         //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
-        public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas, List<string> cleanBlkName, List<string> AvoidBlkName) : base(datas, cleanBlkName, AvoidBlkName)
+        //public ThDisplayDeviceFixedPointLayoutService(List<ThGeometry> datas, List<string> cleanBlkName, List<string> AvoidBlkName) : base(datas, cleanBlkName, AvoidBlkName)
+        //{
+        //}
+
+        public ThDisplayDeviceFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker, BuildingType buildingType )
         {
+            DataQueryWorker = dataQueryWorker;
+            BuildingType = buildingType;
         }
 
-        public override List<KeyValuePair<Point3d, Vector3d>> Layout()
+
+        public List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
+
             List<KeyValuePair<Point3d, Vector3d>> ans = new List<KeyValuePair<Point3d, Vector3d>>();
             List<Polyline> rooms = new List<Polyline>();
             int reservedLength = 500;
             int bufferValue = 0;
             double visualRange = 4000; //视程设为4米
+
+            if (DataQueryWorker == null)
+            {
+                return ans;
+            }
 
             //根据建筑类型提取房间
             if (BuildingType == BuildingType.Resident)
@@ -53,7 +69,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
             foreach (Polyline room in rooms)
             {
-                DrawUtils.ShowGeometry(room, "l0Room", 3);
                 var avoidenceSet = spatialAvoidenceIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
                 List<Polyline> doorWall = new List<Polyline>(); //有门的墙
                 var avoidencePt = DataQueryWorker.GetAvoidPoints(room, avoidenceSet);
@@ -390,7 +405,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             var selectOrder = ThFaFixCommon.DisplayPublicBuildingOrder;
             List<List<string>> selectOrderMap = new List<List<string>>();
             //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
-            selectOrderMap.AddRange(selectOrder.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.roomTableConfig, o)));
+            selectOrderMap.AddRange(selectOrder.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.RoomTableConfig, o)));
             foreach (string fireApartName in DataQueryWorker.FireApartMap) // 遍历每个防火分区
             {
                 if (!roomsArranged.ContainsKey(fireApartName))

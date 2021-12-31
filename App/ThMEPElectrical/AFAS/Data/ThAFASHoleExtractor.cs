@@ -17,7 +17,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASHoleExtractor : ThExtractorBase, IPrint, IGroup, ISetStorey, ITransformer
+    public class ThAFASHoleExtractor : ThExtractorBase, IGroup, ISetStorey, ITransformer
     {
         public Dictionary<Polyline, List<string>> HoleDic { get; private set; }
         private List<ThStoreyInfo> StoreyInfos { get; set; }
@@ -84,7 +84,19 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            HoleDic.ForEach(o => GroupOwner.Add(o.Key, FindCurveGroupIds(groupId, o.Key)));
+            //HoleDic.ForEach(o => GroupOwner.Add(o.Key, FindCurveGroupIds(groupId, o.Key)));
+            foreach (var o in HoleDic)
+            {
+                if (GroupOwner.ContainsKey(o.Key) == false)
+                {
+                    GroupOwner.Add(o.Key, FindCurveGroupIds(groupId, o.Key));
+                }
+                else
+                {
+                    GroupOwner[o.Key] = FindCurveGroupIds(groupId, o.Key);
+                }
+            }
+
         }
         public void Print(Database database)
         {

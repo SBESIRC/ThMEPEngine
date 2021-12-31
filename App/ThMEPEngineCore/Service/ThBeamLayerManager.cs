@@ -61,6 +61,12 @@ namespace ThMEPEngineCore.Service
                     .Where(o =>
                     {
                         var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
+                        // 支持钢梁
+                        if(layerName.Contains("S_STEL_BEAM_DASH"))
+                        {
+                            return true;
+                        }
+
                         if (!layerName.Contains("S_BEAM"))
                         {
                             return false;

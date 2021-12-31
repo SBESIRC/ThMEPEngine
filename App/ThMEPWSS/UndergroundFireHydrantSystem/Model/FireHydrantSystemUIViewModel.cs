@@ -13,8 +13,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
     {
         public static readonly FireHydrantSystemUIViewModel Singleton = new FireHydrantSystemUIViewModel()
         {
-            cbLabelRing = ThMEPWSS.FireNumFlatDiagramNs.FlatDiagramService.cbLabelRing,
-            cbLabelNode = ThMEPWSS.FireNumFlatDiagramNs.FlatDiagramService.cbLabelNode,
+            cbLabelRing = ViewModel.FireHydrantSystemViewModel.InsertLoopMark,
+            cbLabelNode = ViewModel.FireHydrantSystemViewModel.InsertSubLoopMark,
             cbGenerate = ThMEPWSS.FireNumFlatDiagramNs.FlatDiagramService.cbGenerate,
         };
         NumberingMethodEnum _NumberingMethod;

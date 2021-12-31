@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         /// </summary>
         protected double LoopBufferLength = 10.0;
 
-        protected double TesslateLength = 10.0;
+        protected double TesslateLength = 100.0;
         protected double SmallAreaTolerance = 1.0;
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
 

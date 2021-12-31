@@ -4,6 +4,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.IO;
@@ -34,7 +35,7 @@ namespace ThMEPEngineCore
                 var objs = new DBObjectCollection();
                 foreach (var obj in result.Value.GetObjectIds())
                 {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
+                    objs.Add(acadDatabase.Element<Entity>(obj));
                 }
 
                 objs.BufferPolygons(result2.Value)
@@ -276,6 +277,20 @@ namespace ThMEPEngineCore
                     .Select(o => new ThGeometry() { Boundary = o })
                     .ToList();
                 ThGeoOutput.Output(geos, Active.DocumentDirectory, Active.DocumentName);
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THSELGROUP", CommandFlags.Modal)]
+        public void ThSelGroup()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var objs = new List<ObjectId>();
+                acadDatabase.Groups.ForEachDbObject(g =>
+                {
+                    objs.AddRange(g.GetAllEntityIds());
+                });
+                Active.Editor.PickFirstObjects(objs.ToArray());
             }
         }
     }

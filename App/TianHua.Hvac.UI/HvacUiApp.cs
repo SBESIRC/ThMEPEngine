@@ -1,5 +1,8 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using TianHua.Hvac.UI.UI;
 using TianHua.Hvac.UI.Command;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.ApplicationServices;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI
 {
@@ -7,20 +10,25 @@ namespace TianHua.Hvac.UI
     {
         public void Initialize()
         {
-
+            AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
         }
 
         public void Terminate()
         {
-
+            AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
         }
-
-        [CommandMethod("TIANHUACAD", "THDKFPM", CommandFlags.Modal)]
-        public void THDKFPM()
+        private void DocumentManager_DocumentToBeDestroyed(object sender, DocumentCollectionEventArgs e)
         {
-            using (var cmd = new ThHvacDuctPortsCmd())
+            if (AcadApp.DocumentManager.Count == 1)
             {
-                cmd.Execute();
+                if (uiAirPortParameter.Instance != null)
+                {
+                    uiAirPortParameter.Instance.Hide();
+                }
+                if(uiFGDXParameter.Instance!=null)
+                {
+                    uiFGDXParameter.Instance.Hide();
+                }
             }
         }
         [CommandMethod("TIANHUACAD", "THDKFPMFG", CommandFlags.Modal)]
@@ -83,6 +91,79 @@ namespace TianHua.Hvac.UI
         public void THFJGN()
         {
             using (var cmd = new ThHvacExtractRoomFunctionCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        
+       [CommandMethod("TIANHUACAD", "THSNJ", CommandFlags.Modal)]
+        public void THSNJ()
+        {
+            using (var cmd = new ThHvacIndoorFanCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        
+       [CommandMethod("TIANHUACAD", "THFGLY", CommandFlags.Modal)]
+        public void THFGLY()
+        {
+            using (var cmd = new ThHvacRouteCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THFGLG", CommandFlags.Modal)]
+        public void THFGLG()
+        {
+            using (var cmd = new ThHvacFGLGInsertCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THCRFK", CommandFlags.Modal)]
+        public void THCRFK()
+        {
+            if (null != uiAirPortParameter.Instance && uiAirPortParameter.Instance.IsLoaded)
+            {
+                if (!uiAirPortParameter.Instance.IsVisible)
+                {
+                    uiAirPortParameter.Instance.Show();
+                }
+                return;
+            }
+            uiAirPortParameter.Instance.WindowStartupLocation = 
+                System.Windows.WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModelessWindow(uiAirPortParameter.Instance);
+        }
+        [CommandMethod("TIANHUACAD", "THFGDX", CommandFlags.Modal)]
+        public void THFGDX()
+        {
+            using (var cmd = new ThHvacFGDXUiCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THSGLY", CommandFlags.Modal)]
+        public void THSGLY()
+        {
+            using (var cmd = new ThWaterPipeRouteCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THSGDX", CommandFlags.Modal)]
+        public void THSGDX()
+        {
+            using (var cmd = new ThHvacSGDXInsertCmd())
+            {
+                cmd.Execute();
+            }
+        }
+        [CommandMethod("TIANHUACAD", "TTTTTTTTest", CommandFlags.Modal)]
+        public void TTTTTTTTest()
+        {
+            using (var cmd = new ThCutCurveTestCmd())
             {
                 cmd.Execute();
             }

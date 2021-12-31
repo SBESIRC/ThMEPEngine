@@ -6,6 +6,7 @@ using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -92,15 +93,41 @@ namespace ThMEPLighting.Garage.Service
                 }
                 else
                 {
-                    throw new NotSupportedException();
+                    var extLine = SelectExtendLine(fdxLine, linkLines.Where(o => IsCenterHasBothSides(o)).ToList());
+                    if (extLine!=null)
+                    {
+                        Extend(fdxLine, extLine);
+                    }
                 }
             }
-            else if (linkLines.Count > 2)
+            else
             {
-                throw new NotSupportedException();
+                var extLine = SelectExtendLine(fdxLine, linkLines.Where(o => IsCenterHasBothSides(o)).ToList());
+                if (extLine != null)
+                {
+                    Extend(fdxLine, extLine);
+                }
             }
         }
 
+        private Line SelectExtendLine(Line fdx,List<Line> dxs,double tolerance=10.0)
+        {
+            var vec = fdx.LineDirection();
+            // 先选择垂直的
+            var firstFilter = dxs.Where(o=> Math.Abs(vec.GetAngleTo(o.LineDirection()).RadToAng()-90.0)<=1.0);
+            if(firstFilter.Count()>0)
+            {
+                return firstFilter.OrderBy(o=> Math.Abs(vec.GetAngleTo(o.LineDirection()).RadToAng() - 90.0)).First();
+            }
+            var secondFilter = dxs.Where(o => Math.Abs(vec.GetAngleTo(o.LineDirection()).RadToAng() - 90.0) <= tolerance)
+                .OrderBy(o=> Math.Abs(vec.GetAngleTo(o.LineDirection()).RadToAng() - 90.0));
+
+            if (secondFilter.Count()>0)
+            {
+                return secondFilter.First();
+            }
+            return null;
+        }
         private void Shorten(Line fdxLine)
         {
             Point3d sp = fdxLine.StartPoint;

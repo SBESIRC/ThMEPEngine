@@ -28,8 +28,6 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 {
     public class ThAFASSmokeCmd : ThMEPBaseCommand, IDisposable
     {
-        private bool UseUI { get; set; }
-
         private int _theta = 0;
         private int _floorHight = 2;
         private double _scale = 100;
@@ -37,9 +35,8 @@ namespace ThMEPElectrical.FireAlarmArea.Command
         private double _wallThick = 100;
         private bool _needDetective = true;
 
-        public ThAFASSmokeCmd(bool UI)
+        public ThAFASSmokeCmd()
         {
-            UseUI = UI;
             InitialCmdInfo();
             InitialSetting();
         }
@@ -50,15 +47,12 @@ namespace ThMEPElectrical.FireAlarmArea.Command
         }
         private void InitialSetting()
         {
-            if (UseUI == true)
-            {
-                _theta = FireAlarmSetting.Instance.RoofGrade;
-                _floorHight = FireAlarmSetting.Instance.RoofHight;
-                _scale = FireAlarmSetting.Instance.Scale;
-                _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
-                _wallThick = FireAlarmSetting.Instance.RoofThickness;
-                _needDetective = _referBeam == true ? true : false;
-            }
+            _theta = FireAlarmSetting.Instance.RoofGrade;
+            _floorHight = FireAlarmSetting.Instance.RoofHight;
+            _scale = FireAlarmSetting.Instance.Scale;
+            _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
+            _wallThick = FireAlarmSetting.Instance.RoofThickness;
+            _needDetective = _referBeam == true ? true : false;
         }
         private void SettingNoUI()
         {
@@ -96,53 +90,55 @@ namespace ThMEPElectrical.FireAlarmArea.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //--------------画框，提数据，转数据
-                var pts = ThAFASUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
-                if (UseUI == false)
-                {
-                    SettingNoUI();
-                }
+                ////--------------画框，提数据，转数据
+                //var pts = ThAFASUtils.GetFrameBlk();
+                //if (pts.Count == 0)
+                //{
+                //    return;
+                //}
+                //if (UseUI == false)
+                //{
+                //    SettingNoUI();
+                //}
 
-                //--------------初始图块信息，导入块图层。free图层
+                var transformer = ThAFASDataPass.Instance.Transformer;
+                var pts = ThAFASDataPass.Instance.SelectPts;
+
+                //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Smoke, ThFaCommon.BlkName_Heat, ThFaCommon.BlkName_Smoke_ExplosionProf, ThFaCommon.BlkName_Heat_ExplosionProf };
+                var cleanBlkName = ThFaCommon.LayoutBlkList[0];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameSmoke = ThFaCommon.BlkName_Smoke;
                 var layoutBlkNameHeat = ThFaCommon.BlkName_Heat;
                 var layoutBlkNameSmokePrf = ThFaCommon.BlkName_Smoke_ExplosionProf;
                 var layoutBlkNameHeatPrf = ThFaCommon.BlkName_Heat_ExplosionProf;
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
+                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
-                var geos = ThAFASUtils.GetSmokeData(pts, extractBlkList, _referBeam, _wallThick, _needDetective);
+                //var geos = ThAFASUtils.GetAreaLayoutData(pts,extractBlkList, _referBeam, _wallThick, _needDetective);
+                var geos = ThAFASUtils.GetAreaLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, _needDetective);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //--------------数据转回原点
-                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
-                //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
-                //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
-                //var transformer = ThAFASUtils.TransformToOrig(newPts, geos);
+                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                ////var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+                ////newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+                ////var transformer = ThAFASUtils.TransformToOrig(newPts, geos);
+                ThAFASUtils.TransformToZero(transformer, geos);
 
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。定义房间名称类型
-                var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
-                dataQuery.AnalysisHoles();
-                dataQuery.ClassifyData();
+                //var dataQuery = new ThAFASAreaDataQueryService(geos, cleanBlkName, avoidBlkName);
+                var dataQuery = new ThAFASAreaDataQueryService(geos, avoidBlkName);
+                //dataQuery.AnalysisHoles();
+                //dataQuery.ClassifyData();//先分房间再扩大
+                dataQuery.AddMRoomDict();
+                dataQuery.ClassifyDataNew();
                 var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, _scale);
                 dataQuery.ExtendPriority(priorityExtend);
                 var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
-
-                foreach (var frame in dataQuery.FrameList)
-                {
-                    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
-                }
 
                 //--------------定义传数据
                 var layoutParameter = new ThAFASSmokeLayoutParameter();
@@ -169,11 +165,11 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 //--------------转回到原始位置
                 layoutResult.ForEach(x => x.TransformBack(transformer));
+                ThAFASUtils.TransformReset(transformer, geos);
 
                 //--------------打印最终图块
                 ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
-
             }
         }
     }

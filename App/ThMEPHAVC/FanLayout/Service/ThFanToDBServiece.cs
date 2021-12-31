@@ -291,7 +291,26 @@ namespace ThMEPHVAC.FanLayout.Service
                 dbText.TextString = strText;
                 dbText.Position = position;
                 dbText.Rotation = angle;
+                dbText.Height = 300.0;
+                dbText.WidthFactor = 0.7;
+                dbText.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+                dbText.HorizontalMode = TextHorizontalMode.TextCenter;
+                dbText.VerticalMode = TextVerticalMode.TextVerticalMid;
+                dbText.AlignmentPoint = position;
                 database.ModelSpace.Add(dbText);
+            }
+        }
+        public void InsertValve(string layer, string blockName,string strType, Point3d position, double angle, Scale3d scale)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                var blkId = InsertBlockReference(database.ModelSpace.ObjectId, layer, blockName, position, scale, angle, attNameValues);
+                var data = new ThBlockReferenceData(blkId);
+                if (data.CustomProperties.Contains("可见性"))
+                {
+                    data.CustomProperties.SetValue("可见性", strType);
+                }
             }
         }
         public ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)

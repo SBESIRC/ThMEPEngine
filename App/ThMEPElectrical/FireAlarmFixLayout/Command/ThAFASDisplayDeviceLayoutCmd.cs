@@ -18,6 +18,7 @@ using ThMEPEngineCore.Command;
 using ThMEPEngineCore.IO;
 
 using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
@@ -27,14 +28,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
 {
     class ThAFASDisplayDeviceLayoutCmd : ThMEPBaseCommand, IDisposable
     {
-        private bool UseUI { get; set; }
         private BuildingType _buildingType = BuildingType.None;
         private string layoutBlkName = ThFaCommon.BlkName_Display_District;
         private double _scale = 100;
 
-        public ThAFASDisplayDeviceLayoutCmd(bool UI)
+        public ThAFASDisplayDeviceLayoutCmd()
         {
-            UseUI = UI;
             InitialCmdInfo();
             InitialSetting();
         }
@@ -45,12 +44,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
         }
         private void InitialSetting()
         {
-            if (UseUI == true)
-            {
-                _buildingType = (BuildingType)FireAlarmSetting.Instance.DisplayBuilding;
-                layoutBlkName = FireAlarmSetting.Instance.DisplayBlk == 0 ? ThFaCommon.BlkName_Display_Floor : ThFaCommon.BlkName_Display_District;
-                _scale = FireAlarmSetting.Instance.Scale;
-            }
+            _buildingType = (BuildingType)FireAlarmSetting.Instance.DisplayBuilding;
+            layoutBlkName = FireAlarmSetting.Instance.DisplayBlk == 0 ? ThFaCommon.BlkName_Display_Floor : ThFaCommon.BlkName_Display_District;
+            _scale = FireAlarmSetting.Instance.Scale;
         }
         public override void SubExecute()
         {
@@ -64,50 +60,59 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //画框，提数据，转数据
-                //var pts = ThAFASUtils.GetFrame();
-                var pts = ThAFASUtils.GetFrameBlk();
-                if (pts.Count == 0)
-                {
-                    return;
-                }
-                if (UseUI == false)
-                {
-                    SettingNoUI();
-                }
+                ////------------画框，提数据，转数据
+                //var pts = ThAFASUtils.GetFrameBlk();
+                //if (pts.Count == 0)
+                //{
+                //    return;
+                //}
+                //if (UseUI == false)
+                //{
+                //    SettingNoUI();
+                //}
+
+                //------------
+                var transformer = ThAFASDataPass.Instance.Transformer;
+                var pts = ThAFASDataPass.Instance.SelectPts;
+
                 if (_buildingType == BuildingType.None)
                 {
                     return;
                 }
+
+                //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Display_District, ThFaCommon.BlkName_Display_Floor };
+                var cleanBlkName =new List<string>() { layoutBlkName };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
 
-                //导入块图层。free图层
-                ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.blk_layer.Select(x => x.Value).Distinct().ToList());
-
-                var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
+                //--------------提取数据
+                //var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
+                var geos = ThAFASUtils.GetFixLayoutData2(ThAFASDataPass.Instance, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
-                //转回原点
-                var transformer = ThAFASUtils.TransformToOrig(pts, geos);
-                //var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
-                //newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
-                //var transformer = ThAFASUtils.transformToOrig(newPts, geos);
+                //------------转回原点
+                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
+                ////var newPts = new Autodesk.AutoCAD.Geometry.Point3dCollection();
+                ////newPts.Add(new Autodesk.AutoCAD.Geometry.Point3d());
+                ////var transformer = ThAFASUtils.transformToOrig(newPts, geos);
+                ThAFASUtils.TransformToZero(transformer, geos);
 
-                //布置
-                ThFixedPointLayoutService layoutService = null;
-                layoutService = new ThDisplayDeviceFixedPointLayoutService(geos, cleanBlkName, avoidBlkName)
-                {
-                    BuildingType = _buildingType,
-                };
+                //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。
+                var dataQuery = new ThAFASFixDataQueryService(geos, avoidBlkName);
+                dataQuery.ExtendEquipment(cleanBlkName, _scale);
+                dataQuery.AddAvoidence();
+                dataQuery.MapGeometry();
 
+                //------------布置
+                ThDisplayDeviceFixedPointLayoutService layoutService = null;
+                layoutService = new ThDisplayDeviceFixedPointLayoutService(dataQuery, _buildingType);
                 var results = layoutService.Layout();
 
-                // 对结果的重设
+                ////------------对结果的重设
                 var pairs = new List<KeyValuePair<Point3d, Vector3d>>();
                 results.ForEach(p =>
                 {
@@ -116,9 +121,10 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
 
-                //插入真实块
-                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.blk_layer[layoutBlkName], true);
-
+                //------------对插入真实块
+                ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
+                ThAFASUtils.TransformReset(transformer, geos);
+                
                 ////Print
                 //pairs.ForEach(p =>
                 //{

@@ -5,8 +5,12 @@ using DotNetARX;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
+using Serilog;
+using Serilog.Core;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -18,11 +22,17 @@ using ThMEPArchitecture.PartitionLayout;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
+using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
     {
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
+
         public ThParkingStallArrangementCmd()
         {
             CommandName = "-THDXQYFG";
@@ -38,7 +48,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    CreateAreaSegment(currentDb);
+                    Run(currentDb);
                 }
             }
             catch (Exception ex)
@@ -52,12 +62,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
         }
 
-        public void CreateAreaSegment(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase)
         {
             var database = acadDatabase.Database;
             var selectArea = SelectAreas();//生成候选区域
             var outerBrder = new OuterBrder();
-            outerBrder.Extract(database, selectArea);//提取多段线
+            var extractRst = outerBrder.Extract(database, selectArea);//提取多段线
+            if(!extractRst)
+            {
+                return;
+            }
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
             var sortSegLines = new List<Line>();
@@ -67,8 +81,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var usedLines = new HashSet<int>();
             var maxVals = new List<double>();
             var minVals = new List<double>();
-            Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals);
-            gaPara.Set(sortSegLines, maxVals, minVals);
+            var maxIterations = outerBrder.SegLines.Count;
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            double threshSecond = 20;
+            var correctSeg = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
+            stopwatch.Stop();
+            if(!correctSeg)
+            {
+                Logger?.Information("分割线不合理，分区失败！");
+                return;
+            }
+            gaPara.Set(sortSegLines, maxVals, minVals );
 
             var segLineDic = new Dictionary<int, Line>();
             for (int i = 0; i < sortSegLines.Count; i++)
@@ -97,17 +121,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
             var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            geneAlgorithm.Logger = Logger;  
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
+            bool recordprevious = false;
             try
             {
-                rst = geneAlgorithm.Run(histories);
+                rst = geneAlgorithm.Run(histories, recordprevious);
             }
             catch
             {
-
+                ;
             }
-
             var solution = rst.First();
             histories.Add(rst.First());
             for (int k = 0; k < histories.Count; k++)
@@ -125,25 +150,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    int index = layoutPara.AreaNumber[j];
-                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
-                    layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
-                    var obstacles = new List<Polyline>();
-                    obstaclesList.ForEach(e => obstacles.AddRange(e));
-
-                    var Cutters = new DBObjectCollection();
-                    obstacles.ForEach(e => Cutters.Add(e));
-                    var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                    PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
-                    partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
-                    partition.ProcessAndDisplay(layerNames, 30);
+                    PartitionV3 partition = new PartitionV3();
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
+                    {
+                        try
+                        {
+                            partition.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            partition.Dispose();
+                        }
+                    }
                 }
             }
-
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
             layoutPara.Dispose();

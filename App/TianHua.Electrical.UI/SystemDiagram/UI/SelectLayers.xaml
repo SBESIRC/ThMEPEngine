@@ -6,7 +6,8 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
                     SizeToContent="WidthAndHeight"
                     mc:Ignorable="d"
-                    Title="火灾自动报警系统图">
+                    Title="火灾自动报警系统图"
+                    Closed="ThCustomWindow_Closed">
     <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -203,6 +204,7 @@
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Center">
                 <TextBox x:Name="AddLayerTxt" Width="140" HorizontalContentAlignment="Left"></TextBox>
                 <cus:ImageButton Margin="10,0,0,0" Content="添加" Width="40" Height="24"  Click="AddLayerButton_Click"></cus:ImageButton>
+                <cus:ImageButton Margin="10,0,0,0" Content="拾取" Width="40" Height="24"  Click="PickLayerButton_Click"></cus:ImageButton>
             </StackPanel>
             <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>

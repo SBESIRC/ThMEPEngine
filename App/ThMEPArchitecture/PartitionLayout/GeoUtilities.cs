@@ -180,6 +180,13 @@ namespace ThMEPArchitecture.PartitionLayout
             return p;
         }
 
+        public static Polyline PolyFromPoint(Point3d point)
+        {
+            Polyline p = new Polyline();
+            p.AddVertexAt(0, point.ToPoint2d(), 0, 0, 0);
+            return p;
+        }
+
         public static Polyline PolyFromPoints(Point3d[] points, bool closed = true)
         {
             Polyline p = new Polyline();
@@ -493,14 +500,49 @@ namespace ThMEPArchitecture.PartitionLayout
             return pt_on_a.DistanceTo(pt_on_b);
         }
 
-        public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls)
+        public static bool IsPointInFast(this Polyline poly, Point3d p)
         {
+            return poly.IsPointIn(p);
+            double temp = 0;
+            var points = poly.Vertices();
+            for (int i = 0; i < points.Count; i++)
+            {
+                int j = (i < points.Count - 1) ? (i + 1) : 0;
+                var v1 = points[i].ToPoint2d() - p.ToPoint2d();
+                var v2 = points[j].ToPoint2d() - p.ToPoint2d();
+                temp += v1.MinusPiToPiAngleTo(v2);
+            }
+            if (Math.Abs(Math.Abs(temp) - 2 * Math.PI) < 0.1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
+        {
+            if (!allowOnEdge)
+            {
+                if (ClosestPointInCurves(pt, pls) < 1) return false;
+            }
+            pls.OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
             foreach (var p in pls)
             {
                 if (p.Area < 1) continue;
-                if (p.IsPointIn(pt))
+                if (p.Vertices().Count == 5)
                 {
-                    return true;
+                    if (p.GeometricExtents.IsPointIn(pt))
+                        return true;
+                }
+                else
+                {
+                    if (/*p.IsPointInFast(pt)*/p.Contains(pt))
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -656,12 +698,46 @@ namespace ThMEPArchitecture.PartitionLayout
         public static Point3dCollection DivideCurveByLength(Curve crv, double length, ref DBObjectCollection segs)
         {
             Point3dCollection pts = new Point3dCollection();
-
             pts = new Point3dCollection(crv.GetPointsByDist(length).ToArray());
-
             segs = crv.GetSplitCurves(pts);
             if (segs.Count == 0) segs.Add(crv);
 
+            return pts;
+        }
+
+        public static Point3dCollection DivideCurveByDifferentLength(Curve crv, ref DBObjectCollection segs, double length_a, int count_a, double length_b, int count_b)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            pts.Add(crv.StartPoint);
+            double t = 0;
+            bool quit = false;
+            while (true)
+            {
+                for (int i = 0; i < count_a + count_b; i++)
+                {
+                    if (i < count_a)
+                    {
+                        t += length_a;
+                    }
+                    else
+                    {
+                        t += length_b;
+                    }
+                    if (t < crv.GetLength())
+                    {
+                        pts.Add(crv.GetPointAtDist(t));
+                    }
+                    else
+                    {
+                        quit = true;
+                        break;
+                    }
+                }
+                if (quit) break;
+            }
+            pts.Add(crv.EndPoint);
+            segs = crv.GetSplitCurves(pts);
+            if (segs.Count == 0) segs.Add(crv);
             return pts;
         }
 
@@ -732,7 +808,7 @@ namespace ThMEPArchitecture.PartitionLayout
             var splited = SplitCurve(a, new DBObjectCollection() { pl });
             foreach (Line s in splited)
             {
-                if (!pl.IsPointIn(s.GetCenter())) length += s.Length;
+                if (!pl.IsPointInFast(s.GetCenter())) length += s.Length;
             }
             return length;
         }

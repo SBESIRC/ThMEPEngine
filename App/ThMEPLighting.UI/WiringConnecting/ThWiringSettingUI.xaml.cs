@@ -20,6 +20,7 @@ namespace ThMEPLighting.UI.WiringConnecting
                 settingVM = new WiringConnectingViewModel();
             }
             this.DataContext = settingVM;
+            this.AvoidColumn.IsChecked = false;
         }
     
         private void TitleBar_MouseMove(object sender, MouseEventArgs e)

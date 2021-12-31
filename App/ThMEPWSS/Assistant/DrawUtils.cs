@@ -761,7 +761,7 @@ namespace ThMEPWSS.Assistant
             }
         }
         public static readonly NetTopologySuite.Utilities.GeometricShapeFactory GeometricShapeFactory = new NetTopologySuite.Utilities.GeometricShapeFactory(DefaultGeometryFactory);
-        public static List<GLineSegment> ToNodedLineSegments(IList<GLineSegment> lineSegments)
+        public static List<GLineSegment> ToNodedLineSegments(IEnumerable<GLineSegment> lineSegments)
         {
             var arr = lineSegments.Where(x => x.IsValid).Distinct().Select(x => x.ToLineString()).ToArray();
             if (arr.Length == 0) return new List<GLineSegment>();
@@ -780,11 +780,11 @@ namespace ThMEPWSS.Assistant
             }
             if (geo is LineString ls)
             {
-                return f(ls).ToList();
+                return f(ls).Distinct().ToList();
             }
             else if (geo is MultiLineString mls)
             {
-                return mls.Geometries.OfType<LineString>().SelectMany(ls => f(ls)).ToList();
+                return mls.Geometries.OfType<LineString>().SelectMany(f).Distinct().ToList();
             }
             else
             {
@@ -852,29 +852,67 @@ namespace ThMEPWSS.Assistant
             }
             return GetCenterLine(segs);
         }
-        public static IEnumerable<GLineSegment> GetLines(Geometry geo)
+        public static IEnumerable<LineString> GetNodedLineStrings(IEnumerable<Geometry> geos, bool distinct = true)
         {
-            if (geo is LineString ls)
+            return ToNodedLineSegments(GetManyLines(geos, distinct)).Select(x => x.ToLineString());
+        }
+        public static IEnumerable<LineString> GetManyLineStrings(IEnumerable<Geometry> geos, bool distinct = true)
+        {
+            return GetManyLines(geos, distinct).Select(x => x.ToLineString());
+        }
+        public static IEnumerable<GLineSegment> GetManyLines(IEnumerable<Geometry> geos, bool distinct = true)
+        {
+            var q = geos.SelectMany(geo => GetLines(geo, false));
+            if (distinct)
             {
-                var arr = ls.Coordinates;
-                for (int i = 0; i < arr.Length - 1; i++)
+                return q.Distinct();
+            }
+            else
+            {
+                return q;
+            }
+        }
+        public static IEnumerable<GLineSegment> GetLines(Geometry geo, bool distinct = true)
+        {
+            IEnumerable<GLineSegment> f()
+            {
+                if (geo is LineString ls)
                 {
-                    var seg = new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
-                    if (seg.IsValid)
+                    var arr = ls.Coordinates;
+                    for (int i = 0; i < arr.Length - 1; i++)
                     {
-                        yield return seg;
+                        var seg = new GLineSegment(arr[i].ToPoint2d(), arr[i + 1].ToPoint2d());
+                        if (seg.IsValid)
+                        {
+                            yield return seg;
+                        }
                     }
                 }
-            }
-            else if (geo is GeometryCollection mls)
-            {
-                foreach (var _g in mls.Geometries)
+                else if (geo is Polygon pl)
                 {
-                    foreach (var r in GetLines(_g))
+                    foreach (var r in GetLines(pl.Shell))
                     {
                         yield return r;
                     }
                 }
+                else if (geo is GeometryCollection mls)
+                {
+                    foreach (var _g in mls.Geometries)
+                    {
+                        foreach (var r in GetLines(_g))
+                        {
+                            yield return r;
+                        }
+                    }
+                }
+            }
+            if (distinct)
+            {
+                return f().Distinct();
+            }
+            else
+            {
+                return f();
             }
         }
         public static IEnumerable<Point2d> GetPoints(Geometry geo)
@@ -929,7 +967,7 @@ namespace ThMEPWSS.Assistant
         {
             return DefaultGeometryFactory.BuildGeometry(geomList);
         }
-        public static Geometry CreateGeometryEx<T>(List<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
+        public static Geometry CreateGeometryEx<T>(ICollection<T> geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx<T>(T[] geomList) where T : Geometry => CreateGeometryEx(geomList.Cast<Geometry>().ToList());
         public static Geometry CreateGeometryEx(List<Geometry> geomList) => CreateGeometry(GeoFac.GroupGeometries(geomList).Select(x => (x.Count > 1 ? (x.Aggregate((x, y) => x.Union(y))) : x[0])).Distinct().ToList());
         public static Geometry CreateGeometry(object tag, params Geometry[] geos)
@@ -1034,7 +1072,7 @@ namespace ThMEPWSS.Assistant
             return shapeFactory.CreateCircle();
         }
         public static readonly PreparedGeometryFactory PreparedGeometryFactory = new PreparedGeometryFactory();
-        public static Func<Geometry, bool> CreateIntersectsTester<T>(List<T> geos) where T : Geometry
+        public static Func<Geometry, bool> CreateIntersectsTester<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => false;
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
@@ -1045,6 +1083,43 @@ namespace ThMEPWSS.Assistant
                 var gf = PreparedGeometryFactory.Create(geo);
                 return engine.Query(geo.EnvelopeInternal).Any(g => gf.Intersects(g));
             };
+        }
+        public static (Func<Geometry, bool>, Action<T>) CreateIntersectsTesterEngine<T>(IEnumerable<T> geos = null) where T : Geometry
+        {
+            var hasBuild = false;
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>();
+            var hs = new HashSet<T>(16);
+            if (geos != null)
+            {
+                foreach (var geo in geos)
+                {
+                    engine.Insert(geo.EnvelopeInternal, geo);
+                    hs.Add(geo);
+                }
+            }
+            return (geo =>
+            {
+                if (geo == null) throw new ArgumentNullException();
+                var gf = PreparedGeometryFactory.Create(geo);
+                hasBuild = true;
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).Any();
+            }, geo =>
+            {
+                if (geo == null) throw new ArgumentNullException();
+                if (hs.Contains(geo)) return;
+                if (hasBuild)
+                {
+                    engine = new NetTopologySuite.Index.Strtree.STRtree<T>(hs.Count + 1 > 10 ? hs.Count + 1 : 10);
+                    foreach (var _geo in hs)
+                    {
+                        engine.Insert(_geo.EnvelopeInternal, _geo);
+                    }
+                    hasBuild = false;
+                }
+                engine.Insert(geo.EnvelopeInternal, geo);
+                hs.Add(geo);
+            }
+            );
         }
         public static (Func<Geometry, List<T>>, Action<T>) CreateIntersectsSelectorEngine<T>(IEnumerable<T> geos = null) where T : Geometry
         {
@@ -1083,7 +1158,7 @@ namespace ThMEPWSS.Assistant
             }
             );
         }
-        public static Func<Geometry, List<T>> CreateContainsSelector<T>(List<T> geos) where T : Geometry
+        public static Func<Geometry, List<T>> CreateContainsSelector<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
@@ -1094,7 +1169,7 @@ namespace ThMEPWSS.Assistant
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Contains(g)).ToList();
             };
         }
-        public static Func<Geometry, List<T>> CreateIntersectsSelector<T>(List<T> geos) where T : Geometry
+        public static Func<Geometry, List<T>> CreateIntersectsSelector<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
@@ -1106,7 +1181,29 @@ namespace ThMEPWSS.Assistant
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
             };
         }
-        public static Func<Geometry, List<T>> CreateEnvelopeSelector<T>(List<T> geos) where T : Geometry
+        public static Func<Geometry, List<T>> CreateCoveredBySelectorr<T>(ICollection<T> geos) where T : Geometry
+        {
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
+            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
+            return geo =>
+            {
+                var gf = PreparedGeometryFactory.Create(geo);
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.CoveredBy(g)).ToList();
+            };
+        }
+        public static Func<Geometry, List<T>> CreateDisjointSelectorr<T>(ICollection<T> geos) where T : Geometry
+        {
+            if (geos.Count == 0) return r => new List<T>();
+            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
+            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
+            return geo =>
+            {
+                var gf = PreparedGeometryFactory.Create(geo);
+                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Disjoint(g)).ToList();
+            };
+        }
+        public static Func<Geometry, List<T>> CreateEnvelopeSelector<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
@@ -1117,7 +1214,7 @@ namespace ThMEPWSS.Assistant
                 return engine.Query(geo.EnvelopeInternal).ToList();
             };
         }
-        public static Func<T, List<T>> CreateSTRTreeSelector<T>(List<T> list, Func<T, Envelope> getEnvelope, Func<T, bool> test)
+        public static Func<T, List<T>> CreateSTRTreeSelector<T>(ICollection<T> list, Func<T, Envelope> getEnvelope, Func<T, bool> test)
         {
             if (list.Count == 0) return r => new List<T>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(list.Count > 10 ? list.Count : 10);
@@ -1295,6 +1392,16 @@ namespace ThMEPWSS.Assistant
                 ++c;
             }
         }
+        public static T Tag<T>(this T geo, Action cb) where T : Geometry
+        {
+            geo.UserData = cb;
+            return geo;
+        }
+        public static T Tag<T>(this T geo, object tag) where T : Geometry
+        {
+            geo.UserData = tag;
+            return geo;
+        }
     }
     public static class CadJsonExtension
     {
@@ -1314,6 +1421,7 @@ namespace ThMEPWSS.Assistant
                 typeof(MultiPoint),
                 typeof(MultiLineString),
                 typeof(MultiPolygon),
+                typeof(GeometryCollection),
             };
             }
             public override bool CanConvert(Type objectType)
@@ -1331,6 +1439,7 @@ namespace ThMEPWSS.Assistant
                 if (objectType == typeof(Polygon)) return GeoFac.ToPolygon(serializer.Deserialize<JObject>(reader));
                 if (objectType == typeof(MultiLineString)) return GeoFac.ToMultiLineString(serializer.Deserialize<JObject>(reader));
                 if (objectType == typeof(MultiPolygon)) return GeoFac.ToMultiPolygon(serializer.Deserialize<JObject>(reader));
+                if (objectType == typeof(GeometryCollection)) return GeoFac.ToGeometryCollection(serializer.Deserialize<JObject>(reader));
                 throw new NotSupportedException();
             }
 
@@ -2255,10 +2364,10 @@ namespace ThMEPWSS.Assistant
             //}
         }
 
-        public static T SelectEntity<T>(AcadDatabase adb) where T : DBObject
+        public static T SelectEntity<T>(AcadDatabase adb, bool openForWrite = false) where T : DBObject
         {
             var id = GetEntity();
-            var ent = adb.Element<T>(id);
+            var ent = adb.Element<T>(id, openForWrite);
             return ent;
         }
         public static T TrySelectEntity<T>(AcadDatabase adb) where T : DBObject

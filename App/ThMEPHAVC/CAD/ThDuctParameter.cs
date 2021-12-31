@@ -13,6 +13,7 @@ namespace ThMEPHVAC.CAD
         public string RecommendInnerDuctSize { get; set; }
         //管道尺寸信息
         public List<string> DefaultDuctsSizeString { get; set; }
+        public double WHRatio { get; set; }
     }
     public class ThDuctParameter
     {
@@ -20,41 +21,106 @@ namespace ThMEPHVAC.CAD
         public ThDuctParameter(double airVolume, string scenario)
         {
             GetAirSpeedRange(airVolume, scenario, out double ceiling, out double floor);
+            var ratio = GetWHRatio(airVolume, scenario);
             var candidate = GetCandidateDucts(airVolume, ceiling, floor);
             if (candidate.Count > 0)
             {
                 var recommendOuterDuct = candidate.First(d => d.AspectRatio == candidate.Max(f => f.AspectRatio));
                 var recommendInnerDuct = candidate.First(d => d.AspectRatio == candidate.Min(f => f.AspectRatio));
-
+                var defaultDuctsSizeString = GetDefaultDuctsSizeString(candidate);
+                string selectSize = String.Empty;
+                double minRatio = Double.MaxValue;
+                foreach (var size in defaultDuctsSizeString)
+                {
+                    string[] s = size.Split('x');
+                    if (s.Length != 2)
+                        throw new NotImplementedException("Duct size info doesn't contain width or height");
+                    double width = Double.Parse(s[0]);
+                    double height = Double.Parse(s[1]);
+                    var r = width / height;
+                    var t = Math.Abs(r - ratio);
+                    if (t < minRatio)
+                    {
+                        minRatio = t;
+                        selectSize = size;
+                    }
+                }
+                var filter = new List<string>();
+                foreach (var s in defaultDuctsSizeString)
+                {
+                    var h = GetHeight(s);
+                    if (h <= 500)
+                        filter.Add(s);
+                }
                 DuctSizeInfor = new ThDuctSizeInfor()
                 {
-                    DefaultDuctsSizeString = GetDefaultDuctsSizeString(candidate),
-                    RecommendOuterDuctSize = recommendOuterDuct.DuctWidth + "x" + recommendOuterDuct.DuctHeight,
-                    RecommendInnerDuctSize = recommendInnerDuct.DuctWidth + "x" + recommendInnerDuct.DuctHeight
+                    DefaultDuctsSizeString = filter,
+                    RecommendOuterDuctSize = selectSize,
+                    RecommendInnerDuctSize = selectSize,
+                    WHRatio = ratio
                 };
             }
             else
                 DuctSizeInfor = new ThDuctSizeInfor();
         }
-        private List<DuctSizeParameter> GetCandidateDucts(double air_volume, double air_speed_ceiling, double air_speed_floor)
+        public static double GetHeight(string size)
         {
-            double duct_area_floor = air_volume / 3600.0 / air_speed_floor;
-            double duct_area_ceiling = air_volume / 3600.0 / air_speed_ceiling;
-            Round_2_float(ref duct_area_floor);
-            Round_2_float(ref duct_area_ceiling);
-            var json_reader = new ThDuctParameterJsonReader();
-            var size_floor = json_reader.Parameters.Where(d => d.SectionArea >= duct_area_ceiling).OrderBy(d => d.SectionArea);
-            var satisfied_ducts = size_floor.Where(d => d.SectionArea <= duct_area_floor).ToList();
-
-            if (satisfied_ducts.Count == 0)
+            if (size == null)
+                return 0;
+            string[] width = size.Split('x');
+            if (width.Length != 2)
+                throw new NotImplementedException("Duct size info doesn't contain width or height");
+            return Double.Parse(width[1]);
+        }
+        public double GetWHRatio(double airVolume, string scenario)
+        {
+            if ((scenario.Contains("排烟") && !scenario.Contains("兼")) || scenario == "消防加压送风" || scenario == "消防补风")
             {
-                if (size_floor.Count() == 0)
+                if (airVolume >= 100000) { return 6; }
+                else if (airVolume >= 80000) { return 5; }
+                else if (airVolume >= 50000) { return 3; }
+                else if (airVolume >= 8000) { return 2.5; }
+                else { return 2; }
+            }
+            else if (scenario == "厨房排油烟")
+            {
+                if (airVolume >= 60000) { return 6; }
+                else if (airVolume >= 50000) { return 5; }
+                else if (airVolume >= 40000) { return 4; }
+                else if (airVolume >= 30000) { return 3; }
+                else if (airVolume >= 5000) { return 2.5; }
+                else { return 2; }
+            }
+            else
+            {
+                if (airVolume >= 40000) { return 6; }
+                else if (airVolume >= 35000) { return 5; }
+                else if (airVolume >= 30000) { return 4; }
+                else if (airVolume >= 12000) { return 3; }
+                else if (airVolume >= 2000) { return 2.5; }
+                else { return 2; }
+            }
+        }
+
+        private List<DuctSizeParameter> GetCandidateDucts(double airVolume, double airSpeedCeiling, double airSpeedFloor)
+        {
+            double ductAreaFloor = airVolume / 3600.0 / airSpeedFloor;
+            double ductAreaCeiling = airVolume / 3600.0 / airSpeedCeiling;
+            Round2float(ref ductAreaFloor);
+            Round2float(ref ductAreaCeiling);
+            var jsonReader = new ThDuctParameterJsonReader();
+            var sizeFloor = jsonReader.Parameters.Where(d => d.SectionArea >= ductAreaCeiling).OrderBy(d => d.SectionArea);
+            var satisfiedDucts = sizeFloor.Where(d => d.SectionArea <= ductAreaFloor).ToList();
+
+            if (satisfiedDucts.Count == 0)
+            {
+                if (sizeFloor.Count() == 0)
                 {
                     return new List<DuctSizeParameter>();
                 }
-                return new List<DuctSizeParameter>() { size_floor.First() };
+                return new List<DuctSizeParameter>() { sizeFloor.First() };
             }
-            return satisfied_ducts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
+            return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
         }
         //获取管道尺寸信息列表
         private List<string> GetDefaultDuctsSizeString(List<DuctSizeParameter> defaultcandidateducts)
@@ -82,7 +148,7 @@ namespace ThMEPHVAC.CAD
             else
             {
                 if (airVolume >= 26000) { ceiling = 8.9; floor = 5; }
-                else if (airVolume >= 12000) { ceiling = 8; floor = 4.5; }
+                else if (airVolume >= 12000) { ceiling = 8.9; floor = 4.5; }
                 else if (airVolume >= 8000) { ceiling = 7; floor = 4.5; }
                 else if (airVolume >= 4000) { ceiling = 6; floor = 4.5; }
                 else if (airVolume >= 3000) { ceiling = 6; floor = 3.5; }
@@ -90,7 +156,7 @@ namespace ThMEPHVAC.CAD
                 else { ceiling = 4; floor = 2; }//throw new NotImplementedException();
             }
         }
-        private void Round_2_float(ref double f)
+        private void Round2float(ref double f)
         {
             string s = f.ToString("#0.00");
             f = Double.Parse(s);

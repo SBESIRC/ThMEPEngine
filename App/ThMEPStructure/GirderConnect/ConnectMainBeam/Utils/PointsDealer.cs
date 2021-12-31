@@ -37,12 +37,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     if (DirectionCompair(prePoint, curPoint, nxtPoint) < 0)
                     {
-                        //ShowInfo.ShowPointAsO(curPoint, 130); // debug
                         PointClass.Add(curPoint, 1);
                     }
                     else
                     {
-                        //ShowInfo.ShowPointAsO(curPoint, 210); // debug
                         PointClass.Add(curPoint, 2);
                     }
                 }
@@ -72,7 +70,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             Dictionary<Point3d, int> PointClass = new Dictionary<Point3d, int>();
             PointClassify(polyline, PointClass);
             var points = Algorithms.GetConvexHull(PointClass.Keys.ToList());
-            foreach (var point in points) //actually O(1) time
+            foreach (var point in points)
             {
                 if (PointClass.ContainsKey(point))
                 {
@@ -91,13 +89,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     if (point.Value == ptType)
                     {
-                        //ShowInfo.ShowPointAsO(point.Key, 130);
                         outPoints.Add(point.Key);
                     }
-                    //else // debug: do not delete
-                    //{
-                    //    ShowInfo.ShowPointAsO(point.Key, 210);
-                    //}
                 }
                 return outPoints;
             }
@@ -111,7 +104,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <returns></returns>
         public static List<Point3d> NearPoints(Dictionary<Polyline, Point3dCollection> poly2points, Point3dCollection points)
         {
-            //StructureBuilder.VoronoiDiagramConnect(points, poly2points);
             VoronoiDiagramNearPoints(points, poly2points);
 
             List<Point3d> ansPts = new List<Point3d>();
@@ -156,7 +148,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                                 if (!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
                                 {
                                     pl2pts.Value.Add(pt);
-                                    //ShowInfo.ShowPointAsX(pt, 2, 500);
                                 }
                             }
                         }
@@ -216,7 +207,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             double minDis = double.MaxValue;
             double curArea;
             double curDis;
-            Point3d ansPt = new Point3d();
             foreach (var priCntPt in priotityConnectPt)
             {
                 foreach (var outPt in outPts)
@@ -229,10 +219,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (curArea < minArea)
                 {
                     minArea = curArea;
-                    ansPt = priCntPt;
                 }
             }
-            //return ansPt;
             return priotityConnectPt[0];
         }
 
@@ -332,7 +320,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 if (curDis > maxDis)
                 {
                     points.Remove(pt);
-                    //ShowInfo.ShowPointAsU(pt, 2);
                 }
             }
         }
@@ -367,7 +354,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="pline"></param>
         /// <param name="fstPts"></param>
         /// <param name="SndPts"></param>
-        public static void WallCrossPoint(Polyline pline, ref List<Point3d> fstPts, ref List<Point3d> SndPts)//, ref HashSet<Point3d> zeroPts)
+        public static void WallCrossPoint(Polyline pline, ref List<Point3d> fstPts, ref List<Point3d> SndPts)
         {
             fstPts.Clear();
             SndPts.Clear();
@@ -387,7 +374,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     zeroPts.Add(polyline.GetCentroidPoint());
                     fstPts.Add(polyline.GetCentroidPoint());
-                    //ShowInfo.ShowPointAsO(polyline.GetCentroidPoint(), 3, 500);
                 }
             }
             foreach (var pt2Pt in pt2Pts)
@@ -415,19 +401,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             if (IsCrossPt(pt, pt2Pts))
                             {
                                 fstPts.Add(pt);
-                                //ShowInfo.ShowPointAsO(pt, 1);
                             }
                             else
                             {
                                 SndPts.Add(pt);
-                                //ShowInfo.ShowPointAsO(pt, 5);
                             }
                         }
                     }
                 }
             }
-            //fstPts = RemoveSimmilerPoint(fstPts);
-            //SndPts = RemoveSimmilerPoint(SndPts);
         }
 
         public static Dictionary<Point3d, HashSet<Point3d>> LinesToTuples(List<Line> lines)
@@ -472,7 +454,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 ansList.Add(line.StartPoint);
                 ansList.Add(line.EndPoint);
             }
-            ansList = RemoveSimmilerPoint(ansList, tolerence);
+            ansList = PointsDistinct(ansList, tolerence);
             return ansList;
         }
 
@@ -554,18 +536,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// Update structure Outline2BorderNearPts
         /// </summary>
         /// <param name="outline2BorderNearPts"></param>
-        /// <param name="allConnects"></param>
         public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> connects)
         {
-            foreach(var outline2BorderNearPt in outline2BorderNearPts)
+            foreach (var outline2BorderNearPt in outline2BorderNearPts)
             {
                 var outline = outline2BorderNearPt.Key;
-                foreach(var border2NearPts in outline2BorderNearPt.Value)
+                foreach (var border2NearPts in outline2BorderNearPt.Value)
                 {
                     var borderPt = border2NearPts.Key;
                     if (connects.ContainsKey(borderPt))
                     {
-                        foreach(var pt in connects[borderPt])
+                        foreach (var pt in connects[borderPt])
                         {
                             if (!outline2BorderNearPt.Value.ContainsKey(pt) && !border2NearPts.Value.Contains(pt))
                             {
@@ -614,9 +595,23 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             });
             return ansPts;
         }
-        public static HashSet<Point3d> PointsDistinct(HashSet<Point3d> pts)
+        public static HashSet<Point3d> PointsDistinct(HashSet<Point3d> pts, double deviation = 1.0)
         {
             HashSet<Point3d> ansPts = new HashSet<Point3d>();
+            var kdTree = new ThCADCoreNTSKdTree(1.0);
+            foreach (Point3d pt in pts)
+            {
+                kdTree.InsertPoint(pt);
+            }
+            kdTree.Nodes.ForEach(o =>
+            {
+                ansPts.Add(o.Key.Coordinate.ToAcGePoint3d());
+            });
+            return ansPts;
+        }
+        public static List<Point3d> PointsDistinct(List<Point3d> pts, double deviation = 1.0)
+        {
+            List<Point3d> ansPts = new List<Point3d>();
             var kdTree = new ThCADCoreNTSKdTree(1.0);
             foreach (Point3d pt in pts)
             {

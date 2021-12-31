@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
@@ -76,33 +77,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             AreaNumber.Clear();
 
-            foreach (var line in SegLines)
-            {
-                line.Dispose();
-            }
+            SegLines.ForEach(e => e.Dispose());
             SegLines.Clear();
 
-            foreach(var pline in Areas)
-            {
-                pline.Dispose();
-            }
+            Areas.ForEach(e => e.Dispose());
             Areas.Clear();
 
-            foreach(var pline in AreaDic.Values)
-            {
-                pline.Dispose();
-            }
+            AreaDic.ForEach(e => e.Value.Dispose());
             AreaDic.Clear();
 
-            foreach(var blocks in ObstacleDic.Values)
-            {
-                foreach(var block in blocks)
-                {
-                    block.Dispose();
-                }
-                blocks.Clear();
-            }
-            ObstacleDic.Clear();
+            //foreach(var blocks in ObstacleDic.Values)
+            //{
+            //    foreach(var block in blocks)
+            //    {
+            //        block.Dispose();
+            //    }
+            //    blocks.Clear();
+            //}
+            ObstacleDic.Clear();//这个暂时不支持dispose
 
             foreach (var lines in SegLineDic.Values)
             {
@@ -113,6 +105,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 lines.Clear();
             }
             SegLineDic.Clear();
+
+            AreaSegLineDic.Clear();
 
             foreach (var plines in AreaWalls.Values)
             {
@@ -157,7 +151,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 plinesList.Clear();
             }
             ObstaclesList.Clear();
+
+            SubAreaDic.ForEach(e => e.Value.Dispose());
+            SubAreaDic.Clear();
+
+            IntersectPt.Clear();
+
+            SegLineIndexDic.ForEach(e => e.Value.Dispose());
+            SegLineIndexDic.Clear();
         }
+
         public void Clear2()
         {
             AreaNumber.Clear();
@@ -179,11 +182,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             var areas = new List<Polyline>();
             areas.Add(InitialWalls);
-            Clear2();//清空所有参数
+            Clear();//清空所有参数
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
+                var beforeCnt = areas.Count;
                 Split(gene, ref areas);
+                var afterCnt = areas.Count;
+                if(afterCnt != beforeCnt + 1)
+                {
+                    ;
+                }
                 var line = GetSegLine(gene);
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
@@ -206,7 +215,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 AreaDic.Add(i, Areas[i]);
                 var buildings = GetObstacles(Areas[i]);
                 ObstacleDic.Add(i, buildings);
-                SegLineDic.Add(i, GetSegLines(Areas[i], out List<int> lineNums));
+                var segLines = GetSegLines(Areas[i], out List<int> lineNums);
+                if(segLines.Count > 4)
+                {
+                    ;
+                }
+                SegLineDic.Add(i, segLines);
                 AreaSegLineDic.Add(i, lineNums);
                 AreaSegs.Add(i, GetAreaSegs(Areas[i], SegLineDic[i], out List<Polyline> areaWall));
                 AreaWalls.Add(i, areaWall);
@@ -245,43 +259,46 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         }
                     }
                 }
-                var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
+                {
+                    
+                    //var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
 
-                if (bdBoxes.Count == 0)//这个区域没有建筑物
-                {
-                    SubAreaDic.Add(Convert.ToString(i) + "a", null);
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    {
-                        var sub = subArea[k];
-                        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
-                    }
-                }
-                else
-                {
-                    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
-                    var index = 0;
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    {
-                        var sub = subArea[k];
-                        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
-                        if (rst.Count > 0)//当前子区域包含建筑物
-                        {
-                            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
-                            index = k;
-                            break;
-                        }
-                    }
-                    var curIndex = 1;
-                    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    {
-                        if (k == index)
-                        {
-                            continue;
-                        }
-                        var sub = subArea[k];
-                        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
-                        curIndex++;
-                    }
+                    //if (bdBoxes.Count == 0)//这个区域没有建筑物
+                    //{
+                    //    SubAreaDic.Add(Convert.ToString(i) + "a", null);
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        var sub = subArea[k];
+                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
+                    //    var index = 0;
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        var sub = subArea[k];
+                    //        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
+                    //        if (rst.Count > 0)//当前子区域包含建筑物
+                    //        {
+                    //            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
+                    //            index = k;
+                    //            break;
+                    //        }
+                    //    }
+                    //    var curIndex = 1;
+                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                    //    {
+                    //        if (k == index)
+                    //        {
+                    //            continue;
+                    //        }
+                    //        var sub = subArea[k];
+                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
+                    //        curIndex++;
+                    //    }
+                    //}
                 }
             }
 
@@ -338,14 +355,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
                 dbObjs.Cast<Entity>()
                     .ForEach(e => segLines.Add(e as Line));
-                if (segLines.Count == 0)
-                {
-                    //using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                    //{
-                    //    acadDatabase.CurrentSpace.Add(area);
-                    //}
-                }
-                
+
             }
             catch(Exception ex)
             {
@@ -359,17 +369,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             lineNums = new List<int>();
             var pts = area.GetPoints();
             var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
+            var areaColl = new List<Polyline>() { area };
+            var areaIndex = new ThCADCoreNTSSpatialIndex(areaColl.ToCollection());
             foreach (var db in dbObjs)
             {
+                
                 var line = db as Line;
-                foreach (var pt in pts)
+                if(line.IsBoundOf(area))
                 {
-                    if (line.GetClosestPointTo(pt, false).DistanceTo(pt) < 1.0)
-                    {
-                        segLines.Add(line);
-                        break;
-                    }
+                    segLines.Add(line);
                 }
+                //var extendLine = line.ExtendLine(-10.0);
+                
+                //var rect = extendLine.Buffer(1.0);
+                //var rst = areaIndex.SelectCrossingPolygon(rect);
+                //if(rst.Count > 0)
+                //{
+                //    segLines.Add(line);
+                //}
             }
             for (int i = 0; i < SegLineIndexDic.Count; i++)
             {

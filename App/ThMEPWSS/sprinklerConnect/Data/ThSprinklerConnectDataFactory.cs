@@ -1,42 +1,26 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
-using Dreambuild.AutoCAD;
-using DotNetARX;
-
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.EditorInput;
 
 using ThCADExtension;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Service;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.LaneLine;
-using NetTopologySuite.Geometries;
-
-
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Engine;
-
 using ThMEPWSS.Sprinkler.Data;
 using ThMEPWSS.Sprinkler.Service;
 
 namespace ThMEPWSS.SprinklerConnect.Data
 {
-
-
-    class ThSprinklerConnectDataFactory : ThMEPDataSetFactory
+    public class ThSprinklerConnectDataFactory : ThMEPDataSetFactory
     {
         private List<ThGeometry> Geos { get; set; }
         public ThSprinklerConnectDataFactory()
@@ -148,12 +132,12 @@ namespace ThMEPWSS.SprinklerConnect.Data
             };
         }
 
-        public static List<Point3d> GetSprinklerConnectData(Polyline frame)
+        public static List<Point3d> GetSprinklerConnectData()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
-                recognizeAllEngine.RecognizeMS(acadDatabase.Database, frame.Vertices());
+                recognizeAllEngine.RecognizeMS(acadDatabase.Database, new Point3dCollection());
 
 
 
@@ -173,13 +157,28 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 var extractService = new ThExtractPolylineService()
                 {
                     ElementLayer = layer,
-
                 };
-                extractService.Extract(acadDatabase.Database , frame.Vertices());
+                extractService.Extract(acadDatabase.Database, frame.Vertices());
                 polyList.AddRange(extractService.Polys);
             }
 
             return polyList;
+        }
+
+        public static List<Line> GetPipeLineData(Polyline frame, string layer)
+        {
+            var lineList = new List<Line>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var extractService = new ThExtractLineService()
+                {
+                    ElementLayer = layer,
+                };
+                extractService.Extract(acadDatabase.Database, frame.Vertices());
+                lineList.AddRange(extractService.Lines);
+            }
+
+            return lineList;
 
         }
 
@@ -198,7 +197,6 @@ namespace ThMEPWSS.SprinklerConnect.Data
             }
             polyList.ForEach(x => x.Closed = true);
             return polyList;
-
         }
     }
 }

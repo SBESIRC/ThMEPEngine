@@ -11,6 +11,7 @@ namespace ThMEPElectrical.AFAS.ViewModel
         public double Scale { get; set; }
         public int Beam { get; set; }
         public int LayoutItem { get; set; }
+        public List<int> LayoutItemList { get; set; }
         public int RoofHight { get; set; }
         public int RoofGrade { get; set; }
         public double RoofThickness { get; set; }
@@ -18,7 +19,7 @@ namespace ThMEPElectrical.AFAS.ViewModel
         public int BroadcastLayout { get; set; }
         public double StepLengthBC { get; set; }
         public double StepLengthMA { get; set; }
-        public double ProtectRadius { get; set; }
+        public double GasProtectRadius { get; set; }
 
         public int DisplayBuilding { get; set; }
         public int DisplayBlk { get; set; }
@@ -41,10 +42,12 @@ namespace ThMEPElectrical.AFAS.ViewModel
 
             StepLengthMA = 25 * 1000;
 
-            ProtectRadius = 8000;
+            GasProtectRadius = 8000;
 
             DisplayBuilding = 0;
             DisplayBlk = 0;
+
+            LayoutItemList = new List<int>();
 
         }
     }

@@ -46,7 +46,9 @@ namespace ThMEPHVAC.Model
         {
             var srtPl = ThMEPHVACService.CreateDetector(p);
             var crossLines = index.SelectCrossingPolygon(srtPl);
-            if (connectorPSet.Add(p) && crossLines.Count > 1)
+            if (!connectorPSet.Add(p))
+                return;
+            if (crossLines.Count > 1)
                 CreateConnector(p, crossLines, dic);
             crossLines.Remove(currLine);
             switch (crossLines.Count)

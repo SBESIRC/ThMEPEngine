@@ -72,7 +72,7 @@
         /// </summary>
         ExternalSpace,
         /// <summary>
-        /// 车道线
+        /// 防火卷帘
         /// </summary>
         FireproofShutter,
         /// <summary>
@@ -84,7 +84,7 @@
         /// </summary>
         Hole,
         /// <summary>
-        /// 防火卷帘
+        /// 车道线
         /// </summary>
         LaneLine,
         /// <summary>

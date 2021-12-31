@@ -11,6 +11,10 @@ using GeometryExtensions;
 using ThMEPWSS.UndergroundFireHydrantSystem.Method;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPWSS.Hydrant.Engine;
+using ThCADCore.NTS;
+using ThMEPWSS.Uitl;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.Command
 {
@@ -59,7 +63,7 @@ namespace ThMEPWSS.Command
                     return null;
                 }
                 var propPtRes = opt.Value;
-                
+
                 loopStartPt = propPtRes.TransformBy(Active.Editor.UCS2WCS());
             }
 
@@ -93,10 +97,6 @@ namespace ThMEPWSS.Command
             {
                 return null;
             }
-            //for (int i = 0; i < mainPathList[0].Count - 1; i++)
-            //{
-            //    curDb.CurrentSpace.Add(new Line(mainPathList[0][i]._pt, mainPathList[0][i + 1]._pt));
-            //}
             var subPathList = SubLoop.Get(ref fireHydrantSysIn, mainPathList);//支环提取
 
             var visited = new HashSet<Point3dEx>();//访问标志

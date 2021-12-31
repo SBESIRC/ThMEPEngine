@@ -94,7 +94,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 }
                 
                 LoadCraterClear.LoadBlockLayerToDocument(acdb.Database);
-                LoadCraterClear.ClearHistoryLines(acdb.Database, ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME, outPLine, innerPLines, _originTransformer);
+                LoadCraterClear.ClearHistoryLines(acdb.Database, ParkingStallCommon.PARK_LIGHT_CONNECT_LAYER, outPLine, innerPLines, _originTransformer);
 
                 var connectGroup = AreaLightConnect(outPLine,innerPLines, alPoint);
                 if (null == connectGroup || connectGroup.Count<1)
@@ -128,7 +128,7 @@ namespace ThMEPLighting.ParkingStall.Core
                     Point2d p2 = new Point2d(cc.X - r, cc.Y);
                     Polyline poly = new Polyline();
                     poly.Closed = false;
-                    poly.Layer = ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME;
+                    poly.Layer = ParkingStallCommon.PARK_LIGHT_CONNECT_LAYER;
                     poly.ColorIndex = (int)ColorIndex.BYLAYER;
                     poly.AddVertexAt(0, p1, 1, 0, 0);
                     poly.AddVertexAt(1, p2, 1, 0, 0);
@@ -141,7 +141,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 foreach (var line in lines)
                 {
                     var copyLine = (Line)line.Clone();
-                    copyLine.Layer = ParkingStallCommon.PARKINGLIGHTCONNECT_LAYERAME;
+                    copyLine.Layer = ParkingStallCommon.PARK_LIGHT_CONNECT_LAYER;
                     copyLine.ColorIndex = (int)ColorIndex.BYLAYER;
                     _originTransformer.Reset(copyLine);
                     acdb.ModelSpace.Add(copyLine);

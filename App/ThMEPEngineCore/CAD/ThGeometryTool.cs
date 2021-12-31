@@ -1,4 +1,5 @@
 ﻿using System;
+using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -134,26 +135,35 @@ namespace ThMEPEngineCore.CAD
         {
             try
             {
-                Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, dBText.Normal, dBText.Position);
-                DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
-
-                Polyline obb = newText.GeometricExtents.ToRectangle();
-                Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
-                obb.TransformBy(counterClockwiseMat);
-                return obb;
+                return dBText.OBBFrame();
             }
             catch
             {
-                //
+                // 以下原因可能导致DBText.GeometricExtents异常：
+                //  1. 缺文字样式的字体
+                //  2. 文字的内容为空
+                // 这里返回一个空闭合多段线
+                return new Polyline()
+                {
+                    Closed = true
+                };
             }
-
-            return new Polyline();
         }
         public static Polyline TextOBB(this MText mText)
         {
             if(mText.Location.IsNull())
             {
-                return new Polyline();
+                return new Polyline()
+                {
+                    Closed = true,
+                };
+            }
+            if (string.IsNullOrEmpty(mText.Text))
+            {
+                return new Polyline()
+                {
+                    Closed = true,
+                };
             }
             var mTextCopy = mText.Clone() as MText;
             var ang = Vector3d.XAxis.GetAngleTo(mTextCopy.Direction, mTextCopy.Normal);
@@ -163,9 +173,16 @@ namespace ThMEPEngineCore.CAD
             var objs = new DBObjectCollection();
             newText.Explode(objs);
             var extents = new Extents3d();
-            objs.Cast<DBText>().ForEach(o =>
+            objs.Cast<DBText>().Where(o => !string.IsNullOrEmpty(o.TextString)).ForEach(o =>
             {
-                extents.AddExtents(o.GeometricExtents);
+                try
+                {
+                    extents.AddExtents(o.GeometricExtents);
+                }
+                catch
+                {
+                    // 忽略导致异常的DBText
+                }
             });
             var obb = extents.ToRectangle();
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(ang, mText.Normal, mText.Location);
