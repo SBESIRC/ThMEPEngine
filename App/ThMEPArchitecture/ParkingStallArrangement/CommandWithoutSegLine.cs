@@ -40,7 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Run(currentDb);
+                    Test(currentDb);
                 }
             }
             catch (Exception ex)
@@ -222,7 +222,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     okDir.Add(probList[i]);
                 }
             }
-            for(int i =0; i < allSeglines.Count; i++)
+            for (int i = 0; i < allSeglines.Count; i++)
             {
                 try
                 {
@@ -239,15 +239,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         acadDatabase.CurrentSpace.Add(seg);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     ;
                 }
-                
-            }
-            
-            return;
 
+            }
+            return;
+            sortSegLines = allSeglines[0];
             gaPara.Set(sortSegLines, maxVals, minVals);
 
             var segLineDic = new Dictionary<int, Line>();
