@@ -8,6 +8,7 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Model;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanConnect.ViewModel;
@@ -120,7 +121,15 @@ namespace ThMEPHVAC.FanConnect.Command
                 //提取风机
                 var fcus = ThEquipElementExtractServiece.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                var lines = ThFanConnectUtils.CleanLaneLines(pipes);
+                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+
+                var tmpLines = new List<Line>();
+                foreach (var l in lineColl)
+                {
+                    tmpLines.Add(l as Line);
+                }
+                var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
                 double space = 300.0;
                 if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                 {
