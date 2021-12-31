@@ -819,6 +819,20 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
 
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 选项
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("选项",
+                    "天华选项",
+                    "THMEPOPTIONS",
+                    "天华选项",
+                    "IDI_THCAD_THOPTIONS_SMALL",
+                    "IDI_THCAD_THOPTIONS_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
             //{
             //    var subPanel = row.AddNewPanel();
 
