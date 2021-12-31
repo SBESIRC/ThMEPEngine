@@ -44,17 +44,17 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
         public static List<Polyline> ArcPolygonize(this List<Curve> curves, Polyline frame, double arcChord)      //仅支持圆弧、直线、polyline直线（ps：最好全部用直线）
         {
             var handleCurves = HandleLinesByFrame(frame, curves);
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                var s = frame.Clone() as Polyline;
-                s.ColorIndex = 4;
-                //db.ModelSpace.Add(s);
-                foreach (var item in curves)
-                {
-                    item.ColorIndex = 4;
-                    //db.ModelSpace.Add(item);
-                }
-            }
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    var s = frame.Clone() as Polyline;
+            //    s.ColorIndex = 4;
+            //    db.ModelSpace.Add(s);
+            //    foreach (var item in curves)
+            //    {
+            //        item.ColorIndex = 4;
+            //        db.ModelSpace.Add(item);
+            //    }
+            //}
             var allLines = handleCurves.ConvertToLine(arcChord);
             allLines = allLines.Select(x => x.ExtendLine(50)).ToList();
             var polygons = allLines.ToCollection().Polygons().Cast<Polyline>().Where(x => x.Area > 1).ToList();
@@ -92,28 +92,34 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
                 if (curvePts.Count > 0)
                 {
                     curvePts = CleanIntersectLine(curvePts);
-                    var curvePt = curvePts.Last();
                     if (curvePts.Count > 1)
                     {
                         if (curvePts.Any(x => x is Arc))
                         {
                             var intersectPts = new List<Point3d>();
-                            curvePts.Remove(curvePt);
                             Point3dCollection pts = new Point3dCollection();
                             foreach (var checkCurve in curvePts)
                             {
-                                curvePt.IntersectWith(checkCurve, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                                intersectPts.AddRange(pts.Cast<Point3d>());
+                                foreach (var curvePt in curvePts.Except(new List<Curve>() { checkCurve }))
+                                {
+                                    curvePt.IntersectWith(checkCurve, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                                    intersectPts.AddRange(pts.Cast<Point3d>());
+                                }
+                                
                             }
                             if (intersectPts.Count > 0)
                             {
                                 pt = intersectPts.OrderBy(x => x.DistanceTo(pt)).First();
+                                if (polygon.GetPoint3dAt(i).DistanceTo(pt) > 10)
+                                {
+                                    pt = polygon.GetPoint3dAt(i);
+                                }
                             }
                         }
                     }
                     if (!polygonPts.Keys.Contains(pt))
                     {
-                        polygonPts.Add(pt, curvePt);
+                        polygonPts.Add(pt, curvePts.Last());
                     }
                 }
             }

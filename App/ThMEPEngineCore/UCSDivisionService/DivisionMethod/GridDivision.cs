@@ -54,10 +54,10 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
 
             //获得所有轴网的网格区域
             var gridAreas = GetGridArea(gridLines.SelectMany(x => x.Key).ToList());
-            
+
             //获得每个轴网的凸包
             var gridHulls = gridTypes.ToDictionary(x => x.Key, y => GetGridHull(y.Key));
-
+            
             //获得每个轴网本来所占区域
             var gridRegion = gridTypes.ToDictionary(x => x.Key, y => GetGridRegion(y.Key));
 
