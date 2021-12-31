@@ -39,7 +39,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             linePoints = Sort(linePoints);
 
             // 优化布置的点
-            var optimizer = new ThLayoutPointOptimizeService(linePoints, FilterPointDistance);
+            var optimizer = new ThLayoutPointOptimizeService(linePoints, ArrangeParameter.FilterPointDistance);
             optimizer.Optimize();
 
             firstLightEdges.ForEach(f =>
@@ -114,13 +114,6 @@ namespace ThMEPLighting.Garage.Service.Arrange
             var edges = new List<ThLightEdge>();
             lines.ForEach(o => edges.Add(new ThLightEdge(o) { EdgePattern = edgePattern }));
             return edges;
-        }
-        private double FilterPointDistance
-        {
-            get
-            {
-                return 0.4 * ArrangeParameter.Interval;
-            }
         }
     }
 }

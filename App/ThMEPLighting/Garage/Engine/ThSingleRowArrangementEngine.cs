@@ -47,18 +47,18 @@ namespace ThMEPLighting.Garage.Engine
             }
 
             // 优化布置的点
-            var optimizer = new ThLayoutPointOptimizeService(linePoints, FilterPointDistance);
+            var optimizer = new ThLayoutPointOptimizeService(linePoints, ArrangeParameter.FilterPointDistance);
             optimizer.Optimize();
 
             // 计算回路数量
             var lightNumber = linePoints.Sum(o => o.Value.Count);
-            LoopNumber = GetLoopNumber(lightNumber);
+            LoopNumber = ArrangeParameter.GetLoopNumber(lightNumber);
 
             // 创建边
             var lightEdges = BuildEdges(linePoints);
 
             // 编号
-            Graphs = CreateGraphs(lightEdges);
+            Graphs = lightEdges.CreateGraphs();
             Graphs.ForEach(g =>
             {
                 g.Number(LoopNumber, true, base.DefaultStartNumber);
@@ -108,34 +108,6 @@ namespace ThMEPLighting.Garage.Engine
                 results = layoutPointService.Layout(regionBorder.DxCenterLines);
             }
             return results;
-        }
-
-        private int GetLoopNumber(int lightNumber)
-        {
-            if (ArrangeParameter.AutoCalculate)
-            {
-               return CalculateLoopNumber(lightNumber,
-                    ArrangeParameter.LightNumberOfLoop);
-            }
-            else
-            {
-               return GetUILoopNumber();
-            }
-        }
-
-        private int GetUILoopNumber()
-        {
-            return ArrangeParameter.LoopNumber < 2 ? 2 : ArrangeParameter.LoopNumber;
-        }
-
-        private int CalculateLoopNumber(int lightNumbers,int lightNumberOfLoop)
-        {
-            double number = Math.Ceiling(lightNumbers * 1.0 / lightNumberOfLoop);
-            if (number < 2)
-            {
-                number = 2;
-            }
-            return (int)number;
         }
     }
 }

@@ -13,8 +13,7 @@ namespace ThMEPLighting.Garage.Engine
         /// 根据一个分区的布灯点的数量，计算的回路数
         /// </summary>
         public int LoopNumber { get; protected set; }
-
-        protected int DefaultStartNumber { get; set; }
+        public int DefaultStartNumber { get; protected set; }
         /// <summary>
         /// 通过布灯线生成的图
         /// </summary>
@@ -24,7 +23,7 @@ namespace ThMEPLighting.Garage.Engine
         {
             ArrangeParameter = arrangeParameter;
             Graphs = new List<ThLightGraphService>();
-            DefaultStartNumber = arrangeParameter.DefaultStartNumber;
+            DefaultStartNumber = ArrangeParameter.DefaultStartNumber;
         }
         public void Dispose()
         {
@@ -43,13 +42,6 @@ namespace ThMEPLighting.Garage.Engine
         public void SetDefaultStartNumber(int defaultStartNumber)
         {
             this.DefaultStartNumber = defaultStartNumber;
-        }
-        protected double FilterPointDistance
-        {
-            get
-            {
-                return 0.4 * ArrangeParameter.Interval;
-            }
         }
     }
 }

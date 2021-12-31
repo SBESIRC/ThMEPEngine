@@ -27,6 +27,11 @@ namespace ThMEPLighting.Garage.Factory
                 return SideLineNumberDict.Where(o => o.Value == EdgePattern.Second).Select(o => o.Key).ToList();
             }
         }
+        public ThFirstSecondFactory()
+        {
+            SideLineNumberDict = new Dictionary<Line, EdgePattern>();
+            CenterSideDict = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
+        }
         public abstract void Produce();
     }
 }

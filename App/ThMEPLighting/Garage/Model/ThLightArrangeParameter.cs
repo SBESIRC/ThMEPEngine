@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace ThMEPLighting.Garage.Model
 {
@@ -116,6 +117,85 @@ namespace ThMEPLighting.Garage.Model
         /// 建筑车道线图层
         /// </summary>
         public List<string> LaneLineLayers { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 过滤点的距离
+        /// </summary>
+        public double FilterPointDistance
+        {
+            get
+            {
+                return 0.4 * Interval;
+            }
+        }
+
+        public int GetLoopNumber(int lightNumber)
+        {
+            if (AutoCalculate)
+            {
+                return IsSingleRow ? 
+                    CalculateSingleRowLoopNumber(lightNumber, LightNumberOfLoop) :
+                    CalculateDoubleRowLoopNumber(lightNumber, LightNumberOfLoop);
+            }
+            else
+            {
+                return IsSingleRow ? 
+                    GetSingleRowUILoopNumber() : 
+                    GetDoubleRowUILoopNumber();
+            }
+        }
+        private int CalculateSingleRowLoopNumber(int lightNumbers, int lightNumberOfLoop)
+        {
+            double number = Math.Ceiling(lightNumbers * 1.0 / lightNumberOfLoop);
+            if (number < 2)
+            {
+                number = 2;
+            }
+            return (int)number;
+        }
+        /// <summary>
+        /// 根据灯的数量和每一个回路包含灯的数量，计算灯回路
+        /// eg. 灯的数量为100,每个回路25盏灯，计算得出4个回路
+        /// </summary>
+        /// <param name="lightNumbers">灯的数量</param>
+        /// <param name="lightNumberOfLoop">每一个回路包含多少盏灯</param>
+        /// <returns></returns>
+        private int CalculateDoubleRowLoopNumber(int lightNumbers, int lightNumberOfLoop)
+        {
+            var value = lightNumbers * 1.0 / lightNumberOfLoop;
+            double number = Math.Ceiling(value);
+            int intNumber = (int)number;
+            if (intNumber < 4)
+            {
+                intNumber = 4;
+            }
+            if (intNumber % 2 == 1)
+            {
+                intNumber += 1;
+            }
+            return intNumber / 2; // 计算单回路数量
+        }
+        private int GetSingleRowUILoopNumber()
+        {
+            return LoopNumber < 2 ? 2 : LoopNumber;
+        }
+        private int GetDoubleRowUILoopNumber()
+        {
+            int result = 0;
+            if (LoopNumber < 4)
+            {
+                result = 4;
+            }
+            else
+            {
+                result = LoopNumber;
+            }
+            if (result % 2 == 1)
+            {
+                result += 1;
+            }
+            return result / 2; // 计算单回路数量
+        }
     }
     public enum InstallWay
     {
