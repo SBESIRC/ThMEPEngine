@@ -18,6 +18,7 @@ namespace ThCADCore.NTS
             {
                 return curves;
             }
+            Plane plane = hatch.GetPlane();
             for (int index = 0; index < hatch.NumberOfLoops; index++)
             {
                 var hatchLoop = hatch.GetLoopAt(index);
@@ -51,7 +52,7 @@ namespace ThCADCore.NTS
                         var circle = ToCircle(hatchLoop.Curves);
                         if (circle.Area <= 1e-6)
                         {
-                            curves.Add(ToPolyline(hatchLoop.Curves, tolerance));
+                            curves.Add(ToPolyline(hatchLoop.Curves, plane, tolerance));
                         }
                         else
                         {
@@ -60,7 +61,7 @@ namespace ThCADCore.NTS
                     }
                     else
                     {
-                        curves.Add(ToPolyline(hatchLoop.Curves, tolerance));
+                        curves.Add(ToPolyline(hatchLoop.Curves, plane, tolerance));
                     }
                 }
             }
@@ -92,7 +93,7 @@ namespace ThCADCore.NTS
                 return new Circle();
             }
         }
-        private static Polyline ToPolyline(Curve2dCollection curve2ds, double tolerance = 1e-4)
+        private static Polyline ToPolyline(Curve2dCollection curve2ds, Plane plane,  double tolerance = 1e-4)
         {
             var segments = new PolylineSegmentCollection();
             foreach (Curve2d cv in curve2ds)
@@ -103,7 +104,9 @@ namespace ThCADCore.NTS
                 NurbCurve2d spline2d = cv as NurbCurve2d;
                 if (line2d != null)
                 {
-                    segments.Add(new PolylineSegment(line2d));
+                    var startPoint = new Point3d(plane, line2d.StartPoint);
+                    var endPoint = new Point3d(plane, line2d.EndPoint);
+                    segments.Add(new PolylineSegment(startPoint.ToPoint2D(), endPoint.ToPoint2D()));
                 }
                 else if (arc2d != null)
                 {
