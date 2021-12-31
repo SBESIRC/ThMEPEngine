@@ -165,6 +165,7 @@
     <Compile Include="ConnectWiring\Service\MultiLoopService.cs" />
     <Compile Include="Data\ThMEPDataSet.cs" />
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
+    <Compile Include="Diagnostics\DrawUtils.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />
