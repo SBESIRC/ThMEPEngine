@@ -84,11 +84,8 @@ namespace TianHua.Hvac.UI.UI.FanConnect
                 
                 var selectedItem = (ListBoxItem)SuppLeftListBox.SelectedItem;
                 string selectedValve = (string)selectedItem.Content;
-                if (!SuppRightListBox.Items.Contains(selectedValve))
-                {
-                    SuppRightListBox.Items.Add(selectedValve);
-                    ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValves.Add(selectedValve);
-                }
+                SuppRightListBox.Items.Add(selectedValve);
+                ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.FeedPipeValves.Add(selectedValve);
             }
         }
 
@@ -109,11 +106,8 @@ namespace TianHua.Hvac.UI.UI.FanConnect
             {
                 var selectedItem = (ListBoxItem)BackLeftListBox.SelectedItem;
                 string selectedValve = (string)selectedItem.Content;
-                if (!BackRightListBox.Items.Contains(selectedValve))
-                {
-                    BackRightListBox.Items.Add(selectedValve);
-                    ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeves.Add(selectedValve);
-                }
+                BackRightListBox.Items.Add(selectedValve);
+                ViewModel.WaterPipeConfigInfo.WaterValveConfigInfo.ReturnPipeValeves.Add(selectedValve);
             }
         }
 

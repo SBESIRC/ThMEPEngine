@@ -110,11 +110,20 @@
                     <Label x:Name="label10" Content="供水管："/>
                     <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
                         <ListBox x:Name="SuppLeftListBox" Height="80" Width="70">
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="闸阀"></ListBoxItem>
                             <ListBoxItem Content="球阀"></ListBoxItem>
-                            <ListBoxItem Content="柱塞阀"></ListBoxItem>
-                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="快开阀"></ListBoxItem>
+                            <ListBoxItem Content="蝶阀"></ListBoxItem>
+                            <ListBoxItem Content="止回阀"></ListBoxItem>
+                            <ListBoxItem Content="碟式止回阀"></ListBoxItem>
+                            <ListBoxItem Content="静态平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="定流量阀"></ListBoxItem>
+                            <ListBoxItem Content="定压差阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动调节阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动二通调节阀"></ListBoxItem>
                         </ListBox>
                         <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
                             <Button x:Name="SuppAddBtn" Content="->" Width="25" Margin="0,15,0,10" Click="SuppAddBtn_Click"/>
@@ -128,12 +137,20 @@
                     <Label x:Name="label11" Content="回水管："/>
                     <WrapPanel Orientation="Horizontal"  Margin="5,0,0,0">
                         <ListBox x:Name="BackLeftListBox" Height="80" Width="70">
+                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="闸阀"></ListBoxItem>
                             <ListBoxItem Content="球阀"></ListBoxItem>
-                            <ListBoxItem Content="住塞阀"></ListBoxItem>
-                            <ListBoxItem Content="截止阀"></ListBoxItem>
                             <ListBoxItem Content="快开阀"></ListBoxItem>
-                            <ListBoxItem Content="平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="蝶阀"></ListBoxItem>
+                            <ListBoxItem Content="止回阀"></ListBoxItem>
+                            <ListBoxItem Content="碟式止回阀"></ListBoxItem>
+                            <ListBoxItem Content="静态平衡阀"></ListBoxItem>
+                            <ListBoxItem Content="定流量阀"></ListBoxItem>
+                            <ListBoxItem Content="定压差阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动调节阀"></ListBoxItem>
+                            <ListBoxItem Content="动态压差平衡型电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动双位阀"></ListBoxItem>
+                            <ListBoxItem Content="电动二通调节阀"></ListBoxItem>
                         </ListBox>
                         <WrapPanel Orientation="Vertical" Margin="5,0,5,0">
                             <Button x:Name="BackAddBtn" Content="->" Width="25" Margin="0,15,0,10" Click="BackAddBtn_Click"/>

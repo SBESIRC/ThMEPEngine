@@ -91,8 +91,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 //提取水管路由
                 var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
-                ////水管干路和支干路
-                //var pipes = ThFanConnectUtils.SelectPipes();
+                //水管干路和支干路
                 if (pipes.Count == 0)
                 {
                     return;
@@ -102,7 +101,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     return;
                 }
-
                 //获取剪力墙
                 var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
                 //获取结构柱

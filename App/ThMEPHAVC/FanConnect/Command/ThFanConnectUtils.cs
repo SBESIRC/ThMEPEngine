@@ -99,6 +99,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     foreach (var obj in result.Value.GetObjectIds())
                     {
                         var entity = acadDb.Element<Entity>(obj);
+                        Point3d basePt = Point3d.Origin;
+                        if (entity.GeometricExtents != null)
+                        {
+                            basePt = entity.GeometricExtents.CenterPoint();
+                        }
+                        var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
+                        entity.UpgradeOpen();
+                        entity.TransformBy(mt);
+                        
                         if (entity is BlockReference)
                         {
                             var blk = entity as BlockReference;
@@ -115,9 +124,13 @@ namespace ThMEPHVAC.FanConnect.Command
 
                                 tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
                                 tmpFan.FanObb = dbcollection.GetMinimumRectangle();
+                                tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
+                                tmpFan.FanObb.TransformBy(mt.Inverse());
                                 retModeles.Add(tmpFan);
                             }
                         }
+                        entity.TransformBy(mt.Inverse());
+                        entity.DowngradeOpen();
                     }
                 }
                 return retModeles;
@@ -183,15 +196,24 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public static Polyline CreateMapFrame(Line line,Point3d pt, double expandLength)
         {
-            List<Point3d> pts = new List<Point3d>();
-            pts.Add(pt);
-            pts.Add(line.GetClosestPointTo(pt, false));
-
-            Polyline polyLine = new Polyline();
-            polyLine.AddVertexAt(0, pts[0].ToPoint2D(), 0, 0, 0);
-            polyLine.AddVertexAt(0, pts[1].ToPoint2D(), 0, 0, 0);
-            var objcet = polyLine.BufferPL(expandLength)[0];
-            return objcet as Polyline;
+            var clostPt = line.GetClosestPointTo(pt, false);
+            
+            if (pt.DistanceTo(clostPt) < 10.0)
+            {
+                var polyLine = ThDrawTool.CreateSquare(pt, 10000.0);
+                return polyLine;
+            }
+            else
+            {
+                List<Point3d> pts = new List<Point3d>();
+                pts.Add(pt);
+                pts.Add(clostPt);
+                Polyline polyLine = new Polyline();
+                polyLine.AddVertexAt(0, pts[0].ToPoint2D(), 0, 0, 0);
+                polyLine.AddVertexAt(1, pts[1].ToPoint2D(), 0, 0, 0);
+                var objcet = polyLine.BufferPL(expandLength)[0];
+                return objcet as Polyline;
+            }
         }
         /// <summary>
         /// 判断是否和外框线相交
