@@ -89,7 +89,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
-                    MessageForAdding = "选择要布置的设备",
+                    MessageForAdding = "选择要连接的设备",
                     RejectObjectsOnLockedLayers = true,
                 };
                 var result = Active.Editor.GetSelection(options);

@@ -278,7 +278,10 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             var retNodes = new List<ThFanTreeNode<ThFanPointModel>>();
             retNodes.Add(node);
-            retNodes.AddRange(FindConnectNode1(node));//找子结点
+            if (!node.Item.IsCrossPoint)
+            {
+                retNodes.AddRange(FindConnectNode1(node));//找子结点
+            }
             retNodes.AddRange(FindConnectNode2(node));//找父结点
             retNodes = retNodes.Distinct().ToList();
             return retNodes;
