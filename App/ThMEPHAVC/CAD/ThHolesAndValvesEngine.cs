@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPHVAC.Model;
+using ThCADCore.NTS;
 
 namespace ThMEPHVAC.CAD
 {
@@ -13,6 +14,8 @@ namespace ThMEPHVAC.CAD
         public List<ThValveGroup> roomValves { get; set; }
         public List<ThValveGroup> notRoomValves { get; set; }
         private Matrix3d disMat;
+        private Point3d srtP;
+        private ThCADCoreNTSSpatialIndex index;
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
                                       DBObjectCollection wallobjects,
                                       DBObjectCollection bypassobjects,
@@ -23,8 +26,9 @@ namespace ThMEPHVAC.CAD
             double teeWidth = ThMEPHVACService.GetWidth(param.bypassSize);
             double roomWidth = ThMEPHVACService.GetWidth(param.roomDuctSize);
             double notRoomWidth = ThMEPHVACService.GetWidth(param.notRoomDuctSize);
-            var p = fanmodel.isExhaust ? fanmodel.FanInletBasePoint : fanmodel.FanOutletBasePoint;
-            disMat = Matrix3d.Displacement(p.GetAsVector());
+            srtP = fanmodel.isExhaust ? fanmodel.FanInletBasePoint : fanmodel.FanOutletBasePoint;
+            disMat = Matrix3d.Displacement(srtP.GetAsVector());
+            index = new ThCADCoreNTSSpatialIndex(param.centerLines);
             //非送风场景 room是入风口 (送，补) room是出风口
             roomValves = GetRoomValveGroupWithoutWall(roomWidth, fanmodel);
             notRoomValves = GetNotRoomValveGroupWithoutWall(notRoomWidth, fanmodel);
@@ -143,9 +147,8 @@ namespace ThMEPHVAC.CAD
         private List<ThValveGroup> GetNotRoomValveGroupWithoutWall(double notRoomWidth, ThDbModelFan fanmodel)
         {
             var valvegroups = new List<ThValveGroup>();
-            var inVec = (fanmodel.FanInletBasePoint - fanmodel.FanBasePoint).GetNormal();
-            var outVec = (fanmodel.FanOutletBasePoint - fanmodel.FanBasePoint).GetNormal();
-            UpdateSrtVec(ref inVec, ref outVec);
+            var inVec = GetDir(fanmodel.FanInletBasePoint);
+            var outVec = GetDir(fanmodel.FanOutletBasePoint);
             if (inVec.IsEqualTo(Point3d.Origin.GetAsVector()) && outVec.IsEqualTo(Point3d.Origin.GetAsVector()))
             {
                 ThMEPHVACService.PromptMsg("[CheckError]: Can not find start vec!");
@@ -172,13 +175,23 @@ namespace ThMEPHVAC.CAD
             valvegroups.Add(valveGroup);
             return valvegroups;
         }
-
+        private Vector3d GetDir(Point3d p)
+        {
+            var mat = Matrix3d.Displacement(-srtP.GetAsVector());
+            var movep = p.TransformBy(mat);
+            var pl = ThMEPHVACService.CreateDetector(movep);
+            var res = index.SelectCrossingPolygon(pl);
+            if (res.Count != 1)
+                return Point3d.Origin.GetAsVector();
+            var l = res[0] as Line;
+            var otherP = ThMEPHVACService.GetOtherPoint(l, movep, new Tolerance(1.5, 1.5));
+            return (otherP - movep).GetNormal();
+        }
         private List<ThValveGroup> GetRoomValveGroupWithoutWall(double roomWidth, ThDbModelFan fanmodel)
         {
             var valvegroups = new List<ThValveGroup>();
-            var inVec = (fanmodel.FanInletBasePoint - fanmodel.FanBasePoint).GetNormal();
-            var outVec = (fanmodel.FanOutletBasePoint - fanmodel.FanBasePoint).GetNormal();
-            UpdateSrtVec(ref inVec, ref outVec);
+            var inVec = GetDir(fanmodel.FanInletBasePoint);
+            var outVec = GetDir(fanmodel.FanOutletBasePoint);
             if (inVec.IsEqualTo(Point3d.Origin.GetAsVector()) && outVec.IsEqualTo(Point3d.Origin.GetAsVector()))
             {
                 ThMEPHVACService.PromptMsg("[CheckError]: Can not find start vec!");

@@ -32,6 +32,7 @@
     <Compile Include="Algorithm\ThFanCenterLineDetector.cs" />
     <Compile Include="Algorithm\ThMEPHAVCBounds.cs" />
     <Compile Include="Algorithm\ThPointJudger.cs" />
+    <Compile Include="Algorithm\ThPolygonlizerCurveLine.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />

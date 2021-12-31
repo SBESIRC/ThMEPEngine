@@ -160,5 +160,13 @@ namespace TianHua.Hvac.UI
                 cmd.Execute();
             }
         }
+        [CommandMethod("TIANHUACAD", "TTTTTTTTest", CommandFlags.Modal)]
+        public void TTTTTTTTest()
+        {
+            using (var cmd = new ThCutCurveTestCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }
