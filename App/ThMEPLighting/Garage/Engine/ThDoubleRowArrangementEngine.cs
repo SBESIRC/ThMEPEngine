@@ -62,6 +62,7 @@ namespace ThMEPLighting.Garage.Engine
             {
                 arrange.Arrange();
                 Graphs = arrange.Graphs;
+                LoopNumber = arrange.LoopNumber;
                 CenterSideDicts = arrange.CenterSideDicts;
                 CenterGroupLines = arrange.CenterGroupLines;
             }
