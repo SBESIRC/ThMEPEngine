@@ -16,6 +16,7 @@ using System.Linq;
 using ThMEPEngineCore.GridOperation;
 using ThMEPEngineCore.GridOperation.Model;
 using ThMEPEngineCore.UCSDivisionService.DivisionMethod;
+using NFox.Cad;
 
 namespace ThMEPElectrical
 {
@@ -111,6 +112,10 @@ namespace ThMEPElectrical
                         retAxisCurves.Add(copy);
                     }
                 }
+                if (retAxisCurves.Count <= 0)
+                {
+                    retAxisCurves = GetAxis(frame);
+                }
 
                 GetStructureInfo(acadDatabase, frame, out List<Polyline> columns, out List<Polyline> walls);
 
@@ -119,6 +124,7 @@ namespace ThMEPElectrical
 
                 var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
                 curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
+                curves = curves.Where(x => x.Count > 0).ToList();
                 GridDivision gridDivision = new GridDivision();
                 var ucsPolygons = gridDivision.DivisionGridRegions(curves);
                 foreach (var item in ucsPolygons)
@@ -129,6 +135,26 @@ namespace ThMEPElectrical
                         acadDatabase.ModelSpace.Add(s);
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取轴网线
+        /// </summary>
+        /// <param name="polyline"></param>
+        public List<Curve> GetAxis(Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var axis = acadDatabase.ModelSpace
+                    .OfType<Curve>()
+                    .ToList();
+
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(axis.ToCollection());
+                var axisLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(bufferPoly).Cast<Curve>().ToList();
+
+                return axisLines;
             }
         }
 

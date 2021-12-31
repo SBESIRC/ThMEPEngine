@@ -41,7 +41,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
             var polygons = GetUCSPolygons(gridDics, grids.SelectMany(x => x).ToList());
             //polygons = polygons.Select(x => x.ArcSimplify()).ToList();
 
-            return polygons.Values.ToList();
+            return polygons.Values.SelectMany(x => x).ToList();
         }
 
         public List<GridModel> DivisionGridRegions(List<List<Curve>> grids)
@@ -80,30 +80,34 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <param name="gridLines"></param>
         /// <param name="gridTypes"></param>
         /// <returns></returns>
-        private List<GridModel> CalCutGridRegions(Dictionary<List<Line>, Polyline> polygons, Dictionary<List<Line>, List<Curve>> gridLines,
+        private List<GridModel> CalCutGridRegions(Dictionary<List<Line>, List<Polyline>> polygons, Dictionary<List<Line>, List<Curve>> gridLines,
             Dictionary<List<Line>, GridType> gridTypes)
         {
             List<GridModel> resGirds = new List<GridModel>();
             CutGridRegionService cutGridRegionService = new CutGridRegionService();
-            foreach (var polygon in polygons)
+            foreach (var polygonDic in polygons)
             {
-                var regions = cutGridRegionService.CutRegion(polygon.Value, gridLines[polygon.Key], gridTypes[polygon.Key]);
-                GridModel gridModel = new GridModel();
-                gridModel.allLines = gridLines[polygon.Key];
-                gridModel.regions = regions;
-                gridModel.GridPolygon = polygon.Value;
-                if (gridTypes[polygon.Key] == GridType.ArcGrid)
+                var polygonKey = polygonDic.Key;
+                foreach (var polygon in polygonDic.Value)
                 {
-                    gridModel.gridType = GridType.ArcGrid;
-                    gridModel.centerPt = (gridLines[polygon.Key].First(x => x is Arc) as Arc).Center;
+                    var regions = cutGridRegionService.CutRegion(polygon, gridLines[polygonKey], gridTypes[polygonKey]);
+                    GridModel gridModel = new GridModel();
+                    gridModel.allLines = gridLines[polygonKey];
+                    gridModel.regions = regions;
+                    gridModel.GridPolygon = polygon;
+                    if (gridTypes[polygonKey] == GridType.ArcGrid)
+                    {
+                        gridModel.gridType = GridType.ArcGrid;
+                        gridModel.centerPt = (gridLines[polygonKey].First(x => x is Arc) as Arc).Center;
+                    }
+                    else if (gridTypes[polygonKey] == GridType.LineGrid)
+                    {
+                        gridModel.gridType = GridType.LineGrid;
+                        var firLine = gridLines[polygonKey].First(x => x is Line) as Line;
+                        gridModel.vector = (firLine.EndPoint - firLine.StartPoint).GetNormal();
+                    }
+                    resGirds.Add(gridModel);
                 }
-                else if (gridTypes[polygon.Key] == GridType.LineGrid)
-                {
-                    gridModel.gridType = GridType.LineGrid;
-                    var firLine = gridLines[polygon.Key].First(x => x is Line) as Line;
-                    gridModel.vector =(firLine.EndPoint - firLine.StartPoint).GetNormal();
-                }
-                resGirds.Add(gridModel);
             }
 
             return resGirds;
@@ -115,9 +119,9 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         /// <param name="gridDics"></param>
         /// <param name="curves"></param>
         /// <returns></returns>
-        private Dictionary<List<Line>, Polyline> GetUCSPolygons(Dictionary<List<Line>, DBObjectCollection> gridDics, List<Curve> curves)
+        private Dictionary<List<Line>, List<Polyline>> GetUCSPolygons(Dictionary<List<Line>, DBObjectCollection> gridDics, List<Curve> curves)
         {
-            var ucsPolys = new Dictionary<List<Line>, Polyline>();
+            var ucsPolys = new Dictionary<List<Line>, List<Polyline>>();
             foreach (var dics in gridDics)
             {
                 var bufferPolys = dics.Value.Cast<Polyline>()
@@ -128,7 +132,14 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                 foreach (var poly in polygons)
                 {
                     var ucsPolygon = poly.ResetArcPolygon(curves);
-                    ucsPolys.Add(dics.Key, ucsPolygon);
+                    if (!ucsPolys.Keys.Contains(dics.Key))
+                    {
+                        ucsPolys.Add(dics.Key, new List<Polyline>() { ucsPolygon });
+                    }
+                    else
+                    {
+                        ucsPolys[dics.Key].Add(ucsPolygon);
+                    }
                 }
             }
 
