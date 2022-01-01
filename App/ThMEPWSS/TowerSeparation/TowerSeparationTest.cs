@@ -90,18 +90,31 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             //line.AddVertexAt(0, new Point2d(5, -10), 0, 0, 0);
             //line.AddVertexAt(1, new Point2d(5, 20), 0, 0, 0);
             //line.Closed = true;
-            Line line = new Line(new Point3d(5, -10, 0), new Point3d(5, 20, 0));
-            DrawUtils.ShowGeometry(line, "line", 5);
-            bool flag1 = targetPoly.Intersects(line);
-            DBObjectCollection polySet = new DBObjectCollection { targetPoly, crossPoly, edgePoly };
-            var polySpatialIndex = new ThCADCoreNTSSpatialIndex(polySet);
-            bool flag2 = polySpatialIndex.Intersects(line.Buffer(1));
+            //Line line = new Line(new Point3d(5, -10, 0), new Point3d(5, 20, 0));
+            //DrawUtils.ShowGeometry(line, "line", 5);
+            //bool flag1 = targetPoly.Intersects(line);
+            //DBObjectCollection polySet = new DBObjectCollection { targetPoly, crossPoly, edgePoly };
+            //var polySpatialIndex = new ThCADCoreNTSSpatialIndex(polySet);
+            //bool flag2 = polySpatialIndex.Intersects(line.Buffer(1));
             //var temp = line.Buffer(1);
             ////var temp = line.Buffer(1).Cast<Polyline>().ToList().FirstOrDefault();
             //var difference2 = ThCADCoreNTSEntityExtension.Difference(temp, new DBObjectCollection { targetPoly });
             //DrawUtils.ShowGeometry(difference2.Cast<Entity>().ToList(), "testForDifference2", 6);
             //var doubleInter = ThCADCoreNTSEntityExtension.Intersection(line, difference2);
             //DrawUtils.ShowGeometry(doubleInter.Cast<Entity>().ToList(), "testForDifference3", 7);
+
+            Polyline testPoly = new Polyline();
+            testPoly.AddVertexAt(0, new Point2d(0, 0), 0, 0, 0);
+            testPoly.AddVertexAt(1, new Point2d(20, 0), 0, 0, 0);
+            testPoly.AddVertexAt(2, new Point2d(20, 5), 0, 0, 0);
+            testPoly.AddVertexAt(3, new Point2d(5, 5), 0, 0, 0);
+            testPoly.AddVertexAt(4, new Point2d(5, 15), 0, 0, 0);
+            testPoly.AddVertexAt(5, new Point2d(0, 15), 0, 0, 0);
+            testPoly.Closed = true;
+            DrawUtils.ShowGeometry(testPoly, "testPoly", 5);
+            var temp = testPoly.Buffer(-2).Cast<Entity>().ToList();
+            DrawUtils.ShowGeometry(temp, "testPolyBuffer", 6);
+
         }
     }
 
