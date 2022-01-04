@@ -33,8 +33,8 @@ namespace ThMEPHVAC
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THLGTEMP", CommandFlags.Modal)]
-        public void THLGTEMP()
+        [CommandMethod("TIANHUACAD", "THFGSGLG", CommandFlags.Modal)]
+        public void THFGSGLG()
         {
             using (var cmd = new ThWaterPipeConnectExtractCmd_Temp())
             {
