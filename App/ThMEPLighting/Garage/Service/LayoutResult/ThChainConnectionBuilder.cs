@@ -1,16 +1,16 @@
-﻿using System;
+﻿using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -34,8 +34,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             LightPositionDict = BuildLightPos();
 
             // 创建连接线，按照灯长度把灯所在的边打断
-            var firstEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.First).ToList();
-            var secondEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.Second).ToList();
+            var firstEdges = GetEdges(EdgePattern.First); 
+            var secondEdges = GetEdges(EdgePattern.Second);
             var firstLinkWireObjs = CreateLinkWire(firstEdges);
             firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
             var secondLinkWireObjs = CreateLinkWire(secondEdges);
@@ -77,14 +77,55 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private DBObjectCollection CreateJumpWire(out List<Point3dCollection> ductions)
         {
+            ductions = new List<Point3dCollection>();
+            if (ArrangeParameter.ArrangeEdition== ArrangeEdition.Second)
+            {
+                return CreateJumpWire1(out ductions);
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                return CreateJumpWire2(out ductions);
+            }
+            else
+            {
+                return new DBObjectCollection();
+            }
+        }
+
+        private DBObjectCollection CreateJumpWire1(out List<Point3dCollection> ductions)
+        {
+            // 创建跳接线
+            return CreateJumpWire(Graphs, out ductions);
+        }
+        private DBObjectCollection CreateJumpWire2(out List<Point3dCollection> ductions)
+        {
+            // 创建跳接线
+            var results = new DBObjectCollection();
+            var ductionCollector = new List<Point3dCollection>();
+            var firstEdges = GetEdges(EdgePattern.First);
+            var secondEdges = GetEdges(EdgePattern.Second);
+            firstEdges.ForEach(o => o.IsTraversed = false);
+            secondEdges.ForEach(o => o.IsTraversed = false);
+
+            var graphs = new List<ThLightGraphService>();
+            graphs.AddRange(firstEdges.CreateGraphs());
+            graphs.AddRange(secondEdges.CreateGraphs());
+
+            return CreateJumpWire(graphs, out ductions);
+        }
+
+        private DBObjectCollection CreateJumpWire(
+            List<ThLightGraphService> graphs,
+            out List<Point3dCollection> ductions)
+        {
             // 创建跳接线
             var results = new DBObjectCollection();
             ductions = new List<Point3dCollection>();
             var ductionCollector = new List<Point3dCollection>();
-            Graphs.ForEach(g =>
+            graphs.ForEach(g =>
             {
                 var linkService = new ThLightNodeSameLinkService(g.Links);
-                var lightNodeLinks = linkService.FindLightNodeLink2();
+                var lightNodeLinks = linkService.FindLightNodeLink1();
                 var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
                 {
                     DefaultNumbers = this.DefaultNumbers,
@@ -96,7 +137,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 };
                 jumpWireFactory.Build();
                 ductionCollector.AddRange(jumpWireFactory.Deductions);
-                lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e=> results.Add(e));
+                lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             });
             ductions = ductionCollector;
             return results;

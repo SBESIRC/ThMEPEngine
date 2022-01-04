@@ -1,15 +1,15 @@
-﻿using System;
+﻿using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -73,13 +73,51 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private DBObjectCollection CreateJumpWire()
         {
+            if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
+            {
+                return CreateJumpWire1();
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                return CreateJumpWire2();
+            }
+            else
+            {
+                return new DBObjectCollection();
+            }
+        }
+
+        private DBObjectCollection CreateJumpWire1()
+        {
+            // 创建图链路上跳接线
+            return CreateJumpWire(Graphs);
+        }
+
+        private DBObjectCollection CreateJumpWire2()
+        {
             // 创建图链路上跳接线
             var results = new DBObjectCollection();
-            Graphs.ForEach(g =>
+            var firstEdges = GetEdges(EdgePattern.First);
+            var secondEdges = GetEdges(EdgePattern.Second);
+            firstEdges.ForEach(o => o.IsTraversed = false);
+            secondEdges.ForEach(o => o.IsTraversed = false);
+
+            var graphs = new List<ThLightGraphService>();
+            graphs.AddRange(firstEdges.CreateGraphs());
+            graphs.AddRange(secondEdges.CreateGraphs());
+
+            return CreateJumpWire(graphs);
+        }
+
+        private DBObjectCollection CreateJumpWire(List<ThLightGraphService> graphs)
+        {
+            // 创建图链路上跳接线
+            var results = new DBObjectCollection();
+            graphs.ForEach(g =>
             {
                 var gLinks = g.Links;
                 var linkService = new ThLightNodeSameLinkService(gLinks);
-                var lightNodeLinks = linkService.FindLightNodeLink2();
+                var lightNodeLinks = linkService.FindLightNodeLink1();
                 var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
                 {
                     DefaultNumbers = this.DefaultNumbers,

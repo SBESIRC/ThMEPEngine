@@ -20,47 +20,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             Links = links;
         }
-        /// <summary>
-        /// 适用于跳线连接
-        /// </summary>
-        /// <returns></returns>
+        
         public List<ThLightNodeLink> FindLightNodeLink1()
-        {
-            var results = new List<ThLightNodeLink>();
-            // 信息打平，便于后期查询
-            BuildLightNodePositionDict();
-
-            // 查找直段上具有相同编号且相邻的灯
-            // 创建直段     
-            var straitLinks = BuildStraitLinks(Links.SelectMany(l => l.Edges).ToList());
-            straitLinks.ForEach(l =>
-            {
-                // 查询
-                var lightNodeLinks = BuildLightNodeLinks(l);
-                lightNodeLinks.ForEach(o => o.OnLinkPath = true);
-                results.AddRange(lightNodeLinks);
-            });
-
-            // 查找分支处具有相同编号且相邻的灯
-            // 分支拐弯处
-            Links.ForEach(l =>
-            {
-                var lightNodeLinks = FindCornerLightNodeLink(l);
-                foreach (var link in lightNodeLinks)
-                {
-                    if (!IsExisted(link, results))
-                    {
-                        results.Add(link);
-                    }
-                }
-            });
-            return results;
-        }
-        /// <summary>
-        /// 适用于弧形连接
-        /// </summary>
-        /// <returns></returns>
-        public List<ThLightNodeLink> FindLightNodeLink2()
         {
             var results = new List<ThLightNodeLink>();
             // 信息打平，便于后期查询

@@ -106,6 +106,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
+        protected List<ThLightEdge> GetEdges(EdgePattern edgePattern)
+        {
+            return Graphs
+                .SelectMany(g => g.GraphEdges)
+                .Where(o => o.EdgePattern == edgePattern)
+                .ToList();
+        }
+
         #region----------Printer----------
         protected void SetDatabaseDefault(Database db)
         {
