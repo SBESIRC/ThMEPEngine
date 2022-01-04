@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using static ThMEPArchitecture.PartitionLayout.GeoUtilitiesOptimized;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -59,12 +60,7 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-        public static void SortAlongCurve(List<Point3d> points, Curve curve)
-        {
-            var comparer = new PointAlongCurveComparer(curve);
-            points.Sort(comparer);
-            return;
-        }
+      
 
         public static List<Line> DivideLineByLength(Line line, double length)
         {
@@ -85,60 +81,7 @@ namespace ThMEPArchitecture.PartitionLayout
             return res;
         }
 
-        private class PointAlongCurveComparer : IComparer<Point3d>
-        {
-            public PointAlongCurveComparer(Curve curve)
-            {
-                Curve = curve;
-            }
-            private Curve Curve;
-            public int Compare(Point3d a, Point3d b)
-            {
-                var param_a = 0.0;
-                var param_b = 0.0;
-                if (Curve is Polyline)
-                {
-                    var pl = (Polyline)Curve;
-                    param_a = a.GetDisOnPolyLine(pl);
-                    param_b = b.GetDisOnPolyLine(pl);
-                }
-                else if (Curve is Line)
-                {
-                    var line = (Line)Curve;
-                    var pa = line.GetClosestPointTo(a, false);
-                    var pb = line.GetClosestPointTo(b, false);
-                    param_a = pa.DistanceTo(line.StartPoint);
-                    param_b = pb.DistanceTo(line.StartPoint);
-                }
-                if (param_a == param_b) return 0;
-                else if (param_a < param_b) return -1;
-                else return 1;
-            }
-        }
 
-        public static double GetDisOnPolyLine(this Point3d pt, Polyline poly)
-        {
-            if (poly.GetClosestPointTo(pt, false).DistanceTo(pt) > 0.1)
-            {
-                return -1;
-            }
-            double distance = 0.0;
-            for (int i = 0; i < poly.NumberOfVertices - 1; i++)
-            {
-                var lineSeg = poly.GetLineSegmentAt(i);
-                if (lineSeg.IsOn(pt, new Tolerance(1.0, 1.0)))
-                {
-                    var newPt = pt.GetProjectPtOnLine(lineSeg.StartPoint, lineSeg.EndPoint);
-                    distance += lineSeg.StartPoint.DistanceTo(newPt);
-                    break;
-                }
-                else
-                {
-                    distance += lineSeg.Length;
-                }
-            }
-            return distance;
-        }
 
         public static Polyline PolyFromLine(Line a)
         {
@@ -325,92 +268,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 return new Curve[] { curve };
             }
-        }
-
-        public static Curve[] SplitLine(Line curve, Curve cutter)
-        {
-            List<Point3d> points = new List<Point3d>();
-            points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
-            points = RemoveDuplicatePts(points, 1);
-            SortAlongCurve(points, curve);
-            if (points.Count > 0)
-            {
-                Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
-                points = points.Select(e => curve.GetClosestPointTo(e, false)).ToList();
-                var splited = GetSplitLine(curve, points);
-                ps.Dispose();
-                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
-            }
-            else
-            {
-                return new Curve[] { curve };
-            }
-        }
-
-        public static Curve[] SplitLine(Line curve, List<Polyline> cutters)
-        {
-            List<Point3d> points = new List<Point3d>();
-            foreach (var cutter in cutters)
-            {
-                points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
-            }
-            
-            points = RemoveDuplicatePts(points, 1);
-            SortAlongCurve(points, curve);
-            if (points.Count > 0)
-            {
-                Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
-                points = points.Select(e => curve.GetClosestPointTo(e, false)).ToList();
-                var splited = GetSplitLine(curve, points);
-                ps.Dispose();
-                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
-            }
-            else
-            {
-                return new Curve[] { curve };
-            }
-        }
-
-        public static Curve[] SplitCurve(Curve curve, List<Polyline> cutters)
-        {
-            List<Point3d> points = new List<Point3d>();          
-            foreach (var cutter in cutters)
-            {
-                points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
-            }
-            points = RemoveDuplicatePts(points, 1);
-            SortAlongCurve(points, curve);
-            if (points.Count > 0)
-            {
-                Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
-                var splited = curve.GetSplitCurves(ps);
-                ps.Dispose();
-                return splited.Cast<Curve>().ToArray();
-            }
-            else
-            {
-                return new Curve[] { curve };
-            }
-        }
-
-
-        public static List<Point3d> RemoveDuplicatePts(List<Point3d> points, double tol = 0)
-        {
-            List<Point3d> results = new List<Point3d>(points);
-            for (int i = 1; i < results.Count; i++)
-            {
-                for (int j = 0; j < i; j++)
-                {
-                    if (results[i].DistanceTo(results[j]) <= tol)
-                    {
-                        results.RemoveAt(i);
-                        i--;
-                        break;
-                    }
-                }
-            }
-            return results;
-        }
+        }     
 
         public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
         {
@@ -424,14 +282,14 @@ namespace ThMEPArchitecture.PartitionLayout
             SortAlongCurve(points, curve);
             if (curve is Line)
             {
-                return GetSplitLine((Line)curve, points).Cast<Curve>().ToList();
+                return SplitLine((Line)curve, points).Cast<Curve>().ToList();
             }
             else if (curve is Polyline)
             {
                 List<Polyline> plys = new List<Polyline>();
                 var pl = (Polyline)curve;
                 var verts = pl.Vertices().Cast<Point3d>().ToList();
-                var param = verts.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e, pl)).ToList();
+                var param = verts.Select(e => GetDisOnPolyLine(e, pl)).ToList();
                 points.Insert(0, verts.First());
                 points.Add(verts.Last());
                 points = RemoveDuplicatePts(points,1);
@@ -441,7 +299,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 param.RemoveAt(param.Count - 1);
                 verts.RemoveAt(0);
                 verts.RemoveAt(verts.Count - 1);
-                if(verts.Count==0) return GetSplitLine(new Line(curve.StartPoint,curve.EndPoint), points).Cast<Curve>().ToList();
+                if(verts.Count==0) return SplitLine(new Line(curve.StartPoint,curve.EndPoint), points).Cast<Curve>().ToList();
 
 
                 var curparam = points.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e,pl)).ToList();
@@ -814,27 +672,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return length;
         }
 
-        public static List<Line> GetSplitLine(Line line, List<Point3d> points)
-        {
-            points.Insert(0, line.StartPoint);
-            points.Add(line.EndPoint);
-            RemoveDuplicatePts(points);
-            try
-            {
-                SortAlongCurve(points, line);
-            }
-            catch(Exception ex)
-            {
-                ;
-                SortAlongCurve(points, line);
-            }
-            List<Line> results = new List<Line>();
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                Line r = new Line(points[i], points[i + 1]);
-                results.Add(r);
-            }
-            return results;
-        }
+       
     }
 }

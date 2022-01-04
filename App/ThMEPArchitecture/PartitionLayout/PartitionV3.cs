@@ -11,6 +11,7 @@ using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
 using static ThMEPArchitecture.PartitionLayout.Utitlties;
+using static ThMEPArchitecture.PartitionLayout.GeoUtilitiesOptimized;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -683,7 +684,7 @@ namespace ThMEPArchitecture.PartitionLayout
             points = points.Select(e => line.GetClosestPointTo(e, false)).Distinct().ToList();
             //RemoveDuplicatePts(points);
             carindexes.Dispose();
-            var res = GetSplitLine(line, points).Where(e => e.Length > DisCarWidth - 1).ToList();
+            var res = SplitLine(line, points).Where(e => e.Length > DisCarWidth - 1).ToList();
             //res = res.Where(e => !IsInAnyPolys(e.GetCenter(),Obstacles)).ToList();
             res = res.Where(e =>
             {
@@ -1032,10 +1033,13 @@ namespace ThMEPArchitecture.PartitionLayout
             bool judge_carmodulebox = true, bool reverse_dividesequence = false, bool adjust_pillar_edge = false, bool judge_modulebox = false,
             bool gfirstpillar = false, bool allow_pillar_in_wall = false, bool judge_in_obstacles = false, bool glastpillar = true, List<Polyline> crs = null)
         {
+            
             if (allow_pillar_in_wall && GPillars)
             {
                 var dis = ClosestPointInVertCurves(line.StartPoint, line, IniLanes.Select(e => e.Line).ToList());
                 if (dis >= DisLaneWidth + DisPillarLength - 1 && Math.Abs(dis - DisCarAndHalfLane) > 1)
+                    line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-Vector(line).GetNormal() * DisPillarLength)), line.EndPoint);
+                else if (line.Length < DisCarWidth * 4)
                     line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-Vector(line).GetNormal() * DisPillarLength)), line.EndPoint);
             }
             var segobjs = new DBObjectCollection();
@@ -1357,8 +1361,8 @@ namespace ThMEPArchitecture.PartitionLayout
                         test_pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, test_pl.Centroid()));
                     }
                     catch { }
-                    var crossed = ObstaclesSpatialIndex.Intersects(test_pl, true) ||
-                        Boundary.Intersect(test_pl, Intersect.OnBothOperands).Count > 0;
+                    var crossed = ObstaclesSpatialIndex.Intersects(test_pl, true) /*||*/
+                        /*Boundary.Intersect(test_pl, Intersect.OnBothOperands).Count > 0*/;
                     test_l.Dispose();
                     test_pl.Dispose();
                     var closest_diatance_on_offset_direction = GetClosestDistanceOnOffsetDirection(offsetlane, vec, IniLaneLines);

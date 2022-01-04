@@ -20,6 +20,29 @@ namespace ThMEPArchitecture.PartitionLayout
         [CommandMethod("TIANHUACAD", "ThPPPPPParkTest", CommandFlags.Modal)]
         public void ThPPPPPParkTest()
         {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = result.Value
+                   .GetObjectIds()
+                   .Select(o => adb.Element<Entity>(o))
+                   .Where(o => o is Hatch)
+                   .Select(o => o.Clone() as Entity)
+                   .ToList();
+                var pls = objs.Select(e => (Hatch)e);
+                foreach (var e in pls)
+                {
+                    var k = e.Boundaries()[0];
+                    k.Layer = "障碍物边缘";
+                    k.AddToCurrentSpace();
+                }
+                return;
+            }
+
             //using (AcadDatabase adb = AcadDatabase.Active())
             //{
             //    var result = Active.Editor.GetSelection();
@@ -46,7 +69,6 @@ namespace ThMEPArchitecture.PartitionLayout
             //    var dd = sindex.Intersects(b, true);
             //    var t = sindex.Intersects(b);
             //    var k = a.IsPointIn(b.GetRecCentroid());
-
             //    ;
             //}
             Execute();

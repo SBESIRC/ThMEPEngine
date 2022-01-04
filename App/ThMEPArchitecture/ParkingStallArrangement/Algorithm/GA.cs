@@ -109,6 +109,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             layoutPara.Set(Genome);
             int result = GetParkingNums(layoutPara);
+            //Thread.Sleep(3);
+            //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             Count = result;
             //System.Diagnostics.Debug.WriteLine(Count);
 

@@ -40,5 +40,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingStallArrangement.WithoutSegLineCmd))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ThParkingStallArrangementByFixedLines))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.ParkingPartitionTest))]
-[assembly: CommandClass(typeof(ThMEPArchitecture.ParkingPartitionTestV2))]
 [assembly: CommandClass(typeof(ThMEPArchitecture.PartitionLayout.TestCommondV3))]

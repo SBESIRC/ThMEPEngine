@@ -12,6 +12,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
+using static ThMEPArchitecture.PartitionLayout.GeoUtilitiesOptimized;
 
 namespace ThMEPArchitecture
 {
