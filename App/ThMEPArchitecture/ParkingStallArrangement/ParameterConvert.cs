@@ -85,7 +85,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
-                logger?.Error("数据无效, wall: " + w + "lanes: " + l + "Boundary: " + GeoUtilities.AnalysisPoly(boundary));
                 //partition.Dispose();
                 return false;
             }
