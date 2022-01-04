@@ -83,13 +83,14 @@ namespace ThMEPHVAC.LoadCalculation.Service
                                         if (!table.IsNull())
                                         {
                                             int addRowCount = table.Rows.Count - existedTable.Rows.Count;
-                                            if (addRowCount != 0)
+                                            var connectpoint = tableBoundary.Contains(curve.EndPoint) ? curve.EndPoint : curve.StartPoint;
+                                            if (addRowCount != 0 && Math.Abs(connectpoint.Y - existedTable.Position.Y) > existedTable.Height / 2)
                                             {
-                                                var connectpoint = tableBoundary.Contains(curve.EndPoint) ? curve.EndPoint : curve.StartPoint;
-                                                if (Math.Abs(connectpoint.Y - existedTable.Position.Y) > existedTable.Height / 2)
-                                                {
-                                                    table.Position = table.Position + new Vector3d(0, addRowCount * 440, 0);
-                                                }
+                                                table.Position = table.Position + new Vector3d(0, addRowCount * 440, 0);
+                                            }
+                                            if (!table.GeometricExtents.ToRectangle().Contains(connectpoint))
+                                            {
+                                                table.Position = table.Position + new Vector3d(existedTable.Width - table.Width, 0, 0);
                                             }
                                             Deprecatedtables.Add(existedTable);
                                             result.Add(table);
@@ -162,7 +163,9 @@ namespace ThMEPHVAC.LoadCalculation.Service
             table.SetSize(ShowData.Count, 2);
             table.SetRowHeight(440);
             table.SetTextHeight(300);
-            table.SetColumnWidth(2400);
+            // 根据文字的字符数估算列的长度
+            table.Columns[0].Width = 2400;
+            table.Columns[1].Width = ShowData.Max(o =>o.Item3.Length) * 180 + 200;
             table.GenerateLayout();
             table.Rows[0].Style = "数据";//将第一行样式由表头->数据
             table.Rows[1].Style = "数据";//将第二行样式由标题->数据
