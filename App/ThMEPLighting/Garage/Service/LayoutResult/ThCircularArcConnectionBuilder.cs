@@ -75,7 +75,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             // 创建图链路上跳接线
             var results = new DBObjectCollection();
-            Graphs.Cast<ThCdzmLightGraphService>().ForEach(g =>
+            Graphs.ForEach(g =>
             {
                 var gLinks = g.Links;
                 var linkService = new ThLightNodeSameLinkService(gLinks);

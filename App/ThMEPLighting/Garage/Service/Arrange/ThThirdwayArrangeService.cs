@@ -40,7 +40,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 var firstGraphs = o.Item1.CreateDirectionGraphs();
 
                 // 为1号线编号
-                firstGraphs.ForEach(f => f.Number(base.LoopNumber, false, ArrangeParameter.DefaultStartNumber));
+                firstGraphs.ForEach(f => f.Number1(base.LoopNumber, false, ArrangeParameter.DefaultStartNumber));
 
                 // 把1号线编号,传递到2号线
                 PassNumber(firstGraphs.SelectMany(g => g.GraphEdges).ToList(), o.Item2);

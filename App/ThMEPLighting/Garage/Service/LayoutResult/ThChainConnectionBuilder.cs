@@ -81,7 +81,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new DBObjectCollection();
             ductions = new List<Point3dCollection>();
             var ductionCollector = new List<Point3dCollection>();
-            Graphs.Cast<ThCdzmLightGraphService>().ForEach(g =>
+            Graphs.ForEach(g =>
             {
                 var linkService = new ThLightNodeSameLinkService(g.Links);
                 var lightNodeLinks = linkService.FindLightNodeLink2();
