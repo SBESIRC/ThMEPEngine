@@ -23,7 +23,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
         SprinklerCheckersUI uiSprinklerCheckers;
         SprinklerConnectionUI uiSprinklerConnection;
         RoomOutlineUI uiRoomOutline;
-        static uiUserConfig tianHuaUserConfig;
         public void Initialize()
         {
             uiFireHydrant = null;
@@ -62,10 +61,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 if (SprinklerConnectionUI.Instance != null)
                 {
                     SprinklerConnectionUI.Instance.Hide();
-                }
-                if (tianHuaUserConfig != null)
-                {
-                    tianHuaUserConfig.Hide();
                 }
             }
         }
@@ -381,11 +376,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THMEPOPTIONS", CommandFlags.Modal)]
         public void ThMEPOptions()
         {
-            if (tianHuaUserConfig == null)
-            {
-                tianHuaUserConfig = new uiUserConfig();
-            }
-            AcadApp.ShowModelessWindow(tianHuaUserConfig);
+            var vm = new ThTianHuaUserConfigVM();
+            var config = new uiUserConfig(vm);
+            config.WindowStartupLocation = System.Windows.
+                WindowStartupLocation.CenterScreen;
+            AcadApp.ShowModalWindow(config);
         }
     }
 }
