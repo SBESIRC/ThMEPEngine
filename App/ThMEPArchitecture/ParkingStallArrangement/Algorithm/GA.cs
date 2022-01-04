@@ -22,7 +22,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
     public class Gene : IEquatable<Gene>
     {
         public double Value { get; set; }//线的值
-        public bool Direction { get; set; }//点的方向，true是y方向
+        public bool VerticalDirection { get; set; }//点的方向，true是y方向
         public double MinValue { get; set; }//线的最小值
         public double MaxValue { get; set; }//线的最大值
         public double StartValue { get; set; }//线的起始点另一维
@@ -30,7 +30,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public Gene(double value, bool direction, double minValue, double maxValue, double startValue, double endValue)
         {
             Value = value;
-            Direction = direction;
+            VerticalDirection = direction;
             MinValue = minValue;//绝对的最小值
             MaxValue = maxValue;//绝对的最大值
             StartValue = startValue;
@@ -40,7 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public Gene()
         {
             Value = 0;
-            Direction = false;
+            VerticalDirection = false;
             MinValue = 0;
             MaxValue = 0;
             StartValue = 0;
@@ -48,17 +48,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         public override int GetHashCode()
         {
-            return Value.GetHashCode() ^ Direction.GetHashCode();
+            return Value.GetHashCode() ^ VerticalDirection.GetHashCode();
         }
         public bool Equals(Gene other)
         {
-            return Value.Equals(other.Value) && Direction.Equals(other.Direction);
+            return Value.Equals(other.Value) && VerticalDirection.Equals(other.VerticalDirection);
         }
 
         public Line ToLine()
         {
             Point3d spt, ept;
-            if (Direction)
+            if (VerticalDirection)
             {
                 spt = new Point3d(Value, StartValue, 0);
                 ept = new Point3d(Value, EndValue, 0);
@@ -80,19 +80,44 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public Serilog.Core.Logger Logger = null;
 
         public int Count { get; set; }
+
+        static private Dictionary<PartitionBoundary,int> _cachedPartitionCnt = new Dictionary<PartitionBoundary, int>();
+
+        static public Dictionary<PartitionBoundary,int> CachedPartitionCnt
+        {
+            get { return _cachedPartitionCnt; }
+            set { _cachedPartitionCnt = value; }
+        }
+
         public int GenomeCount()
         {
             return Genome.Count;
         }
+
+        public int GetMaximumNumber_(LayoutParameter layoutPara, GaParameter gaPara)
+        {
+            layoutPara.Set(Genome);
+
+            Random rand = new Random();
+            int rst = rand.Next(200);
+            Count = rst;
+            return rst;
+        }
+
         //Fitness method
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
         {
             layoutPara.Set(Genome);
-            //int result = GetParkingNums(layoutPara);
-            Thread.Sleep(3);
-            int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
+            int result = GetParkingNums(layoutPara);
             Count = result;
+            //System.Diagnostics.Debug.WriteLine(Count);
+
             return result;
+        }
+
+        public void Clear()
+        {
+            Genome.Clear();
         }
 
         public int GetMaximumNumberFast(LayoutParameter layoutPara, GaParameter gaPara)
@@ -109,12 +134,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 int index = layoutPara.AreaNumber[j];
-                layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
+                layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
+                layoutPara.Id2AllSubAreaDic.TryGetValue(index, out Polyline boundary);
+                layoutPara.SubAreaId2ShearWallsDic.TryGetValue(index, out List<List<Polyline>> obstaclesList);
                 layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> walls);
+                layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
                 var obstacles = new List<Polyline>();
                 obstaclesList.ForEach(e => obstacles.AddRange(e));
                 var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
@@ -131,6 +156,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return count;
         }
 
+        
         private int GetParkingNums(LayoutParameter layoutPara)
         {
             int count = 0;
@@ -141,12 +167,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     try
                     {
-                        count += partition.CalNumOfParkingSpaces();
+                        var partitionBoundary = new PartitionBoundary(partition.Boundary.Vertices());
+                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
+                        {
+                            count += CachedPartitionCnt[partitionBoundary];
+                        }
+                        else
+                        {
+                            var subCnt = partition.CalNumOfParkingSpaces();
+                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                            count += subCnt;
+                        }
                     }
                     catch (Exception ex)
                     {
+                        //partition.Dispose();
                         Logger.Error(ex.Message);
-                        partition.Dispose();
+                    }
+                    finally
+                    {
+                       // partition.Dispose();
                     }
                 }
             }
@@ -267,12 +308,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 int maxNums = 0;
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.Minutes < MaxTime)
+                while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.TotalMinutes < MaxTime)
                 {
                     var strCurIterIndex = $"迭代次数：{curIteration}";
                     //Active.Editor.WriteMessage(strCurIterIndex);
                     Logger?.Information(strCurIterIndex);
-                    selected = Selection(pop, out int curNums);
+                    System.Diagnostics.Debug.WriteLine(strCurIterIndex);
+                    System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
+
+                    selected = Selection(curIteration, pop, out int curNums);
+
                     if (recordprevious)
                     {
                         histories.Add(selected.First());
@@ -292,13 +337,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 var strBest = $"最大车位数: {pop.First().Count}";
                 Active.Editor.WriteMessage(strBest);
                 Logger?.Information(strBest);
+                var strTotalMins = $"运行总时间: {stopWatch.Elapsed.TotalMinutes} 分";
                 stopWatch.Stop();
-                var strTotalMins = $"运行总时间: {stopWatch.Elapsed.Minutes} 分";
+
                 Logger?.Information(strTotalMins);
+                System.Diagnostics.Debug.WriteLine(strTotalMins);
+
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+            }
+            finally
+            {
+                System.Diagnostics.Debug.WriteLine($"Total sub partitions: {Chromosome.CachedPartitionCnt.Count}");
+
+                Chromosome.CachedPartitionCnt.Clear();
             }
 
             return selected;
@@ -423,17 +477,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return newS;
         }
 
-        private List<Chromosome> Selection(List<Chromosome> inputSolution, out int maxNums)
+        private List<Chromosome> Selection(int iterationIndex, List<Chromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
+            //System.Diagnostics.Debug.WriteLine("进行选择");
 
-            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            int index = 0;
+            inputSolution.ForEach(s =>
+                {
+                    s.GetMaximumNumber(LayoutPara, GaPara);
+                    System.Diagnostics.Debug.WriteLine($"{iterationIndex}.{index++}: { s.Count}");
+                }
+            );
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
 
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;
             var strBestCnt = $"当前最大车位数： {sorted.First().Count}\n";
             Logger?.Information(strBestCnt);
+            System.Diagnostics.Debug.WriteLine(strBestCnt);
+
             var rst = new List<Chromosome>();
             for (int i = 0; i < SelectionSize; ++i)
             {

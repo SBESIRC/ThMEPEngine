@@ -235,6 +235,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 result.Add(pls[0]);
                 pls.RemoveAt(0);
             }
+            pls.ForEach(pl => pl.Dispose());
             pls.Clear();
             return result;
         }
@@ -304,10 +305,10 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-        public static Curve[] SplitCurve(Curve curve, Curve cutter)
+        public static Curve[] SplitCurve(Curve curve, Curve splitter)
         {
             List<Point3d> points = new List<Point3d>();
-            points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
+            points.AddRange(curve.Intersect(splitter, Intersect.OnBothOperands));
             points = RemoveDuplicatePts(points, 1);
             SortAlongCurve(points, curve);
             if (points.Count > 0 && curve.GetLength()>1)

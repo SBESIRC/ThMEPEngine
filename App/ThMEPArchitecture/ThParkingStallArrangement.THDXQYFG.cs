@@ -10,6 +10,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPArchitecture.ParkingStallArrangement;
+using Autodesk.AutoCAD.EditorInput;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
+using System.Linq;
 
 namespace ThMEPArchitecture
 {
@@ -56,6 +59,34 @@ namespace ThMEPArchitecture
 
                 var geoString = ThGeoOutput.Output(dataSet.Container);
                 //ThGeoOutput.Output(dataSet.Container, "", "");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THBuildAreas", CommandFlags.Modal)]
+        public void THBuildAreas()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var selected = new List<DBObject>();
+                foreach (var id in result.Value.GetObjectIds())
+                {
+                    selected.Add(acadDatabase.Element<DBObject>(id));
+                }
+
+                var lines = selected.OfType<Line>().ToList();
+                var pls = selected.OfType<Polyline>().ToList();
+                for (int i = 0; i < 10000; i++)
+                {
+                    var areas = lines.SplitArea(pls);
+                    areas.ForEach(a => a.Dispose());
+                }
+                //Active.Editor.WriteLine(areas.Count);
             }
         }
     }

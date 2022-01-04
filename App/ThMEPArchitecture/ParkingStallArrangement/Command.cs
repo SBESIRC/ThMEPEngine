@@ -166,7 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            layoutPara.Dispose();
+            //layoutPara.Dispose();
         }
 
         private static Point3dCollection SelectAreas()

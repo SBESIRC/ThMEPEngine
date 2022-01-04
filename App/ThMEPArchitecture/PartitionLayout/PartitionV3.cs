@@ -14,7 +14,38 @@ using static ThMEPArchitecture.PartitionLayout.Utitlties;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
-    public class PartitionV3
+    public class PartitionBoundary : IEquatable<PartitionBoundary>
+    {
+        public List<Point3d> BoundaryVertices = new List<Point3d>();
+        public PartitionBoundary(Point3dCollection pts)
+        {
+            BoundaryVertices = pts.Cast<Point3d>().ToList();
+        }
+
+        public bool Equals(PartitionBoundary other)
+        {
+            if (this.BoundaryVertices.Count != other.BoundaryVertices.Count) return false;
+            var thisVertices = this.BoundaryVertices;
+            var otherVertices = other.BoundaryVertices;
+            for (int i = 0; i < this.BoundaryVertices.Count; i++)
+            {
+                if (!thisVertices[i].IsEqualTo(otherVertices[i])) return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashcode = BoundaryVertices.Count;
+            var thisVertices = this.BoundaryVertices;
+            foreach (var vertex in thisVertices)
+            {
+                hashcode ^= vertex.GetHashCode();
+            }
+            return hashcode;
+        }
+    }
+    public class PartitionV3 : IEquatable<PartitionV3>
     {
         public PartitionV3()
         {
@@ -27,7 +58,7 @@ namespace ThMEPArchitecture.PartitionLayout
             GPillars = gpillars;
             Walls = walls;
             IniLaneLines = iniLanes;
-            Obstacles = obstacles;
+            //Obstacles = obstacles;
             Boundary = boundary;
             BuildingBoxes = buildingBox;
             BoundingBox = Boundary.GeometricExtents.ToRectangle();
@@ -35,9 +66,6 @@ namespace ThMEPArchitecture.PartitionLayout
             IniBoundary = boundary;
             Countinilanes = iniLanes.Count;
             InitialzeLanes(iniLanes, boundary);
-            CheckObstacles();
-            CheckBuildingBoxes();
-
         }
         public List<Polyline> Walls;
         public List<Lane> IniLanes = new List<Lane>();
@@ -78,6 +106,7 @@ namespace ThMEPArchitecture.PartitionLayout
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
 
+        
         public bool Validate()
         {
             double totallength = 0;
@@ -157,23 +186,22 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void Dispose()
         {
-            Walls.ForEach(e => e.Dispose());
-            IniLanes.ForEach(e => e.Line.Dispose());
-            Obstacles.ForEach(e => e.Dispose());
-            Boundary.Dispose();
-            ObstaclesSpatialIndex.Dispose();
-            ObstaclesMPolygonSpatialIndex.Dispose();
-            CarModuleBox.ForEach(e => e.Dispose());
-            MoudleSpatialIndex.Dispose();
-            IntegralModules.ForEach(e => e.Box.Dispose());
-            IntegralModules.ForEach(e => e.Lanes.ForEach(o => o.Dispose()));
-            IniLaneLines.ForEach(e => e.Dispose());
-            BuildingBoxes.ForEach(e => e.Dispose());
-            BoundingBox.Dispose();
-            CarSpatialIndex.Dispose();
-            ModuleBox.ForEach(e => e.Dispose());
-            Laneboxes.ForEach(e => e.Dispose());
-            IniBoundary.Dispose();
+            Walls?.ForEach(e => e.Dispose());
+            //Walls?.Clear
+            IniLanes?.ForEach(e => e.Line.Dispose());
+            //Obstacles?.ForEach(e => e.Dispose());
+            Boundary?.Dispose();
+            CarModuleBox?.ForEach(e => e.Dispose());
+            MoudleSpatialIndex?.Dispose();
+            IntegralModules?.ForEach(e => e.Box.Dispose());
+            IntegralModules?.ForEach(e => e.Lanes.ForEach(o => o.Dispose()));
+            IniLaneLines?.ForEach(e => e.Dispose());
+            BuildingBoxes?.ForEach(e => e.Dispose());
+            BoundingBox?.Dispose();
+            CarSpatialIndex?.Dispose();
+            ModuleBox?.ForEach(e => e.Dispose());
+            Laneboxes?.ForEach(e => e.Dispose());
+            IniBoundary?.Dispose();
         }
 
         /// <summary>
@@ -198,33 +226,24 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <summary>
         /// Judge if it is legal building box.
         /// </summary>
-        private void CheckBuildingBoxes()
+        public void CheckBuildingBoxes()
         {
-            var points = new List<Point3d>();
-            Obstacles.ForEach(o => points.AddRange(o.Vertices().Cast<Point3d>()));
-            for (int i = 0; i < BuildingBoxes.Count; i++)
+            for (int i = BuildingBoxes.Count -1 ; i >= 0 ; i--)
             {
-                bool found=false;
-                for (int j = 0; j < points.Count; j++)
-                {
-                    if (BuildingBoxes[i].IsPointInFast(points[j]))
-                    {
-                        found=true;
-                        break;
-                    }
-                }
-                if (found) continue;
-                BuildingBoxes.RemoveAt(i);
-                i--;
+                var box = BuildingBoxes[i];
+                var selected = ObstaclesSpatialIndex.SelectCrossingPolygon(box);
+                if(selected == null || selected.Count == 0)
+                    BuildingBoxes.RemoveAt(i);
             }
         }
 
         /// <summary>
         /// Judge if it is legal obstacle.
         /// </summary>
-        private void CheckObstacles()
+        public void CheckObstacles()
         {
-            Obstacles=Obstacles.Where(e => e.Intersect(Boundary,Intersect.OnBothOperands).Count>0 || Boundary.IsPointInFast(e.GetCenter())).ToList();
+            Obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(Boundary).Cast<Polyline>().ToList();
+            //Obstacles=Obstacles.Where(e => e.Intersect(Boundary,Intersect.OnBothOperands).Count>0 || Boundary.IsPointInFast(e.GetCenter())).ToList();
         }
 
         /// <summary>
@@ -1553,6 +1572,29 @@ namespace ThMEPArchitecture.PartitionLayout
                 AddToSpatialIndex(plbp, ref carSpacilaIndex);
                 ModuleBox.Add(plbp);
             }
+        }
+
+        public bool Equals(PartitionV3 other)
+        {
+            if (this.Boundary.NumberOfVertices != other.Boundary.NumberOfVertices) return false;
+            var thisVertices = this.Boundary.Vertices();
+            var otherVertices = other.Boundary.Vertices();
+            for (int i = 0; i < this.Boundary.NumberOfVertices; i++)
+            {
+                if (!thisVertices[i].IsEqualTo(otherVertices[i])) return false;
+            }
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var hashcode = Boundary.NumberOfVertices;
+            var thisVertices = this.Boundary.Vertices();
+            foreach(var vertex in thisVertices)
+            {
+                hashcode ^= vertex.GetHashCode();
+            }
+            return hashcode;
         }
 
         /// <summary>

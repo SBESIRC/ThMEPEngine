@@ -23,7 +23,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
                     var gene = chromosome.Genome[i];
                     var line = new Line();
-                    if (gene.Direction)
+                    if (gene.VerticalDirection)
                     {
                         var spt = new Point3d(gene.Value, gene.StartValue, 0);
                         var ept = new Point3d(gene.Value, gene.EndValue, 0);

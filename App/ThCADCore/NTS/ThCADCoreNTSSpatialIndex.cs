@@ -28,7 +28,10 @@ namespace ThCADCore.NTS
         }
         public void Dispose()
         {
-            //
+            Geometries.Clear();
+            Geometries = null;
+            GeometryLookup = null;
+            Engine = null;
         }
 
         private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)

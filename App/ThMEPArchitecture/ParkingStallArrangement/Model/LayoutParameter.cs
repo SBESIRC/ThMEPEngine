@@ -17,20 +17,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
     public class LayoutParameter:IDisposable
     {
-        public Polyline InitialWalls { get; set; }//初始外包框，不被disposal
-        public Polyline OuterBoundary { get; set; }//最外包围框
+        public Polyline InitialWalls { get; set; }//初始外包框
+        public Polyline OuterBoundary { get; set; }//最外包围框，不被disposal
         public List<int> AreaNumber { get; set; }//区域索引，从0开始
         public List<string> SubAreaNumber { get; set; }//子区域索引，从a开始
-        public DBObjectCollection Obstacles { get; set; }//所有障碍物
+        public DBObjectCollection BuildingBlocks { get; set; }//所有障碍物
         public List<Line> SegLines { get; set; }//所有分割线
         public List<Polyline> Areas { get; set; }//所有区域包围框
-        public Dictionary<int, Polyline> AreaDic { get; set; }//区域包围框
-        public Dictionary<int, List<Polyline>> AreaWalls { get; set; }//区域墙线
-        public Dictionary<int, List<Line>> AreaSegs { get; set; }//区域分割线
-        public Dictionary<int, List<BlockReference>> ObstacleDic { get; set; }//区域内的障碍物块
-        public Dictionary<int, List<List<Polyline>>> ObstaclesList { get; set; }//区域内的障碍物线
+        public Dictionary<int, Polyline> Id2AllSubAreaDic { get; set; }//区域包围框
+        public Dictionary<int, List<Polyline>> SubAreaId2OuterWallsDic { get; set; }//区域墙线
+        public Dictionary<int, List<Line>> SubAreaId2SegsDic { get; set; }//区域分割线
+        public Dictionary<int, List<BlockReference>> SubAreaId2BuildingBlockDic { get; set; }//区域内的障碍物块
+        public Dictionary<int, List<List<Polyline>>> SubAreaId2ShearWallsDic { get; set; }//区域内的障碍物线,剪力墙等
         public Dictionary<int, List<Polyline>> BuildingBoxes { get; set; }//区域内的障碍物boundingbox
-        public Dictionary<int, List<Line>> SegLineDic { get; set; }//区域边界分割线, key表示区域index
+        public Dictionary<int, List<Line>> Id2AllSegLineDic { get; set; }//区域边界分割线, key表示区域index
         public Dictionary<int, Line> SegLineIndexDic { get; set; }//区域边界分割线, key表示直线本身的index
         public Dictionary<int, List<int>> AreaSegLineDic { get; set; }//key表示区域索引，value表示线索引
         public Dictionary<int, bool> PtDirectionList { get; set; }//交点的方向
@@ -40,31 +40,75 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Dictionary<string, Polyline> SubAreaSegLineDic { get; set; }//子区域的车道线
         public List<Point3d> IntersectPt { get; set; }//交点列表
         public Dictionary<LinePairs, int> LinePtDic { get; set; }
-        public ThCADCoreNTSSpatialIndex ObstacleSpatialIndex { get; set; }//所有障碍物索引
+        public ThCADCoreNTSSpatialIndex BuildingBlockSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
 
-        public LayoutParameter(Polyline outerBoundary, DBObjectCollection obstacles, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
+        private ThCADCoreNTSSpatialIndex _AllShearwallSpatialIndex = null;
+
+        public ThCADCoreNTSSpatialIndex AllShearwallsSpatialIndex
+        {
+            get 
+            { 
+                if(_AllShearwallSpatialIndex == null)
+                {
+                    var allCuttersList = new List<List<Polyline>>();//临时建筑物框线
+                    foreach (BlockReference buildingBlock in BuildingBlocks)
+                    {
+                        var cuttersInBuilding = buildingBlock.GetCutters();
+                        allCuttersList.Add(cuttersInBuilding);
+                    }
+                    var allCutters = allCuttersList.SelectMany(c => c).ToCollection();
+                    _AllShearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(allCutters);
+                }
+
+                return _AllShearwallSpatialIndex;
+            }
+        }
+
+        private ThCADCoreNTSSpatialIndex _AllCuttersMPolygonSpatialIndex = null;
+
+        public ThCADCoreNTSSpatialIndex AllShearwallsMPolygonSpatialIndex
+        {
+            get 
+            { 
+                if(_AllCuttersMPolygonSpatialIndex == null)
+                {
+                    var Cutters = AllShearwallsSpatialIndex.SelectAll();
+                    var mpCutters = new List<MPolygon>();
+                    foreach(Polyline c in Cutters)
+                    {
+                       var mp = c.ToNTSPolygon().ToDbMPolygon();
+                       mpCutters.Add(mp);
+                    }
+                    _AllCuttersMPolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                }
+
+                return _AllCuttersMPolygonSpatialIndex;
+            }
+        }
+
+        public LayoutParameter(Polyline outerBoundary, DBObjectCollection buildingBlocks, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
             Dictionary<LinePairs, int> linePtDic)
         {
             InitialWalls = outerBoundary.Clone() as Polyline;
             OuterBoundary = outerBoundary;
-            Obstacles = obstacles;
+            BuildingBlocks = buildingBlocks;
             SegLines = segLines;
             AreaNumber = new List<int>();
             SubAreaNumber = new List<string>() { "a", "b", "c", "d", "e" };
             Areas = new List<Polyline>();
-            Areas.Add(outerBoundary);
-            AreaDic = new Dictionary<int, Polyline>();
-            AreaWalls = new Dictionary<int, List<Polyline>>();
-            AreaSegs = new Dictionary<int, List<Line>>();
-            ObstacleDic = new Dictionary<int, List<BlockReference>>();
-            ObstaclesList = new Dictionary<int, List<List<Polyline>>>();
+            Areas.Add(InitialWalls);
+            Id2AllSubAreaDic = new Dictionary<int, Polyline>();
+            SubAreaId2OuterWallsDic = new Dictionary<int, List<Polyline>>();
+            SubAreaId2SegsDic = new Dictionary<int, List<Line>>();
+            SubAreaId2BuildingBlockDic = new Dictionary<int, List<BlockReference>>();
+            SubAreaId2ShearWallsDic = new Dictionary<int, List<List<Polyline>>>();
             BuildingBoxes = new Dictionary<int, List<Polyline>>();
-            SegLineDic = new Dictionary<int, List<Line>>();
+            Id2AllSegLineDic = new Dictionary<int, List<Line>>();
             SubAreaDic = new Dictionary<string, Polyline>();
             SubAreaWallLineDic = new Dictionary<string, Polyline>();
             SubAreaSegLineDic = new Dictionary<string, Polyline>();
-            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(obstacles);
+            BuildingBlockSpatialIndex = new ThCADCoreNTSSpatialIndex(buildingBlocks);
             PtDic = ptDic;
             PtDirectionList = directionList;
             IntersectPt = new List<Point3d>();
@@ -83,20 +127,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             Areas.ForEach(e => e.Dispose());
             Areas.Clear();
 
-            AreaDic.ForEach(e => e.Value.Dispose());
-            AreaDic.Clear();
+            Id2AllSubAreaDic.ForEach(e => e.Value.Dispose());
+            Id2AllSubAreaDic.Clear();
 
-            //foreach(var blocks in ObstacleDic.Values)
-            //{
-            //    foreach(var block in blocks)
-            //    {
-            //        block.Dispose();
-            //    }
-            //    blocks.Clear();
-            //}
-            ObstacleDic.Clear();//这个暂时不支持dispose
+            SubAreaId2BuildingBlockDic.Clear();//这个暂时不支持dispose
 
-            foreach (var lines in SegLineDic.Values)
+            foreach (var lines in Id2AllSegLineDic.Values)
             {
                 foreach (var line in lines)
                 {
@@ -104,11 +140,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
                 lines.Clear();
             }
-            SegLineDic.Clear();
+            Id2AllSegLineDic.Clear();
 
             AreaSegLineDic.Clear();
 
-            foreach (var plines in AreaWalls.Values)
+            foreach (var plines in SubAreaId2OuterWallsDic.Values)
             {
                 foreach (var pline in plines)
                 {
@@ -116,9 +152,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
                 plines.Clear();
             }
-            AreaWalls.Clear();
+            SubAreaId2OuterWallsDic.Clear();
 
-            foreach (var lines in AreaSegs.Values)
+            foreach (var lines in SubAreaId2SegsDic.Values)
             {
                 foreach (var line in lines)
                 {
@@ -126,7 +162,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
                 lines.Clear();
             }
-            AreaSegs.Clear();
+            SubAreaId2SegsDic.Clear();
 
             foreach (var plines in BuildingBoxes.Values)
             {
@@ -138,19 +174,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             BuildingBoxes.Clear();
 
-            foreach (var plinesList in ObstaclesList.Values)
-            {
-                foreach(var plines in plinesList)
-                {
-                    foreach (var pline in plines)
-                    {
-                        pline.Dispose();
-                    }
-                    plines.Clear();
-                }
-                plinesList.Clear();
-            }
-            ObstaclesList.Clear();
+            //foreach (var plinesList in SubAreaId2CuttersDic.Values)
+            //{
+            //    foreach(var plines in plinesList)
+            //    {
+            //        foreach (var pline in plines)
+            //        {
+            //            pline.Dispose();
+            //        }
+            //        plines.Clear();
+            //    }
+            //    plinesList.Clear();
+            //}
+            SubAreaId2ShearWallsDic.Clear();
 
             SubAreaDic.ForEach(e => e.Value.Dispose());
             SubAreaDic.Clear();
@@ -166,41 +202,53 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             AreaNumber.Clear();
             SegLines.Clear();
             Areas.Clear();
-            AreaDic.Clear();
-            ObstacleDic.Clear();
-            SegLineDic.Clear();
+            Id2AllSubAreaDic.Clear();
+            SubAreaId2BuildingBlockDic.Clear();
+            Id2AllSegLineDic.Clear();
             AreaSegLineDic.Clear();
-            AreaWalls.Clear();
-            AreaSegs.Clear();
+            SubAreaId2OuterWallsDic.Clear();
+            SubAreaId2SegsDic.Clear();
             BuildingBoxes.Clear();
-            ObstaclesList.Clear();
+            SubAreaId2ShearWallsDic.Clear();
             SubAreaDic.Clear();
             IntersectPt.Clear();
             SegLineIndexDic.Clear();
         }
         public void Set(List<Gene> genome)
         {
-            var areas = new List<Polyline>();
-            areas.Add(InitialWalls);
             Clear();//清空所有参数
+
+            var areas = new List<Polyline>();
+            var tmpBoundary = OuterBoundary.Clone() as Polyline;
+            areas.Add(tmpBoundary);
+
+            //init splitting lines
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                var beforeCnt = areas.Count;
                 Split(gene, ref areas);
-                var afterCnt = areas.Count;
-                if(afterCnt != beforeCnt + 1)
-                {
-                    ;
-                }
                 var line = GetSegLine(gene);
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
-            SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
+            
+            System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
+            System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 
-            Areas.AddRange(areas);
+            try
+            {
+                SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
+                Areas.AddRange(areas);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                tmpBoundary.Dispose();
+            }
 
+            // update other parameters
             for (int i = 0; i < PtDic.Count; i++)
             {
                 var line1 = SegLines[PtDic[i][0]];//拿到第一根分割线
@@ -208,113 +256,111 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 var pt = line1.Intersect(line2, Intersect.ExtendBoth).First();
                 IntersectPt.Add(pt);//交点添加
             }
-
             for (int i = 0; i < Areas.Count; i++)
             {
                 AreaNumber.Add(i);
-                AreaDic.Add(i, Areas[i]);
-                var buildings = GetObstacles(Areas[i]);
-                ObstacleDic.Add(i, buildings);
+                Id2AllSubAreaDic.Add(i, Areas[i]);
+
+                //todo: optimize
+                var buildingBlocksInSubArea = GetBuildings(Areas[i]);
+
+                SubAreaId2BuildingBlockDic.Add(i, buildingBlocksInSubArea);
                 var segLines = GetSegLines(Areas[i], out List<int> lineNums);
-                if(segLines.Count > 4)
-                {
-                    ;
-                }
-                SegLineDic.Add(i, segLines);
+
+                //continue; //700m
+
+                Id2AllSegLineDic.Add(i, segLines);
                 AreaSegLineDic.Add(i, lineNums);
-                AreaSegs.Add(i, GetAreaSegs(Areas[i], SegLineDic[i], out List<Polyline> areaWall));
-                AreaWalls.Add(i, areaWall);
+                SubAreaId2SegsDic.Add(i, GetAreaSegs(Areas[i], Id2AllSegLineDic[i], out List<Polyline> areaWall));
+                SubAreaId2OuterWallsDic.Add(i, areaWall);
+
+                //continue; //900
 
                 var bdBoxes = new List<Polyline>();//临时建筑物外包线
-                var obstacles = new List<List<Polyline>>();//临时建筑物框线
-                foreach(var build in buildings)
+                var allCuttersInSubArea = new List<List<Polyline>>();//临时建筑物框线
+                foreach(var build in buildingBlocksInSubArea)
                 {
                     var rect = build.GetRect();
-                    var obstacle = build.GetPlines();
+                    var cuttersInBuilding = AllShearwallsSpatialIndex.SelectCrossingPolygon(rect).Cast<Polyline>().ToList();
                     bdBoxes.Add(rect);
-                    obstacles.Add(obstacle);
+                    allCuttersInSubArea.Add(cuttersInBuilding);
                 }
                 BuildingBoxes.Add(i, bdBoxes);
-                ObstaclesList.Add(i, obstacles);
+                SubAreaId2ShearWallsDic.Add(i, allCuttersInSubArea);
 
-                var pointNums = new List<int>();
-                var directions = new List<int>();
-                if (lineNums.Count > 1)//存在两根以上的分割线
-                {
-                    for (int k = 0; k < lineNums.Count - 1; k++)
-                    {
-                        for (int j = 1; j < lineNums.Count; j++)
-                        {
-                            var linePair = new LinePairs(lineNums[k], lineNums[j]);
-                            if (LinePtDic.ContainsKey(linePair))
-                            {
-                                var ptNum = LinePtDic[linePair];//拿到点的编号
-                                var ptDir = Convert.ToInt32(PtDirectionList[ptNum]);//拿到点的方向
-                                if (!pointNums.Contains(ptNum))
-                                {
-                                    pointNums.Add(ptNum);
-                                    directions.Add(ptDir);
-                                }
-                            }
-                        }
-                    }
-                }
-                {
-                    
-                    //var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
+                //continue; //1.5
 
-                    //if (bdBoxes.Count == 0)//这个区域没有建筑物
-                    //{
-                    //    SubAreaDic.Add(Convert.ToString(i) + "a", null);
-                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    //    {
-                    //        var sub = subArea[k];
-                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
-                    //    var index = 0;
-                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    //    {
-                    //        var sub = subArea[k];
-                    //        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
-                    //        if (rst.Count > 0)//当前子区域包含建筑物
-                    //        {
-                    //            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
-                    //            index = k;
-                    //            break;
-                    //        }
-                    //    }
-                    //    var curIndex = 1;
-                    //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
-                    //    {
-                    //        if (k == index)
-                    //        {
-                    //            continue;
-                    //        }
-                    //        var sub = subArea[k];
-                    //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
-                    //        curIndex++;
-                    //    }
-                    //}
-                }
+                //todo: area main diretion related stuff
+                //
+                //var pointNums = new HashSet<int>();
+                //var directions = new List<int>();
+                //if (lineNums.Count > 1)//存在两根以上的分割线
+                //{
+                //    for (int k = 0; k < lineNums.Count - 1; k++)
+                //    {
+                //        for (int j = 1; j < lineNums.Count; j++)
+                //        {
+                //            var linePair = new LinePairs(lineNums[k], lineNums[j]);
+                //            if (LinePtDic.ContainsKey(linePair))
+                //            {
+                //                var ptNum = LinePtDic[linePair];//拿到点的编号
+                //                var ptDir = Convert.ToInt32(PtDirectionList[ptNum]);//拿到点的方向
+                //                if (!pointNums.Contains(ptNum))
+                //                {
+                //                    pointNums.Add(ptNum);
+                //                    directions.Add(ptDir);
+                //                }
+                //            }
+                //        }
+                //    }
+                //}
             }
+            {
 
-            //foreach (var area in SubAreaDic.Values)
-            //{
-            //    using (AcadDatabase currentDb = AcadDatabase.Active())
-            //    {
+                //var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
 
-            //        currentDb.CurrentSpace.Add(area);
-            //    }
-            //}
+                //if (bdBoxes.Count == 0)//这个区域没有建筑物
+                //{
+                //    SubAreaDic.Add(Convert.ToString(i) + "a", null);
+                //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                //    {
+                //        var sub = subArea[k];
+                //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[k + 1], sub);
+                //    }
+                //}
+                //else
+                //{
+                //    var bdBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(bdBoxes.ToCollection());//创建建筑物的空间索引
+                //    var index = 0;
+                //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                //    {
+                //        var sub = subArea[k];
+                //        var rst = bdBoxesSpatialIndex.SelectCrossingPolygon(sub);
+                //        if (rst.Count > 0)//当前子区域包含建筑物
+                //        {
+                //            SubAreaDic.Add(Convert.ToString(i) + "a", sub);
+                //            index = k;
+                //            break;
+                //        }
+                //    }
+                //    var curIndex = 1;
+                //    for (int k = 0; k < subArea.Count; k++)//子区域遍历
+                //    {
+                //        if (k == index)
+                //        {
+                //            continue;
+                //        }
+                //        var sub = subArea[k];
+                //        SubAreaDic.Add(Convert.ToString(i) + SubAreaNumber[curIndex], sub);
+                //        curIndex++;
+                //    }
+                //}
+            }
         }
         private Line GetSegLine(Gene gene)
         {
             Point3d spt, ept;
-            if(gene.Direction)
+            if(gene.VerticalDirection)
             {
                 spt = new Point3d(gene.Value, gene.StartValue, 0);
                 ept = new Point3d(gene.Value, gene.EndValue, 0);
@@ -329,22 +375,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         private void Split(Gene gene, ref List<Polyline> areas)
         {
             var line = gene.ToLine();//对于每一条线
-            if(AreaSplit.IsCorrectSegLines(line, ref areas))
+            if (AreaSplit.SplitAreasByOrgiginLine(line, ref areas))
             {
-                return;
+                ;
             }
             else
             {
-                AreaSplit.IsCorrectSegLines2(line, ref areas);
+                AreaSplit.SplitAreasByExtentedLine(line, ref areas);
             }
+            line.Dispose();
         }
-        private List<BlockReference> GetObstacles(Polyline area)
+        private List<BlockReference> GetBuildings(Polyline area)
         {
-            var obstacles = new List<BlockReference>();
-            var dbObjs = ObstacleSpatialIndex.SelectCrossingPolygon(area);
-            dbObjs.Cast<BlockReference>()
-                .ForEach(e => obstacles.Add(e));
-            return obstacles;
+            var dbObjs = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
+            return dbObjs.Cast<BlockReference>().ToList();
         }
         private List<Line> GetSegLines(Polyline area)
         {
@@ -371,22 +415,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(area);
             var areaColl = new List<Polyline>() { area };
             var areaIndex = new ThCADCoreNTSSpatialIndex(areaColl.ToCollection());
+            areaColl.Clear();
             foreach (var db in dbObjs)
             {
-                
                 var line = db as Line;
                 if(line.IsBoundOf(area))
                 {
                     segLines.Add(line);
                 }
-                //var extendLine = line.ExtendLine(-10.0);
-                
-                //var rect = extendLine.Buffer(1.0);
-                //var rst = areaIndex.SelectCrossingPolygon(rect);
-                //if(rst.Count > 0)
-                //{
-                //    segLines.Add(line);
-                //}
             }
             for (int i = 0; i < SegLineIndexDic.Count; i++)
             {
@@ -405,7 +441,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         private List<Line> GetAreaSegs(Polyline area, List<Line> allSegs, out List<Polyline> areaWalls)
         {
             var segLines = new List<Line>();
-            var lines = new List<Line>();
+            var lines = new HashSet<Line>();
             for(int i = 0; i < area.NumberOfVertices-1; i++)
             {
                 var line = new Line(area.GetPoint3dAt(i), area.GetPoint3dAt(i+1));
@@ -414,8 +450,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
             foreach (var seg in allSegs)
             {
-                var rst = lineSpatialIndex.SelectCrossingPolygon(seg.Buffer(1.0));
-                if(rst.Count == 0)
+                //var bufferedSeg = seg.Buffer(1.0);
+                var rst = lineSpatialIndex.SelectFence(seg);
+                //bufferedSeg.Dispose();
+                if (rst.Count == 0)
                 {
                     ;
                 }
@@ -432,11 +470,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     }
                 }
             }
+
             var ptDic = new Dictionary<Point3dEx, List<Point3dEx>>();
             foreach(var line in lines)
             {
                 var spt = new Point3dEx(line.StartPoint);
                 var ept = new Point3dEx(line.EndPoint);
+                line.Dispose();
+
                 if(ptDic.ContainsKey(spt))
                 {
                     ptDic[spt].Add(ept);
@@ -480,9 +521,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 var pline = new Polyline();
                 pline.CreatePolyline(pts.ToCollection());
+                pts.Clear();
                 areaWalls.Add(pline);
             }
-
+            plines.Clear();
+            visited.Clear();
             return segLines;
         }
         private void Dfs(Point3dEx cur, ref List<Point3dEx> termPts, ref List<Point2d> pts, ref HashSet<Point3dEx> visited, Dictionary<Point3dEx, List<Point3dEx>> ptDic)
@@ -511,28 +554,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public void Dispose()
         {
             InitialWalls.Dispose();
-            OuterBoundary.Dispose();
+            //OuterBoundary.Dispose();
             AreaNumber.Clear();
             SubAreaNumber.Clear();
-            Obstacles.Dispose();
+            //BuildingBlocks.Dispose();
             SegLines.ForEach(e => e.Dispose());
             SegLines.Clear();
             Areas.ForEach(e => e.Dispose());
             Areas.Clear();
-            AreaDic.ForEach(e => e.Value.Dispose());
-            AreaDic.Clear();
-            AreaWalls.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
-            AreaWalls.Clear();
-            AreaSegs.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
-            AreaSegs.Clear();
-            ObstacleDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
-            ObstacleDic.Clear();
-            ObstaclesList.ForEach(e => e.Value.ForEach(e1 => e1.ForEach(e2 => e2.Dispose())));
-            ObstaclesList.Clear();
+            Id2AllSubAreaDic.ForEach(e => e.Value.Dispose());
+            Id2AllSubAreaDic.Clear();
+            SubAreaId2OuterWallsDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
+            SubAreaId2OuterWallsDic.Clear();
+            SubAreaId2SegsDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
+            SubAreaId2SegsDic.Clear();
+            //SubAreaId2BuildingBlockDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
+            SubAreaId2BuildingBlockDic.Clear();
+            SubAreaId2ShearWallsDic.ForEach(e => e.Value.ForEach(e1 => e1.ForEach(e2 => e2.Dispose())));
+            SubAreaId2ShearWallsDic.Clear();
             BuildingBoxes.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
             BuildingBoxes.Clear();
-            SegLineDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
-            SegLineDic.Clear();
+            Id2AllSegLineDic.ForEach(e => e.Value.ForEach(e1 => e1.Dispose()));
+            Id2AllSegLineDic.Clear();
             SegLineIndexDic.ForEach(e => e.Value.Dispose());
             SegLineIndexDic.Clear();
             AreaSegLineDic.Clear();
@@ -546,14 +589,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             SubAreaSegLineDic.Clear();
             IntersectPt.Clear();
             LinePtDic.Clear();
-            ObstacleSpatialIndex.Dispose();
-            SegLineSpatialIndex.Dispose();
+            BuildingBlockSpatialIndex.Dispose();
+            SegLineSpatialIndex?.Dispose();
+            AllShearwallsSpatialIndex?.Dispose();
+            AllShearwallsMPolygonSpatialIndex?.Dispose();
         }
     }
 
     public static class Plines
     {
-        public static List<Polyline> GetPlines(this BlockReference br)
+        public static List<Polyline> GetCutters(this BlockReference br)
         {
             var plines = new List<Polyline>();
             var objs = new DBObjectCollection();
