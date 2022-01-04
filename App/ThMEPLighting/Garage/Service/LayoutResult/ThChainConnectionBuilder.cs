@@ -146,7 +146,72 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection CreateThreeWayJumpWire()
         {
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetThreeWayJumpWireLinks();
+            if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
+            {
+                results = CreateThreeWayOppositeJumpWire();
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                results = results.Union(CreateThreeWayOppositeJumpWire());
+                results = results.Union(CreateThreeWayAdjacentJumpWire());
+            }
+            return results;
+        }
+
+        private DBObjectCollection CreateThreeWayOppositeJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayOppositeLinks();
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildCrossLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+        private DBObjectCollection CreateThreeWayAdjacentJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayAdjacentLinks();
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.Build(); //ToDO
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+
+        private DBObjectCollection CreateCrossJumpWire()
+        {
+            var results = new DBObjectCollection();
+            if(ArrangeParameter.ArrangeEdition== ArrangeEdition.Second)
+            {
+                results = CreateCrossOppositeJumpWire();
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                results = results.Union(CreateCrossOppositeJumpWire());
+                results = results.Union(CreateCrossAdjacentJumpWire());
+            }
+            return results;
+        }
+
+        private DBObjectCollection CreateCrossOppositeJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetCrossOppositeLinks();
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,
@@ -161,10 +226,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
-        private DBObjectCollection CreateCrossJumpWire()
+        private DBObjectCollection CreateCrossAdjacentJumpWire()
         {
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetCrossJumpWireLinks();
+            var lightNodeLinks = GetCrossAdjacentLinks();
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,

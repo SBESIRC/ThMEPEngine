@@ -136,7 +136,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection CreateCrossJumpWire()
         {
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetCrossJumpWireLinks();
+            var lightNodeLinks = GetCrossOppositeLinks();
             var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
             {
                 LampLength = this.ArrangeParameter.LampLength,

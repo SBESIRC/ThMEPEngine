@@ -503,6 +503,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return partitions;
         }
+
+        protected List<Tuple<Line, Line>> CreateAdjacentPartition(List<Line> lines)
+        {
+            var partitions = new List<Tuple<Line, Line>>();
+            int count = lines.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var adjacentEdgeA = lines[i];
+                var adjacentEdgeB = lines[(i + 1) % count];
+                if (!adjacentEdgeA.IsParallelToEx(adjacentEdgeB))
+                {
+                    partitions.Add(Tuple.Create(adjacentEdgeA, adjacentEdgeB));
+                }
+            }
+            return partitions;
+        }
         protected virtual List<Line> GroupSides(Polyline partition, List<Line> sides)
         {
             return sides
