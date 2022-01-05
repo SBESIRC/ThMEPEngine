@@ -17,7 +17,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public static class ParameterConvert
     {
-        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref PartitionV3 partition, Logger logger = null)
+        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, Logger logger = null)
         {
             int index = layoutPara.AreaNumber[j];
             layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
@@ -73,7 +73,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             fs1.Close();
 #endif
             inilanes = inilanes.Distinct().ToList();
-            partition = new PartitionV3(outerWallLines, inilanes, null, bound, buildingBoxes);
+            partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes);
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
             partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
             partition.CheckObstacles();

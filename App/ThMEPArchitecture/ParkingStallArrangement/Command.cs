@@ -150,7 +150,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    PartitionV3 partition = new PartitionV3();
+                    ParkingPartition partition = new ParkingPartition();
                     if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
                     {
                         try

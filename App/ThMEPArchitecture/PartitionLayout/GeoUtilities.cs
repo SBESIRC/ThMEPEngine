@@ -46,16 +46,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return new Line(a.StartPoint, a.EndPoint);
         }
 
-        public static Polyline CreatePolyFromPoints(List<Point3d> points)
-        {
-            Polyline p = new Polyline();
-            for (int i = 0; i < points.Count; i++)
-            {
-                p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
-            }
-            return p;
-        }
-
         public static Polyline CreatePolyFromPoint(Point3d point)
         {
             Polyline p = new Polyline();
@@ -116,16 +106,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return result;
         }
 
-        public static List<Line> OffsetLine(Line a, double dis)
-        {
-            var vec_a = CreateVector(a).GetPerpendicularVector().GetNormal() * dis;
-            var la = (Line)a.Clone();
-            var lb = (Line)a.Clone();
-            la.TransformBy(Matrix3d.Displacement(vec_a));
-            lb.TransformBy(Matrix3d.Displacement(-vec_a));
-            return new List<Line>() { la, lb };
-        }
-
         public static List<Curve> SplitCurve(Curve curve, DBObjectCollection objs)
         {
             List<Point3d> pts = new List<Point3d>();
@@ -158,25 +138,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 return splited.Cast<Curve>().Where(e => e.GetLength() > 1).ToList();
             }
             else return new List<Curve>() { curve };
-        }
-
-        public static Curve[] SplitCurve(Curve curve, Curve[] cutters)
-        {
-            List<Point3d> points = new List<Point3d>();
-            cutters.ForEach(e => points.AddRange(curve.Intersect(e, Intersect.OnBothOperands)));
-            points = RemoveDuplicatePts(points, 1);
-            SortAlongCurve(points, curve);
-            if (points.Count > 0 && curve.GetLength()>1)
-            {
-                Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
-                var splited = curve.GetSplitCurves(ps);
-                ps.Dispose();
-                return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
-            }
-            else
-            {
-                return new Curve[] { curve };
-            }
         }
 
         public static Curve[] SplitCurve(Curve curve, Curve splitter)
@@ -276,13 +237,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
 
-        public static double DisBetweenTwoParallelLines(Line a, Line b)
-        {
-            Point3d pt_on_a = a.GetClosestPointTo(b.GetCenter(), false);
-            Point3d pt_on_b = b.GetClosestPointTo(pt_on_a, false);
-            return pt_on_a.DistanceTo(pt_on_b);
-        }
-
         public static bool IsPointInFast(this Polyline poly, Point3d p)
         {
             return poly.IsPointIn(p);
@@ -347,54 +301,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return false;
         }
 
-        public static bool IsInCar(Point3d pt, List<Polyline> pls)
-        {
-            if (pls.Count == 0) return false;
-            var bContains = pls.Any(pl => pl.GeometricExtents.IsPointIn(pt));
-            return bContains;
-        }
-
-        public static void ClosestPointInCurves(Point3d pt, List<Curve> crvs,
-            ref Point3d result, ref double dis, ref int index)
-        {
-            if (crvs.Count == 0) return;
-            result = crvs[0].GetClosestPointTo(pt, false);
-            dis = result.DistanceTo(pt);
-            index = 0;
-            if (crvs.Count == 1) return;
-            for (int i = 1; i < crvs.Count; i++)
-            {
-                var p = crvs[i].GetClosestPointTo(pt, false);
-                var d = p.DistanceTo(pt);
-                if (d < dis)
-                {
-                    dis = d;
-                    index = i;
-                    result = p;
-                }
-            }
-            return;
-        }
-
-        public static double ClosestPointInCurves(Point3d pt, List<Curve> crvs)
-        {
-            if (crvs.Count == 0) return 0;
-            var p = crvs[0].GetClosestPointTo(pt, false);
-            var res = p.DistanceTo(pt);
-            if (crvs.Count == 1) return res;
-            for (int i = 1; i < crvs.Count; i++)
-            {
-                var pc = crvs[i].GetClosestPointTo(pt, false);
-                var d = pc.DistanceTo(pt);
-                if (d < res)
-                {
-                    res = d;
-                }
-            }
-            return res;
-        }
-
-
         public static double ClosestPointInCurves(Point3d pt, List<Line> crvs)
         {
             if (crvs.Count == 0) return 0;
@@ -447,32 +353,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
             }
             return res;
-        }
-
-        private static List<Line> GetSplitedLine(Line line, List<Point3d> points)
-        {
-            List<Line> results = new List<Line>();
-            SortAlongCurve(points, line);
-            if (points.Count == 0) return new List<Line>() { line };
-
-            if (points[0].DistanceTo(line.StartPoint) > 1) points.Insert(0, line.StartPoint);
-            if (points[points.Count - 1].DistanceTo(line.EndPoint) > 1) points.Add(line.EndPoint);
-            for (int i = 0; i < points.Count - 1; i++)
-            {
-                results.Add(new Line(points[i], points[i = 1]));
-            }
-            return results;
-
-        }
-
-        public static bool IsIntersect(Curve c, List<Curve> crvs)
-        {
-            foreach (var crv in crvs)
-            {
-                if (c.Intersect(crv, Intersect.OnBothOperands).Count > 0)
-                    return true;
-            }
-            return false;
         }
 
         public static Point3dCollection DivideCurveByLength(Curve crv, double length, ref DBObjectCollection segs)
@@ -529,12 +409,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return;
         }
 
-        public static void AddToSpatialIndex(DBObjectCollection objs, ref ThCADCoreNTSSpatialIndex spatialIndex)
-        {
-            spatialIndex.Update(objs, new DBObjectCollection());
-            return;
-        }
-
         public static string AnalysisLine(Line a)
         {
             string s = a.StartPoint.X.ToString() + "," + a.StartPoint.Y.ToString() + "," +
@@ -569,7 +443,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return s;
         }
-
         public static string AnalysisPointList(List<Point3d> points)
         {
             string s = "";
@@ -578,18 +451,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 s += pt.X.ToString() + "," + pt.Y.ToString() + ",";
             }
             return s;
-        }
-
-        public static double GetLengthDifferentFromParallelBofA(Line a, Line b, double buffer = 15700)
-        {
-            double length = 0;
-            var pl = b.Buffer(buffer);
-            var splited = SplitCurve(a, new DBObjectCollection() { pl });
-            foreach (Line s in splited)
-            {
-                if (!pl.IsPointInFast(s.GetCenter())) length += s.Length;
-            }
-            return length;
         }
     }
 }

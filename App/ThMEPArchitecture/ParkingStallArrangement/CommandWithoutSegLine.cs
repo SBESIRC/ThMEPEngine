@@ -146,7 +146,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    PartitionV3 partition = new PartitionV3();
+                    ParkingPartition partition = new ParkingPartition();
                     if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
                     {
                         try
@@ -317,7 +317,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                    PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                    ParkingPartition partition = new ParkingPartition(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
                     partition.ProcessAndDisplay(layerNames, 30);
                 }
