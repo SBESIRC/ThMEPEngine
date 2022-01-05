@@ -74,7 +74,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 ArrangeParameter.LightNumberTextHeight,
                 ArrangeParameter.LightNumberTextWidthFactor);
         }
-
+        #region ---------- 绘制同一段上的具有相同编号的跳线 ----------
         private DBObjectCollection CreateJumpWire(out List<Point3dCollection> ductions)
         {
             ductions = new List<Point3dCollection>();
@@ -91,7 +91,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new DBObjectCollection();
             }
         }
-
         private DBObjectCollection CreateJumpWire1(out List<Point3dCollection> ductions)
         {
             // 创建跳接线
@@ -113,10 +112,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             return CreateJumpWire(graphs, out ductions);
         }
-
-        private DBObjectCollection CreateJumpWire(
-            List<ThLightGraphService> graphs,
-            out List<Point3dCollection> ductions)
+        private DBObjectCollection CreateJumpWire(List<ThLightGraphService> graphs,out List<Point3dCollection> ductions)
         {
             // 创建跳接线
             var results = new DBObjectCollection();
@@ -142,7 +138,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             ductions = ductionCollector;
             return results;
         }
+        #endregion
 
+        #region ---------- 绘制T型路口跨区具有相同编号的的跳线 ----------
         private DBObjectCollection CreateThreeWayJumpWire()
         {
             var results = new DBObjectCollection();
@@ -157,7 +155,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-
         private DBObjectCollection CreateThreeWayOppositeJumpWire()
         {
             var results = new DBObjectCollection();
@@ -188,11 +185,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
             jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.Build(); //ToDO
+            jumpWireFactory.BuildCrossAdjacentLinks(); 
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
+        #endregion
 
+        #region ---------- 绘制十字路口跨区具有相同编号的的跳线 ----------
         private DBObjectCollection CreateCrossJumpWire()
         {
             var results = new DBObjectCollection();
@@ -207,7 +206,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-
         private DBObjectCollection CreateCrossOppositeJumpWire()
         {
             var results = new DBObjectCollection();
@@ -225,7 +223,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
-
         private DBObjectCollection CreateCrossAdjacentJumpWire()
         {
             var results = new DBObjectCollection();
@@ -239,10 +236,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
             jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildCrossLinks();
+            jumpWireFactory.BuildCrossAdjacentLinks();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
+        #endregion
 
         private DBObjectCollection DetuctLinkWire(DBObjectCollection linkWires,List<Point3dCollection> deductions)
         {
@@ -270,7 +268,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 });
             return results;
         }
-
         private List<Line> ToLines(Point3dCollection pts)
         {
             var lines = new List<Line>();
