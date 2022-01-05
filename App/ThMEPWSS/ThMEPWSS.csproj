@@ -97,8 +97,6 @@
     <Compile Include="Hydrant\Data\ThHydrantArchitectureWallExtractor.cs" />
     <Compile Include="Hydrant\Data\ThHydrantRoomExtractor.cs" />
     <Compile Include="Hydrant\Data\ThHydrantShearwallExtractor.cs" />
-    <Compile Include="Hydrant\Engine\ThExtractFireExtinguisher.cs" />
-    <Compile Include="Hydrant\Engine\ThExtractFireHydrant.cs" />
     <Compile Include="Hydrant\ThFireHydrantDiagram.cs" />
     <Compile Include="OutsideFrameRecognition\ThRecogniseOutsideFrame.cs" />
     <Compile Include="SprinklerConnect\Cmd\ThSprinklerConnectCommand.cs" />
