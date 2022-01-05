@@ -73,11 +73,11 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THXFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            // 室内风机布置
-            row.AddNewButton("室内风机\r\n布置",
-                "天华室内风机布置",
+            // 室内机布置
+            row.AddNewButton("室内机\r\n布置",
+                "天华室内机布置",
                 "THSNJ",
-                "天华室内风机布置",
+                "天华室内机布置",
                 "IDI_THCAD_THSNJ_SMALL",
                 "IDI_THCAD_THSNJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
@@ -493,13 +493,13 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THDXXHS_LARGE",
                 RibbonButtonStyle.LargeWithText);
 
-            //row.AddNewButton("消火栓编号",
-            //    "天华消火栓编号",
-            //    "THXHSBH",
-            //    "天华消火栓编号",
-            //    "IDI_THCAD_THXHSBH_SMALL",
-            //    "IDI_THCAD_THXHSBH_LARGE",
-            //    RibbonButtonStyle.LargeWithText);
+            row.AddNewButton("消火栓编号",
+                "天华消火栓编号",
+                "THXHSBH",
+                "天华消火栓编号",
+                "IDI_THCAD_THXHSBH_SMALL",
+                "IDI_THCAD_THXHSBH_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
 
         private static void CreateWUndergroundSystemPanel(RibbonTabSource tab)

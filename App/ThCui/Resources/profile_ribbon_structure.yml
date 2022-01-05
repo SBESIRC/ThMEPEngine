@@ -142,7 +142,7 @@ panels:
           attributes: { "IsVisible": true, "IsEnabled": true }
         - text: "小风机"
           attributes: { "IsVisible": true, "IsEnabled": true }
-        - text: "室内风机\r\n布置"
+        - text: "室内机\r\n布置"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlHVACPLAN"
