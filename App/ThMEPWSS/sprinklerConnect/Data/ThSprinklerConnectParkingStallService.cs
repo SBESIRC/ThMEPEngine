@@ -10,6 +10,7 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.FlushPoint.Data;
+using ThMEPWSS.SprinklerConnect.Service;
 
 namespace ThMEPWSS.SprinklerConnect.Data
 {
@@ -92,10 +93,20 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 LayerNames = new List<string>(),
             };
             parkingStallExtractor.Extract(database, pline.Vertices());
-            ParkingStalls = parkingStallExtractor.ParkingStalls
-                .OfType<Polyline>()
-                .Select(o => o.Buffer(-1).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
-                .ToCollection();
+
+            if(parkingStallExtractor.ParkingStalls.Count > 0)
+            {
+                var parkingStallsTemp = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToList();
+                var transformer = ThSprinklerTransformer.GetTransformer(parkingStallsTemp[0].Vertices());
+                parkingStallsTemp.ForEach(o =>
+                {
+                    transformer.Transform(o);
+                });
+                ParkingStalls = parkingStallsTemp
+                    .Select(o => o.Buffer(-1).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
+                    .ToCollection();
+                transformer.Reset(ParkingStalls);
+            }
         }
 
         private List<List<Polyline>> AssortParkingStall(DBObjectCollection parkingStalls)

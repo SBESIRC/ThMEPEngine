@@ -138,13 +138,10 @@ namespace ThMEPWSS.SprinklerConnect.Data
             {
                 var recognizeAllEngine = new ThTCHSprinklerRecognitionEngine();
                 recognizeAllEngine.RecognizeMS(acadDatabase.Database, new Point3dCollection());
-
-
-
                 var sprinklersData = recognizeAllEngine.Elements
-                                      .OfType<ThSprinkler>()
-                                      .Select(o => o.Position)
-                                      .ToList();
+                    .OfType<ThSprinkler>()
+                    .Select(o => o.Position)
+                    .ToList();
                 return sprinklersData;
             }
         }
@@ -179,7 +176,6 @@ namespace ThMEPWSS.SprinklerConnect.Data
             }
 
             return lineList;
-
         }
 
         public static List<Polyline> GetCarData(Polyline frame, string layer)
@@ -200,9 +196,3 @@ namespace ThMEPWSS.SprinklerConnect.Data
         }
     }
 }
-
-
-
-
-
-

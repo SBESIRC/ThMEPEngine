@@ -21,9 +21,14 @@ namespace ThMEPWSS.SprinklerConnect.Engine
         }
 
         // 喷头连管
-        public void SprinklerConnectEngine(ThSprinklerParameter sprinklerParameter, List<Polyline> geometryWithoutColumn,
+        public List<Line> SprinklerConnectEngine(ThSprinklerParameter sprinklerParameter, List<Polyline> geometryWithoutColumn,
             List<Polyline> doubleStall, List<Polyline> smallRooms, List<Polyline> obstacle, List<Polyline> column, bool isVertical = true)
         {
+            if (sprinklerParameter.SprinklerPt.Count <= 1)
+            {
+                return new List<Line>();
+            }
+
             var netList = ThSprinklerPtNetworkEngine.GetSprinklerPtNetwork(sprinklerParameter, geometryWithoutColumn, out double dtTol);
             var geometry = geometryWithoutColumn;
             geometry.AddRange(column);
@@ -90,10 +95,11 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             {
                 results.AddRange(row.ConnectLines);
             });
+            results = results.Where(o => o.Length > 1.0).ToList();
+            service.BreakMainLine(results);
 
             // 最终散点处理
-            results = results.Where(o => o.Length > 1.0).ToList();
-            Present(results);
+            return results;
         }
 
         private List<Line> GetLaneLine(List<Polyline> doubleStall)
@@ -106,19 +112,6 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                 laneLine.Add(new Line(pts[2], pts[3]));
             });
             return laneLine;
-        }
-
-        private void Present(List<Line> results)
-        {
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                var layerId = acadDatabase.Database.CreateAILayer(ThWSSCommon.Sprinkler_Connect_Pipe, 2);
-                results.ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(o);
-                    o.LayerId = layerId;
-                });
-            }
         }
     }
 }

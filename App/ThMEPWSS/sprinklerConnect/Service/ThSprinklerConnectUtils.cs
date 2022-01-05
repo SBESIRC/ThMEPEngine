@@ -71,9 +71,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var frame = new Polyline();
                 frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
                 frame.TransformBy(Active.Editor.UCS2WCS());
-                var frames = new List<Polyline>() { frame };
 
-                resPolys.AddRange(GetAllFramePolys(frames));
+                resPolys.AddRange(GetAllFramePolys(frame));
                 resPolys.Remove(frame);
 
                 return resPolys;
@@ -113,7 +112,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 foreach (ObjectId frame in result.Value.GetObjectIds())
                 {
                     var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
+                    var plBackClone = plBack.Clone() as Polyline;
+                    var transformer = ThSprinklerTransformer.GetTransformer(plBackClone.Vertices());
+                    transformer.Transform(plBackClone);
+                    var plFrame = ThMEPFrameService.Normalize(plBackClone);
+                    transformer.Reset(plFrame);
                     resPolys.Add(plFrame);
                 }
 
@@ -126,11 +129,14 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// </summary>
         /// <param name="frames"></param>
         /// <returns></returns>
-        private static List<Polyline> GetAllFramePolys(List<Polyline> frames)
+        private static List<Polyline> GetAllFramePolys(Polyline frame)
         {
             var resPolys = new List<Polyline>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var transformer = ThSprinklerTransformer.GetTransformer(frame.Vertices());
+                transformer.Transform(frame);
+
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Polyline)).DxfName,
@@ -139,7 +145,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 {
                     ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT,
                 };
-                var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                var filterlist = OpFilter.Bulid(o => o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) & 
                     o.Dxf((int)DxfCode.LayerName) == string.Join(",", layerNames));
                 var polys = new List<Polyline>();
                 var status = Active.Editor.SelectAll(filterlist);
@@ -148,22 +154,21 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     foreach (ObjectId obj in status.Value.GetObjectIds())
                     {
                         var plBack = acadDatabase.Element<Polyline>(obj);
-                        var plFrame = ThMEPFrameService.Normalize(plBack);
+                        var plBackClone = plBack.Clone() as Polyline;
+                        transformer.Transform(plBackClone);
+                        var plFrame = ThMEPFrameService.Normalize(plBackClone);
                         polys.Add(plFrame);
                     }
                 }
 
-                foreach (var frame in frames)
+                var checkFrame = frame.Buffer(5)[0] as Polyline;
+                polys.Where(o =>
                 {
-                    var checkFrame = frame.Buffer(5)[0] as Polyline;
-                    polys.Where(o =>
-                    {
-                        return o.Area > 0 && checkFrame.Contains(o) && (frame.Area - o.Area) > 50;
-                    })
-                   .OfType<Polyline>()
-                   .ForEachDbObject(o => resPolys.Add(o));
-                    resPolys.Add(frame);
-                }
+                    return o.Area > 0 && checkFrame.Contains(o) && (frame.Area - o.Area) > 50;
+                })
+                    .OfType<Polyline>()
+                    .ForEachDbObject(o => resPolys.Add(o));
+                polys.ForEach(o => transformer.Reset(o));
             }
 
             return resPolys;

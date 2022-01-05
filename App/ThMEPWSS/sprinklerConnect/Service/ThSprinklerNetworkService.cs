@@ -81,13 +81,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var averageC = 0;
             var lengthTemp = 0.0;
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 3 && i < lengthGroup.Count(); i++)
             {
-                if (i <= lengthGroup.Count())
-                {
-                    lengthTemp = lengthTemp + lengthGroup[i].Key;
-                    averageC = averageC + 1;
-                }
+                lengthTemp += lengthGroup[i].Key;
+                averageC++;
             }
             if (lengthTemp > 0)
             {
