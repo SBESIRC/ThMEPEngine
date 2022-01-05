@@ -7,6 +7,7 @@ using ThMEPElectrical.BlockConvert;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using TianHua.Electrical.UI.ThBroadcast;
 
 namespace TianHua.Electrical.UI
 {
@@ -97,6 +98,13 @@ namespace TianHua.Electrical.UI
         {
             SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
             AcadApp.ShowModalWindow(securityPlaneSystemUI);
+        }
+
+        [CommandMethod("TIANHUACAD", "THGB", CommandFlags.Modal)]
+        public void THGB()
+        {
+            ThBroadcastUI thBroadcastUI = new ThBroadcastUI();
+            AcadApp.ShowModalWindow(thBroadcastUI);
         }
 
         //火灾报警

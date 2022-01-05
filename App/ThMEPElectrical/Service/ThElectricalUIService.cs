@@ -1,4 +1,5 @@
-﻿using ThMEPElectrical.Model;
+﻿using ThMEPElectrical.Broadcast.Model;
+using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Service
 {
@@ -19,5 +20,10 @@ namespace ThMEPElectrical.Service
         /// 安防平面
         /// </summary>
         public ThSecurityPlaneSystemParameter Parameter = new ThSecurityPlaneSystemParameter();
+
+        /// <summary>
+        /// 天华广播
+        /// </summary>
+        public ThBroadcastParameter thGBParameter = new ThBroadcastParameter();
     }
 }

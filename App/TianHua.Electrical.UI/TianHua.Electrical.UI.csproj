@@ -102,6 +102,9 @@
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
+      <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="fmBlockConvert.resx">
       <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
@@ -258,6 +261,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SystemDiagram\UI\SelectLayers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ThBroadcast\ThBroadcastUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
