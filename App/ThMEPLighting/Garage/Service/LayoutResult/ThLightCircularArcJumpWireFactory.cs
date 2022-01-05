@@ -56,10 +56,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         public void BuildCrossAdjacentLinks()
         {
-            // 绘制在同一段上,不是默认编号
+            // 绘制在同一段上
             LightNodeLinks
-                .Where(l => !DefaultNumbers.Contains(l.First.Number))
-                .Where(l => l.OnLinkPath && l.Edges.Count > 0 && !l.IsCrossLink)
+                .Where(l => l.OnLinkPath)
                 .ForEach(l => DrawAdjacentSamePathJumpWire(l));
         }
 
@@ -77,12 +76,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void DrawAdjacentSamePathJumpWire(ThLightNodeLink lightNodeLink)
         {
             // 获取跳接线的偏移方向
-            var offsetDir = GetJumpWireDirection(lightNodeLink);
+            var offsetDir = GetAdjacentJumpWireDirection(lightNodeLink);
             if (!offsetDir.HasValue)
             {
                 return;
             }
-            DrawArc(lightNodeLink, offsetDir.Value.Negate());
+            DrawArc(lightNodeLink, offsetDir.Value);
         }
 
         private void DrawArc(ThLightNodeLink lightNodeLink,Vector3d direction)

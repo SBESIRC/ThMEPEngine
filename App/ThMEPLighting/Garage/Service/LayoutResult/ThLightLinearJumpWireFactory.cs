@@ -85,9 +85,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var shortenDis = LampLength / 2.0 + LampSideIntervalLength;
             OffsetDis3 = OffsetDis2;
 
-            // 绘制在同一段上,且不是默认编号的灯
+            // 绘制在同一段上
             LightNodeLinks
-                .Where(l => !DefaultNumbers.Contains(l.First.Number) && l.OnLinkPath)
+                .Where(l => l.OnLinkPath)
                 .ForEach(l =>
                 {
                     DrawAdjacentSamePathJumpWire(l);
@@ -192,10 +192,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var path = CreatePolyline(lightNodeLink.Edges, lightNodeLink.First.Position, lightNodeLink.Second.Position);
 
             // 获取跳接线的偏移方向
-            var offsetDir = GetJumpWireDirection(lightNodeLink);
+            var offsetDir = GetAdjacentJumpWireDirection(lightNodeLink);
             if (offsetDir.HasValue)
             {
-                return DrawLinkCurves(path, offsetDir.Value.Negate());
+                return DrawLinkCurves(path, offsetDir.Value);
             }
             else
             {

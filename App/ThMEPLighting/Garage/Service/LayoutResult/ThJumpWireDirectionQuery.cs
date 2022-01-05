@@ -39,6 +39,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
+        public Vector3d? Query(Point3d position)
+        {
+            return Calculator.Calcuate(position);
+        }
+
         private int Query(string number)
         {
             if(DirectionConfig.ContainsKey(number))

@@ -226,8 +226,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 };
                 var linkService = new ThLightNodeSameLinkService(new List<ThLinkPath> { linkPath });
                 var lightNodeLinks = linkService.FindLightNodeLink1();
+                lightNodeLinks = lightNodeLinks
+                    .Where(o => !IsOnSameSide(o.First.Position, o.Second.Position, branch))
+                    .ToList();
+                results.AddRange(lightNodeLinks);
             }
             return results;
+        }
+
+        private bool IsOnSameSide(Point3d start,Point3d end,Line branch)
+        {
+            var startProjectionPt = start.GetProjectPtOnLine(branch.StartPoint, branch.EndPoint);
+            var endProjectionPt = end.GetProjectPtOnLine(branch.StartPoint, branch.EndPoint);
+            var startDir = startProjectionPt.GetVectorTo(start);
+            var endDir = endProjectionPt.GetVectorTo(end);
+            return startDir.IsSameDirection(endDir);
         }
 
         private ThLightEdge CreateEdge(Point3d sp,Point3d ep)

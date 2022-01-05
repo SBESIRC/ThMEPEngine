@@ -247,6 +247,29 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
         }
+
+        protected Vector3d? GetAdjacentJumpWireDirection(ThLightNodeLink lightNodeLink)
+        {
+            // 指向车道中心线的方向
+            var firstDir = GetJumpWireDirection(lightNodeLink.First.Position);
+            if (firstDir.HasValue)
+            {
+                return firstDir.Value;
+            }
+            else
+            {
+                var secondDir = GetJumpWireDirection(lightNodeLink.Second.Position);
+                if (secondDir.HasValue)
+                {
+                    return secondDir.Value;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
         private Vector3d GetJumpWireDirection(Vector3d vec)
         {
             return vec.GetAlignedDimensionTextDir();
@@ -258,6 +281,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 JumpWireDirectionQuery = new ThJumpWireDirectionQuery(DirectionConfig, CenterSideDicts);
             }
             return JumpWireDirectionQuery.Query(number, position);
+        }
+        private Vector3d? GetJumpWireDirection(Point3d position)
+        {
+            if (JumpWireDirectionQuery == null)
+            {
+                JumpWireDirectionQuery = new ThJumpWireDirectionQuery(DirectionConfig, CenterSideDicts);
+            }
+            return JumpWireDirectionQuery.Query(position);
         }
         protected Tuple<Point3d, Point3d> CalculateJumpStartEndPt(ThLightNodeLink lightNodeLink)
         {
