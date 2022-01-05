@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +16,65 @@ namespace ThMEPEngineCore.GridOperation
 {
     public class CutGridRegionService
     {
-        double tol = 10000;
-        public List<Polyline> CutRegion(Polyline polyline, List<Curve> grids, GridType gridType)
+        public double tol = 10000;
+        public List<Polyline> CutRegion(Polyline polyline, List<Curve> grids, List<Polyline> otherPolys, GridType gridType)
         {
-            var regions = CutByGrid(grids, polyline, gridType);
+            var polylines = new List<Polyline>(otherPolys);
+            polylines.Add(polyline);
+            var extendGrids = ExtendGirds(grids, polylines, gridType);
+            foreach (var poly in otherPolys)
+            {
+                var dbCollec = new DBObjectCollection();
+                poly.Explode(dbCollec);
+                extendGrids.AddRange(dbCollec.Cast<Curve>());
+            }
+
+            var regions = CetGridRegion(extendGrids, polyline).Where(x => x.Area > 0).ToList();
+            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (var item in regions)
+                {
+                    //item.ColorIndex = 3;
+                    //db.ModelSpace.Add(item);
+                }
+            }
+            var mPolyDic = ToMPolygonCollection(regions);
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(mPolyDic.Keys.ToCollection());
+            foreach (var poly in otherPolys)
+            {
+                var bufferPoly = poly.Buffer(-10)[0] as Polyline;
+                var intersectPolys = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<MPolygon>()
+                    .Select(x => mPolyDic[x]).ToList();
+                regions = regions.Except(intersectPolys).ToList();
+            }
+
             return regions;
         }
 
-        private List<Polyline> CutByGrid(List<Curve> grids, Polyline polyline, GridType gridType)
+        /// <summary>
+        /// polyline转成mopolygon的映射
+        /// </summary>
+        /// <param name="polylines"></param>
+        /// <returns></returns>
+        private Dictionary<MPolygon, Polyline> ToMPolygonCollection(List<Polyline> polylines)
+        {
+            Dictionary<MPolygon, Polyline> mPolygonDic = new Dictionary<MPolygon, Polyline>();
+            foreach (var poly in polylines)
+            {
+                var mPoly = new DBObjectCollection() { poly }.BuildMPolygon();
+                mPolygonDic.Add(mPoly, poly);
+            }
+            return mPolygonDic;
+        }
+
+        /// <summary>
+        /// 延申轴网线到边界
+        /// </summary>
+        /// <param name="grids"></param>
+        /// <param name="polyline"></param>
+        /// <param name="gridType"></param>
+        /// <returns></returns>
+        private List<Curve> ExtendGirds(List<Curve> grids, List<Polyline> polylines, GridType gridType)
         {
             List<Curve> extendGrids = new List<Curve>();
             if (gridType == GridType.ArcGrid)
@@ -36,8 +88,8 @@ namespace ThMEPEngineCore.GridOperation
                     else
                     {
                         var dir = (grid.EndPoint - grid.StartPoint).GetNormal();
-                        var startPt = CalBoundaryPt(polyline, grid.StartPoint, -dir);
-                        var endPt = CalBoundaryPt(polyline, grid.EndPoint, dir);
+                        var startPt = CalBoundaryPt(polylines, grid.StartPoint, -dir);
+                        var endPt = CalBoundaryPt(polylines, grid.EndPoint, dir);
                         extendGrids.Add(new Line(startPt, endPt));
                     }
                 }
@@ -47,14 +99,13 @@ namespace ThMEPEngineCore.GridOperation
                 foreach (var grid in grids)
                 {
                     var dir = (grid.EndPoint - grid.StartPoint).GetNormal();
-                    var startPt = CalBoundaryPt(polyline, grid.StartPoint, -dir);
-                    var endPt = CalBoundaryPt(polyline, grid.EndPoint, dir);
+                    var startPt = CalBoundaryPt(polylines, grid.StartPoint, -dir);
+                    var endPt = CalBoundaryPt(polylines, grid.EndPoint, dir);
                     extendGrids.Add(new Line(startPt, endPt));
                 }
             }
 
-            var regions = CetGridRegion(extendGrids, polyline);
-            return regions;
+            return extendGrids;
         }
 
         /// <summary>
@@ -76,81 +127,38 @@ namespace ThMEPEngineCore.GridOperation
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private Point3d CalBoundaryPt(Polyline polyline, Point3d pt, Vector3d dir)
+        private Point3d CalBoundaryPt(List<Polyline> polylines, Point3d pt, Vector3d dir)
         {
             var startPt = pt;
-            if (polyline.Contains(startPt) && polyline.GetClosestPointTo(startPt, false).DistanceTo(startPt) > 1)
+            foreach (var polyline in polylines)
             {
-                Ray ray = new Ray()
+                List<Point3d> allPts = new List<Point3d>();
+                if (polyline.Contains(startPt) && polyline.GetClosestPointTo(startPt, false).DistanceTo(startPt) > 1)
                 {
-                    BasePoint = startPt,
-                    UnitDir = -dir,
-                };
-                Point3dCollection pts = new Point3dCollection();
-                polyline.IntersectWith(ray, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-                if (pts.Count > 0)
+                    Ray ray = new Ray()
+                    {
+                        BasePoint = startPt,
+                        UnitDir = -dir,
+                    };
+                    Point3dCollection pts = new Point3dCollection();
+                    polyline.IntersectWith(ray, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
+                    if (pts.Count > 0)
+                    {
+                        allPts.AddRange(pts.Cast<Point3d>());
+                    }
+                }
+                if (allPts.Count > 0)
                 {
-                    var closetPt = pts.Cast<Point3d>().OrderBy(x => x.DistanceTo(startPt)).First();
+                    var closetPt = allPts.OrderBy(x => x.DistanceTo(startPt)).First();
                     if (closetPt.DistanceTo(startPt) < tol)
                     {
                         startPt = closetPt;
                     }
                 }
             }
+            
 
             return startPt;
-        }
-
-        /// <summary>
-        /// 创建轴网类
-        /// </summary>
-        /// <param name="curves"></param>
-        /// <param name="gridType"></param>
-        /// <returns></returns>
-        private GridModel ClassifyGrid(List<Curve> curves, GridType gridType)
-        {
-            if (gridType == GridType.ArcGrid)
-            {
-                ArcGridModel arcGrid = new ArcGridModel()
-                {
-                    centerPt = (curves.First(x => x is Arc) as Arc).Center,
-                    arcLines = new List<Arc>(),
-                    lines = new List<Line>(),
-                };
-                foreach (var curve in curves)
-                {
-                    if (curve is Line line)
-                    {
-                        arcGrid.lines.Add(line);
-                    }
-                    else if (curve is Arc arc)
-                    {
-                        arcGrid.arcLines.Add(arc);
-                    }
-                }
-                return arcGrid;
-            }
-            else
-            {
-                LineGridModel lineGrid = new LineGridModel()
-                {
-                    vecter = (curves.First().EndPoint - curves.First().StartPoint).GetNormal(),
-                    xLines = new List<Line>(),
-                    yLines = new List<Line>(),
-                };
-                foreach (Line curve in curves)
-                {
-                    if ((curve.EndPoint - curve.StartPoint).GetNormal().IsParallelTo(lineGrid.vecter, new Tolerance(0.1, 0.1)))
-                    {
-                        lineGrid.xLines.Add(curve);
-                    }
-                    else
-                    {
-                        lineGrid.yLines.Add(curve);
-                    }
-                }
-                return lineGrid;
-            }
         }
     }
 }

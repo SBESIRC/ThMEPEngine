@@ -130,7 +130,9 @@ namespace ThMEPElectrical
                 var ucsPolygons = gridDivision.DivisionGridRegions(curves);
                 foreach (var item in ucsPolygons)
                 {
-                    acadDatabase.ModelSpace.Add(item.GridPolygon);
+                    var aa = item.GridPolygon;
+                    aa.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(aa);
                     foreach (var s in item.regions)
                     {
                         acadDatabase.ModelSpace.Add(s);

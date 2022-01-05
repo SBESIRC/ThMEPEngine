@@ -44,20 +44,19 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
         public static List<Polyline> ArcPolygonize(this List<Curve> curves, Polyline frame, double arcChord)      //仅支持圆弧、直线、polyline直线（ps：最好全部用直线）
         {
             var handleCurves = HandleLinesByFrame(frame, curves);
-            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            //{
-            //    var s = frame.Clone() as Polyline;
-            //    s.ColorIndex = 4;
-            //    db.ModelSpace.Add(s);
-            //    foreach (var item in curves)
-            //    {
-            //        item.ColorIndex = 4;
-            //        db.ModelSpace.Add(item);
-            //    }
-            //}
+            
             var allLines = handleCurves.ConvertToLine(arcChord);
-            allLines = allLines.Select(x => x.ExtendLine(50)).ToList();
-            var polygons = allLines.ToCollection().Polygons().Cast<Polyline>().Where(x => x.Area > 1).ToList();
+            allLines = allLines.Select(x => x.ExtendLine(200)).ToList();
+            var polygons = allLines.ToCollection().PolygonsEx()
+                .Cast<Entity>()
+                .Select(x =>
+                {
+                    if(x is MPolygon mPolygon)
+                    {
+                        return mPolygon.Loops().First() as Entity;
+                    }
+                    return x;
+                }).Cast<Polyline>().Where(x => x.Area > 1).ToList();
 
             var checkCurves = new List<Curve>(curves);
             DBObjectCollection collection = new DBObjectCollection();
