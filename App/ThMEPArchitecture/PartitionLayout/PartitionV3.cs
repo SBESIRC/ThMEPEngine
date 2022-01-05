@@ -107,7 +107,31 @@ namespace ThMEPArchitecture.PartitionLayout
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
 
-        
+        public void Dispose()
+        {
+            Walls?.ForEach(e => e.Dispose());
+            //Walls?.Clear
+            IniLanes?.ForEach(e => e.Line.Dispose());
+            //Obstacles?.ForEach(e => e.Dispose());
+            Boundary?.Dispose();
+            CarModuleBox?.ForEach(e => e.Dispose());
+            MoudleSpatialIndex?.Dispose();
+            IntegralModules?.ForEach(e => e.Box.Dispose());
+            IntegralModules?.ForEach(e => e.Lanes.ForEach(o => o.Dispose()));
+            IniLaneLines?.ForEach(e => e.Dispose());
+            BuildingBoxes?.ForEach(e => e.Dispose());
+            BoundingBox?.Dispose();
+            CarSpatialIndex?.Dispose();
+            ModuleBox?.ForEach(e => e.Dispose());
+            Laneboxes?.ForEach(e => e.Dispose());
+            IniBoundary?.Dispose();
+            FirstStageCarBoxes?.ForEach(e => e.Dispose());
+            NewBound?.Dispose();
+            NewBoundEdges?.ForEach(e => e.Dispose());
+            PModuleBox?.ForEach(e => e.Dispose());
+            GSingleLanes?.ForEach(e => e.Line?.Dispose());
+        }
+
         public bool Validate()
         {
             double totallength = 0;
@@ -183,30 +207,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
                 return e;
             }).AddToCurrentSpace();
-        }
-
-        public void Dispose()
-        {
-            Walls?.ForEach(e => e.Dispose());
-            //Walls?.Clear
-            IniLanes?.ForEach(e => e.Line.Dispose());
-            //Obstacles?.ForEach(e => e.Dispose());
-            Boundary?.Dispose();
-            CarModuleBox?.ForEach(e => e.Dispose());
-            MoudleSpatialIndex?.Dispose();
-            IntegralModules?.ForEach(e => e.Box.Dispose());
-            IntegralModules?.ForEach(e => e.Lanes.ForEach(o => o.Dispose()));
-            IniLaneLines?.ForEach(e => e.Dispose());
-            BuildingBoxes?.ForEach(e => e.Dispose());
-            BoundingBox?.Dispose();
-            CarSpatialIndex?.Dispose();
-            ModuleBox?.ForEach(e => e.Dispose());
-            Laneboxes?.ForEach(e => e.Dispose());
-            IniBoundary?.Dispose();
-            FirstStageCarBoxes?.ForEach(e => e.Dispose());
-            NewBound?.Dispose();
-            NewBoundEdges?.ForEach(e => e.Dispose());
-            PModuleBox?.ForEach(e => e.Dispose());
         }
 
         /// <summary>
@@ -291,6 +291,8 @@ namespace ThMEPArchitecture.PartitionLayout
             Point3d pto = new Point3d();
             List<Vector3d> vecs = new List<Vector3d>();
             UpdateBoundaryEdge(ref crvs, ref pto, ref vecs, bigbox, edges, disy);
+            bigbox.Dispose();
+
 
             List<Curve> res = new List<Curve>();
             for (int i = 0; i < crvs.Count; i++)
@@ -314,7 +316,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 catch
                 {
-                    ;
                 }
                 double mindis = 9999999;
                 Curve crv = new Line();
@@ -328,6 +329,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                 }
                 NewBoundEdges.Add(crv);
+                l.Dispose();
             }
 
             NewBoundEdges = NewBoundEdges.Clone().Cast<Curve>().ToList();
@@ -382,6 +384,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         }
                     }
                     crvs2.Add(crv);
+                    l.Dispose();
                 }
                 crvs2 = crvs2.Distinct().Where(e => e.GetLength() > 1).ToList();
                 if (crvs2.Count > crvs.Count)
@@ -410,7 +413,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     if (j.Line.GetClosestPointTo(NewBoundEdges[i].GetCenter(), false).DistanceTo(NewBoundEdges[i].GetCenter()) < 1)
                     {
-
                         tmplanes.Add((Line)NewBoundEdges[i]);
                         NewBoundEdges.RemoveAt(i);
                         i--;
@@ -468,19 +470,29 @@ namespace ThMEPArchitecture.PartitionLayout
                     lane.TransformBy(Matrix3d.Displacement(-inilane.Vec.GetNormal() * (DisLaneWidth / 2 + DisCarWidth * 3)));
                     if (ClosestPointInCurves(lane.StartPoint, inilanelines) < 1)
                     {
-                        if (lane.Length < DisCarAndHalfLane) continue;
+                        if (lane.Length < DisCarAndHalfLane)
+                        {
+                            lane.Dispose();
+                            continue;
+                        }
                         else
                             lane = new Line(lane.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane.StartPoint, lane.EndPoint).GetNormal() * DisCarAndHalfLane)), lane.EndPoint);
                     }
                     if (ClosestPointInCurves(lane.EndPoint, inilanelines) < 1)
                     {
-                        if (lane.Length < DisCarAndHalfLane) continue;
+                        if (lane.Length < DisCarAndHalfLane)
+                        {
+                            lane.Dispose();
+                            continue;
+                        }
                         else
                             lane = new Line(lane.StartPoint, lane.EndPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane.EndPoint, lane.StartPoint).GetNormal() * DisCarAndHalfLane)));
                     }
                     LayoutOneDirection(lane, inilane.Vec, Obstacles, boundobstacles, ref length_module_used);
+                    lane.Dispose();
                 }
                 IniLanes[i].RestLength = IniLanes[i].Line.Length - length_module_used;
+                l.Dispose();
             }
 
             IniLanes = IniLanes.OrderByDescending(e => e.RestLength).ToList();
@@ -507,7 +519,9 @@ namespace ThMEPArchitecture.PartitionLayout
                 boundobstacles.RemoveAt(i);
                 boundobstacles.AddRange(Walls);
                 GenerateRestVertAndParallelSpots(new List<Line>() { lane }, IniLanes[i].Vec, boundobstacles);
+                lane.Dispose();
             }
+            
         }
 
         /// <summary>
@@ -537,12 +551,14 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (test.Count >= pMModlues.Count) pMModlues = test;
                 else break;
             }
+            ilanes.ForEach(e=>e.Dispose());
             List<Line> restsegs = new List<Line>();
             if (pMModlues.Bounds.Count > 0)
                 restsegs = SplitLine(lane, pMModlues.Bounds).Cast<Line>().Where(e => ClosestPointInCurves(e.GetCenter(), pMModlues.Bounds) > 1).ToList();           
             else restsegs.Add(lane);
             restsegs = restsegs.Where(e => e.Length >= DisCarWidth).ToList();
             GenerateRestVertAndParallelSpots(restsegs, vec, boundobstacles);
+            restsegs.ForEach(e=>e.Dispose());
             GetCarSpots(ref pMModlues, ref CarSpatialIndex, ObstaclesSpatialIndex, ModuleBox, Boundary);
             length_module_used = pMModlues.Bounds.Count * DisModulus;
         }
@@ -575,6 +591,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     GenerateCarsAndPillarsForEachLane(vl, vec, DisCarWidth, DisCarLength, true, true, true, false, true, true, true, true, true, respots);
                 }
+                validvertlines.ForEach(f => f.Dispose());
+                l.Dispose();
             }
             foreach (var e in restls)
             {
@@ -589,7 +607,10 @@ namespace ThMEPArchitecture.PartitionLayout
                     {
                         GenerateCarsAndPillarsForEachLane(vl, vec, DisCarLength, DisCarWidth, true, true, false, false, false, true, true, true);
                     }
+                    lis.ForEach(f => f.Dispose());
                 }
+                validvertlines.ForEach(f => f.Dispose());
+                l.Dispose();
             }
         }
 
@@ -671,7 +692,6 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <returns></returns>
         private List<Line> SplitLineByObstacles(Line line, Line oriline)
         {
-            List<Line> results = new List<Line>();
             var pl = CreatePolyFromPoints(new Point3d[] { line.StartPoint, line.EndPoint, oriline.EndPoint, oriline.StartPoint });
             pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pl.GetRecCentroid()));
             List<Point3d> points = new List<Point3d>();
@@ -697,6 +717,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 pltmp.Dispose();
                 return resin;
             }).ToList();
+            pl.Dispose();
             return res;
         }
 
@@ -761,7 +782,6 @@ namespace ThMEPArchitecture.PartitionLayout
                     ptb = ptb.TransformBy(Matrix3d.Displacement(CreateVector(ptb, lane.EndPoint).GetNormal() * (DisLaneWidth / 2 - disb)));
                 }
             }
-            var pl = CreatePolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, ptb, pta });
             Line eb = new Line(lane.EndPoint, ptb);
             Line ea = new Line(lane.StartPoint, pta);
             count += ((int)Math.Floor((ea.Length - DisLaneWidth / 2) / DisCarWidth));
@@ -772,7 +792,10 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 if (ClosestPointInVertCurves(ea.StartPoint, ea, IniLanes.Select(e => e.Line).ToList()) < 1 &&
                     Math.Abs(ClosestPointInVertCurves(ea.EndPoint, ea, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisCarWidth &&
-                    ea.Length < DisLaneWidth / 2 + DisCarWidth * 6) {  }
+                    ea.Length < DisLaneWidth / 2 + DisCarWidth * 6)
+                {
+                    pa.Dispose();
+                }
                 else
                 {
                     plys.Add(pa);
@@ -785,13 +808,21 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 if (ClosestPointInVertCurves(eb.StartPoint, eb, IniLanes.Select(e => e.Line).ToList()) < 1 &&
                     Math.Abs(ClosestPointInVertCurves(eb.EndPoint, eb, IniLanes.Select(e => e.Line).ToList()) - DisLaneWidth / 2) < DisCarWidth &&
-    eb.Length < DisLaneWidth / 2 + DisCarWidth * 6) { }
+    eb.Length < DisLaneWidth / 2 + DisCarWidth * 6)
+                {
+                    pb.Dispose();
+                }
                 else
                 {
                     plys.Add(pb);
                     generatedcount++;
                 }
             }
+            unittest.Dispose();
+            pltest.Dispose();
+            pltestsc.Dispose();
+            ea.Dispose();
+            eb.Dispose();
             return count;
         }
 
@@ -899,6 +930,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 pl = r.Buffer(DisLaneWidth / 2);
                 pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pl.Centroid()));
                 var crossedunder = ObstaclesSpatialIndex.SelectCrossingPolygon(pl);
+                underl.Dispose();
                 if (crossedunder.Count > 0) return false;
             }
             else
@@ -911,6 +943,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (crossed.Count > 0) return false;
             }
 
+            pl.Dispose();
             var v = CreateVector(r).GetPerpendicularVector().GetNormal();
             var p = r.StartPoint.TransformBy(Matrix3d.Displacement(v));
             if (lane.Line.GetClosestPointTo(p, true).DistanceTo(pt) > DisCarAndHalfLane) v = -v;
@@ -929,6 +962,11 @@ namespace ThMEPArchitecture.PartitionLayout
                 generate_adj_lanes = true;
                 IniLaneLines.Add(r);
                 return generate_adj_lanes;
+            }
+            lt.Dispose();
+            if (segs.Count > 1)
+            {
+                for (int i = 1; i < segs.Count; i++) segs[i].Dispose();
             }
             return generate_adj_lanes;
         }
@@ -1029,8 +1067,14 @@ namespace ThMEPArchitecture.PartitionLayout
                     {
                         GenerateCarsAndPillarsForEachLane(vl, vec, length_divided, length_offset - DisLaneWidth / 2, true, true, true, false, false, true);
                     }
+                    validvertlines.ForEach(f => f.Dispose());
+                    lt.Dispose();
                 }
             }
+            inioffset.Dispose();
+            offset.Dispose();
+            pl.Dispose();
+            plsc.Dispose();
         }
 
         private void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset, bool judge_lanebox = true,
@@ -1116,7 +1160,6 @@ namespace ThMEPArchitecture.PartitionLayout
                         {
                             Pillars.RemoveAt(Pillars.Count - 1);
                         }
-
                     }
                     if (precar.Area == 0)
                     {
@@ -1148,6 +1191,8 @@ namespace ThMEPArchitecture.PartitionLayout
                             {
                                 vec = -vec;
                             }
+                            li.Dispose();
+                            lf.Dispose();
                         }
                         precar = car;
                     }
@@ -1176,6 +1221,8 @@ namespace ThMEPArchitecture.PartitionLayout
                             {
                                 vec = -vec;
                             }
+                            li.Dispose();
+                            lf.Dispose();
                         }
                         else { }
                         precar = car;
@@ -1207,6 +1254,8 @@ namespace ThMEPArchitecture.PartitionLayout
                         {
                             vec = -vec;
                         }
+                        li.Dispose();
+                        lf.Dispose();
                     }
                 }
                 carsc.Dispose();
@@ -1233,13 +1282,21 @@ namespace ThMEPArchitecture.PartitionLayout
                 bool skip = false;
                 bool cont = false;
                 generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisCarWidth);
-                if (cont) continue;
+                if (cont)
+                {
+                    offset.Dispose();
+                    continue;
+                }
 
                 offset = CreateLine(line);
                 cont = false;
                 skip = false;
                 generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisCarWidth);
-                if (cont) continue;
+                if (cont)
+                {
+                    offset.Dispose();
+                    continue;
+                }
             }
         }
 
@@ -1260,13 +1317,21 @@ namespace ThMEPArchitecture.PartitionLayout
                 bool skip = false;
                 bool cont = false;
                 generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisCarWidth + DisLaneWidth / 2, DisCarLength);
-                if (cont) continue;
+                if (cont)
+                {
+                    offset.Dispose();
+                    continue;
+                }
 
                 offset = CreateLine(line);
                 cont = false;
                 skip = false;
                 generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisCarWidth + DisLaneWidth / 2, DisCarLength);
-                if (cont) continue;
+                if (cont)
+                {
+                    offset.Dispose();
+                    continue;
+                }
             }
         }
 
@@ -1313,6 +1378,7 @@ namespace ThMEPArchitecture.PartitionLayout
             if (disend < DisLaneWidth / 2)
                 lane = new Line(lane.StartPoint, lane.EndPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane.EndPoint, lane.StartPoint).GetNormal() * (DisLaneWidth / 2 - disend))));
             GenerateCarsAndPillarsForEachLane(lane, vec, DisCarWidth, DisCarLength, false, false,true,false,false,true);
+            lane.Dispose();
         }
 
         /// <summary>
@@ -1412,6 +1478,7 @@ namespace ThMEPArchitecture.PartitionLayout
                                     j--;
                                 }
                             }
+                            offsetlane.Dispose();
                             break;
                         }
                         else
@@ -1444,6 +1511,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         }
                     }
                 }
+                splited.ForEach(e => e.Dispose());
             }
             return generate_integral_modules;
         }
@@ -1579,6 +1647,9 @@ namespace ThMEPArchitecture.PartitionLayout
                 var plbp = CreatePolyFromPoints(new Point3d[] { b.StartPoint, b.EndPoint, plb.EndPoint, plb.StartPoint });
                 AddToSpatialIndex(plbp, ref carSpacilaIndex);
                 ModuleBox.Add(plbp);
+                objs.Dispose();
+                tb.Dispose();
+                plb.Dispose();
             }
         }
 
@@ -1642,7 +1713,6 @@ namespace ThMEPArchitecture.PartitionLayout
             public int Count;
             public Vector3d Vec;
             public List<Polyline> Bounds;
-
         }
     }
 
@@ -1685,6 +1755,7 @@ namespace ThMEPArchitecture.PartitionLayout
             var points = new List<Point3d>();
             lanes.Select(e => sdl.Intersect(e, Intersect.OnBothOperands)).ForEach(f => points.AddRange(f));
             points = points.OrderBy(e => e.DistanceTo(pt)).ToList();
+            sdl.Dispose();
             return points.Count > 0 ? pt.DistanceTo(points.First()) : 0;
         }
     }

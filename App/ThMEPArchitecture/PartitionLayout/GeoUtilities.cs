@@ -16,50 +16,6 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public static class GeoUtilities
     {
-        public static void SortLinesByLength(List<Line> lines, bool ascending = true)
-        {
-            var comparer = new LineLengthComparer();
-            lines.Sort(comparer);
-            if (!ascending) lines.Reverse();
-            return;
-        }
-        private class LineLengthComparer : IComparer<Line>
-        {
-            public LineLengthComparer()
-            {
-
-            }
-            public int Compare(Line a, Line b)
-            {
-                if (a.Length == b.Length) return 0;
-                else if (a.Length < b.Length) return -1;
-                else return 1;
-            }
-        }
-
-        public static void SortLinesByDistanceToPoint(List<Line> lines, Point3d point)
-        {
-            var comparer = new LineDisToPointComparer(point);
-            lines.Sort(comparer);
-            return;
-        }
-        private class LineDisToPointComparer : IComparer<Line>
-        {
-            public LineDisToPointComparer(Point3d pt)
-            {
-                Pt = pt;
-            }
-            private Point3d Pt;
-            public int Compare(Line a, Line b)
-            {
-                var disa = a.GetClosestPointTo(Pt, false).DistanceTo(Pt);
-                var disb = b.GetClosestPointTo(Pt, false).DistanceTo(Pt);
-                if (disa == disb) return 0;
-                else if (disa < disb) return -1;
-                else return 1;
-            }
-        }
-
         public static Polyline CreatePolyFromLine(Line a)
         {
             Polyline p = new Polyline();
@@ -456,7 +412,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return res;
         }
-
         public static double ClosestPointInVertCurves(Point3d pt, Line line, List<Line> crvss)
         {
             var crvs = crvss.Where(e => IsPerpLine(line, e)).ToList();
@@ -475,7 +430,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return res;
         }
-
 
         public static double ClosestPointInCurves(Point3d pt, List<Polyline> crvs)
         {
@@ -510,7 +464,6 @@ namespace ThMEPArchitecture.PartitionLayout
             return results;
 
         }
-
 
         public static bool IsIntersect(Curve c, List<Curve> crvs)
         {
@@ -638,7 +591,5 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return length;
         }
-
-       
     }
 }

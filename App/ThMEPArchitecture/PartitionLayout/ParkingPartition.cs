@@ -177,7 +177,7 @@ namespace ThMEPArchitecture
                     count++;
                     if (count > 20) break;
                     int lanecount = IniLanes.Count;
-                    SortLinesByLength(IniLanes, false);
+                    IniLanes = IniLanes.OrderByDescending(e =>e.Length).ToList();
 
                     //
                     var generate_adjwall = GenerateLanesAdjWall();
@@ -186,7 +186,7 @@ namespace ThMEPArchitecture
                     var generated_wallext = GenerateLanesExtWall();
                     if (generated_wallext) continue;
 
-                    SortLinesByLength(IniLanes, false);
+                    IniLanes = IniLanes.OrderByDescending(e => e.Length).ToList();
                     List<Line> offsetest = new List<Line>();
                     List<Line> offseini = new List<Line>();
                     foreach (var l in IniLanes)
@@ -197,7 +197,7 @@ namespace ThMEPArchitecture
                     }
 
                     if (offsetest.Count == 0) break;
-                    SortLinesByLength(offsetest, false);
+                    offsetest = offsetest.OrderByDescending(e => e.Length).ToList();
 
                     var generate_bblane = GenerateLanesBackToBack(offsetest, offseini);
                     if (generate_bblane) continue;
@@ -369,7 +369,8 @@ namespace ThMEPArchitecture
                 DBObjectCollection explodedbounds = new DBObjectCollection();
                 wallpl.Explode(explodedbounds);
                 var edges = explodedbounds.Cast<Line>().ToList().Where(e => e.Length > DisModulus).ToList();
-                SortLinesByLength(edges, false);
+                edges = edges.OrderByDescending(e => e.Length).ToList();
+
 
                 explodedbounds.Dispose();
                 wallpl.Dispose();
@@ -530,7 +531,7 @@ namespace ThMEPArchitecture
             IniLanes.ForEach(e => lanesobj.Add(e));
             AddToSpatialIndex(lanesobj, ref ObstaclesSpatialIndex);
 
-            SortLinesByLength(IniLanes, false);
+            IniLanes = IniLanes.OrderByDescending(e => e.Length).ToList();
             List<Polyline> laneBoxes = new List<Polyline>();
             DBObjectCollection objslanebox = new DBObjectCollection();
             foreach (var l in IniLanes)
@@ -840,7 +841,7 @@ namespace ThMEPArchitecture
             var objs = new DBObjectCollection();
             ((Polyline)box.Clone()).Explode(objs);
             var edges = objs.Cast<Line>().ToList();
-            SortLinesByLength(edges, false);
+            edges = edges.OrderByDescending(e => e.Length).ToList();
             var maxdistance = edges[0].Length;
             var ps = lane.StartPoint;
             var pe = lane.EndPoint;
@@ -859,7 +860,7 @@ namespace ThMEPArchitecture
                 linestmp.AddRange(OffsetLine(a, DisCarAndHalfLane));
                 linestmp.AddRange(OffsetLine(b, DisCarAndHalfLane));
                 var center = box.GetCenter();
-                SortLinesByDistanceToPoint(linestmp, center);
+                linestmp = linestmp.OrderBy(e => e.GetClosestPointTo(center, false).DistanceTo(center)).ToList();
                 var l = linestmp[0];
                 DBObjectCollection objsbound = new DBObjectCollection();
                 objsbound.Add(box);
