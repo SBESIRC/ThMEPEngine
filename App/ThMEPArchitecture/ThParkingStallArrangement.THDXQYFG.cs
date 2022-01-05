@@ -1,18 +1,20 @@
-﻿using AcHelper;
+﻿using System.IO;
+using System.Linq;
+using System.Collections.Generic;
+using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThMEPEngineCore.IO;
 using ThMEPArchitecture.ParkingStallArrangement;
-using Autodesk.AutoCAD.EditorInput;
+using ThMEPArchitecture.ParkingStallArrangement.IO;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
-using System.Linq;
 
 namespace ThMEPArchitecture
 {
@@ -59,6 +61,34 @@ namespace ThMEPArchitecture
 
                 var geoString = ThGeoOutput.Output(dataSet.Container);
                 //ThGeoOutput.Output(dataSet.Container, "", "");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "-THExtractTestDataForZheData", CommandFlags.Modal)]
+        public void THExtractTestDataForZheData()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return;
+                }
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var frame = new Polyline();
+                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
+                frame.TransformBy(Active.Editor.UCS2WCS());
+
+                var dataSetFactory = new ThParkingStallDataSetFactory();
+                var dataSet = dataSetFactory.Create(acadDatabase.Database, frame.Vertices());
+
+                var fileInfo = new FileInfo(Active.Document.Name);
+                var path = fileInfo.Directory.FullName;
+                ThGeoOutput.Output(dataSet.Container, path, fileInfo.Name);
             }
         }
 
