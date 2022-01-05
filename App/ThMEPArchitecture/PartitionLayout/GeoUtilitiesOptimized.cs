@@ -126,6 +126,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 else
                     distance += lineSeg.Length;
+                lineSeg.Dispose();
             }
             return distance;
         }
@@ -169,8 +170,5 @@ namespace ThMEPArchitecture.PartitionLayout
             else
                 return new Line[] { curve };
         }
-
-
-
     }
 }

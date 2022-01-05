@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             foreach (var e in iniLanes)
             {
-                var vec = Vector(e).GetPerpendicularVector().GetNormal();
+                var vec = CreateVector(e).GetPerpendicularVector().GetNormal();
                 var pt = e.GetCenter().TransformBy(Matrix3d.Displacement(vec));
                 if (!boundary.IsPointIn(pt))
                 {

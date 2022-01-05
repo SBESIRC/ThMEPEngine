@@ -42,7 +42,7 @@ namespace ThMEPArchitecture
                     else if (o.Layer == "walls")
                     {
                         if (o is Polyline) walls.Add((Polyline)o);
-                        else if (o is Line) walls.Add(PartitionLayout.GeoUtilities.PolyFromLine((Line)o));
+                        else if (o is Line) walls.Add(PartitionLayout.GeoUtilities.CreatePolyFromLine((Line)o));
                     }
                     else if (o.Layer == "obstacles") obstacles.Add((Polyline)o);
                 }

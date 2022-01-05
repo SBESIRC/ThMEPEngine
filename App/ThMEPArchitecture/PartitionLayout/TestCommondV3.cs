@@ -98,7 +98,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (o.Layer == "walls")
                     {
                         if (o is Polyline) walls.Add((Polyline)o);
-                        else if (o is Line) walls.Add(GeoUtilities.PolyFromLine((Line)o));
+                        else if (o is Line) walls.Add(GeoUtilities.CreatePolyFromLine((Line)o));
                     }
                     else if (o.Layer == "obstacles")
                     {

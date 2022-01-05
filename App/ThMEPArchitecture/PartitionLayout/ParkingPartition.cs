@@ -332,7 +332,7 @@ namespace ThMEPArchitecture
 
 
                             Line li = new Line(k.StartPoint, k.EndPoint);
-                            Vector3d vec_m = Vector(pto, ptori).GetNormal() * DisCarAndHalfLane;
+                            Vector3d vec_m = CreateVector(pto, ptori).GetNormal() * DisCarAndHalfLane;
                             li.TransformBy(Matrix3d.Displacement(vec_m));
                             ParkModule pm = new ParkModule();
                             pm.Lanes = new Line[] { k, li };
@@ -385,7 +385,7 @@ namespace ThMEPArchitecture
                         {
                             Point3d pes = e.StartPoint.DistanceTo(ponlane) > e.EndPoint.DistanceTo(ponlane) ? e.StartPoint : e.EndPoint;
                             Line newlane = new Line(ponlane, pes);
-                            Vector3d vec = Vector(newlane).GetPerpendicularVector().GetNormal();
+                            Vector3d vec = CreateVector(newlane).GetPerpendicularVector().GetNormal();
                             Point3d ptest = e.GetCenter();
                             ptest = ptest.TransformBy(Matrix3d.Displacement(vec));
                             if (!Boundary.IsPointIn(ptest)) vec = -vec;
@@ -537,7 +537,7 @@ namespace ThMEPArchitecture
             {
                 var a = OffsetLine(l, DisLaneWidth / 2)[0];
                 var b = OffsetLine(l, DisLaneWidth / 2)[1];
-                var pl = PolyFromPoints(new List<Point3d>() {
+                var pl = CreatePolyFromPoints(new List<Point3d>() {
                     a.StartPoint,a.EndPoint,b.EndPoint,b.StartPoint,a.StartPoint});
                 //AddToSpatialIndex(pl, ref ObstaclesSpatialIndex);
                 objslanebox.Add(pl);
@@ -654,7 +654,7 @@ namespace ThMEPArchitecture
                     && e.GetClosestPointTo(la.EndPoint, true).DistanceTo(la.EndPoint) < 1
                     && Math.Abs(e.Length - la.Length) < 1)).ToList();
 
-                var ase = Vector(la.StartPoint, la.EndPoint).GetNormal() * DisLaneWidth / 2;
+                var ase = CreateVector(la.StartPoint, la.EndPoint).GetNormal() * DisLaneWidth / 2;
                 if (ClosestPointInCurves(la.StartPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
                     la = new Line(la.StartPoint.TransformBy(Matrix3d.Displacement(ase)), la.EndPoint);
                 if (ClosestPointInCurves(la.EndPoint, lanesclonea.Cast<Curve>().ToList()) < 10)
@@ -662,7 +662,7 @@ namespace ThMEPArchitecture
 
                 
 
-                var vec_ab = Vector(la.GetClosestPointTo(lb.GetCenter(), true), lb.GetCenter()).GetNormal();
+                var vec_ab = CreateVector(la.GetClosestPointTo(lb.GetCenter(), true), lb.GetCenter()).GetNormal();
 
                 var labottom = new Line(la.StartPoint, la.EndPoint);
                 var latop = new Line(la.StartPoint, la.EndPoint);
@@ -670,7 +670,7 @@ namespace ThMEPArchitecture
                 latop.TransformBy(Matrix3d.Displacement(vec_ab * DisModulus / 2));
 
 
-                var pls=GenerateCars(la, Vector(la.GetCenter(),latop.GetCenter()));
+                var pls=GenerateCars(la, CreateVector(la.GetCenter(),latop.GetCenter()));
 
                 //DBObjectCollection objspcars = new DBObjectCollection();
                
@@ -800,8 +800,8 @@ namespace ThMEPArchitecture
                 var ltops = OffsetLine(l, DisLaneWidth / 2);
                 var lbottoms = OffsetLine(l, DisCarLength + DisLaneWidth / 2);
                 var pls = new List<Polyline>();
-                pls.AddRange(GenerateCars(l, Vector(l.GetCenter(), lbottoms[0].GetCenter())));
-                pls.AddRange(GenerateCars(l, Vector(l.GetCenter(), lbottoms[1].GetCenter())));
+                pls.AddRange(GenerateCars(l, CreateVector(l.GetCenter(), lbottoms[0].GetCenter())));
+                pls.AddRange(GenerateCars(l, CreateVector(l.GetCenter(), lbottoms[1].GetCenter())));
 
                 //DBObjectCollection objscars = new DBObjectCollection();
                 foreach (var pl in pls)
@@ -844,7 +844,7 @@ namespace ThMEPArchitecture
             var maxdistance = edges[0].Length;
             var ps = lane.StartPoint;
             var pe = lane.EndPoint;
-            Vector3d vec_a = Vector(lane).GetPerpendicularVector();
+            Vector3d vec_a = CreateVector(lane).GetPerpendicularVector();
             var pts = new List<Point3d>() { pe };
             if (bothsides) pts.Insert(0, ps);
             List<Line> lines = new List<Line>();
@@ -854,8 +854,8 @@ namespace ThMEPArchitecture
             foreach (var pt in pts)
             {
                 var linestmp = new List<Line>();
-                Line a = LineSDL(pt, vec_a, maxdistance);
-                Line b = LineSDL(pt, vec_a, -maxdistance);
+                Line a = CreateLineFromStartPtAndVector(pt, vec_a, maxdistance);
+                Line b = CreateLineFromStartPtAndVector(pt, vec_a, -maxdistance);
                 linestmp.AddRange(OffsetLine(a, DisCarAndHalfLane));
                 linestmp.AddRange(OffsetLine(b, DisCarAndHalfLane));
                 var center = box.GetCenter();
@@ -903,10 +903,10 @@ namespace ThMEPArchitecture
         /// <returns></returns>
         private Line MoveLaneForMoreParkingSpace(Line lane, Point3d ptori)
         {
-            Vector3d vec = Vector(lane.GetClosestPointTo(ptori, false), ptori);
+            Vector3d vec = CreateVector(lane.GetClosestPointTo(ptori, false), ptori);
             var k_toini = lane.Clone() as Line;
             k_toini.TransformBy(Matrix3d.Displacement(vec));
-            Polyline ply = PolyFromPoints(new List<Point3d>() { lane.StartPoint, lane.EndPoint, k_toini.EndPoint, k_toini.StartPoint, lane.StartPoint });
+            Polyline ply = CreatePolyFromPoints(new List<Point3d>() { lane.StartPoint, lane.EndPoint, k_toini.EndPoint, k_toini.StartPoint, lane.StartPoint });
             var splited = SplitCurve(Boundary, new DBObjectCollection() { ply });
             Extents3d ext = ply.GeometricExtents;
             foreach (var split in splited)
@@ -924,7 +924,7 @@ namespace ThMEPArchitecture
                             var lnew = lane.Clone() as Line;
                             Point3d pt_on_k = ((Line)lane).GetClosestPointTo(((Line)edge).GetCenter(), false);
                             Point3d pt_on_edge = ((Line)edge).GetClosestPointTo(pt_on_k, false);
-                            Vector3d vec_to_edge = Vector(pt_on_k, pt_on_edge);
+                            Vector3d vec_to_edge = CreateVector(pt_on_k, pt_on_edge);
                             lnew.TransformBy(Matrix3d.Displacement(vec_to_edge));
                             Vector3d vec_to_new = -vec_to_edge.GetNormal() * DisCarAndLane;
                             lnew.TransformBy(Matrix3d.Displacement(vec_to_new));
@@ -985,7 +985,7 @@ namespace ThMEPArchitecture
                 {
                     Point3d ps = lane.GetClosestPointTo(s.StartPoint, false);
                     Point3d pe = lane.GetClosestPointTo(s.EndPoint, false);
-                    var vec = Vector(ps, s.StartPoint).GetNormal() * DisModulus;
+                    var vec = CreateVector(ps, s.StartPoint).GetNormal() * DisModulus;
                     Line r = new Line(ps, pe);
                     r.TransformBy(Matrix3d.Displacement(vec));
                     offseted.Add(r);
@@ -1023,7 +1023,7 @@ namespace ThMEPArchitecture
                 pls.Remove(l);
                 if (ClosestPointInCurves(l.StartPoint, pls) > 10)
                 {
-                    Line ls = LineSDL(l.StartPoint, Vector(l.EndPoint, l.StartPoint), 100000);
+                    Line ls = CreateLineFromStartPtAndVector(l.StartPoint, CreateVector(l.EndPoint, l.StartPoint), 100000);
                     var rs = new Line();
                     foreach (var k in SplitCurve(ls, Cutters))
                     {
@@ -1055,7 +1055,7 @@ namespace ThMEPArchitecture
                 if (ClosestPointInCurves(l.EndPoint, pls) > 10)
                 {
 
-                    Line le = LineSDL(l.EndPoint, Vector(l.StartPoint, l.EndPoint), 100000);
+                    Line le = CreateLineFromStartPtAndVector(l.EndPoint, CreateVector(l.StartPoint, l.EndPoint), 100000);
                     var re = new Line();
                     foreach (var k in SplitCurve(le, Cutters))
                     {
@@ -1114,7 +1114,7 @@ namespace ThMEPArchitecture
                     var cs = lps.Where(e => IsParallelLine(l, (Line)e)).Cast<Curve>().ToList();
                     ClosestPointInCurves(l.StartPoint, cs, ref ps, ref ds, ref ist);
                     Line lx = new Line(l.StartPoint, ps);
-                    lx.TransformBy(Matrix3d.Displacement(Vector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
+                    lx.TransformBy(Matrix3d.Displacement(CreateVector(l.StartPoint, l.EndPoint).GetNormal() * DisLaneWidth / 2));
                     IniLanes.Add(lx);
                     SequenceLanes.Add(lx);
                 }
@@ -1134,7 +1134,7 @@ namespace ThMEPArchitecture
         {
             List<Line> results = new List<Line>();
             var ls = OffsetLine(lane, dis);
-            var lanebox = PolyFromPoints(new List<Point3d>() {  ls[0].StartPoint, ls[0].EndPoint,
+            var lanebox = CreatePolyFromPoints(new List<Point3d>() {  ls[0].StartPoint, ls[0].EndPoint,
                  ls[1].EndPoint,ls[1].StartPoint,ls[0].StartPoint});
             var crossed = ObstaclesSpatialIndex.SelectCrossingPolygon(lanebox);
             if (crossed.Count == 0)
@@ -1334,7 +1334,7 @@ namespace ThMEPArchitecture
                 var lb = new Line(lane.StartPoint, lane.EndPoint);
                 lb.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisLaneWidth / 2));
                 var edge = new Line(lb.GetClosestPointTo(s.StartPoint, true), lb.GetClosestPointTo(s.EndPoint, true));
-                var pl = PolyFromPoints(new List<Point3d>() { edge.StartPoint, edge.EndPoint, s.EndPoint, s.StartPoint, edge.StartPoint });
+                var pl = CreatePolyFromPoints(new List<Point3d>() { edge.StartPoint, edge.EndPoint, s.EndPoint, s.StartPoint, edge.StartPoint });
                 pls.Add(pl);
             }
             return pls;

@@ -60,30 +60,7 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-      
-
-        public static List<Line> DivideLineByLength(Line line, double length)
-        {
-            int count = ((int)Math.Floor(line.Length / length));
-            if (count == 0) return new List<Line>() { line };
-            List<Line> res = new List<Line>();
-            Line a = LineSDL(line.StartPoint, Vector(line), length);
-            for (int i = 0; i < count; i++)
-            {
-                var k = Line(a);
-                k.TransformBy(Matrix3d.Displacement(Vector(line).GetNormal() * length * i));
-                res.Add(k);
-            }
-            if (res[res.Count - 1].EndPoint.DistanceTo(line.EndPoint) > 1)
-            {
-                res.Add(new Line(res[res.Count - 1].EndPoint, line.EndPoint));
-            }
-            return res;
-        }
-
-
-
-        public static Polyline PolyFromLine(Line a)
+        public static Polyline CreatePolyFromLine(Line a)
         {
             Polyline p = new Polyline();
             p.AddVertexAt(0, a.StartPoint.ToPoint2d(), 0, 0, 0);
@@ -91,29 +68,29 @@ namespace ThMEPArchitecture.PartitionLayout
             return p;
         }
 
-        public static Line LineSDL(Point3d start, Vector3d vec, double length)
+        public static Line CreateLineFromStartPtAndVector(Point3d start, Vector3d vec, double length)
         {
             var v = vec.GetNormal() * length;
             var pe = start.TransformBy(Matrix3d.Displacement(v));
             return new Line(start, pe);
         }
 
-        public static Vector3d Vector(Line line)
+        public static Vector3d CreateVector(Line line)
         {
-            return Vector(line.StartPoint, line.EndPoint);
+            return CreateVector(line.StartPoint, line.EndPoint);
         }
 
-        public static Vector3d Vector(Point3d ps, Point3d pe)
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
         {
             return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
         }
 
-        public static Line Line(Line a)
+        public static Line CreateLine(Line a)
         {
             return new Line(a.StartPoint, a.EndPoint);
         }
 
-        public static Polyline PolyFromPoints(List<Point3d> points)
+        public static Polyline CreatePolyFromPoints(List<Point3d> points)
         {
             Polyline p = new Polyline();
             for (int i = 0; i < points.Count; i++)
@@ -123,14 +100,14 @@ namespace ThMEPArchitecture.PartitionLayout
             return p;
         }
 
-        public static Polyline PolyFromPoint(Point3d point)
+        public static Polyline CreatePolyFromPoint(Point3d point)
         {
             Polyline p = new Polyline();
             p.AddVertexAt(0, point.ToPoint2d(), 0, 0, 0);
             return p;
         }
 
-        public static Polyline PolyFromPoints(Point3d[] points, bool closed = true)
+        public static Polyline CreatePolyFromPoints(Point3d[] points, bool closed = true)
         {
             Polyline p = new Polyline();
             for (int i = 0; i < points.Length; i++)
@@ -145,7 +122,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             List<Polyline> pls = new List<Polyline>();
             pls.AddRange(plys);
-            lines.ForEach(e => pls.Add(PolyFromLine(e)));
+            lines.ForEach(e => pls.Add(CreatePolyFromLine(e)));
             List<Polyline> result = new List<Polyline>();
             if (pls.Count == 0) return result;
             result.Add(pls[0]);
@@ -185,7 +162,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static List<Line> OffsetLine(Line a, double dis)
         {
-            var vec_a = Vector(a).GetPerpendicularVector().GetNormal() * dis;
+            var vec_a = CreateVector(a).GetPerpendicularVector().GetNormal() * dis;
             var la = (Line)a.Clone();
             var lb = (Line)a.Clone();
             la.TransformBy(Matrix3d.Displacement(vec_a));
@@ -196,7 +173,6 @@ namespace ThMEPArchitecture.PartitionLayout
         public static List<Curve> SplitCurve(Curve curve, DBObjectCollection objs)
         {
             List<Point3d> pts = new List<Point3d>();
-            //objs.Cast<Entity>().ToList().ForEach(e => pts.AddRange(curve.Intersect(e, Intersect.OnBothOperands)));
             foreach (var e in objs.Cast<Entity>().ToList())
             {
                 if (e != null)
@@ -222,7 +198,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 catch
                 {
-                    ;
                 }
                 return splited.Cast<Curve>().Where(e => e.GetLength() > 1).ToList();
             }
@@ -259,9 +234,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 Point3dCollection ps = new Point3dCollection(points.Select(e => curve.GetClosestPointTo(e, false)).ToArray());
                 var splited = curve.GetSplitCurves(ps);
                 ps.Dispose();
-
-                //DoubleCollection param = new DoubleCollection(points.Select(e => curve.GetParamAtPointX(curve.GetClosestPointTo(e, false))).ToArray());
-                //var splited = curve.GetSplitCurves(param);
                 return splited.Cast<Curve>().Where(e => e.GetLength()>1).ToArray();
             }
             else
@@ -272,7 +244,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
         {
-            double angle = Vector((Line)a).GetAngleTo(Vector((Line)b));
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
             return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
         }
 
@@ -300,10 +272,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 verts.RemoveAt(0);
                 verts.RemoveAt(verts.Count - 1);
                 if(verts.Count==0) return SplitLine(new Line(curve.StartPoint,curve.EndPoint), points).Cast<Curve>().ToList();
-
-
                 var curparam = points.Select(e => /*pl.GetParamAtPointX(e)*/GetDisOnPolyLine(e,pl)).ToList();
-
                 for (int i = 0; i < curparam.Count - 1; i++)
                 {
                     Polyline p = new Polyline();
@@ -338,7 +307,6 @@ namespace ThMEPArchitecture.PartitionLayout
                     plys.Add(p);
                 }
                 return plys.Cast<Curve>().ToList();
-
             }
             else
             {
@@ -348,7 +316,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static bool IsPerpLine(Line a, Line b, double degreetol = 1)
         {
-            double angle = Vector((Line)a).GetAngleTo(Vector((Line)b));
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
             return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
 
@@ -560,7 +528,6 @@ namespace ThMEPArchitecture.PartitionLayout
             pts = new Point3dCollection(crv.GetPointsByDist(length).ToArray());
             segs = crv.GetSplitCurves(pts);
             if (segs.Count == 0) segs.Add(crv);
-
             return pts;
         }
 
