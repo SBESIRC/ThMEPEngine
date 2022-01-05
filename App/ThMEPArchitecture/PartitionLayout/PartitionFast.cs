@@ -9,7 +9,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
-using static ThMEPArchitecture.PartitionLayout.Utitlties;
 
 namespace ThMEPArchitecture.PartitionLayout
 {

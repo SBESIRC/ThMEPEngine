@@ -400,6 +400,18 @@ namespace ThMEPArchitecture.PartitionLayout
             return pts;
         }
 
+        public static double GetClosestDistanceOnOffsetDirection(Line line, Vector3d vec, List<Line> lines)
+        {
+            lines = lines.Where(e => IsParallelLine(line, e)).ToList();
+            var pt = line.GetCenter();
+            Line sdl = CreateLineFromStartPtAndVector(pt, vec, 100000);
+            var points = new List<Point3d>();
+            lines.Select(e => sdl.Intersect(e, Intersect.OnBothOperands)).ForEach(f => points.AddRange(f));
+            points = points.OrderBy(e => e.DistanceTo(pt)).ToList();
+            sdl.Dispose();
+            return points.Count > 0 ? pt.DistanceTo(points.First()) : 0;
+        }
+
         public static void AddToSpatialIndex(Entity e, ref ThCADCoreNTSSpatialIndex spatialIndex)
         {
             DBObjectCollection add = new DBObjectCollection();
