@@ -21,15 +21,22 @@ namespace ThCADCore.NTS
         {
             if (polygon.IsValid)
             {
-                var holes = new List<Curve>();
                 var shell = polygon.Shell.ToDbPolyline();
                 if(shell.Area<=1.0) 
                 {
                     //防止近似与线的闭合Polyline的问题
+                    shell.Dispose();
                     return new MPolygon();
                 }
-                holes = polygon.Holes.Select(o=>o.ToDbPolyline()).Where(o=>o.Area>1.0).Cast<Curve>().ToList();
-                return ThMPolygonTool.CreateMPolygon(shell, holes);
+
+                var holes = polygon.Holes.Select(o=>o.ToDbPolyline()).Where(o=>o.Area>1.0).Cast<Curve>().ToList();
+
+                var mpolygon = ThMPolygonTool.CreateMPolygon(shell, holes);
+                shell.Dispose();
+                holes.ForEach(h => h.Dispose());
+                holes.Clear();
+
+                return mpolygon;
             }
             return new MPolygon();
         }

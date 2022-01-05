@@ -25,7 +25,7 @@ namespace ThMEPWSS.Command
             using (var docLock = Active.Document.LockDocument())
             using (var acadDb =  AcadDatabase.Active())
             {
-                if(VM.BeamSourceSwitch== "协同")
+                if(VM.BeamSourceSwitch== BeamRecognizeSource.DB)
                 {
                     Application.SetSystemVariable("USERR1", 0);
                 }

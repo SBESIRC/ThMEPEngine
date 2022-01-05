@@ -141,6 +141,9 @@ namespace ThMEPEngineCore.CAD
             {
                 results.Add(new Line(segment.StartPoint.ToPoint3d(), segment.EndPoint.ToPoint3d()));
             }
+            newPolyline.Dispose();
+            polylineSegments.Clear();
+            polylineSegments = null;
             return results;
         }
 

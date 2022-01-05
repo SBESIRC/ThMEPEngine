@@ -49,7 +49,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 int ptNum = dtPoly.NumberOfVertices;
                 if (dtPoly.Closed == false)
                 {
-                    ptNum = ptNum - 1;
+                    ptNum--;
                 }
                 for (int i = 0; i < ptNum; i++)
                 {

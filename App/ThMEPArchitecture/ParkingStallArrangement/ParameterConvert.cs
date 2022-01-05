@@ -17,48 +17,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public static class ParameterConvert
     {
-        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref PartitionV3 partition, Logger logger = null)
+        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, Logger logger = null)
         {
             int index = layoutPara.AreaNumber[j];
-            layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-            layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-            layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstacleList);
-            layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-            layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+            layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
+            layoutPara.Id2AllSubAreaDic.TryGetValue(index, out Polyline boundary);
+            layoutPara.SubAreaId2ShearWallsDic.TryGetValue(index, out List<List<Polyline>> buildingObstacleList);
+            layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> orgBuildingBoxes);
+            layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> outerWallLines);
+            layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
             List<Polyline> buildingBoxes = new List<Polyline>();
-            var bound = GeoUtilities.JoinCurves(walls, inilanes)[0];
-            var obstacleListNew = new List<List<Polyline>>();
-            for (int i = 0; i < obstacleList.Count; i++)
+            var bound = GeoUtilities.JoinCurves(outerWallLines, inilanes)[0];
+            
+            for(int i = 0; i < orgBuildingBoxes.Count; ++i)
             {
-                var pls = obstacleList[i];
-                obstacleListNew.Add(new List<Polyline>());
-                foreach (var pl in pls)
+                if(!bound.Intersects(orgBuildingBoxes[i]))
                 {
-                    obstacleListNew[obstacleListNew.Count - 1].AddRange((GeoUtilities.SplitCurve(pl, bound).Where(e => bound.IsPointIn(e.GetCenter())).Select(e =>
+                    buildingBoxes.Add(orgBuildingBoxes[i]);
+                }
+                else
+                {
+                    var intersections = bound.GeometryIntersection(orgBuildingBoxes[i]);
+                    Extents3d buildingExtent = new Extents3d();
+                    foreach (Entity intersection in intersections)
                     {
-                        if (e is Polyline) return (Polyline)e;
-                        else return GeoUtilities.PolyFromLine((Line)e);
-                    })));
+                        buildingExtent.AddExtents(intersection.GeometricExtents);
+                        intersection.Dispose();
+                    }
+                    buildingBoxes.Add(buildingExtent.ToRectangle());
                 }
             }
-            foreach (var obs in obstacleListNew)
-            {
-                if (obs.Count == 0) continue;
-                Extents3d ext = new Extents3d();
-                foreach (var pl in obs) ext.AddExtents(pl.GeometricExtents);
-                buildingBoxes.Add(ext.ToRectangle());
-            }
-            var obstacles = new List<Polyline>();
-            obstacleList.ForEach(e => obstacles.AddRange(e));
-            var Cutters = new DBObjectCollection();
-            obstacles.ForEach(e => Cutters.Add(e));
-            var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-            var CuttersM = new DBObjectCollection();
-            obstacles.ForEach(e => CuttersM.Add(e.ToNTSPolygon().ToDbMPolygon()));
-            var ObstaclesMpolygonSpatialIndex = new ThCADCoreNTSSpatialIndex(CuttersM);
+            
+            var ObstaclesSpatialIndex = layoutPara.AllShearwallsSpatialIndex;
+
+            var ObstaclesMpolygonSpatialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
+
+#if DEBUG
             string w = "";
             string l = "";
-            foreach (var e in walls)
+            foreach (var e in outerWallLines)
             {
                 foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
                     w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
@@ -68,7 +65,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
                     + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
             }
-#if DEBUG
             FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
             StreamWriter sw = new StreamWriter(fs1);
             sw.WriteLine(w);
@@ -77,13 +73,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             fs1.Close();
 #endif
             inilanes = inilanes.Distinct().ToList();
-            partition = new PartitionV3(walls, inilanes, obstacles, bound, buildingBoxes);
+            partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes);
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
             partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
-            if (partition.Validate()) return true;
+            partition.CheckObstacles();
+            partition.CheckBuildingBoxes();
+            if (partition.Validate())
+            {
+                //partition.Dispose();
+                return true; 
+            }
             else
             {
-                logger?.Error("数据无效, wall: " + w + "lanes: " + l + "Boundary: " + GeoUtilities.AnalysisPoly(boundary));
+                //partition.Dispose();
                 return false;
             }
         }

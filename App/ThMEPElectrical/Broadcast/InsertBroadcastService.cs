@@ -13,7 +13,7 @@ namespace ThMEPElectrical.Broadcast
 {
     public static class InsertBroadcastService
     {
-        private static double scaleNum = 100;
+        public static double scaleNum = 100;
 
         public static void InsertSprayBlock(List<ColumnModel> insertPts)
         {

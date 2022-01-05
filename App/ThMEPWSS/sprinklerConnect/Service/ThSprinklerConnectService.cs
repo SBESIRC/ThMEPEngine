@@ -10,6 +10,7 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.SprinklerConnect.Model;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
@@ -2246,5 +2247,47 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
             }
         }
+
+        public void BreakMainLine(List<Line> results)
+        {
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
+            var subMainPipe = SprinklerParameter.SubMainPipe;
+            subMainPipe.ForEach(p =>
+            {
+                var breakPts = new List<Point3d>
+                {
+                    p.StartPoint
+                };
+                var frame = p.ExtendLine(-15.0).Buffer(1.0);
+                var filter = spatialIndex.SelectCrossingPolygon(frame);
+                filter.OfType<Line>().ForEach(line =>
+                {
+                    breakPts.Add(line.GetClosestPointTo(p.StartPoint, false));
+                });
+                breakPts = ThSprinklerConnectTools.DistinctPoints(breakPts);
+                breakPts = breakPts.OrderBy(pt => pt.DistanceTo(p.StartPoint)).ToList();
+                breakPts.Add(p.EndPoint);
+
+                for (int i = 1; i < breakPts.Count; i++)
+                {
+                    results.Add(new Line(breakPts[i - 1], breakPts[i]));
+                }
+            });
+        }
+
+        //private bool Intersection(Line line, Line other, out Point3d intersectPt)
+        //{
+        //    var geometry = line.ToNTSLineString().Intersection(other.ToNTSLineString());
+        //    if (geometry is Point point)
+        //    {
+        //        intersectPt = point.ToAcGePoint3d();
+        //        return true;
+        //    }
+        //    else
+        //    {
+        //        intersectPt = new Point3d();
+        //        return false;
+        //    }
+        //}
     }
 }

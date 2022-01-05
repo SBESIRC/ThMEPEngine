@@ -73,7 +73,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         if (gapNums > 0)
                         {
                             var splitLine = line.OffSetX(-gapNums * Gap);
-                            splitAreas = splitLine.Split(area);
+                            splitAreas = splitLine.SplitByLine(area);
                         }
                     }
                     else//区域在分割线右边
@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         if (gapNums > 0)
                         {
                             var splitLine = line.OffSetX(gapNums * Gap);
-                            splitAreas = splitLine.Split(area);
+                            splitAreas = splitLine.SplitByLine(area);
                         }
                     }
                 }
@@ -100,7 +100,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         if (gapNums > 0)
                         {
                             var splitLine = line.OffSetY(-gapNums * Gap);
-                            splitAreas = splitLine.Split(area);
+                            splitAreas = splitLine.SplitByLine(area);
                         }
                     }
                     else//区域在分割线上边
@@ -110,7 +110,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         if (gapNums > 0)
                         {
                             var splitLine = line.OffSetY(gapNums * Gap);
-                            splitAreas = splitLine.Split(area);
+                            splitAreas = splitLine.SplitByLine(area);
                         }
                     }
                 }
@@ -148,7 +148,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (gapNums > 0)
                     {
                         var splitLine = line.OffSetX(-gapNums * Gap);
-                        splitAreas = splitLine.Split(area);
+                        splitAreas = splitLine.SplitByLine(area);
                         offsetPt = pt.OffSetX(-gapNums * Gap);//返回偏移点
                     }
                 }
@@ -159,7 +159,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (gapNums > 0)
                     {
                         var splitLine = line.OffSetX(gapNums * Gap);
-                        splitAreas = splitLine.Split(area);
+                        splitAreas = splitLine.SplitByLine(area);
                         offsetPt = pt.OffSetX(gapNums * Gap);//返回偏移点
                     }
                 }
@@ -177,7 +177,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (gapNums > 0)
                     {
                         var splitLine = line.OffSetY(-gapNums * Gap);
-                        splitAreas = splitLine.Split(area);
+                        splitAreas = splitLine.SplitByLine(area);
                         offsetPt = pt.OffSetY(-gapNums * Gap);//返回偏移点
                     }
                 }
@@ -188,7 +188,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     if (gapNums > 0)
                     {
                         var splitLine = line.OffSetY(gapNums * Gap);
-                        splitAreas = splitLine.Split(area);
+                        splitAreas = splitLine.SplitByLine(area);
                         offsetPt = pt.OffSetY(gapNums * Gap);//返回偏移点
                     }
                 }

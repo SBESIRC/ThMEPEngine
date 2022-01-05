@@ -19,6 +19,7 @@ using ThMEPWSS.SprinklerConnect.Data;
 using ThMEPWSS.SprinklerConnect.Engine;
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.SprinklerConnect.Cmd
 {
@@ -40,10 +41,14 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
         public void SprinklerConnectExecute()
         {
-            using (var doclock = Active.Document.LockDocument())
+            using (var docLock = Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var frames = ThSprinklerConnectUtils.GetFrames();
+                if (frames.Count == 0)
+                {
+                    return;
+                }
                 var isVertical = true;
                 if (ParameterFromUI)
                 {
@@ -67,14 +72,26 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 }
 
                 var frameIndex = new ThCADCoreNTSSpatialIndex(frames.ToCollection());
-                var frameClone = frameIndex.SelectAll().OfType<Polyline>();
+                var frameClone = frameIndex.SelectAll().OfType<Polyline>().ToList();
+                var transformerPt = frameClone[0].StartPoint;
+                var transformer = new ThMEPOriginTransformer(transformerPt);
+                //ThSprinklerPtNetworkEngine.TransformerPt = transformerPt;
+
 
                 // 提取数据
                 var allSprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
+                var sprinklersTran = new List<Point3d>();
+                allSprinklerPts.ForEach(o => sprinklersTran.Add(transformer.Transform(o)));
+
                 var dataset = new ThSprinklerConnectDataFactory();
                 var geos = dataset.Create(acadDatabase.Database, new Point3dCollection()).Container;
                 var dataQuery = new ThSprinklerDataQueryService(geos);
                 dataQuery.ClassifyData();
+
+                dataQuery.ArchitectureWallList.ForEach(o => transformer.Transform(o));
+                dataQuery.ShearWallList.ForEach(o => transformer.Transform(o));
+                dataQuery.ColumnList.ForEach(o => transformer.Transform(o));
+                dataQuery.RoomList.ForEach(o => transformer.Transform(o));
                 var archIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ArchitectureWallList.ToCollection());
                 var shearIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ShearWallList.ToCollection());
                 var columnIndex = new ThCADCoreNTSSpatialIndex(dataQuery.ColumnList.ToCollection());
@@ -83,13 +100,17 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var obstacle = new List<Polyline>();
 
                 // 提取车位
-                var parkingStallService = new ThSprinklerConnectParkingStallService();
-                parkingStallService.BlockNameDict = BlockNameDict;
+                var parkingStallService = new ThSprinklerConnectParkingStallService
+                {
+                    BlockNameDict = BlockNameDict
+                };
                 parkingStallService.ParkingStallExtractor(acadDatabase.Database, new Polyline());
+                transformer.Transform(parkingStallService.ParkingStalls);
 
                 foreach (var frame in frameClone)
                 {
-                    if (frame == null || frame.Area < 10)
+                    transformer.Transform(frame);
+                    if (frame == null || frame.Area < 10.0)
                     {
                         continue;
                     }
@@ -108,15 +129,22 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         if (difference == null || difference.Area / r.Area < 0.25)
                         {
                             exactFrames.Add(r);
-                            sprinklerPts.AddRange(allSprinklerPts.Where(pt => r.Contains(pt)).ToList());
+                            sprinklerPts.AddRange(sprinklersTran.Where(pt => r.Contains(pt)).ToList());
                         }
                     });
+                    sprinklerPts.AddRange(sprinklersTran.Where(pt => frame.Contains(pt)).ToList());
 
                     var exactFrame = exactFrames.Outline().OfType<Polyline>().OrderByDescending(o => o.Area).First();
+                    transformer.Reset(exactFrame);
+
                     var mainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
                     var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
                     var mainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
                     var subMainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
+                    mainPipe.ForEach(p => transformer.Transform(p));
+                    subMainPipe.ForEach(p => transformer.Transform(p));
+                    mainPipeLine.ForEach(p => transformer.Transform(p));
+                    subMainPipeLine.ForEach(p => transformer.Transform(p));
 
                     //打散管线
                     ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
@@ -139,7 +167,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     };
 
                     CleanPipe(ThWSSCommon.Sprinkler_Connect_Pipe, exactFrame);
-
+                    transformer.Transform(exactFrame);
                     geometryWithoutColumn = new List<Polyline>();
                     obstacle = new List<Polyline>();
                     var architectureWall = archIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
@@ -169,9 +197,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         }
                     });
 
-                    //转回原点
-                    //var transformer = ThSprinklerConnectUtil.transformToOrig(pts, geos);
-
                     var bufferArea = 1.0;
                     var roomsArea = 1.0;
                     if (room.Count() > 0)
@@ -194,13 +219,18 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         StallPresent(doubleStall, layerName);
                         //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(reducedFrame, ThSprinklerConnectCommon.Layer_DoubleCar);
 
-                        engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, doubleStall, smallRoomsWithSpr,
-                            obstacle, column, isVertical);
+                        var results = engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, doubleStall,
+                            smallRoomsWithSpr, obstacle, column, isVertical);
+
+                        results.ForEach(r => transformer.Reset(r));
+                        Present(results);
                     }
                     else
                     {
-                        engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, new List<Polyline>(), smallRoomsWithSpr,
-                            obstacle, column, isVertical);
+                        var results = engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, new List<Polyline>(),
+                            smallRoomsWithSpr, obstacle, column, isVertical);
+                        results.ForEach(r => transformer.Reset(r));
+                        Present(results);
                     }
                 }
             }
@@ -268,6 +298,19 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                                 o.UpgradeOpen();
                                 o.Erase();
                             });
+            }
+        }
+
+        private void Present(List<Line> results)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var layerId = acadDatabase.Database.CreateAILayer(ThWSSCommon.Sprinkler_Connect_Pipe, 2);
+                results.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.LayerId = layerId;
+                });
             }
         }
 

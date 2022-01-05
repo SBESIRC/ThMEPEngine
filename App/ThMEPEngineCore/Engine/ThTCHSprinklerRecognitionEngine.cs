@@ -135,11 +135,13 @@ namespace ThMEPEngineCore.Engine
             Polyline frame = null;
             if (polygon.Count != 0)
             {
+                var transformer = new ThMEPOriginTransformer(polygon[0]);
                 frame = new Polyline()
                 {
                     Closed = true,
                 };
                 frame.CreatePolyline(polygon);
+                transformer.Transform(frame);
             }
             foreach (var data in dataList)
             {
@@ -153,9 +155,13 @@ namespace ThMEPEngineCore.Engine
                     continue;
                 }
 
-                if (frame != null && !frame.Intersects(new DBPoint(block.Position)))
+                if (frame != null)
                 {
-                    continue;
+                    var transformer = new ThMEPOriginTransformer(polygon[0]);
+                    if (!frame.Intersects(new DBPoint(transformer.Transform(block.Position))))
+                    {
+                        continue;
+                    }
                 }
 
                 var sprinkler = new ThSprinkler()

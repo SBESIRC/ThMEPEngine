@@ -146,7 +146,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    PartitionV3 partition = new PartitionV3();
+                    ParkingPartition partition = new ParkingPartition();
                     if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
                     {
                         try
@@ -305,19 +305,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     int index = layoutPara.AreaNumber[j];
-                    layoutPara.SegLineDic.TryGetValue(index, out List<Line> lanes);
-                    layoutPara.AreaDic.TryGetValue(index, out Polyline boundary);
-                    layoutPara.ObstaclesList.TryGetValue(index, out List<List<Polyline>> obstaclesList);
+                    layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
+                    layoutPara.Id2AllSubAreaDic.TryGetValue(index, out Polyline boundary);
+                    layoutPara.SubAreaId2ShearWallsDic.TryGetValue(index, out List<List<Polyline>> obstaclesList);
                     layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
-                    layoutPara.AreaWalls.TryGetValue(index, out List<Polyline> walls);
-                    layoutPara.AreaSegs.TryGetValue(index, out List<Line> inilanes);
+                    layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> walls);
+                    layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
                     var obstacles = new List<Polyline>();
                     obstaclesList.ForEach(e => obstacles.AddRange(e));
 
                     var Cutters = new DBObjectCollection();
                     obstacles.ForEach(e => Cutters.Add(e));
                     var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
-                    PartitionV3 partition = new PartitionV3(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                    ParkingPartition partition = new ParkingPartition(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
                     partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
                     partition.ProcessAndDisplay(layerNames, 30);
                 }

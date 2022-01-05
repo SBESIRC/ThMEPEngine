@@ -11,13 +11,15 @@ namespace ThMEPEngineCore.GridOperation.Utils
 {
     public static class GridLineExtendService
     {
+        static double maxLength = 10000;
         /// <summary>
         /// 延申轴网
         /// </summary>
         /// <param name="lineGroup"></param>
         /// <returns></returns>
-        public static List<LineGridModel> ExtendGrid(List<LineGridModel> lineGroup)
+        public static List<LineGridModel> ExtendGrid(List<LineGridModel> lineGroup, double extendLength = 10000)
         {
+            maxLength = extendLength;
             var resGroup = new List<LineGridModel>();
             foreach (var group in lineGroup)
             {
@@ -66,7 +68,7 @@ namespace ThMEPEngineCore.GridOperation.Utils
             sRay.BasePoint = line.StartPoint;
             sRay.UnitDir = (line.StartPoint - line.EndPoint).GetNormal();
             var sPt = GetIntersectPts(sRay, lineGroup);
-            if (sPt == null)
+            if (sPt == null || line.StartPoint.DistanceTo(sPt.Value) > maxLength)
             {
                 sPt = line.StartPoint;
             }
@@ -75,7 +77,7 @@ namespace ThMEPEngineCore.GridOperation.Utils
             eRay.BasePoint = line.EndPoint;
             eRay.UnitDir = (line.EndPoint - line.StartPoint).GetNormal();
             var ePt = GetIntersectPts(eRay, lineGroup);
-            if (ePt == null)
+            if (ePt == null || line.EndPoint.DistanceTo(ePt.Value) > maxLength)
             {
                 ePt = line.EndPoint;
             }

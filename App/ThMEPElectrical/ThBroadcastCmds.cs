@@ -40,6 +40,25 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                var scaleOptions = new PromptKeywordOptions("\n选择图块比例");
+                scaleOptions.Keywords.Add("1:150", "A", "1:150(A)");
+                scaleOptions.Keywords.Add("1:100", "B", "1:100(B)");
+                scaleOptions.Keywords.Default = "1:150";
+                var scaleResult = Active.Editor.GetKeywords(scaleOptions);
+                double scale = 150;
+                if (scaleResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                if (scaleResult.StringResult == "1:150")
+                {
+                    scale = 150;
+                }
+                else if (scaleResult.StringResult == "1:100")
+                {
+                    scale = 100;
+                }
+
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
@@ -115,6 +134,7 @@ namespace ThMEPElectrical
                     blindAreaService.PrintBlindArea(layoutPts, plInfo, BlindAreaRadius, originTransformer);
 
                     //放置广播
+                    InsertBroadcastService.scaleNum = scale;
                     var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo, originTransformer);
 
                     //车道广播连管

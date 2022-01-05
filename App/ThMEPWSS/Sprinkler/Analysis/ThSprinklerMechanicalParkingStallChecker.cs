@@ -56,11 +56,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var lines = new DBObjectCollection();
                 o.Explode(lines);
                 var list = lines.OfType<Line>().OrderBy(l => l.Length).ToList();
-                var range = new DBObjectCollection { list[0], list[1] }.Buffer(50);
+                var range = new DBObjectCollection { list[0], list[1] }.Buffer(50.0);
                 var dirction = list[1].GetCenter() - list[0].GetCenter();
-                var count = 0;
+                var countCheck = true;
                 range.OfType<Polyline>().ForEach(pline =>
                 {
+                    var count = 0;
                     sprinklersIndex.SelectCrossingPolygon(pline)
                                    .OfType<DBPoint>()
                                    .Select(point => point.Position)
@@ -79,8 +80,12 @@ namespace ThMEPWSS.Sprinkler.Analysis
 
                                    });
                     dirction = list[0].GetCenter() - list[1].GetCenter();
+                    if(count < 1)
+                    {
+                        countCheck = false;
+                    }
                 });
-                if (count < 1)
+                if (!countCheck)
                 {
                     results.Add(o);
                 }

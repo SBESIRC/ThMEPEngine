@@ -44,12 +44,15 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public static DBObjectCollection PolygonsEx(this DBObjectCollection lines)
         {
-            var objs = new List<DBObject>();
-            foreach (Polygon polygon in lines.Polygonize())
+            var geos = lines.Polygonize();
+            var objs = new DBObjectCollection();
+            foreach (Polygon polygon in geos)
             {
                 objs.Add(polygon.ToDbEntity());
             }
-            return objs.ToCollection();
+            geos.Clear();
+            geos = null;
+            return objs;
         }
 
         public static DBObjectCollection Outline(this DBObjectCollection lines)

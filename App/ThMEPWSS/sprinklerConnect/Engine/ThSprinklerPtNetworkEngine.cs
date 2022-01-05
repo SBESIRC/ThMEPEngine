@@ -6,11 +6,15 @@ using Autodesk.AutoCAD.Geometry;
 
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Service;
+using ThMEPEngineCore.Diagnostics;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.SprinklerConnect.Engine
 {
     public class ThSprinklerPtNetworkEngine
     {
+        //public static Point3d TransformerPt { get; set; }
+
         /// <summary>
         /// 获取点位分片图
         /// </summary>
@@ -26,14 +30,17 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                 .CreatePartGroup(group, sprinklerParameter.MainPipe, sprinklerParameter.SubMainPipe)).ToList();
 
             // 测试使用
+            //var transformer = new ThMEPOriginTransformer(TransformerPt);
             //for (int i = 0; i < netGroups.Count; i++)
             //{
             //    var net = netGroups[i];
-            //    for (int j = 0; j < net.ptsGraph.Count; j++)
+            //    for (int j = 0; j < net.PtsGraph.Count; j++)
             //    {
-            //        var lines = net.ptsGraph[j].print(net.pts);
+            //        var lines = net.PtsGraph[j].Print(net.Pts);
+            //        lines.ForEach(line => transformer.Reset(line));
             //        DrawUtils.ShowGeometry(lines, string.Format("l3graph{0}-{1}", i, j), i % 7);
             //    }
+            //    net.Pts.ForEach(p => DrawUtils.ShowGeometry(transformer.Reset(p), "sprinkler", 0));
             //}
 
             return netGroups;

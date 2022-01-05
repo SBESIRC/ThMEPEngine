@@ -25,11 +25,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
             mainLine = new List<Line>();
             subMainLine = new List<Line>();
             var allTemp = new List<Line>();
-            var mainTemp = new List<Line>();
-            var subMainTemp = new List<Line>();
 
-            mainTemp = ThSprinklerLineService.PolylineToLine(mainPipe);
-            subMainTemp = ThSprinklerLineService.PolylineToLine(subMainPipe);
+            var mainTemp = ThSprinklerLineService.PolylineToLine(mainPipe);
+            var subMainTemp = ThSprinklerLineService.PolylineToLine(subMainPipe);
             allTemp.AddRange(mainTemp);
             allTemp.AddRange(subMainTemp);
 
@@ -51,7 +49,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     }
                 }
             }
-
         }
 
         public static void ThSprinklerPipeToLine2(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine, out List<Line> allLine)
@@ -59,11 +56,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
             mainLine = new List<Line>();
             subMainLine = new List<Line>();
             var allTemp = new List<Line>();
-            var mainTemp = new List<Line>();
-            var subMainTemp = new List<Line>();
 
-            mainTemp = ThSprinklerLineService.PolylineToLine(mainPipe);
-            subMainTemp = ThSprinklerLineService.PolylineToLine(subMainPipe);
+            var mainTemp = ThSprinklerLineService.PolylineToLine(mainPipe);
+            var subMainTemp = ThSprinklerLineService.PolylineToLine(subMainPipe);
             allTemp.AddRange(mainTemp);
             allTemp.AddRange(subMainTemp);
 

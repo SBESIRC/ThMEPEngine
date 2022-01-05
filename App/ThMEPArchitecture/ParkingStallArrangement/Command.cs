@@ -150,7 +150,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    PartitionV3 partition = new PartitionV3();
+                    ParkingPartition partition = new ParkingPartition();
                     if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
                     {
                         try
@@ -166,7 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            layoutPara.Dispose();
+            //layoutPara.Dispose();
         }
 
         private static Point3dCollection SelectAreas()

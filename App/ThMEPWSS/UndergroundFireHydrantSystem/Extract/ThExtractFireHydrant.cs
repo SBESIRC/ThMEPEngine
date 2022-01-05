@@ -149,8 +149,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(blkVisitor);
-            //extractor.ExtractFromMS(db);
-
+            extractor.ExtractFromMS(db);
             extractor.Extract(db);
 
             return blkVisitor.Results.Select(o => o.Geometry).ToCollection();

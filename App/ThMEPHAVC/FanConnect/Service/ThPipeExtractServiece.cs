@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPHVAC.FanConnect.Model;
+using ThMEPHVAC.FanPipeAlgorithm;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -79,7 +80,19 @@ namespace ThMEPHVAC.FanConnect.Service
         private List<Polyline> GetPipeTreeModel1()
         {
             List<Polyline> retPLine = new List<Polyline>();
-            //可以引用自己写类和方法
+            List<Polyline> poly = new List<Polyline>();
+            run run0 = new run();
+            poly = run0.return_polyline(EquipModel, PipeStartPt, ObstacleRooms, ObstacleHoles);
+
+            //using (AcadDatabase acad = AcadDatabase.Active())
+            //{
+            //    var sp = new Point3d(0, 0, 0);
+            //    var ep = new Point3d(10000, 10000, 0);
+            //    var line = new Line(sp, ep);
+            //    acad.CurrentSpace.Add(line);
+            //}
+
+            retPLine.AddRange(poly);
             return retPLine;
         }
     }

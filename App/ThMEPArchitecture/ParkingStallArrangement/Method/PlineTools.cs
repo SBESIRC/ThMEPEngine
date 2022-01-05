@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -13,18 +14,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     {
         public static bool IsBoundOf(this Line line, Polyline pline)
         {
-            var pts = pline.GetPoints().ToList();
-            for (int i = 0; i < pts.Count - 1; i++)
+            var lines = pline.ToLines();
+            try
             {
-                for (int j = 0; j < pts.Count; j++)
+                foreach (var l in lines)
                 {
-                    var line2 = new Line(pts[i], pts[j]);
-                    if (line.IsOverlap(line2))
-                    {
-                        return true;
-                    }
+                    if (line.IsOverlap(l)) return true;
                 }
             }
+            finally
+            {
+                lines.ForEach(l => l.Dispose());
+            }
+
             return false;
         }
         public static bool IsOverlap(this Line line1, Line line2)
@@ -36,9 +38,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             var line2d1 = new Line2d(spt1, ept1);
             var line2d2 = new Line2d(spt2, ept2);
-            if (line2d1.Overlap(line2d2) is null)
+            try
             {
-                return false;
+                if (!line2d1.IsParallelTo(line2d2))
+                {
+                    return false;
+                }
+                if (line2d1.Overlap(line2d2) is null)
+                {
+                    return false;
+                }
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                line2d1.Dispose();
+                line2d2.Dispose();
             }
 
             return true;
