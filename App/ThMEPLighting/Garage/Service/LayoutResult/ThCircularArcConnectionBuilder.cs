@@ -54,14 +54,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = avoidService.Results;
 
             // 创建连接线，按照灯长度把灯所在的边打断   
-            var firstEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.EdgePattern==EdgePattern.First).ToList();
-            var secondEdges = Graphs.SelectMany(g => g.GraphEdges).Where(o => o.EdgePattern == EdgePattern.Second).ToList();
-            var firstLinkWireObjs = CreateLinkWire(firstEdges);
-            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
-            var secondLinkWireObjs = CreateLinkWire(secondEdges);
-            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
-            Wires = Wires.Union(firstLinkWireObjs);
-            Wires = Wires.Union(secondLinkWireObjs);
+            var linkWireObjs = CreateLinkWire();
+            Wires = Wires.Union(linkWireObjs);
 
             // 创建灯文字
             NumberTexts = BuildNumberText(
@@ -70,6 +64,39 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 ArrangeParameter.LightNumberTextHeight,
                 ArrangeParameter.LightNumberTextWidthFactor);
         }
+        #region ---------- 对灯线和灯打断 -------------------------
+        private DBObjectCollection CreateLinkWire()
+        {
+            if (ArrangeParameter.IsSingleRow)
+            {
+                return CreateSingleRowLinkWire();
+            }
+            else
+            {
+                return CreateDoubleRowLinkWire();
+            }
+        }
+        private DBObjectCollection CreateSingleRowLinkWire()
+        {
+            var edges = GetEdges();
+            var linkWireObjs = CreateLinkWire(edges);
+            linkWireObjs = FilerLinkWire(linkWireObjs);
+            return linkWireObjs;
+        }
+        private DBObjectCollection CreateDoubleRowLinkWire()
+        {
+            var results = new DBObjectCollection();
+            var firstEdges = GetEdges(EdgePattern.First);
+            var secondEdges = GetEdges(EdgePattern.Second);
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);
+            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
+            var secondLinkWireObjs = CreateLinkWire(secondEdges);
+            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
+            results = results.Union(firstLinkWireObjs);
+            results = results.Union(secondLinkWireObjs);
+            return results;
+        }
+        #endregion
         #region ---------- 绘制同一段上的具有相同编号的跳线 ----------
         private DBObjectCollection CreateJumpWire()
         {

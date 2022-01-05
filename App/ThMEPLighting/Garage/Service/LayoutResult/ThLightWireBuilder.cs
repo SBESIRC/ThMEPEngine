@@ -144,6 +144,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .ToList();
         }
 
+        protected List<ThLightEdge> GetEdges()
+        {
+            return Graphs
+                .SelectMany(g => g.GraphEdges)
+                .ToList();
+        }
+
         #region----------Printer----------
         protected void SetDatabaseDefault(Database db)
         {

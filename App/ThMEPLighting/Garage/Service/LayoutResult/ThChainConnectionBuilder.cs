@@ -34,12 +34,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             LightPositionDict = BuildLightPos();
 
             // 创建连接线，按照灯长度把灯所在的边打断
-            var firstEdges = GetEdges(EdgePattern.First); 
-            var secondEdges = GetEdges(EdgePattern.Second);
-            var firstLinkWireObjs = CreateLinkWire(firstEdges);
-            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
-            var secondLinkWireObjs = CreateLinkWire(secondEdges);
-            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
+            var linkWireObjs = CreateLinkWire();
 
             // 建议允许最大的回路编号是4
             var ductions = new List<Point3dCollection>();
@@ -64,8 +59,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = Wires.Union(crossJumpWireRes);
             Wires = Wires.Union(threewayJumpWireRes);        
             Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
-            Wires = Wires.Union(firstLinkWireObjs); // 切记：请在BreakWire之后，添加进去
-            Wires = Wires.Union(secondLinkWireObjs);// 切记：请在BreakWire之后，添加进去
+            Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
 
             // 创建灯文字
             NumberTexts = BuildNumberText(
@@ -74,6 +68,40 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 ArrangeParameter.LightNumberTextHeight,
                 ArrangeParameter.LightNumberTextWidthFactor);
         }
+        #region ---------- 对灯线和灯打断 -----------
+        private DBObjectCollection CreateLinkWire()
+        {
+            if(ArrangeParameter.IsSingleRow)
+            {
+                return CreateSingleRowLinkWire();
+            }
+            else
+            {
+                return CreateDoubleRowLinkWire();
+            }
+        }
+        private DBObjectCollection CreateSingleRowLinkWire()
+        {
+            var edges = GetEdges();
+            var linkWireObjs = CreateLinkWire(edges);
+            linkWireObjs = FilerLinkWire(linkWireObjs);
+            return linkWireObjs;
+        }
+        private DBObjectCollection CreateDoubleRowLinkWire()
+        {
+            var results = new DBObjectCollection();
+            var firstEdges = GetEdges(EdgePattern.First);
+            var secondEdges = GetEdges(EdgePattern.Second);
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);
+            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
+            var secondLinkWireObjs = CreateLinkWire(secondEdges);
+            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
+            results = results.Union(firstLinkWireObjs);
+            results = results.Union(secondLinkWireObjs);
+            return results;
+        }
+        #endregion
+
         #region ---------- 绘制同一段上的具有相同编号的跳线 ----------
         private DBObjectCollection CreateJumpWire(out List<Point3dCollection> ductions)
         {
