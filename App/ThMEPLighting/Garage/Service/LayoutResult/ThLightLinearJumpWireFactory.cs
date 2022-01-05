@@ -90,7 +90,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(l => !DefaultNumbers.Contains(l.First.Number) && l.OnLinkPath)
                 .ForEach(l =>
                 {
-                    DrawCrossAdjacentSamePathJumpWire(l);
+                    DrawAdjacentSamePathJumpWire(l);
                     UpdateFirstLinkLine(l, shortenDis);
                     UpdateSecondLinkLine(l, shortenDis);
                 });
@@ -159,7 +159,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightNodeLink.JumpWires = Draw(lightNodeLink);
         }
 
-        private void DrawCrossAdjacentSamePathJumpWire(ThLightNodeLink lightNodeLink)
+        private void DrawAdjacentSamePathJumpWire(ThLightNodeLink lightNodeLink)
         {
             lightNodeLink.JumpWires = DrawAdjacent(lightNodeLink);
         }

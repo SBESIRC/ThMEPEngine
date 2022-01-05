@@ -84,7 +84,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
             {
-                return CreateJumpWire2(out ductions);
+                if (ArrangeParameter.IsSingleRow)
+                {
+                    return CreateJumpWire1(out ductions);
+                }
+                else
+                {
+                    return CreateJumpWire2(out ductions);
+                } 
             }
             else
             {
@@ -144,6 +151,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection CreateThreeWayJumpWire()
         {
             var results = new DBObjectCollection();
+            if(ArrangeParameter.IsSingleRow)
+            {
+                return results;
+            }
             if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
             {
                 results = CreateThreeWayOppositeJumpWire();
@@ -159,6 +170,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var results = new DBObjectCollection();
             var lightNodeLinks = GetThreeWayOppositeLinks();
+            if(lightNodeLinks.Count==0)
+            { 
+                return results;
+            }
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,
@@ -176,6 +191,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var results = new DBObjectCollection();
             var lightNodeLinks = GetThreeWayAdjacentLinks();
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,
@@ -195,7 +214,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection CreateCrossJumpWire()
         {
             var results = new DBObjectCollection();
-            if(ArrangeParameter.ArrangeEdition== ArrangeEdition.Second)
+            if (ArrangeParameter.IsSingleRow)
+            {
+                return results;
+            }
+            if (ArrangeParameter.ArrangeEdition== ArrangeEdition.Second)
             {
                 results = CreateCrossOppositeJumpWire();
             }
@@ -210,6 +233,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var results = new DBObjectCollection();
             var lightNodeLinks = GetCrossOppositeLinks();
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,
@@ -227,6 +254,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var results = new DBObjectCollection();
             var lightNodeLinks = GetCrossAdjacentLinks();
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,

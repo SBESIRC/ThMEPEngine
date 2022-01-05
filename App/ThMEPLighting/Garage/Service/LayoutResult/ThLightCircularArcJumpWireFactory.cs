@@ -1,13 +1,12 @@
 ﻿using System;
-using DotNetARX;
 using System.Linq;
-using ThCADExtension;
+using System.Collections.Generic;
+using DotNetARX;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -44,33 +43,61 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(l => !DefaultNumbers.Contains(l.First.Number))
                 .Where(l => !l.OnLinkPath && l.Edges.Count > 0 && !l.IsCrossLink)
                 .ForEach(l => DrawCornerJumpWire(l));
+        }
 
+        public void BuildCrossLinks()
+        {
+            // 用于十字区域对角区域的连接
             // 绘制十字路口跳线
             LightNodeLinks
                 .Where(l => l.IsCrossLink)
                 .ForEach(l => DrawCrossJumpWire(l));
         }
 
+        public void BuildCrossAdjacentLinks()
+        {
+            // 绘制在同一段上,不是默认编号
+            LightNodeLinks
+                .Where(l => !DefaultNumbers.Contains(l.First.Number))
+                .Where(l => l.OnLinkPath && l.Edges.Count > 0 && !l.IsCrossLink)
+                .ForEach(l => DrawAdjacentSamePathJumpWire(l));
+        }
+
         private void DrawSamePathJumpWire(ThLightNodeLink lightNodeLink)
         {
-            // 获取跳接线的偏移方向
-            var firstLine = lightNodeLink.Edges.FirstOrDefault();
+            // 获取跳接线的偏移方向            
             var offsetDir = GetJumpWireDirection(lightNodeLink);
             if(!offsetDir.HasValue)
             {
                 return;
             }
+            DrawArc(lightNodeLink, offsetDir.Value);
+        }
+
+        private void DrawAdjacentSamePathJumpWire(ThLightNodeLink lightNodeLink)
+        {
+            // 获取跳接线的偏移方向
+            var offsetDir = GetJumpWireDirection(lightNodeLink);
+            if (!offsetDir.HasValue)
+            {
+                return;
+            }
+            DrawArc(lightNodeLink, offsetDir.Value.Negate());
+        }
+
+        private void DrawArc(ThLightNodeLink lightNodeLink,Vector3d direction)
+        {
             var startEndPt = CalculateJumpStartEndPt(lightNodeLink);
             var startPt = startEndPt.Item1;
             var endPt = startEndPt.Item2;
-            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, offsetDir.Value);
+            var arcTopVec = ThArcDrawTool.CalculateArcTopVec(startPt, endPt, direction);
             var radius = CalculateRadius(startPt.DistanceTo(endPt));
             var wire = ThArcDrawTool.DrawArc(startPt, endPt, radius, arcTopVec);
-            if (wire!=null)
+            if (wire != null)
             {
                 lightNodeLink.JumpWires.Add(wire);
             }
-        }        
+        }
 
         private void DrawCornerJumpWire(ThLightNodeLink lightNodeLink)
         {

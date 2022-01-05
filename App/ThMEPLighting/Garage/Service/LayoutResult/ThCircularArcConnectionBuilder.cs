@@ -70,7 +70,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 ArrangeParameter.LightNumberTextHeight,
                 ArrangeParameter.LightNumberTextWidthFactor);
         }
-
+        #region ---------- 绘制同一段上的具有相同编号的跳线 ----------
         private DBObjectCollection CreateJumpWire()
         {
             if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
@@ -79,20 +79,25 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
             {
-                return CreateJumpWire2();
+                if(ArrangeParameter.IsSingleRow)
+                {
+                    return CreateJumpWire1();
+                }
+                else
+                {
+                    return CreateJumpWire2();
+                }
             }
             else
             {
                 return new DBObjectCollection();
             }
         }
-
         private DBObjectCollection CreateJumpWire1()
         {
             // 创建图链路上跳接线
             return CreateJumpWire(Graphs);
         }
-
         private DBObjectCollection CreateJumpWire2()
         {
             // 创建图链路上跳接线
@@ -108,7 +113,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             return CreateJumpWire(graphs);
         }
-
         private DBObjectCollection CreateJumpWire(List<ThLightGraphService> graphs)
         {
             // 创建图链路上跳接线
@@ -132,28 +136,31 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return results;
         }
+        #endregion
 
-        private DBObjectCollection CreateCrossJumpWire()
-        {
-            var results = new DBObjectCollection();
-            var lightNodeLinks = GetCrossOppositeLinks();
-            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
-            {
-                LampLength = this.ArrangeParameter.LampLength,
-                DefaultNumbers = this.DefaultNumbers,
-                CenterSideDicts = this.CenterSideDicts,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-            };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.Build();
-            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-            return results;
-        }
-
+        #region ---------- 绘制T型路口跨区具有相同编号的的跳线 ----------
         private DBObjectCollection CreateThreeWayJumpWire()
         {
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetThreeWayJumpWireLinks();
+            if (ArrangeParameter.IsSingleRow)
+            {
+                return results;
+            }
+            if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
+            {
+                results = CreateThreeWayOppositeJumpWire();
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                results = results.Union(CreateThreeWayOppositeJumpWire());
+                results = results.Union(CreateThreeWayAdjacentJumpWire());
+            }
+            return results;
+        }
+        private DBObjectCollection CreateThreeWayOppositeJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayOppositeLinks();
             var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
             {
                 LampLength = this.ArrangeParameter.LampLength,
@@ -162,10 +169,92 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
             };
             jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.Build();
+            jumpWireFactory.BuildCrossLinks();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
+
+        private DBObjectCollection CreateThreeWayAdjacentJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetThreeWayAdjacentLinks();
+            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+            {
+                DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildCrossAdjacentLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+
+        #endregion
+
+        #region ---------- 绘制十字路口跨区具有相同编号的的跳线 ----------
+        private DBObjectCollection CreateCrossJumpWire()
+        {
+            var results = new DBObjectCollection();
+            if (ArrangeParameter.IsSingleRow)
+            {
+                return results;
+            }
+            if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Second)
+            {
+                results = CreateCrossOppositeJumpWire();
+            }
+            else if (ArrangeParameter.ArrangeEdition == ArrangeEdition.Third)
+            {
+                results = results.Union(CreateCrossOppositeJumpWire());
+                results = results.Union(CreateCrossAdjacentJumpWire());
+            }
+            return results;
+        }
+        private DBObjectCollection CreateCrossOppositeJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetCrossOppositeLinks();
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
+            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+            {
+                DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildCrossLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+        private DBObjectCollection CreateCrossAdjacentJumpWire()
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetCrossAdjacentLinks();
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
+            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+            {
+                DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,          
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildCrossAdjacentLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+        #endregion
 
         public override void Reset()
         {
