@@ -265,8 +265,8 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ThBroadcast\ThBroadcastUI.xaml">
-      <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
