@@ -15,6 +15,7 @@ namespace ThMEPEngineCore.GridOperation
     public class GridLineCleanService
     {
         double arcCenterTol = 100;
+        public double lineExtendLength = 10000;
         /// <summary>
         /// 清洗轴网线
         /// </summary>
@@ -33,7 +34,7 @@ namespace ThMEPEngineCore.GridOperation
             //处理直线轴网
             GridLineSimplifyService simplifyService = new GridLineSimplifyService();
             lineGridRes = simplifyService.Simplify(lineGroup);
-            lineGridRes = GridLineExtendService.ExtendGrid(lineGridRes);
+            lineGridRes = GridLineExtendService.ExtendGrid(lineGridRes, lineExtendLength);
             lineGridRes = GridLineMergeService.MergeLine(lineGridRes, columns);
 
             //处理弧形轴网
