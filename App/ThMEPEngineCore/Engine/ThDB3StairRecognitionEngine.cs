@@ -67,43 +67,42 @@ namespace ThMEPEngineCore.Engine
 
                 var objs = new DBObjectCollection();
                 stair.Explode(objs);
-                var platforms = objs.Cast<Entity>()
-                    .OfType<Curve>()
+                var platforms = objs.OfType<Curve>()
                     .Where(e => e.Layer.Contains("DEFPOINTS-2"))
+                    .Where(e => e.Area > 0.8e6)
                     .ToCollection();
-                var rungs = objs.Cast<Entity>()
-                    .OfType<Curve>()
+                var rungs = objs.OfType<Curve>()
                     .Where(e => e.Layer.Contains("AE-STAR"))
                     .Where(e => e.Area > 0.1)
                     .ToCollection();
-                var beams = objs.Cast<Entity>()
-                    .OfType<Curve>()
+                var beams = objs.OfType<Curve>()
                     .Where(e => e.Layer.Contains("S_BEAM"))
                     .ToCollection();
-                var down = objs.Cast<Entity>()
-                    .OfType<DBText>()
+                var down = objs.OfType<DBText>()
                     .Where(e => e.TextString == "下")
                     .Where(e => e.Layer.Contains("DEFPOINTS-1"));
-                var up = objs.Cast<Entity>()
-                    .OfType<DBText>()
+                var up = objs.OfType<DBText>()
                     .Where(e => e.TextString == "上")
                     .Where(e => e.Layer.Contains("DEFPOINTS-1"));
-                var coverage = objs.Cast<Entity>()
-                    .OfType<Wipeout>()
+                var coverage = objs.OfType<Wipeout>()
                     .Where(e => e.Layer == "0")
                     .ToCollection();
 
                 var beamCenter = beams.GeometricExtents().CenterPoint();
                 var platform = new Polyline();
                 var halfPlatform = new Polyline();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+                var frameTidal = spatialIndex.SelectCrossingPolygon(stair.GeometricExtents.ToRectangle().Vertices());
                 if (platforms.Count == 0)
                 {
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
-                    var frameTidal = spatialIndex.SelectCrossingPolygon(stair.ToOBB(Matrix3d.Identity).Vertices());
                     var frame = new Polyline();
                     if (frameTidal.Count > 0)
                     {
                         frame = frameTidal.GeometricExtents().ToRectangle();
+                    }
+                    else
+                    {
+                        return ifcStair;
                     }
 
                     ifcStair.Storey = "首层";
@@ -111,7 +110,6 @@ namespace ThMEPEngineCore.Engine
                     {
                         ifcStair.StairType = "双跑楼梯";
                         ifcStair.PlatForLayout.Add(GetLayoutList(frame, beams));
-
                     }
                     else if (rungs.Count == 2)
                     {
@@ -128,11 +126,13 @@ namespace ThMEPEngineCore.Engine
                     platform = platforms[0] as Polyline;
                     if (down.Any())
                     {
-                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+                        var scrPlat = GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams);
+                        ifcStair.PlatForLayout.Add(scrPlat);
                     }
                     else if (up.Any())
                     {
-                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, up.ToCollection(), false, beams));
+                        var scrPlat = GetLayoutList(platform, beamCenter, up.ToCollection(), false, beams);
+                        ifcStair.PlatForLayout.Add(scrPlat);
                     }
                     else
                     {
@@ -167,7 +167,8 @@ namespace ThMEPEngineCore.Engine
                                     ChangeOrder(ref platform, ref halfPlatform);
                                 }
                             }
-                            ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+
+                                ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
                             ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
                         }
                         else if (down.ToCollection().Count == 2)
@@ -176,9 +177,9 @@ namespace ThMEPEngineCore.Engine
                             ifcStair.StairType = "剪刀楼梯";
                             ifcStair.Rungs = rungs;
                             ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
-                                                       beamCenter, down.ToCollection(), true, beams));
+                                beamCenter, down.ToCollection(), true, beams));
                             ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
-                                                       beamCenter, down.ToCollection(), true, beams));
+                                beamCenter, down.ToCollection(), true, beams));
                         }
                         else
                         {
@@ -207,8 +208,33 @@ namespace ThMEPEngineCore.Engine
                                 ChangeOrder(ref platform, ref halfPlatform);
                             }
                         }
-                        var temp = down.ToCollection();
-                        ifcStair.PlatForLayout.Add(GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams));
+
+                        var scrPlat = GetLayoutList(platform, beamCenter, down.ToCollection(), true, beams);
+                        if (frameTidal.Count == 2)
+                        {
+                            var centerPt = GetCenter(scrPlat[0], scrPlat[1]);
+                            var centerPtTidal = GetCenter(scrPlat[2], scrPlat[3]);
+                            var halfPlatFirst = new List<Point3d>
+                            {
+                                scrPlat[0],
+                                centerPt,
+                                centerPtTidal,
+                                scrPlat[3],
+                            };
+                            var halfPlatSecond = new List<Point3d>
+                            {
+                                centerPt,
+                                scrPlat[1],
+                                scrPlat[2],
+                                centerPtTidal,
+                            };
+                            ifcStair.PlatForLayout.Add(halfPlatFirst);
+                            ifcStair.PlatForLayout.Add(halfPlatSecond);
+                        }
+                        else
+                        {
+                            ifcStair.PlatForLayout.Add(scrPlat);
+                        }
                         ifcStair.HalfPlatForLayout.Add(GetLayoutList(halfPlatform, beamCenter, down.ToCollection(), true, beams));
                     }
                     else if (coverage.Count == 2)
@@ -216,9 +242,9 @@ namespace ThMEPEngineCore.Engine
                         ifcStair.Storey = "中间层";
                         ifcStair.StairType = "剪刀楼梯";
                         ifcStair.PlatForLayout.Add(GetLayoutList(platforms[0] as Polyline,
-                                                       beamCenter, down.ToCollection(), true, beams));
+                            beamCenter, down.ToCollection(), true, beams));
                         ifcStair.PlatForLayout.Add(GetLayoutList(platforms[1] as Polyline,
-                                                   beamCenter, down.ToCollection(), true, beams));
+                            beamCenter, down.ToCollection(), true, beams));
                     }
                 }
                 return ifcStair;
@@ -269,7 +295,6 @@ namespace ThMEPEngineCore.Engine
 
         private List<Point3d> GetLayoutList(Polyline frame, DBObjectCollection beams)
         {
-            
             var center = frame.GetCentroidPoint();
             var maxDistance = 0.0;
             var maxPoint = new Point3d();
@@ -389,6 +414,11 @@ namespace ThMEPEngineCore.Engine
         private Point3d ToPoint3d(Vector3d vector)
         {
             return new Point3d(vector.X, vector.Y, vector.Z);
+        }
+
+        private Point3d GetCenter(Point3d first, Point3d second)
+        {
+            return new Point3d((first.X + second.X) / 2, (first.Y + second.Y) / 2, 0);
         }
     }
 }
