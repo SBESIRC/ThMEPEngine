@@ -52,10 +52,6 @@ namespace ThMEPHVAC
             using (var acadDb = AcadDatabase.Use(database))
             {
                 acadDb.Database.AddLayer(layer);
-                acadDb.Database.UnLockLayer(layer);
-                acadDb.Database.UnOffLayer(layer);
-                acadDb.Database.UnHidden(layer);
-                acadDb.Database.UnFrozenLayer(layer);
             }
         }
 

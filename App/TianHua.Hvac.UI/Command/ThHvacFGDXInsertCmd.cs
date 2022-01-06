@@ -6,14 +6,15 @@ using Linq2Acad;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.Algorithm;
 using ThMEPHVAC;
 using ThMEPHVAC.Model;
 using ThMEPHVAC.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -44,8 +45,9 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var docLock= Active.Document.LockDocument())
             {
-                CreateLayer();
+                ImportLayers();
                 ImportBlocks();
+                OpenLayer();
                 UserInteract();
             }
         }
@@ -85,11 +87,12 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void CreateLayer()
+        private void ImportLayers()
         {
             using (var acadDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDb.Database.CreateLayer(FGDXLayer);  
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(FGDXLayer), true);
             }
         }
 
@@ -99,6 +102,14 @@ namespace TianHua.Hvac.UI.Command
             using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(FGDXBlkName), true);
+            }
+        }
+
+        private void OpenLayer()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                acadDb.Database.OpenAILayer(FGDXLayer);
             }
         }
 

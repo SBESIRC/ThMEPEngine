@@ -39,7 +39,8 @@ namespace TianHua.Hvac.UI.Command
                 var rooms = GetRooms();
                 if(rooms.Count>0)
                 {
-                    CreateLayer();
+                    ImportLayers(); // 优先用导入的图层
+                    CreateLayer();  // 如果没有，则创建
                     ImportBlocks();
                     UserInteract(rooms);
                 }
@@ -84,7 +85,10 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                acadDb.Database.CreateAINoteLayer();  
+                if(!acadDb.Layers.Contains(ThMEPEngineCoreLayerUtils.Note))
+                {
+                    acadDb.Database.CreateAINoteLayer();
+                }
             }
         }
 
@@ -94,6 +98,15 @@ namespace TianHua.Hvac.UI.Command
             using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(SGDXBlkName), true);
+            }
+        }
+
+        private void ImportLayers()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPEngineCoreLayerUtils.Note), true);
             }
         }
 

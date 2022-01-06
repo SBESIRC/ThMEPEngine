@@ -2,6 +2,7 @@
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
+using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 
@@ -22,9 +23,31 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var acdb = AcadDatabase.Active())
             {
-                acdb.Database.CreateAIWaterPipeRouteLayer();
+                ImportLayer();
+                CreateLayer();
                 acdb.Database.SetCurrentLayer(ThMEPEngineCoreLayerUtils.WaterPipeRoute);
                 Active.Document.SendStringToExecute("_Polyline ", true, false, true);
+            }
+        }
+
+        private void ImportLayer()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPEngineCoreLayerUtils.WaterPipeRoute), true);
+                acadDb.Database.OpenAILayer(ThMEPEngineCoreLayerUtils.WaterPipeRoute);
+            }
+        }
+
+        private void CreateLayer()
+        {
+            using (var acdb = AcadDatabase.Active())
+            {
+                if (!acdb.Layers.Contains(ThMEPEngineCoreLayerUtils.WaterPipeRoute))
+                {
+                    acdb.Database.CreateAIWaterPipeRouteLayer();
+                }
             }
         }
     }

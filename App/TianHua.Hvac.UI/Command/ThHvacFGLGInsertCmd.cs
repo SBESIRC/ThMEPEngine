@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
-using ThMEPHVAC;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.Hvac.UI.Command
 {
@@ -69,7 +69,7 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                acadDb.Database.CreateLayer(layerName);  
+                acadDb.Database.OpenAILayer(layerName);  
             }
         }
         private string GetCurrentLayer()

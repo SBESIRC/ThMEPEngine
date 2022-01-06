@@ -4,15 +4,17 @@ using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using ThMEPHVAC;
 using ThMEPHVAC.Model;
+using ThMEPHVAC.Service;
 
 namespace TianHua.Hvac.UI.Command
 {
     public class ThHvacCRFKInsertCmd : ThMEPBaseCommand, IDisposable
     {
-        private string AirPortLayer = "H-DAPP-GRIL";
+        private string AirPortLayer = "";
         private string AirPortBlkName = "AI-风口";
         private ThAirPortParameter AirPortParameter { get; set; }
         private ThDuctPortsDrawPort DrawPortService;
@@ -21,6 +23,8 @@ namespace TianHua.Hvac.UI.Command
             ActionName = "插风口";
             CommandName = "THCRFK";
             AirPortParameter = airPortParameter;
+            AirPortLayer = ThMEPHAVCDataManager.AirPortLayer;
+            AirPortBlkName = ThMEPHAVCDataManager.AirPortBlkName;
             DrawPortService = new ThDuctPortsDrawPort(AirPortLayer, AirPortBlkName, 0);
         }
         public void Dispose()
@@ -31,8 +35,9 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var docLock=Active.Document.LockDocument())
             {
-                CreateLayer();
+                ImportLayers();
                 ImportBlocks();
+                OpenLayer();
                 UserInteract();
             }
         }
@@ -44,11 +49,19 @@ namespace TianHua.Hvac.UI.Command
                 acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(AirPortBlkName), true);
             }
         }
-        private void CreateLayer()
+        private void ImportLayers()
+        {
+            using (var acadDb = AcadDatabase.Active())
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDb.Layers.Import(blockDb.Layers.ElementOrDefault(AirPortLayer), true);
+            }
+        }
+        private void OpenLayer()
         {
             using (var acadDb = AcadDatabase.Active())
             { 
-                acadDb.Database.CreateLayer(AirPortLayer);
+                acadDb.Database.OpenAILayer(AirPortLayer);
             }
         }
         private void UserInteract()
