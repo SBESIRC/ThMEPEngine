@@ -80,12 +80,6 @@
     <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
       <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
     </Compile>
-    <Compile Include="fmBlockConvert.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmBlockConvert.Designer.cs">
-      <DependentUpon>fmBlockConvert.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmSmokeLayout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -110,9 +104,6 @@
     <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
       <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="fmBlockConvert.resx">
-      <DependentUpon>fmBlockConvert.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="fmSmokeLayout.resx">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </EmbeddedResource>
