@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,7 +34,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     FindCount += AreaData.Data.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
                 });
+                DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                WireCircuitText.TextString = "总线点位数量："+FindCount;
+                WireCircuitText.Position = new Point3d(16500, OuterFrameLength * FloorNum + 200, 0);
+                WireCircuitText.Layer = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
+                WireCircuitText.AlignmentPoint = WireCircuitText.Position;
+                Result.Add(WireCircuitText);
+
                 FindCount = (int)Math.Ceiling((double)FindCount / FireCompartmentParameter.ControlBusCount);//向上缺省
+
                 var objid = InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (StartIndexBlock - 1) + 2300, OuterFrameLength * FloorNum + 1500, 0), new Scale3d(-100, 100, 100), 0, new Dictionary<string, string>() { { "N", FindCount.ToString() } });
                 using (Linq2Acad.AcadDatabase acad = Linq2Acad.AcadDatabase.Active())
                 {

@@ -12,6 +12,7 @@ namespace ThMEPElectrical
         public static readonly double FireDistrictShortestLength = 200;
         public static readonly string FireDistrictByLayer = "AD-AREA-DIVD";     //防火分区图层
         public static readonly string WireCircuitByLayer = "E-FAS-NUMB";     //电路编号图层
+        public static readonly string CloudBlockName = "THHZXT_fault";     //云线块名
 
         //左部分的列数量
         public static readonly int SystemColLeftNum = 6;

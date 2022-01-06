@@ -11,6 +11,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
+using Autodesk.AutoCAD.ApplicationServices;
+using AcHelper;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -236,7 +238,37 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 //加入组
                 if (FireCompartmentParameter.DiagramCreateGroup == 1)
                 {
-                    Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                    using (Active.Document.LockDocument())
+                    {
+                        Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                    }
+                }
+            }
+        }
+
+        public void DrawAlarm()
+        {
+            //加载所有已打开的文件
+            var dm = Application.DocumentManager;
+            foreach (Document doc in dm)
+            {
+                var FileName = doc.Name;
+                var alarm = FireCompartmentParameter.WarningCache.FirstOrDefault(o => o.Doc == doc);
+                if (alarm.IsNull() || alarm.AlarmList.Count < 1)
+                {
+                    continue;
+                }
+                //Application.DocumentManager.MdiActiveDocument = doc;//不能执行此操作，因为此操作会切换图纸，以用户视角看来会非常的'混乱'
+                using (DocumentLock docLock = doc.LockDocument())
+                using (new ThDbWorkingDatabaseSwitch(doc.Database))
+                using (AcadDatabase db = AcadDatabase.Use(doc.Database))
+                {
+                    InsertBlockService.ImportCloudBlock(doc.Database, ThAutoFireAlarmSystemCommon.CloudBlockName);
+                    alarm.AlarmList.ForEach(o =>
+                    {
+                        var objID = InsertBlockService.InsertCloudBlock(db.Database, ThAutoFireAlarmSystemCommon.CloudBlockName, o.Item2);
+                        alarm.UiAlarmList.Add((o.Item1, objID).ToTuple());
+                    });
                 }
             }
         }

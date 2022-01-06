@@ -7,11 +7,13 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Extension;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
     public class ThAlarmControlWireCircuitModel
     {
+        public Document doc { get; set; }
         public string WireCircuitName { get; set; } = string.Empty;
 
         public AdjacencyGraph<ThAFASVertex, ThAFASEdge<ThAFASVertex>> Graph { get; set; }
@@ -167,6 +169,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 Data = x.Data + y.Data,
                 BlockCount = x.BlockCount + y.BlockCount,
                 Graph = x.Graph,
+                doc = x.doc,
             };
             newWireCircuitModel.Data.BlockData.BlockStatistics["短路隔离器"] = x.Data.BlockData.BlockStatistics["短路隔离器"] + y.Data.BlockData.BlockStatistics["短路隔离器"];
             newWireCircuitModel.Graph.AddVertexRange(y.Graph.Vertices.Select(v => { v.IsStartVertexOfGraph = false; return v; }));

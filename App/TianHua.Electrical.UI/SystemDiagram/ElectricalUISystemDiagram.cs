@@ -9,6 +9,7 @@ namespace TianHua.Electrical.UI.SystemDiagram
     public class ElectricalUISystemDiagram
     {
         SelectLayers ChoiseLayers;
+        ShowAlarm uiConnect;
         [CommandMethod("TIANHUACAD", "THHZXT", CommandFlags.Modal)]
         public void THCL()
         {
@@ -31,6 +32,13 @@ namespace TianHua.Electrical.UI.SystemDiagram
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THHZXTP");
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "ZXJHMX", CommandFlags.Modal)]
+        public void THC2L()
+        {
+            uiConnect = new ShowAlarm();
+            AcadApp.ShowModelessWindow(uiConnect);
         }
     }
 }

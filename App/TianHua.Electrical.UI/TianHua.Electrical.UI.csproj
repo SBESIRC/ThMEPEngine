@@ -97,11 +97,16 @@
     <Compile Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml.cs">
       <DependentUpon>SecurityPlaneSystemUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SystemDiagram\DoubleConvert.cs" />
     <Compile Include="SystemDiagram\ElectricalUISystemDiagram.cs" />
     <Compile Include="SystemDiagram\UI\DrainageLayerViewModel.cs" />
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SystemDiagram\UI\ShowAlarm.xaml.cs">
+      <DependentUpon>ShowAlarm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SystemDiagram\UI\ShowAlarmViewModel.cs" />
     <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
       <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
     </Compile>
@@ -263,6 +268,10 @@
     <Page Include="SystemDiagram\UI\SelectLayers.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SystemDiagram\UI\ShowAlarm.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="ThBroadcast\ThBroadcastUI.xaml">
       <SubType>Designer</SubType>

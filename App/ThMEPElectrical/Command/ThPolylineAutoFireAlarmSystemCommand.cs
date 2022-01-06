@@ -50,7 +50,7 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
-
+                FireCompartmentParameter.WarningCache.Clear();
                 //防火分区
                 var builder = new ThFireCompartmentBuilder()
                 {

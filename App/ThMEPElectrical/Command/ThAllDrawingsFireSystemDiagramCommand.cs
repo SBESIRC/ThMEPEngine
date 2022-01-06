@@ -56,7 +56,7 @@ namespace ThMEPElectrical.Command
             {
                 return;
             }
-
+            FireCompartmentParameter.WarningCache.Clear();
             //加载所有已打开的文件
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
@@ -113,7 +113,7 @@ namespace ThMEPElectrical.Command
                             }
                             return;
                         }
-
+                        FireCompartmentParameter.WarningCache.Add(new AlarmModel() { Doc = doc });
                         //获取块引擎附加信息
                         var datas = BlockReferenceEngine.QueryAllOriginDatas();
 
@@ -169,6 +169,7 @@ namespace ThMEPElectrical.Command
             }
             //画系统图
             diagram.DrawSystemDiagram(ppr.Value.GetAsVector(), Active.Editor.UCS2WCS());
+            diagram.DrawAlarm();
         }
     }
 }

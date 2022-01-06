@@ -15,6 +15,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
+using ThMEPEngineCore.CAD;
+using ThMEPElectrical.BlockConvert;
+using DotNetARX;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -156,6 +160,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
             }
 
+            var doc = adb.Database.GetDocument();
             //统计楼层内回路计数
             Floors.ForEach(floor =>
             {
@@ -167,9 +172,13 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 GraphEngine.InitGraph();
                 GraphEngine.DrawCrossAlarms();
                 //GraphEngine.DrawGraphs();
-                if (GraphEngine.CrossAlarmCount > 0)
+                if (GraphEngine.CrossAlarms.Count > 0)
                 {
-                    Active.Editor.WriteLine($"\n违反强条！{floor.FloorName}层共{GraphEngine.CrossAlarmCount}个穿越防火分区处总线未设置短路隔离器，见标注×处");
+                    Active.Editor.WriteLine($"\n违反强条！{floor.FloorName}层共{GraphEngine.CrossAlarms.Count}个穿越防火分区处总线未设置短路隔离器，见标注×处");
+                    GraphEngine.CrossAlarms.ForEach(o =>
+                    {
+                        FireCompartmentParameter.WarningCache.Last().AlarmList.Add((floor.FloorName+"_穿防火分区", o).ToTuple());
+                    });
                 }
                 var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
                 int Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
@@ -188,6 +197,10 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 floor.FireDistricts.ForEach(fireDistrict =>
                 {
                     FillingFireCompartmentData(ref fireDistrict, GraphEngine.GraphsDic, adb.Database);
+                    fireDistrict.WireCircuits.ForEach(wireCircuit =>
+                    {
+                        wireCircuit.doc = doc;
+                    });
                 });
             });
 
@@ -259,7 +272,13 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         protected override void PrepareData()
         {
-            List<string> warningMsg = DataProcessing();
+            var Alarms = new List<Tuple<Document,string, Point3d>>() ;
+            List<string> warningMsg = DataProcessing(out Alarms);
+            foreach (var tuple in Alarms)
+            {
+                FireCompartmentParameter.WarningCache.First(o => o.Doc == tuple.Item1).AlarmList.Add((tuple.Item2, tuple.Item3).ToTuple());
+            }
+            //FireCompartmentParameter.WarningCache
             warningMsg.ForEach(msg => Active.Editor.WriteLine($"\n{msg}"));
             var AllData = GetDrawModelInfo();
             this.DrawData = AllData;
@@ -350,8 +369,9 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         /// <param name="allData"></param>
         /// <returns></returns>
-        private List<string> DataProcessing()
+        private List<string> DataProcessing(out List<Tuple<Document, string,Point3d>> Alarms)
         {
+            var alarms = new List<Tuple<Document, string, Point3d>>();
             var warningMsg = new List<string>();
             //过滤未延申到火灾自动报警总线包括的回路
             this.floors.ForEach(floor => floor.FireDistricts.ForEach(o =>
@@ -457,9 +477,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 }
                 y.WireCircuits.ForEach(o =>
                 {
-                    if (o.BlockCount > 32)
+                    if (o.BlockCount > FireCompartmentParameter.ShortCircuitIsolatorCount)
                     {
                         warningMsg.Add($"违反强条！检测到回路{o.WireCircuitName}的消防设备总数超过了{FireCompartmentParameter.ShortCircuitIsolatorCount}个点,现有{o.BlockCount}个点，请复核。");
+                        alarms.Add((o.doc, o.WireCircuitName + "回路设备超点", o.TextPoint).ToTuple());
+
                     }
                     if (o.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] > 0)
                         o.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] = 0;
@@ -533,6 +555,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     }
                 });
             }
+            Alarms = alarms;
             return warningMsg;
         }
 
