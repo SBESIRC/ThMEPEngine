@@ -112,7 +112,7 @@ namespace ThMEPHVAC.Model
                 ThDuctPortsDrawService.DrawLines(mainlines.centerLines, orgDisMat, service.centerLayer, out ObjectIdList centerIds);
                 // port根据中心线变化
                 var elevation = portParam.param.elevation.ToString();
-                double airVolume = Math.Floor(info.airVolume / 10) * 10;
+                double airVolume = ThMEPHVACService.RoundNum(info.airVolume, 50);
                 var param = ThMEPHVACService.CreateDuctModifyParam(mainlines.centerLines, info.ductSize, elevation, airVolume);
                 ThDuctPortsRecoder.CreateDuctGroup(geoIds, flgIds, centerIds, param);
                 var dirVec = (l.EndPoint - l.StartPoint).GetNormal();

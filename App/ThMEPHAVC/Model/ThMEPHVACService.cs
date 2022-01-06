@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -38,29 +39,6 @@ namespace ThMEPHVAC.Model
                 throw new NotImplementedException("Duct size info doesn't contain width or height");
             width = Double.Parse(s[0]);
             height = Double.Parse(s[1]);
-        }
-        private static double CalcAirSpeed(double air_vloume, string duct_size)
-        {
-            GetWidthAndHeight(duct_size, out double width, out double height);
-            return air_vloume / 3600 / (width * height / 1000000);
-        }
-        public static double CalcAirSpeed(double airVolume)
-        {
-            //TODO: Range scenario
-            if (airVolume >= 26000)
-                return 8;
-            else if (airVolume >= 12000)
-                return 6;
-            else if (airVolume >= 8000)
-                return 4.5;
-            else if (airVolume >= 4000)
-                return 3.5;
-            else if (airVolume >= 3000)
-                return 5.14;
-            else if (airVolume >= 2800)
-                return 4.8;
-            else
-                return 3;
         }
         public static void GetLinePosInfo(Line l, out double angle, out Point3d centerPoint)
         {
@@ -297,25 +275,6 @@ namespace ThMEPHVAC.Model
             var ep = l.EndPoint + dis_vec;
             return new Line(sp, ep);
         }
-        private static bool MidPointIsInLine(Point2d p, Line l)
-        {
-            double maxX = Math.Max(l.StartPoint.X, l.EndPoint.X);
-            double maxY = Math.Max(l.StartPoint.Y, l.EndPoint.Y);
-            double minX = Math.Min(l.StartPoint.X, l.EndPoint.X);
-            double minY = Math.Min(l.StartPoint.Y, l.EndPoint.Y);
-            if (minX <= p.X && p.X <= maxX && minY <= p.Y && p.Y <= maxY)
-                return true;
-            return false;
-        }
-        public static double PointToLine(Point2d p, Line l)
-        {
-            var verticalP = GetVerticalPoint(p, l);
-            return verticalP.GetDistanceTo(p);
-        }
-        public static bool Is_equal(double a, double b)
-        {
-            return Math.Abs(a - b) <= 1e-3;
-        }
         public static double Extract_decimal(string s)
         {
             s = Regex.Replace(s, @"[^\d.\d]", "");
@@ -326,18 +285,6 @@ namespace ThMEPHVAC.Model
         public static void PromptMsg(string message)
         {
             Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor.WriteMessage(message);
-        }
-        public static Point3d GetMaxPoint(Point3d p1, Point3d p2)
-        {
-            double max_x = Math.Max(p1.X, p2.X);
-            double max_y = Math.Max(p1.Y, p2.Y);
-            return new Point3d(max_x, max_y, 0);
-        }
-        public static Point3d GetMinPoint(Point3d p1, Point3d p2)
-        {
-            double min_x = Math.Min(p1.X, p2.X);
-            double min_y = Math.Min(p1.Y, p2.Y);
-            return new Point3d(min_x, min_y, 0);
         }
         public static Polyline GetLineExtend(Point3d sp, Point3d ep, double ext_len)
         {
@@ -364,18 +311,6 @@ namespace ThMEPHVAC.Model
                 Y = 0;
             return new Point2d(X, Y);
         }
-        public static Polyline CreateDetectPoly(Point3d p)
-        {
-            var poly = new Polyline();
-            poly.CreatePolygon(p.ToPoint2D(), 4, 10);
-            return poly;
-        }
-        public static bool IsPointInLeftSide(Line l, Point3d p)
-        {
-            var dir_vec = GetEdgeDirection(l);
-            var vec = (p - l.StartPoint).GetNormal();
-            return dir_vec.CrossProduct(vec).Z > 0;
-        }
         public static void SearchPolyBorder(DBObjectCollection lines, out Point2d top, out Point2d left, out Point2d right, out Point2d bottom)
         {
             top = new Point2d(0, Double.MinValue);
@@ -398,34 +333,6 @@ namespace ThMEPHVAC.Model
                 top = p;
             if (p.Y < bottom.Y)
                 bottom = p;
-        }
-        public static bool IsConnected(Line l1, Line l2, Tolerance tor)
-        {
-            return l1.StartPoint.IsEqualTo(l2.StartPoint, tor) || l1.StartPoint.IsEqualTo(l2.EndPoint, tor) ||
-                   l1.EndPoint.IsEqualTo(l2.StartPoint, tor) || l1.EndPoint.IsEqualTo(l2.EndPoint, tor);
-        }
-        public static Point3d LineSetWithOneIntersection(DBObjectCollection set1, 
-                                                         DBObjectCollection set2,
-                                                         out Line cross1,
-                                                         out Line cross2)
-        {
-            cross1 = new Line();
-            cross2 = new Line();
-            var tor = new Tolerance(1.5, 1.5);
-            foreach (Line l1 in set1)
-            {
-                foreach (Line l2 in set2)
-                {
-                    var p = IntersectPoint(l1, l2);
-                    if (!p.IsEqualTo(Point3d.Origin, tor))
-                    {
-                        cross1 = l1;
-                        cross2 = l2;
-                        return p;
-                    }
-                }
-            }
-            return Point3d.Origin;
         }
         public static Point3d IntersectPoint(Line l1, Line l2)
         {
@@ -456,18 +363,6 @@ namespace ThMEPHVAC.Model
                 return Point3d.Origin;//Intersection not within line segments
             else
                 return l1.StartPoint + vec1 * S;
-        }
-        public static bool IsOutPolyline(DBObjectCollection lines, DBObjectCollection fence)
-        {
-            if (lines.Count > 0)
-            {
-                var first = lines[0] as Line;
-                var is_out = !IsInPolyline(first.StartPoint, fence);
-                foreach (Line l in lines)
-                    is_out = is_out && (!IsInPolyline(l.EndPoint, fence));
-                return is_out;
-            }
-            return false;
         }
         public static bool IsInPolyline(Point3d p, DBObjectCollection lines)
         {
@@ -546,28 +441,6 @@ namespace ThMEPHVAC.Model
             }
             return max_line;
         }
-        public static Polyline CreateRect(Point2d p, Vector2d dir_vec, double width, double height)
-        {
-            var l_vec = GetLeftVerticalVec(dir_vec);
-            var r_vec = GetRightVerticalVec(dir_vec);
-            var w = 0.5 * width;
-            var h = 0.5 * height;
-            var min_p = p - dir_vec * w + r_vec * h;
-            var max_p = p + dir_vec * w + l_vec * h;
-            var poly = new Polyline();
-            poly.CreateRectangle(min_p, max_p);
-            return poly;
-        }
-        public static double GetSrtFlagRotation(Vector3d vec)
-        {
-            var angle = vec.GetAngleTo(Vector3d.YAxis);
-            var z = vec.CrossProduct(Vector3d.YAxis).Z;
-            if (Math.Abs(z) < 1e-3)
-                z = 0;
-            if (z > 0)
-                angle = 2 * Math.PI - angle;
-            return angle;
-        }
         public static bool IsCross(DBObjectCollection centerLine, DBObjectCollection bypassLine)
         {
             if (bypassLine.Count == 0)
@@ -617,14 +490,14 @@ namespace ThMEPHVAC.Model
                 return l1.EndPoint;
             throw new NotImplementedException("此函数只针对有共点线的情况");
         }
-        public static double RoundToInteger(double num, double round)
+        public static double RoundNum(double num, double round)
         {
-            return ((int)(num / round)) * round;
+            return (Math.Floor(num / round)) * round;
         }
         public static ThCADCoreNTSSpatialIndex CreateRoomOutlineIndex(Point3d srtP)
         {
             var mat = Matrix3d.Displacement(-srtP.GetAsVector());
-            var wallBounds = ThDuctPortsReadComponent.GetBoundsByLayer("AI-房间框线");
+            var wallBounds = ThDuctPortsReadComponent.GetBoundsByLayer(ThHvacCommon.AI_ROOM_BOUNDS);
             var mpObjs = new DBObjectCollection();
             foreach (Polyline pl in wallBounds)
             {

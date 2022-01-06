@@ -188,5 +188,9 @@
         public const string AI_PORT = "AI-风口";
         public const string AI_BROKEN_LINE = "AI-风管断线";
         public const string AI_VERTICAL_PIPE = "AI-风管立管";
+
+        public const string AI_ROOM_BOUNDS = "AI-房间框线";
+        public const string AI_DUCT_ROUTINE = "AI-风管路由";
+        public const string AI_SMOKE_BROKE = "AI-挡烟垂壁";
     }
 }

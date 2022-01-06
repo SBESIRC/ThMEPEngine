@@ -20,23 +20,30 @@ namespace ThMEPHVAC.CAD
                                       DBObjectCollection wallobjects,
                                       DBObjectCollection bypassobjects,
                                       FanParam param,
-                                      HashSet<Line> roomLines,
-                                      HashSet<Line> notRoomLines)
+                                      ThFanAnalysis anayRes)
         {
             double teeWidth = ThMEPHVACService.GetWidth(param.bypassSize);
             double roomWidth = ThMEPHVACService.GetWidth(param.roomDuctSize);
             double notRoomWidth = ThMEPHVACService.GetWidth(param.notRoomDuctSize);
             srtP = fanmodel.isExhaust ? fanmodel.FanInletBasePoint : fanmodel.FanOutletBasePoint;
             disMat = Matrix3d.Displacement(srtP.GetAsVector());
-            index = new ThCADCoreNTSSpatialIndex(param.centerLines);
+            index = new ThCADCoreNTSSpatialIndex(CollectCenterlines(anayRes.auxLines));
             //非送风场景 room是入风口 (送，补) room是出风口
             roomValves = GetRoomValveGroupWithoutWall(roomWidth, fanmodel);
             notRoomValves = GetNotRoomValveGroupWithoutWall(notRoomWidth, fanmodel);
             if (wallobjects.Count > 0)
             {
-                roomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, teeWidth, roomLines, true));
-                notRoomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, teeWidth, notRoomLines, false));
+                roomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, roomWidth, teeWidth, anayRes.roomLines, true));
+                notRoomValves.AddRange(GetFireAndHoleWithWall(fanmodel, wallobjects, bypassobjects, notRoomWidth, teeWidth, anayRes.notRoomLines, false));
             }
+        }
+        private DBObjectCollection CollectCenterlines(List<Line> ls)
+        {
+            var lines = new DBObjectCollection();
+
+            foreach (Line l in ls)
+                lines.Add(l);
+            return lines;
         }
         public void RunInletValvesInsertEngine()
         {

@@ -9,6 +9,7 @@ using ThMEPHVAC.CAD;
 using ThMEPHVAC.Algorithm;
 using NFox.Cad;
 using ThMEPEngineCore.Model.Hvac;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPHVAC.Model
 {
@@ -23,6 +24,7 @@ namespace ThMEPHVAC.Model
         public Dictionary<int, SegInfo> mainLinesInfos;
         public List<TextAlignLine> textAlignment;
         public ThShrinkDuct shrinkService;// connector 通过shrink获得
+        private bool smokeFlag;
         private Tolerance tor;
         private PortParam portParam;
         // mainLines的第一条线是最远离主路的主路线(最先被累计风量)，最后一条是根线
@@ -43,7 +45,7 @@ namespace ThMEPHVAC.Model
             else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
             {
                 // 1.风口上带风量
-                CountWithPortAirVolume();
+                CountEndlinePortAirVolume();
                 AccumMainDuctAirVolume();
                 SetFirstDuctSize();
                 SetMainDuctSize();
@@ -72,7 +74,7 @@ namespace ThMEPHVAC.Model
             // 用于UI上读带风量的风口
             Init(portParam, new DBObjectCollection(), new Dictionary<Polyline, ObjectId>());
             GetMainLineAndEndLine();
-            CountWithPortAirVolume();
+            CountEndlinePortAirVolume();
             AccumMainDuctAirVolume();
             if (mainLinesInfos.Count > 0)
             {
@@ -404,12 +406,6 @@ namespace ThMEPHVAC.Model
             foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
                 if (size == favorite)
                     return size;
-            //foreach (var size in ductInfo.DuctSizeInfor.DefaultDuctsSizeString)
-            //{
-            //    var w = ThMEPHVACService.GetWidth(size);
-            //    if (Math.Abs(inW - w) < 1e-3)
-            //        return size;
-            //}
             string s = String.Empty;
             double minRatio = Double.MaxValue;
             var r = GetWHRatio(airVolume, portParam.param.scenario);
@@ -486,22 +482,80 @@ namespace ThMEPHVAC.Model
         {
             if (mainLines.Count > 0)
             {
-                var lines = CreateEndlineIndex(out Dictionary<int, double> dicLineToParam);
-                var index = new ThCADCoreNTSSpatialIndex(lines);
-                var selectMaxFlag = (portParam.param.scenario.Contains("排烟") && !portParam.param.scenario.Contains("兼")) ||
-                                    portParam.param.scenario.Contains("消防加压送风");
-                foreach (Line l in mainLines)
-                {
-                    var pl = new Polyline();
-                    pl.CreatePolygon(l.EndPoint.ToPoint2D(), 4, 10);
-                    var res = index.SelectCrossingPolygon(pl);
-                    var airVolume = selectMaxFlag ? GetMaxAirVolume(res, dicLineToParam) : AccumAirVolume(res, dicLineToParam);
-                    mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume, l = l });
-                    lines.Add(l);
-                    index = new ThCADCoreNTSSpatialIndex(lines);
-                    dicLineToParam.Add(l.GetHashCode(), airVolume);
-                }
+                if (smokeFlag)
+                    AccMainDuctWithExhaust();
+                else
+                    AccMainDuctWithNotExhaust();
             }
+        }
+        private void AccMainDuctWithExhaust()
+        {
+            var dic = CountSmokeZoneAirVolume(out DBObjectCollection smokeBounds);
+            var endSegs = new DBObjectCollection();
+            foreach (var lines in endLines)
+                foreach (Line l in lines)
+                    endSegs.Add(l);
+            foreach (Line l in mainLines)
+                endSegs.Add(l);
+            var smokeIndex = new ThCADCoreNTSSpatialIndex(smokeBounds);
+
+            foreach (Line l in mainLines)
+            {
+                endSegs.Remove(l);
+                var airVolumes = GetZoneAirVolume(endSegs, l, smokeIndex, dic);
+                airVolumes.Sort();
+                var airVolume = airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2])
+                                                      : airVolumes[0];
+                mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume + airVolumes.Count(), l = l });
+                endSegs.Add(l);
+            }
+        }
+        private List<double> GetZoneAirVolume(DBObjectCollection lines, 
+                                              Line l, 
+                                              ThCADCoreNTSSpatialIndex smokeIndex, 
+                                              Dictionary<int, double> dicZone2AirVolume)
+        {
+            var detector = new ThFanCenterLineDetector(true);
+            detector.SearchCenterLine(lines, l.EndPoint, l);
+            var airVolumes = new List<double>();
+            var set = new HashSet<int>();
+            foreach (Line connLine in detector.connectLines)
+            {
+                var polyline = connLine.Buffer(1);
+                var t = new DBObjectCollection() { polyline };
+                var mp = t.BuildMPolygon();
+                var res = smokeIndex.SelectCrossingPolygon(mp);
+                foreach (MPolygon pl in res)
+                    if (set.Add(pl.GetHashCode()))
+                        airVolumes.Add(dicZone2AirVolume[pl.GetHashCode()]);
+            }
+            return airVolumes;
+        }
+
+        private void AccMainDuctWithNotExhaust()
+        {
+            var lines = CreateEndlineIndex(out Dictionary<int, double> dicLineToParam);
+            var index = new ThCADCoreNTSSpatialIndex(lines);
+            var selectMaxFlag = portParam.param.scenario.Contains("消防加压送风");
+            foreach (Line l in mainLines)
+            {
+                var pl = new Polyline();
+                pl.CreatePolygon(l.EndPoint.ToPoint2D(), 4, 10);
+                var res = index.SelectCrossingPolygon(pl);
+                var airVolume = selectMaxFlag ? GetMaxAirVolume(res, dicLineToParam) : AccumAirVolume(res, dicLineToParam);
+                mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume, l = l });
+                lines.Add(l);
+                index = new ThCADCoreNTSSpatialIndex(lines);
+                dicLineToParam.Add(l.GetHashCode(), airVolume);
+            }
+        }
+        private DBObjectCollection GetSmokeZone(DBObjectCollection smokeLines)
+        {
+            var zone = smokeLines.Polygonize();
+            var bounds = new DBObjectCollection();
+            foreach (Polygon pl in zone)
+                bounds.Add(pl.ToDbEntity());
+            return bounds;
         }
 
         private double AccumAirVolume(DBObjectCollection lines, Dictionary<int, double> dicLineToParam)
@@ -636,11 +690,36 @@ namespace ThMEPHVAC.Model
             }
             return count;
         }
-        private double CountWithPortAirVolume()
+
+        private Dictionary<int, double> CountSmokeZoneAirVolume(out DBObjectCollection smokeMpBounds)
+        {
+            smokeMpBounds = new DBObjectCollection();
+            var smokeLines = ThDuctPortsReadComponent.ReadSmokeLine();
+            var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
+            foreach (Curve c in smokeLines)
+                c.TransformBy(mat);
+            var smokeBounds = GetSmokeZone(smokeLines);
+            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out Dictionary<int, PortInfo> dicPlToAirVolume);
+            var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
+            var dicSmokeZone = new Dictionary<int, double>();
+            foreach (Polyline bounds in smokeBounds)
+            {
+                var t = new DBObjectCollection() { bounds };
+                var mp = t.BuildMPolygon();
+                smokeMpBounds.Add(mp);
+                var res = portIndex.SelectCrossingPolygon(mp);
+                double zoneAirVolume = 0;
+                foreach (MPolygon p in res)
+                    zoneAirVolume += dicPlToAirVolume[p.GetHashCode()].portAirVolume;
+                dicSmokeZone.Add(mp.GetHashCode(), zoneAirVolume);
+            }
+            return dicSmokeZone;
+        }
+
+        private void CountEndlinePortAirVolume()
         {
             var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out Dictionary<int, PortInfo> dicPlToAirVolume);
             var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
-            double allTotalAirVolume = 0;
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -663,17 +742,22 @@ namespace ThMEPHVAC.Model
                     p.seg.airVolume = totalAirVolume;
                     endline.Add(l.GetHashCode(), p);
                 }
-                allTotalAirVolume += totalAirVolume;
                 endLinesInfos.Add(new EndlineInfo() { endlines = endline, totalAirVolume = totalAirVolume });
             }
-            return allTotalAirVolume;
         }
         private Polyline CreateLineBound(Line l)
         {
-            var dirVec = ThMEPHVACService.GetEdgeDirection(l);
-            var extLine = new Line(l.StartPoint - dirVec, l.EndPoint + dirVec);
-            var w = ThMEPHVACService.GetWidth(portParam.param.inDuctSize) * 0.5;
-            return extLine.Buffer(w);
+            if (portParam.param.portName.Contains("侧"))
+            {
+                var dirVec = ThMEPHVACService.GetEdgeDirection(l);
+                var extLine = new Line(l.StartPoint - dirVec, l.EndPoint + dirVec);
+                var w = ThMEPHVACService.GetWidth(portParam.param.inDuctSize) * 0.5;
+                return extLine.Buffer(w);
+            }
+            else
+            {
+                return l.Buffer(1);
+            }
         }
         private List<double> SortByDistance(Point3d baseP,
                                             DBObjectCollection res,
@@ -682,7 +766,7 @@ namespace ThMEPHVAC.Model
         {
             var distances = new List<double>();
             dic = new Dictionary<string, PortInfo>();
-            foreach (Polyline pl in res)
+            foreach (MPolygon pl in res)
             {
                 var info = dicPlToAirVolume[pl.GetHashCode()];
                 var dis = info.position.DistanceTo(baseP);
@@ -908,6 +992,7 @@ namespace ThMEPHVAC.Model
             reducingInfos = new List<ReducingInfo>();
             mainLinesInfos = new Dictionary<int, SegInfo>();
             textAlignment = new List<TextAlignLine>();
+            smokeFlag = portParam.param.scenario.Contains("排烟") && !portParam.param.scenario.Contains("兼");
         }
     }
 }
