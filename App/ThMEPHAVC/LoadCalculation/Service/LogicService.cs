@@ -41,6 +41,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                     BlockReference roomFunction = BlocksDic[dBPoint];
 
                     var loadCalculationtableobjs = tableSpatialIndex.SelectCrossingPolygon(roomBoundary);
+                    bool findtable = false;
                     if (loadCalculationtableobjs.Count >0)
                     {
                         foreach (Entity item in loadCalculationtableobjs)
@@ -54,6 +55,7 @@ namespace ThMEPHVAC.LoadCalculation.Service
                                 var table = FillTableData(roomBoundary, roomFunction, summerVentilationT, winterVentilationT, existedTable.Position);
                                 if (!table.IsNull())
                                 {
+                                    findtable = true;
                                     Deprecatedtables.Add(existedTable);
                                     result.Add(table);
                                 }
@@ -61,12 +63,11 @@ namespace ThMEPHVAC.LoadCalculation.Service
                             }
                         }
                     }
-                    else
+                    if(!findtable)
                     {
                         var curveobjs = curveSpatialIndex.SelectFence(roomBoundary);
                         if (curveobjs.Count > 0)
                         {
-                            bool findtable = false;
                             foreach (Curve curve in curveobjs)
                             {
                                 var pts = new Point3dCollection();
