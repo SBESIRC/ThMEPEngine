@@ -300,6 +300,20 @@ namespace TianHua.AutoCAD.ThCui
             {
                 var subPanel = row.AddNewPanel();
 
+                // 总线校核明细
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("总线校核明细",
+                    "天华总线校核明细",
+                    "THZXJHMX",
+                    "天华总线校核明细",
+                    "IDI_THCAD_THZXJHMX_SMALL",
+                    "IDI_THCAD_THZXJHMX_LARGE",
+                    RibbonButtonStyle.LargeWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
                 // 地库消防广播
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地库消防广播",
