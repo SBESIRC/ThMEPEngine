@@ -384,12 +384,12 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
             </Commands>
         </ComponentEntry>
@@ -399,12 +399,12 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
             </Commands>
         </ComponentEntry>
@@ -414,12 +414,12 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
                 <Command Local="THAFPM" Global="THAFPM" />
                 <Command Local="THHZBJ" Global="THHZBJ" />
+                <Command Local="THXFGB"  Global="THXFGB" />
                 <Command Local="THZXJHMX" Global="THZXJHMX" />
             </Commands>
         </ComponentEntry>

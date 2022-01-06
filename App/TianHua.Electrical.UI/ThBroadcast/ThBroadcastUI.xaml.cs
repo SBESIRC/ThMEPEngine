@@ -27,7 +27,7 @@ namespace TianHua.Electrical.UI.ThBroadcast
         {
             InitializeComponent();
 
-            this.MutexName = "THGB";
+            this.MutexName = "Mutext_ThBroadcastUI";
 
             //设置默认值
             SetDefaultValue();

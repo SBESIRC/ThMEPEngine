@@ -318,35 +318,11 @@ namespace TianHua.AutoCAD.ThCui
                 var subRow = subPanel.AddNewRibbonRow();
                 subRow.AddNewButton("地库消防广播",
                     "天华地库消防广播",
-                    "THGB",
-                    "基于提取出的车道中心线，一键布置地库广播点位",
+                    "THXFGB",
+                    "天华地库消防广播",
                     "IDI_THCAD_THGB_SMALL",
                     "IDI_THCAD_THGB_LARGE",
                     RibbonButtonStyle.LargeWithText);
-            }
-
-            {
-                var subPanel = row.AddNewPanel();
-
-                // 消防广播连线
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("消防广播连线",
-                    "天华广播连线",
-                    "THGBLX",
-                    "基于提取出的车道中心线，一键完成地库广播连线",
-                    "IDI_THCAD_THGBLX_SMALL",
-                    "IDI_THCAD_THGBLX_SMALL",
-                    RibbonButtonStyle.SmallWithText);
-
-                // 广播盲区显示
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("广播盲区显示",
-                    "天华广播盲区",
-                    "THGBMQ",
-                    "基于提取出的车道中心线，检测广播点位布置后，可能的走道端头盲区",
-                    "IDI_THCAD_THGBMQ_SMALL",
-                    "IDI_THCAD_THGBMQ_LARGE",
-                    RibbonButtonStyle.SmallWithText);
             }
         }
         private static void CreateElectronicPanel(RibbonTabSource tab)

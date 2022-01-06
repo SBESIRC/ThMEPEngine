@@ -210,12 +210,6 @@ panels:
         items:
           - text: "地库消防广播"
             attributes: { "IsVisible": true, "IsEnabled": true }
-      - text: ""
-        items:
-          - text: "消防广播连线"
-            attributes: { "IsVisible": true, "IsEnabled": true }
-          - text: "广播盲区显示"
-            attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlELIGHTING"
     name: "ELIGHTING"

@@ -1,13 +1,14 @@
 ﻿using Linq2Acad;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
-using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical.BlockConvert;
+using TianHua.Electrical.UI.FireAlarm;
+using TianHua.Electrical.UI.ThBroadcast;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using TianHua.Electrical.UI.ThBroadcast;
 
 namespace TianHua.Electrical.UI
 {
@@ -93,28 +94,35 @@ namespace TianHua.Electrical.UI
             }
         }
 
+        /// <summary>
+        /// 安防平面
+        /// </summary>
         [CommandMethod("TIANHUACAD", "THAFPM", CommandFlags.Modal)]
         public void THAFPM()
         {
-            SecurityPlaneSystemUI securityPlaneSystemUI = new SecurityPlaneSystemUI();
-            AcadApp.ShowModalWindow(securityPlaneSystemUI);
+            var ui = new SecurityPlaneSystemUI();
+            AcadApp.ShowModalWindow(ui);
         }
 
-        [CommandMethod("TIANHUACAD", "THGB", CommandFlags.Modal)]
-        public void THGB()
+        /// <summary>
+        /// 消防广播
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THXFGB", CommandFlags.Modal)]
+        public void THXFGB()
         {
-            ThBroadcastUI thBroadcastUI = new ThBroadcastUI();
-            AcadApp.ShowModelessWindow(thBroadcastUI);
-        }
-
-        //火灾报警
-        [CommandMethod("TIANHUACAD", "THHZBJ", CommandFlags.Modal)]
-        public void THHZBJUI()
-        {
-            var ui = new FireAlarm.UIThFireAlarm();
+            var ui = new ThBroadcastUI();
             AcadApp.ShowModelessWindow(ui);
         }
 
+        /// <summary>
+        /// 火灾报警
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THHZBJ", CommandFlags.Modal)]
+        public void THHZBJUI()
+        {
+            var ui = new UIThFireAlarm();
+            AcadApp.ShowModelessWindow(ui);
+        }
 
         private string LayoutType
         {
