@@ -5,6 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Runtime;
+using ThMEPElectrical.AFAS;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.Model;
+using ThMEPElectrical.AFAS.ViewModel;
 
 namespace ThMEPLighting.IlluminationLighting
 {
@@ -13,10 +17,40 @@ namespace ThMEPLighting.IlluminationLighting
         [CommandMethod("TIANHUACAD", "THFAIlluminationNoUI", CommandFlags.Modal)]
         public void THFAIlluminationNoUI()
         {
-            using (var cmd = new IlluminationLightingCmd(null))
+
+            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
+            var radiusN = ThAFASUtils.SettingDouble("\n正常照明灯具布置半径(mm)");
+            var radiusE = ThAFASUtils.SettingDouble("\n应急照明灯具布置半径(mm)");
+            var layoutEmg = ThAFASUtils.SettingInt("\n布置应急照明灯 否（0）是（1）");
+
+            FireAlarmSetting.Instance.Scale = 100;
+            FireAlarmSetting.Instance.Beam = beam;
+            FireAlarmSetting.Instance.RoofThickness = wallThick;
+            FireAlarmSetting.Instance.IlluRadiusNormal = radiusN;
+            FireAlarmSetting.Instance.IlluRadiusEmg = radiusE;
+            FireAlarmSetting.Instance.IlluLightType = 0;
+            FireAlarmSetting.Instance.IlluIfLayoutEmg = layoutEmg == 1 ? true : false;
+            FireAlarmSetting.Instance.IlluIfEmgAsNormal = false;
+
+            FireAlarmSetting.Instance.LayoutItemList.Clear();
+            FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.NormalLighting);
+            FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.EmergencyLighting);
+
+
+            ThAFASDataPass.Instance = new ThAFASDataPass();
+            ThAFASUtils.AFASPrepareStep();
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+            {
+                return;
+            }
+
+            using (var cmd = new IlluminationLightingCmd())
             {
                 cmd.Execute();
             }
+
+            ThAFASDataPass.Instance = null;
         }
     }
 }

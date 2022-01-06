@@ -18,57 +18,61 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         public List<Line> SegLines = new List<Line>();//分割线
         public List<BlockReference> Building = new List<BlockReference>();//建筑物block
         public Polyline WallLine = new Polyline();//外框线
-        public bool Extract(Database database, Point3dCollection polygon)
+        public List<List<Polyline>> buildingPlines = new List<List<Polyline>>();//建筑物hatch提取得到的多段线
+        public bool Extract(BlockReference basement)
         {
             var objs = new DBObjectCollection();
-            using (var acadDatabase = AcadDatabase.Use(database))
+
+            Explode(basement);
+            foreach (var db in SegmentLines)
             {
-                var Results = acadDatabase
-                   .ModelSpace
-                   .OfType<Entity>()
-                   .Where(o => o is BlockReference);
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                if(dbObjs.Count != 1)
-                {
-                    return false;
-                }
-                if(!(dbObjs[0] is BlockReference))
-                {
-                    return false;
-                }
-                dbObjs.Cast<Entity>()
-                      .ForEach(e => Explode(e));
+                var spt = (db as Polyline).StartPoint;
+                var ept = (db as Polyline).EndPoint;
+                SegLines.Add(new Line(spt, ept));
+            }
 
-                foreach(var db in SegmentLines)
+            foreach(var obj in OuterLines)
+            {
+                var pline = obj as Polyline;
+                if (pline.Length > 0.0)
                 {
-                    var spt = (db as Polyline).StartPoint;
-                    var ept = (db as Polyline).EndPoint;
-                    SegLines.Add(new Line(spt, ept));
+                    pline = pline.DPSimplify(1.0);
+                    pline = pline.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
                 }
+                WallLine = pline;
+                break;
+            }
 
-                foreach(var obj in OuterLines)
-                {
-                    var pline = obj as Polyline;
-                    if (pline.Length > 0.0)
-                    {
-                        pline = pline.DPSimplify(1.0);
-                        pline = pline.MakeValid().OfType<Polyline>().OrderByDescending(p => p.Area).First(); // 处理自交
-                    }
-                    WallLine = pline;
-                    break;
-                }
+            var buildingPlines = new List<List<Polyline>>();
+            foreach(var block in Building)
+            {
+                buildingPlines.Add(ExplodeBlock(block));
             }
             return true;
         }
 
+
+        private List<Polyline> ExplodeBlock(BlockReference block)
+        {
+            var plines = new List<Polyline>();
+            var dbObjs = new DBObjectCollection();
+            block.Explode(dbObjs);
+            foreach(var obj in dbObjs)
+            {
+                if(obj is Hatch hatch)
+                {
+                    plines.Add(hatch.Boundaries()[0] as Polyline);
+                }
+            }
+            return plines;
+        }
         private bool IsOuterLayer(string layer)
         {
             return layer.ToUpper() == "地库边界";
         }
         private bool IsBuildingLayer(string layer)
         {
-            return layer.ToUpper() == "障碍物边缘";
+            return layer.ToUpper().Contains("障碍物");
         }
         private bool IsEquipmentLayer(string layer)
         {

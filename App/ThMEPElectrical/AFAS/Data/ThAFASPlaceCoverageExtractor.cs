@@ -27,7 +27,9 @@ namespace ThMEPElectrical.AFAS.Data
         public List<ThIfcWall> Walls { get; set; } = new List<ThIfcWall>();
         public List<Polyline> Holes { get; set; } = new List<Polyline>();
         public bool ReferBeam { get; set; } = true;
-        #endregion 
+
+        public double WallThickness { get; set; } = 100;
+        #endregion
 
 
         public List<Entity> CanLayoutAreas { get; set; }
@@ -90,6 +92,7 @@ namespace ThMEPElectrical.AFAS.Data
             cmd.Holes = Holes;
             cmd.BufferDistance = 500;
             cmd.ReferBeams = ReferBeam;
+            cmd.WallThickness = WallThickness;
 
             //获取可布置区域
             var poly = pts.CreatePolyline();

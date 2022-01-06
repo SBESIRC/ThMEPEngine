@@ -62,12 +62,11 @@ namespace ThMEPWSS.SprinklerConnect.Data
                     singleRowSort.ForEach(row =>
                     {
                         var doubleRow = row.Select(o => o.Buffer(200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
-                        .ToCollection()
-                        .Outline()
-                        .OfType<Polyline>()
-                        .Select(o => o.OBB().Buffer(-200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
-                        .ToList();
-
+                            .ToCollection()
+                            .Outline()
+                            .OfType<Polyline>()
+                            .Select(o => o.OBB().Buffer(-200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
+                            .ToList();
                         parkingStalls.AddRange(doubleRow);
                     });
                 }
@@ -94,7 +93,7 @@ namespace ThMEPWSS.SprinklerConnect.Data
             };
             parkingStallExtractor.Extract(database, pline.Vertices());
 
-            if(parkingStallExtractor.ParkingStalls.Count > 0)
+            if (parkingStallExtractor.ParkingStalls.Count > 0)
             {
                 var parkingStallsTemp = parkingStallExtractor.ParkingStalls.OfType<Polyline>().ToList();
                 var transformer = ThSprinklerTransformer.GetTransformer(parkingStallsTemp[0].Vertices());
@@ -186,8 +185,14 @@ namespace ThMEPWSS.SprinklerConnect.Data
             var stallsTidal = new List<Polyline>();
             parkingStalls.ForEach(o =>
             {
-                if (o.GetPoint3dAt(1).DistanceTo(o.StartPoint) > o.GetPoint3dAt(1).DistanceTo(o.GetPoint3dAt(2)))
+                var firstDist = o.GetPoint3dAt(1).DistanceTo(o.StartPoint);
+                var secondDist = o.GetPoint3dAt(1).DistanceTo(o.GetPoint3dAt(2));
+                if (firstDist > secondDist
+                    && !(o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.5 && firstDist / secondDist < 1.6)
+                    || (firstDist < secondDist 
+                        && o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.5 && firstDist / secondDist < 1.6))
                 {
+                    // 取长边为车道方向
                     stallsTidal.Add(o.Clone() as Polyline);
                 }
                 else

@@ -37,7 +37,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Command\ThCutCurveTestCmd.cs" />
     <Compile Include="Command\ThHvacCmdService.cs" />
     <Compile Include="Command\ThHvacDuctModifyCmd.cs" />
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />

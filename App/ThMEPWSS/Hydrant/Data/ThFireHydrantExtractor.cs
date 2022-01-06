@@ -20,7 +20,7 @@ namespace ThMEPWSS.Hydrant.Data
         /// <summary>
         /// 点距离房间边线的最远距离
         /// </summary>
-        private double MaxDistanceToRoom = 150.0;
+        private double MaxDistanceToRoom = 100.0;
         public List<DBPoint> FireHydrants { get; set; }
         private List<ThIfcRoom> Rooms { get; set; }
         private Dictionary<DBPoint, Polyline> HydrantOutline { get; set; }
@@ -91,8 +91,7 @@ namespace ThMEPWSS.Hydrant.Data
             isoldatedHydrants.ForEach(o =>
             {
                 var obb = HydrantOutline[o];
-                var width = GetRectangleWidth(obb);
-                var disDic = DistancToRoom(o.Position, rooms, width / 2.0);
+                var disDic = DistancToRoom(o.Position, rooms);
                 if (disDic.Count > 0)
                 {
                     var closestRoom = disDic.OrderBy(m => m.Value).First().Key;
@@ -124,13 +123,13 @@ namespace ThMEPWSS.Hydrant.Data
             });
             return results;
         }
-        private Dictionary<Entity, double> DistancToRoom(Point3d pt, List<ThIfcRoom> rooms, double width)
+        private Dictionary<Entity, double> DistancToRoom(Point3d pt, List<ThIfcRoom> rooms)
         {
             var result = new Dictionary<Entity, double>();
             rooms.ForEach(r =>
             {
                 var dis = r.Boundary.ToNTSPolygonalGeometry().Dictance(pt);
-                if (dis <= width + MaxDistanceToRoom)
+                if (dis <= MaxDistanceToRoom+1.0) // 1.0 用于控制误差
                 {
                     result.Add(r.Boundary, dis);
                 }

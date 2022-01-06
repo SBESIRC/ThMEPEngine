@@ -279,7 +279,7 @@ namespace ThMEPWSS.DrainageSystemDiagram
                             intersectPts = lines[tuple.Item1].Intersect(lines[tuple.Item2], Intersect.ExtendBoth);
                             if (intersectPts.Count != 1)
                             {
-                                //throw new NotSupportedException();
+                                throw new NotSupportedException();
                             }
                             else
                             {

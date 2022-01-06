@@ -42,11 +42,13 @@ namespace ThMEPEngineCore.Engine
                 return false;
             }
 
-            // 忽略不可“炸开”的块
-            if (!blockTableRecord.Explodable)
-            {
-                return false;
-            }
+            // 有些块由于未知的原因成为不可炸的，这样会大大影响我们提取底层数据
+            // 暂时让这种块通过
+            //// 忽略不可“炸开”的块
+            //if (!blockTableRecord.Explodable)
+            //{
+            //    return false;
+            //}
 
             return true;
         }

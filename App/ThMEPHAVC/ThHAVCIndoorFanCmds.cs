@@ -21,7 +21,7 @@ namespace ThMEPHVAC
             //Step1 选择房间框线 获取房间内外轮廓信息
             var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
-            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis);
+            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,false);
             indoorFanLayout.Execute();
         }
         [CommandMethod("TIANHUACAD", "THSNJFZ", CommandFlags.Modal)]
@@ -29,6 +29,14 @@ namespace ThMEPHVAC
         {
             var placeFan = new IndoorFanPlace();
             placeFan.Execute();
+        }
+        [CommandMethod("TIANHUACAD", "THSNJArea", CommandFlags.Modal)]
+        public void THIndoorFanTest()
+        {
+            var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            var selectAreas = SelectPolyline();
+            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,true);
+            indoorFanLayout.Execute();
         }
         private Dictionary<Polyline, List<Polyline>> SelectPolyline()
         {

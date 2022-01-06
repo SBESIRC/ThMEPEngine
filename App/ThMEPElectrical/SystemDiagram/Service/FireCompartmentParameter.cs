@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,11 @@ namespace ThMEPElectrical.SystemDiagram.Service
         public static List<string> ChoiseFileNames { get; set; } = new List<string>();
 
         public static List<DynamicCheckBox> CacheDynamicCheckBoxs = new List<DynamicCheckBox>();
+
+        //Floor - Msg/DB/ID
+        //public static Dictionary<string, List<Tuple<string, Database, ObjectId>>> WarningCache = new Dictionary<string, List<Tuple<string, Database, ObjectId>>>();
+
+        public static List<AlarmModel> WarningCache = new List<AlarmModel>();
 
         /// <summary>
         /// 控制总线计数模块

@@ -81,6 +81,11 @@ namespace ThMEPHVAC.Algorithm
             else
                 connectLines.Add(new Line(startPoint, detectPoint));
         }
+        public void SearchCenterLine(DBObjectCollection lines, Point3d startPoint, Line srtLine)
+        {
+            index = new ThCADCoreNTSSpatialIndex(lines);
+            searchConnLine(startPoint, srtLine);
+        }
         private void searchConnLineBreakByElbow(Point3d detectPoint, Line currentLine)
         {
             var res = detect(detectPoint, currentLine);

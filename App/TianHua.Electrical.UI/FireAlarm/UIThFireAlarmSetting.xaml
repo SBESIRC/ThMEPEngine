@@ -113,12 +113,12 @@
                     </ComboBox>
                 </StackPanel>
                 <!--row 1-->
-                <StackPanel Grid.Row="1"  Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" >
+                <!--<StackPanel Grid.Row="1"  Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" >
                     <Label  Content ="板顶厚度："  />
                     <cus:InputTextBox Width ="70" TextBoxInputType="InputInteger"  NumCanMinus="False" VerticalAlignment="Top" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
                     <Label  Content="mm"/>
-                </StackPanel>
-                <StackPanel IsEnabled="False"  Grid.Row="1"  Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" >
+                </StackPanel>-->
+                <StackPanel IsEnabled="False"  Grid.Row="1"  Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" >
                     <Label  Content ="修正系数："  />
                     <ComboBox  SelectedItem="{Binding FixRef,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                               ItemsSource="{Binding FixRefList ,Mode=OneWay,NotifyOnSourceUpdated=True}">

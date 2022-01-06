@@ -55,7 +55,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     foreach (BlockReference buildingBlock in BuildingBlocks)
                     {
                         var cuttersInBuilding = buildingBlock.GetCutters();
-                        allCuttersList.Add(cuttersInBuilding);
+#if DEBUG
+                        using (AcadDatabase currentDb = AcadDatabase.Active())
+                        {
+                            foreach (var pline in cuttersInBuilding)
+                            {
+                                currentDb.CurrentSpace.Add(pline);
+                            }
+                        }
+#endif
+                            allCuttersList.Add(cuttersInBuilding);
                     }
                     var allCutters = allCuttersList.SelectMany(c => c).ToCollection();
                     _AllShearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(allCutters);
@@ -601,16 +610,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public static List<Polyline> GetCutters(this BlockReference br)
         {
             var plines = new List<Polyline>();
-            var objs = new DBObjectCollection();
-            br.Explode(objs);
-            foreach (var obj in objs)
+            var dbObjs = new DBObjectCollection();
+            br.Explode(dbObjs);
+            foreach (var obj in dbObjs)
             {
-                if (obj is Polyline pline)
+                if (obj is Hatch hatch)
                 {
-                    plines.Add(pline);
+                    plines.Add(hatch.Boundaries()[0] as Polyline);
                 }
             }
             return plines;
+            //var plines = new List<Polyline>();
+            //var objs = new DBObjectCollection();
+            //br.Explode(objs);
+            //foreach (var obj in objs)
+            //{
+            //    if (obj is Polyline pline)
+            //    {
+            //        plines.Add(pline);
+            //    }
+            //}
+            //return plines;
         }
     }
 }

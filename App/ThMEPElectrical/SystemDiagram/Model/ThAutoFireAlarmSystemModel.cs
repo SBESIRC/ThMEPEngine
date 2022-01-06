@@ -11,6 +11,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
+using Autodesk.AutoCAD.ApplicationServices;
+using AcHelper;
 
 namespace ThMEPElectrical.SystemDiagram.Model
 {
@@ -237,6 +239,29 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 if (FireCompartmentParameter.DiagramCreateGroup == 1)
                 {
                     Groups.ForEach(g => GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), g));
+                }
+            }
+        }
+
+        public void DrawAlarm()
+        {
+            foreach (Document doc in Application.DocumentManager)
+            {
+                var alarm = FireCompartmentParameter.WarningCache.FirstOrDefault(o => o.Doc == doc);
+                if (alarm.IsNull() || alarm.AlarmList.Count < 1)
+                {
+                    continue;
+                }
+                using (DocumentLock docLock = doc.LockDocument())
+                using (new ThDbWorkingDatabaseSwitch(doc.Database))
+                using (AcadDatabase db = AcadDatabase.Use(doc.Database))
+                {
+                    InsertBlockService.ImportCloudBlock(doc.Database, ThAutoFireAlarmSystemCommon.CloudBlockName);
+                    alarm.AlarmList.ForEach(o =>
+                    {
+                        var objID = InsertBlockService.InsertCloudBlock(db.Database, ThAutoFireAlarmSystemCommon.CloudBlockName, o.Item2);
+                        alarm.UiAlarmList.Add((o.Item1, objID).ToTuple());
+                    });
                 }
             }
         }

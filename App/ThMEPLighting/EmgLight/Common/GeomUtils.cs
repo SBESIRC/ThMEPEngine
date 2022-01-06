@@ -26,7 +26,7 @@ namespace ThMEPLighting.EmgLight.Common
         /// <returns></returns>
         public static Polyline ExpandLine(Line line, double left, double up, double right, double down)
         {
-            Vector3d lineDir = line.Delta.GetNormal();
+            Vector3d lineDir = (line.EndPoint - line.StartPoint).GetNormal();
             Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
 
             //向前延伸
@@ -116,7 +116,7 @@ namespace ThMEPLighting.EmgLight.Common
                 }
             }
 
-             orderLinePts = pts.ToDictionary(x => x, x => x.TransformBy(lineMatrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
+            orderLinePts = pts.ToDictionary(x => x, x => x.TransformBy(lineMatrix.Inverse())).OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
 
             return orderLinePts;
         }

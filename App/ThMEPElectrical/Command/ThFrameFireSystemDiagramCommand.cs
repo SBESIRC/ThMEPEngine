@@ -16,6 +16,7 @@ using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
 using NFox.Cad;
 using ThMEPEngineCore.Command;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPElectrical.Command
 {
@@ -52,7 +53,7 @@ namespace ThMEPElectrical.Command
                     {
                         return;
                     }
-
+                    FireCompartmentParameter.WarningCache.Clear();
                     //业务逻辑，处理0图层，将0图层 解锁，解冻，打开
                     acadDatabase.Database.UnLockLayer("0");
                     acadDatabase.Database.UnFrozenLayer("0");
@@ -128,6 +129,9 @@ namespace ThMEPElectrical.Command
                     }
                     else
                     {
+                        FireCompartmentParameter.WarningCache.Add(
+                            new AlarmModel() { Doc =  acadDatabase.Database.GetDocument() 
+                            });
                         diagram = new ThAutoFireAlarmSystemModelFromWireCircuit();
                         var RequiredElementEngine = new ThRequiredElementRecognitionEngine();
                         var ControlCircuitEngine = new ThControlCircuitRecognitionEngine() { LayerFilter = new List<string>() { "E-FAS-WIRE" } };
@@ -161,6 +165,7 @@ namespace ThMEPElectrical.Command
 
                     //画系统图
                     diagram.DrawSystemDiagram(ppr.Value.GetAsVector(), Active.Editor.UCS2WCS());
+                    diagram.DrawAlarm();
                 }
             }
         }

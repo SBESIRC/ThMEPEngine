@@ -200,7 +200,7 @@ namespace ThMEPHVAC.Model
                     {
                         var shrinkedLine = seg.seg.GetShrinkedLine();
                         var len = firstEndline.Equals(seg) ? 1300 : 0;
-                        var portStep = isAuto ? ThMEPHVACService.RoundToInteger((shrinkedLine.Length - (x + 400 + 340 + len)) / (seg.portNum - 1), 100) : portParam.portInterval;
+                        var portStep = isAuto ? ThMEPHVACService.RoundNum((shrinkedLine.Length - (x + 400 + 340 + len)) / (seg.portNum - 1), 100) : portParam.portInterval;
                         var dirVec = ThMEPHVACService.GetEdgeDirection(shrinkedLine);
                         //var firstOftDis = endEndline.Equals(seg) ? 200 : portStep;末端偏移200，中间端居中
                         var p = shrinkedLine.EndPoint - firstOftDis * dirVec;
@@ -227,7 +227,7 @@ namespace ThMEPHVAC.Model
                     // 若反向，p在line之外
                     var port = portsInfo.LastOrDefault();
                     var dis = p.DistanceTo(startPoint);
-                    dis = ThMEPHVACService.RoundToInteger(dis, 100);
+                    dis = ThMEPHVACService.RoundNum(dis, 100);
                     if (dis < portParam.portInterval)
                     {
                         // 根据startPoint对称后可以放下
@@ -236,7 +236,7 @@ namespace ThMEPHVAC.Model
                     else
                     {
                         // 对称后放不下
-                        dis = ThMEPHVACService.RoundToInteger(portParam.portInterval / 4, 10);
+                        dis = ThMEPHVACService.RoundNum(portParam.portInterval / 4, 10);
                         port.position = p + dis * dirVec;
                     }
                 }

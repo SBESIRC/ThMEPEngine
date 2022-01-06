@@ -9,15 +9,23 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
+using ThMEPArchitecture.ParkingStallArrangement.Model;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.IO
 {
     public class ThParkingStallDataSetFactory : ThMEPDataSetFactory
     {
         private OuterBrder Border { get; set; }
-        public ThParkingStallDataSetFactory()
+        public ThParkingStallDataSetFactory(OuterBrder border)
         {
-            Border = new OuterBrder();
+            if(border!=null)
+            {
+                Border = border;
+            }
+            else
+            {
+                Border = new OuterBrder();
+            }
         }
         protected override ThMEPDataSet BuildDataSet()
         {
@@ -32,7 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.IO
 
         protected override void GetElements(Database database, Point3dCollection collection)
         {
-            Border.Extract(database, collection);
+            //ToDO
         }
 
         private List<ThGeometry> BuildOuterLines()
@@ -50,8 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.IO
             Border.Building.ForEach(o =>
             {
                 var buildingId = Guid.NewGuid().ToString();
-                var objs = ThDrawTool.Explode(o);
-                objs.OfType<Polyline>().ForEach(p =>
+                Plines.GetCutters(o).ForEach(p =>
                 {
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, "BuildingLine");

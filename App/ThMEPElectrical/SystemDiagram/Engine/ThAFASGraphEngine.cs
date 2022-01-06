@@ -13,6 +13,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPElectrical.SystemDiagram.Service;
 using ThMEPElectrical.SystemDiagram.Extension;
+using ThMEPElectrical.BlockConvert;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
@@ -22,14 +23,12 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         private Dictionary<Entity, Entity> GlobleNTSMappingDic;
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private List<Point3d> CrossAlarms { get; set; }
+        public List<Point3d> CrossAlarms { get; set; }
         private ThCADCoreNTSSpatialIndex FireCompartmentIndex { get; set; }
 
         public Dictionary<Point3d, List<ThAlarmControlWireCircuitModel>> GraphsDic { get; set; }
 
         private Database Database { get; set; }
-
-        public int CrossAlarmCount { get { return CrossAlarms.Count; } }
 
         /// <summary>
         /// 全部数据集合
@@ -907,6 +906,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
                     kdTree.InsertPoint(pt);
                 }
                 this.CrossAlarms = kdTree.SelectAll().Cast<Point3d>().ToList();
+                List<Tuple<string, Database, ObjectId>> tuples = new List<Tuple<string, Database, ObjectId>>();
                 this.CrossAlarms.ForEach(o =>
                 {
                     var newDBText = new DBText() { Height = 800, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = "×", Position = o, AlignmentPoint = o, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };

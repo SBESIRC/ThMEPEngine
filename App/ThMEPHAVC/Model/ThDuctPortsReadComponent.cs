@@ -435,9 +435,10 @@ namespace ThMEPHVAC.Model
                     var centerP = ThMEPHAVCBounds.GetDownPortCenterPoint(port, portParam);
                     var portBound = new Polyline();
                     portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
-                    portBounds.Add(portBound);
+                    var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
+                    portBounds.Add(polygon);
                     var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
-                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
+                    dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
                 }
                 else
                     AddPortCompToDic(portParam, port, dicPlToAirVolume, portBounds);
@@ -464,9 +465,10 @@ namespace ThMEPHVAC.Model
                     var centerP = ThMEPHAVCBounds.GetSidePortCenterPoint(port, portParam.srtPoint, portParam.param.portSize, ductWidth);
                     var portBound = new Polyline();
                     portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
-                    portBounds.Add(portBound);
+                    var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
+                    portBounds.Add(polygon);
                     var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量")) * 2; // 一对侧风口
-                    dicPlToAirVolume.Add(portBound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
+                    dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
                 }
                 else
                     AddPortCompToDic(portParam, port, dicPlToAirVolume, portBounds);
@@ -490,8 +492,9 @@ namespace ThMEPHVAC.Model
                 bound.CreatePolygon(p.ToPoint2D(), 4, len); // 断线可能需要小一点，但这边统一用200
                 var strVolume = blk.Id.GetAttributeInBlockReference("风量");
                 double airVolume = GetAirVolume(strVolume);
-                portBounds.Add(bound);
-                dicPlToAirVolume.Add(bound.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = p });
+                var polygon = new DBObjectCollection() { bound }.BuildMPolygon();
+                portBounds.Add(polygon);
+                dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = p });
             }
             else
             {
@@ -518,10 +521,21 @@ namespace ThMEPHVAC.Model
             }
             return bounds;
         }
+
+        public static DBObjectCollection ReadSmokeLine()
+        {
+            var wallBounds = GetBoundsByLayer(ThHvacCommon.AI_ROOM_BOUNDS);
+            var broker = GetCenterlineByLayer(ThHvacCommon.AI_SMOKE_BROKE);
+            var lines = ThMEPHVACLineProc.Explode(wallBounds);
+            foreach (Curve c in broker)
+                lines.Add(c);
+            return lines;
+        }
+
         private static double GetAirVolume(string s)
         {
             var str = s.Split('m');
-            return Double.Parse(str[0]);
+            return str.Count() > 0 ? Double.Parse(str[0]) : 0;
         }
     }
 }

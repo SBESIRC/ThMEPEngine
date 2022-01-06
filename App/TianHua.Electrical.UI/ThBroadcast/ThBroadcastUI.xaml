@@ -1,0 +1,37 @@
+﻿<cus:ThCustomWindow 
+                    x:Class="TianHua.Electrical.UI.ThBroadcast.ThBroadcastUI"
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    mc:Ignorable="d" 
+                    Title="天华广播布置"
+                    SizeToContent="WidthAndHeight"
+                    d:DesignHeight="220" d:DesignWidth="260">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Row="0" Grid.Column="0" Content="图块比例：" HorizontalAlignment="Center" Margin="10,5,5,5"></Label>
+        <ComboBox Grid.Row="0" Grid.Column="1" Name="BlockScale" Height="22" Width="120" Margin="10,5,5,5" HorizontalAlignment="Left" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch"/>
+        <Label Grid.Row="1" Grid.Column="0" Content="盲区半径：" HorizontalAlignment="Center" Margin="10,5,5,5"></Label>
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" Margin="10,5,5,5">
+            <cus:InputTextBox TextBoxInputType="InputDouble" x:Name="blindArea" Width="120" Height="22" VerticalAlignment="Center" TabIndex="2">12500</cus:InputTextBox>
+            <Label>m</Label>
+        </StackPanel>
+        <StackPanel Grid.Row="5" Grid.ColumnSpan="2" Orientation="Vertical" Margin="10,20,10,10" VerticalAlignment="Bottom">
+            <cus:ImageButton IsTabStop="True" TabIndex="1" Content="消防广播布置" x:Name="btnLayout" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly"  Click="btnLayout_Click"></cus:ImageButton>
+            <cus:ImageButton IsTabStop="True" TabIndex="2" Content="消防广播连线" x:Name="btnWiringConnect" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnWiringConnect_Click"></cus:ImageButton>
+            <cus:ImageButton IsTabStop="True" TabIndex="3" Content="广播盲区显示" x:Name="btnGetBlindArea" Height="24" Margin="10,5,0,0" ImageTextLocation="TextOnly" Click="btnGetBlindArea_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>

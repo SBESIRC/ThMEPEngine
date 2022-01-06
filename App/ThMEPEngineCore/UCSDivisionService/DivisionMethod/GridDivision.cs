@@ -51,23 +51,17 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
 
             //获得所有轴网的网格区域
             var gridAreas = GetGridArea(gridLines.SelectMany(x => x.Key).ToList());
-            using (Linq2Acad.AcadDatabase db =Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in gridAreas)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
+
             //获得每个轴网的凸包
             var gridHulls = gridTypes.ToDictionary(x => x.Key, y => GetGridHull(y.Key));
-            
+
             //获得每个轴网本来所占区域
             var gridRegion = gridTypes.ToDictionary(x => x.Key, y => GetGridRegion(y.Key))
-                .Where(x => x.Value != null).ToDictionary(x => x.Key, y => y.Value); ;
+                .Where(x => x.Value != null).ToDictionary(x => x.Key, y => y.Value);
 
             //划分轴网属于哪个区域
             var gridDics = ClassifyGridArea(gridAreas, gridHulls, gridRegion, gridTypes);
-            
+
             //还原出ucs的polygon
             var polygons = GetUCSPolygons(gridDics, grids.SelectMany(x => x).ToList());
 
@@ -89,12 +83,15 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
         {
             List<GridModel> resGirds = new List<GridModel>();
             CutGridRegionService cutGridRegionService = new CutGridRegionService();
+            var allPolygons = polygons.Values.SelectMany(x => x).ToList();
             foreach (var polygonDic in polygons)
             {
                 var polygonKey = polygonDic.Key;
+                var exceptPolygons = allPolygons.Except(polygonDic.Value).ToList();
                 foreach (var polygon in polygonDic.Value)
                 {
-                    var regions = cutGridRegionService.CutRegion(polygon, gridLines[polygonKey], gridTypes[polygonKey]);
+                    var intersectPolys = exceptPolygons.Where(x => (x.Intersects(polygon) || polygon.Contains(x)) && !x.Contains(polygon)).ToList();
+                    var regions = cutGridRegionService.CutRegion(polygon, gridLines[polygonKey], intersectPolys, gridTypes[polygonKey]);
                     GridModel gridModel = new GridModel();
                     gridModel.allLines = gridLines[polygonKey];
                     gridModel.regions = regions;
@@ -132,9 +129,15 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                     .SelectMany(x => x.Buffer(-2).Cast<Polyline>())
                     .SelectMany(x => x.Buffer(5).Cast<Polyline>())
                     .ToList();
-                var polygons = bufferPolys.ToCollection().UnionPolygons().Cast<Polyline>().SelectMany(x => x.Buffer(-5).Cast<Polyline>()).Where(x => x.Area > 10).ToList();
+                var polygons = bufferPolys.ToCollection().UnionPolygons().Cast<Polyline>().SelectMany(x => x.Buffer(-5).Cast<Polyline>()).Where(x => x.Area > 10)
+                    .OrderByDescending(x => x.Area).ToList();
+                List<Polyline> usedPoly = new List<Polyline>();
                 foreach (var poly in polygons)
                 {
+                    if (usedPoly.Any(y => y.Contains(poly)))
+                    {
+                        continue;
+                    }
                     var ucsPolygon = poly.ResetArcPolygon(curves);
                     if (!ucsPolys.Keys.Contains(dics.Key))
                     {
@@ -144,6 +147,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                     {
                         ucsPolys[dics.Key].Add(ucsPolygon);
                     }
+                    usedPoly.Add(poly);
                 }
             }
 
@@ -170,7 +174,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
 
             foreach (var area in areas)
             {
-                var dicInfo = areaDic.Where(x => x.Value.Contains(area)).ToDictionary(x => x.Key, y => y.Value);
+                var dicInfo = areaDic.Where(x => x.Value.Contains(area) && areaDic.Keys.Contains(x.Key)).ToDictionary(x => x.Key, y => y.Value);
                 if (dicInfo.Count == 1)
                 {
                     continue;
@@ -210,27 +214,28 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
             var gridTypes = GridTypes.Where(x => gridArea.Keys.Any(y => y == x.Key))
                 .OrderBy(x => gridArea[x.Key].Area).ToDictionary(x => x.Key, y => y.Value);
             var arcDics = gridTypes.Where(x => x.Value == GridType.ArcGrid).ToDictionary(x => x.Key, y => y.Value);
-            if (arcDics.Count > 0)
-            {
-                return arcDics.First().Key;
-            }
-            else
-            {
-                var otherTypes = gridTypes.Except(arcDics).ToDictionary(x => x.Key, y => y.Value);
-                if (otherTypes.Count > 1)
-                {
-                    var areaDir = GetAreaDir(area);
-                    foreach (var gArea in otherTypes)   //后归入方向将近一致的区域
-                    {
-                        var gAreaDir = GetAreaDir(gridArea[gArea.Key]);
-                        if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
-                        {
-                            return gArea.Key;
-                        }
-                    }
-                }
-                return otherTypes.First().Key;
-            }
+            return gridTypes.First().Key;
+            //if (arcDics.Count > 0)
+            //{
+            //    return arcDics.First().Key;
+            //}
+            //else
+            //{
+            //    var otherTypes = gridTypes.Except(arcDics).ToDictionary(x => x.Key, y => y.Value);
+            //    if (otherTypes.Count > 1)
+            //    {
+            //        var areaDir = GetAreaDir(area);
+            //        foreach (var gArea in otherTypes)   //后归入方向将近一致的区域
+            //        {
+            //            var gAreaDir = GetAreaDir(gridArea[gArea.Key]);
+            //            if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
+            //            {
+            //                return gArea.Key;
+            //            }
+            //        }
+            //    }
+            //    return otherTypes.First().Key;
+            //}
         }
 
         /// <summary>

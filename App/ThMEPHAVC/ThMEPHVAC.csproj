@@ -56,10 +56,6 @@
     <Compile Include="IndoorFanLayout\Business\ArcAreaLayoutFanByVertical.cs" />
     <Compile Include="IndoorFanLayout\Business\AreaLayoutFan.cs" />
     <Compile Include="IndoorFanLayout\Business\AreaLayoutGroup.cs" />
-    <Compile Include="IndoorFanLayout\Business\AxisArcSimpleRegion.cs" />
-    <Compile Include="IndoorFanLayout\Business\AxisLineGroup.cs" />
-    <Compile Include="IndoorFanLayout\Business\AxisLineSimpleRegion.cs" />
-    <Compile Include="IndoorFanLayout\Business\AxisSimpleRegion.cs" />
     <Compile Include="IndoorFanLayout\Business\CalcLayoutArea.cs" />
     <Compile Include="IndoorFanLayout\Business\CalcRegionAdjacent.cs" />
     <Compile Include="IndoorFanLayout\Business\FanRectangleToBlock.cs" />

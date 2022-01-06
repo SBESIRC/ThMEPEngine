@@ -80,12 +80,6 @@
     <Compile Include="FireAlarm\UIThFireAlarmSetting.xaml.cs">
       <DependentUpon>UIThFireAlarmSetting.xaml</DependentUpon>
     </Compile>
-    <Compile Include="fmBlockConvert.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="fmBlockConvert.Designer.cs">
-      <DependentUpon>fmBlockConvert.cs</DependentUpon>
-    </Compile>
     <Compile Include="fmSmokeLayout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,14 +91,19 @@
     <Compile Include="SecurityPlaneUI\SecurityPlaneSystemUI.xaml.cs">
       <DependentUpon>SecurityPlaneSystemUI.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SystemDiagram\DoubleConvert.cs" />
     <Compile Include="SystemDiagram\ElectricalUISystemDiagram.cs" />
     <Compile Include="SystemDiagram\UI\DrainageLayerViewModel.cs" />
     <Compile Include="SystemDiagram\UI\SelectLayers.xaml.cs">
       <DependentUpon>SelectLayers.xaml</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="fmBlockConvert.resx">
-      <DependentUpon>fmBlockConvert.cs</DependentUpon>
-    </EmbeddedResource>
+    <Compile Include="SystemDiagram\UI\ShowAlarm.xaml.cs">
+      <DependentUpon>ShowAlarm.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SystemDiagram\UI\ShowAlarmViewModel.cs" />
+    <Compile Include="ThBroadcast\ThBroadcastUI.xaml.cs">
+      <DependentUpon>ThBroadcastUI.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="fmSmokeLayout.resx">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </EmbeddedResource>
@@ -258,6 +257,14 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="SystemDiagram\UI\SelectLayers.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SystemDiagram\UI\ShowAlarm.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="ThBroadcast\ThBroadcastUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

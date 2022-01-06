@@ -10,6 +10,7 @@ using TianHua.FanSelection.Function;
 using TianHua.Hvac.UI.Command;
 using NFox.Cad;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.Hvac.UI
 {
@@ -543,7 +544,7 @@ namespace TianHua.Hvac.UI
         }
         private void GetCenterlinesAndTrans(Point3d p)
         {
-            centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer("AI-风管路由");
+            centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
             ExcludeBypass(ref centerlines);
             var linesDic = SepLineByColor();
             var procLines = new List<DBObjectCollection>();
@@ -992,7 +993,7 @@ namespace TianHua.Hvac.UI
                 portParam.centerLines = detector.connectLines;
                 var anay = new ThDuctPortsAnalysis();
                 var airVolume = anay.CalcAirVolume(portParam);
-                airVolume = (Math.Floor(airVolume / 10)) * 10;
+                airVolume = ThMEPHVACService.RoundNum(airVolume, 50);
                 textAirVolume.Text = airVolume.ToString();
             }
         }

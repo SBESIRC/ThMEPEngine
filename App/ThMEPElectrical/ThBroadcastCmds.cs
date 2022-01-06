@@ -27,38 +27,20 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using ThMEPEngineCore.LaneLine;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical
 {
     public class ThBroadcastCmds
     {
         readonly double bufferLength = 100;
-        readonly double BlindAreaRadius = 12500;
+        public double BlindAreaRadius = 12500;
 
-        [CommandMethod("TIANHUACAD", "THGB", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THGBBZ", CommandFlags.Modal)]
         public void ThBroadcast()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var scaleOptions = new PromptKeywordOptions("\n选择图块比例");
-                scaleOptions.Keywords.Add("1:150", "A", "1:150(A)");
-                scaleOptions.Keywords.Add("1:100", "B", "1:100(B)");
-                scaleOptions.Keywords.Default = "1:150";
-                var scaleResult = Active.Editor.GetKeywords(scaleOptions);
-                double scale = 150;
-                if (scaleResult.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                if (scaleResult.StringResult == "1:150")
-                {
-                    scale = 150;
-                }
-                else if (scaleResult.StringResult == "1:100")
-                {
-                    scale = 100;
-                }
-
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
@@ -131,10 +113,10 @@ namespace ThMEPElectrical
                     //计算广播盲区
                     var layoutPts = resLayoutInfo.SelectMany(x => x.Value.Keys).ToList();
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(layoutPts, plInfo, BlindAreaRadius, originTransformer);
+                    blindAreaService.PrintBlindArea(layoutPts, plInfo, ThElectricalUIService.Instance.thGBParameter.BlindRadius, originTransformer);
 
                     //放置广播
-                    InsertBroadcastService.scaleNum = scale;
+                    InsertBroadcastService.scaleNum = ThElectricalUIService.Instance.thGBParameter.Scale;
                     var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo, originTransformer);
 
                     //车道广播连管
@@ -208,7 +190,7 @@ namespace ThMEPElectrical
 
                     //打印盲区
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(pts, plInfo, BlindAreaRadius, originTransformer);
+                    blindAreaService.PrintBlindArea(pts, plInfo, ThElectricalUIService.Instance.thGBParameter.BlindRadius, originTransformer);
                 }
             }
         }

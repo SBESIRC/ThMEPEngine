@@ -15,6 +15,7 @@ using ThMEPEngineCore.IO;
 using ThMEPArchitecture.ParkingStallArrangement;
 using ThMEPArchitecture.ParkingStallArrangement.IO;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 
 namespace ThMEPArchitecture
 {
@@ -68,23 +69,13 @@ namespace ThMEPArchitecture
         public void THExtractTestDataForZheData()
         {
             using (var acadDatabase = AcadDatabase.Active())
-            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return;
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
 
-                var dataSetFactory = new ThParkingStallDataSetFactory();
-                var dataSet = dataSetFactory.Create(acadDatabase.Database, frame.Vertices());
+                var outerBorder = new OuterBrder();
+                InputData.GetOuterBrder(acadDatabase, out outerBorder);
+
+                var dataSetFactory = new ThParkingStallDataSetFactory(outerBorder);
+                var dataSet = dataSetFactory.Create(acadDatabase.Database, new Point3dCollection());
 
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;

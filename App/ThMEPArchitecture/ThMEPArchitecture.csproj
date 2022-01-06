@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="ParkingStallArrangement\Algorithm\GA.cs" />
     <Compile Include="ParkingStallArrangement\CommandWithoutSegLine.cs" />
+    <Compile Include="ParkingStallArrangement\Extractor\InputData.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThObstacleGeoJsonFactory.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThBoundaryGeoJsonFactory.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThObstacleExtractionVisitor.cs" />
@@ -43,7 +44,6 @@
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA2.cs" />
-    <Compile Include="PartitionLayout\GeoUtilitiesOptimized.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\RandInt2.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\OuterBrder.cs" />

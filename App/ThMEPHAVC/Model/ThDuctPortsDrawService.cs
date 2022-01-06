@@ -221,17 +221,6 @@ namespace ThMEPHVAC.Model
                     throw new NotImplementedException("[CheckError]: No such reducing!");
             }
         }
-        public void DrawDuct(List<SegInfo> centerLines, Matrix3d mat, string elevation, double airVolume)
-        {
-            foreach (var seg in centerLines)
-            {
-                var l = seg.GetShrinkedLine();
-                var duct = ThDuctPortsFactory.CreateDuct(l.StartPoint, l.EndPoint, ThMEPHVACService.GetWidth(seg.ductSize));
-                DrawDuct(duct, mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds);
-                var ductParam = ThMEPHVACService.CreateDuctModifyParam(duct.centerLines, seg.ductSize, elevation, airVolume);
-                ThDuctPortsRecoder.CreateDuctGroup(geoIds, flgIds, centerIds, ductParam);
-            }
-        }
         public void DrawDuct(LineGeoInfo info, Matrix3d mat, out ObjectIdList geoIds, out ObjectIdList flgIds, out ObjectIdList centerIds)
         {
             DrawLines(info.geo, mat, geoLayer, out geoIds);

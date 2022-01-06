@@ -229,7 +229,15 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         void CheckAndRemoveLayoutFan() 
         {
-            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, _roomLoad, _fanRectangle.Load);
+            //计算需要多少台时要根据当前UCS面积计算需要，如果有多个UCS时不能以整个房间的负荷作为计算
+            var areaLoad = 0.0;
+            var ucsArea = 0.0;
+            foreach (var item in _roomIntersectAreas) 
+            {
+                ucsArea += item.RealIntersectAreas.Sum(c => c.Area);
+            }
+            areaLoad = ucsArea * _roomUnitLoad;
+            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, areaLoad, _fanRectangle.Load);
             var calcDelFans = layoutResultCheck.GetDeleteFanByRow();
             if (calcDelFans.Count < 1)
                 return;
@@ -331,6 +339,10 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     {
                         area.NeedFanCount += 1;
                         addCount -= 1;
+                    }
+                    if (Math.Abs(area.divisionArea.AreaPolyline.Area - 33847790) < 10) 
+                    {
+                    
                     }
                     area.FanLayoutAreaResult.Clear();
                     CalcLayoutArea(area, _fanRectangle, _groupYVector,false);

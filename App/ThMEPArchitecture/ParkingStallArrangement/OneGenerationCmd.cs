@@ -63,12 +63,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
 
         public void Run(AcadDatabase acadDatabase)
-        {       
-            var database = acadDatabase.Database;
-            var selectArea = SelectAreas();//生成候选区域
-            var outerBrder = new OuterBrder();
-            var extractRst = outerBrder.Extract(database, selectArea);//提取多段线
-            if (!extractRst)
+        {
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            if (!rstDataExtract)
             {
                 return;
             }

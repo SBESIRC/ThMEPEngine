@@ -8,7 +8,8 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using AcHelper;
-
+using Serilog;
+using Serilog.Core;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Command;
@@ -106,7 +107,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[0];
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.Smoke];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameSmoke = ThFaCommon.BlkName_Smoke;
                 var layoutBlkNameHeat = ThFaCommon.BlkName_Heat;
@@ -141,6 +142,10 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(dataQuery.Rooms, dataQuery.RoomFrameDict);
 
                 //--------------定义传数据
+                //string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), Active.DocumentName + ".log");
+                string LogFileName = Path.Combine(Active.DocumentDirectory, Active.DocumentName + ".log");
+                LogUtil Logger = new LogUtil(LogFileName);
+
                 var layoutParameter = new ThAFASSmokeLayoutParameter();
                 layoutParameter.FloorHightIdx = _floorHight;
                 layoutParameter.RootThetaIdx = _theta;
@@ -156,6 +161,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 layoutParameter.priorityExtend = priorityExtend;
                 layoutParameter.DoorOpenings = dataQuery.DoorOpenings;
                 layoutParameter.Windows = dataQuery.Windows;
+                layoutParameter.Log = Logger;
 
                 //--------------布置楼梯部分
                 var stairBlkResult = ThFASmokeStairService.LayoutStair(layoutParameter);

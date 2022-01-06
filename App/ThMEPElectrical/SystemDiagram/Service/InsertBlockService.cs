@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.SystemDiagram.Model;
 using NFox.Cad;
 using Dreambuild.AutoCAD;
+using AcHelper;
 
 namespace ThMEPElectrical.SystemDiagram.Service
 {
@@ -43,6 +44,48 @@ namespace ThMEPElectrical.SystemDiagram.Service
             }
         }
 
+        public static void ImportCloudBlock(Database database,string BlockName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(BlockName));
+            }
+        }
+
+        /// <summary>
+        /// 插入云线图块
+        /// </summary>
+        /// <param name="BlockName"></param>
+        public static ObjectId InsertCloudBlock(Database database, string BlockName, Point3d point)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                var objId = acadDatabase.Database.InsertBlock(
+                    ThAutoFireAlarmSystemCommon.CountBlockByLayer,
+                    BlockName,
+                    point,
+                    new Scale3d(),
+                    0,
+                    false,
+                    null);
+                var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                ObjectId revcloud = ObjectId.Null;
+                void handler(object s, ObjectEventArgs e)
+                {
+                    if (e.DBObject is Polyline polyline)
+                    {
+                        revcloud = e.DBObject.ObjectId;
+                    }
+                }
+                database.ObjectAppended +=handler;
+                blkref.ExplodeToOwnerSpace();
+                database.ObjectAppended -=handler;
+                blkref.Erase();
+                return revcloud;
+            }
+        }
+
         public static void ImportFireDistrictLayerAndStyle(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -57,13 +100,15 @@ namespace ThMEPElectrical.SystemDiagram.Service
         }
         public static ObjectIdList InsertOuterBorderBlock(int RowNum, int ColNum)
         {
-            ObjectIdList objectIds = new ObjectIdList();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 string BlockName = ThAutoFireAlarmSystemCommon.OuterBorderBlockName;
                 string LayerName = ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer;
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(BlockName));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(LayerName));
+
+                ObjectIdList objectIds = new ObjectIdList();
                 for (int j = -1; j < ColNum; j++)
                 {
                     var objId = acadDatabase.Database.InsertBlock(
@@ -78,8 +123,8 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     blkref.TransformBy(conversionMatrix);
                     objectIds.Add(objId);
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         /// <summary>
@@ -89,12 +134,13 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="vector">偏移量</param>
         public static ObjectIdList InsertSpecifyBlock(Dictionary<Point3d, ThBlockModel> dicBlockPoints)
         {
-            ObjectIdList objectIds = new ObjectIdList();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.BlockByLayer;
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(LayerName), true);
+
+                ObjectIdList objectIds = new ObjectIdList();
                 foreach (var BlockInfo in dicBlockPoints)
                 {
                     string BlockName = BlockInfo.Value.BlockName;
@@ -117,15 +163,15 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     blkref.TransformBy(conversionMatrix);
                     objectIds.Add(objId);
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         public static ObjectIdList InsertEntity(List<Entity> ents)
         {
-            ObjectIdList objectIds = new ObjectIdList();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                ObjectIdList objectIds = new ObjectIdList();
                 foreach (var item in ents)
                 {
                     if (item is BlockReference br)
@@ -140,8 +186,8 @@ namespace ThMEPElectrical.SystemDiagram.Service
                         objectIds.Add(objId);
                     }
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         /// <summary>

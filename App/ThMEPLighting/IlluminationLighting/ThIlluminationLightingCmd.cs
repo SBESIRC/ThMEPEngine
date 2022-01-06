@@ -19,10 +19,11 @@ using ThMEPEngineCore.Command;
 using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmArea;
 using ThMEPElectrical.FireAlarmArea.Data;
 
-using ThMEPLighting.Lighting.ViewModels;
+//using ThMEPLighting.Lighting.ViewModels;
 using ThMEPLighting.IlluminationLighting.Model;
 using ThMEPLighting.IlluminationLighting.Service;
 
@@ -30,28 +31,24 @@ namespace ThMEPLighting.IlluminationLighting
 {
     public class IlluminationLightingCmd : ThMEPBaseCommand, IDisposable
     {
-        readonly LightingViewModel _UiConfigs;
+        //   readonly LightingViewModel _UiConfigs;
 
-        private LightTypeEnum _lightType = LightTypeEnum.circleCeiling;
+        private ThIlluminationCommon.LightTypeEnum _lightType = ThIlluminationCommon.LightTypeEnum.circleCeiling;
         private double _scale = 100;
         private bool _referBeam = true;
         private double _radiusN = 3000;
         private double _radiusE = 6000;
         private bool _ifLayoutEmg = true;
         private bool _ifEmgAsNormal = false;
-        private double _wallThick = 0;
+        private double _wallThick = 100;
 
-        public IlluminationLightingCmd(LightingViewModel uiConfigs)
+        public IlluminationLightingCmd()
         {
-            _UiConfigs = uiConfigs;
+            // _UiConfigs = uiConfigs;
             InitialCmdInfo();
             InitialSetting();
         }
 
-        public IlluminationLightingCmd()
-        {
-            InitialCmdInfo();
-        }
         private void InitialCmdInfo()
         {
             CommandName = "THZM";
@@ -60,21 +57,32 @@ namespace ThMEPLighting.IlluminationLighting
 
         private void InitialSetting()
         {
-            if (_UiConfigs != null)
-            {
-                _scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
-                _lightType = _UiConfigs.LightingType;
-                _radiusN = _UiConfigs.RadiusNormal;
-                _radiusE = _UiConfigs.RadiusEmg;
-                _referBeam = _UiConfigs.ShouldConsiderBeam;
-                _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
-                _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
-            }
-            else
-            {
-                SettingNoUI();
-            }
+            //if (_UiConfigs != null)
+            //{
+            //    _scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
+            //    _lightType = _UiConfigs.LightingType;
+            //    _radiusN = _UiConfigs.RadiusNormal;
+            //    _radiusE = _UiConfigs.RadiusEmg;
+            //    _referBeam = _UiConfigs.ShouldConsiderBeam;
+            //    _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
+            //    _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
+            //    _wallThick = _UiConfigs.RoofThickness;
+            //}
+            //else
+            //{
+            //    SettingNoUI();
+            //}
+            _scale = FireAlarmSetting.Instance.Scale;
+            _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
+            _wallThick = FireAlarmSetting.Instance.RoofThickness;
+
+            _lightType = (ThIlluminationCommon.LightTypeEnum)FireAlarmSetting.Instance.IlluLightType;
+            _radiusN = FireAlarmSetting.Instance.IlluRadiusNormal;
+            _radiusE = FireAlarmSetting.Instance.IlluRadiusEmg;
+            _ifLayoutEmg = FireAlarmSetting.Instance.IlluIfLayoutEmg;
+            _ifEmgAsNormal = FireAlarmSetting.Instance.IlluIfEmgAsNormal;
         }
+
         public override void SubExecute()
         {
             ThIlluminationLightingLayoutExecute();
@@ -88,7 +96,7 @@ namespace ThMEPLighting.IlluminationLighting
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ////画框，提数据，转数据
+                //--------------画框，提数据，转数据
                 //var pts = ThAFASUtils.GetFrameBlk();
                 //if (pts.Count == 0)
                 //{
@@ -100,19 +108,15 @@ namespace ThMEPLighting.IlluminationLighting
 
                 //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = new List<string>() { ThFaCommon.BlkName_CircleCeiling,
-                                                        ThFaCommon.BlkName_DomeCeiling,
-                                                        ThFaCommon.BlkName_InductionCeiling,
-                                                        ThFaCommon.BlkName_Downlight,
-                                                       };
-                if (_ifLayoutEmg)
-                {
-                    cleanBlkName.Add(ThFaCommon.BlkName_EmergencyLight);
-                }
-
-                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
                 var layoutBlkNameE = ThFaCommon.BlkName_EmergencyLight;
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.NormalLighting];
+                if (_ifLayoutEmg)
+                {
+                    cleanBlkName.AddRange(ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.EmergencyLighting]);
+                }
+                var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+
                 //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
@@ -145,6 +149,9 @@ namespace ThMEPLighting.IlluminationLighting
                 //    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
                 //}
 
+                //--------------定义传数据
+                string LogFileName = Path.Combine(Active.DocumentDirectory, Active.DocumentName + ".log");
+                LogUtil Logger = new LogUtil(LogFileName);
 
                 var layoutParameter = new ThAFASIlluminationLayoutParameter();
                 layoutParameter.Scale = _scale;
@@ -160,7 +167,7 @@ namespace ThMEPLighting.IlluminationLighting
                 layoutParameter.priorityExtend = priorityExtend;
                 layoutParameter.DoorOpenings = dataQuery.DoorOpenings;
                 layoutParameter.Windows = dataQuery.Windows;
-
+                layoutParameter.Log = Logger;
 
                 //接入楼梯
                 var stairBlkResult = ThIlluminationStairService.LayoutStair(layoutParameter);
@@ -188,6 +195,15 @@ namespace ThMEPLighting.IlluminationLighting
                 return;
             }
             _referBeam = beam.Value == 1 ? true : false;
+            if (_referBeam == true)
+            {
+                var wallThickness = Active.Editor.GetInteger("\n板厚");
+                if (wallThickness.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                _wallThick = wallThickness.Value;
+            }
 
             var radiusN = Active.Editor.GetInteger("\n正常照明灯具布置半径(mm)");
             if (radiusN.Status != PromptStatus.OK)

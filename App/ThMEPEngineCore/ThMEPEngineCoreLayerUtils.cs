@@ -118,13 +118,27 @@ namespace ThMEPEngineCore
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var layerId = database.AddLayer(name);
-                database.UnHidden(name);
-                database.UnOffLayer(name);
-                database.UnLockLayer(name);
-                database.UnPrintLayer(name);
-                database.UnFrozenLayer(name);
+                OpenAILayer(database, name);                
                 database.SetLayerColor(name, colorIndex);
                 return layerId;
+            }
+        }
+
+        /// <summary>
+        /// 打开图层设置
+        /// (不要锁定、不要关闭、不要隐藏、不要冻结、不要打印)
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="layer"></param>
+        public static void OpenAILayer(this Database database, string layer)
+        {
+            using (var acadDb = AcadDatabase.Use(database))
+            {
+                acadDb.Database.UnHidden(layer);
+                acadDb.Database.UnOffLayer(layer);
+                acadDb.Database.UnLockLayer(layer);
+                acadDb.Database.UnPrintLayer(layer);
+                acadDb.Database.UnFrozenLayer(layer);
             }
         }
     }

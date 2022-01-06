@@ -78,11 +78,12 @@
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
 
             <!--比例行-->
             <StackPanel Grid.Row="0"  Grid.Column="0">
-                <Label  Content ="绘图比例"  />
+                <Label  Content ="绘图比例" FontWeight ="Black"  />
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="1">
                 <ComboBox  SelectedItem="{Binding ScaleItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
@@ -106,7 +107,7 @@
 
             <!--布置要求-->
             <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
-                <Label Content="布置要求"/>
+                <Label Content="布置要求"  FontWeight ="Black"/>
             </StackPanel>
             <StackPanel Grid.Row="4" Grid.Column="0">
                 <RadioButton GroupName="rbBeam" Content="考虑梁" 
@@ -116,47 +117,54 @@
                 <RadioButton GroupName="rbBeam" Content="不考虑梁" 
                              IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=0}"/>
             </StackPanel>
+            <StackPanel Grid.Row="5" Grid.Column="0">
+                <Label  Content ="板顶厚度"  />
+            </StackPanel>
+            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" >
+                <cus:InputTextBox Width ="70" HorizontalAlignment="Left"  TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                <Label Content="mm"/>
+            </StackPanel>
             <!---->
 
             <!--布置内容-->
-            <StackPanel Grid.Row="5" Grid.ColumnSpan="2">
-                <Label Content="请选择需要布置内容"/>
+            <StackPanel Grid.Row="6" Grid.ColumnSpan="2">
+                <Label Content="请选择需要布置内容"  FontWeight ="Black"/>
             </StackPanel>
-            <StackPanel Grid.Row="6" Grid.Column="0">
+            <StackPanel Grid.Row="7" Grid.Column="0">
                 <!--<RadioButton GroupName="rbFunction" Content="烟感温感" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=0}"/>-->
                 <CheckBox  Content="烟感温感"  IsChecked="{Binding LayoutSmoke,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            <StackPanel Grid.Row="6" Grid.Column="1">
+            <StackPanel Grid.Row="7" Grid.Column="1">
                 <!--<RadioButton GroupName="rbFunction" Content="可燃气体" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=4}"/>-->
                 <CheckBox  Content="可燃气体"  IsChecked="{Binding LayoutGas,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            <StackPanel Grid.Row="7" Grid.Column="0">
+            <StackPanel Grid.Row="8" Grid.Column="0">
                 <!--<RadioButton GroupName="rbFunction" Content="消防广播"
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=1}"/>-->
                 <CheckBox  Content="消防广播"  IsChecked="{Binding LayoutBroadcast,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
 
             </StackPanel>
-            <StackPanel Grid.Row="7" Grid.Column="1">
+            <StackPanel Grid.Row="8" Grid.Column="1">
                 <!--<RadioButton GroupName="rbFunction" Content="手报声光" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=5}"/>-->
                 <CheckBox  Content="手报声光"  IsChecked="{Binding LayoutManualAlart,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
 
             </StackPanel>
-            <StackPanel Grid.Row="8" Grid.Column="0">
+            <StackPanel Grid.Row="9" Grid.Column="0">
                 <!--<RadioButton GroupName="rbFunction" Content="楼层显示" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=2}"/>-->
                 <CheckBox  Content="楼层显示"  IsChecked="{Binding LayoutDisplay,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
 
             </StackPanel>
-            <StackPanel Grid.Row="8" Grid.Column="1">
+            <StackPanel Grid.Row="9" Grid.Column="1">
                 <!--<RadioButton GroupName="rbFunction" Content="防火门监控" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=6}"/>-->
                 <CheckBox  Content="防火门监控"  IsChecked="{Binding LayoutMonitor,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
 
             </StackPanel>
-            <StackPanel Grid.Row="9" Grid.Column="0">
+            <StackPanel Grid.Row="10" Grid.Column="0">
                 <!--<RadioButton GroupName="rbFunction" Content="消防电话" 
                              IsChecked="{Binding LayoutItem,Converter={StaticResource LayoutConverter},ConverterParameter=3}"/>-->
                 <CheckBox  Content="消防电话"  IsChecked="{Binding LayoutTel,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
@@ -165,7 +173,7 @@
             <!---->
 
             <!--布置按钮-->
-            <StackPanel Grid.Row="10" Grid.Column="1"  Grid.ColumnSpan="2">
+            <StackPanel Grid.Row="11" Grid.Column="1"  Grid.ColumnSpan="2">
                 <cus:ImageButton IsTabStop="True" Focusable="True" 
                              TabIndex="0" Content="布置" 
                              x:Name="btnLayout" 

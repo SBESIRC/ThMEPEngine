@@ -93,13 +93,12 @@ namespace ThMEPWSS.Command
             }
             return waterWellList;
         }
-        public List<ThWDeepWellPump> GetDeepWellPumpList()
+        public List<ThWDeepWellPump> GetDeepWellPumpList(Point3dCollection range)
         {
             List<ThWDeepWellPump> deepWellPump = new List<ThWDeepWellPump>();
             using (var database = AcadDatabase.Active())
             using (var engine = new ThWDeepWellPumpEngine())
             {
-                var range = new Point3dCollection();
                 engine.RecognizeMS(database.Database, range);
                 foreach (ThIfcDistributionFlowElement element in engine.Elements)
                 {
@@ -123,7 +122,7 @@ namespace ThMEPWSS.Command
                     return;
                 }
                 //获取潜水泵
-                List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
+                List<ThWDeepWellPump> pumpList = GetDeepWellPumpList(input);
 
                 var pumpDictionary = new Dictionary<string, List<ThWDeepWellPump>>();
 

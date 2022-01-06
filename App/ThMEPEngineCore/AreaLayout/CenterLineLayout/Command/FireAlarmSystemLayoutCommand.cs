@@ -52,6 +52,11 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 //MPolygon roomForCenterLine = objs.BuildMPolygon();
 
                 GetRoomHoleMPoly(out var roomWithHole);
+                DrawUtils.ShowGeometry(roomWithHole, "l0roomWithOnlyHole", 123, 30);
+                if (layoutList.Count == 0)
+                {
+                    return;
+                }
 
                 List<Point3d> centerLinePts = CenterLineSimplify.CLSimplifyPts(roomWithHole);
                 centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));

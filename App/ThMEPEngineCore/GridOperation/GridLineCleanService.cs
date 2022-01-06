@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,10 +28,13 @@ namespace ThMEPEngineCore.GridOperation
             
             //分组弧形轴网和直线轴网
             CalGridGroup(lineGrids, arcGrids, out List<LineGridModel> lineGroup, out List<ArcGridModel> arcGroup);
+
+            //简单过滤
             lineGroup = lineGroup.Where(x => !(x.xLines == null || x.xLines.Count <= 0 || x.yLines == null || x.yLines.Count <= 0))
                 .Where(x => x.xLines.Any(y => x.yLines.Any(z => z.IsIntersects(y)))).ToList();
             arcGroup = arcGroup.Where(x => !(x.lines == null || x.lines.Count <= 0 || x.arcLines == null || x.arcLines.Count <= 0)).ToList();
-            
+            FilterGrids(ref lineGroup, ref arcGroup);
+
             //处理直线轴网
             GridLineSimplifyService simplifyService = new GridLineSimplifyService();
             lineGridRes = simplifyService.Simplify(lineGroup);
@@ -73,6 +77,39 @@ namespace ThMEPEngineCore.GridOperation
             //        }
             //    }
             //}
+        }
+
+        /// <summary>
+        /// 过滤掉无法构成闭合区域的轴网
+        /// </summary>
+        /// <param name="lineGridRes"></param>
+        /// <param name="arcGridRes"></param>
+        private void FilterGrids(ref List<LineGridModel> lineGridRes, ref List<ArcGridModel> arcGridRes)
+        {
+            List<LineGridModel> discardLineGrids = new List<LineGridModel>();
+            foreach (var grid in lineGridRes)
+            {
+                var allLines = new List<Curve>(grid.xLines);
+                allLines.AddRange(grid.yLines);
+                if(allLines.ToCollection().PolygonsEx().Count <= 0)
+                {
+                    discardLineGrids.Add(grid);
+                }
+            }
+
+            List<ArcGridModel> discardArcGrids = new List<ArcGridModel>();
+            foreach (var grid in arcGridRes)
+            {
+                var allLines = new List<Curve>(grid.arcLines);
+                allLines.AddRange(grid.lines);
+                if (allLines.ToCollection().PolygonsEx().Count <= 0)
+                {
+                    discardArcGrids.Add(grid);
+                }
+            }
+
+            lineGridRes = lineGridRes.Except(discardLineGrids).ToList();
+            arcGridRes = arcGridRes.Except(discardArcGrids).ToList();
         }
 
         /// <summary>

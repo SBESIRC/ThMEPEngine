@@ -117,9 +117,13 @@ namespace Dreambuild.AutoCAD
             var id = DbHelper.GetLayerId(layerName);
             id.QOpenForWrite<LayerTableRecord>(layer =>
             {
-                layer.IsFrozen = false;
-                layer.IsHidden = false;
                 layer.IsOff = false;
+                layer.IsHidden = false;
+                layer.IsLocked = false;
+                //图层在CAD中使用时，无法冻结，也不能设置冻结。
+                //会报无效图层问题，如果在使用时就不用设置解冻属性
+                if(!layer.IsUsed)
+                    layer.IsFrozen = false;
             });
         }
 

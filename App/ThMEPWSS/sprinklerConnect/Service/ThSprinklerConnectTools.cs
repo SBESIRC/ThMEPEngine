@@ -416,6 +416,23 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             break;
                         }
                     }
+                    var k = 1;
+                    var orderDict = filterRow.OrderDict.OrderChange(true);
+                    for (;k< orderDict.Count - 1;k++)
+                    {
+                        if (frame.Contains(orderDict[k][0]))
+                        {
+                            break;
+                        }
+                    }
+                    if(k > i)
+                    {
+                        i = k;
+                        filterRow.OrderDict = orderDict;
+                        var ptTemp = filterRow.StartPoint;
+                        filterRow.StartPoint = filterRow.EndPoint;
+                        filterRow.EndPoint = ptTemp;
+                    }
                     if (i == 1)
                     {
                         spatialIndex.Update(new DBObjectCollection(), new DBObjectCollection { line });

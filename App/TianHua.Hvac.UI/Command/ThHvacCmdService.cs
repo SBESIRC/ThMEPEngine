@@ -112,7 +112,7 @@ namespace TianHua.Hvac.UI.Command
             var anayRes = new ThFanAnalysis(ioBypassSepDis, fan, fanParam, portParam, bypassLines, wallLines, haveMultiFan);
             if (anayRes.centerLines.Count == 0)
                 return;
-            var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes.roomLines, anayRes.notRoomLines);
+            var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
             _ = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             if (isIntegrate)
@@ -144,7 +144,7 @@ namespace TianHua.Hvac.UI.Command
             }
             RecordBypassAlignmentLine(maxBypass, fanParam, fan, bypassLines, anayRes.textRoomAlignment, anayRes.moveSrtP);
             // 先画阀，pinter会移动中心线导致墙线与中心线交不上
-            var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes.roomLines, anayRes.notRoomLines);
+            var valveHole = new ThHolesAndValvesEngine(fan, wallLines, bypassLines, fanParam, anayRes);
             InsertValve(fan.isExhaust, fanParam.roomEnable, fanParam.notRoomEnable, valveHole);
             var pinter = new ThFanDraw(anayRes, fanParam.roomEnable, fanParam.notRoomEnable);
             InsertElectricValve(fanParam, fan, maxBypass, pinter);

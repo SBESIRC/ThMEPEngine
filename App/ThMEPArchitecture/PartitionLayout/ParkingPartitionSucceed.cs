@@ -10,7 +10,6 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
-using static ThMEPArchitecture.PartitionLayout.GeoUtilitiesOptimized;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -872,6 +871,64 @@ namespace ThMEPArchitecture.PartitionLayout
             else if (lanes.Count > 0 && ClosestPointInCurves(line.EndPoint, lanes) < 3000 && ClosestPointInCurves(line.StartPoint, lanes) < 3000
                 && line.StartPoint.Y - line.EndPoint.Y > 1000) line.ReverseCurve();
             lane = line;
+        }
+
+        public static void SortLaneByDirection(List<Lane> lanes, int mode)
+        {
+            var comparer = new LaneComparer(mode);
+            lanes.Sort(comparer);
+        }
+        public class LaneComparer : IComparer<Lane>
+        {
+            public LaneComparer(int mode)
+            {
+                Mode = mode;
+            }
+            private int Mode;
+            public int Compare(Lane a, Lane b)
+            {
+                if (Mode == 0)
+                {
+                    if (a.Line.Length == b.Line.Length) return 0;
+                    else if (a.Line.Length > b.Line.Length) return -1;
+                    else return 1;
+                }
+                else if (Mode == 1)
+                {
+                    if (IsHorizontalLine(a.Line) && !IsHorizontalLine(b.Line)) return -1;
+                    else if (!IsHorizontalLine(a.Line) && IsHorizontalLine(b.Line)) return 1;
+                    else
+                    {
+                        if (a.Line.Length == b.Line.Length) return 0;
+                        else if (a.Line.Length > b.Line.Length) return -1;
+                        else return 1;
+                    }
+                }
+                else if (Mode == 2)
+                {
+                    if (IsVerticalLine(a.Line) && !IsVerticalLine(b.Line)) return -1;
+                    else if (!IsVerticalLine(a.Line) && IsVerticalLine(b.Line)) return 1;
+                    else
+                    {
+                        if (a.Line.Length == b.Line.Length) return 0;
+                        else if (a.Line.Length > b.Line.Length) return -1;
+                        else return 1;
+                    }
+                }
+                else return 0;
+            }
+        }
+
+        private static bool IsHorizontalLine(Line line, double degreetol = 1)
+        {
+            double angle = CreateVector(line).GetAngleTo(Vector3d.YAxis);
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
+
+        private static bool IsVerticalLine(Line line, double degreetol = 1)
+        {
+            double angle = CreateVector(line).GetAngleTo(Vector3d.XAxis);
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
 
     }

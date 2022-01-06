@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
+using ThMEPElectrical.AFAS.Utils;
 
 namespace ThMEPLighting.IlluminationLighting.Model
 {
@@ -29,5 +30,6 @@ namespace ThMEPLighting.IlluminationLighting.Model
         public List<ThGeometry> Windows { get; set; } = new List<ThGeometry>();
 
         public Dictionary<Polyline, ThIlluminationCommon.LayoutType> roomType { get; set; } = new Dictionary<Polyline, ThIlluminationCommon.LayoutType>();
+        public LogUtil Log { get; set; }
     }
 }

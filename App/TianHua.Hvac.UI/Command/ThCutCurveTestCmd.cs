@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using ThMEPEngineCore.Command;
+using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Algorithm;
 using ThMEPHVAC.Model;
 
@@ -20,7 +21,7 @@ namespace TianHua.Hvac.UI.Command
         {
             var curves = new List<Curve>();
             var lines = new DBObjectCollection();
-            var centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer("AI-风管路由");
+            var centerlines = ThDuctPortsReadComponent.GetCenterlineByLayer(ThHvacCommon.AI_DUCT_ROUTINE);
             foreach (var a in centerlines)
             {
                 if (a is Line)

@@ -18,17 +18,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var beamDbExtension = new ThStructureBeamDbExtension(database))
+            var visitor = new ThRawBeamExtractionVisitor()
             {
-                //获取梁线
-                beamDbExtension.BuildElementCurves();
-                Results = beamDbExtension.BeamCurves.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Geometry = o,
-                }).ToList();
-            }
-
+                LayerFilter = ThBeamLayerManager.GeometryXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
