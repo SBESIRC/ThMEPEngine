@@ -167,6 +167,7 @@
     <Compile Include="Diagnostics\DrawUtils.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
+    <Compile Include="Engine\ThRawBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
