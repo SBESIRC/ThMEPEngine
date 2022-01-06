@@ -27,6 +27,8 @@ namespace TianHua.Electrical.UI.ThBroadcast
         {
             InitializeComponent();
 
+            this.MutexName = "THGB";
+
             //设置默认值
             SetDefaultValue();
         }
@@ -46,20 +48,19 @@ namespace TianHua.Electrical.UI.ThBroadcast
             ThElectricalUIService.Instance.thGBParameter.Scale = double.Parse(BlockScale.SelectedItem.ToString());
             ThElectricalUIService.Instance.thGBParameter.BlindRadius = double.Parse(blindArea.Text.ToString());
             CommandHandlerBase.ExecuteFromCommandLine(false, "THGBBZ");
-            this.Hide();
         }
 
         private void btnWiringConnect_Click(object sender, RoutedEventArgs e)
         {
             CommandHandlerBase.ExecuteFromCommandLine(false, "THGBLX");
-            this.Hide();
         }
 
         private void btnGetBlindArea_Click(object sender, RoutedEventArgs e)
         {
             ThElectricalUIService.Instance.thGBParameter.BlindRadius = double.Parse(blindArea.ToString());
             CommandHandlerBase.ExecuteFromCommandLine(false, "THGBMQ");
-            this.Hide();
         }
+
+
     }
 }

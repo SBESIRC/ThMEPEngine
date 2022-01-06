@@ -104,7 +104,7 @@ namespace TianHua.Electrical.UI
         public void THGB()
         {
             ThBroadcastUI thBroadcastUI = new ThBroadcastUI();
-            AcadApp.ShowModalWindow(thBroadcastUI);
+            AcadApp.ShowModelessWindow(thBroadcastUI);
         }
 
         //火灾报警
