@@ -24,7 +24,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
 
         public static void InsertCircuitLayerAndLineType(string layer, string linetype)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -35,7 +34,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
 
         public static void InsertDiagramLayerAndStyle()
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -48,7 +46,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
 
         public static void ImportCloudBlock(Database database,string BlockName)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -62,7 +59,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="BlockName"></param>
         public static ObjectId InsertCloudBlock(Database database, string BlockName, Point3d point)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var objId = acadDatabase.Database.InsertBlock(
@@ -92,7 +88,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
 
         public static void ImportFireDistrictLayerAndStyle(Database database)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -105,14 +100,15 @@ namespace ThMEPElectrical.SystemDiagram.Service
         }
         public static ObjectIdList InsertOuterBorderBlock(int RowNum, int ColNum)
         {
-            ObjectIdList objectIds = new ObjectIdList();
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 string BlockName = ThAutoFireAlarmSystemCommon.OuterBorderBlockName;
                 string LayerName = ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer;
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(BlockName));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(LayerName));
+
+                ObjectIdList objectIds = new ObjectIdList();
                 for (int j = -1; j < ColNum; j++)
                 {
                     var objId = acadDatabase.Database.InsertBlock(
@@ -127,8 +123,8 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     blkref.TransformBy(conversionMatrix);
                     objectIds.Add(objId);
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         /// <summary>
@@ -138,13 +134,13 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="vector">偏移量</param>
         public static ObjectIdList InsertSpecifyBlock(Dictionary<Point3d, ThBlockModel> dicBlockPoints)
         {
-            ObjectIdList objectIds = new ObjectIdList();
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.BlockByLayer;
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(LayerName), true);
+
+                ObjectIdList objectIds = new ObjectIdList();
                 foreach (var BlockInfo in dicBlockPoints)
                 {
                     string BlockName = BlockInfo.Value.BlockName;
@@ -167,16 +163,15 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     blkref.TransformBy(conversionMatrix);
                     objectIds.Add(objId);
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         public static ObjectIdList InsertEntity(List<Entity> ents)
         {
-            ObjectIdList objectIds = new ObjectIdList();
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                ObjectIdList objectIds = new ObjectIdList();
                 foreach (var item in ents)
                 {
                     if (item is BlockReference br)
@@ -191,8 +186,8 @@ namespace ThMEPElectrical.SystemDiagram.Service
                         objectIds.Add(objId);
                     }
                 }
+                return objectIds;
             }
-            return objectIds;
         }
 
         /// <summary>
@@ -202,7 +197,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="vector">偏移量</param>
         public static void InsertSpecifyBlock(string BlockName)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
             {
@@ -231,7 +225,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         {
             if (ThAutoFireAlarmSystemCommon.CanDrawFireHydrantPump)
             {
-                using (Active.Document.LockDocument())
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
@@ -267,7 +260,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         {
             if (ThAutoFireAlarmSystemCommon.CanDrawSprinklerPump)
             {
-                using (Active.Document.LockDocument())
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
@@ -303,7 +295,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         {
             if (ThAutoFireAlarmSystemCommon.CanDrawFixedPartSmokeExhaust)
             {
-                using (Active.Document.LockDocument())
                 using (AcadDatabase acadDatabase = AcadDatabase.Active())
                 using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
@@ -338,7 +329,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="vector">偏移量</param>
         public static ObjectId InsertCountBlock(Point3d position, Scale3d scale, double angle, Dictionary<string, string> attNameValues)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var objId = acadDatabase.Database.InsertBlock(
@@ -366,7 +356,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="angle"></param>
         private static ObjectId InsertBlock(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle, bool showAtt, Dictionary<string, string> attNameValues)
         {
-            using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 if (showAtt)
