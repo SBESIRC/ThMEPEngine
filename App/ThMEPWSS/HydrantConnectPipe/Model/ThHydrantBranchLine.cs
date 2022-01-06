@@ -145,6 +145,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
             //判断该位置是否与avoidLines相交
             if (!IsIntersectWith(avoidLines, pt, scale, angle))
             {
+                //如果没有相交
                 return true;
             }
             else
@@ -158,27 +159,40 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 point1 = point1 + vector1;
 
                 bool isOK1 = true;
-                while (IsIntersectWith(avoidLines, point1, scale, angle))
+                while (IsIntersectWith(avoidLines, point1, scale, angle))//向start点找rigthPoint
                 {
                     point1 = point1 + vector1;
-                    if (point1.DistanceTo(line.StartPoint) < 500)
+                    //构造蝶阀包围盒
+                    var vector = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
+                    var point11 = point1 + vector * (240.0 * scale);
+                    var valveLine = new Line(point1, point11);
+                    var valveBox = valveLine.Buffer(90 * scale);
+
+                    if (valveBox.Contains(line.StartPoint))
                     {
                         isOK1 = false;
+                        break;
                     }
                 }
 
                 point2 = point2 + vector2;
                 bool isOK2 = true;
-                while (IsIntersectWith(avoidLines, point2, scale, angle))
+                while (IsIntersectWith(avoidLines, point2, scale, angle))//向end点找leftPoint
                 {
                     point2 = point2 + vector2;
-                    if (point2.DistanceTo(line.EndPoint) < 500)
+                    //构造蝶阀包围盒
+                    var vector = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
+                    var point21 = point2 + vector * (240.0 * scale);
+                    var valveLine = new Line(point2, point21);
+                    var valveBox = valveLine.Buffer(90 * scale);
+                    if (valveBox.Contains(line.EndPoint))
                     {
                         isOK2 = false;
+                        break;
                     }
                 }
 
-                if (isOK1 && isOK2)
+                if (isOK1 && isOK2)//如果都找到，比较pt和他们的距离
                 {
                     if (point1.DistanceTo(pt) < point2.DistanceTo(pt))
                     {
@@ -189,7 +203,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                         pt = point2;
                     }
                 }
-                else if (isOK1 && (!isOK2))
+                else if (isOK1 && (!isOK2))//如果只找到一个，pt = 该点
                 {
                     pt = point1;
                 }
@@ -197,15 +211,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 {
                     pt = point2;
                 }
-                else
+                else//如果都没找到，返回false
                 {
                     return false;
                 }
-                //向end点找leftPoint
-                //向start点找rigthPoint
-                //如果都找到，比较pt和他们的距离
-                //如果只找到一个，pt = 该点
-                //如果都没找到，返回false
             }
 
 
@@ -232,10 +241,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
         {
             //构造蝶阀包围盒
             var vector = new Vector3d(Math.Cos(angle), Math.Sin(angle), 0.0);
-            var pt1 = pt + vector * 240 * scale;
+            var pt1 = pt + vector * (240.0 * scale);
             var valveLine = new Line(pt, pt1);
-            var newValveLine = valveLine.ExtendLine(200);
-            var valveBox = newValveLine.Buffer(100);
+            var newLine = valveLine.ExtendLine(50.0);
+            var valveBox = newLine.Buffer(90*scale + 50.0);
             foreach (var l in avoidLines)
             {
                 if (valveBox.IsIntersects(l))

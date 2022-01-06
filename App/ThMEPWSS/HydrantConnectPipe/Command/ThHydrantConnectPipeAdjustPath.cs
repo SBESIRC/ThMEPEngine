@@ -112,31 +112,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             }
             tmpPath = tmpPath.Distinct().ToList();
             tmpPath.Reverse();
-            /*
-            while (path.Count >= 3)
-            {
-                var firPt = path.First();
-                path.Remove(firPt);
-                var midPt = path.First();
-                path.Remove(midPt);
-                var lasPt = path.First();
-                if(IsPointCollinear(firPt, midPt, lasPt))
-                {
-                    path.Insert(0, firPt);
-                    continue;
-                }
-                else
-                {
-                    tmpPath.Add(firPt);
-                    tmpPath.Add(midPt);
-                }
-            }
-            foreach (var pt in path)
-            {
-                tmpPath.Add(pt);
-            }
-            */
-            //            tmpPath.Reverse();
             return tmpPath;
         }
 
