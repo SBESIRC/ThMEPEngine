@@ -49,7 +49,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             // < netList.Count
             for (int i = 0; i < netList.Count; i++)
             {
-                // < netList[i].ptsGraph.Count
+                // < netList[i].PtsGraph.Count
                 for (int j = 0; j < netList[i].PtsGraph.Count; j++)
                 {
                     rowConnection.AddRange(service.GraphPtsConnect(netList[i], j, pipeScatters, isVertical));

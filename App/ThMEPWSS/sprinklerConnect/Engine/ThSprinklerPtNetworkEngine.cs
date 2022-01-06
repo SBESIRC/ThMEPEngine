@@ -13,7 +13,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
 {
     public class ThSprinklerPtNetworkEngine
     {
-        //public static Point3d TransformerPt { get; set; }
+        // public static Point3d TransformerPt { get; set; }
 
         /// <summary>
         /// 获取点位分片图
@@ -40,7 +40,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             //        lines.ForEach(line => transformer.Reset(line));
             //        DrawUtils.ShowGeometry(lines, string.Format("l3graph{0}-{1}", i, j), i % 7);
             //    }
-            //    net.Pts.ForEach(p => DrawUtils.ShowGeometry(transformer.Reset(p), "sprinkler", 0));
+            //    //net.Pts.ForEach(p => DrawUtils.ShowGeometry(transformer.Reset(p), "sprinkler", 0));
             //}
 
             return netGroups;

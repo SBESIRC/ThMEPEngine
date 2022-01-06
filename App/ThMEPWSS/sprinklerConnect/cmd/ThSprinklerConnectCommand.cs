@@ -74,9 +74,12 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var frameIndex = new ThCADCoreNTSSpatialIndex(frames.ToCollection());
                 var frameClone = frameIndex.SelectAll().OfType<Polyline>().ToList();
                 var transformerPt = frameClone[0].StartPoint;
+                // 测试使用
+                // transformerPt = new Point3d();
                 var transformer = new ThMEPOriginTransformer(transformerPt);
-                //ThSprinklerPtNetworkEngine.TransformerPt = transformerPt;
-
+                
+                // 测试使用
+                // ThSprinklerPtNetworkEngine.TransformerPt = transformerPt;
 
                 // 提取数据
                 var allSprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
@@ -147,7 +150,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     subMainPipeLine.ForEach(p => transformer.Transform(p));
 
                     //打散管线
-                    ThSprinklerPipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
+                    var pipeService = new ThSprinklerPipeService();
+                    pipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
                     mainLine.AddRange(mainPipeLine);
                     subMainLine.AddRange(subMainPipeLine);
                     allLines.AddRange(mainPipeLine);
@@ -214,14 +218,22 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         //提取车位外包框
                         var reducedFrame = exactFrame.Buffer(-50.0).OfType<Polyline>().OrderByDescending(o => o.Area).First();
                         var doubleStall = parkingStallService.GetParkingStallOBB(reducedFrame);
-                        var layerName = "AI-车位排-双排";
-                        CleanPline(layerName, reducedFrame);
-                        StallPresent(doubleStall, layerName);
-                        //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(reducedFrame, ThSprinklerConnectCommon.Layer_DoubleCar);
-
                         var results = engine.SprinklerConnectEngine(sprinklerParameter, geometryWithoutColumn, doubleStall,
                             smallRoomsWithSpr, obstacle, column, isVertical);
 
+                        // 清理并打印车位
+                        var layerName = "AI-车位排-双排";
+                        transformer.Reset(reducedFrame);
+                        doubleStall.ForEach(stall => transformer.Reset(stall));
+                        CleanPline(layerName, reducedFrame);
+                        StallPresent(doubleStall, layerName);
+
+                        // 测试使用
+                        //transformer.Reset(reducedFrame);
+                        //var doubleStall = ThSprinklerConnectDataFactory.GetCarData(reducedFrame, "AI-车位排-双排");
+                        //doubleStall.ForEach(stall => transformer.Transform(stall));
+
+                        // 打印结果
                         results.ForEach(r => transformer.Reset(r));
                         Present(results);
                     }
