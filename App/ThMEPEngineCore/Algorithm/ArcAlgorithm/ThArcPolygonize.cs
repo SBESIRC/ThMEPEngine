@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
                     }
                     return x;
                 }).Cast<Polyline>().Where(x => x.Area > 1).ToList();
-
+            
             var checkCurves = new List<Curve>(curves);
             DBObjectCollection collection = new DBObjectCollection();
             frame.Explode(collection);

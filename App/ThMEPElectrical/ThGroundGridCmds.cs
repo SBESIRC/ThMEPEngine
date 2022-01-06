@@ -125,7 +125,7 @@ namespace ThMEPElectrical
                 var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
                 curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
                 curves = curves.Where(x => x.Count > 0).ToList();
-
+               
                 GridDivision gridDivision = new GridDivision();
                 var ucsPolygons = gridDivision.DivisionGridRegions(curves);
                 foreach (var item in ucsPolygons)

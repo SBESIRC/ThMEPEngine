@@ -86,7 +86,7 @@ namespace ThMEPEngineCore.GridOperation.Utils
             eRay.BasePoint = line.EndPoint;
             eRay.UnitDir = (line.EndPoint - line.StartPoint).GetNormal();
             var ePt = GetIntersectPts(eRay, lines);
-            if (ePt == null || ePt.Value.DistanceTo(line.StartPoint) > spcing)
+            if (ePt == null || ePt.Value.DistanceTo(line.EndPoint) > spcing)
             {
                 ePt = line.EndPoint;
             }
