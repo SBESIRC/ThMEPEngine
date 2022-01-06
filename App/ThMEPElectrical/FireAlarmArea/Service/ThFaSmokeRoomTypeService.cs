@@ -76,12 +76,12 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                     }
                 }
 
-                ////如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
-                ////update : 没有就不布置
-                if (typeInt == ThFaSmokeCommon.layoutType.noName)
-                {
-                    typeInt = ThFaSmokeCommon.layoutType.smoke;
-                }
+                //////如果没找到名字。或者名字没有明确不布置tag ，默认布置烟感
+                //////update : 没有就不布置
+                //if (typeInt == ThFaSmokeCommon.layoutType.noName)
+                //{
+                //    typeInt = ThFaSmokeCommon.layoutType.smoke;
+                //}
 
 
                 frameSensorType.Add(roomFrameDict[room], typeInt);

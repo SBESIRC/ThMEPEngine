@@ -22,7 +22,7 @@ namespace ThMEPElectrical.AFAS.Service
 {
     internal class ThHandlePlaceConverage
     {
-        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, bool referBeam)
+        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, bool referBeam,double wallThickness)
         {
             var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
             var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
@@ -39,6 +39,7 @@ namespace ThMEPElectrical.AFAS.Service
                 Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
                 ReferBeam = referBeam,
                 Transformer = transformer,
+                WallThickness = wallThickness,
             };
 
             placeConverageExtract.Extract(null, new Point3dCollection());

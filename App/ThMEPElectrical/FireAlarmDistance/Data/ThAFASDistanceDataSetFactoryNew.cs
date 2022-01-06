@@ -21,6 +21,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
         public bool ReferBeam { get; set; } = true;
         public bool NeedConverage { get; set; } = true;
         public List<ThExtractorBase> InputExtractors { get; set; }
+        public double WallThickness { get; set; } = 100;
 
         /////output
         private List<ThGeometry> Geos { get; set; }
@@ -128,7 +129,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             //提取可布区域
             if (NeedConverage == true)
             {
-                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam);
+                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam, WallThickness);
                 placeConverage.Set(storeyInfos);
                 placeConverage.Group(fireApartExtractor.FireApartIds);
                 extractors.Add(placeConverage);

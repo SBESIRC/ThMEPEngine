@@ -93,7 +93,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             extractors.ForEach(o => o.Extract(database, collection));
 
             //提取可布区域
-            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam);
+            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam, WallThick);
             extractors.Add(placeConverage);
 
             //提取探测区域

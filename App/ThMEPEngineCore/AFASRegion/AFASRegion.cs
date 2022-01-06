@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.AFASRegion
         /// 内缩距离
         /// </summary>
         public double BufferDistance { get; set; } = 500;
-        
+
         /// <summary>
         /// 是否考虑梁的影响
         /// </summary>
@@ -161,9 +161,9 @@ namespace ThMEPEngineCore.AFASRegion
                 if (Rooms.IsNull() || Rooms.Count == 0)
                     return ArrangeableSpace;
                 AFASRegionService regionService = new AFASRegionService();
-                regionService.WallThickness=WallThickness;
+                regionService.WallThickness = WallThickness;
                 regionService.BufferDistance = BufferDistance;
-                regionService.Initialize(Columns, Beams, Walls,Holes);
+                regionService.Initialize(Columns, Beams, Walls, Holes);
                 //计算每个房间可布置区域
                 Rooms.ForEach(room =>
                 {

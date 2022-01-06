@@ -24,7 +24,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 {
     public class ThAFASManualAlarmCmd : ThMEPBaseCommand, IDisposable
     {
-        private bool _referBeam = false;
+
         private double _scale = 100;
         private double _stepLength = 25000;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
@@ -43,10 +43,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
         private void InitialSetting()
         {
-
             _scale = FireAlarmSetting.Instance.Scale;
             _stepLength = FireAlarmSetting.Instance.StepLengthMA;
-
         }
         public void Dispose()
         {
@@ -67,16 +65,18 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
                 //--------------初始图块信息!!!!!!避让计算有问题
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[5];
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.ManualAlarm];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameBottom = ThFaCommon.BlkName_ManualAlarm;
                 var layoutBlkNameTop = ThFaCommon.BlkName_SoundLightAlarm;
                 //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
-                var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
+                var needConverage = false;
+                var wallThickness = 100;
+                var referBeam = false;
                 //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
                 if (geos.Count == 0)
                 {
                     return;
@@ -98,7 +98,8 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
 #if DEBUG
                 {
-                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
+
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
                     File.WriteAllText(path, geojson);
                 }
 #endif

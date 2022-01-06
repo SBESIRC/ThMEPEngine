@@ -106,7 +106,7 @@ namespace ThMEPElectrical
             {
                 layoutStringHint = layoutStringHint + String.Format("{0}({1}) ", s.ToString(), (int)s);
             }
-            var layoutInt = ThAFASUtils.SettingString("\n逗号拼接布置："+ layoutStringHint);
+            var layoutInt = ThAFASUtils.SettingString("\n逗号拼接布置：" + layoutStringHint);
             if (layoutInt == "")
             {
                 return;
@@ -115,6 +115,8 @@ namespace ThMEPElectrical
 
             var setBeam = false;
             var beam = 0;
+            double wallThick = 100;
+            var setWallThick = false;
 
             foreach (var layout in layoutList)
             {
@@ -127,7 +129,11 @@ namespace ThMEPElectrical
                             setBeam = true;
                         }
 
-                        var wallThick = ThAFASUtils.SettingDouble("\n烟温感板厚");
+                        if (setWallThick == false && beam == 1)
+                        {
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            setWallThick = true;
+                        }
 
                         var hintStringHight = new Dictionary<string, (string, string)>()
                         {{"0",("0","h<=12(0)")},
@@ -150,6 +156,7 @@ namespace ThMEPElectrical
                         FireAlarmSetting.Instance.RoofThickness = wallThick;
 
                         break;
+
                     case (int)ThFaCommon.LayoutItemType.Broadcast:
                         var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）");
                         if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling && setBeam == false)
@@ -157,11 +164,19 @@ namespace ThMEPElectrical
                             beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
                             setBeam = true;
                         }
+
+                        if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling && setWallThick == false && beam == 1)
+                        {
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            setWallThick = true;
+                        }
+
                         var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：");
 
                         FireAlarmSetting.Instance.BroadcastLayout = isWallPa;
                         FireAlarmSetting.Instance.Beam = beam;
                         FireAlarmSetting.Instance.StepLengthBC = stepDistanceP;
+                        FireAlarmSetting.Instance.RoofThickness = wallThick;
 
                         break;
                     case (int)ThFaCommon.LayoutItemType.Display:
@@ -177,9 +192,15 @@ namespace ThMEPElectrical
                             beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
                             setBeam = true;
                         }
+                        if (setWallThick == false && beam == 1)
+                        {
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            setWallThick = true;
+                        }
                         var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：");
                         FireAlarmSetting.Instance.Beam = beam;
                         FireAlarmSetting.Instance.GasProtectRadius = radius;
+                        FireAlarmSetting.Instance.RoofThickness = wallThick;
 
                         break;
                     case (int)ThFaCommon.LayoutItemType.ManualAlarm:
@@ -209,9 +230,8 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Session)]
         public void THFASmokeNoUI()
         {
-
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
-            var wallThick = ThAFASUtils.SettingDouble("\n烟温感板厚");
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
             var hintStringHight = new Dictionary<string, (string, string)>()
                         {{"0",("0","h<=12(0)")},
                         {"1",("1","6<=h<=12(1)")},
@@ -232,10 +252,10 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.RoofThickness = wallThick;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Smoke);
-
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
-            if (ThAFASDataPass.Instance.SelectPts ==null || ThAFASDataPass.Instance.SelectPts.Count == 0)
+
+            ThAFASUtils.AFASPrepareStep();
+            if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
             }
@@ -255,7 +275,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -274,7 +295,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Monitor);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -292,7 +314,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Tel);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -308,13 +331,16 @@ namespace ThMEPElectrical
         public void THFAGasNoUI()
         {
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
             var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：");
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.GasProtectRadius = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Gas);
+            FireAlarmSetting.Instance.RoofThickness = wallThick;
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -333,9 +359,11 @@ namespace ThMEPElectrical
 
             var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）");
             var beam = 0;
+            double wallThick = 100;
             if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling)
             {
                 beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+                wallThick = ThAFASUtils.SettingDouble("\n板厚");
             }
             var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：");
 
@@ -344,8 +372,10 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.StepLengthBC = stepDistanceP;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Broadcast);
+            FireAlarmSetting.Instance.RoofThickness = wallThick;
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -369,7 +399,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-            GetData();
+
+            ThAFASUtils.AFASPrepareStep();
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -384,45 +415,6 @@ namespace ThMEPElectrical
 #endif
         }
 
-        private void GetData()
-        {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                ThAFASDataPass.Instance = new ThAFASDataPass();
-
-                var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
-                //var selectPts = ThAFASSelectFrameUtil.GetFrame();
-                if (selectPts.Count == 0)
-                {
-                    return;
-                }
-
-                var transformer = ThAFASUtils.GetTransformer(selectPts);
-
-                ////////导入所有块，图层信息
-                var extractBlkList = ThFaCommon.BlkNameList;
-                ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
-                ////////清除所选的块
-                var cleanBlkList = FireAlarmSetting.Instance.LayoutItemList.SelectMany(x => ThFaCommon.LayoutBlkList[x]).ToList();
-                var previousEquipmentData = new ThAFASBusinessDataSetFactory()
-                {
-                    BlkNameList = cleanBlkList,
-                    //  InputExtractors = extractors,
-                };
-                previousEquipmentData.SetTransformer(transformer);
-                var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
-                var cleanEquipment = localEquipmentData.Container;
-                ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
-
-                ///////////获取数据元素,已转回原位置附近////////
-                var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
-                ThAFASDataPass.Instance.Extractors = extractors;
-                ThAFASDataPass.Instance.Transformer = transformer;
-                ThAFASDataPass.Instance.SelectPts = selectPts;
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THFACleanAllBlk", CommandFlags.Modal)]
         public void THFACleanAllBlk()

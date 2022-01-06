@@ -33,7 +33,25 @@ namespace ThMEPLighting.IlluminationLighting
         public static string NormalTag = "正常照明";
         public static string EvacuationTag = "疏散照明";
 
-        
+        public enum LightTypeEnum
+        {
+            /// <summary>
+            /// 圆形吸顶灯
+            /// </summary>
+            circleCeiling,
+            /// <summary>
+            /// 半球吸顶灯
+            /// </summary>
+            domeCeiling,
+            /// <summary>
+            /// 感应吸顶灯
+            /// </summary>
+            inductionCeiling,
+            /// <summary>
+            /// 筒灯
+            /// </summary>
+            downlight,
+        }
 
 
     }

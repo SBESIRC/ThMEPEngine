@@ -337,10 +337,15 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                         continue;
                     for (int j = 0; j < tempAvoid.Count - 1; ++j)
                     {
+                       
                         Line avoidOnWall = new Line(tempAvoid[j], tempAvoid[j + 1]);
-                        Line actualAvoid = new Line((avoidOnWall.StartPoint + avoidOnWall.Delta.GetNormal().MultiplyBy(-reservedLength)),
-                        (avoidOnWall.EndPoint + avoidOnWall.Delta.GetNormal().MultiplyBy(reservedLength)));//实际不可布置区域
-                        result.Add(actualAvoid);
+                        var dir = (avoidOnWall.EndPoint - avoidOnWall.StartPoint).GetNormal ();
+                        Line actualAvoid = new Line((avoidOnWall.StartPoint + dir.MultiplyBy(-reservedLength)),
+                        (avoidOnWall.EndPoint + dir.MultiplyBy(reservedLength)));//实际不可布置区域
+                        if (actualAvoid.Length >1)
+                        {
+                            result.Add(actualAvoid);
+                        }
                     }
                 }
             }
@@ -360,8 +365,9 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                 var temp = new Line(wallsOutline.GetPoint3dAt(i), wallsOutline.GetPoint3dAt(i + 1));
                 if (temp.Length < 2 * reservedLength)
                     continue;
-                Line editableBase = new Line((temp.StartPoint + temp.Delta.GetNormal().MultiplyBy(reservedLength)),
-                    (temp.EndPoint + temp.Delta.GetNormal().MultiplyBy(-reservedLength))); //墻可安置部分
+                var dir = (temp.EndPoint - temp.StartPoint).GetNormal();
+                Line editableBase = new Line((temp.StartPoint + dir.MultiplyBy(reservedLength)),
+                    (temp.EndPoint + dir.MultiplyBy(-reservedLength))); //墻可安置部分
                 var editablePt = new List<Point3d>();
                 var startPt = editableBase.StartPoint;
                 var editablePoly = ThCADCoreNTSEntityExtension.Difference(editableBase.Buffer(bufferValue), avoidWallSet);

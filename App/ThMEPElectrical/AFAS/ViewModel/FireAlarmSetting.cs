@@ -8,21 +8,37 @@ namespace ThMEPElectrical.AFAS.ViewModel
 {
     public class FireAlarmSetting
     {
+        //----通用
         public double Scale { get; set; }
         public int Beam { get; set; }
-        public int LayoutItem { get; set; }
         public List<int> LayoutItemList { get; set; }
+        public double RoofThickness { get; set; }
+
+        //----烟温感
         public int RoofHight { get; set; }
         public int RoofGrade { get; set; }
-        public double RoofThickness { get; set; }
         public double FixRef { get; set; }
+
+        //----广播
         public int BroadcastLayout { get; set; }
         public double StepLengthBC { get; set; }
+
+        //----手报
         public double StepLengthMA { get; set; }
+
+        //----可燃气
         public double GasProtectRadius { get; set; }
 
+        //----显示器
         public int DisplayBuilding { get; set; }
         public int DisplayBlk { get; set; }
+
+        //----照明
+        public double IlluRadiusNormal { get; set; }
+        public double IlluRadiusEmg { get; set; }
+        public bool IlluIfLayoutEmg { get; set; }
+        public bool IlluIfEmgAsNormal { get; set; }
+        public int IlluLightType { get; set; }
 
         public static FireAlarmSetting Instance = new FireAlarmSetting();
 
@@ -30,7 +46,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
         {
             Scale = 100;
             Beam = 1;
-            LayoutItem = 0;
 
             RoofHight = 2;
             RoofGrade = 0;
@@ -46,6 +61,12 @@ namespace ThMEPElectrical.AFAS.ViewModel
 
             DisplayBuilding = 0;
             DisplayBlk = 0;
+
+            IlluRadiusNormal = 3000;
+            IlluRadiusEmg = 3000;
+            IlluIfLayoutEmg = false;
+            IlluIfEmgAsNormal = false;
+            IlluLightType = 0;
 
             LayoutItemList = new List<int>();
 

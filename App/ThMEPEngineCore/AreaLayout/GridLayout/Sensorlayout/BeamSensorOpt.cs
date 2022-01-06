@@ -387,7 +387,18 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             var min = new Point3d(point.X - 1, point.Y - 1, 0);
             var max = new Point3d(point.X + 1, point.Y + 1, 0);
 
-            return thCADCoreNTSSpatialIndexDetect.SelectCrossingWindow(min, max).Cast<MPolygon>().First().ToNTSPolygon();
+            var obj = thCADCoreNTSSpatialIndexDetect.SelectCrossingWindow(min, max);
+            MPolygon detect =null;
+            Polygon returnObj = null;
+            if (obj.Count >0)
+            {
+                detect = obj.OfType <MPolygon>().FirstOrDefault();
+            }
+            if (detect != null)
+            {
+                returnObj = detect.ToNTSPolygon();
+            }
+            return returnObj;
         }
         //处理盲区
         private void RemoveBlind(NetTopologySuite.Geometries.Geometry blind)

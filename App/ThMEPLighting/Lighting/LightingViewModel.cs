@@ -195,6 +195,22 @@ namespace ThMEPLighting.Lighting.ViewModels
                 OnPropertyChanged("ShouldConsiderBeam");
             }
         }
+
+        //板厚
+        private double _RoofThickness = 100;
+        public double RoofThickness
+        {
+            get
+            {
+                return _RoofThickness;
+            }
+            set
+            {
+                _RoofThickness = value;
+                OnPropertyChanged("RoofThickness");
+            }
+        }
+
         //需要加这个值。否则存不住结果
         private bool _NotShouldConsiderBeam = false;
         public bool NotShouldConsiderBeam

@@ -45,6 +45,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
             _scale = FireAlarmSetting.Instance.Scale;
             _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
             _radius = FireAlarmSetting.Instance.GasProtectRadius;
+            _wallThick = FireAlarmSetting.Instance.RoofThickness;
         }
         private void SettingNoUI()
         {
@@ -92,7 +93,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[4];
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.Gas];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameGas = ThFaCommon.BlkName_Gas;
                 var layoutBlkNameProfGas = ThFaCommon.BlkName_Gas_ExplosionProf;

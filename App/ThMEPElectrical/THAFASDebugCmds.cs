@@ -87,68 +87,68 @@ namespace ThMEPElectrical
         //#endif
         //        }
 
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "THFaAreaData", CommandFlags.Modal)]
-        public void ThFaAreaData()
-        {
-            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
-            var wallThick = 0.0;
-            var needDetective = true;
-            if (referBeam == false)
-            {
-                needDetective = false;
-            }
-            else
-            {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
-                needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）");
-            }
+        //[System.Diagnostics.Conditional("DEBUG")]
+        //[CommandMethod("TIANHUACAD", "THFaAreaData", CommandFlags.Modal)]
+        //public void ThFaAreaData()
+        //{
+        //    var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+        //    var wallThick = 0.0;
+        //    var needDetective = true;
+        //    if (referBeam == false)
+        //    {
+        //        needDetective = false;
+        //    }
+        //    else
+        //    {
+        //        wallThick = ThAFASUtils.SettingDouble("\n板厚");
+        //        needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）");
+        //    }
 
-            var theta = 0;
-            var floorHight = 2;
-            var layoutType = ThFaSmokeCommon.layoutType.smoke;
+        //    var theta = 0;
+        //    var floorHight = 2;
+        //    var layoutType = ThFaSmokeCommon.layoutType.smoke;
 
-            var extractBlkList = ThFaCommon.BlkNameList;
-            //var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Smoke, ThFaCommon.BlkName_Heat };
-            var cleanBlkName = new List<string>();
-            var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
+        //    var extractBlkList = ThFaCommon.BlkNameList;
+        //    //var cleanBlkName = new List<string>() { ThFaCommon.BlkName_Smoke, ThFaCommon.BlkName_Heat };
+        //    var cleanBlkName = new List<string>();
+        //    var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
-            //画框，提数据，转数据
-            //var pts = ThAFASSelectFrameUtil.GetFrame();
-            var pts = ThAFASSelectFrameUtil.GetRoomFrame();
+        //    //画框，提数据，转数据
+        //    //var pts = ThAFASSelectFrameUtil.GetFrame();
+        //    var pts = ThAFASSelectFrameUtil.GetRoomFrame();
 
-            if (pts.Count == 0)
-            {
-                return;
-            }
+        //    if (pts.Count == 0)
+        //    {
+        //        return;
+        //    }
 
-            var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, referBeam, wallThick, needDetective);
+        //    var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, referBeam, wallThick, needDetective);
 
-            var data = new ThAFASAreaDataQueryService(geos, avoidBlkName);
-            data.Print();
-            //data.AnalysisHoles();
-            //data.ClassifyData();
-            data.AddMRoomDict();
-            data.ClassifyDataNew();//先分房间再扩大
-            var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
+        //    var data = new ThAFASAreaDataQueryService(geos, avoidBlkName);
+        //    data.Print();
+        //    //data.AnalysisHoles();
+        //    //data.ClassifyData();
+        //    data.AddMRoomDict();
+        //    data.ClassifyDataNew();//先分房间再扩大
+        //    var roomType = ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
 
-            foreach (var frame in data.FrameList)
-            {
-                var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
-                var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(data.FrameLayoutList[frame], radius);
-                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
+        //    foreach (var frame in data.FrameList)
+        //    {
+        //        var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
+        //        var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(data.FrameLayoutList[frame], radius);
+        //        var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
 
-                var type = bIsAisleArea == true ? "centerline" : "grid";
-                var centPt = frame.GetCentroidPoint();
-                DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
-                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l4lastInfo", 3, 25, 200);
-            }
+        //        var type = bIsAisleArea == true ? "centerline" : "grid";
+        //        var centPt = frame.GetCentroidPoint();
+        //        DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0analysisHole"), 190);
+        //        DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l4lastInfo", 3, 25, 200);
+        //    }
 
 
-            var fileInfo = new FileInfo(Active.Document.Name);
-            var path = fileInfo.Directory.FullName;
-            ThGeoOutput.Output(geos, path, fileInfo.Name);
-        }
+        //    var fileInfo = new FileInfo(Active.Document.Name);
+        //    var path = fileInfo.Directory.FullName;
+        //    ThGeoOutput.Output(geos, path, fileInfo.Name);
+        //}
 
 
 
@@ -189,6 +189,12 @@ namespace ThMEPElectrical
             {
                 var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
                 var needConverage = referBeam == true ? true : false;
+                var wallThickness = 100.0;
+                if (referBeam == true)
+                {
+                    wallThickness = ThAFASUtils.SettingDouble("\n板厚");
+                }
+
 
                 //var scale = 100;
                 var extractBlkList = ThFaCommon.BlkNameList;
@@ -210,7 +216,7 @@ namespace ThMEPElectrical
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
 
-                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, referBeam, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
 
                 var data = new ThAFASDistanceDataQueryService(geos, avoidBlkName);
                 data.Print();
@@ -340,7 +346,7 @@ namespace ThMEPElectrical
                 DrawUtils.ShowGeometry(data.FrameWallList[frame], string.Format("l0FrameWall"), 1);
                 data.FrameLayoutList[frame].ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0Framelayout"), 6));
                 DrawUtils.ShowGeometry(data.FrameDetectAreaList[frame], string.Format("l0FrameDetec"), 91);
-                DrawUtils.ShowGeometry(data.FramePriorityList [frame], string.Format("l0FrameEquipment"), 152);
+                DrawUtils.ShowGeometry(data.FramePriorityList[frame], string.Format("l0FrameEquipment"), 152);
 
                 DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l0lastInfo", 3, 25, 200);
 
@@ -404,5 +410,6 @@ namespace ThMEPElectrical
             }
         }
 
+       
     }
 }

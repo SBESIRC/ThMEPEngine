@@ -88,7 +88,7 @@ namespace ThMEPEngineCore.AFASRegion.Utls
             List<Point3d> allPts = new List<Point3d>();
             foreach (var line in lines)
             {
-                if (!allPts.Any(x=>x.IsEqualTo(line.StartPoint, new Tolerance(1, 1))))
+                if (!allPts.Any(x => x.IsEqualTo(line.StartPoint, new Tolerance(1, 1))))
                 {
                     allPts.Add(line.StartPoint);
                 }
@@ -136,7 +136,7 @@ namespace ThMEPEngineCore.AFASRegion.Utls
             }
 
             var checkAngele = dirAngle / Math.PI * 180;
-            if (checkAngele<= angle)
+            if (checkAngele <= angle)
             {
                 return true;
             }
@@ -292,7 +292,7 @@ namespace ThMEPEngineCore.AFASRegion.Utls
         /// <returns></returns>
         public static Polyline ExpandLine(Line line, double distance, double tol = 0)
         {
-            Vector3d lineDir = line.Delta.GetNormal();
+            Vector3d lineDir = (line.EndPoint - line.StartPoint).GetNormal();
             Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
             Point3d p1 = line.StartPoint + lineDir * tol + moveDir * distance;
             Point3d p2 = line.EndPoint - lineDir * tol + moveDir * distance;

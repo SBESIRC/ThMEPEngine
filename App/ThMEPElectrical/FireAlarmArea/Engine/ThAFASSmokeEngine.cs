@@ -70,23 +70,15 @@ namespace ThMEPElectrical.FireAlarmArea
                 }
                 catch (System.Exception ex)
                 {
-                    //var pt = frame.GetPoint3dAt(0);
+                    var pt = frame.GetPoint3dAt(0);
+                    var ptOri = ThAFASDataPass.Instance.Transformer.Reset(pt);
+                    var err = System.Environment.NewLine;
+                    err = err + string.Format("point:{0},{1} Ori point:{2},{3} ", pt.X, pt.Y, ptOri.X, ptOri.Y) + System.Environment.NewLine;
+                    err = err + ex.Message + System.Environment.NewLine;
+                    err = err + ex.StackTrace.ToString() + System.Environment.NewLine;
 
-                    //var ptOri = ThAFASDataPass.Instance.Transformer.Reset(pt);
-                    //var err = string.Format("{0}-point:{1},{2}{3} point Ori:{4},{5}{6}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), pt.X, pt.Y, System.Environment.NewLine,
-                    //                                    ptOri.X, ptOri.Y, System.Environment.NewLine);
-
-                    //err = System.Environment.NewLine + err + ex.StackTrace.ToString() + System.Environment.NewLine;
-                    //string path = Path.Combine(Active.DocumentDirectory, string.Format("log-{0}-{1}.txt", Active.DocumentName, DateTime.Now.ToString("yyyyMMdd")));
-
-                    //if (File.Exists(path) == false)
-                    //{
-                    //    File.WriteAllText(path, err);
-                    //}
-                    //else
-                    //{
-                    //    File.AppendAllText(path, err);
-                    //}
+                    var logger = layoutParameter.Log;
+                    logger.WriteErrLog(err);
 
                     continue;
                 }

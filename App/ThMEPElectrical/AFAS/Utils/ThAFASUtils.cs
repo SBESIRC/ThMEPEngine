@@ -24,6 +24,7 @@ using ThMEPElectrical.FireAlarmDistance.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Model;
+using ThMEPElectrical.AFAS.ViewModel;
 
 namespace ThMEPElectrical.AFAS.Utils
 {
@@ -49,65 +50,6 @@ namespace ThMEPElectrical.AFAS.Utils
             });
             vm.DB3DoorStoneVisitor.Results.ForEach(o => transformer.Transform(o.Geometry));
         }
-
-
-        public static List<ThGeometry> GetAreaLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
-        {
-
-            var geos = new List<ThGeometry>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-
-                var datasetFactory = new ThAFASAreaDataSetFactory()
-                {
-                    ReferBeam = referBeam,
-                    WallThick = wallThick,
-                    NeedDetective = needDetective,
-                    BlkNameList = extractBlkList,
-                };
-                var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-                geos.AddRange(dataset.Container);
-
-            }
-
-            return geos;
-        }
-
-        //public static List<ThGeometry> GetFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
-        //{
-        //    var geos = new List<ThGeometry>();
-
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        var datasetFactory = new ThAFASFixLayoutDataSetFactory()
-        //        {
-        //            BlkNameList = extractBlkList,
-        //        };
-        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-        //        geos.AddRange(dataset.Container);
-
-        //        return geos;
-        //    }
-        //}
-
-        //public static List<ThGeometry> GetDistLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, bool needConverage)
-        //{
-        //    var geos = new List<ThGeometry>();
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        var datasetFactory = new ThAFASDistanceDataSetFactory()
-        //        {
-        //            ReferBeam = referBeam,
-        //            NeedConverage = needConverage,
-        //            BlkNameList = extractBlkList,
-        //        };
-
-        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
-        //        geos.AddRange(dataset.Container);
-
-        //        return geos;
-        //    }
-        //}
 
         public static void CleanPreviousEquipment(List<ThGeometry> CleanEquipments)
         {
@@ -148,7 +90,7 @@ namespace ThMEPElectrical.AFAS.Utils
             var transformer = new ThMEPOriginTransformer(center);
             return transformer;
         }
-        public static List<ThGeometry> GetDistLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, bool needConverage)
+        public static List<ThGeometry> GetDistLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThickness, bool needConverage)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -163,6 +105,7 @@ namespace ThMEPElectrical.AFAS.Utils
                     ReferBeam = referBeam,
                     NeedConverage = needConverage,
                     InputExtractors = extractors,
+                    WallThickness = wallThickness,
                 };
                 localDataFactory.SetTransformer(transformer);
                 var localdataset = localDataFactory.Create(acadDatabase.Database, selectPts);
@@ -181,7 +124,6 @@ namespace ThMEPElectrical.AFAS.Utils
                 return geos;
             }
         }
-
 
         public static List<ThGeometry> GetFixLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList)
         {
@@ -249,6 +191,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 return geos;
             }
         }
+
         /// <summary>
         /// for test get all data
         /// </summary>
@@ -319,9 +262,6 @@ namespace ThMEPElectrical.AFAS.Utils
 
         }
 
-
-
-
         /// <summary>
         /// 计算blk外扩距离
         /// </summary>
@@ -368,6 +308,46 @@ namespace ThMEPElectrical.AFAS.Utils
                 }
             }
             return result;
+        }
+
+        public static void AFASPrepareStep()
+        {
+            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                //-----------选取图块
+                var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+                //var selectPts = ThAFASSelectFrameUtil.GetFrame();
+                //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+
+                if (selectPts.Count == 0)
+                {
+                    return;
+                }
+
+                var transformer = ThAFASUtils.GetTransformer(selectPts);
+
+                //-----------导入所有块，图层信息
+                var extractBlkList = ThFaCommon.BlkNameList;
+                ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
+
+                //-----------清除所选的块
+                var cleanBlkList = FireAlarmSetting.Instance.LayoutItemList.SelectMany(x => ThFaCommon.LayoutBlkList[x]).ToList();
+                var previousEquipmentData = new ThAFASBusinessDataSetFactory()
+                {
+                    BlkNameList = cleanBlkList,
+                };
+                previousEquipmentData.SetTransformer(transformer);
+                var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
+                var cleanEquipment = localEquipmentData.Container;
+                ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
+
+                //-----------获取数据元素,已转回原位置附近
+                var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+                ThAFASDataPass.Instance.Extractors = extractors;
+                ThAFASDataPass.Instance.Transformer = transformer;
+                ThAFASDataPass.Instance.SelectPts = selectPts;
+            }
         }
 
         /////-------for no UI mode setting
@@ -446,6 +426,65 @@ namespace ThMEPElectrical.AFAS.Utils
 
             return ans;
         }
+
+        //-------------no use
+        //public static List<ThGeometry> GetAreaLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
+        //{
+
+        //    var geos = new List<ThGeometry>();
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+
+        //        var datasetFactory = new ThAFASAreaDataSetFactory()
+        //        {
+        //            ReferBeam = referBeam,
+        //            WallThick = wallThick,
+        //            NeedDetective = needDetective,
+        //            BlkNameList = extractBlkList,
+        //        };
+        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(dataset.Container);
+
+        //    }
+
+        //    return geos;
+        //}
+
+        //public static List<ThGeometry> GetFixLayoutData(Point3dCollection pts, List<string> extractBlkList)
+        //{
+        //    var geos = new List<ThGeometry>();
+
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        var datasetFactory = new ThAFASFixLayoutDataSetFactory()
+        //        {
+        //            BlkNameList = extractBlkList,
+        //        };
+        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(dataset.Container);
+
+        //        return geos;
+        //    }
+        //}
+
+        //public static List<ThGeometry> GetDistLayoutData(Point3dCollection pts, List<string> extractBlkList, bool referBeam, bool needConverage)
+        //{
+        //    var geos = new List<ThGeometry>();
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    {
+        //        var datasetFactory = new ThAFASDistanceDataSetFactory()
+        //        {
+        //            ReferBeam = referBeam,
+        //            NeedConverage = needConverage,
+        //            BlkNameList = extractBlkList,
+        //        };
+
+        //        var dataset = datasetFactory.Create(acadDatabase.Database, pts);
+        //        geos.AddRange(dataset.Container);
+
+        //        return geos;
+        //    }
+        //}
 
     }
 }

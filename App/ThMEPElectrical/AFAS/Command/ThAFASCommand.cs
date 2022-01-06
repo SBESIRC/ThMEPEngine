@@ -34,35 +34,41 @@ namespace ThMEPElectrical.AFAS.Command
             {
                 ThAFASDataPass.Instance = new ThAFASDataPass();
 
-                var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
-                if (selectPts.Count == 0)
+                //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+                //if (selectPts.Count == 0)
+                //{
+                //    return;
+                //}
+
+                //var transformer = ThAFASUtils.GetTransformer(selectPts);
+
+                //////////导入所有块，图层信息
+                //var extractBlkList = ThFaCommon.BlkNameList;
+                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
+
+                //////////清除所选的块
+                //var cleanBlkList = FireAlarmSetting.Instance.LayoutItemList.SelectMany(x => ThFaCommon.LayoutBlkList[x]).ToList();
+                //var previousEquipmentData = new ThAFASBusinessDataSetFactory()
+                //{
+                //    BlkNameList = cleanBlkList,
+                //    //  InputExtractors = extractors,
+                //};
+                //previousEquipmentData.SetTransformer(transformer);
+                //var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
+                //var cleanEquipment = localEquipmentData.Container;
+                //ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
+
+                /////////////获取数据元素,已转回原位置附近////////
+                //var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
+                //ThAFASDataPass.Instance.Extractors = extractors;
+                //ThAFASDataPass.Instance.Transformer = transformer;
+                //ThAFASDataPass.Instance.SelectPts = selectPts;
+
+                ThAFASUtils.AFASPrepareStep();
+                if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
                 {
                     return;
                 }
-
-                var transformer = ThAFASUtils.GetTransformer(selectPts);
-
-                ////////导入所有块，图层信息
-                var extractBlkList = ThFaCommon.BlkNameList;
-                ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
-                ////////清除所选的块
-                var cleanBlkList = FireAlarmSetting.Instance.LayoutItemList.SelectMany(x => ThFaCommon.LayoutBlkList[x]).ToList();
-                var previousEquipmentData = new ThAFASBusinessDataSetFactory()
-                {
-                    BlkNameList = cleanBlkList,
-                    //  InputExtractors = extractors,
-                };
-                previousEquipmentData.SetTransformer(transformer);
-                var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
-                var cleanEquipment = localEquipmentData.Container;
-                ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
-
-                ///////////获取数据元素,已转回原位置附近////////
-                var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
-                ThAFASDataPass.Instance.Extractors = extractors;
-                ThAFASDataPass.Instance.Transformer = transformer;
-                ThAFASDataPass.Instance.SelectPts = selectPts;
 
                 Document document = Active.Document;
 
@@ -75,14 +81,13 @@ namespace ThMEPElectrical.AFAS.Command
                             {
                                 ////加\n自动回车 否则用户要敲回车键。
                                 ////CommandHandlerBase.ExecuteFromCommandLine(false, "THFASmoke") 是异步，这里不适用
+                                ////Active.Editor.Command(new Object[] { "THFASmoke" });没有ui模式可以，有ui模式会报错
                                 ////sendCommand同步调用。cmd cammand flag需要是session。
                                 document.SendCommand("THFASmoke" + "\n");
                                 break;
                             }
                         case (int)ThFaCommon.LayoutItemType.Broadcast:
                             {
-
-                                //Active.Editor.Command(new Object[] { "THFABroadcast" });
                                 document.SendCommand("THFABroadcast" + "\n");
                                 break;
                             }
@@ -101,19 +106,16 @@ namespace ThMEPElectrical.AFAS.Command
                                 document.SendCommand("THFAGas" + "\n");
                                 break;
                             }
-
                         case (int)ThFaCommon.LayoutItemType.ManualAlarm:
                             {
                                 document.SendCommand("THFAManualAlarm" + "\n");
                                 break;
                             }
-
                         case (int)ThFaCommon.LayoutItemType.Monitor:
                             {
                                 document.SendCommand("THFAMonitor" + "\n");
                                 break;
                             }
-
                         default:
                             break;
                     }

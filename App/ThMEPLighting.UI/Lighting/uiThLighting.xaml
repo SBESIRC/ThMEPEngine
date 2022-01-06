@@ -90,16 +90,23 @@
                     <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=true,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">是</RadioButton>
                     <RadioButton Margin="5,5,0,0" GroupName="rbEmgAsNormal"  IsChecked="{Binding IfEmgUsedForNormal,  ConverterParameter=false,Mode=OneWayToSource,UpdateSourceTrigger=PropertyChanged, NotifyOnSourceUpdated=True}">否</RadioButton>
                 </StackPanel>
-                <Grid >
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
+                    <RadioButton GroupName="rbBeam" Margin="10,5,0,0" 
+                             IsChecked="{Binding ShouldConsiderBeam}">考虑梁</RadioButton>
+                    <RadioButton GroupName="rbBeam" Margin="10,5,0,0"
+                             IsChecked ="{Binding NotShouldConsiderBeam }" >不考虑梁</RadioButton>
+                </StackPanel>
+
+                <Grid  Margin="10,5,0,0" >
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="0.5*"/>
                         <ColumnDefinition Width="0.5*"/>
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Top">
-                        <RadioButton GroupName="rbBeam" Margin="10,5,0,0" 
-                             IsChecked="{Binding ShouldConsiderBeam}">考虑梁</RadioButton>
-                        <RadioButton GroupName="rbBeam" Margin="10,5,0,0"
-                             IsChecked ="{Binding NotShouldConsiderBeam }" >不考虑梁</RadioButton>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                        <Label Content ="板顶厚度"  />
+                        <cus:InputTextBox   Width ="70"   TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                        <Label Content="mm"/>
                     </StackPanel>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>

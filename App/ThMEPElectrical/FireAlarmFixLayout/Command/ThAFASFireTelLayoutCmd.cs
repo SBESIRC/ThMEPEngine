@@ -66,7 +66,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var layoutBlkName = ThFaCommon.BlkName_FireTel;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[3];
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.Tel];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 

@@ -30,6 +30,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
         bool _referBeam = true;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
         double _stepLength = 25000;
+        double _wallThickness = 100;
 
         public ThAFASBroadcastCmd()
         {
@@ -49,6 +50,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
             _mode = (ThAFASPlacementMountModeMgd)FireAlarmSetting.Instance.BroadcastLayout;
             _stepLength = FireAlarmSetting.Instance.StepLengthBC;
             _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
+            _wallThickness = FireAlarmSetting.Instance.RoofThickness;
         }
         public void Dispose()
         {
@@ -77,7 +79,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 //--------------提取数据
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
                 //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
                 if (geos.Count == 0)
                 {
                     return;
