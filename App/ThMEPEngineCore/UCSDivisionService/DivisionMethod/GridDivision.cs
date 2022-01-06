@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
 
             //获得每个轴网本来所占区域
             var gridRegion = gridTypes.ToDictionary(x => x.Key, y => GetGridRegion(y.Key))
-                .Where(x => x.Value != null).ToDictionary(x => x.Key, y => y.Value); ;
+                .Where(x => x.Value != null).ToDictionary(x => x.Key, y => y.Value);
 
             //划分轴网属于哪个区域
             var gridDics = ClassifyGridArea(gridAreas, gridHulls, gridRegion, gridTypes);
@@ -174,7 +174,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
 
             foreach (var area in areas)
             {
-                var dicInfo = areaDic.Where(x => x.Value.Contains(area) || areaDic.Keys.Contains(x.Key)).ToDictionary(x => x.Key, y => y.Value);
+                var dicInfo = areaDic.Where(x => x.Value.Contains(area) && areaDic.Keys.Contains(x.Key)).ToDictionary(x => x.Key, y => y.Value);
                 if (dicInfo.Count == 1)
                 {
                     continue;
@@ -214,27 +214,28 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
             var gridTypes = GridTypes.Where(x => gridArea.Keys.Any(y => y == x.Key))
                 .OrderBy(x => gridArea[x.Key].Area).ToDictionary(x => x.Key, y => y.Value);
             var arcDics = gridTypes.Where(x => x.Value == GridType.ArcGrid).ToDictionary(x => x.Key, y => y.Value);
-            if (arcDics.Count > 0)
-            {
-                return arcDics.First().Key;
-            }
-            else
-            {
-                var otherTypes = gridTypes.Except(arcDics).ToDictionary(x => x.Key, y => y.Value);
-                if (otherTypes.Count > 1)
-                {
-                    var areaDir = GetAreaDir(area);
-                    foreach (var gArea in otherTypes)   //后归入方向将近一致的区域
-                    {
-                        var gAreaDir = GetAreaDir(gridArea[gArea.Key]);
-                        if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
-                        {
-                            return gArea.Key;
-                        }
-                    }
-                }
-                return otherTypes.First().Key;
-            }
+            return gridTypes.First().Key;
+            //if (arcDics.Count > 0)
+            //{
+            //    return arcDics.First().Key;
+            //}
+            //else
+            //{
+            //    var otherTypes = gridTypes.Except(arcDics).ToDictionary(x => x.Key, y => y.Value);
+            //    if (otherTypes.Count > 1)
+            //    {
+            //        var areaDir = GetAreaDir(area);
+            //        foreach (var gArea in otherTypes)   //后归入方向将近一致的区域
+            //        {
+            //            var gAreaDir = GetAreaDir(gridArea[gArea.Key]);
+            //            if (areaDir.IsParallelTo(gAreaDir, new Tolerance(0.1, 0.1)) || Math.Abs(gAreaDir.DotProduct(areaDir)) < 0.1)
+            //            {
+            //                return gArea.Key;
+            //            }
+            //        }
+            //    }
+            //    return otherTypes.First().Key;
+            //}
         }
 
         /// <summary>

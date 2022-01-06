@@ -30,14 +30,14 @@ namespace ThMEPEngineCore.GridOperation
             }
 
             var regions = CetGridRegion(extendGrids, polyline).Where(x => x.Area > 0).ToList();
-            using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (var item in regions)
-                {
-                    //item.ColorIndex = 3;
-                    //db.ModelSpace.Add(item);
-                }
-            }
+            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+            //{
+            //    foreach (var item in regions)
+            //    {
+            //        //item.ColorIndex = 3;
+            //        //db.ModelSpace.Add(item);
+            //    }
+            //}
             var mPolyDic = ToMPolygonCollection(regions);
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(mPolyDic.Keys.ToCollection());
             foreach (var poly in otherPolys)

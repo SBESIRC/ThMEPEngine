@@ -43,7 +43,8 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
         /// <returns></returns>
         public static List<Polyline> ArcPolygonize(this List<Curve> curves, Polyline frame, double arcChord)      //仅支持圆弧、直线、polyline直线（ps：最好全部用直线）
         {
-            var handleCurves = HandleLinesByFrame(frame, curves);
+            var simplyFrame = frame.DPSimplify(1);
+            var handleCurves = HandleLinesByFrame(simplyFrame, curves);
             
             var allLines = handleCurves.ConvertToLine(arcChord);
             allLines = allLines.Select(x => x.ExtendLine(200)).ToList();
@@ -53,7 +54,7 @@ namespace ThMEPEngineCore.Algorithm.ArcAlgorithm
                 {
                     if(x is MPolygon mPolygon)
                     {
-                        return mPolygon.Loops().First() as Entity;
+                        return mPolygon.Outline() as Entity;
                     }
                     return x;
                 }).Cast<Polyline>().Where(x => x.Area > 1).ToList();
