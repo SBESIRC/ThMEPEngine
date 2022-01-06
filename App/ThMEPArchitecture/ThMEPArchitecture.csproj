@@ -43,7 +43,6 @@
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\GA2.cs" />
-    <Compile Include="PartitionLayout\GeoUtilitiesOptimized.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\RandInt2.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\OuterBrder.cs" />

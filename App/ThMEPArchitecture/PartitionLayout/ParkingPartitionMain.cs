@@ -10,7 +10,6 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
-using static ThMEPArchitecture.PartitionLayout.GeoUtilitiesOptimized;
 
 namespace ThMEPArchitecture.PartitionLayout
 {
@@ -107,6 +106,14 @@ namespace ThMEPArchitecture.PartitionLayout
 
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
+
+        const int LayoutMode = ((int)LayoutDirection.VERTICAL);
+        enum LayoutDirection : int
+        {
+            LENGTH = 0,
+            HORIZONTAL = 1,
+            VERTICAL = 2
+        }
 
         public void Dispose()
         {
@@ -414,7 +421,8 @@ namespace ThMEPArchitecture.PartitionLayout
         /// </summary>
         private void GenerateCarSpotsInMinPartitionUnits()
         {
-            IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            //IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            SortLaneByDirection(IniLanes, LayoutMode);
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var inilanelines = new List<Line>(IniLanes.Select(e => e.Line).Cast<Line>().ToList());
@@ -504,7 +512,8 @@ namespace ThMEPArchitecture.PartitionLayout
         private bool GenerateIntegralModuleLanes()
         {
             var generate_integral_modules = false;
-            IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            //IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            SortLaneByDirection(IniLanes, LayoutMode);
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var vec = IniLanes[i].Vec;
@@ -639,7 +648,8 @@ namespace ThMEPArchitecture.PartitionLayout
         private bool GenerateAdjLanes()
         {
             var generate_adj_lanes = false;
-            IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            //IniLanes = IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            SortLaneByDirection(IniLanes, LayoutMode);
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var lane = IniLanes[i];
