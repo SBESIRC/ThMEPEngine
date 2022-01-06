@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
+using System.Diagnostics;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
@@ -104,8 +105,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         }
 
         public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
-            ref List<List<Point3dEx>> rstPaths, Point3dEx target, FireHydrantSystemIn fireHydrantSysIn)
+            ref List<List<Point3dEx>> rstPaths, Point3dEx target, FireHydrantSystemIn fireHydrantSysIn, Stopwatch stopwatch)
         {
+            if(stopwatch.Elapsed.TotalSeconds > 20)//搜索了20s，可能死循环了
+            {
+                return;
+            }
             if (cur._pt.DistanceTo(target._pt) < 5)
             {
                 if(PointCompute.IsSecondLoop(cur, tempPath[tempPath.Count-2], fireHydrantSysIn.AngleList[target]))
@@ -178,7 +183,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 tempPath.Add(p);
                 visited.Add(p);
 
-                dfsSubLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn);
+                dfsSubLoop(p, tempPath, visited, ref rstPaths, target, fireHydrantSysIn, stopwatch);
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }

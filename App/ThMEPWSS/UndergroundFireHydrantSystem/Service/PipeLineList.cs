@@ -14,7 +14,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
-    class PipeLineList
+    public static class PipeLineList
     {
         public static void PipeLineAutoConnect(ref List<Line> lineList, ref FireHydrantSystemIn fireHydrantSysIn)
         {
@@ -243,120 +243,83 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             lineList = CleanLaneLines3(lineList);
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
         }
-
-        public static List<Line> CleanLaneLines2(List<Line> lines)
+        public static void ConnectBreakLineWithoutPtdic(ref List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn,
+            ref List<Point3dEx> pointList, List<Point3dEx> stopPts)
         {
-            var rstLines = new List<Line>();
-
-            var lineSegs = lines.Select(l => new LineSegment2d(l.StartPoint.ToPoint2D(), l.EndPoint.ToPoint2D())).ToList();
-
-
-            //Grouping
-            List<HashSet<LineSegment2d>> lineSegGroups = new List<HashSet<LineSegment2d>>();
-            for (int j = 0; j < lineSegs.Count(); ++j)
+            double tor = 10.0;//断开阈值
+            //连接不是端点的孤立线段
+            var connectLine = new List<Line>();
+            foreach (var line in lineList)
             {
-                bool alreadyContains = false;
-                foreach (var g in lineSegGroups)
+                if (line.Length < 50)
                 {
-                    if (g.Contains(lineSegs[j]))
+                    continue;//把一些短线直接跳过
+                }
+                var pt1 = new Point3dEx(line.StartPoint);
+                var pt2 = new Point3dEx(line.EndPoint);
+                var flag1 = pt1.IsNotStopPt(stopPts, tor);
+                var flag2 = pt2.IsNotStopPt(stopPts, tor);
+                CreateNewConnectLine(lineList, fireHydrantSysIn, tor, connectLine, line, pt1, flag1);
+                CreateNewConnectLine(lineList, fireHydrantSysIn, tor, connectLine, line, pt2, flag2);
+            }
+            foreach (var l in connectLine)
+            {
+                lineList.Add(l);
+            }
+            foreach (var pt1 in pointList)
+            {
+                foreach (var pt2 in pointList)
+                {
+                    double dist = pt1.DistanceToEx(pt2);
+                    if (dist < 10 && dist > 1)
                     {
-                        alreadyContains = true;
-                        break;
+                        var line = new Line(pt1._pt, pt2._pt);
+                        if (!lineList.Contains(line))
+                        {
+                            lineList.Add(new Line(pt1._pt, pt2._pt));
+                        }
                     }
                 }
-
-                if (alreadyContains) continue;
-
-                var colinerSegs = lineSegs.Where(l => l.IsColinearTo(lineSegs[j])).ToHashSet();
-                lineSegGroups.Add(colinerSegs);
             }
-            
-            //Processing
-            foreach (var lg in lineSegGroups)
-            {
-                var processedSegs = new HashSet<LineSegment2d>();
-
-                var tobeProcessedSegs = new List<LineSegment2d>(lg);
-                var rstLineSegs = new List<LineSegment2d>();
-
-                while (tobeProcessedSegs.Count != 0)
-                {
-                    tobeProcessedSegs = tobeProcessedSegs.Except(processedSegs).ToList();
-                    if (tobeProcessedSegs.Count == 0) break;
-                    var longestLineSeg = tobeProcessedSegs.OrderBy(l => l.Length).ToList().Last();
-                    processedSegs.Add(longestLineSeg);
-                    tobeProcessedSegs.Remove(longestLineSeg);
-
-                    var tempMergedSeg = longestLineSeg;// new LineSegment2d(longestLineSeg.StartPoint, longestLineSeg.EndPoint);
-
-                    for (var i = 0; i < tobeProcessedSegs.Count; ++i)
-                    {
-                        var curSeg = tobeProcessedSegs[i];
-
-                        var ptSet = new HashSet<Point3dEx>();
-                        ptSet.Add(new Point3dEx(tempMergedSeg.StartPoint.X, tempMergedSeg.StartPoint.Y, 0.0, 1E-5));
-                        ptSet.Add(new Point3dEx(tempMergedSeg.EndPoint.X, tempMergedSeg.EndPoint.Y, 0.0, 1E-5));
-                        ptSet.Add(new Point3dEx(curSeg.StartPoint.X, curSeg.StartPoint.Y, 0.0, 1E-5));
-                        ptSet.Add(new Point3dEx(curSeg.EndPoint.X, curSeg.EndPoint.Y, 0.0, 1E-5));
-
-                        var overlapedSeg = tempMergedSeg.Overlap(curSeg);
-                        if (overlapedSeg == null ) 
-                        {
-                            //remove mid-point
-                            if(ptSet.Count == 3)
-                            {
-                                var tempMergedSegPts = new HashSet<Point3dEx>();
-                                tempMergedSegPts.Add(new Point3dEx(tempMergedSeg.StartPoint.X, tempMergedSeg.StartPoint.Y, 0.0, 1E-5));
-                                tempMergedSegPts.Add(new Point3dEx(tempMergedSeg.EndPoint.X, tempMergedSeg.EndPoint.Y, 0.0, 1E-5));
-
-                                var curPts = new HashSet<Point3dEx>();
-                                curPts.Add(new Point3dEx(curSeg.StartPoint.X, curSeg.StartPoint.Y, 0.0, 1E-5));
-                                curPts.Add(new Point3dEx(curSeg.EndPoint.X, curSeg.EndPoint.Y, 0.0, 1E-5));
-
-                                var leftStart = tempMergedSegPts.Except(curPts).First();
-                                var leftEnd = curPts.Except(tempMergedSegPts).First();
-
-                                tempMergedSeg = new LineSegment2d(leftStart._pt.ToPoint2D(), leftEnd._pt.ToPoint2D());
-                                processedSegs.Add(curSeg);
-
-                            }
-                            continue;
-                        }
-
-                        //having overlop
-                        if (ptSet.Count == 3)
-                        {
-                            var tempMergedSegPts = new HashSet<Point3dEx>();
-                            tempMergedSegPts.Add(new Point3dEx(tempMergedSeg.StartPoint.X, tempMergedSeg.StartPoint.Y,0.0,1E-5));
-                            tempMergedSegPts.Add(new Point3dEx(tempMergedSeg.EndPoint.X, tempMergedSeg.EndPoint.Y,0.0,1E-5));
-
-                            var tobeRemovedPt = ptSet.Except(tempMergedSegPts).First();
-
-                            ptSet.Remove(tobeRemovedPt);
-
-                        }
-                        else if(ptSet.Count == 4)
-                        {
-                            ptSet.Remove(new Point3dEx(overlapedSeg.StartPoint.X, overlapedSeg.StartPoint.Y,0.0,1E-5));
-                            ptSet.Remove(new Point3dEx(overlapedSeg.EndPoint.X, overlapedSeg.EndPoint.Y,0.0,1E-5));
-                        }
-
-                        System.Diagnostics.Debug.Assert(ptSet.Count() == 2);
-                        if (ptSet.Count == 2)
-                        {
-                            tempMergedSeg = new LineSegment2d(ptSet.First()._pt.ToPoint2D(), ptSet.Last()._pt.ToPoint2D());
-                            processedSegs.Add(curSeg);
-                        }
-                    }
-
-                    rstLineSegs.Add(tempMergedSeg);
-                }
-                //rstLineSegs.AddRange(tobeProcessedSegs);
-                
-                rstLines.AddRange(rstLineSegs.Select(sg => new Line( sg.StartPoint.ToPoint3d(), sg.EndPoint.ToPoint3d())));
-            }
-            return rstLines;
+            lineList = CleanLaneLines3(lineList);
+            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新 
         }
+
+        private static void CreateNewConnectLine(List<Line> lineList, FireHydrantSystemIn fireHydrantSysIn, double tor, List<Line> connectLine, Line line, Point3dEx pt1, bool flag1)
+        {
+            if (flag1 && !PtInPtList.PtIsTermPt(pt1, fireHydrantSysIn.VerticalPosition))
+            {
+                foreach (var l in lineList)
+                {
+                    if (l.GetClosestPointTo(pt1._pt, false).DistanceTo(pt1._pt) < tor && !l.Equals(line))
+                    {
+                        var pts = new Point3dCollection();
+                        l.IntersectWith(line, (Intersect)2, pts, (IntPtr)0, (IntPtr)0);
+                        if (pts.Count > 0)
+                        {
+                            if (pts[0].DistanceTo(pt1._pt) < tor && pts[0].DistanceTo(pt1._pt) > 1)
+                            {
+                                connectLine.Add(new Line(pts[0], pt1._pt));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool IsNotStopPt(this Point3dEx pt, List<Point3dEx> stopPts, double tor)
+        {
+            foreach (var stop in stopPts)
+            {
+                if (pt._pt.DistanceTo(stop._pt) < tor)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+
 
         public static List<Line> CleanLaneLines3(List<Line> lines)
         {

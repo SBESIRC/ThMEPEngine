@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using ThMEPWSS.UndergroundFireHydrantSystem.Model;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -26,9 +27,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
 
                 visited.Add(nd[0]);
                 subTempPath.Add(nd[0]);
-
+                var stopwatch = new Stopwatch();
+                stopwatch.Start();
                 //次环路深度搜索
-                DepthFirstSearch.dfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn);
+                DepthFirstSearch.dfsSubLoop(nd[0], subTempPath, visited, ref subPathList, nd[1], fireHydrantSysIn, stopwatch);
+                stopwatch.Stop();
                 visited.Remove(visited.Last());//删除占用的点，避免干扰其他次环的遍历
             }
             ThPointCountService.SetPointType(ref fireHydrantSysIn, subPathList);

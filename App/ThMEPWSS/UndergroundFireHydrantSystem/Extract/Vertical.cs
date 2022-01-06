@@ -80,7 +80,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             var type = ent.GetType().Name;
             return type.Equals("BlockReference")
-                || type.Equals("ImpEntity");
+                || type.Equals("ImpEntity")
+                || type.Equals("ImpCurve");
         }
         private static void ExplodeBlock(BlockReference br, DBObjectCollection DBobjsResults)
         {
@@ -184,6 +185,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     VerticalPts.Add(pt);
                 }
             }
+#if DEBUG
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                foreach (var ptEx in VerticalPts)
+                {
+                    var pt = ptEx._pt;
+                    var c = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                    c.LayerId = DbHelper.GetLayerId("立管圆圈图层");
+                    currentDb.CurrentSpace.Add(c);
+                }
+            }
+#endif
             return VerticalPts;
         }
     }

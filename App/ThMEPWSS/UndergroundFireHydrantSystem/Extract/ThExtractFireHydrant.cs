@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.CADExtensionsNs;
@@ -27,17 +28,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 DBobjs = ExtractBlocks(acadDatabase.Database, "室内消火栓平面");
-                ;
-                //foreach(var db in DBobjs)
-                //{
-                //    var br = db as BlockReference;
-                //    using (AcadDatabase currentDb = AcadDatabase.Active())
-                //    {
-                //        var rect = GetRect(br);
-                //        rect.LayerId = DbHelper.GetLayerId("消火栓圆圈图层");
-                //        currentDb.CurrentSpace.Add(rect);
-                //    }
-                //}
+#if DEBUG
+                DrawFireHydrant(database);
+#endif
             }
         }
 
@@ -55,7 +48,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pline.CreatePolyline(point2dColl);
             return pline;
         }
-
         public void CreateVerticalHydrantDic(List<Point3dEx> verticals, FireHydrantSystemIn fireHydrantSysIn)
         {
             var verticalSpatialIndex = new ThCADCoreNTSSpatialIndex(CreateRect(verticals));
@@ -66,13 +58,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     var obj = dbObjs[i];
                     var pt = GetCenter((obj as BlockReference).GeometricExtents);
-                    using (AcadDatabase currentDb = AcadDatabase.Active())
-                    {
-                        var c = new Circle(pt, new Vector3d(0,0,1), 200);
-                        c.LayerId = DbHelper.GetLayerId("消火栓圆圈图层");
-                        currentDb.CurrentSpace.Add(c);
-                    }
-                        var pline = CreatePolyline(pt, 1000);
+
+                    var pline = CreatePolyline(pt, 1000);
                     var res = verticalSpatialIndex.SelectCrossingPolygon(pline).ToArray();
                     if (res.Count() == 0)
                     {
@@ -89,7 +76,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             
         }
-        
         private Point3d GetCenter(Extents3d extent3d)
         {
             var pt1 = extent3d.MaxPoint;
@@ -106,7 +92,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             return dbObjs;
         }
-
         private static Polyline CreatePolyline(Point3dEx c, int tolerance = 50)
         {
             var pl = new Polyline();
@@ -131,15 +116,13 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             pl.CreatePolyline(pts);
             return pl;
         }
-
-
         private DBObjectCollection ExtractBlocks(Database db, string blockName)
         {
             Func<Entity, bool> IsBlkNameQualified = (e) =>
             {
                 if (e is BlockReference br)
                 {
-                    return br.GetEffectiveName().ToUpper().EndsWith(blockName.ToUpper());
+                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
                 }
                 return false;
             };
@@ -149,15 +132,33 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(blkVisitor);
-            extractor.ExtractFromMS(db);
-            extractor.Extract(db);
+            extractor.Extract(db); // 提取块中块(包括外参)
+            extractor.ExtractFromMS(db); // 提取本地块
 
             return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
+
+        private void DrawFireHydrant(Database database)
+        {
+            string layerName = "消火栓圆圈图层";
+            try
+            {
+                ThMEPEngineCoreLayerUtils.CreateAILayer(database, layerName, 30);
+            }
+            catch { }
+
+            foreach (var db in DBobjs)
+            {
+                var br = db as BlockReference;
+                using (AcadDatabase currentDb = AcadDatabase.Active())
+                {
+                    var rect = GetRect(br);
+                    rect.LayerId = DbHelper.GetLayerId(layerName);
+                    currentDb.CurrentSpace.Add(rect);
+                }
+            }
+        }
     }
-
-
-
     public class ThBlockReferenceExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public Func<Entity, bool> CheckQualifiedLayer { get; set; }
