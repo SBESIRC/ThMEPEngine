@@ -419,7 +419,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 allPoints.AddRange(IndoorFanCommon.GetPolylinePoints(item));
             }
             //根据方向获取分割线位置
-            var orderDirPoints = ThPointVectorUtil.PointsOrderByDirection(allPoints, dir, false);
+            var orderDirPoints = ThPointVectorUtil.PointsOrderByDirection(allPoints, dir, true);
             var orderOhterDirPoints = ThPointVectorUtil.PointsOrderByDirection(allPoints, otherDir, false);
             var maxDis = Math.Abs((orderDirPoints.Last() - orderDirPoints.First()).DotProduct(dir));
             var otherMaxDis = Math.Abs((orderOhterDirPoints.Last() - orderOhterDirPoints.First()).DotProduct(otherDir));
@@ -428,12 +428,12 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             for (int i = 0; i < rowCount; i++)
             {
                 var thisRowPlines = new List<Polyline>();
-                var SLinePoint = origin + dir.Negate().MultiplyBy(moveDis * i);
+                var SLinePoint = origin + dir.MultiplyBy(moveDis * i);
                 if (i > 0)
-                    SLinePoint = SLinePoint + dir.Negate().MultiplyBy(200);
-                var ELinePoint = origin + dir.Negate().MultiplyBy(moveDis * (i + 1));
+                    SLinePoint = SLinePoint + dir.MultiplyBy(200);
+                var ELinePoint = origin + dir.MultiplyBy(moveDis * (i + 1));
                 if (i < rowCount - 1)
-                    ELinePoint = ELinePoint - dir.Negate().MultiplyBy(200);
+                    ELinePoint = ELinePoint - dir.MultiplyBy(200);
                 var sLine = new Line(SLinePoint - otherDir.MultiplyBy(otherMaxDis), SLinePoint + otherDir.MultiplyBy(otherMaxDis));
                 var eLine = new Line(ELinePoint - otherDir.MultiplyBy(otherMaxDis), ELinePoint + otherDir.MultiplyBy(otherMaxDis));
                 var curves = new List<Curve>();
@@ -451,6 +451,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     objs.Add(curve);
                 }
                 var allPolylines = objs.PolygonsEx();
+                var rowCenterPoints = new Dictionary<Point3d, Polyline>();
                 foreach (Polyline pline in allPolylines)
                 {
                     if (null == pline)
@@ -458,8 +459,18 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     var centerPoint = IndoorFanCommon.PolylinCenterPoint(pline);
                     var tempDis = Math.Abs((centerPoint - origin).DotProduct(dir));
                     if (tempDis > moveDis * i && tempDis < (moveDis * (i + 1)))
-                        thisRowPlines.Add(pline);
+                    {
+                        rowCenterPoints.Add(centerPoint,pline);
+                        thisRowPlines.Add(pline); 
+                    }
                 }
+                var points = rowCenterPoints.Select(c => c.Key).ToList();
+                points = ThPointVectorUtil.PointsOrderByDirection(points, dir, true);
+                //var 
+                //foreach (var key in points) 
+                //{
+                //    rowPolylines.Add(rowCenterPoints[key]);
+                //}
                 rowPolylines.Add(thisRowPlines);
             }
             return rowPolylines;

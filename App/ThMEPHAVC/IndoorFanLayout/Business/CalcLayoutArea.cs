@@ -138,6 +138,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             _roomIntersectAreas = new List<DivisionRoomArea>();
             var outGeo = _roomPLine.ToNTSPolygon();
             var targetAreas = GetDivisionAreas(_roomPLine);
+            //房间有些区域可能没分割后的区域，这些区域需要根据区域去除后再计算
             foreach (var divisionArea in targetAreas)
             {
                 var tempGeo = divisionArea.AreaPolyline.ToNTSPolygon();
@@ -183,8 +184,107 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 layoutFan.NeedLoad = needLoad;
                 _roomIntersectAreas.Add(layoutFan);
             }
+            Geometry geometry = _roomPLine.ToNTSPolygon();
+            foreach (var area in _roomIntersectAreas) 
+            {
+                var tempGeo = area.divisionArea.AreaPolyline.ToNTSPolygon();
+                geometry = geometry.Difference(tempGeo);
+            }
+            foreach (var item in _roomInnerPLine) 
+            {
+                var tempGeo = item.ToNTSPolygon();
+                geometry = geometry.Difference(tempGeo);
+            }
+            var needAddAreas = geometry.ToDbObjects(true);
+            foreach (var area in needAddAreas) 
+            {
+                Polyline addPLine = null;
+                if (area is Polyline polyline)
+                {
+                    if (polyline.Area < 100)
+                        continue;
+                    addPLine = polyline;
+                }
+                else if (area is MPolygon mPolygon) 
+                {
+                    if (mPolygon.Area < 100)
+                        continue;
+                    addPLine =mPolygon.Outline();
+                }
+                
+                var needLoad = CalcAreaLoad(new List<Polyline> { addPLine });
+                
+                var tempBuffers = addPLine.Buffer(IndoorFanCommon.RoomBufferOffSet);
+                if (tempBuffers == null || tempBuffers.Count < 1)
+                    continue;
+                var tempRoomPLine = tempBuffers[0] as Polyline;
+                if (tempRoomPLine == null || tempRoomPLine.Area < 100)
+                    continue;
+                var addArea = new DivisionArea(false, addPLine);
+                //计算区域的UCS,外扩100找相交的区域，判断用那个UCS
+                addArea.XVector = GetAddAreaUCS(addPLine);
+                var layoutFan = new DivisionRoomArea(addArea);
+                layoutFan.RealIntersectAreas.Add(addPLine);
+                layoutFan.RoomLayoutAreas.Add(tempRoomPLine);
+                layoutFan.NeedLoad = needLoad;
+                _roomIntersectAreas.Add(layoutFan);
+            }
         }
-        
+        Vector3d GetAddAreaUCS(Polyline addPLine) 
+        {
+            var pl = (addPLine.Buffer(100)[0] as Polyline).ToNTSGeometry();
+            var vectors = new List<Vector3d>();
+            var vectorAreas = new Dictionary<Vector3d, double>();
+            foreach (var item in _roomIntersectAreas) 
+            {
+                var tempGeo = item.divisionArea.AreaPolyline.ToNTSPolygon();
+                var interGeo = OverlayNGRobust.Overlay(
+                    pl,
+                    tempGeo,
+                    SpatialFunction.Intersection);
+                var res = interGeo.ToDbCollection();
+                if (res.Count < 1)
+                    continue;
+                var xVector = item.divisionArea.XVector;
+                var interPolylines = new List<Polyline>();
+                foreach (var area in res)
+                {
+                    if (area is Polyline polyline)
+                    {
+                        if (polyline.Area < 100)
+                            continue;
+                        interPolylines.Add(polyline);
+                    }
+                    else if (area is Polygon polygon)
+                    {
+                        if (polygon == null || polygon.Area < 100)
+                            continue;
+                        interPolylines.Add(polygon.Shell.ToDbPolyline());
+                    }
+                }
+                if (interPolylines.Count < 1)
+                    continue;
+                var dArea = interPolylines.Sum(c => c.Area);
+                vectors.Add(xVector);
+                bool isAdd = true;
+                foreach (var keyValue in vectorAreas) 
+                {
+                    if (Math.Abs(keyValue.Key.DotProduct(xVector)) > 0.999)
+                    {
+                        vectorAreas[keyValue.Key] += dArea;
+                        isAdd = false;
+                        break;
+                    }
+                }
+                if (isAdd)
+                    vectorAreas.Add(xVector, dArea);
+            }
+            if (vectors.Count < 1)
+                return _roomIntersectAreas.First().divisionArea.XVector;
+            var dir = vectorAreas.OrderByDescending(c => c.Value).First().Key; //vectors.GroupBy(c => c).ToDictionary(c => c.Key, x => x.Count()).OrderByDescending(c => c.Value).First().Key;
+            return dir;
+
+        }
         List<DivisionArea> GetDivisionAreas(Polyline roomOutPLine) 
         {
             var resList = new List<DivisionArea>();
@@ -272,6 +372,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 bool dirHaveGroup = false;
                 //计算第一排方向上是否和其它的区域相交，比较时是和其它UCS的区域数据进行比较
                 var firstGroupFirstRows = firstGroup.GroupDivisionAreas.Where(c => c.GroupId == firstGroup.GroupFirstId).ToList();
+                if (firstGroupFirstRows.Count < 1)
+                    continue;
                 var firstRowDir = firstGroupFirstRows.First().GroupDir;
                 //将第一排区域外扩5mm，找相交到的区域
                 var firstPLines = new List<Polyline>();
@@ -288,6 +390,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         continue;
                     var secondGroup = areaUCSGroups[j];
                     var secondGroupFirstRows = secondGroup.GroupDivisionAreas.Where(c => c.GroupId == secondGroup.GroupFirstId).ToList();
+                    if (secondGroupFirstRows.Count < 1)
+                        continue;
                     var secondRowDir = secondGroupFirstRows.First().GroupDir;
                     //先初步获取
                     var inserts = GetGroupInsert(firstPLines, secondGroup);
@@ -336,6 +440,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             //再计算受影响的每个UCS的方向,要考虑先后影响的问题，哪个区域的第一排朝向优先计算
             while (ucsIds.Count < areaUCSGroups.Count) 
             {
+                if (dirUcsGroupIds.Count < 1)
+                    break;
                 foreach (var item in areaUCSGroups)
                 {
                     if (ucsIds.Any(c => c == item.UcsGroupId))
@@ -361,6 +467,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             foreach (var group in areaUCSGroups)
             {
                 if (ucsIds.Any(c => c == group.UcsGroupId))
+                    continue;
+                if (string.IsNullOrEmpty(group.GroupFirstId))
                     continue;
                 var thisGroupFirstId = group.GroupFirstId;
                 var firstGroupIndex = group.OrderGroupIds.IndexOf(thisGroupFirstId);

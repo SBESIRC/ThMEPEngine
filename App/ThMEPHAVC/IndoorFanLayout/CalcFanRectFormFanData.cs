@@ -81,7 +81,7 @@ namespace ThMEPHVAC.IndoorFanLayout
             }
             load *= correctionFactor;
             fanRectangle.Load = load;
-            fanRectangle.MinLength = 2000;
+            fanRectangle.MinLength = 1600;
             fanRectangle.MaxLength = 5000;
             var size = coilUnitFan.AirSupplyuctSize.ToLower();
             var spliteWidth = size.Split('x');
@@ -100,8 +100,8 @@ namespace ThMEPHVAC.IndoorFanLayout
             double.TryParse(spliteVentWidth[0], out ventWidth);
             fanRectangle.VentRect.VentWidth = ventWidth;
             fanRectangle.VentRect.VentLength = ventWidth;
-            fanRectangle.VentRect.VentMinDistanceToStart = 1500;
-            fanRectangle.VentRect.VentMinDistanceToEnd = 500;
+            fanRectangle.VentRect.VentMinDistanceToStart = 1300;
+            fanRectangle.VentRect.VentMinDistanceToEnd = 300;
             fanRectangle.VentRect.VentMinDistanceToPrevious = 2000;
             return fanRectangle;
         }
@@ -121,7 +121,7 @@ namespace ThMEPHVAC.IndoorFanLayout
             }
             load *= correctionFactor;
             fanRectangle.Load = load;
-            fanRectangle.MinLength = 2500;
+            fanRectangle.MinLength = 2300;
             fanRectangle.MaxLength = 5000;
             var size = fan.AirSupplyuctSize.ToLower();
             var spliteWidth = size.Split('x');
@@ -141,7 +141,7 @@ namespace ThMEPHVAC.IndoorFanLayout
             fanRectangle.VentRect.VentWidth = ventWidth;
             fanRectangle.VentRect.VentLength = ventWidth;
             fanRectangle.VentRect.VentMinDistanceToStart = 2000;
-            fanRectangle.VentRect.VentMinDistanceToEnd = 500;
+            fanRectangle.VentRect.VentMinDistanceToEnd = 300;
             fanRectangle.VentRect.VentMinDistanceToPrevious = 1000;
             return fanRectangle;
         }

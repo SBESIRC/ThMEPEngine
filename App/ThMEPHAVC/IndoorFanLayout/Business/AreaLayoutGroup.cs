@@ -66,12 +66,13 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             if (this.GroupDivisionAreas.Count < 1)
                 return;
             var areaCenterPoints = this.GroupDivisionAreas.Select(c => c.divisionArea.CenterPoint).ToList();
+            var allAreaCenterPoints = new List<Point3d>();
             var otherDir = Vector3d.ZAxis.CrossProduct(this.FirstDir);
-            var firstArea = this.GroupDivisionAreas.First();
             var centerPoint = this.ArcCenter;
             string firstRowGroupId = "";
             if (this.IsArcGroup)
             {
+                var firstArea = this.GroupDivisionAreas.First();
                 var arc = firstArea.divisionArea.AreaCurves.OfType<Arc>().First();
                 var outDir = (arc.EndPoint - centerPoint).GetNormal();
                 if (outDir.DotProduct(this.FirstDir) < 0)
@@ -81,15 +82,17 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             else
                 areaCenterPoints = ThPointVectorUtil.PointsOrderByDirection(areaCenterPoints, this.FirstDir, true);
-            double rowAllAreas = 0.0;
-            double rowAreaRatio = 0.0;
-            bool haveFirst = false;
+            allAreaCenterPoints.AddRange(areaCenterPoints);
             while (areaCenterPoints.Count > 0)
             {
                 string groupId = Guid.NewGuid().ToString();
                 var first = areaCenterPoints.First();
+                var firstArea = GroupDivisionAreas.Where(c => c.divisionArea.CenterPoint.DistanceTo(first) < 5).First();
                 areaCenterPoints.Remove(first);
+                var areaPoints = IndoorFanCommon.GetPolylinePoints(firstArea.divisionArea.AreaPolyline);
                 var linePoints = new List<Point3d>();
+                
+                
                 if (this.IsArcGroup)
                 {
                     var thisRadius = first.DistanceTo(centerPoint);
@@ -104,15 +107,32 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 {
                     foreach (var point in areaCenterPoints)
                     {
-                        var checkDir = (point - first).GetNormal();
-                        var angle = otherDir.GetAngleTo(checkDir);
-                        angle %= Math.PI;
-                        if (angle > _precisionAngle && angle < Math.PI - _precisionAngle)
+                        var orderPoints = ThPointVectorUtil.PointsOrderByDirection(areaPoints, this.FirstDir, false);
+                        var sp = orderPoints.First();
+                        var ep = orderPoints.Last();
+                        var prjEp = ThPointVectorUtil.PointToLine(ep, sp, this.FirstDir);
+
+                        var area = GroupDivisionAreas.Where(c => c.divisionArea.CenterPoint.DistanceTo(point) < 5).First();
+                        var thisAreaPoints = IndoorFanCommon.GetPolylinePoints(area.divisionArea.AreaPolyline);
+                        var thisOrderPoints = ThPointVectorUtil.PointsOrderByDirection(thisAreaPoints, this.FirstDir, false);
+                        var thisPrjSp = ThPointVectorUtil.PointToLine(thisOrderPoints.First(), sp, this.FirstDir);
+                        var thisPrjEp = ThPointVectorUtil.PointToLine(thisOrderPoints.Last(), sp, this.FirstDir);
+                        IndoorFanCommon.FindIntersection(new Line(sp, prjEp), new Line(thisPrjSp, thisPrjEp), out List<Point3d> interPoints);
+                        if (interPoints.Count < 2)
                             continue;
-                        var dot = (point - first).DotProduct(this.FirstDir);
-                        if (Math.Abs(dot) > 2000)
+                        if (interPoints.First().DistanceTo(interPoints.Last()) < 1000)
                             continue;
+                        areaPoints.AddRange(thisOrderPoints);
                         linePoints.Add(point);
+                        //var checkDir = (point - first).GetNormal();
+                        //var angle = otherDir.GetAngleTo(checkDir);
+                        //angle %= Math.PI;
+                        //if (angle > _precisionAngle && angle < Math.PI - _precisionAngle)
+                        //    continue;
+                        //var dot = (point - first).DotProduct(this.FirstDir);
+                        //if (Math.Abs(dot) > 2000)
+                        //    continue;
+                        //linePoints.Add(point);
                     }
                 }
                 foreach (var point in linePoints)
@@ -147,38 +167,14 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 {
                     firstRowGroupId = groupId;
                 }
-                //检查相交面积和比值
-                //double thisAllAreas = 0.0;
-                //double thisInsertAreas = 0.0;
-                //foreach (var item in this.GroupDivisionAreas)
-                //{
-                //    if (linePoints.Any(c => c.DistanceTo(item.divisionArea.CenterPoint) < 5))
-                //    {
-                //        thisAreas.Add(item);
-                //        item.GroupId = groupId;
-                //        thisAllAreas += item.divisionArea.AreaPolyline.Area;
-                //        thisInsertAreas += item.RealIntersectAreas.Sum(c => c.Area);
-                //    }
-                //}
-                //var center = GroupRowCenterPoints(thisAreas);
-                //this.GroupCenterPoints.Add(groupId, center);
-                //if (haveFirst)
-                //    continue;
-                //var ratio = thisInsertAreas / thisAllAreas;
-                //if (ratio > 0.4)
-                //{
-                //    haveFirst = true;
-                //    rowAllAreas = thisAllAreas;
-                //    rowAreaRatio = ratio;
-                //    firstRowGroupId = groupId;
-                //}
-                //else if (ratio > rowAreaRatio)
-                //{
-                //    rowAllAreas = thisAllAreas;
-                //    rowAreaRatio = ratio;
-                //    firstRowGroupId = groupId;
-                //}
             }
+            if (string.IsNullOrEmpty(firstRowGroupId)) 
+            {
+                var firstCenter = allAreaCenterPoints.First();
+                firstRowGroupId = GroupCenterPoints.Where(c => c.Value.DistanceTo(firstCenter) < 10).FirstOrDefault().Key;
+                firstRowGroupId = GroupCenterPoints.First().Key;
+            }
+               
             this.GroupFirstId = firstRowGroupId;
         }
         void CalcGroupAreaColumn()

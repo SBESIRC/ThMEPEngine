@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -44,6 +45,11 @@ namespace ThMEPHVAC.IndoorFanLayout
         };
         public static void LoadBlockLayerToDocument(Database database)
         {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            {
+                //解锁0图层，后面块有用0图层的
+                DbHelper.EnsureLayerOn("0");
+            }
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
