@@ -34,8 +34,8 @@ namespace TianHua.Electrical.UI.SystemDiagram
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ZXJHMX", CommandFlags.Modal)]
-        public void THC2L()
+        [CommandMethod("TIANHUACAD", "THZXJHMX", CommandFlags.Modal)]
+        public void THZXJH()
         {
             uiConnect = new ShowAlarm();
             AcadApp.ShowModelessWindow(uiConnect);
