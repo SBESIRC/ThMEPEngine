@@ -136,8 +136,9 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
-                <Command Local="THGB"   Global="THGB" />
+                <Command Local="THGBBZ" Global="THGBBZ" />
                 <Command Local="THGBMQ" Global="THGBMQ" />
+                <Command Local="THGBLX" Global="THGBLX" />
                 <Command Local="THLCDY" Global="THLCDY" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
@@ -154,8 +155,9 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
-                <Command Local="THGB"   Global="THGB" />
+                <Command Local="THGBBZ" Global="THGBBZ" />
                 <Command Local="THGBMQ" Global="THGBMQ" />
+                <Command Local="THGBLX" Global="THGBLX" />
                 <Command Local="THLCDY" Global="THLCDY" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
@@ -172,8 +174,9 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
-                <Command Local="THGB"   Global="THGB" />
+                <Command Local="THGBBZ" Global="THGBBZ" />
                 <Command Local="THGBMQ" Global="THGBMQ" />
+                <Command Local="THGBLX" Global="THGBLX" />
                 <Command Local="THLCDY" Global="THLCDY" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
@@ -381,6 +384,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
@@ -395,6 +399,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
@@ -409,6 +414,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THGB"  Global="THGB" />
                 <Command Local="THYWG" Global="THYWG" />
                 <Command Local="THTZZH" Global="THTZZH" />
                 <Command Local="THHZXT" Global="THHZXT" />
