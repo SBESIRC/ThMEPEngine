@@ -125,7 +125,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             bool recordprevious = false;
             try
             {
-                rst = geneAlgorithm.Run(histories, recordprevious);
+                //rst = geneAlgorithm.Run(histories, recordprevious);
+                rst = geneAlgorithm.Run2(histories, recordprevious);
             }
             catch
             {
