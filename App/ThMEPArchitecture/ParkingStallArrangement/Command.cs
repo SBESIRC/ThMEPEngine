@@ -23,6 +23,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -64,11 +65,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var database = acadDatabase.Database;
-            var selectArea = SelectAreas();//生成候选区域
-            var outerBrder = new OuterBrder();
-            var extractRst = outerBrder.Extract(database, selectArea);//提取多段线
-            if(!extractRst)
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            if(!rstDataExtract)
             {
                 return;
             }
@@ -169,24 +167,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //layoutPara.Dispose();
         }
 
-        private static Point3dCollection SelectAreas()
-        {
-            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return new Point3dCollection();
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                return frame.Vertices();
-            }
-        }
+        
     }
 }

@@ -27,6 +27,7 @@
   <ItemGroup>
     <Compile Include="ParkingStallArrangement\Algorithm\GA.cs" />
     <Compile Include="ParkingStallArrangement\CommandWithoutSegLine.cs" />
+    <Compile Include="ParkingStallArrangement\Extractor\InputData.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThObstacleGeoJsonFactory.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThBoundaryGeoJsonFactory.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThObstacleExtractionVisitor.cs" />
