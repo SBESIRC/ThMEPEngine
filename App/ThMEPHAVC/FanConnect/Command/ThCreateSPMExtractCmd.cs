@@ -173,7 +173,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;
                 pipeExtendServiece.PipeExtend(treeModel);
-
                 //计算流量
                 ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
                 if(pointTreeModel.RootNode == null)

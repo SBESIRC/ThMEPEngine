@@ -8,9 +8,8 @@ using ThMEPHVAC.FanConnect.Model;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using NFox.Cad;
-using ThCADExtension;
 using ThMEPWSS.HydrantConnectPipe.Command;
-using Dreambuild.AutoCAD;
+using System.Linq;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -48,9 +47,8 @@ namespace ThMEPHVAC.FanConnect.Service
                     pathList.Add(tmpPath);
                 }
             }
-
             //从pathList里面，挑选一条
-            return pathList[0];
+            return pathList.FirstOrDefault();
         }
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
@@ -95,6 +93,10 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 //使用A*算法，跑出路径
                 retLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
+            }
+            if(retLine == null)
+            {
+                return null;
             }
             retLine.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
             return retLine;

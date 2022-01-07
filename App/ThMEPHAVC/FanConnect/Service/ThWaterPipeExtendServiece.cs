@@ -120,11 +120,14 @@ namespace ThMEPHVAC.FanConnect.Service
                                         var cline = currentExLines[i];
                                         var pline = parentExLines[i];
                                         var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth);
-                                        cline.StartPoint = closPt[0];
-                                        node.Item.ExPoint.Add(closPt[0]);
-                                        if (node.Item.IsConnect)
+                                        if(closPt.Count > 0)
                                         {
-                                            pline.EndPoint = closPt[0];
+                                            cline.StartPoint = closPt[0];
+                                            node.Item.ExPoint.Add(closPt[0]);
+                                            if (node.Item.IsConnect)
+                                            {
+                                                pline.EndPoint = closPt[0];
+                                            }
                                         }
                                     }
                                 }
@@ -142,13 +145,17 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 {
                                                     var cline = currentExLines[i];
                                                     var pline = parentExLines[i];
-                                                    var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
-                                                    cline.StartPoint = closPt;
-                                                    node.Item.ExPoint.Add(closPt);
-                                                    if (node.Item.IsConnect)
+                                                    var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth);
+                                                    if (closPt.Count > 0)
                                                     {
-                                                        pline.EndPoint = closPt;
+                                                        cline.StartPoint = closPt[0];
+                                                        node.Item.ExPoint.Add(closPt[0]);
+                                                        if (node.Item.IsConnect)
+                                                        {
+                                                            pline.EndPoint = closPt[0];
+                                                        }
                                                     }
+
                                                 }
                                             }
                                             break;
@@ -163,37 +170,38 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var pline4 = parentExLines[3];
                                                 var pline5 = parentExLines[4];
 
-                                                var closPt1 = ThFanConnectUtils.IntersectWithEx(pline1,cline1, Intersect.ExtendBoth)[0];
-                                                var closPt2 = ThFanConnectUtils.IntersectWithEx(pline2,cline1, Intersect.ExtendBoth)[0];
-                                                var closPt3 = ThFanConnectUtils.IntersectWithEx(pline3,cline2, Intersect.ExtendBoth)[0];
-                                                var closPt4 = ThFanConnectUtils.IntersectWithEx(pline4,cline2, Intersect.ExtendBoth)[0];
-                                                var closPt5 = ThFanConnectUtils.IntersectWithEx(pline5,cline3, Intersect.ExtendBoth)[0];
+                                                var closPt1 = ThFanConnectUtils.IntersectWithEx(pline1,cline1, Intersect.ExtendBoth);
+                                                var closPt2 = ThFanConnectUtils.IntersectWithEx(pline2,cline1, Intersect.ExtendBoth);
+                                                var closPt3 = ThFanConnectUtils.IntersectWithEx(pline3,cline2, Intersect.ExtendBoth);
+                                                var closPt4 = ThFanConnectUtils.IntersectWithEx(pline4,cline2, Intersect.ExtendBoth);
+                                                var closPt5 = ThFanConnectUtils.IntersectWithEx(pline5,cline3, Intersect.ExtendBoth);
+                                                if (closPt1.Count > 0 && closPt2.Count > 0 && closPt3.Count > 0 && closPt4.Count > 0 && closPt5.Count > 0)
+                                                {
+                                                    cline1.StartPoint = closPt2[0];
+                                                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                                                    {
+                                                        cline2.StartPoint = closPt4[0];
+                                                    }
+                                                    else
+                                                    {
+                                                        cline2.StartPoint = closPt3[0];
+                                                    }
+                                                    cline3.StartPoint = closPt5[0];
 
-                                                cline1.StartPoint = closPt2;
-                                                if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
-                                                {
-                                                    cline2.StartPoint = closPt4;
+                                                    node.Item.ExPoint.Add(closPt1[0]);
+                                                    node.Item.ExPoint.Add(closPt2[0]);
+                                                    node.Item.ExPoint.Add(closPt3[0]);
+                                                    node.Item.ExPoint.Add(closPt4[0]);
+                                                    node.Item.ExPoint.Add(closPt5[0]);
+                                                    if (node.Item.IsConnect)
+                                                    {
+                                                        pline1.EndPoint = closPt1[0];
+                                                        pline2.EndPoint = closPt2[0];
+                                                        pline3.EndPoint = closPt3[0];
+                                                        pline4.EndPoint = closPt4[0];
+                                                        pline5.EndPoint = closPt5[0];
+                                                    }
                                                 }
-                                                else
-                                                {
-                                                    cline2.StartPoint = closPt3;
-                                                }
-                                                cline3.StartPoint = closPt5;
-
-                                                node.Item.ExPoint.Add(closPt1);
-                                                node.Item.ExPoint.Add(closPt2);
-                                                node.Item.ExPoint.Add(closPt3);
-                                                node.Item.ExPoint.Add(closPt4);
-                                                node.Item.ExPoint.Add(closPt5);
-                                                if (node.Item.IsConnect)
-                                                {
-                                                    pline1.EndPoint = closPt1;
-                                                    pline2.EndPoint = closPt2;
-                                                    pline3.EndPoint = closPt3;
-                                                    pline4.EndPoint = closPt4;
-                                                    pline5.EndPoint = closPt5;
-                                                }
-                                                
                                             }
                                             break;
                                         default:
@@ -212,12 +220,15 @@ namespace ThMEPHVAC.FanConnect.Service
                         {
                             var cline = currentExLines[i];
                             var pline = parentExLines[i];
-                            var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth)[0];
-                            cline.StartPoint = closPt;
-                            node.Item.ExPoint.Add(closPt);
-                            if (node.Item.IsConnect)
+                            var closPt = ThFanConnectUtils.IntersectWithEx(pline,cline, Intersect.ExtendBoth);
+                            if (closPt.Count > 0)
                             {
-                                pline.EndPoint = closPt;
+                                cline.StartPoint = closPt[0];
+                                node.Item.ExPoint.Add(closPt[0]);
+                                if (node.Item.IsConnect)
+                                {
+                                    pline.EndPoint = closPt[0];
+                                }
                             }
                         }
                     }
