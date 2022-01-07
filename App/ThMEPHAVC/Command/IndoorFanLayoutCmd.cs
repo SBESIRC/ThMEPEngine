@@ -115,64 +115,13 @@ namespace ThMEPHVAC.Command
             //获取轴网线，根据轴网计算分割区域,
             //用选中的所有房间的轮廓线构成的AABB，外扩15m获取相交到的线，进行计算区域
             Polyline roomPline = SelectRoomOutPolyline();
-            var allAxis = indoorFanData.GetAllAxisCurves();
-            var curveObjs = new DBObjectCollection();
-            foreach (var item in allAxis)
-            {
-                curveObjs.Add(item);
-            }
-            _curveSpatialIndex = new ThCADCoreNTSSpatialIndex(curveObjs);
-            var calcCurves = GetCalaAxisCurves(allAxis, roomPline);
-
-            var columns = new List<Polyline>();
-            var gridLineClean = new GridLineCleanService();
-            gridLineClean.CleanGrid(calcCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
-            var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
-            curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
-            curves = curves.Where(x => x.Count > 0).ToList();
-            var gridDivision = new GridDivision();
-            var ucsPolygons = gridDivision.DivisionGridRegions(curves);
-            var areaObjs = new DBObjectCollection();
-            var areaDic = new Dictionary<Polyline, DivisionArea>();
-            int colorIndex = 0;
-            var allAreaRegion = new List<DivisionArea>();
-            foreach (var item in ucsPolygons) 
-            {
-                var isArc = item.gridType == GridType.ArcGrid;
-                var centerPoint = item.centerPt;
-                foreach (var polyline in item.regions) 
-                {
-                    if (polyline.Area < 10000)
-                        continue;
-                    if (onlyShowAxis) 
-                    {
-                        polyline.ColorIndex = colorIndex;
-                        showCurves.Add(polyline);
-                    }
-                    var area = new DivisionArea(isArc, polyline);
-                    if (isArc)
-                        area.ArcCenterPoint = centerPoint;
-                    else
-                        area.XVector = item.vector;
-                    areaObjs.Add(polyline);
-                    areaDic.Add(polyline, area);
-                    allAreaRegion.Add(area);
-                }
-                colorIndex += 1;
-            }
+            var areaRegion = GetGridDivisonAreas(roomPline, out List<Curve> showRegionCurves);
             if (onlyShowAxis) 
             {
-                ShowTestLineText(showCurves, fanTexts);
+                ShowTestLineText(showRegionCurves, fanTexts);
                 return;
             }
-            _areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
-            var crossPL = _areaSpatialIndex.SelectCrossingPolygon(roomPline);
-            var areaRegion = new List<DivisionArea>();
-            foreach(var item in crossPL)
-            {
-                if (item is Polyline polyline)
-                    areaRegion.Add(areaDic[polyline]);
-            }
+
             //获取房间负荷信息
             var thRoomLoadTool = new ThRoomLoadTable(_originTransformer);
             var allRoomLoads = thRoomLoadTool.GetAllRoomLoadTable();
@@ -227,12 +176,13 @@ namespace ThMEPHVAC.Command
                         continue;
                     calcLayoutArea.InitRoomData(pline.Key, pline.Value,roomArea*1000*1000, roomLoad);
                     string fanName = "";
-                    var roomInserterAreas = calcLayoutArea.CalaRoomInsertAreas();
-                    if (roomInserterAreas.Count < 1)
+                    var roomInserterAreas = calcLayoutArea.CalaRoomInsertAreas(dir,out List<DivisionRoomArea> addAreas);
+                    if ((roomInserterAreas.Count<1 && addAreas.Count<1)|| roomInserterAreas.Count < 1 && pline.Value.Count>0)
                         continue;
                     if (!isHisDir)
                     {
-                        var canUseFans = RoomCalcFanNumber(roomInserterAreas, calcLayoutArea.RoomUnitLoad);
+                        var calcFanAreas = roomInserterAreas.Count > 0 ? roomInserterAreas : addAreas;
+                        var canUseFans = RoomCalcFanNumber(calcFanAreas, calcLayoutArea.RoomUnitLoad);
                         if (canUseFans.Count < 1)
                             continue;
                         fanName = canUseFans.First();
@@ -382,6 +332,70 @@ namespace ThMEPHVAC.Command
             fanRectangleToBlock.AddBlock(fanLayoutRects, IndoorFanParameter.Instance.LayoutModel.FanType);
             //将计算后的排布矩形转换为具体的块
             ShowTestLineText(showCurves, fanTexts);
+        }
+
+        List<DivisionArea> GetGridDivisonAreas(Polyline roomsAABB,out List<Curve> showCurves)
+        {
+            showCurves = new List<Curve>();
+            var allAreaRegion = new List<DivisionArea>();
+            var allAxis = indoorFanData.GetAllAxisCurves();
+            if (null == allAxis || allAxis.Count < 1)
+                return allAreaRegion;
+            var curveObjs = new DBObjectCollection();
+            foreach (var item in allAxis)
+            {
+                curveObjs.Add(item);
+            }
+            _curveSpatialIndex = new ThCADCoreNTSSpatialIndex(curveObjs);
+            var calcCurves = GetCalaAxisCurves(allAxis, roomsAABB);
+
+            var columns = new List<Polyline>();
+            var gridLineClean = new GridLineCleanService();
+            gridLineClean.CleanGrid(calcCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
+            var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
+            curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
+            curves = curves.Where(x => x.Count > 0).ToList();
+            var gridDivision = new GridDivision();
+            var ucsPolygons = gridDivision.DivisionGridRegions(curves);
+            var areaObjs = new DBObjectCollection();
+            var areaDic = new Dictionary<Polyline, DivisionArea>();
+            int colorIndex = 0;
+           
+            foreach (var item in ucsPolygons)
+            {
+                var isArc = item.gridType == GridType.ArcGrid;
+                var centerPoint = item.centerPt;
+                foreach (var polyline in item.regions)
+                {
+                    if (polyline.Area < 10000)
+                        continue;
+                    if (onlyShowAxis)
+                    {
+                        polyline.ColorIndex = colorIndex;
+                        showCurves.Add(polyline);
+                    }
+                    var area = new DivisionArea(isArc, polyline);
+                    if (isArc)
+                        area.ArcCenterPoint = centerPoint;
+                    else
+                        area.XVector = item.vector;
+                    areaObjs.Add(polyline);
+                    areaDic.Add(polyline, area);
+                    allAreaRegion.Add(area);
+                }
+                colorIndex += 1;
+            }
+            if (onlyShowAxis)
+                return allAreaRegion;
+            _areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
+            var crossPL = _areaSpatialIndex.SelectCrossingPolygon(roomsAABB);
+            var areaRegion = new List<DivisionArea>();
+            foreach (var item in crossPL)
+            {
+                if (item is Polyline polyline)
+                    areaRegion.Add(areaDic[polyline]);
+            }
+            return areaRegion;
         }
         List<string> RoomCalcFanNumber(List<DivisionRoomArea> roomInsterAreas,double roomUnitLoad) 
         {

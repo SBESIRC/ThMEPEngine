@@ -22,7 +22,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         ThCADCoreNTSSpatialIndex _areaSpatialIndex;
         Dictionary<Polyline, DivisionArea> _areaPLine;
         FanRectangle _fanRectangle;
-
+        Vector3d _firstDir;
         public CalcLayoutArea(List<DivisionArea> divisionAreas)
         {
             _allDivisionAreas = new List<DivisionArea>();
@@ -59,6 +59,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         public List<AreaLayoutGroup> GetRoomInsterAreas(Vector3d firstDir, FanRectangle fanRectangle)
         {
+            _firstDir = firstDir;
             _fanRectangle = fanRectangle;
             //根据外轮廓获取相交到的轮廓
             var resUCSGroups = new List<AreaLayoutGroup>();
@@ -135,8 +136,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
 
             return hisDir;
         }
-        public List<DivisionRoomArea> CalaRoomInsertAreas() 
+        public List<DivisionRoomArea> CalaRoomInsertAreas(Vector3d firstDir, out List<DivisionRoomArea> addAreas) 
         {
+            _firstDir = firstDir;
+            var divisionAreas =new List<DivisionRoomArea>();
+            addAreas = new List<DivisionRoomArea>();
             _roomIntersectAreas = new List<DivisionRoomArea>();
             var outGeo = _roomPLine.ToNTSPolygon();
             var targetAreas = GetDivisionAreas(_roomPLine);
@@ -184,6 +188,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     layoutFan.RoomLayoutAreas.Add(tempRoomPLine);
                 }
                 layoutFan.NeedLoad = needLoad;
+                divisionAreas.Add(layoutFan);
                 _roomIntersectAreas.Add(layoutFan);
             }
             Geometry geometry = _roomPLine.ToNTSPolygon();
@@ -229,13 +234,16 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 layoutFan.RealIntersectAreas.Add(addPLine);
                 layoutFan.RoomLayoutAreas.Add(tempRoomPLine);
                 layoutFan.NeedLoad = needLoad;
+                addAreas.Add(layoutFan);
                 _roomIntersectAreas.Add(layoutFan);
             }
-            return _roomIntersectAreas;
+            return divisionAreas;
         }
         Vector3d GetAddAreaUCS(Polyline addPLine) 
         {
             var pl = (addPLine.Buffer(100)[0] as Polyline).ToNTSGeometry();
+            if (_roomIntersectAreas.Count < 1)
+                return _firstDir;
             var vectors = new List<Vector3d>();
             var vectorAreas = new Dictionary<Vector3d, double>();
             foreach (var item in _roomIntersectAreas) 
@@ -291,6 +299,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         List<DivisionArea> GetDivisionAreas(Polyline roomOutPLine) 
         {
             var resList = new List<DivisionArea>();
+            if (_areaSpatialIndex == null || _allDivisionAreas.Count < 1)
+                return resList;
             //通过空间索引初步过滤
             var interPLines = _areaSpatialIndex.SelectCrossingPolygon(roomOutPLine);
             foreach (var item in interPLines) 
