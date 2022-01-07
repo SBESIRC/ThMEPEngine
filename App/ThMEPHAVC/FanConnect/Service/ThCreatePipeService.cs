@@ -47,8 +47,8 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 if (hole is Polyline)
                 {
-                    var tmpHole = (hole as Polyline).Buffer(PipeWidth)[0] as Polyline;
-                    ObstacleHoles.Add(tmpHole);
+//                    var tmpHole = (hole as Polyline).Buffer(PipeWidth)[0] as Polyline;
+                    ObstacleHoles.Add(hole as Polyline);
                 }
             }
         }
