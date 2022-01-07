@@ -74,8 +74,10 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var frameIndex = new ThCADCoreNTSSpatialIndex(frames.ToCollection());
                 var frameClone = frameIndex.SelectAll().OfType<Polyline>().ToList();
                 var transformerPt = frameClone[0].StartPoint;
+
                 // 测试使用
                 // transformerPt = new Point3d();
+                
                 var transformer = new ThMEPOriginTransformer(transformerPt);
                 
                 // 测试使用
@@ -144,6 +146,11 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
                     var mainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
                     var subMainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
+
+                    // 测试使用
+                    //subMainPipe.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                    //continue;
+
                     mainPipe.ForEach(p => transformer.Transform(p));
                     subMainPipe.ForEach(p => transformer.Transform(p));
                     mainPipeLine.ForEach(p => transformer.Transform(p));
@@ -157,7 +164,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     allLines.AddRange(mainPipeLine);
                     allLines.AddRange(subMainPipeLine);
 
-                    if (sprinklerPts.Count == 0 || subMainPipe.Count == 0)
+                    if (sprinklerPts.Count == 0 || subMainLine.Count == 0)
                     {
                         continue;
                     }

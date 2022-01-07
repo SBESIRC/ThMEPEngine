@@ -188,9 +188,9 @@ namespace ThMEPWSS.SprinklerConnect.Data
                 var firstDist = o.GetPoint3dAt(1).DistanceTo(o.StartPoint);
                 var secondDist = o.GetPoint3dAt(1).DistanceTo(o.GetPoint3dAt(2));
                 if (firstDist > secondDist
-                    && !(o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.5 && firstDist / secondDist < 1.6)
+                    && !(o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.45 && firstDist / secondDist < 1.6)
                     || (firstDist < secondDist 
-                        && o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.5 && firstDist / secondDist < 1.6))
+                        && o.Area > 7.5e7 && o.Area < 8.5e7 && firstDist / secondDist > 1.45 && firstDist / secondDist < 1.6))
                 {
                     // 取长边为车道方向
                     stallsTidal.Add(o.Clone() as Polyline);

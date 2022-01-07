@@ -29,8 +29,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             subMainLine = new List<Line>();
             var allTemp = new List<Line>();
 
-            var mainTemp = ThSprinklerLineService.PolylineToLine(mainPipe);
-            var subMainTemp = ThSprinklerLineService.PolylineToLine(subMainPipe);
+            var mainTemp = ProjectToXY(ThSprinklerLineService.PolylineToLine(mainPipe));
+            var subMainTemp = ProjectToXY(ThSprinklerLineService.PolylineToLine(subMainPipe));
             allTemp.AddRange(mainTemp);
             allTemp.AddRange(subMainTemp);
 
@@ -257,7 +257,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         }
 
         // 直线拍平到z=0的平面
-        private List<Line> ProjectToXY(List<Line> lines)
+        private static List<Line> ProjectToXY(List<Line> lines)
         {
             var lines_z0 = new List<Line>();
             lines.ForEach(o =>
@@ -284,7 +284,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             var intersectPts = lines[tuple.Item1].Intersect(lines[tuple.Item2], Intersect.OnBothOperands);
                             if (intersectPts.Count != 1)
                             {
-                                throw new NotSupportedException();
+                                //throw new NotSupportedException();
                             }
                             else
                             {

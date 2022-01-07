@@ -15,7 +15,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
     {
         // public static Point3d TransformerPt { get; set; }
 
-        /// <summary>
+        /// <summary> 
         /// 获取点位分片图
         /// </summary>
         /// <param name="sprinklerParameter"></param>
