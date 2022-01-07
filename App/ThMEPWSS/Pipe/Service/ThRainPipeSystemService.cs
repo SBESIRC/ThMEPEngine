@@ -1804,7 +1804,7 @@ new Point2d(maxX, minY)
             foreach (var ext in WaterBuckets)
             {
                 var r = GRect.Create(ext);
-                var pl = EntityFactory.CreatePolyline(r.ToPoint3dCollection());
+                var pl = EntityFactory.CreatePolyline(r.ToPt3dCollection());
                 pls.Add(pl);
                 BoundaryDict[pl] = r;
             }

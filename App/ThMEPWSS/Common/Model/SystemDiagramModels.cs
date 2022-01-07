@@ -83,7 +83,7 @@ namespace ThMEPWSS.Uitl
         }
         public Point3dCollection ToPoint3dCollection()
         {
-            return ToGRect().ToPoint3dCollection();
+            return ToGRect().ToPt3dCollection();
         }
         public Polyline ToPolyline()
         {
