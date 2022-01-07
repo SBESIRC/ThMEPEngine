@@ -56,6 +56,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Debug" Guid="{0F72870C-915B-41C2-B348-C4AEEE096D36}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\BouncyCastle.Crypto.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Debug" Guid="{9CA5C0FF-0B6F-441A-9994-A44C015DBDE3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" Guid="{0DBC948F-6CD9-4EA0-93D5-ED2CEEE07DBC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Serilog.Sinks.File.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -109,6 +115,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Debug" Guid="{886752A4-FBA2-4A6D-8CEE-7C62C165A4BF}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\BouncyCastle.Crypto.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Debug" Guid="{497D62C7-69AE-4486-A772-2576159ACE55}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" Guid="{8C49D56E-8AFE-459A-B9CD-87283E4A5779}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Serilog.Sinks.File.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -164,6 +176,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Debug" Guid="{EAEDCA4C-19CF-4C47-B822-8E9BB88D1D9E}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\BouncyCastle.Crypto.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Debug" Guid="{73236ABE-1B40-4D19-B15B-E0637C8CA713}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" Guid="{6E47D01A-6B05-40EB-8F06-B1D3590177E6}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Serilog.Sinks.File.dll" />
+            </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
@@ -218,7 +236,13 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Release" Guid="{098E31DB-D9E9-4C35-A549-A9C6A6985DFD}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_NPOI_BouncyCastle_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\BouncyCastle.Crypto.dll" />
-            </Component> 
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Release" Guid="{86D5F492-0379-498E-B3F0-96695E1022C5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" Guid="{578442B8-64CE-4E56-886E-62767ACC4B0C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Serilog.Sinks.File.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -273,6 +297,12 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Release" Guid="{48EE0A36-23C6-4A9C-91DE-C106909704E5}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_NPOI_BouncyCastle_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\BouncyCastle.Crypto.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Release" Guid="{532700D6-351D-4203-9C9B-357F5C3A101E}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" Guid="{81FAF773-7276-4ADC-ADB4-DC635FDDC787}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Serilog.Sinks.File.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -326,6 +356,12 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Release" Guid="{2CF8A7AB-E823-4BCB-B1C3-E900DCE30C57}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_NPOI_BouncyCastle_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\BouncyCastle.Crypto.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Release" Guid="{85ABAF6C-67AF-4FF6-AC12-C3A19C83381A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Serilog.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" Guid="{9606F249-18F5-4B2A-8A40-6785A02CA0F3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Serilog.Sinks.File.dll" />
             </Component>
         </DirectoryRef>
         <?endif?>
@@ -385,6 +421,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -438,6 +480,12 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_YamlDotNet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_YamlDotNet_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_YamlDotNet_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>
