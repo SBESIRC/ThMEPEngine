@@ -7,6 +7,7 @@ using NFox.Cad;
 using ThMEPWSS.SprinklerConnect.Service;
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Engine;
+using System;
 
 namespace THMEPWSS.RoomOrderingService
 {
@@ -28,8 +29,10 @@ namespace THMEPWSS.RoomOrderingService
         public List<List<Line>> orthogonalGrid { get; set; } = new List<List<Line>>();
 
         //key为外层房间，value为里层房间
+        public Dictionary<KeyValuePair<Polyline, Polyline>, KeyValuePair<Point3d,double> > penetrablePoint { get; set; } = new Dictionary<KeyValuePair<Polyline, Polyline>, KeyValuePair<Point3d, double>>();
+        public Dictionary<Polyline, List<Line>> piplineToRoom { get; set; } = new Dictionary<Polyline, List<Line>>();
         public Dictionary<Polyline, List<ThSprinklerNetGroup>> sprinklerParameterList { get; set; } = new Dictionary<Polyline, List<ThSprinklerNetGroup>>();
-
+        public List<Line> subPipelineList { get; set; } = new List<Line>();
         private double boundary { get; set; }
         public void PipelineArrange(List<Polyline> rooms, List<Polyline> geometry, double bound)
         {
@@ -38,6 +41,7 @@ namespace THMEPWSS.RoomOrderingService
             smallArea = rooms.Where(r => r.Area < boundary).ToList();
             bigArea = rooms.Where(r => r.Area > boundary).ToHashSet();
             //var spatialShearwallIndex = new ThCADCoreNTSSpatialIndex(shearWalls);
+            //记录房间相应喷淋点位,将有喷淋的放入targetRoom
             smallArea.ForEach(r =>
             {
                 sprinkler.ForEach(pt =>
@@ -55,31 +59,12 @@ namespace THMEPWSS.RoomOrderingService
                     }
                 });
             });
-            //foreach (var room in sprinklerInRoom)
-            //{
-            //    var dtOrthogonalSeg = ThSprinklerNetworkService.FindOrthogonalAngleFromDT(room.Value, out var dtSeg);
-            //    var roomBoundary = room.Key;
-            //    for (int i = 0; i < dtOrthogonalSeg.Count; ++i)
-            //    {
-            //        var l = dtOrthogonalSeg[i];
-            //        //spatialShearwallIndex.Intersects(l.Buffer(1)) ||
-            //        if ( roomBoundary.Intersects(l))
-            //        {
-            //            dtOrthogonalSeg.RemoveAt(i);
-            //            --i;
-            //        }
-            //    }
-            //    if (dtOrthogonalSeg.Count > 0)
-            //    {
-            //        orthogonalGrid.Add(dtOrthogonalSeg);
-            //    }
-            //    if (dtSeg.Count > 0)
-            //    {
-            //        gridLines.Add(dtSeg);
-            //    }
-            //}
+
+           
 
             targetRoom = sprinklerInRoom.Keys.ToList();
+            FindOrder(targetRoom);
+
             foreach(var room in targetRoom)
             {
                 var sprinklerParameter = new ThSprinklerParameter();
@@ -89,48 +74,143 @@ namespace THMEPWSS.RoomOrderingService
                 //List<Line> lines = new List<Line>();
                 //netList.ForEach(o => lines.AddRange(o.lines));
                 //var tree = kruskal(lines, sprinklerInRoom[room]);
-                List<List<Line>> forest = new List<List<Line>>();
-                netList.ForEach(o => forest.Add(kruskal(o.lines, sprinklerInRoom[room])));
+                //List<List<Line>> forest = new List<List<Line>>();
+                //netList.ForEach(o => forest.Add(kruskal(o.lines, sprinklerInRoom[room])));
 
 
             }
 
         }
 
-        private List<Line> kruskal(List<Line> group, List<Point3d> sprinkler)
+        private void FindSubPipelineInRoom(Polyline room)
         {
-            List<Line> result = new List<Line>();
-            HashSet<Point3d> ptSet = new HashSet<Point3d>();
-            Dictionary<Point3d, Point3d> father = new Dictionary<Point3d, Point3d>();
-            group.Sort((p1, p2) =>  p1.Length.CompareTo(p2.Length));
-            foreach(var pt in sprinkler)
+            var outerRoom = nextOuterLayerPoly[room];
+            var innerRoom = nextInlayerPoly[room];
+            outerRoom.OrderBy(o => sprinklerInRoom[o].Count());
+            //double denominator = 5;
+            var roomBound = ThCADCoreNTSDbExtension.ToNTSPolygon(room).EnvelopeInternal;
+            var lenth = roomBound.Width / 2;
+            bool flag = false;
+            if (innerRoom.Count == 0)
             {
-                father[pt] = pt;
+                //if(sprinklerInRoom[room].Count <= 8)
+                //{
+                    foreach(Polyline o in outerRoom)
+                    {
+                        var walls = penetrableWalls[new KeyValuePair<Polyline, Polyline>(o, room)];     
+                        foreach(Polyline wall in walls)
+                        {
+                            var angles = GetAngle(wall);
+                            foreach(var angle in angles)
+                            {
+                                var start = getPoint(wall, room, angle, lenth);
+                                if (start != wall.GetPoint3dAt(0))
+                                {
+                                    flag = true;
+                                    break;
+                                }
+                                if (flag) break;
+                            }
+                            if (flag) break;
+                        }
+                    }
+                //}
+
             }
-            foreach(var l in group)
+            else
             {
-                var pt1 = l.StartPoint;
-                var pt2 = l.EndPoint;
-                var fatherPt1 = findFather(father,pt1);
-                var fatherPt2 = findFather(father,pt2);
-                if(fatherPt1 != fatherPt2)
+                var innerRoomPoints = new List<KeyValuePair<Point3d, double>>();
+                innerRoom.ForEach(x => innerRoomPoints.Add(penetrablePoint[new KeyValuePair<Polyline, Polyline> (room, x)]));
+                var outerRoomAngles = new List<double>();
+                foreach(Polyline o in outerRoom)
                 {
-                    result.Add(l);
-                    father[pt1] = fatherPt2;
+                    var walls = penetrableWalls[new KeyValuePair<Polyline, Polyline>(o, room)];
+                    foreach(Polyline wall in walls)
+                    {
+                        var outerAngles = GetAngle(wall).ToHashSet();
+                        var innerRoomAngels = new HashSet<double>();
+                        innerRoomPoints.ForEach(x => innerRoomAngels.Add(x.Value));
+                        var intersection = new HashSet<double>(innerRoomAngels);
+                        intersection.IntersectWith(outerAngles);
+                        if (intersection.Count > 0)
+                        {
+
+                        }
+                    }
+
                 }
             }
-           
+
+
+        }
+
+        private bool collision(Line l, Polyline room)
+        {
+            var sprinklers = sprinklerInRoom[room];
+            var tol = 250;
+            foreach(var o in sprinklers)
+            {
+                if(l.GetDistAtPoint(o) < tol)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        //返回支干管交房间的点
+        private Point3d getPoint(Polyline p, Polyline room, double angle, double lenth)
+        {
+            double tol = 1;
+            var start = new Point3d();
+            var denominator = 6;
+            bool flag = false;
+            for(int i = 0; i<p.NumberOfVertices; ++i)
+            {
+                var l = new Line(p.GetPoint3dAt(i), p.GetPoint3dAt(i + 1));
+                if (Math.Abs(l.Angle - angle) % (Math.PI/2) < tol)
+                {
+
+                    while (!flag && denominator>0)
+                    {
+                        start = (l.StartPoint + l.Delta) * (1 / denominator);
+                        --denominator;
+                        var end = (start + new Vector3d(1, 0, 0) * lenth).RotateBy(angle, Vector3d.ZAxis, start);
+                        var pipeline = new Line(start, end);
+                        if (!collision(pipeline, room))
+                        {
+                            subPipelineList.Add(pipeline);
+                            piplineToRoom[room].Add(pipeline);
+                            flag = true;
+                        }
+                    }
+                    
+                }
+                if (flag)
+                    break;
+            }
+            if (!flag)
+                start = p.GetPoint3dAt(0);
+
+            return start;
+        }
+
+
+
+        private List<double> GetAngle(Polyline bound)
+        {
+            var result = new List<double>();
+            double min = 250;
+            for(int i = 0; i< bound.NumberOfVertices; ++i)
+            {
+                var l = new Line(bound.GetPoint3dAt(i), bound.GetPoint3dAt(i + 1));
+                if (l.Length <= min) continue;
+                if (!result.Contains(l.Angle))
+                    result.Add(l.Angle);
+            }
             return result;
         }
 
-        private Point3d findFather(Dictionary<Point3d, Point3d> father, Point3d pt)
-        {
-            while(father[pt]!= pt)
-            {
-                pt = father[pt];
-            }
-            return pt;
-        }
+  
         private void FindOrder(List<Polyline> targetRoom)
         {
             var firstLayer = new List<Polyline>();
@@ -142,11 +222,12 @@ namespace THMEPWSS.RoomOrderingService
                 var temp = new List<Polyline>();
                 var presentLayer = roomOrder[roomOrder.Count - 1];
                 presentLayer.ForEach( o => temp.AddRange(FindCorrespondingRoom(o, targetRoom)));
+                temp.ToHashSet().ToList();
                 roomOrder.Add(temp);
-                presentLayer.ForEach(o => presentLayer.Remove(o));
+                temp.ForEach(o => targetRoom.Remove(o));
             }
         }
-
+        //记录相邻房间并记录可穿墙
         private List<Polyline> FindCorrespondingRoom(Polyline roomA, List<Polyline> roomSetB)
         {
             ThCADCoreNTSSpatialIndex spatialRoomIndex = new ThCADCoreNTSSpatialIndex(roomSetB.ToCollection());
