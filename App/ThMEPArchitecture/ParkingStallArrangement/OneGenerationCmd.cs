@@ -22,6 +22,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -81,6 +82,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var stopwatch = new Stopwatch();
             stopwatch.Start();
             double threshSecond = 20;
+
+            var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
+            if (!dirSetted)
+                return;
 
             var splitRst = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
             if (!splitRst)
