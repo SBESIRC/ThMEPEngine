@@ -32,6 +32,14 @@ namespace ThMEPLighting.Garage
                 return false;
             }
         }
+        public static bool IsLessThan45Degree(this Line first, Line second)
+        {
+            return IsLessThan45Degree(first.StartPoint, first.EndPoint,second.StartPoint,second.EndPoint);
+        }
+        public static double CalculateTwoLineOuterAngle(this Line first, Line second)
+        {
+            return CalculateTwoLineOuterAngle(first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint);
+        }
         public static double CalculateTwoLineOuterAngle(Point3d firstStart, Point3d firstEnd, Point3d secondStart, Point3d secondEnd)
         {
             var distance = new List<double>
