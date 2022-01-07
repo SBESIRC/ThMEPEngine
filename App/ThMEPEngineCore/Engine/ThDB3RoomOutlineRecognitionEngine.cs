@@ -80,8 +80,8 @@ namespace ThMEPEngineCore.Engine
             {
                 if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
                 {
-                    var curves = new DBObjectCollection() { polyline };
                     var simplifer = new ThRoomOutlineSimplifier();
+                    var curves = simplifer.Close(new List<Polyline>() { polyline }).ToCollection();
                     curves = simplifer.Simplify(curves);
                     curves = simplifer.MakeValid(curves);
                     curves = simplifer.Simplify(curves);

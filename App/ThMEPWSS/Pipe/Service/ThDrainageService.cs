@@ -1273,7 +1273,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         }
                                         else
                                         {
-                                            DrawPipeButtomHeightSymbol(THESAURUSEUPHORIA, THESAURUSSTAMPEDE, info.EndPoint.OffsetY(PHOTOSYNTHETICALLY));
+                                            DrawPipeButtomHeightSymbol(THESAURUSEUPHORIA, THESAURUSSTAMPEDE, info.EndPoint.OffsetY(HEIGHT / THESAURUSCOMMUNICATION));
                                         }
                                     }
                                 }
@@ -1309,11 +1309,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     {
                                         var vecs = new List<Vector2d> { new Vector2d(ANTICONVULSANTS, -ANTICONVULSANTS), new Vector2d(THESAURUSFLUTTER, THESAURUSSTAMPEDE), new Vector2d(THESAURUSPERVADE, -THESAURUSPERVADE) };
                                         var dx = vecs.GetLastPoint(Point2d.Origin).X;
-                                        var startPt = info.EndPoint.OffsetXY(-dx, HEIGHT / THESAURUSCOMMUNICATION);
+                                        var startPt = info.EndPoint.OffsetXY(-dx, HEIGHT / THESAURUSCOMMUNICATION + ANTICONVULSANTS);
                                         var segs = vecs.ToGLineSegments(startPt);
                                         var p1 = segs.Last(INTROPUNITIVENESS).StartPoint;
                                         drawDomePipes(segs, THESAURUSDEPLORE);
                                         _DrawDSCurve(vec7, p1, isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                        var dn = getBasinDN();
+                                        DrawNoteText(dn, p1 - new Vector2d(-ANTICONVULSANTS, -THESAURUSASSURANCE));
                                     }
                                     else
                                     {
@@ -1760,24 +1762,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             if (run.HasCheckPoint)
                             {
                                 var h = HEIGHT / ACANTHOCEPHALANS * QUOTATIONEDIBLE;
-                                if (!run.HasLongTranslator)
-                                {
-                                    if (IsPL(gpItem.Labels.First()) || gpItem.Hangings[i].HasDoubleSCurve)
-                                    {
-                                        h = HEIGHT / ACANTHOCEPHALANS * SUPERLATIVENESS;
-                                    }
-                                }
                                 Point2d pt1, pt2;
-                                if (run.HasShortTranslator)
-                                {
-                                    var p = info.Segs.Last().StartPoint;
-                                    pt1 = p.OffsetY(h);
-                                    pt2 = new Point2d(p.X, info.EndPoint.Y);
-                                }
-                                else
                                 {
                                     pt1 = info.EndPoint.OffsetY(h);
                                     pt2 = info.EndPoint;
+                                    if (run.HasLongTranslator)
+                                    {
+                                        pt1 = info.EndPoint.OffsetY(DETERMINATENESS + QUINQUARTICULAR);
+                                    }
                                 }
                                 _DrawCheckPoint(pt1, THESAURUSOBSTINACY, THESAURUSDEPLORE);
                                 if (storey == THESAURUSREGION)
@@ -4008,7 +4000,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     if (hanging == null) continue;
                     if (hanging.Storey == maxS + THESAURUSASPIRATION)
                     {
-                        if (item.Items[i].HasShort)
+                        if (item.Items[i].HasShort || item.Items[i].HasLong)
                         {
                             var m = item.Items[i];
                             m.HasShort = INTRAVASCULARLY;
@@ -7681,6 +7673,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string QUOTATIONROBERT = "单盆洗手台";
         public const string THESAURUSDELIVER = "双盆洗手台";
         public const string CYLINDRICALNESS = "坐便器";
+        public const int THESAURUSASSURANCE = 505;
+        public const int DETERMINATENESS = 239;
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>

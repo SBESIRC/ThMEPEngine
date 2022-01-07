@@ -20,12 +20,14 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         public Dictionary<int, string> FloorDic { get; set; }
         public TermPoint2 TermPt { get; set; }
         private string PipeDN { get; set; }
-        public FireDistrictRight(Point3d stPt, TermPoint2 termPoint, string DN)
+        public bool hasFlow { get; set; }
+        public FireDistrictRight(Point3d stPt, TermPoint2 termPoint, string DN, bool hasflow)
         {
             StPt = stPt;
             FloorNum = termPoint.PipeNumber.Replace("接至", "").Split('喷')[0];
             TermPt = termPoint;
             PipeDN = DN;
+            hasFlow = hasflow;
         }
         public void InsertBlock(AcadDatabase acadDatabase)
         {
@@ -34,9 +36,9 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertLine(acadDatabase, StPt, StPt.OffsetX(300), "W-FRPT-SPRL-PIPE");
             if(!PipeDN.Equals(""))
             {
-                InsertText(acadDatabase, StPt.OffsetXY(50, 50), PipeDN);
+                InsertText(acadDatabase, StPt.OffsetXY(50, 150), PipeDN);
             }
-            if (TermPt.HasSignalValve)
+            /*if (TermPt.HasSignalValve)
             {
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "遥控信号阀",
                     StPt.OffsetX(300), new Scale3d(1, 1, 1), 0);
@@ -58,6 +60,18 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
                 InsertLine(acadDatabase, StPt.OffsetX(650), StPt.OffsetX(890), "W-FRPT-SPRL-PIPE");
             }
 
+            InsertLine(acadDatabase, StPt.OffsetX(890), StPt.OffsetX(1090), "W-FRPT-SPRL-PIPE");*/
+
+            if (hasFlow)
+            {
+                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "信号阀＋水流指示器",
+                    StPt.OffsetXY(300-57592, 11322), new Scale3d(1, 1, 1), 0);
+            }
+            else
+            {
+                InsertLine(acadDatabase, StPt.OffsetX(300), StPt.OffsetX(890), "W-FRPT-SPRL-PIPE");
+            }
+
             InsertLine(acadDatabase, StPt.OffsetX(890), StPt.OffsetX(1090), "W-FRPT-SPRL-PIPE");
 
             var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "减压孔板",
@@ -65,7 +79,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             objID.SetDynBlockValue("可见性","水平");
 
             InsertLine(acadDatabase, StPt.OffsetX(1290), StPt.OffsetX(2140), "W-FRPT-SPRL-PIPE");
-            InsertLine(acadDatabase, StPt.OffsetX(2140), StPt.OffsetX(2740), "W-FRPT-SPRL-EQPM");
+            InsertLine(acadDatabase, StPt.OffsetX(2140), StPt.OffsetX(2740), "W-FRPT-SPRL-EQPM", "DASH");
 
             objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-EQPM", "喷头系统",
                     StPt.OffsetX(1790), new Scale3d(1, 1, 1), 0);
@@ -132,7 +146,6 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertText(acadDatabase, StPt.OffsetXY(2350, -3380), "截止阀", "W-FRPT-NOTE");
             InsertText(acadDatabase, StPt.OffsetXY(2340, -4000), "K=80", "W-FRPT-NOTE");
             InsertText(acadDatabase, StPt.OffsetXY(2310, -4450), "试水接头", "W-FRPT-NOTE");
-            InsertText(acadDatabase, StPt.OffsetXY(160, 200), "DN150");
             InsertText(acadDatabase, StPt.OffsetXY(740, -840), "DN50");
             InsertText(acadDatabase, StPt.OffsetXY(1040, -5250), "DN50", "W-FRPT-SPRL-DIMS", Math.PI / 2);
             InsertText(acadDatabase, StPt.OffsetXY(4060, -5250), "DN80", "W-FRPT-SPRL-DIMS", Math.PI / 2);
@@ -175,6 +188,16 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             {
                 LayerId = DbHelper.GetLayerId(layer),
                 ColorIndex = (int)ColorIndex.BYLAYER
+            };
+            acadDatabase.CurrentSpace.Add(line);
+        }
+        private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer, string linetype)
+        {
+            var line = new Line(pt1, pt2)
+            {
+                LayerId = DbHelper.GetLayerId(layer),
+                ColorIndex = (int)ColorIndex.BYLAYER,
+                Linetype = linetype
             };
             acadDatabase.CurrentSpace.Add(line);
         }

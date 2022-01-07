@@ -656,7 +656,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
                 coolHotMarkes.AddRange(FindMarkFromLine(line, ref marks));
             }
-            connectChild = connectChild.OrderBy(o => o.Item.CntPoint.DistanceTo(o.Parent.Item.CntPoint)).ToList();
+            connectChild = connectChild.OrderBy(o => DistanceTo(o, o.Parent)).ToList();
             //判断该结点是否有mark
             if (coolHotMarkes.Count > 0)//如果有，判断是否可以使用，如果不能使用删除，重新生成
             {

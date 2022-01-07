@@ -70,7 +70,6 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Command
                 //ShowPoints();
                 //ShowBlind();
                 //ShowDetect();
-
             }
         }
 

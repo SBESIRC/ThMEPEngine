@@ -282,11 +282,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             int indxx = 0;
             foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
             {
-                var pttt = new Point3dEx(1436842.5, 662004.6, 0);
-                if (pt.DistanceToEx(pttt) < 5)
-                {
-                    ;
-                }
                 try
                 {
                     CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);

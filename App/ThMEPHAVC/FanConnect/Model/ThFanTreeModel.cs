@@ -202,10 +202,10 @@ namespace ThMEPHVAC.FanConnect.Model
                     level = node.Parent.Item.PipeLevel;
                 }
                 var childModel = new ThFanPipeModel(l, level, space);
-                childModel.IsFlag = isFlag;
-                if(node.Item.IsFlag)
+                childModel.IsFlag = node.Item.IsFlag;
+                if(isFlag)
                 {
-                    childModel.IsFlag = true;
+                    childModel.IsFlag = !node.Item.IsFlag;
                 }
                 childModel.IsConnect = true;
                 childModel.CroVector = croVector;
@@ -229,10 +229,10 @@ namespace ThMEPHVAC.FanConnect.Model
                     isFlag = true;
                 }
                 var childModel = new ThFanPipeModel(l, PIPELEVEL.LEVEL2, space);
-                childModel.IsFlag = isFlag;
-                if (node.Item.IsFlag)
+                childModel.IsFlag = node.Item.IsFlag;
+                if (isFlag)
                 {
-                    childModel.IsFlag = true;
+                    childModel.IsFlag = !node.Item.IsFlag;
                 }
                 childModel.IsConnect = false;
                 childModel.CroVector = croVector;

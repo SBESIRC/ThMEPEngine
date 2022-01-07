@@ -58,10 +58,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         {
             foreach (var f in dbObjs)
             {
-                var fl = f as Polyline;
-                if (fl is null)
+                if (f is Line fline)
                 {
-                    var fline = f as Line;
+                    if(fline.Length < 1)
+                    {
+                        continue;//小于1的直线跳过
+                    }
                     var pt1 = new Point3dEx(fline.StartPoint.X, fline.StartPoint.Y, 0);
                     var pt2 = new Point3dEx(fline.EndPoint.X, fline.EndPoint.Y, 0);
                     
@@ -70,7 +72,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");
                     lineList.Add(new Line(pt1._pt, pt2._pt));
                 }
-                else
+                if(f is Polyline fl)
                 {
                     var ptPre = fl.GetPoint3dAt(0);
                     for (int i = 1; i < fl.NumberOfVertices; i++)
@@ -78,7 +80,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                         var pti = fl.GetPoint3dAt(i);
                         var pt1 = new Point3dEx(ptPre.X, ptPre.Y, 0);
                         var pt2 = new Point3dEx(pti.X, pti.Y, 0);
-                        
+                        if(pt1._pt.DistanceTo(pt2._pt) < 1)
+                        {
+                            continue;
+                        }
                         pointList.Add(pt1);
                         pointList.Add(pt2);
                         ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2, "MainLoop");

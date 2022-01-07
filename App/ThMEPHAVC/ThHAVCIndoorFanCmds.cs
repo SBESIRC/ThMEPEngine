@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -18,11 +19,45 @@ namespace ThMEPHVAC
         [CommandMethod("TIANHUACAD", "THSNJBZ", CommandFlags.Modal)]
         public void THIndoorFanLayout()
         {
+            string layerName = "AI-圈注";
             //Step1 选择房间框线 获取房间内外轮廓信息
             var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
             var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,false);
             indoorFanLayout.Execute();
+            var cloudLines = indoorFanLayout.ErrorRoomPolylines;
+            if (null == cloudLines || cloudLines.Count < 1)
+                return;
+            var cloudIds = new List<ObjectId>();
+            using (var acdb = AcadDatabase.Active())
+            {
+                LayerTableRecord layerRecord = null;
+                foreach (var layer in acdb.Layers)
+                {
+                    if (layer.Name.ToUpper().Equals(layerName))
+                    {
+                        layerRecord = acdb.Layers.Element(layerName);
+                        break;
+                    }
+                }
+
+                // 创建新的图层
+                if (layerRecord == null)
+                {
+                    layerRecord = acdb.Layers.Create(layerName);
+                    layerRecord.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0); ;
+                    layerRecord.IsPlottable = false;
+                }
+                foreach (var item in cloudLines)
+                {
+                    var id = acdb.ModelSpace.Add(item);
+                    if (id == null || !id.IsValid)
+                        continue;
+                    item.Layer = layerName;
+                    cloudIds.Add(id);
+                }
+            }
+            ShowErrroPolylines(cloudIds);
         }
         [CommandMethod("TIANHUACAD", "THSNJFZ", CommandFlags.Modal)]
         public void THIndoorFanPlace() 
@@ -35,8 +70,56 @@ namespace ThMEPHVAC
         {
             var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
-            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,true);
+            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis, true);
             indoorFanLayout.Execute();
+        }
+        private void ShowErrroPolylines(List<ObjectId> cloudLineIds) 
+        {
+            if (null == cloudLineIds || cloudLineIds.Count < 1)
+                return;
+            //revcloud can only print to the current layer.
+            //so it changes the active layer to the required layer, then changes back.
+            //画云线。 云线只能画在当前图层。所以先转图层画完在转回来。\
+            var oriLayer = Active.Database.Clayer;
+            using (var acdb = AcadDatabase.Active())
+            {
+                foreach (var id in cloudLineIds)
+                {
+                    var pline = acdb.ModelSpace.Element(id);
+                    if (null == pline)
+                        continue;
+                    ObjectId revcloud = ObjectId.Null;
+                    void handler(object s, ObjectEventArgs e)
+                    {
+                        if (e.DBObject is Polyline polyline)
+                        {
+                            revcloud = e.DBObject.ObjectId;
+                        }
+                    }
+                    acdb.Database.ObjectAppended += handler;
+
+#if ACAD_ABOVE_2014
+                    Active.Editor.Command("_.REVCLOUD", "_arc", 500, 500, "_Object", id, "_No");
+#else
+                    ResultBuffer args = new ResultBuffer(
+                       new TypedValue((int)LispDataType.Text, "_.REVCLOUD"),
+                       new TypedValue((int)LispDataType.Text, "_ARC"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "500"),
+                       new TypedValue((int)LispDataType.Text, "_Object"),
+                       new TypedValue((int)LispDataType.ObjectId, id),
+                       new TypedValue((int)LispDataType.Text, "_No"));
+                    Active.Editor.AcedCmd(args);
+#endif
+                    acdb.Database.ObjectAppended -= handler;
+
+                    // 设置运行属性
+                    var revcloudObj = acdb.Element<Entity>(revcloud, true);
+                    revcloudObj.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0);
+                    revcloudObj.Layer = "AI-圈注";
+                }
+            }
+            Active.Database.Clayer = oriLayer;
         }
         private Dictionary<Polyline, List<Polyline>> SelectPolyline()
         {

@@ -266,6 +266,12 @@ namespace ThMEPWSS.CADExtensionsNs
             var p4 = r.RightTop.ToPoint3d().TransformBy(matrix).ToNTSCoordinate();
             return new LinearRing(new Coordinate[] { p1, p2, p3, p4, p1 });
         }
+        public static Polygon ToPolygon(this GRect r,Matrix3d matrix)
+        {
+            var lr = r.ToLinearRing2(matrix);
+            if (lr is null) return null;
+            return new Polygon(lr);
+        }
         public static LineString ToLineString(this IList<Point3d> pts)
         {
             var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
@@ -344,7 +350,7 @@ namespace ThMEPWSS.CADExtensionsNs
         {
             return Pipe.Service.PolylineTools.CreatePolygon(r.Center, num, r.Radius);
         }
-        public static Point3dCollection ToPoint3dCollection(this GRect r)
+        public static Point3dCollection ToPt3dCollection(this GRect r)
         {
             return new Point3dCollection() { new Point3d(r.MinX, r.MinY, 0), new Point3d(r.MinX, r.MaxY, 0), new Point3d(r.MaxX, r.MaxY, 0), new Point3d(r.MaxX, r.MinY, 0) };
         }

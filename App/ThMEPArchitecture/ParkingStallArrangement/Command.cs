@@ -109,8 +109,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 directionList.Add(num, flag);//默认给全横向
             }
 
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
+            var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
+            if (!dirSetted)
+                return;
 
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
 
             var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
             if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
@@ -125,7 +128,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             bool recordprevious = false;
             try
             {
-                rst = geneAlgorithm.Run(histories, recordprevious);
+                //rst = geneAlgorithm.Run(histories, recordprevious);
+                rst = geneAlgorithm.Run2(histories, recordprevious);
             }
             catch
             {

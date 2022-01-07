@@ -8,9 +8,8 @@ using ThMEPHVAC.FanConnect.Model;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService;
 using NFox.Cad;
-using ThCADExtension;
 using ThMEPWSS.HydrantConnectPipe.Command;
-using Dreambuild.AutoCAD;
+using System.Linq;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -48,9 +47,8 @@ namespace ThMEPHVAC.FanConnect.Service
                     pathList.Add(tmpPath);
                 }
             }
-
             //从pathList里面，挑选一条
-            return pathList[0];
+            return pathList.FirstOrDefault();
         }
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
@@ -58,13 +56,18 @@ namespace ThMEPHVAC.FanConnect.Service
             var collection = ObstacleHoles.ToCollection();
             collection.Add(model.FanObb);
             //根据model的类型，先走一步
+            var clostPt0 = line.GetClosestPointTo(model.FanPoint, false);
             var stepPt = TakeStep(model.FanObb, model.FanPoint,300);
-            var clostPt = line.GetClosestPointTo(stepPt, false);
-            if(stepPt.DistanceTo(clostPt) < 10.0)
+            if(clostPt0.DistanceTo(model.FanPoint) <= 300.0)
+            {
+                stepPt = model.FanPoint;
+            }
+            var clostPt1 = line.GetClosestPointTo(stepPt, false);
+            if(stepPt.DistanceTo(clostPt1) < 10.0)
             {
                 var pl = new Polyline();
                 pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
-                pl.AddVertexAt(1, clostPt.ToPoint2D(), 0.0, 0.0, 0.0);
+                pl.AddVertexAt(1, clostPt1.ToPoint2D(), 0.0, 0.0, 0.0);
                 return pl;
             }
             //根据model位置和line，构建一个框frame
@@ -95,6 +98,10 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 //使用A*算法，跑出路径
                 retLine = GetPathByAStar(frame, line, stepPt, holes, rooms);
+            }
+            if(retLine == null)
+            {
+                return null;
             }
             retLine.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
             return retLine;
@@ -148,7 +155,7 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 200);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
             var costGetter = new ToLineCostGetterEx();
             var pathAdjuster = new ThFanPipeAdjustPath();
             aStarRoute.costGetter = costGetter;

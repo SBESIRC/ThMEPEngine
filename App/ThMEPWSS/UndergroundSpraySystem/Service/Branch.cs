@@ -17,6 +17,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             int throughIndex = 0;
             int index = 0;
             var lastFirePt = new Point3d();
+            bool textRecord = false; //记录是否标记排气阀
             foreach (var pt in spraySystem.BranchDic.Keys)//pt 支路起始点
             {
                 try
@@ -58,6 +59,17 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                     if (hasAutoValve)
                     {
                         sprayOut.SprayBlocks.Add(new SprayBlock("自动排气阀系统1", stPt));
+                        if (!textRecord)
+                        {
+                            textRecord = true;
+                            var stPt1 = stPt.OffsetY(731.7);
+                            var stPt2 = stPt1.OffsetY(2000);
+                            var stPt3 = stPt2.OffsetX(1000);
+                            sprayOut.NoteLine.Add(new Line(stPt1, stPt2));
+                            sprayOut.NoteLine.Add(new Line(stPt2, stPt3));
+                            var text = new Text("DN25排气阀余同", stPt2);
+                            sprayOut.Texts.Add(text);
+                        }
                     }
 
                     bool signelBranch = true;//第一个 type 4 标志
@@ -72,7 +84,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                             }
 
                             var termPt = sprayIn.TermPtDic[tpt];
-                            string DN = "DN150";
+                            string DN = "DNXXX";
                             foreach(var vpt in sprayIn.TermDnDic.Keys)
                             {
                                 if(tpt._pt.DistanceTo(vpt._pt) < 100)//端点管径标注包含当前点
@@ -100,8 +112,12 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                                 }
 
                                 var firePt = fireStpt.OffsetX((fireNums - branchNums - 1) * 5500);
-                                
-                                var fireDistrict = new FireDistrictRight(firePt, termPt, DN);
+                                bool hasFlow = false;
+                                if (spraySystem.FlowDIc.Contains(tpt))
+                                {
+                                    hasFlow = true;
+                                }
+                                var fireDistrict = new FireDistrictRight(firePt, termPt, DN, hasFlow);
                                 sprayOut.FireDistricts.Add(fireDistrict);
                                 sprayOut.PipeLine.Add(new Line(stPt, new Point3d(firePt.X, stPt.Y, 0)));
                                 sprayOut.PipeLine.Add(new Line(firePt, new Point3d(firePt.X, stPt.Y, 0)));

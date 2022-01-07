@@ -25,8 +25,9 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         public Vector3d FirstRowDir { get; set; }
         public Point3d ArcCenter { get; }
         public bool IsInnerFirst { get; }
+        public double UCSGroupLayoutArea { get; set; }
         double _precisionAngle = 15.0 * Math.PI / 180.0;
-        public AreaLayoutGroup(List<DivisionRoomArea> thisGroupAreas, Vector3d firstVector,double roomYWidth, bool isByVertical = false)
+        public AreaLayoutGroup(List<DivisionRoomArea> thisGroupAreas, Vector3d firstVector,double roomYWidth, double fanMinLength,bool isByVertical = false)
         {
             this.UcsGroupId = Guid.NewGuid().ToString();
             this.GroupCenterPoints = new Dictionary<string, Point3d>();
@@ -48,10 +49,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 item.UscGroupId = this.UcsGroupId;
                 this.GroupDivisionAreas.Add(item);
             }
+            this.UCSGroupLayoutArea = thisGroupAreas.Sum(c => c.RealIntersectAreas.Sum(x => x.Area));
             ArcVertical = isByVertical;
             if (!isByVertical)
             {
-                CalcGroupAreaRow(roomYWidth);
+                CalcGroupAreaRow(roomYWidth, fanMinLength);
                 CalcGroupPointOrder();
             }
             else
@@ -61,7 +63,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 CalcGroupPointOrderByVertical();
             }
         }
-        void CalcGroupAreaRow(double roomWidth)
+        void CalcGroupAreaRow(double roomWidth, double fanMinLength)
         {
             if (this.GroupDivisionAreas.Count < 1)
                 return;
@@ -141,7 +143,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
 
                 double length = 0.0;
                 var thisAreas = new List<DivisionRoomArea>();
-                
+
+                bool canLayoutFan = false;
                 foreach (var item in this.GroupDivisionAreas)
                 {
                     if (linePoints.Any(c => c.DistanceTo(item.divisionArea.CenterPoint) < 5))
@@ -153,7 +156,13 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                             var thisGroupPoints = new List<Point3d>();
                             thisGroupPoints.AddRange(IndoorFanCommon.GetPolylinePoints(pl));
                             thisGroupPoints = ThPointVectorUtil.PointsOrderByDirection(thisGroupPoints, otherDir, false);
-                            var thisLength = (thisGroupPoints.First() - thisGroupPoints.Last()).DotProduct(otherDir);
+                            var thisLength = Math.Abs((thisGroupPoints.First() - thisGroupPoints.Last()).DotProduct(otherDir));
+                            if (!canLayoutFan && thisLength > 1800 + Math.Abs(IndoorFanCommon.RoomBufferOffSet * 2)) 
+                            {
+                                thisGroupPoints = ThPointVectorUtil.PointsOrderByDirection(thisGroupPoints, FirstDir, false);
+                                var dirLength = Math.Abs((thisGroupPoints.First() - thisGroupPoints.Last()).DotProduct(FirstDir));
+                                canLayoutFan = dirLength > fanMinLength + Math.Abs(IndoorFanCommon.RoomBufferOffSet * 2);
+                            }
                             length += Math.Abs(thisLength);
                         }
                     }
@@ -163,10 +172,12 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
 
                 if (!string.IsNullOrEmpty(firstRowGroupId))
                     continue;
-                if ((roomWidth / length) < 2.0) 
-                {
+                if (canLayoutFan)
                     firstRowGroupId = groupId;
-                }
+                //if ((roomWidth / length) < 2.0) 
+                //{
+                //    firstRowGroupId = groupId;
+                //}
             }
             if (string.IsNullOrEmpty(firstRowGroupId)) 
             {

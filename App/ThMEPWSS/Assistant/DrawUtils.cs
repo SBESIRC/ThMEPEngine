@@ -1181,7 +1181,7 @@ namespace ThMEPWSS.Assistant
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.Intersects(g)).ToList();
             };
         }
-        public static Func<Geometry, List<T>> CreateCoveredBySelectorr<T>(ICollection<T> geos) where T : Geometry
+        public static Func<Geometry, List<T>> CreateCoveredBySelector<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
             var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
@@ -1192,15 +1192,13 @@ namespace ThMEPWSS.Assistant
                 return engine.Query(geo.EnvelopeInternal).Where(g => gf.CoveredBy(g)).ToList();
             };
         }
-        public static Func<Geometry, List<T>> CreateDisjointSelectorr<T>(ICollection<T> geos) where T : Geometry
+        public static Func<Geometry, List<T>> CreateDisjointSelector<T>(ICollection<T> geos) where T : Geometry
         {
             if (geos.Count == 0) return r => new List<T>();
-            var engine = new NetTopologySuite.Index.Strtree.STRtree<T>(geos.Count > 10 ? geos.Count : 10);
-            foreach (var geo in geos) engine.Insert(geo.EnvelopeInternal, geo);
             return geo =>
             {
                 var gf = PreparedGeometryFactory.Create(geo);
-                return engine.Query(geo.EnvelopeInternal).Where(g => gf.Disjoint(g)).ToList();
+                return geos.Where(g => gf.Disjoint(g)).ToList();
             };
         }
         public static Func<Geometry, List<T>> CreateEnvelopeSelector<T>(ICollection<T> geos) where T : Geometry
@@ -2251,7 +2249,7 @@ namespace ThMEPWSS.Assistant
         }
         public static Point3dCollection SelectRange()
         {
-            return SelectGRect().ToPoint3dCollection();
+            return SelectGRect().ToPt3dCollection();
         }
         public static Point3dCollection TrySelectRange()
         {

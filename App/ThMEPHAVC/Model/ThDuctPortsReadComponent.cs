@@ -438,7 +438,8 @@ namespace ThMEPHVAC.Model
                     var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
                     portBounds.Add(polygon);
                     var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));
-                    dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = centerP });
+                    dicPlToAirVolume.Add(polygon.GetHashCode(), 
+                        new PortInfo() { portAirVolume = airVolume, position = centerP, id = port.Id, effectiveName = ThHvacCommon.AI_PORT });
                 }
                 else
                     AddPortCompToDic(portParam, port, dicPlToAirVolume, portBounds);
@@ -494,7 +495,8 @@ namespace ThMEPHVAC.Model
                 double airVolume = GetAirVolume(strVolume);
                 var polygon = new DBObjectCollection() { bound }.BuildMPolygon();
                 portBounds.Add(polygon);
-                dicPlToAirVolume.Add(polygon.GetHashCode(), new PortInfo() { portAirVolume = airVolume, position = p });
+                dicPlToAirVolume.Add(polygon.GetHashCode(), 
+                    new PortInfo() { portAirVolume = airVolume, position = p, id = blk.Id, effectiveName = blkName });
             }
             else
             {

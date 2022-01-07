@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using NetTopologySuite.Algorithm.Locate;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.OverlayNG;
@@ -89,6 +90,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
                 }
             }
             vis_vertexs.Add(vis_vertexs[0]);
+            //var pline = new Polyline()
+            //{
+            //    Closed = lineString.IsClosed,
+            //};
+            //pline.CreatePolyline(lineString.Coordinates.ToAcGePoint3ds());
             return new Polygon(new LinearRing(vis_vertexs.ToArray()));
         }
         //计算半径有限的可见多边形
@@ -158,24 +164,37 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Method
         private static List<LineSegment> ConvertToSegments(Polygon polygon)
         {
             List<LineSegment> segments = new List<LineSegment>();
-            //添加边界
-            for (int i = 0; i < polygon.Shell.NumPoints - 1; i++)
+            //找到边界上一条长度大于1的边的终点
+            int origin = 0, n = polygon.Shell.NumPoints - 1, i, next;
+            bool flag = false;
+            for (; origin != 1; origin = (origin - 1 + n) % n)
+                if (polygon.Shell.Coordinates[(origin - 1 + n) % n].Distance(polygon.Shell.Coordinates[origin]) > 1)
+                    break;
+            //添加边界，过滤非常接近的点
+            for (i = origin, flag = false; !(flag && i == origin); i = next)
             {
+                flag = true;
                 Coordinate p1 = new Coordinate(polygon.Shell.Coordinates[i].X, polygon.Shell.Coordinates[i].Y);
-                Coordinate p2 = new Coordinate(polygon.Shell.Coordinates[i + 1].X, polygon.Shell.Coordinates[i + 1].Y);
+                for (next = (i + 1) % n; next != i && polygon.Shell.Coordinates[next].Distance(p1) <= 1; next = (next + 1) % n) ;
+                Coordinate p2 = new Coordinate(polygon.Shell.Coordinates[next].X, polygon.Shell.Coordinates[next].Y);
                 segments.Add(new LineSegment(p1, p2));
             }
 
-            //添加内部的洞
+            //添加内部的洞，过滤非常接近的点
             foreach (var hole in polygon.Holes)
             {
-                for (int j = 0; j < hole.NumPoints - 1; j++)
+                n = hole.NumPoints - 1;
+                for (origin = 0; origin != 1; origin = (origin - 1 + n) % n)
+                    if (hole.Coordinates[(origin - 1 + n) % n].Distance(hole.Coordinates[origin]) > 1)
+                        break;
+                for (i = origin, flag = false; !(flag && i == origin); i = next)
                 {
-                    Coordinate p1 = new Coordinate(hole.Coordinates[j].X, hole.Coordinates[j].Y);
-                    Coordinate p2 = new Coordinate(hole.Coordinates[j + 1].X, hole.Coordinates[j + 1].Y);
+                    flag = true;
+                    Coordinate p1 = new Coordinate(hole.Coordinates[i].X, hole.Coordinates[i].Y);
+                    for (next = (i + 1) % n; next != i && hole.Coordinates[next].Distance(p1) <= 1; next = (next + 1) % n) ;
+                    Coordinate p2 = new Coordinate(hole.Coordinates[next].X, hole.Coordinates[next].Y);
                     segments.Add(new LineSegment(p1, p2));
                 }
-
             }
             return segments;
         }

@@ -16,6 +16,29 @@ namespace ThMEPHVAC.IndoorFanLayout
             var allPoints = GetPolylinePoints(polyline);
             return ThPointVectorUtil.PointsAverageValue(allPoints);
         }
+        public static Polyline PointsAABBByVector(List<Point3d> points,Vector3d xVector,Vector3d normal) 
+        {
+            var yVector = normal.CrossProduct(xVector).GetNormal();
+            var orderXPoints = ThPointVectorUtil.PointsOrderByDirection(points, xVector, false);
+            var orderYPoints = ThPointVectorUtil.PointsOrderByDirection(points, yVector, false);
+            var xMin = orderXPoints.First();
+            var xMax = orderXPoints.Last();
+            var yMin = orderYPoints.First();
+            var yMax = orderYPoints.Last();
+            var minPoint = ThPointVectorUtil.PointToFace(xMin, yMin, yVector);
+            var maxPoint = ThPointVectorUtil.PointToFace(xMax, yMax, yVector);
+            var pt1 = minPoint;
+            var pt2 = ThPointVectorUtil.PointToFace(minPoint, maxPoint, yVector);
+            var pt3 = maxPoint;
+            var pt4 = ThPointVectorUtil.PointToFace(maxPoint, minPoint, yVector);
+            Polyline polyline = new Polyline();
+            polyline.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, pt3.ToPoint2D(), 0, 0, 0);
+            polyline.AddVertexAt(0, pt4.ToPoint2D(), 0, 0, 0);
+            polyline.Closed = true;
+            return polyline;
+        }
         public static List<Curve> GetPolylineCurves(Polyline polyline)
         {
             var allCurves = new DBObjectCollection();

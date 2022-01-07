@@ -921,6 +921,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     foreach (var closePt in virtualPtList)
                     {
                         var newLine = new Line(closePt, ptList[i]).ExtendLine(-10.0);
+                        if(newLine.Length < 10.0)
+                        {
+                            continue;
+                        }
                         var filter = spatialIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
                         if (filter.Count == 0 && !newLine.IsLineInWall(Geometry))
                         {

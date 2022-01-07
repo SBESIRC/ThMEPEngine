@@ -24,6 +24,8 @@ namespace ThMEPHVAC.Model
         public Dictionary<int, SegInfo> mainLinesInfos;
         public List<TextAlignLine> textAlignment;
         public ThShrinkDuct shrinkService;// connector 通过shrink获得
+        public List<int> connPort;
+        public Dictionary<int, PortInfo> dicPlToAirVolume;
         private bool smokeFlag;
         private Tolerance tor;
         private PortParam portParam;
@@ -33,6 +35,7 @@ namespace ThMEPHVAC.Model
         private List<DBObjectCollection> endLines;
         private DBObjectCollection excludeLines;
         private Dictionary<Polyline, ObjectId> allFansDic;
+        private ThCADCoreNTSSpatialIndex portIndex;
         // start_point_ == (0,0,0) -> center_lines_ is near (0,0,0)
         // start_point_ != (0,0,0) -> center_lines_ need to move
         public ThDuctPortsAnalysis() { }
@@ -490,14 +493,14 @@ namespace ThMEPHVAC.Model
         }
         private void AccMainDuctWithExhaust()
         {
-            var dic = CountSmokeZoneAirVolume(out DBObjectCollection smokeBounds);
+            var dic = CountSmokeZoneAirVolume(out DBObjectCollection smokeMpBounds);
             var endSegs = new DBObjectCollection();
             foreach (var lines in endLines)
                 foreach (Line l in lines)
                     endSegs.Add(l);
             foreach (Line l in mainLines)
                 endSegs.Add(l);
-            var smokeIndex = new ThCADCoreNTSSpatialIndex(smokeBounds);
+            var smokeIndex = new ThCADCoreNTSSpatialIndex(smokeMpBounds);
 
             foreach (Line l in mainLines)
             {
@@ -699,8 +702,6 @@ namespace ThMEPHVAC.Model
             foreach (Curve c in smokeLines)
                 c.TransformBy(mat);
             var smokeBounds = GetSmokeZone(smokeLines);
-            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out Dictionary<int, PortInfo> dicPlToAirVolume);
-            var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
             var dicSmokeZone = new Dictionary<int, double>();
             foreach (Polyline bounds in smokeBounds)
             {
@@ -710,7 +711,10 @@ namespace ThMEPHVAC.Model
                 var res = portIndex.SelectCrossingPolygon(mp);
                 double zoneAirVolume = 0;
                 foreach (MPolygon p in res)
+                {
+                    //connPort.Add(p.GetHashCode());
                     zoneAirVolume += dicPlToAirVolume[p.GetHashCode()].portAirVolume;
+                }
                 dicSmokeZone.Add(mp.GetHashCode(), zoneAirVolume);
             }
             return dicSmokeZone;
@@ -718,8 +722,9 @@ namespace ThMEPHVAC.Model
 
         private void CountEndlinePortAirVolume()
         {
-            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out Dictionary<int, PortInfo> dicPlToAirVolume);
-            var portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
+            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out dicPlToAirVolume);
+            portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
+            connPort = new List<int>();
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -768,6 +773,7 @@ namespace ThMEPHVAC.Model
             dic = new Dictionary<string, PortInfo>();
             foreach (MPolygon pl in res)
             {
+                connPort.Add(pl.GetHashCode());
                 var info = dicPlToAirVolume[pl.GetHashCode()];
                 var dis = info.position.DistanceTo(baseP);
                 dic.Add(dis.ToString(), info);
@@ -959,13 +965,14 @@ namespace ThMEPHVAC.Model
             var pointDetector = new ThFanCenterLineDetector(false);
             // portParam.srtDisVec ThHvacCmdService.cs Line : 239更新
             var srtP = Point3d.Origin + portParam.srtDisVec;// 有上下翻时需要更新起始点
-            pointDetector.SearchCenterLine(portParam.centerLines, srtP, SearchBreakType.breakWithEndline);
+            pointDetector.SearchCenterLine(portParam.centerLines, ref srtP, SearchBreakType.breakWithEndline);
             startLine = pointDetector.srtLine;
             foreach (var p in pointDetector.endPoints.Keys)
             {
                 var endLineDetector = new ThFanCenterLineDetector(true);// 保持原线的走向
                 // 搜索末端点到三通四通的所有点
-                endLineDetector.SearchCenterLine(pointDetector.connectLines, p, SearchBreakType.breakWithTeeAndCross);
+                var pp = p;
+                endLineDetector.SearchCenterLine(pointDetector.connectLines, ref pp, SearchBreakType.breakWithTeeAndCross);
                 var set = new DBObjectCollection();
                 for (int i = endLineDetector.connectLines.Count - 1; i >= 0; --i)
                 {

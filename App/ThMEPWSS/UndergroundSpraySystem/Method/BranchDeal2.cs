@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ThMEPWSS.UndergroundSpraySystem.Model;
 using ThMEPWSS.UndergroundSpraySystem.General;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.UndergroundSpraySystem.Method
 {
@@ -235,10 +236,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                         var tempPath = new List<Point3dEx>();
                         var visited2 = new HashSet<Point3dEx>();
                         bool hasValve = false;
-                        DfsBranch(spt, ept, spraySystem.MainLoops[j], tempPath, visited2, sprayIn, ref hasValve);
+                        bool hasFlow = false;
+                        DfsBranch(spt, ept, spraySystem.MainLoops[j], tempPath, visited2, sprayIn, ref hasValve, ref hasFlow);
                         if(hasValve)
                         {
                             spraySystem.ValveDic.Add(ept);
+                        }
+                        if (hasFlow)
+                        {
+                            spraySystem.FlowDIc.Add(ept);
                         }
                     }
                 }
@@ -267,7 +273,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
         }
 
         public static void DfsBranch(Point3dEx cur, Point3dEx target, List<Point3dEx> branchLoop, List<Point3dEx> tempPath, HashSet<Point3dEx> visited,
-    SprayIn sprayIn, ref bool hasValve)
+    SprayIn sprayIn, ref bool hasValve, ref bool hasFlow)
         {
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
@@ -282,6 +288,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                     {
                         hasValve = true;
                     }
+                    /*foreach (var dic in sprayIn.PtTypeDic)
+                    {
+                        if (dic.Value.Contains("Flow"))
+                        {
+                            if (dic.Key._pt.DistanceTo(pt._pt) < 1000)
+                            {
+                                hasFlow = true;
+                            }
+                        }
+                    }*/
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(sprayIn.FlowBlocks);
+                    var rec = pt._pt.GetRect(50);
+                    var qureys = spatialIndex.SelectCrossingPolygon(rec);
+                    if (qureys.Count > 0)
+                    {
+                        hasFlow = true;
+                    }
                 }
                 return;
             }
@@ -292,7 +315,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                 if (branchLoop.Contains(p)) continue;
                 tempPath.Add(p);
                 visited.Add(p);
-                DfsBranch(p, target, branchLoop, tempPath, visited, sprayIn, ref hasValve);
+                DfsBranch(p, target, branchLoop, tempPath, visited, sprayIn, ref hasValve, ref hasFlow);
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }

@@ -161,6 +161,13 @@ namespace ThMEPWSS.UndergroundSpraySystem.General
             }
         }
 
+        public static void CreatFlowBlocks(DBObjectCollection flowblocks, SprayIn sprayIn)
+        {
+            foreach (var objs in flowblocks)
+            {
+                sprayIn.FlowBlocks.Add((DBObject)objs);
+            }
+        }
         public static void CreatePtTypeDic1(List<Point3d> pts, string ptType, ref SprayIn sprayIn)
         {
             var restPts = new List<Point3d>();

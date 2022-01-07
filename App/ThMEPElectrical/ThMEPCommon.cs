@@ -17,7 +17,7 @@ namespace ThMEPElectrical
 
         //连管
         public static readonly string ConnectPipeLayerName = "E-BRST-WIRE";     //广播连管图层
-        public static readonly string ConnectPipeLineType = "TH_B";     //广播连管线型
+        public static readonly string ConnectPipeLineType = "ByLayer";//"TH_B";     //广播连管线型
 
         // 烟感温感
         public const string SENSORLAYERNMAE = "E-FAS-DEVC";

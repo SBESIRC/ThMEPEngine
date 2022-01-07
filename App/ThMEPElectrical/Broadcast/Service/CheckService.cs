@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPElectrical.Broadcast.Service
 {
@@ -29,30 +30,39 @@ namespace ThMEPElectrical.Broadcast.Service
             if (columns.Count > 0)
             {
                 var orderColumns = columns.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix).X).ToList();
-                if (!IsUsefulColumn(frame, orderColumns.First(), sPt, xDir))
-                {
-                    columns.Remove(orderColumns.First());
-                }
-                if (!IsUsefulColumn(frame, orderColumns.Last(), ePt, xDir))
-                {
-                    columns.Remove(orderColumns.Last());
-                }
+                var firMoveColumns = IsUsefulColumn(frame, orderColumns, sPt, xDir);
+                columns = columns.Except(firMoveColumns).ToList();
+                orderColumns.Reverse();
+                var lastMoveColumns = IsUsefulColumn(frame, orderColumns, sPt, xDir);
+                columns = columns.Except(lastMoveColumns).ToList();
             }
             
             return columns;
         }
 
-        private bool IsUsefulColumn(Polyline frame, Polyline polyline, Point3d pt, Vector3d dir)
+        /// <summary>
+        /// 判断是否是可用柱
+        /// </summary>
+        /// <param name="frame"></param>
+        /// <param name="polyline"></param>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        private List<Polyline> IsUsefulColumn(Polyline frame, List<Polyline> colomns, Point3d pt, Vector3d dir)
         {
-            var newPoly = polyline.Buffer(200)[0] as Polyline;
-            Line layoutLine = IsLayoutColumn(newPoly, pt, dir);
-            Point3dCollection pts = new Point3dCollection();
-            layoutLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-            if (pts.Count > 0)            {
-                return false;
+            var moveColumns = new List<Polyline>();
+            foreach (var polyline in colomns)
+            {
+                var newPoly = polyline.Buffer(200)[0] as Polyline;
+                Line layoutLine = IsLayoutColumn(newPoly, pt, dir);
+                bool isIntersect = layoutLine.IsIntersects(frame);
+                if (!isIntersect)
+                {
+                    return moveColumns;
+                }
+                moveColumns.Add(polyline);
             }
-
-            return true;
+            return moveColumns;
         }
 
         private Line IsLayoutColumn(Polyline polyline, Point3d pt, Vector3d dir)

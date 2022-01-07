@@ -96,6 +96,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "0");
                 ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-DIMS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-CS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb, "H-PIPE-CR");

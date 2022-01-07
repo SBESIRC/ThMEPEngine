@@ -40,7 +40,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 var pts = new List<Point3d>();
                 foreach (var obj in DBObjs)
                 {
-                    pts.Add((obj as BlockReference).Position);
+                    pts.Add((obj as BlockReference).Position.ToPoint2D().ToPoint3d());
                 }
                 return pts;
             }

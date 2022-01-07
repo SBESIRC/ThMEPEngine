@@ -33,32 +33,28 @@ namespace ThMEPHVAC.Algorithm
             endPoints = new Dictionary<Point3d, Point3d>();
             connectLines = new DBObjectCollection();
         }
-        private void FixFirstLine(Point3d startPoint, DBObjectCollection res, DBObjectCollection lines)
+        private void FixSrtPoint(ref Point3d startPoint)
         {
-            var l = res[0] as Line;
-            srtLine = l;
-            if (!startPoint.IsEqualTo(l.StartPoint, tor) && !startPoint.IsEqualTo(l.EndPoint, tor))
+            if (!startPoint.IsEqualTo(srtLine.StartPoint, tor) && !startPoint.IsEqualTo(srtLine.EndPoint, tor))
             {
-                // 需要更新
-                lines.Remove(l);
-                var updateLine = (startPoint.DistanceTo(l.StartPoint) > startPoint.DistanceTo(l.EndPoint)) ?
-                    new Line(startPoint, l.StartPoint) : new Line(startPoint, l.EndPoint);
-                lines.Add(updateLine);
-                srtLine = updateLine;
-                index = new ThCADCoreNTSSpatialIndex(lines);
+                startPoint = (startPoint.DistanceTo(srtLine.StartPoint) > startPoint.DistanceTo(srtLine.EndPoint)) ?
+                    srtLine.EndPoint : srtLine.StartPoint;
             }
         }
-        public void SearchCenterLine(DBObjectCollection lines, Point3d startPoint, SearchBreakType type)
+        public void SearchCenterLine(DBObjectCollection lines, ref Point3d startPoint, SearchBreakType type)
         {
             index = new ThCADCoreNTSSpatialIndex(lines);
             var pl = new Polyline();
-            // 起始搜索点容差为100
-            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 100);
+            // 起始搜索点容差为300
+            pl.CreatePolygon(startPoint.ToPoint2D(), 4, 300);
             var res = index.SelectCrossingPolygon(pl);
             if (res.Count != 1)
                 return;
-            FixFirstLine(startPoint, res, lines);
+            srtLine = res[0] as Line; ;
+            FixSrtPoint(ref startPoint);
             var detectPoint = ThMEPHVACService.GetOtherPoint(srtLine, startPoint, tor);
+            
+            
             if (identifier.Add(srtLine.GetHashCode()))
             {
                 //if (isOrigine)

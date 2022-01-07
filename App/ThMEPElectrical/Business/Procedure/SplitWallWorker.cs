@@ -71,14 +71,18 @@ namespace ThMEPElectrical.Business.Procedure
             {
                 if (ob is Polyline resPoly)
                 {
-                    var bufferPoly = resPoly.Buffer(-10)[0] as Polyline;
-                    if (holes.Any(x=>x.Intersects(bufferPoly)))
+                    var bufferCollection = resPoly.Buffer(-10);
+                    if (bufferCollection.Count > 0)
                     {
-                        resHoles.Add(resPoly);
-                    }
-                    else
-                    {
-                        resFrames.Add(resPoly);
+                        var bufferPoly = bufferCollection[0] as Polyline;
+                        if (holes.Any(x => x.Intersects(bufferPoly)))
+                        {
+                            resHoles.Add(resPoly);
+                        }
+                        else
+                        {
+                            resFrames.Add(resPoly);
+                        }
                     }
                 }
             }

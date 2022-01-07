@@ -44,7 +44,12 @@ namespace ThMEPArchitecture.PartitionLayout
             return hashcode;
         }
     }
-
+    public enum LayoutDirection : int
+    {
+        LENGTH = 0,
+        HORIZONTAL = 1,
+        VERTICAL = 2
+    }
     public partial class ParkingPartition : IEquatable<ParkingPartition>
     {
         public ParkingPartition()
@@ -95,9 +100,9 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<Polyline> Pillars = new List<Polyline>();
         public ThCADCoreNTSSpatialIndex ObstaclesMPolygonSpatialIndex;
 
-        const double DisPillarLength = 400;
-        const double DisPillarDepth = 500;
-        const int CountPillarDist = 2;
+        const double DisPillarLength = 600;
+        const double DisPillarDepth = 600;
+        const int CountPillarDist = 3;
         const double DisLaneWidth = 5500;
         const double DisCarLength = 5100;
         const double DisCarWidth = 2400;
@@ -107,13 +112,7 @@ namespace ThMEPArchitecture.PartitionLayout
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
 
-        const int LayoutMode = ((int)LayoutDirection.VERTICAL);
-        enum LayoutDirection : int
-        {
-            LENGTH = 0,
-            HORIZONTAL = 1,
-            VERTICAL = 2
-        }
+        public static int LayoutMode = ((int)LayoutDirection.VERTICAL);
 
         public void Dispose()
         {

@@ -100,6 +100,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
+                ThFanConnectUtils.EnsureLayerOn(acadDb, "0");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-DIMS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CS");
                 ThFanConnectUtils.EnsureLayerOn(acadDb,"H-PIPE-CR");
@@ -173,7 +174,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;
                 pipeExtendServiece.PipeExtend(treeModel);
-
                 //计算流量
                 ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
                 if(pointTreeModel.RootNode == null)

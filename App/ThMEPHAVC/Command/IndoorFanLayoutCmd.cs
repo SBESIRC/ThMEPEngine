@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
 using ThMEPEngineCore.GridOperation;
@@ -36,11 +37,13 @@ namespace ThMEPHVAC.Command
         CalcFanRectFormFanData fanRectFormFanData;
         ThIndoorFanData indoorFanData;
         bool onlyShowAxis = false;
+        public List<Polyline> ErrorRoomPolylines;
         public IndoorFanLayoutCmd(Dictionary<Polyline, List<Polyline>> selectRoomLines,Vector3d xAxis,Vector3d yAxis,bool onlyShowArea) 
         {
             onlyShowAxis = onlyShowArea;
             CommandName = "THSNJBZ";
             ActionName = "室内机布置";
+            ErrorRoomPolylines = new List<Polyline>();
 
             _selectPLines = new Dictionary<Polyline, List<Polyline>>();
             if (null == selectRoomLines || selectRoomLines.Count < 1)
@@ -112,53 +115,10 @@ namespace ThMEPHVAC.Command
             //获取轴网线，根据轴网计算分割区域,
             //用选中的所有房间的轮廓线构成的AABB，外扩15m获取相交到的线，进行计算区域
             Polyline roomPline = SelectRoomOutPolyline();
-            var allAxis = indoorFanData.GetAllAxisCurves();
-            var curveObjs = new DBObjectCollection();
-            foreach (var item in allAxis)
-            {
-                curveObjs.Add(item);
-            }
-            _curveSpatialIndex = new ThCADCoreNTSSpatialIndex(curveObjs);
-            var calcCurves = GetCalaAxisCurves(allAxis, roomPline);
-
-            var areaRegion = new List<DivisionArea>();
-            var columns = new List<Polyline>();
-            var gridLineClean = new GridLineCleanService();
-            gridLineClean.CleanGrid(calcCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
-            var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
-            curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
-            curves = curves.Where(x => x.Count > 0).ToList();
-            var gridDivision = new GridDivision();
-            var ucsPolygons = gridDivision.DivisionGridRegions(curves);
-            var areaObjs = new DBObjectCollection();
-            var areaDic = new Dictionary<Polyline, DivisionArea>();
-            int colorIndex = 0;
-            foreach (var item in ucsPolygons) 
-            {
-                var isArc = item.gridType == GridType.ArcGrid;
-                var centerPoint = item.centerPt;
-                foreach (var polyline in item.regions) 
-                {
-                    if (polyline.Area < 10000)
-                        continue;
-                    if (onlyShowAxis) 
-                    {
-                        polyline.ColorIndex = colorIndex;
-                        showCurves.Add(polyline);
-                    }
-                    var area = new DivisionArea(isArc, polyline);
-                    if (isArc)
-                        area.ArcCenterPoint = centerPoint;
-                    else
-                        area.XVector = item.vector;
-                    areaDic.Add(polyline, area);
-                    areaRegion.Add(area);
-                }
-                colorIndex += 1;
-            }
+            var areaRegion = GetGridDivisonAreas(roomPline, out List<Curve> showRegionCurves);
             if (onlyShowAxis) 
             {
-                ShowTestLineText(showCurves, fanTexts);
+                ShowTestLineText(showRegionCurves, fanTexts);
                 return;
             }
 
@@ -215,16 +175,29 @@ namespace ThMEPHVAC.Command
                     if (!haveValue)
                         continue;
                     calcLayoutArea.InitRoomData(pline.Key, pline.Value,roomArea*1000*1000, roomLoad);
-                    var layoutAreas = new List<AreaLayoutGroup>();
                     string fanName = "";
+                    var roomInserterAreas = calcLayoutArea.CalaRoomInsertAreas(dir,out List<DivisionRoomArea> addAreas);
+                    if ((roomInserterAreas.Count<1 && addAreas.Count<1)|| roomInserterAreas.Count < 1 && pline.Value.Count>0)
+                        continue;
+                    if (!isHisDir)
+                    {
+                        var calcFanAreas = roomInserterAreas.Count > 0 ? roomInserterAreas : addAreas;
+                        var canUseFans = RoomCalcFanNumber(calcFanAreas, calcLayoutArea.RoomUnitLoad);
+                        if (canUseFans.Count < 1)
+                            continue;
+                        fanName = canUseFans.First();
+                    }
+                    var layoutAreas = new List<AreaLayoutGroup>();
+                    
                     var correctionFactor = IndoorFanParameter.Instance.LayoutModel.CorrectionFactor;
-                    if (isHisDir) 
+                    FanRectangle rectangle = null;
+                    if (isHisDir)
                     {
                         //沿用已布置时，获取房间框线内的已经布置的风机，计算方向，风机数据根据当前风机的参数进行计算
                         var needBlockName = IndoorFanBlockName(IndoorFanParameter.Instance.LayoutModel.FanType);
                         var hisFanDir = new Dictionary<Point3d, Vector3d>();
                         double realLoad = 0.0;
-                        foreach (var block in allHisIndoorFans) 
+                        foreach (var block in allHisIndoorFans)
                         {
                             var point = block.Position;
                             point = new Point3d(point.X, point.Y, 0);
@@ -236,27 +209,22 @@ namespace ThMEPHVAC.Command
                                 continue;
                             var blockAngle = block.Rotation;
                             dir = Vector3d.YAxis.RotateBy(blockAngle, Vector3d.ZAxis);
-                            hisFanDir.Add(point,dir);
+                            hisFanDir.Add(point, dir);
                             fanName = block.Id.GetAttributeInBlockReference("设备编号");
                         }
                         if (string.IsNullOrEmpty(fanName))
                             continue;
                         layoutAreas = calcLayoutArea.CalcLayoutGroupAreaDir(hisFanDir);
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
                     }
                     else
-                        layoutAreas = calcLayoutArea.GetRoomInsterAreas(dir);
-                    if (layoutAreas.Count < 1)
-                        continue;
-                    if (!isHisDir) 
                     {
-                        var canUseFans = RoomCalcFanNumber(layoutAreas, calcLayoutArea.RoomUnitLoad);
-                        if (canUseFans.Count < 1)
-                            continue;
-                        fanName = canUseFans.First();
-                    }
-                    if (string.IsNullOrEmpty(fanName))
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
+                        layoutAreas = calcLayoutArea.GetRoomInsterAreas(dir, rectangle);
+                    } 
+                    if (layoutAreas.Count < 1 || rectangle == null)
                         continue;
-                    var rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
+                    //var rectangle = fanRectFormFanData.GetFanRectangle(fanName, correctionFactor);
                     var fanLayout = new AreaLayoutFan(nearRelation, _xAxis, _yAxis.Negate());
                     fanLayout.InitRoomData(layoutAreas,pline.Key, pline.Value, roomLoad);
                     var layoutRectRes = fanLayout.GetLayoutFanResult(rectangle);
@@ -267,6 +235,14 @@ namespace ThMEPHVAC.Command
                     //var delFanIds = layoutResultCheck.GetDeleteFanByMinArea();
                     foreach (var item in layoutRectRes)
                     {
+                        Point3d textPoint = item.divisionArea.CenterPoint;
+                        var allPoints = new List<Point3d>();
+                        foreach (var pl in item.RealIntersectAreas) 
+                        {
+                            allPoints.AddRange(IndoorFanCommon.GetPolylinePoints(pl));
+                        }
+                        if (allPoints.Count > 0)
+                            textPoint = ThPointVectorUtil.PointsAverageValue(allPoints);
                         //showCurves.Add(item.divisionArea.AreaPolyline);
                         string msg = string.Format("{0}kW/{1}kW ={2}台 行{3}", item.NeedLoad.ToString("N2"), rectangle.Load, item.NeedFanCount.ToString(), item.RowCount);
                         //string msg = string.Format("RowId{0}", item.GroupId);
@@ -277,7 +253,7 @@ namespace ThMEPHVAC.Command
                             WidthFactor = 0.7,
                             HorizontalMode = TextHorizontalMode.TextLeft,
                             Oblique = 0,
-                            Position = item.divisionArea.CenterPoint,
+                            Position = textPoint,
                             Rotation = angle,
                         };
                         fanTexts.Add(dbText);
@@ -322,6 +298,16 @@ namespace ThMEPHVAC.Command
                     var color = Color.FromRgb(255,255,255);
                     if (roomNeedFanCount > thisAreaCount)
                     {
+                        var roomPoints = IndoorFanCommon.GetPolylinePoints(pline.Key);
+                        Point3dCollection points = new Point3dCollection();
+                        roomPoints.ForEach(c => points.Add(c));
+                        var addPLine = ThCADCoreNTSPoint3dCollectionExtensions.ConvexHull(points).ToDbCollection().OfType<Polyline>().FirstOrDefault();
+                        if (null != addPLine)
+                        {
+                            if (null != _originTransformer)
+                                _originTransformer.Reset(addPLine);
+                            ErrorRoomPolylines.Add(addPLine);
+                        }
                         color = Color.FromRgb(0, 255, 0);
                     }
                     else if (roomNeedFanCount < thisAreaCount) 
@@ -347,7 +333,71 @@ namespace ThMEPHVAC.Command
             //将计算后的排布矩形转换为具体的块
             ShowTestLineText(showCurves, fanTexts);
         }
-        List<string> RoomCalcFanNumber(List<AreaLayoutGroup> roomInsterAreas,double roomUnitLoad) 
+
+        List<DivisionArea> GetGridDivisonAreas(Polyline roomsAABB,out List<Curve> showCurves)
+        {
+            showCurves = new List<Curve>();
+            var allAreaRegion = new List<DivisionArea>();
+            var allAxis = indoorFanData.GetAllAxisCurves();
+            if (null == allAxis || allAxis.Count < 1)
+                return allAreaRegion;
+            var curveObjs = new DBObjectCollection();
+            foreach (var item in allAxis)
+            {
+                curveObjs.Add(item);
+            }
+            _curveSpatialIndex = new ThCADCoreNTSSpatialIndex(curveObjs);
+            var calcCurves = GetCalaAxisCurves(allAxis, roomsAABB);
+
+            var columns = new List<Polyline>();
+            var gridLineClean = new GridLineCleanService();
+            gridLineClean.CleanGrid(calcCurves, columns, out List<LineGridModel> lineGirds, out List<ArcGridModel> arcGrids);
+            var curves = new List<List<Curve>>(lineGirds.Select(x => { var lines = new List<Curve>(x.xLines); lines.AddRange(x.yLines); return lines; }));
+            curves.Add(arcGrids.SelectMany(x => { var lines = new List<Curve>(x.arcLines); lines.AddRange(x.lines); return lines; }).ToList());
+            curves = curves.Where(x => x.Count > 0).ToList();
+            var gridDivision = new GridDivision();
+            var ucsPolygons = gridDivision.DivisionGridRegions(curves);
+            var areaObjs = new DBObjectCollection();
+            var areaDic = new Dictionary<Polyline, DivisionArea>();
+            int colorIndex = 0;
+           
+            foreach (var item in ucsPolygons)
+            {
+                var isArc = item.gridType == GridType.ArcGrid;
+                var centerPoint = item.centerPt;
+                foreach (var polyline in item.regions)
+                {
+                    if (polyline.Area < 10000)
+                        continue;
+                    if (onlyShowAxis)
+                    {
+                        polyline.ColorIndex = colorIndex;
+                        showCurves.Add(polyline);
+                    }
+                    var area = new DivisionArea(isArc, polyline);
+                    if (isArc)
+                        area.ArcCenterPoint = centerPoint;
+                    else
+                        area.XVector = item.vector;
+                    areaObjs.Add(polyline);
+                    areaDic.Add(polyline, area);
+                    allAreaRegion.Add(area);
+                }
+                colorIndex += 1;
+            }
+            if (onlyShowAxis)
+                return allAreaRegion;
+            _areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areaObjs);
+            var crossPL = _areaSpatialIndex.SelectCrossingPolygon(roomsAABB);
+            var areaRegion = new List<DivisionArea>();
+            foreach (var item in crossPL)
+            {
+                if (item is Polyline polyline)
+                    areaRegion.Add(areaDic[polyline]);
+            }
+            return areaRegion;
+        }
+        List<string> RoomCalcFanNumber(List<DivisionRoomArea> roomInsterAreas,double roomUnitLoad) 
         {
             double maxInsterArea = 0.0;
             double maxArea = 0.0;
@@ -355,19 +405,16 @@ namespace ThMEPHVAC.Command
             //判断房间是否有标准的分割区域
             foreach (var group in roomInsterAreas) 
             {
-                foreach (var area in group.GroupDivisionAreas) 
+                var thisInsterArea = group.RealIntersectAreas.Sum(c => c.Area);
+                var thisArea = group.divisionArea.AreaPolyline.Area;
+                var thisRatio = thisInsterArea / thisArea;
+                if (thisRatio < maxRatio)
+                    continue;
+                if (maxArea < thisArea)
                 {
-                    var thisInsterArea = area.RealIntersectAreas.Sum(c => c.Area);
-                    var thisArea = area.divisionArea.AreaPolyline.Area;
-                    var thisRatio = thisInsterArea / thisArea;
-                    if (thisRatio < maxRatio) 
-                        continue;
-                    if (maxArea < thisArea)
-                    {
-                        maxInsterArea = thisInsterArea;
-                        maxArea = thisArea;
-                        maxRatio = thisRatio;
-                    }
+                    maxInsterArea = thisInsterArea;
+                    maxArea = thisArea;
+                    maxRatio = thisRatio;
                 }
             }
             //根据房间的内部的闭合区域计算可以使用哪一种风机

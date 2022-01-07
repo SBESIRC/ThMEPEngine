@@ -21,7 +21,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         double _roomUnitLoad = 0.0;
         ThCADCoreNTSSpatialIndex _areaSpatialIndex;
         Dictionary<Polyline, DivisionArea> _areaPLine;
-
+        FanRectangle _fanRectangle;
+        Vector3d _firstDir;
         public CalcLayoutArea(List<DivisionArea> divisionAreas)
         {
             _allDivisionAreas = new List<DivisionArea>();
@@ -56,11 +57,13 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         {
             get { return _roomUnitLoad; }
         }
-        public List<AreaLayoutGroup> GetRoomInsterAreas(Vector3d firstDir)
+        public List<AreaLayoutGroup> GetRoomInsterAreas(Vector3d firstDir, FanRectangle fanRectangle)
         {
+            _firstDir = firstDir;
+            _fanRectangle = fanRectangle;
             //根据外轮廓获取相交到的轮廓
             var resUCSGroups = new List<AreaLayoutGroup>();
-            CalaRoomInsertAreas();
+            //CalaRoomInsertAreas();
             if (null == _roomIntersectAreas || _roomIntersectAreas.Count < 1)
                 return resUCSGroups;
             resUCSGroups = CalcDivisionAreaGroup(_roomIntersectAreas, firstDir);
@@ -70,7 +73,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         public List<AreaLayoutGroup> CalcLayoutGroupAreaDir(Dictionary<Point3d, Vector3d> hisFanDir)
         {
             var areaUCSGroups = new List<AreaLayoutGroup>();
-            CalaRoomInsertAreas();
+            //CalaRoomInsertAreas();
             if (null == _roomIntersectAreas || _roomIntersectAreas.Count < 1)
                 return areaUCSGroups;
             var areaDir = GetLayoutAreaHisFandir(hisFanDir);
@@ -133,8 +136,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
 
             return hisDir;
         }
-        private void CalaRoomInsertAreas() 
+        public List<DivisionRoomArea> CalaRoomInsertAreas(Vector3d firstDir, out List<DivisionRoomArea> addAreas) 
         {
+            _firstDir = firstDir;
+            var divisionAreas =new List<DivisionRoomArea>();
+            addAreas = new List<DivisionRoomArea>();
             _roomIntersectAreas = new List<DivisionRoomArea>();
             var outGeo = _roomPLine.ToNTSPolygon();
             var targetAreas = GetDivisionAreas(_roomPLine);
@@ -182,6 +188,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     layoutFan.RoomLayoutAreas.Add(tempRoomPLine);
                 }
                 layoutFan.NeedLoad = needLoad;
+                divisionAreas.Add(layoutFan);
                 _roomIntersectAreas.Add(layoutFan);
             }
             Geometry geometry = _roomPLine.ToNTSPolygon();
@@ -227,12 +234,16 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 layoutFan.RealIntersectAreas.Add(addPLine);
                 layoutFan.RoomLayoutAreas.Add(tempRoomPLine);
                 layoutFan.NeedLoad = needLoad;
+                addAreas.Add(layoutFan);
                 _roomIntersectAreas.Add(layoutFan);
             }
+            return divisionAreas;
         }
         Vector3d GetAddAreaUCS(Polyline addPLine) 
         {
             var pl = (addPLine.Buffer(100)[0] as Polyline).ToNTSGeometry();
+            if (_roomIntersectAreas.Count < 1)
+                return _firstDir;
             var vectors = new List<Vector3d>();
             var vectorAreas = new Dictionary<Vector3d, double>();
             foreach (var item in _roomIntersectAreas) 
@@ -288,6 +299,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         List<DivisionArea> GetDivisionAreas(Polyline roomOutPLine) 
         {
             var resList = new List<DivisionArea>();
+            if (_areaSpatialIndex == null || _allDivisionAreas.Count < 1)
+                return resList;
             //通过空间索引初步过滤
             var interPLines = _areaSpatialIndex.SelectCrossingPolygon(roomOutPLine);
             foreach (var item in interPLines) 
@@ -361,229 +374,119 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         {
             if (null == areaUCSGroups || areaUCSGroups.Count < 1)
                 return areaUCSGroups;
+            areaUCSGroups = areaUCSGroups.OrderByDescending(c => c.UCSGroupLayoutArea).ToList();
             //根据每个UCS的第一排，计算每个UCS的实际第一排
-            //Step1，计算第一排方向上没有其它UCS的分组
-            var ucsIds = new List<string>();
-            var dirUcsGroupIds = new Dictionary<string, string>();
-            var dirGroupRowIds = new Dictionary<string, string>();
-            for (int i = 0; i < areaUCSGroups.Count; i++)
+            //多个UCS时，按照面积最大的UCS区域为准
+            string baseUCSId = areaUCSGroups.First().UcsGroupId;
+            var hisGroupIds = new List<string>();
+            hisGroupIds.Add(baseUCSId);
+            //确定第一个UCS中每排的方向
+            CalcAreaRowDir(areaUCSGroups, new List<string> { baseUCSId });
+            bool haveChange = true;
+            while (haveChange) 
             {
-                var firstGroup = areaUCSGroups[i];
-                bool dirHaveGroup = false;
-                //计算第一排方向上是否和其它的区域相交，比较时是和其它UCS的区域数据进行比较
-                var firstGroupFirstRows = firstGroup.GroupDivisionAreas.Where(c => c.GroupId == firstGroup.GroupFirstId).ToList();
-                if (firstGroupFirstRows.Count < 1)
-                    continue;
-                var firstRowDir = firstGroupFirstRows.First().GroupDir;
-                //将第一排区域外扩5mm，找相交到的区域
-                var firstPLines = new List<Polyline>();
-                foreach (var item in firstGroupFirstRows) 
+                haveChange = false;
+                List<string> hisAearIds = new List<string>(); 
+                foreach (var group in areaUCSGroups)
                 {
-                    var buff = item.divisionArea.AreaPolyline.Buffer(5)[0] as Polyline;
-                    firstPLines.Add(buff);
+                    if (!hisGroupIds.Any(c => c == group.UcsGroupId))
+                        continue;
+                    foreach (var area in group.GroupDivisionAreas)
+                        hisAearIds.Add(area.divisionArea.Uid);
                 }
-                for (int j = 0; j < areaUCSGroups.Count; j++) 
+                string changeAreaId = "";
+                foreach (var group in areaUCSGroups)
                 {
-                    if (dirHaveGroup)
+                    if (hisGroupIds.Any(c => c == group.UcsGroupId))
+                        continue;
+                    string nearAreaId = "";
+                    //计算是否有和已经有区域的地方进行
+                    int firstIndex = -1;
+                    for (int i = 0; i < group.OrderGroupIds.Count; i++)
+                    {
+                        var rowId = group.OrderGroupIds[i];
+                        var rowAreas = group.GroupDivisionAreas.Where(c => c.GroupId == rowId).ToList();
+                        var tempAreas = new List<DivisionArea>();
+                        foreach (var area in rowAreas) 
+                        {
+                            if (area.RealIntersectAreas.Sum(c => c.Area) < 10000)
+                                continue;
+                            var bfArea = area.divisionArea.AreaPolyline.Buffer(10)[0] as Polyline;
+                            var firstCenter = area.divisionArea.CenterPoint;
+                            var interPLines = _areaSpatialIndex.SelectCrossingPolygon(bfArea);
+                            foreach (var item in interPLines)
+                            {
+                                if (item is Polyline polyline) 
+                                {
+                                    if (polyline.Area < 150)
+                                        continue;
+                                    var pl = item as Polyline;
+                                    var addArea = _areaPLine[pl];
+                                    if (!hisAearIds.Any(c => c == addArea.Uid))
+                                        continue;
+                                    var addCenter = addArea.CenterPoint;
+                                    var vector = addCenter - firstCenter;
+                                    var testVector = vector.GetNormal();
+                                    var checkDot = Math.Abs(vector.DotProduct(group.FirstDir));
+                                    if (checkDot / vector.Length > 0.5)
+                                        continue;
+                                    tempAreas.Add(addArea);
+                                }
+                            }
+                        }
+                        if (tempAreas.Count < 1)
+                            continue;
+                        firstIndex = i;
+                        nearAreaId = tempAreas.First().Uid;
                         break;
-                    if (i == j)
-                        continue;
-                    var secondGroup = areaUCSGroups[j];
-                    var secondGroupFirstRows = secondGroup.GroupDivisionAreas.Where(c => c.GroupId == secondGroup.GroupFirstId).ToList();
-                    if (secondGroupFirstRows.Count < 1)
-                        continue;
-                    var secondRowDir = secondGroupFirstRows.First().GroupDir;
-                    //先初步获取
-                    var inserts = GetGroupInsert(firstPLines, secondGroup);
-                    if (inserts.Count < 1)
-                        continue;
-                    var firstDirInsert = GetFirstRowDirInsert(firstGroupFirstRows, firstRowDir, inserts);
-                    if (firstDirInsert.Count < 1)
-                        continue;
-                    dirUcsGroupIds.Add(firstGroup.UcsGroupId, secondGroup.UcsGroupId);
-                    dirGroupRowIds.Add(firstGroup.UcsGroupId, firstDirInsert.First().GroupId);
-                    dirHaveGroup = true;
+                    }
+                    //计算第一排方向
+                    foreach (var hisGroup in areaUCSGroups)
+                    {
+                        if (!hisGroupIds.Any(c => c == hisGroup.UcsGroupId))
+                            continue;
+                        bool isBreak = false;
+                        foreach (var area in hisGroup.GroupDivisionAreas)
+                        {
+                            if (area.divisionArea.Uid == nearAreaId)
+                            { 
+                                group.FirstRowDir = area.GroupDir.DotProduct(group.FirstDir)>0 ? group.FirstDir: group.FirstDir.Negate();
+                                isBreak = true;
+                                break;
+                            }
+                        }
+                        if (isBreak)
+                            break;
+                    }
+                    group.GroupFirstId = group.OrderGroupIds[firstIndex];
+                    changeAreaId = group.UcsGroupId;
+                    haveChange = true;
+                    hisGroupIds.Add(group.UcsGroupId);
                     break;
                 }
-                if (dirHaveGroup)
-                    continue;
-                ucsIds.Add(firstGroup.UcsGroupId);
-            }
-            
-            //Step2,每个UCS确定第一排方向后，计算其余每一排的方向
-            foreach (var group in areaUCSGroups) 
-            {
-                if (!ucsIds.Any(c => c == group.UcsGroupId))
-                    continue;
-                var thisGroupFirstId = group.GroupFirstId;
-                var firstGroupIndex = group.OrderGroupIds.IndexOf(thisGroupFirstId);
-                var orientation = group.FirstRowDir;
-                bool isCurrentDir = true;
-                for (int j = firstGroupIndex; j >= 0; j--)
+                if (haveChange) 
                 {
-                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
-                    var currentGroupId = group.OrderGroupIds[j];
-                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
-                    isCurrentDir = !isCurrentDir;
+                    CalcAreaRowDir(areaUCSGroups, new List<string> { changeAreaId });
+                    continue;
                 }
-                isCurrentDir = false;
-                for (int j = firstGroupIndex + 1; j < group.OrderGroupIds.Count; j++)
-                {
-                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
-                    var currentGroupId = group.OrderGroupIds[j];
-                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
-                    isCurrentDir = !isCurrentDir;
-                }
-            }
-            if (ucsIds.Count == areaUCSGroups.Count)
-                return areaUCSGroups;
-            //再计算受影响的每个UCS的方向,要考虑先后影响的问题，哪个区域的第一排朝向优先计算
-            while (ucsIds.Count < areaUCSGroups.Count) 
-            {
-                if (dirUcsGroupIds.Count < 1)
+                if (hisGroupIds.Count == areaUCSGroups.Count)
                     break;
-                foreach (var item in areaUCSGroups)
+                //再次以剩余的面积最大的进行排布
+                string id = "";
+                foreach (var item in areaUCSGroups) 
                 {
-                    if (ucsIds.Any(c => c == item.UcsGroupId))
+                    if (hisGroupIds.Any(c => c == item.UcsGroupId))
                         continue;
-                    //获取根据哪一个group计算第一排方向
-                    var nearUcsGroupId = dirUcsGroupIds.Where(c => c.Key == item.UcsGroupId).First().Value;
-                    if (ucsIds.Any(c => c == nearUcsGroupId))
-                        continue;
-                    var nearGroup = areaUCSGroups.Where(c => c.UcsGroupId == nearUcsGroupId).First();
-                    var nearRowId = dirGroupRowIds.Where(c => c.Key == item.UcsGroupId).First().Value;
-                    var nearRow = nearGroup.GroupDivisionAreas.Where(c => c.GroupId == nearRowId).First();
-                    var nearRowDir = nearRow.GroupDir;
-                    if (null == nearRowDir)
-                        continue;
-                    var dot = item.FirstRowDir.DotProduct(nearRowDir);
-                    if (dot > 0)
-                        item.FirstRowDir = item.FirstRowDir.Negate();
-                    ucsIds.Add(item.UcsGroupId);
+                    id = item.UcsGroupId;
+                    break;
                 }
-            }
-            
-            //计算其它
-            foreach (var group in areaUCSGroups)
-            {
-                if (ucsIds.Any(c => c == group.UcsGroupId))
-                    continue;
-                if (string.IsNullOrEmpty(group.GroupFirstId))
-                    continue;
-                var thisGroupFirstId = group.GroupFirstId;
-                var firstGroupIndex = group.OrderGroupIds.IndexOf(thisGroupFirstId);
-                var orientation = group.FirstRowDir;
-                bool isCurrentDir = true;
-                for (int j = firstGroupIndex; j >= 0; j--)
-                {
-                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
-                    var currentGroupId = group.OrderGroupIds[j];
-                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
-                    isCurrentDir = !isCurrentDir;
-                }
-                isCurrentDir = false;
-                for (int j = firstGroupIndex + 1; j < group.OrderGroupIds.Count; j++)
-                {
-                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
-                    var currentGroupId = group.OrderGroupIds[j];
-                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
-                    isCurrentDir = !isCurrentDir;
-                }
+                if (string.IsNullOrEmpty(id))
+                    break;
+                CalcAreaRowDir(areaUCSGroups, new List<string> { id });
             }
             return areaUCSGroups;
         }
-        List<DivisionRoomArea> GetGroupInsert(List<Polyline> polylines, AreaLayoutGroup secondGroup) 
-        {
-            var insertAreas = new List<DivisionRoomArea>();
-            foreach (var item in secondGroup.GroupDivisionAreas) 
-            {
-                bool ins = false;
-                var checkPLine = item.divisionArea.AreaPolyline;
-                foreach (var pl in polylines) 
-                {
-                    if (ins)
-                        break;
-                    ins = pl.Intersects(checkPLine);
-                }
-                if (!ins)
-                    continue;
-                insertAreas.Add(item);
-            }
-            return insertAreas;
-        }
-        List<DivisionRoomArea> GetFirstRowDirInsert(List<DivisionRoomArea> firstGroupRows,Vector3d firstDir, List<DivisionRoomArea> insertGroupRows) 
-        {
-            //获取相交到的区域是否有第一排方向上的，然后判断是影响方向
-            var firstCenterPoint = firstGroupRows.First().divisionArea.CenterPoint;
-            var dirInsert = new List<DivisionRoomArea>();
-            var resInsert = new List<DivisionRoomArea>();
-            foreach (var item in insertGroupRows)
-            {
-                var vector = item.divisionArea.CenterPoint - firstCenterPoint;
-                var dot = vector.DotProduct(firstDir);
-                if (dot > 0)
-                    dirInsert.Add(item);
-            }
-            foreach (var first in firstGroupRows) 
-            {
-                var centerPoint = first.divisionArea.CenterPoint;
-                foreach (var item in dirInsert)
-                {
-                    if (resInsert.Any(c => c.divisionArea.Uid == item.divisionArea.Uid))
-                        continue;
-                    //获取共线边，进一步判断是否
-                    var insertCurves = new List<Curve>();
-                    foreach (var firstCurve in first.divisionArea.AreaCurves) 
-                    {
-                        foreach (var secondCurve in item.divisionArea.AreaCurves) 
-                        {
-                            //这里线只有线段和圆弧
-                            if (firstCurve is Line firstLine)
-                            {
-                                if (secondCurve is Line secondLine) 
-                                {
-                                    IndoorFanCommon.FindIntersection(firstLine, secondLine, out List<Point3d> interPoints);
-                                    if (interPoints.Count > 1 && interPoints[0].DistanceTo(interPoints[1]) > 100) 
-                                    {
-                                        insertCurves.Add(firstCurve);
-                                    }
-                                }
-                            }
-                            else if(firstCurve is Arc firstArc)
-                            {
-                                if (secondCurve is Arc secondArc)
-                                {
-                                    var interArc = CircleArcUtil.ArcIntersectArc(firstArc, secondArc);
-                                    if (interArc == null || interArc.Length < 10)
-                                        continue;
-                                    insertCurves.Add(firstArc);
-                                }
-                            }
-                        }
-                    }
-                    if (insertCurves.Count < 1)
-                        continue;
-                    foreach (var curve in insertCurves) 
-                    {
-                        if (curve is Line line)
-                        {
-                            var prjPoint = centerPoint.PointToLine(line);
-                            var dir = (prjPoint - centerPoint).GetNormal();
-                            if (dir.DotProduct(firstDir) > 0.5)
-                                resInsert.Add(item);
-                        }
-                        else if (curve is Arc arc) 
-                        {
-                            var prjPoint = CircleArcUtil.PointToArc(centerPoint, arc);
-                            var dir = (prjPoint - centerPoint).GetNormal();
-                            if (dir.DotProduct(firstDir) > 0.5)
-                                resInsert.Add(item);
-                        }
-                    }
-                }
-            }
-            return resInsert;
-        }
+       
         void CalcGroupRowDir(string currentGroupId,Vector3d currentDir,bool isArcVertical) 
         {
             foreach (var item in _roomIntersectAreas)
@@ -674,7 +577,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         thisAreaFirstVector = dotX > 0 ? xVector : xVector.Negate();
                     else
                         thisAreaFirstVector = dotY > 0 ? yVector : yVector.Negate();
-                    groupByUcs.Add(new AreaLayoutGroup(thisGroupAreas, thisAreaFirstVector, roomWidth));
+                    groupByUcs.Add(new AreaLayoutGroup(thisGroupAreas, thisAreaFirstVector, roomWidth,_fanRectangle.MinLength));
                 }
                 else
                 {
@@ -687,10 +590,40 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     if (angle > Math.PI / 2)
                         angle = Math.PI - angle;
                     var isByVertical = angle > (Math.PI * 45.0 / 180.0);
-                    groupByUcs.Add(new AreaLayoutGroup(thisGroupAreas, vector, roomWidth, isByVertical));
+                    groupByUcs.Add(new AreaLayoutGroup(thisGroupAreas, vector, roomWidth, _fanRectangle.MinLength, isByVertical));
                 }
             }
             return groupByUcs;
+        }
+
+        void CalcAreaRowDir(List<AreaLayoutGroup> areaUCSGroups,List<string> calcIds)
+        {
+            foreach (var group in areaUCSGroups)
+            {
+                if (!calcIds.Any(c=>c == group.UcsGroupId))
+                    continue;
+                var thisGroupFirstId = group.GroupFirstId;
+                if (string.IsNullOrEmpty(thisGroupFirstId))
+                    continue;
+                var firstGroupIndex = group.OrderGroupIds.IndexOf(thisGroupFirstId);
+                var orientation = group.FirstRowDir;
+                bool isCurrentDir = true;
+                for (int j = firstGroupIndex; j >= 0; j--)
+                {
+                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
+                    var currentGroupId = group.OrderGroupIds[j];
+                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
+                    isCurrentDir = !isCurrentDir;
+                }
+                isCurrentDir = false;
+                for (int j = firstGroupIndex + 1; j < group.OrderGroupIds.Count; j++)
+                {
+                    var currentDir = isCurrentDir ? orientation : orientation.Negate();
+                    var currentGroupId = group.OrderGroupIds[j];
+                    CalcGroupRowDir(currentGroupId, currentDir, group.ArcVertical);
+                    isCurrentDir = !isCurrentDir;
+                }
+            }
         }
     }
 }

@@ -661,69 +661,61 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             FireHydrantSystem GetCtx()
             {
                 FocusMainWindow();
-                ThMEPWSS.UndergroundFireHydrantSystem.Service.GetInput.entities.Clear();
-                try
+                var _vm = new FireHydrantSystemViewModel();
+                Point3d loopStartPt;
                 {
-                    var _vm = new FireHydrantSystemViewModel();
-                    Point3d loopStartPt;
-                    {
-                        var opt = new PromptPointOptions(BACTERIOLOGICAL);
-                        var propPtRes = Active.Editor.GetPoint(opt);
-                        if (propPtRes.Status != PromptStatus.OK) return null;
-                        loopStartPt = propPtRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                    }
-                    var _selectArea = TrySelectRangeEx();
-                    if (_selectArea == null) return null;
-                    selectArea = _selectArea.ToGRect().ToPolygon();
-                    if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
-                    {
-                        var opt = new PromptPointOptions(THESAURUSINAPPOSITE);
-                        var propPtRes = Active.Editor.GetPoint(opt);
-                        if (propPtRes.Status != PromptStatus.OK) return null;
-                        selPt = propPtRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                    }
-                    var fireHydrantSysIn = new FireHydrantSystemIn(_vm.SetViewModel.FloorLineSpace);
-                    var fireHydrantSysOut = new FireHydrantSystemOut();
-                    var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();
-                    var valveDic = new Dictionary<Point3dEx, List<Point3dEx>>();
-                    var subPathList = new List<List<Point3dEx>>();
-                    var mainPathList = new List<List<Point3dEx>>();
-                    var ctx = new FireHydrantSystem()
-                    {
-                        BranchDic = branchDic,
-                        ValveDic = valveDic,
-                        FireHydrantSystemIn = fireHydrantSysIn,
-                        FireHydrantSystemOut = fireHydrantSysOut,
-                    };
-                    using (DocLock)
-                    using (var adb = AcadDatabase.Active())
-                    {
-                        GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, _selectArea, loopStartPt);
-                        var _mainPathList = MainLoop.Get(ref fireHydrantSysIn);
-                        if (_mainPathList.Count == THESAURUSSTAMPEDE)
-                        {
-                            throw new Exception(TELECOMMUNICATIONS);
-                        }
-                        var _subPathList = SubLoop.Get(ref fireHydrantSysIn, _mainPathList);
-                        var visited = new HashSet<Point3dEx>();
-                        visited.AddVisit(_mainPathList);
-                        visited.AddVisit(_subPathList);
-                        PtDic.CreateBranchDic(ref branchDic, ref valveDic, _mainPathList, fireHydrantSysIn, visited);
-                        PtDic.CreateBranchDic(ref branchDic, ref valveDic, _subPathList, fireHydrantSysIn, visited);
-                        GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, _mainPathList[THESAURUSSTAMPEDE], fireHydrantSysIn, branchDic);
-                        GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, _subPathList, fireHydrantSysIn, branchDic);
-                        GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, valveDic, fireHydrantSysIn);
-                        mainPathList = _mainPathList;
-                        subPathList = _subPathList;
-                    }
-                    ctx.MainPathList = mainPathList;
-                    ctx.SubPathList = subPathList;
-                    return ctx;
+                    var opt = new PromptPointOptions(BACTERIOLOGICAL);
+                    var propPtRes = Active.Editor.GetPoint(opt);
+                    if (propPtRes.Status != PromptStatus.OK) return null;
+                    loopStartPt = propPtRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
                 }
-                finally
+                var _selectArea = TrySelectRangeEx();
+                if (_selectArea == null) return null;
+                selectArea = _selectArea.ToGRect().ToPolygon();
+                if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
                 {
-                    ThMEPWSS.UndergroundFireHydrantSystem.Service.GetInput.entities.Clear();
+                    var opt = new PromptPointOptions(THESAURUSINAPPOSITE);
+                    var propPtRes = Active.Editor.GetPoint(opt);
+                    if (propPtRes.Status != PromptStatus.OK) return null;
+                    selPt = propPtRes.Value.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
                 }
+                var fireHydrantSysIn = new FireHydrantSystemIn(_vm.SetViewModel.FloorLineSpace);
+                var fireHydrantSysOut = new FireHydrantSystemOut();
+                var branchDic = new Dictionary<Point3dEx, List<Point3dEx>>();
+                var valveDic = new Dictionary<Point3dEx, List<Point3dEx>>();
+                var subPathList = new List<List<Point3dEx>>();
+                var mainPathList = new List<List<Point3dEx>>();
+                var ctx = new FireHydrantSystem()
+                {
+                    BranchDic = branchDic,
+                    ValveDic = valveDic,
+                    FireHydrantSystemIn = fireHydrantSysIn,
+                    FireHydrantSystemOut = fireHydrantSysOut,
+                };
+                using (DocLock)
+                using (var adb = AcadDatabase.Active())
+                {
+                    GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, _selectArea, loopStartPt);
+                    var _mainPathList = MainLoop.Get(ref fireHydrantSysIn);
+                    if (_mainPathList.Count == THESAURUSSTAMPEDE)
+                    {
+                        throw new Exception(TELECOMMUNICATIONS);
+                    }
+                    var _subPathList = SubLoop.Get(ref fireHydrantSysIn, _mainPathList);
+                    var visited = new HashSet<Point3dEx>();
+                    visited.AddVisit(_mainPathList);
+                    visited.AddVisit(_subPathList);
+                    PtDic.CreateBranchDic(ref branchDic, ref valveDic, _mainPathList, fireHydrantSysIn, visited);
+                    PtDic.CreateBranchDic(ref branchDic, ref valveDic, _subPathList, fireHydrantSysIn, visited);
+                    GetFireHydrantPipe.GetMainLoop(ref fireHydrantSysOut, _mainPathList[THESAURUSSTAMPEDE], fireHydrantSysIn, branchDic);
+                    GetFireHydrantPipe.GetSubLoop(ref fireHydrantSysOut, _subPathList, fireHydrantSysIn, branchDic);
+                    GetFireHydrantPipe.GetBranch(ref fireHydrantSysOut, branchDic, valveDic, fireHydrantSysIn);
+                    mainPathList = _mainPathList;
+                    subPathList = _subPathList;
+                }
+                ctx.MainPathList = mainPathList;
+                ctx.SubPathList = subPathList;
+                return ctx;
             }
             var TEXTHEIGHT = vm.CurrentDwgRatio is SEMITRANSPARENT ? THESAURUSSOMBRE : THESAURUSCOMPULSIVE;
             MLeader DrawMLeader(string content, Point3d p1, Point3d p2)
@@ -765,7 +757,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 }
                 LayerThreeAxes(new string[] { THESAURUSBLEMISH });
                 var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
-                mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is not QUOTATIONEDIBLE).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
+                mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
                 var pts = mlInfos.Select(x => x.BasePoint.ToNTSPoint(x)).Distinct().ToList();
                 var ptsf = GeoFac.CreateIntersectsSelector(pts);
                 switch (@case)
@@ -1260,7 +1252,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     {
                         lst = GeoFac.CreateIntersectsSelector(lst)(selectArea);
                     }
-                    var lstf = GeoFac.CreateCoveredBySelectorr(lst);
+                    var lstf = GeoFac.CreateCoveredBySelector(lst);
                     foreach (var pt in ctx.FireHydrantSystemIn.TermPointDic.Values)
                     {
                         if (pt.StartLine is null) continue;
@@ -1290,7 +1282,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 var data = CollectData(adb, selectArea.ToGRect());
                 {
                     var t0 = DateTime.Now;
-                    var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is not QUOTATIONEDIBLE).Select(x => x.PtEx._pt).ToHashSet();
+                    var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx._pt).ToHashSet();
                     var range = data.Range.ToPolygon().ToIPreparedGeometry();
                     range = new MultiPoint(targets.Select(x => x.ToNTSPoint()).Where(x => range.Contains(x)).ToArray()).ToGRect().Expand(maxRadius + THESAURUSNOTORIETY).ToPolygon().ToIPreparedGeometry();
                     var rdls = GeoFac.GetManyLineStrings(data.redlines.Select(x => x.ToLineString()).Where(x => range.Intersects(x))).ToList();

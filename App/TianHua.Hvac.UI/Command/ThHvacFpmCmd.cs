@@ -54,13 +54,12 @@ namespace TianHua.Hvac.UI.Command
                 }
                 var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
                 var wallIndex = ThMEPHVACService.CreateRoomOutlineIndex(portParam.srtPoint);
-                var srtP = portParam.srtPoint;
                 foreach (var key in dicFans.Keys)
                 {
                     var fan = dicFans[key];
                     var model = dicModels[key];
                     var p = model.FanInletBasePoint.TransformBy(mat);
-                    var wallLines = GetWalls(p, srtP, wallIndex);
+                    var wallLines = GetWalls(p, wallIndex);
                     portParam.param.inDuctSize = fan.roomDuctSize;
                     if (model.scenario == "消防加压送风")
                         cmdService.PressurizedAirSupply(fan, model, wallLines, portParam, ref fan.bypassLines, flag, allFansDic);
@@ -75,32 +74,14 @@ namespace TianHua.Hvac.UI.Command
             }
             ThDuctPortsDrawService.ClearGraphs(brokenLineIds);
         }
-        private DBObjectCollection GetWalls(Point3d p, Point3d srtP, ThCADCoreNTSSpatialIndex index)
+        private DBObjectCollection GetWalls(Point3d p, ThCADCoreNTSSpatialIndex index)
         {
             var detector = ThMEPHVACService.CreateDetector(p);
-            var wallLines = index.SelectCrossingPolygon(detector);
-            var lines = new DBObjectCollection();
-            if (wallLines.Count > 0)
-            {
-                var a = wallLines.OfType<Entity>().SelectMany(x =>
-                {
-                    var obj = new DBObjectCollection();
-                    x.Explode(obj);
-                    return obj.Cast<Polyline>().SelectMany(y =>
-                    {
-                        var lineObj = new DBObjectCollection();
-                        y.Explode(lineObj);
-                        return lineObj.Cast<Line>();
-                    });
-                }).ToList();
-                a.RemoveAt(a.Count() - 1);
-                foreach (Line l in a)
-                    lines.Add(l);
-                var mat = Matrix3d.Displacement(srtP.GetAsVector());
-                foreach (Line l in lines)
-                    l.TransformBy(mat);
-            }
-            return lines;
+            var res = index.SelectCrossingPolygon(detector);
+            if (res.Count > 0)
+                return new DBObjectCollection() { res[0] as MPolygon };
+            else
+                return new DBObjectCollection();
         }
 
         private void DrawBrokenLines(PortParam portParam, out ObjectIdList ids)
