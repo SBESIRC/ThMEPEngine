@@ -78,24 +78,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 });
         }
 
-        public void BuildCrossAdjacentLinks()
-        {
-            // 用于相邻区域平行边的灯连接
-            // 初始化
-            var shortenDis = LampLength / 2.0 + LampSideIntervalLength;
-            OffsetDis3 = OffsetDis2;
-
-            // 绘制在同一段上
-            LightNodeLinks
-                .Where(l => l.OnLinkPath)
-                .ForEach(l =>
-                {
-                    DrawAdjacentSamePathJumpWire(l);
-                    UpdateFirstLinkLine(l, shortenDis);
-                    UpdateSecondLinkLine(l, shortenDis);
-                });
-        }
-
         private void DrawDefaultJumpWire(ThLightNodeLink lightNodeLink)
         {
             /*secondPt

@@ -81,22 +81,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-
-        protected List<ThLightNodeLink> GetCrossAdjacentLinks()
-        {
-            // 创建十字路口相邻区域的跳接线
-            if (CenterSideDicts.Count > 0)
-            {
-                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkAdjacentCross();
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
-        }
-
         protected List<ThLightNodeLink> GetThreeWayOppositeLinks()
         {
             // 创建T型路口跳接线
@@ -112,14 +96,29 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
         }
 
-        protected List<ThLightNodeLink> GetThreeWayAdjacentLinks()
+        protected List<ThLightNodeLink> GetCrossCornerStraitLinks()
+        {
+            // 创建十字路口同一域具有相同1、2线的跳接线
+            if (CenterSideDicts.Count > 0)
+            {
+                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
+                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
+                return crossLinker.LinkCrossCorner();
+            }
+            else
+            {
+                return new List<ThLightNodeLink>();
+            }
+        }
+
+        protected List<ThLightNodeLink> GetThreeWayCornerStraitLinks()
         {
             // 创建T型路口跳接线
             if (CenterSideDicts.Count > 0)
             {
                 var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkAdjacentThreeWay();
+                return crossLinker.LinkThreeWayCorner(); // 连接T型拐角处
             }
             else
             {
@@ -138,10 +137,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         protected List<ThLightEdge> GetEdges(EdgePattern edgePattern)
         {
-            return Graphs
-                .SelectMany(g => g.GraphEdges)
+            return GetEdges(Graphs.SelectMany(g => g.GraphEdges).ToList(), edgePattern);
+        }
+
+        protected List<ThLightEdge> GetEdges(List<ThLightEdge> edges,EdgePattern edgePattern)
+        {
+            return edges
                 .Where(o => o.EdgePattern == edgePattern)
-                .ToList();
+               .ToList();
         }
 
         protected List<ThLightEdge> GetEdges()

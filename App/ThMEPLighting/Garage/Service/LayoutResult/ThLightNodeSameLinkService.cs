@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -46,6 +47,128 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
+        public List<ThLightNodeLink> FindCornerStraitLinks()
+        {
+            // 找出拐弯处直连的灯，
+            var results = new List<ThLightNodeLink>();
+            return Links.SelectMany(l => FindCornerStraitLink(l)).ToList();
+        }
+
+        private List<ThLightNodeLink> FindCornerStraitLink(ThLinkPath linkPath)
+        {
+            // 传入ThLinkPath，目的是表达其中的Edges是连续的
+            var results = new List<ThLightNodeLink>();
+            var links = SplitSameLinks(linkPath.Edges);
+            for(int i=0;i< links.Count-1;i++)
+            {
+                var current = links[i];
+                var next = links[i + 1];
+                var linkPt = current.Last().Edge.FindLinkPt(next.First().Edge, ThGarageLightCommon.RepeatedPointDistance);
+                if(!linkPt.HasValue)
+                {
+                    continue;
+                }
+                var currentPath = ToPolyline(current.Select(o => o.Edge).Reverse().ToList(), linkPt.Value);
+                var nextPath = ToPolyline(next.Select(o => o.Edge).ToList(), linkPt.Value);
+
+                var currentNodes = SortNumberNodes(SelectNumberNodes(current),currentPath);
+                var nextNodes = SortNumberNodes(SelectNumberNodes(next), nextPath);
+
+                var currentDifferntNodes = FindDifferNumberNodes(currentNodes, true);
+                var nextDifferntNodes = FindDifferNumberNodes(nextNodes, true);
+
+                var linkNodesPairs = FindLinkNodes(currentDifferntNodes, nextDifferntNodes);
+                linkNodesPairs = FilterByCloseDistance(linkNodesPairs); // 对于有重复编号灯链，获取距离最近的
+
+                linkNodesPairs.ForEach(o => results.Add(CreateNodeLink(o.Item1,o.Item2, linkPath.Edges)));
+            }
+            return results;
+        }
+
+        private ThLightNodeLink CreateNodeLink(ThLightNode first,ThLightNode second,
+            List<ThLightEdge> edges)
+        {
+            var item1NodeEdge = FindLightNodeEdge(edges, first.Id);
+            var item2NodeEdge = FindLightNodeEdge(edges, second.Id);
+            return new ThLightNodeLink()
+            {
+                First = first,
+                Second = second,
+                OnLinkPath = false,
+                Edges = new List<Line> { item1NodeEdge.Edge, item2NodeEdge.Edge },
+            };
+        }
+
+        private List<Tuple<ThLightNode, ThLightNode>> FilterByCloseDistance(List<Tuple<ThLightNode, ThLightNode>> linkNodes)
+        {
+            return linkNodes
+                .GroupBy(o => o.Item1.Number)
+                .Where(g => g.Count() > 0)
+                .Select(g => g.ToList().OrderBy(p => p.Item1.Position.DistanceTo(p.Item2.Position)).First())
+                .ToList();
+        }
+
+        private ThLightEdge FindLightNodeEdge(List<ThLightEdge> edges,string lightNodeId)
+        {
+            return edges
+                 .Where(o => o.LightNodes.Select(n => n.Id).Contains(lightNodeId))
+                 .FirstOrDefault();
+        }
+
+        private List<Tuple<ThLightNode, ThLightNode>> FindLinkNodes(List<ThLightNode> preNodes, List<ThLightNode> nextNodes)
+        {
+            var results = new List<Tuple<ThLightNode, ThLightNode>>();
+            for(int i=0;i< preNodes.Count;i++)
+            {
+                for (int j = 0; j < nextNodes.Count; j++)
+                {
+                    if(preNodes[i].Number== preNodes[j].Number)
+                    {
+                        results.Add(Tuple.Create(preNodes[i], preNodes[j]));
+                    }
+                }
+            }
+            // 增加过滤
+            return results
+                .Where(o=>!string.IsNullOrEmpty(o.Item1.Number))
+                .Where(o=>o.Item1.Position.DistanceTo(o.Item2.Position)>5.0)
+                .ToList();
+        }
+
+        private List<ThLightNode> SortNumberNodes(List<ThLightNode> nodes, Polyline edge)
+        {
+            return nodes.OrderBy(n => n.Position.DistanceTo(edge)).ToList();
+        }
+
+        private List<ThLightNode> SelectNumberNodes(List<ThLightEdge> edges)
+        {
+            return edges.SelectMany(e => e.LightNodes).ToList();
+        }
+
+        private List<List<ThLightEdge>> SplitSameLinks(List<ThLightEdge> sameLinkEdges)
+        {
+            var links = new List<List<ThLightEdge>>();
+            for (int i = 0; i < sameLinkEdges.Count; i++)
+            {
+                var sameLink = new List<ThLightEdge>();
+                sameLink.Add(sameLinkEdges[i]);
+                for (int j = i + 1; j < sameLinkEdges.Count; j++)
+                {
+                    if (sameLinkEdges[j].Edge.IsLessThan45Degree(sameLink.Last().Edge))
+                    {
+                        sameLink.Add(sameLinkEdges[j]);
+                    }
+                    else
+                    {
+                        i = j - 1;
+                        break;
+                    }
+                }
+                links.Add(sameLink);
+            }
+            return links;
+        }
+
         private bool IsOnSamePath(List<Line> lines)
         {
             for (int i = 0; i < lines.Count - 1; i++)
@@ -80,6 +203,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
             return results;
+        }
+
+        private Polyline ToPolyline(List<Line> lines,Point3d startPt)
+        {
+            var path = lines.ToPolyline(ThGarageLightCommon.RepeatedPointDistance);
+            bool isCloseStart = startPt.DistanceTo(path.StartPoint) <= ThGarageLightCommon.RepeatedPointDistance;
+            bool isCloseEnd = startPt.DistanceTo(path.EndPoint) <= ThGarageLightCommon.RepeatedPointDistance;
+            if (isCloseStart || isCloseEnd)
+            {
+                if(isCloseEnd)
+                {
+                    return path.Reverse();
+                }
+            }
+            return path;
         }
 
         private List<List<ThLightEdge>> BuildStraitLinks(List<ThLightEdge> edges)
