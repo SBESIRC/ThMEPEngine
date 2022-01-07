@@ -150,7 +150,7 @@ namespace ThMEPHVAC.FanConnect.Service
         {
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 200);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(frame, dir, closetLane, 400, 300, 50);
             var costGetter = new ToLineCostGetterEx();
             var pathAdjuster = new ThFanPipeAdjustPath();
             aStarRoute.costGetter = costGetter;
