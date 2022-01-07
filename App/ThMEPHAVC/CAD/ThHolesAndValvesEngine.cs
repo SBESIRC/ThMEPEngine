@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using ThMEPHVAC.Duct;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -104,52 +103,37 @@ namespace ThMEPHVAC.CAD
                                                           HashSet<Line> lines,
                                                           bool isRoom)
         {
+            // wallobjects一定有值
             var valveGroups = new List<ThValveGroup>();
-            var walllines = wallobjects.Cast<Line>();
-            foreach (Line l in lines)
+            foreach (MPolygon pl in wallobjects)
             {
-                var dirVec = ThMEPHVACService.GetEdgeDirection(l);
-                bool isBypass = IsBypass(l.StartPoint, l.EndPoint, bypassobjects);
-                double width = isBypass ? teeWidth : ductWidth;
-                foreach (var wallline in walllines)
+                var walllines = ThMEPHVACService.CastMPolygon2Lines(pl);
+                foreach (Line l in lines)
                 {
-                    var IntersectPoints = new Point3dCollection();
-                    var ex_l = ThMEPHVACService.ExtendLine(l, 1.5);
-                    ex_l.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
-                    if (IntersectPoints.Count > 0)
-                    {                        
-                        var vec = new Vector2d(dirVec.X, dirVec.Y);
-                        var holeAngle = vec.Angle >= 0.5 * Math.PI ? vec.Angle - 0.5 * Math.PI : vec.Angle + 1.5 * Math.PI;
-                        var insertP = IntersectPoints[0].TransformBy(disMat);
-                        var groupparameters = new ThValveGroupParameters()
+                    var dirVec = ThMEPHVACService.GetEdgeDirection(l);
+                    bool isBypass = IsBypass(l.StartPoint, l.EndPoint, bypassobjects);
+                    double width = isBypass ? teeWidth : ductWidth;
+                    foreach (Line wallline in walllines)
+                    {
+                        var IntersectPoints = new Point3dCollection();
+                        var ex_l = ThMEPHVACService.ExtendLine(l, 1.5);
+                        ex_l.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
+                        if (IntersectPoints.Count > 0)
                         {
-                            GroupInsertPoint = insertP,
-                            DuctWidth = width,
-                            RotationAngle = holeAngle,
-                            FanScenario = fanmodel.scenario,
-                            ValveToFanSpacing = 2000,
-                        };
-                        // 排烟场景room侧是入风口，非排烟场景room侧是出风口
-                        var isIn = fanmodel.isExhaust ? isRoom : !isRoom;
-                        var valvegroup = new ThValveGroup(groupparameters, fanmodel.isExhaust, isIn);
-                        valvegroup.SetFireHoleGroup(fanmodel.Data.BlockLayer);
-                        valveGroups.Add(valvegroup);
+                            var vec = new Vector2d(dirVec.X, dirVec.Y);
+                            var holeAngle = vec.Angle >= 0.5 * Math.PI ? vec.Angle - 0.5 * Math.PI : vec.Angle + 1.5 * Math.PI;
+                            var insertP = IntersectPoints[0].TransformBy(disMat);
+                            var groupparameters = new ThValveGroupParameters() { GroupInsertPoint = insertP, DuctWidth = width, RotationAngle = holeAngle, FanScenario = fanmodel.scenario, ValveToFanSpacing = 2000 };
+                            // 排烟场景room侧是入风口，非排烟场景room侧是出风口
+                            var isIn = fanmodel.isExhaust ? isRoom : !isRoom;
+                            var valvegroup = new ThValveGroup(groupparameters, fanmodel.isExhaust, isIn);
+                            valvegroup.SetFireHoleGroup(fanmodel.Data.BlockLayer);
+                            valveGroups.Add(valvegroup);
+                        }
                     }
                 }
             }
             return valveGroups;
-        }
-        private void UpdateSrtVec(ref Vector3d inVec, ref Vector3d outVec)
-        {
-            if (inVec.IsEqualTo(Point3d.Origin.GetAsVector()) && outVec.IsEqualTo(Point3d.Origin.GetAsVector()))
-            {
-                return ;
-            }
-            // 如果起始为0向量，与另一边反向(仅能处理in out共线时)
-            if (inVec.IsEqualTo(Point3d.Origin.GetAsVector()))
-                inVec = -outVec;
-            if (inVec.IsEqualTo(Point3d.Origin.GetAsVector()))
-                outVec = -inVec;
         }
         private List<ThValveGroup> GetNotRoomValveGroupWithoutWall(double notRoomWidth, ThDbModelFan fanmodel)
         {

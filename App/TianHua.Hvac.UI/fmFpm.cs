@@ -538,7 +538,7 @@ namespace TianHua.Hvac.UI
                 notRoomStartPoint = notRoomStartPoint.TransformBy(mat);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索全部的线
-                notRoomDetector.SearchCenterLine(centerlines, notRoomStartPoint, SearchBreakType.breakWithEndline);
+                notRoomDetector.SearchCenterLine(centerlines, ref notRoomStartPoint, SearchBreakType.breakWithEndline);
                 connNotRoomLines = notRoomDetector.connectLines;
             }
         }
@@ -600,10 +600,20 @@ namespace TianHua.Hvac.UI
                 roomNotPoint = roomNotPoint.TransformBy(mat);
                 var roomDetector = new ThFanCenterLineDetector(false);
                 // 服务侧搜索全部的线
-                roomDetector.SearchCenterLine(centerlines, roomPoint, SearchBreakType.breakWithEndline);
+                roomDetector.SearchCenterLine(centerlines, ref roomPoint, SearchBreakType.breakWithEndline);
                 var notRoomDetector = new ThFanCenterLineDetector(false);
                 // 非服务侧搜索截至到三通和四通的线
-                notRoomDetector.SearchCenterLine(centerlines, roomNotPoint, SearchBreakType.breakWithTeeAndCross);
+                notRoomDetector.SearchCenterLine(centerlines, ref roomNotPoint, SearchBreakType.breakWithTeeAndCross);
+                if (fanModel.isExhaust)
+                {
+                    fanModel.FanInletBasePoint = roomPoint.TransformBy(reverseMat);
+                    fanModel.FanOutletBasePoint = roomNotPoint.TransformBy(reverseMat);
+                }
+                else
+                {
+                    fanModel.FanInletBasePoint = roomNotPoint.TransformBy(reverseMat);
+                    fanModel.FanOutletBasePoint = roomPoint.TransformBy(reverseMat);
+                }
                 if (fan.scenario == "消防加压送风")
                 {
                     foreach (Line l in fan.bypassLines)
@@ -857,7 +867,7 @@ namespace TianHua.Hvac.UI
             var mat = Matrix3d.Displacement(-p.GetAsVector());
             var searchP = p.TransformBy(mat);
             var detector = new ThFanCenterLineDetector(false);
-            detector.SearchCenterLine(centerlines, searchP, SearchBreakType.breakWithEndline);
+            detector.SearchCenterLine(centerlines, ref searchP, SearchBreakType.breakWithEndline);
             portParam.centerLines = detector.connectLines;
         }
         private void RecordPortParam()
@@ -989,7 +999,8 @@ namespace TianHua.Hvac.UI
                 if (centerlines.Count == 0)
                     return;
                 var detector = new ThFanCenterLineDetector(false);
-                detector.SearchCenterLine(centerlines, Point3d.Origin, SearchBreakType.breakWithEndline);
+                var p = Point3d.Origin;
+                detector.SearchCenterLine(centerlines, ref p, SearchBreakType.breakWithEndline);
                 portParam.centerLines = detector.connectLines;
                 var anay = new ThDuctPortsAnalysis();
                 var airVolume = anay.CalcAirVolume(portParam);

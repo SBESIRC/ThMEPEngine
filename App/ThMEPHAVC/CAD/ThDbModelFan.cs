@@ -58,8 +58,8 @@ namespace ThMEPHVAC.CAD
                 FanOutlet = GetFanOutlet();
                 FanInlet = GetFanInlet();
                 isExhaust = !(scenario.Contains("补") || scenario.Contains("送"));
-                var is_axis = (Name.Contains("轴流风机"));
-                ThDuctPortsDrawService.GetFanDynBlockProperity(Data, is_axis, out fanInWidth, out fanOutWidth);
+                var isAxis = (Name.Contains("轴流风机"));
+                ThDuctPortsDrawService.GetFanDynBlockProperity(Data, isAxis, out fanInWidth, out fanOutWidth);
             } 
         }
         private string GetIntakeForm()

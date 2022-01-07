@@ -9,6 +9,8 @@ using ThCADCore.NTS;
 using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.CAD;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPHVAC.Model
 {
@@ -364,38 +366,6 @@ namespace ThMEPHVAC.Model
             else
                 return l1.StartPoint + vec1 * S;
         }
-        public static bool IsInPolyline(Point3d p, DBObjectCollection lines)
-        {
-            var shadow = new DBObjectCollection();
-            foreach (Line obj in lines)
-                shadow.Add(obj);
-            var pts = new Point3dCollection();
-            var search_p = (shadow[0] as Line).StartPoint;
-            pts.Add(search_p);
-            while (shadow.Count > 0)
-            {
-                var cur_l = Search_p(search_p, shadow, out Point3d other_p);
-                pts.Add(other_p);
-                shadow.Remove(cur_l);
-                search_p = other_p;
-            }
-            var pl = new Polyline();
-            pl.CreatePolyline(pts);
-            return pl.Contains(p);
-        }
-        private static Line Search_p(Point3d p, DBObjectCollection lines, out Point3d other_p)
-        {
-            var tor = new Tolerance(1.5, 1.5);
-            foreach (Line l in lines)
-            {
-                if (p.IsEqualTo(l.StartPoint, tor) || p.IsEqualTo(l.EndPoint, tor))
-                {
-                    other_p = p.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
-                    return l;
-                }
-            }
-            throw new NotImplementedException("search point not belongs wall lines");
-        }
         public static double GetElbowOpenAngle(Line l1, Line l2, Point3d centerP)
         {
             var tor = new Tolerance(1.5, 1.5);
@@ -520,6 +490,22 @@ namespace ThMEPHVAC.Model
                     attRef.Rotation = angle;
                 }
             }
+        }
+        public static string GetADuctSize(double airVolume, string scenario)
+        {
+            var ductInfo = new ThDuctParameter(airVolume, scenario);
+            return ductInfo.DuctSizeInfor.RecommendInnerDuctSize;
+        }
+        public static DBObjectCollection CastMPolygon2Lines(MPolygon pl)
+        {
+            var walllines = new DBObjectCollection();
+            pl.Explode(walllines);
+            var polyline = walllines[0] as Polyline;
+            var lines = polyline.ToLines();
+            var t = new DBObjectCollection();
+            foreach (Line l in lines)
+                t.Add(l);
+            return t;
         }
     }
 }

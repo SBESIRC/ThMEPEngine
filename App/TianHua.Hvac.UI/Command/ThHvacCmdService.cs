@@ -102,7 +102,7 @@ namespace TianHua.Hvac.UI.Command
             return true;
         }
         public void NotPressurizedAirSupply(FanParam fanParam, 
-                                            ThDbModelFan fan, 
+                                            ThDbModelFan fan,
                                             DBObjectCollection wallLines, 
                                             PortParam portParam, 
                                             bool haveMultiFan,

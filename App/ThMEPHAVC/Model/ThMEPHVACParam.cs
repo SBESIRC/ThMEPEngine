@@ -30,6 +30,8 @@ namespace ThMEPHVAC.Model
     };
     public class PortInfo
     {
+        public ObjectId id;
+        public string effectiveName;
         public bool haveLeft = true;
         public bool haveRight = true;
         public string ductSize; // 用于绘制endline管段时的判别
@@ -54,12 +56,12 @@ namespace ThMEPHVAC.Model
         public SegInfo() { }
         public SegInfo (SegInfo seg)
         {
-            this.l = new Line(seg.l.StartPoint, seg.l.EndPoint);
-            this.ductSize = seg.ductSize;
-            this.srcShrink = seg.srcShrink;
-            this.dstShrink = seg.dstShrink;
-            this.airVolume = seg.airVolume;
-            this.elevation = seg.elevation;
+            l = new Line(seg.l.StartPoint, seg.l.EndPoint);
+            ductSize = seg.ductSize;
+            srcShrink = seg.srcShrink;
+            dstShrink = seg.dstShrink;
+            airVolume = seg.airVolume;
+            elevation = seg.elevation;
         }
     }
     public class EndlineSegInfo

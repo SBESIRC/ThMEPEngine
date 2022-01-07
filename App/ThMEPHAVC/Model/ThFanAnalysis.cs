@@ -221,8 +221,7 @@ namespace ThMEPHVAC.CAD
                 SetRoomInfo(iRoomP, roomP);
             else
             {
-                var index = new ThCADCoreNTSSpatialIndex(wallLines);
-                BreakByWall(wallLines, index);
+                BreakByWall(wallLines);
                 if (fanBreakP.IsEqualTo(Point3d.Origin))
                 {
                     // 有墙线但未相交
@@ -312,8 +311,6 @@ namespace ThMEPHVAC.CAD
             foreach (Line l in bypass)
                 l.TransformBy(disMat);
             foreach (Line l in centerLine)
-                l.TransformBy(disMat);
-            foreach (Line l in wallLines)
                 l.TransformBy(disMat);
             if (!isExhaust)
             {
@@ -492,37 +489,44 @@ namespace ThMEPHVAC.CAD
             foreach (Line l in roomLines)
                 lines.Add(l);
             var detector = new ThFanCenterLineDetector(false);
-            detector.SearchCenterLine(lines, p, SearchBreakType.breakWithEndline);
+            detector.SearchCenterLine(lines, ref p, SearchBreakType.breakWithEndline);
             foreach (Line l in detector.connectLines)
             {
                 outCenterLine.Add(l);
                 roomLines.Remove(l);
             }
         }
-        private void BreakByWall(DBObjectCollection wallLines, ThCADCoreNTSSpatialIndex wallIndex)
+        private void BreakByWall(DBObjectCollection wallLines)
         {
+            if (wallLines.Count == 0)
+                return;
+            var lines = ThMEPHVACService.CastMPolygon2Lines(wallLines[0] as MPolygon);
+            var wallIndex = new ThCADCoreNTSSpatialIndex(lines);
             fanBreakP = Point3d.Origin;
             outCenterLine = new DBObjectCollection();
             var crossLine = new Line();
             foreach (var l in roomLines)
             {
-                if (!ThMEPHVACService.IsInPolyline(l.StartPoint, wallLines) && !ThMEPHVACService.IsInPolyline(l.EndPoint, wallLines))
-                    outCenterLine.Add(l);
-                else
+                foreach (MPolygon wall in wallLines)
                 {
-                    var e_l = ThMEPHVACService.ExtendLine(l, 1);
-                    var pl = ThMEPHVACService.GetLineExtend(e_l, 1);
-                    var res = wallIndex.SelectCrossingPolygon(pl);
-                    if (res.Count > 0)
+                    if (!wall.Contains(l.StartPoint) && !wall.Contains(l.EndPoint))
+                        outCenterLine.Add(l);
+                    else
                     {
-                        var line = res[0] as Line;
-                        fanBreakP = ThMEPHVACService.IntersectPoint(e_l, line);
-                        if (fanBreakP.IsEqualTo(Point3d.Origin))
-                            continue;
-                        if (!IsBypass(l))
+                        var e_l = ThMEPHVACService.ExtendLine(l, 1);
+                        var pl = ThMEPHVACService.GetLineExtend(e_l, 1);
+                        var res = wallIndex.SelectCrossingPolygon(pl);
+                        if (res.Count > 0)
                         {
-                            crossLine = l;
-                            break;
+                            var line = res[0] as Line;
+                            fanBreakP = ThMEPHVACService.IntersectPoint(e_l, line);
+                            if (fanBreakP.IsEqualTo(Point3d.Origin))
+                                continue;
+                            if (!IsBypass(l))
+                            {
+                                crossLine = l;
+                                break;
+                            }
                         }
                     }
                 }
@@ -566,9 +570,11 @@ namespace ThMEPHVAC.CAD
         }
         private void UpdateWallBreakPoint(DBObjectCollection wallLines, Line crossLine)
         {
+            if (wallLines.Count == 0)
+                return;
+            var wall = wallLines[0] as MPolygon;
             //fanBreakP -> 中心线和墙
-            var p = ThMEPHVACService.IsInPolyline(crossLine.StartPoint, wallLines) ? 
-                crossLine.StartPoint : crossLine.EndPoint;
+            var p = wall.Contains(crossLine.StartPoint)? crossLine.StartPoint : crossLine.EndPoint;
             foreach (Line l in outCenterLine)
                 roomLines.Remove(l);
             roomLines.Remove(crossLine);

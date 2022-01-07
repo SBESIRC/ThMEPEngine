@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.Model
 {
@@ -42,6 +43,27 @@ namespace ThMEPHVAC.Model
                 service.airValveService.InsertValve(portParam.srtPoint, anayRes.endLinesInfos);
             if (portParam.param.portNum == 0)
                 DrawBrokenLine(anayRes.endPoints);
+            if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
+                FixEndComp(anayRes.dicPlToAirVolume, anayRes.connPort);
+        }
+
+        private void FixEndComp(Dictionary<int, PortInfo> dicPlToAirVolume, List<int> connPort)
+        {
+            using (var adb = Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (int code in connPort)
+                {
+                    var param = dicPlToAirVolume[code];
+                    var b = adb.Element<BlockReference>(param.id, true);
+                    b.Layer = service.portLayer;
+                    if (param.effectiveName == ThHvacCommon.AI_BROKEN_LINE)
+                    {
+                        var s = ThMEPHVACService.GetADuctSize(param.portAirVolume, portParam.param.scenario);
+                        var w = ThMEPHVACService.GetWidth(s);
+                        ThDuctPortsDrawService.SetBrokenLineDynBlockProperity(param.id, w);
+                    }
+                }
+            }
         }
 
         private void DrawBrokenLine(Dictionary<Point3d, Point3d> endPoints)
