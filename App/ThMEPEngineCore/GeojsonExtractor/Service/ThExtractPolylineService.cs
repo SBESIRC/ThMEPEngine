@@ -11,7 +11,7 @@ using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
-    public class ThExtractPolylineService:ThExtractService
+    public class ThExtractPolylineService : ThExtractService
     {
         public List<Polyline> Polys { get; set; }
         public ThExtractPolylineService()
@@ -19,33 +19,47 @@ namespace ThMEPEngineCore.GeojsonExtractor.Service
             Polys = new List<Polyline>();
         }
 
-        public override void Extract(Database db,Point3dCollection pts)
+        public override void Extract(Database db, Point3dCollection pts)
         {
             using (var acadDatabase = AcadDatabase.Use(db))
             {
                 Polys = acadDatabase.ModelSpace
                     .OfType<Polyline>()
                     .Where(o => IsElementLayer(o.Layer))
-                    .Select(o=>(o.Clone() as Polyline).Tessellate(TesslateLength))
+                    .Select(o => o.Clone())
+                    .OfType<Polyline>()
                     .ToList();
-                if(pts.Count>=3)
+
+                if (Polys.Count > 0)
                 {
-                    var objs = Polys.ToCollection();
-                    var transformer = new ThMEPOriginTransformer(objs);
-                    var newPts = new Point3dCollection();
-                    pts.Cast<Point3d>().ForEach(o =>
+                    using (var ov = new ThCADCoreNTSArcTessellationLength(TesslateLength))
                     {
-                        var pt = new Point3d(o.X,o.Y,o.Z);
-                        transformer.Transform(ref pt);
-                        newPts.Add(pt);
-                    });                                 
-                    transformer.Transform(objs);
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                    var querys = spatialIndex.SelectCrossingPolygon(newPts);
-                    transformer.Reset(querys);
-                    Polys = querys.Cast<Polyline>().ToList();
+                        var objs = Polys.ToCollection();
+                        var transformer = new ThMEPOriginTransformer(objs);
+                        // 以下操作都需要在近点完成
+                        transformer.Transform(objs);
+                        var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                        // 利用空间索引将多段线打断
+                        Polys = spatialIndex.SelectAll().OfType<Polyline>().ToList();
+
+                        // 空间索引
+                        if (pts.Count >= 3)
+                        {
+                            var newPts = new Point3dCollection();
+                            pts.OfType<Point3d>().ForEach(o =>
+                            {
+                                var pt = new Point3d(o.X, o.Y, o.Z);
+                                transformer.Transform(ref pt);
+                                newPts.Add(pt);
+                            });
+                            Polys = spatialIndex.SelectCrossingPolygon(newPts).OfType<Polyline>().ToList();
+                        }
+
+                        // 挪回远点
+                        Polys.ForEach(o => transformer.Reset(o));
+                    }
                 }
             }
-        }        
+        }
     }
 }
