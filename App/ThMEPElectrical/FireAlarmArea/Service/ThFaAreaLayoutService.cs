@@ -117,6 +117,62 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             return ans;
         }
 
+        public static bool IsAisleArea2(Polyline frame, List<Polyline> HoleList, double shrinkValue, double threshold)
+        {
+            var isAisle = true;
+
+            var objs = new DBObjectCollection
+            {
+                frame
+            };
+            HoleList.ForEach(x => objs.Add(x));
+            var areaPolygon = objs.BuildAreaGeometry();
+
+            var originalArea = areaPolygon.Area;
+            var shrinkedGeom = areaPolygon.Buffer(-shrinkValue);
+            var shrinkedArea = shrinkedGeom.Area;
+            var objs2 = shrinkedGeom.ToDbCollection();
+            foreach (var obj in objs2)
+            {
+                if (obj is Entity pl)
+                {
+                    ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(pl, "l1shrink", 2);
+                }
+            }
+
+            var bufferShrink = shrinkedGeom.Buffer(shrinkValue * 1);
+            var bufferShrinkArea = bufferShrink.Area;
+            var objs3 = bufferShrink.ToDbCollection();
+            foreach (var obj in objs3)
+            {
+                if (obj is Entity pl)
+                {
+                    ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(pl, "l2bufferShrinkSmall", 3);
+                }
+            }
+
+            var bufferShrink2 = shrinkedGeom.Buffer(shrinkValue*1.5);
+            var bufferShrinkArea2= bufferShrink2.Area;
+            var objs4 = bufferShrink2.ToDbCollection();
+            foreach (var obj in objs4)
+            {
+                if (obj is Entity pl)
+                {
+                    ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(pl, "l2bufferShrinkLarge", 181);
+                }
+            }
+
+            var shrinkAreaPer = shrinkedArea / originalArea;
+            var bufferShrinkAreaPer = bufferShrinkArea / originalArea;
+
+            if (bufferShrinkAreaPer >= threshold)
+            {
+                isAisle = false;
+            }
+
+            return isAisle;
+        }
+
         public static double LayoutAreaWidth(List<MPolygon> LayoutArea, double radius)
         {
             var width = 2700.0;

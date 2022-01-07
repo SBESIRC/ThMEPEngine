@@ -209,7 +209,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
         /// 加入柱子会使中心线形状很奇怪
         /// </summary>
         /// <param name="roomForCenterLine"></param>
-        public void GetRoomHoleMPoly(out MPolygon roomForCenterLine)
+        private void GetRoomHoleMPoly(out MPolygon roomForCenterLine)
         {
 
             var room = frame.ToNTSPolygon();
@@ -287,6 +287,37 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 
         }
 
+        public void GetLayoutMPoly(out List<MPolygon> layoutWithAllHole)
+        {
+            layoutWithAllHole = new List<MPolygon>();
 
+            var holeObj = new DBObjectCollection();
+            holeList.ForEach(x => holeObj.Add(x));
+            wallList.ForEach(x => holeObj.Add(x));
+            columns.ForEach(x => holeObj.Add(x));
+            prioritys.ForEach(x => holeObj.Add(x));
+
+            var holeGeom = holeObj.UnionGeometries();
+            for (int i = 0; i < layoutList.Count; i++)
+            {
+                var layout = layoutList[i];
+                var layoutWithHole = layout.DifferenceMP(holeObj);
+
+                for (int j = 0; j < layoutWithHole.Count; j++)
+                {
+                    var diff = layoutWithHole [j];
+                    if (diff is Polyline pl )
+                    {
+                        layoutWithAllHole.Add(ThMPolygonTool.CreateMPolygon(pl));
+                    }
+                    else if (diff is MPolygon mp)
+                    {
+                        layoutWithAllHole.Add(mp);
+                    }    
+                }
+            }
+
+
+        }
     }
 }

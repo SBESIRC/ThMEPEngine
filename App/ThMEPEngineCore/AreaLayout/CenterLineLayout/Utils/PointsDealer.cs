@@ -7,6 +7,7 @@ using DotNetARX;
 using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
 {
@@ -52,7 +53,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// </summary>
         /// <param name="area">多边形</param>
         /// <returns>返回多边形上的点</returns>
-        public static List<Point3d> PointsOnPolyline(Polyline area)
+        private static List<Point3d> PointsOnPolyline(Polyline area)
         {
             List<Point3d> ans = new List<Point3d>();
             //area.VerticesEx(100.0);
@@ -145,14 +146,16 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         public static List<Point3d> PointsInUncoverArea(Entity uncoverArea, double dis)
         {
             List<Point3d> ptsInUncoverRectangle = new List<Point3d>();
-            List<Point3d> pts = PointsOnPolyline(((Polyline)uncoverArea).CalObb());
+            var obb = ((Polyline)uncoverArea).CalObb();
+            List<Point3d> pts = PointsOnPolyline(obb);
             Point3d pt0 = pts[0];
             Point3d pt01 = CenterOfTwoPoints(pts[0], pts[1]);
             Point3d pt1 = pts[1];
             Point3d pt2 = pts[2];
             Point3d pt23 = CenterOfTwoPoints(pts[2], pts[3]);
             Point3d pt3 = pts[3];
-            ptsInUncoverRectangle.Add(CenterOfTwoPoints(pt0, pt2));
+            Point3d p02 = CenterOfTwoPoints(pt0, pt2);
+            ptsInUncoverRectangle.Add(p02);
             double disX = pt0.DistanceTo(pt1);
             double disY = pt1.DistanceTo(pt2);
             int Xcnt = (int)(disX / dis);
@@ -182,6 +185,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                     Point3d ptAD_D = new Point3d(((Ycnt - j) * ptAD.X + j * ptD.X) / Ycnt, ((Ycnt - j) * ptAD.Y + j * ptD.Y) / Ycnt, 0);
                     Point3d ptBC_B = new Point3d(((Ycnt - j) * ptBC.X + j * ptB.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptB.Y) / Ycnt, 0);
                     Point3d ptBC_C = new Point3d(((Ycnt - j) * ptBC.X + j * ptC.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptC.Y) / Ycnt, 0);
+
                     if (flag)
                     {
                         flag = false;
@@ -200,6 +204,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 ptsInUncoverRectangle.Add(ptAD);//
                 ptsInUncoverRectangle.Add(ptBC);//
             }
+            ptsInUncoverRectangle = ptsInUncoverRectangle.Distinct().ToList();
+            ptsInUncoverRectangle.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptsInRectangle", colorIndex: 150, r: 30));
             //只将在覆盖区域中的点加入ans
             List<Point3d> ptss = new List<Point3d>();
             foreach (var pt in ptsInUncoverRectangle)
@@ -211,6 +217,85 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 }
             }
             ptss = ptss.Distinct().ToList();
+
+            return ptss;
+        }
+
+        public static List<Point3d> PointsInUncoverAreaNew(MPolygon uncoverArea, double dis,out List<Point3d > ptsInUncoverRectangle)
+        {
+             ptsInUncoverRectangle = new List<Point3d>();
+            var obb = (uncoverArea.Shell()).CalObb();
+            List<Point3d> pts = PointsOnPolyline(obb);
+            Point3d pt0 = pts[0];
+            Point3d pt01 = CenterOfTwoPoints(pts[0], pts[1]);
+            Point3d pt1 = pts[1];
+            Point3d pt2 = pts[2];
+            Point3d pt23 = CenterOfTwoPoints(pts[2], pts[3]);
+            Point3d pt3 = pts[3];
+            Point3d p02 = CenterOfTwoPoints(pt0, pt2);
+            ptsInUncoverRectangle.Add(p02);
+            double disX = pt0.DistanceTo(pt1);
+            double disY = pt1.DistanceTo(pt2);
+            int Xcnt = (int)(disX / dis);
+            Xcnt -= Xcnt % 2;
+            int Ycnt = (int)(disY / dis);
+            Ycnt -= Ycnt % 2;
+            //int mode = 0; // 1: Y比较大，削减Y的数量 2: X比较长
+            //Ycnt = Ycnt > 1 ? (Xcnt > 3 ? Ycnt - 2 : Ycnt) : Ycnt;
+            //Xcnt = Xcnt > 1 ? (Ycnt > 3 ? Xcnt - 2 : Xcnt) : Xcnt;
+
+            for (int i = 0; i < Xcnt; i += 2)
+            //for (int i = Xcnt - 1; i >= 0; i -= 2)
+            {
+                Point3d ptA = new Point3d(((Xcnt - i) * pt01.X + i * pt0.X) / Xcnt, ((Xcnt - i) * pt01.Y + i * pt0.Y) / Xcnt, 0);//Apt01_0
+                Point3d ptB = new Point3d(((Xcnt - i) * pt01.X + i * pt1.X) / Xcnt, ((Xcnt - i) * pt01.Y + i * pt1.Y) / Xcnt, 0);//Bpt01_1
+                Point3d ptC = new Point3d(((Xcnt - i) * pt23.X + i * pt2.X) / Xcnt, ((Xcnt - i) * pt23.Y + i * pt2.Y) / Xcnt, 0);//Cpt23_2
+                Point3d ptD = new Point3d(((Xcnt - i) * pt23.X + i * pt3.X) / Xcnt, ((Xcnt - i) * pt23.Y + i * pt3.Y) / Xcnt, 0);//Dpt23_3
+
+                Point3d ptAD = CenterOfTwoPoints(ptA, ptD);//AD中点
+                Point3d ptBC = CenterOfTwoPoints(ptB, ptC);//BC中点
+                bool flag = true;
+                //for (int j = 0; j > 0 && j < (Xcnt > 3 ? Ycnt - 2 : Ycnt); j += 2)
+                for (int j = 0; j < Ycnt; j += 2)
+                //for (int j = Ycnt - 1; j >= 0; j -= 2)
+                {
+                    Point3d ptAD_A = new Point3d(((Ycnt - j) * ptAD.X + j * ptA.X) / Ycnt, ((Ycnt - j) * ptAD.Y + j * ptA.Y) / Ycnt, 0);
+                    Point3d ptAD_D = new Point3d(((Ycnt - j) * ptAD.X + j * ptD.X) / Ycnt, ((Ycnt - j) * ptAD.Y + j * ptD.Y) / Ycnt, 0);
+                    Point3d ptBC_B = new Point3d(((Ycnt - j) * ptBC.X + j * ptB.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptB.Y) / Ycnt, 0);
+                    Point3d ptBC_C = new Point3d(((Ycnt - j) * ptBC.X + j * ptC.X) / Ycnt, ((Ycnt - j) * ptBC.Y + j * ptC.Y) / Ycnt, 0);
+
+                    if (flag)
+                    {
+                        flag = false;
+                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_A, ptBC_B));
+                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
+                    }
+                    ptsInUncoverRectangle.Add(ptAD_A);//ptAD_A
+                    ptsInUncoverRectangle.Add(ptAD_D);//ptAD_D
+                    ptsInUncoverRectangle.Add(ptBC_B);//ptBC_B
+                    ptsInUncoverRectangle.Add(ptBC_C);//ptBC_C
+                }
+                for (int j = 0; j < Ycnt; ++j)
+                {
+                    ptsInUncoverRectangle.Add(new Point3d(((Ycnt - j) * pt01.X + j * pt23.X) / Ycnt, ((Ycnt - j) * pt01.Y + j * pt23.Y) / Ycnt, 0));
+                }
+                ptsInUncoverRectangle.Add(ptAD);//
+                ptsInUncoverRectangle.Add(ptBC);//
+            }
+            ptsInUncoverRectangle = ptsInUncoverRectangle.Distinct().ToList();
+         
+            //只将在覆盖区域中的点加入ans
+            List<Point3d> ptss = new List<Point3d>();
+            foreach (var pt in ptsInUncoverRectangle)
+            {
+                if (uncoverArea.Contains(pt))
+                {
+                    //ShowInfo.ShowPointAsX(pt, 1, 25);
+                    ptss.Add(pt);
+                }
+            }
+            ptss = ptss.Distinct().ToList();
+
             return ptss;
         }
 

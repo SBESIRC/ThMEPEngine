@@ -14,6 +14,7 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
@@ -23,6 +24,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         //  public MPolygon mPolygon { get; set; }
         //  public MPolygon mPolygonShell { get; set; }
         public MPolygon mRoom { get; set; }
+        public List<MPolygon> LayoutWithHole { get; set; }
 
         public double radius { get; set; } = 0;
         public BlindType equipmentType { get; set; } = BlindType.CoverArea;
@@ -122,6 +124,49 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 {
                     ans.Add((Point3d)xx.Key);
                 }
+            }
+
+            pointsInLayoutList = ans.Distinct().ToList();
+
+        }
+
+        private void GetPosiblePositionsNew()
+        {
+            var rateThreshold = 0.05; //试了几个奇怪的带洞区域或者很窄区域的经验值
+            List<Point3d> ans = new List<Point3d>();
+
+            for (int i = 0; i < LayoutWithHole.Count; i++)
+            {
+                var layout = LayoutWithHole[i];
+                var areaPoints = new List<Point3d>();
+
+                if (layout.Area > radius * radius * 0.2)
+                //if(disX > radius || disY > radius)
+                {
+                    var obb = (layout.Shell()).CalObb();
+                    areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 400, out var ptsInUncoverRectangle);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+
+                    double rate = (double)areaPoints.Count / (double)ptsInUncoverRectangle.Count;
+                    var rateArea = layout.Area / obb.Area;
+                    var pt0 = obb.GetPoint3dAt(0);
+                    DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInUncoverRectangle.Count, areaPoints.Count, rate), "l0Info", colorIndex: 3, hight: 30);
+                    DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, layout.Area, rateArea), "l0Info", colorIndex: 3, hight: 30);
+                    ptsInUncoverRectangle.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptsInRectangle", colorIndex: 150, r: 30));
+                    DrawUtils.ShowGeometry(obb, "l0obb");
+
+                    if (Math.Abs(rate - rateArea) > rateThreshold)
+                    {
+                        areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 100, out  ptsInUncoverRectangle);
+                    }
+                }
+                else
+                {
+                    //areaPoints = PointsInArea(poly, radius);
+                     areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 100, out var ptsInUncoverRectangle);
+                }
+
+                ans.AddRange(areaPoints);
+
             }
 
             pointsInLayoutList = ans.Distinct().ToList();

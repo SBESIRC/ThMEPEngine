@@ -24,6 +24,7 @@ using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 #if (ACAD2016 || ACAD2018)
 using CLI;
@@ -187,12 +188,12 @@ namespace ThMEPElectrical
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+                var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
                 var needConverage = referBeam == true ? true : false;
                 var wallThickness = 100.0;
                 if (referBeam == true)
                 {
-                    wallThickness = ThAFASUtils.SettingDouble("\n板厚");
+                    wallThickness = ThAFASUtils.SettingDouble("\n板厚", 0);
                 }
 
 
@@ -282,7 +283,7 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFaAreaData2", CommandFlags.Modal)]
         public void ThFaAreaData2()
         {
-            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = 0.0;
             var needDetective = true;
             if (referBeam == false)
@@ -291,8 +292,8 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
-                needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）");
+                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
+                needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）", 1);
             }
 
             var theta = 0;
@@ -304,9 +305,8 @@ namespace ThMEPElectrical
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
-            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
             var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
 
             if (selectPts.Count == 0)
             {
@@ -335,10 +335,13 @@ namespace ThMEPElectrical
             {
                 var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
                 var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(data.FrameLayoutList[frame], radius);
-                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
+                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea2(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
 
-                var type = bIsAisleArea == true ? "centerline" : "grid";
-                var centPt = frame.GetCentroidPoint();
+                var sCenterLine = bIsAisleArea == true ? "centerline" : "grid";
+                var pt = frame.GetCentroidPoint();
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", "data", sCenterLine), "l0Info", 3, 25, 200);
 
                 DrawUtils.ShowGeometry(frame, string.Format("l0roomFrame"), 30);
                 DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0FrameHole"), 150);
@@ -347,9 +350,6 @@ namespace ThMEPElectrical
                 data.FrameLayoutList[frame].ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0Framelayout"), 6));
                 DrawUtils.ShowGeometry(data.FrameDetectAreaList[frame], string.Format("l0FrameDetec"), 91);
                 DrawUtils.ShowGeometry(data.FramePriorityList[frame], string.Format("l0FrameEquipment"), 152);
-
-                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l0lastInfo", 3, 25, 200);
-
 
             }
 
@@ -363,7 +363,7 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFAAllData", CommandFlags.Modal)]
         public void THFAAllData()
         {
-            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = 0.0;
             var needDetective = referBeam;
             if (referBeam == false)
@@ -372,7 +372,7 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
             }
 
             var extractBlkList = ThFaCommon.BlkNameList;
@@ -410,6 +410,161 @@ namespace ThMEPElectrical
             }
         }
 
-       
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
+        public void ThCleanDebugLayer()
+        {
+            // 调试按钮关闭且图层不是保护半径有效图层
+            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
+            if (debugSwitch)
+            {
+                ClearDrawing();
+            }
+
+        }
+        public static void ClearDrawing()
+        {
+            System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex(@"l[0-9]+");
+
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var layer in db.Layers)
+                {
+
+                    if (rx.IsMatch(layer.Name))
+                    {
+                        ClearDrawing(layer.Name);
+                    }
+                }
+            }
+        }
+
+        private static void ClearDrawing(string layerName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                LayerTable lt = (LayerTable)acadDatabase.Database.LayerTableId.GetObject(OpenMode.ForRead);
+                if (lt.Has(layerName))
+                {
+
+                    DotNetARX.LayerTools.UnFrozenLayer(acadDatabase.Database, layerName);
+                    DotNetARX.LayerTools.UnLockLayer(acadDatabase.Database, layerName);
+                    DotNetARX.LayerTools.UnOffLayer(acadDatabase.Database, layerName);
+
+                    var items = acadDatabase.ModelSpace
+                        .OfType<Entity>()
+                        .Where(o => o.Layer == layerName);
+
+                    foreach (var line in items)
+                    {
+                        line.UpgradeOpen();
+                        line.Erase();
+                    }
+
+                    DotNetARX.LayerTools.DeleteLayer(acadDatabase.Database, layerName);
+                }
+            }
+        }
+
+
+
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestPolygon", CommandFlags.Modal)]
+        public void THTestPolygon()
+        {
+            var frame = ThAFASSelectFrameUtil.GetRoomFramePolyline();
+
+            var room = frame.ToNTSPolygon();
+            var objs = room.ToDbCollection();
+            var roomForCenterLine = objs.BuildMPolygon();
+            DrawUtils.ShowGeometry(roomForCenterLine, "l0mpoly");
+
+            List<Point3d> centerLinePts = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.CenterLineSimplify.CLSimplifyPts(roomForCenterLine);
+            centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));
+
+        }
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygonCenterLine", CommandFlags.Modal)]
+        public void ThBuildMPolygonCenterLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = getMpolygon();
+
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), 300);
+                //删除之前生成的带动多边形，以防影响之后操作
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+
+                // 生成、显示中线
+                centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
+            }
+        }
+        private static MPolygon getMpolygon()
+        {
+            MPolygon mPolygon;
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return null;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acdb.Element<Entity>(obj));
+                }
+                mPolygon = objs.BuildMPolygon();
+                acdb.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+            return mPolygon;
+        }
+
+
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestShrink", CommandFlags.Modal)]
+        public void THTestShrink()
+        {
+            var frame = ThAFASSelectFrameUtil.GetRoomFramePolyline();
+            var radius = 6500;
+            var beamGridWidth = 2600;
+            var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea2(frame, new List<Polyline>(), beamGridWidth, 0.75);
+
+            var sCenterLine = bIsAisleArea == true ? "centerline" : "grid";
+            var pt = frame.GetCentroidPoint();
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
+            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", "data", sCenterLine), "l0Info", 3, 25, 200);
+
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestIntPoint", CommandFlags.Modal)]
+        public void THTestIntPoint()
+        {
+            var frameTemp = ThAFASSelectFrameUtil.GetPolyline();
+            //Polyline frame = (frameTemp is Polyline) ? frameTemp as Polyline : (frameTemp as MPolygon).Shell();
+            MPolygon frame = null;
+            if (frameTemp is Polyline pl)
+            {
+                frame = ThMPolygonTool.CreateMPolygon(pl);
+            }
+            if (frameTemp is MPolygon mpl)
+            {
+                frame = mpl;
+            }
+
+            var dis = 400;
+            var ptInLayoutArea = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverAreaNew(frame, dis);
+
+            ptInLayoutArea.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptFinal", colorIndex: 1, r: 30));
+
+        }
+
     }
 }
