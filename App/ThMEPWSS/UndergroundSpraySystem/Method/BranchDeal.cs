@@ -206,10 +206,15 @@ namespace ThMEPWSS.UndergroundSpraySystem.Method
                                 var tempPath = new List<Point3dEx>();
                                 var visited2 = new HashSet<Point3dEx>();
                                 bool hasValve = false;
-                                BranchDeal2.DfsBranch(spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve);
+                                bool hasFlow = false;
+                                BranchDeal2.DfsBranch(spt, ept, branchLoop, tempPath, visited2, sprayIn, ref hasValve, ref hasFlow);
                                 if (hasValve)
                                 {
                                     spraySystem.ValveDic.Add(ept);
+                                }
+                                if (hasFlow)
+                                {
+                                    spraySystem.FlowDIc.Add(ept);
                                 }
                             }
                         }

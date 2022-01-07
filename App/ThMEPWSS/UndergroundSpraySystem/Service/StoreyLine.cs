@@ -26,7 +26,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             {
                 if(floors[fNumber].Contains(loopStPt))
                 {
-                    sprayOut.PipeInsertPoint = insertPt.OffsetXY(300, height - 800);
+                    sprayOut.PipeInsertPoint = insertPt.OffsetXY(1000, height - 800);
                     sprayOut.CurrentFloor = fNumber;
                 }
                 //sprayOut.FloorLine.Add(new Line(insertPt, insertPt.OffsetX(length)));
@@ -53,10 +53,10 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             Point3d insertPt = sprayOut.InsertPoint.Cloned();
             foreach (var fNumber in floors.Keys)
             {
-                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
+                sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6700, insertPt.Y, 0)));
                 insertPt = insertPt.OffsetY(fHeight);
             }
-            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6000, insertPt.Y, 0)));
+            sprayOut.FloorLine.Add(new Line(insertPt, new Point3d(spraySystem.MaxOffSetX + 6700, insertPt.Y, 0)));
         }
     }
 }

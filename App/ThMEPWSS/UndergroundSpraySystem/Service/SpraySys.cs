@@ -98,6 +98,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
             var flowIndicator = new FlowIndicator();
             flowIndicator.Extract(database, selectArea);
             var flowPts = flowIndicator.CreatePts();
+            var objs = flowIndicator.CreatBlocks();
             pipeLines.PipeLineSplit(flowPts);
 
             pipeLines.CreatePtDic(sprayIn);
@@ -175,6 +176,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Service
                 }
             }
             DicTools.CreatePtTypeDic(flowPts, "Flow", sprayIn);
+            DicTools.CreatFlowBlocks(objs, sprayIn);
 
             var leadLine = new LeadLine();
             leadLine.Extract(database, sprayIn);//3,283ms

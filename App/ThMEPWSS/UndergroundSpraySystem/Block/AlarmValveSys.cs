@@ -37,6 +37,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
             InsertBlock(acadDatabase, "遥控信号阀", StPt.OffsetY(1250));
             InsertBlock(acadDatabase, "截止阀", StPt.OffsetXY(300, 550));
             InsertBlock(acadDatabase, "水力警铃", StPt.OffsetXY(-300, 1300));
+
+            InsertText(acadDatabase, StPt.OffsetXY(750, 200), "DN50", Math.PI / 2);
         }
 
         private void InsertLine(AcadDatabase acadDatabase, Point3d pt1, Point3d pt2, string layer = "W-FRPT-SPRL-PIPE")
@@ -52,6 +54,23 @@ namespace ThMEPWSS.UndergroundSpraySystem.Block
         private void InsertBlock(AcadDatabase acadDatabase, string blockName, Point3d pt, string layer = "W-FRPT-SPRL-EQPM", double scaled = 1, double rotation = Math.PI/2)
         {
             acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, blockName, pt, new Scale3d(scaled, scaled, scaled), rotation);
+        }
+
+        private void InsertText(AcadDatabase acadDatabase, Point3d insertPt, string text, double rotation = 0, string layer = "W-FRPT-HYDT-DIMS")
+        {
+            var dbText = new DBText
+            {
+                TextString = text,
+                Position = insertPt,
+                LayerId = DbHelper.GetLayerId(layer),
+                Rotation = rotation,
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3"),
+                Height = 350,
+                WidthFactor = 0.7,
+                ColorIndex = (int)ColorIndex.BYLAYER
+            };
+
+            acadDatabase.CurrentSpace.Add(dbText);
         }
     }
 }

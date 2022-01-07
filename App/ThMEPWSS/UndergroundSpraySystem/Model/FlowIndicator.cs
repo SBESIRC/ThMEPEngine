@@ -17,6 +17,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
     public class FlowIndicator
     {
         public DBObjectCollection DBObjs { get; set; }
+
+        public string BlockName = "信号阀＋水流指示器";
         public FlowIndicator()
         {
             DBObjs = new DBObjectCollection();
@@ -28,8 +30,8 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 var Results = acadDatabase
                     .ModelSpace
-                    .OfType<Entity>()
-                    .Where(o => IsTargetLayer(o.Layer))
+                    .OfType<BlockReference>()
+                    //.Where(o => IsTargetLayer(o.Layer))
                     .Where(o => IsTarget(o))
                     .ToList();
 
@@ -50,7 +52,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             if (entity is BlockReference blockReference)
             {
                 var blkName = blockReference.GetEffectiveName().ToUpper();
-                return blkName.Contains("水流指示器") ||
+                return blkName.Equals(BlockName) ||
                     (blkName.Contains("VALVE") && blkName.Contains("531"));
             }
             else if (entity.IsTCHValve())
@@ -60,7 +62,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
                 if (objs[0] is BlockReference bkr)
                 {
                     var blkName = bkr.Name.ToUpper();
-                    return blkName.Contains("水流指示器") ||
+                    return blkName.Contains(BlockName) ||
                            (blkName.Contains("VALVE") && blkName.Contains("531"));
                 }
             }
@@ -87,10 +89,26 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             {
                 if(db is BlockReference br)
                 {
-                    pts.Add(new Point3dEx(br.Position));
+                    var bounds = br.Bounds;
+                    var pt = new Point2d((bounds.Value.MaxPoint.X + bounds.Value.MinPoint.X) / 2,
+                        (bounds.Value.MaxPoint.Y + bounds.Value.MinPoint.Y) / 2);
+                    var newpt = pt.ToPoint3d();
+                    pts.Add(new Point3dEx(newpt));
                 }
             }
             return pts;
+        }
+        public DBObjectCollection CreatBlocks()
+        {
+            DBObjectCollection result = new DBObjectCollection();
+            foreach (var db in DBObjs)
+            {
+                if (db is BlockReference br)
+                {
+                    result.Add((DBObject)db);
+                }
+            }
+            return result;
         }
     }
 }

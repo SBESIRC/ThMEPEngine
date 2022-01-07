@@ -35,6 +35,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }//端点及其管径标注
         public Dictionary<Point3dEx, string> SlashDic { get; set; }//斜点的DN字典对
         public Dictionary<LineSegEx, string> PtDNDic { get; set; }//当前点的DN字典对
+        public DBObjectCollection FlowBlocks { get; set; }
 
         public SprayIn(SprayVM _UiConfigs) 
         {
@@ -62,6 +63,7 @@ namespace ThMEPWSS.UndergroundSpraySystem.Model
             TermDnDic = new Dictionary<Point3dEx, string>();
             SlashDic = new Dictionary<Point3dEx, string>();
             PtDNDic = new Dictionary<LineSegEx, string>();
+            FlowBlocks = new DBObjectCollection();
         }
     }
 }
