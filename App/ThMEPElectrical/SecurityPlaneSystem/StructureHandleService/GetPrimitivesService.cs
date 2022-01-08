@@ -109,10 +109,11 @@ namespace ThMEPElectrical.StructureHandleService
                 var MSdoors = acdb.ModelSpace
                     .OfType<Polyline>()
                     .Where(x => x.Layer == ThMEPEngineCoreLayerUtils.DOOR)
-                    .Select(x => x.WashClone() as Polyline)
                     .Where(x => x != null && x.Area > 25000)
+                    .Select(x => ThMEPFrameService.NormalizeEx(x,10.0))//加Normalize使其闭合
+                    .Where(x => x != null && x.Area > 25000)//再过滤一遍 过滤之前非闭合的'门'
+                    .Select(x => x.OBB())
                     .ToList();
-                MSdoors.ForEach(x => x.ProjectOntoXYPlane());
                 //新逻辑，目的是为了把所有的门做一个去重操作
                 var boundary = polyline.Clone() as Polyline;
                 originTransformer.Reset(boundary);
