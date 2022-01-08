@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThQueryDNServiece
+    public class ThQueryDNService
     {
 
         public string QuerySupplyPipeDN(string coeff, double flow)

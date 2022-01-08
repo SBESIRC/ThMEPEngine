@@ -92,7 +92,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 //提取水管路由
                 var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                 foreach(var p in pipes)
                 {
                     p.TransformBy(mt);
@@ -123,11 +123,11 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //获取剪力墙
-                var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
+                var shearWalls = ThBuildElementExtractService.GetShearWalls();
                 //获取结构柱
-                var columns = ThBuildElementExtractServiece.GetColumns();
+                var columns = ThBuildElementExtractService.GetColumns();
                 //获取房间框线
-                var rooms = ThBuildElementExtractServiece.GetBuildRooms();
+                var rooms = ThBuildElementExtractService.GetBuildRooms();
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeWidth = pipeWidth;
@@ -159,7 +159,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     allLines.AddRange(pl.ToLines());
                 }
-                var tmpFcus = ThEquipElementExtractServiece.GetFCUModels();
+                var tmpFcus = ThEquipElementExtractService.GetFCUModels();
                 if (tmpFcus.Count == 0)
                 {
                     return;

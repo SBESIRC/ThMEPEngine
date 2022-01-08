@@ -7,8 +7,11 @@ using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public abstract class ThPipeExtendBaseServiece
+    class ThAirPipeExtendService : ThPipeExtendBaseService
     {
-        public abstract void PipeExtend(ThFanTreeModel tree);
+        public override void PipeExtend(ThFanTreeModel tree)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

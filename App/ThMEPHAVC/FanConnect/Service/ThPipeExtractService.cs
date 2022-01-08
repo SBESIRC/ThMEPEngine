@@ -17,7 +17,7 @@ namespace ThMEPHVAC.FanConnect.Service
     /// <summary>
     /// 管路路由生成器
     /// </summary>
-    public class ThPipeExtractServiece
+    public class ThPipeExtractService
     {
         public Point3d PipeStartPt { set; get; }//水管起始点
         public List<ThFanCUModel> EquipModel { set; get; }//风机设备
@@ -50,7 +50,7 @@ namespace ThMEPHVAC.FanConnect.Service
         private List<Polyline> GetPipePath0()
         {
             var retList = new List<Polyline>();
-            var pathServiece = new ThCreatePathServiece();
+            var pathServiece = new ThCreatePathService();
             pathServiece.TrunkLines = TrunkLines;
             pathServiece.ObstacleRooms = ObstacleRooms;
             pathServiece.ObstacleHoles = ObstacleHoles;

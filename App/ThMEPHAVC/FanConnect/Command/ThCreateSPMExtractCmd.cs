@@ -128,13 +128,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 //提取水管路由
                 var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                 foreach(var p in pipes)
                 {
                     p.TransformBy(mt);
                 }
                 //提取水管连接点
-                var fcus = ThEquipElementExtractServiece.GetFCUModels();
+                var fcus = ThEquipElementExtractService.GetFCUModels();
                 if(fcus.Count == 0)
                 {
                     return;
@@ -171,7 +171,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
                 }
                 //扩展管路
-                ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
+                ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;
                 pipeExtendServiece.PipeExtend(treeModel);
                 //计算流量
@@ -182,13 +182,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
 
                 //标记流量
-                ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
+                ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;
                 pipeMarkServiece.PipeMark(pointTreeModel);
                 if(ConfigInfo.WaterSystemConfigInfo.IsGenerValve && ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                 {
                     //插入阀门
-                    ThAddValveServiece addValveServiece = new ThAddValveServiece();
+                    ThAddValveService addValveServiece = new ThAddValveService();
                     addValveServiece.ConfigInfo = ConfigInfo;
                     addValveServiece.AddValve(treeModel);
                 }

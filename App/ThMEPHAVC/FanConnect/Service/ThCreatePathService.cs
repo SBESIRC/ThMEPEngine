@@ -13,7 +13,7 @@ using System.Linq;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThCreatePathServiece
+    public class ThCreatePathService
     {
         public List<Line> TrunkLines { set; get; }//干路线
         public List<Line> BranchLines { set; get; }//支干路

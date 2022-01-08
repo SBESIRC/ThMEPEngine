@@ -18,7 +18,7 @@ using ThMEPHVAC.FanLayout.Service;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThWaterPipeMarkServiece
+    public class ThWaterPipeMarkService
     {
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public void CoolHotMark(ThFanTreeNode<ThFanPointModel> node, string coolPipe,string hotPipe, string strMarkHeight)//冷热水管标记
@@ -345,7 +345,7 @@ namespace ThMEPHVAC.FanConnect.Service
                     NodeMark(child);
                 }
             }
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             //父结点冷水管管径
             var parentCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.CoolFlow);
             //父结点热水管管径
@@ -429,7 +429,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void NodeMark1(ThFanTreeNode<ThFanPointModel> node)
         {
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
 
             var curCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.CoolFlow);//node.Item.CoolFlow.ToString();
@@ -471,7 +471,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void MarkCoolPipe1(ThFanTreeNode<ThFanPointModel> node)
         {
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
 
             var curCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.CoolFlow);//node.Item.CoolFlow.ToString();
@@ -496,7 +496,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void MarkCondPipe1(ThFanTreeNode<ThFanPointModel> node)
         {
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             //当前结点冷凝水管管径
             var curCondPipe = queryDNServiece.QueryCondPipeDN(node.Item.CoolCapa); //node.Item.CoolCapa.ToString();
                 //标记冷凝水管
@@ -535,7 +535,7 @@ namespace ThMEPHVAC.FanConnect.Service
                     UpdateNodeMark(child, ref marks);
                 }
             }
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             //父结点冷水管管径
             var parentCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.CoolFlow);
             //父结点热水管管径
@@ -617,7 +617,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void UpdateNodeMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
         {
-            ThQueryDNServiece queryDNServiece = new ThQueryDNServiece();
+            ThQueryDNService queryDNServiece = new ThQueryDNService();
             string strMarkHeight = " (h+" + ConfigInfo.WaterSystemConfigInfo.MarkHeigth.ToString("f2") + ")";
 
             var curCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.CoolFlow);

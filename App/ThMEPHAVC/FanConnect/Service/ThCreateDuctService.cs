@@ -54,7 +54,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public List<Polyline> CreatePipeLine(int type)
         {
-            var pipePathServiece = new ThPipeExtractServiece
+            var pipePathServiece = new ThPipeExtractService
             {
                 PipeStartPt = StartPt,
                 EquipModel = EquipModel,

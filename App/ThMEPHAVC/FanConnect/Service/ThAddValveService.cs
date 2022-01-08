@@ -13,7 +13,7 @@ using Linq2Acad;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThAddValveServiece
+    public class ThAddValveService
     {
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public void AddValve(ThFanTreeModel tree)
