@@ -363,7 +363,7 @@ namespace ThMEPHVAC.Command
            
             foreach (var item in ucsPolygons)
             {
-                var isArc = item.gridType == GridType.ArcGrid;
+                var isArc = item is ArcGridModel;
                 var centerPoint = item.centerPt;
                 foreach (var polyline in item.regions)
                 {

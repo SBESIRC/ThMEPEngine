@@ -1,18 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.GridOperation.Model
 {
     public class LineGridModel : GridModel
     {
-        public Vector3d vecter 
+        public Vector3d vecter
         {
-            get; set; 
+            get; set;
         }
 
         public List<Line> xLines = new List<Line>();

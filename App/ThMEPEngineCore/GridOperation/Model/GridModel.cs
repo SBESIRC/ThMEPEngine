@@ -1,13 +1,21 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.GridOperation.Model
 {
+    /// <summary>
+    /// 轴网类型
+    /// </summary>
+    public enum GridType
+    {
+        LineGrid,
+        ArcGrid,
+    }
+
+    /// <summary>
+    /// 轴网模型
+    /// </summary>
     public class GridModel
     {
         public List<Curve> allLines = new List<Curve>();
@@ -19,14 +27,5 @@ namespace ThMEPEngineCore.GridOperation.Model
         public Point3d centerPt { get; set; }
 
         public Vector3d vector { get; set; }
-
-        public GridType gridType { get; set; }
-    }
-
-    public enum GridType
-    {
-        LineGrid,
-
-        ArcGrid,
     }
 }
