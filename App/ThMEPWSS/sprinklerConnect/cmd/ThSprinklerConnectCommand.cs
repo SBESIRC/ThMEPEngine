@@ -79,9 +79,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 // transformerPt = new Point3d();
                 
                 var transformer = new ThMEPOriginTransformer(transformerPt);
-                
-                // 测试使用
-                // ThSprinklerPtNetworkEngine.TransformerPt = transformerPt;
 
                 // 提取数据
                 var allSprinklerPts = ThSprinklerConnectDataFactory.GetSprinklerConnectData();
@@ -146,10 +143,6 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     var subMainPipe = ThSprinklerConnectDataFactory.GetPipeData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
                     var mainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_MainPipe);
                     var subMainPipeLine = ThSprinklerConnectDataFactory.GetPipeLineData(exactFrame, ThWSSCommon.Sprinkler_Connect_SubMainPipe);
-
-                    // 测试使用
-                    //subMainPipe.ForEach(o => acadDatabase.ModelSpace.Add(o));
-                    //continue;
 
                     mainPipe.ForEach(p => transformer.Transform(p));
                     subMainPipe.ForEach(p => transformer.Transform(p));
@@ -231,8 +224,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         // 清理并打印车位
                         var layerName = "AI-车位排-双排";
                         transformer.Reset(reducedFrame);
-                        doubleStall.ForEach(stall => transformer.Reset(stall));
                         CleanPline(layerName, reducedFrame);
+                        doubleStall.ForEach(stall => transformer.Reset(stall));
                         StallPresent(doubleStall, layerName);
 
                         // 测试使用
