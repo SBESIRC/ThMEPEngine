@@ -1653,6 +1653,31 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 row.ConnectLines.Add(new Line(closePt, row.OrderDict[-2][j]));
                             }
                             else if (ptsTemp[ptsTemp.Count - 1].Item2
+                                && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02
+                                && closePt.DistanceTo(ptsTemp[ptsTemp.Count - 2].Item1) < connTolerance / 2)
+                            {
+                                var scrCenter = scrLine.GetCenterPoint();
+                                var moveVector = scrCenter - ptsTemp[ptsTemp.Count - 2].Item1;
+                                var startPointTidal = line.StartPoint + moveVector;
+                                var endPointTidal = line.EndPoint + moveVector;
+
+                                row.ConnectLines.RemoveAll(l => l.StartPoint == ptsTemp[ptsTemp.Count - 2].Item1 && l.EndPoint == ptsTemp[ptsTemp.Count - 1].Item1);
+                                row.ConnectLines.Add(new Line(ptsTemp[ptsTemp.Count - 2].Item1, scrCenter));
+                                row.ConnectLines.Add(new Line(scrCenter, ptsTemp[ptsTemp.Count - 1].Item1));
+                                if(scrCenter.DistanceTo(startPointTidal) < scrCenter.DistanceTo(endPointTidal))
+                                {
+                                    row.ConnectLines.Add(new Line(scrCenter, startPointTidal));
+                                    row.ConnectLines.Add(new Line(startPointTidal, endPointTidal));
+                                }
+                                else
+                                {
+                                    row.ConnectLines.Add(new Line(scrCenter, endPointTidal));
+                                    row.ConnectLines.Add(new Line(endPointTidal, startPointTidal));
+                                }
+                                row.ConnectLines.Add(new Line(startPointTidal, line.StartPoint));
+                                row.ConnectLines.Add(new Line(endPointTidal, line.EndPoint));
+                            }
+                            else if (ptsTemp[ptsTemp.Count - 1].Item2
                                 && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02)
                             {
                                 row.ConnectLines.RemoveAll(l => l.StartPoint == ptsTemp[ptsTemp.Count - 2].Item1 && l.EndPoint == ptsTemp[ptsTemp.Count - 1].Item1);
