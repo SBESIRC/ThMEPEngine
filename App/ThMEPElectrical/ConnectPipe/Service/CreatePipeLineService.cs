@@ -46,9 +46,9 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <param name="connectPtInfo"></param>
         private void CreateConnectPipe(List<Polyline> polylines, BroadcastModel broadcast, Dictionary<Polyline, List<Polyline>> connectPtInfo)
         {
-            var handlePolys = polylines.ToDictionary(x=>x,y => GeUtils.HandleConnectPolys(y))
-                .OrderBy(x=>x.Value.NumberOfVertices)
-                .Select(x=>x.Key)
+            var handlePolys = polylines.ToDictionary(x => x, y => GeUtils.HandleConnectPolys(y))
+                .OrderBy(x => x.Value.NumberOfVertices)
+                .Select(x => x.Key)
                 .ToList();
             foreach (var poly in handlePolys)
             {
@@ -407,7 +407,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 {
                     polyPt = connectPt;
                 }
-                pts.Add(polyPt);
+                if (!pts.Any(x => x.IsEqualTo(polyPt, new Tolerance(1, 1))))
+                {
+                    pts.Add(polyPt);
+                }
             }
 
             Polyline polyline = new Polyline();
