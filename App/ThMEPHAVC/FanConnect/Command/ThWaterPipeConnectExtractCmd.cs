@@ -105,7 +105,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
                 var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-
+                foreach (var p in pipes)
+                {
+                    p.TransformBy(mt.Inverse());
+                }
                 var tmpLines = new List<Line>();
                 foreach (var l in lineColl)
                 {
@@ -113,6 +116,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     line.TransformBy(mt.Inverse());
                     tmpLines.Add(line);
                 }
+
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 if(fucs.Count == 0)
                 {
@@ -147,6 +151,26 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     toDbServiece.InsertEntity(pl , "AI-水管路由");
                 }
+
+                //添加需求ID:1001796
+                var allLines = new List<Line>();
+                allLines.AddRange(pipes);
+                foreach(var pl in plines)
+                {
+                    allLines.AddRange(pl.ToLines());
+                }
+                var tmpFcus = ThEquipElementExtractServiece.GetFCUModels();
+                if (tmpFcus.Count == 0)
+                {
+                    return;
+                }
+                var remSurplusPipe = new ThRemSurplusPipe()
+                {
+                    StartPoint = startPt,
+                    AllLine = allLines,
+                    AllFan = tmpFcus
+                };
+                remSurplusPipe.RemSurplusPipe();
                 return;
             }
         }

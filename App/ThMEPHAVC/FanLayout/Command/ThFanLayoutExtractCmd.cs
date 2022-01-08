@@ -245,7 +245,7 @@ FocusToCAD();
             {
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 50, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)
@@ -332,7 +332,7 @@ FocusToCAD();
             {
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 50, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)
@@ -390,7 +390,7 @@ FocusToCAD();
                 {
                     string strFanHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPipeConfigInfo.AirPortLength, info.AirPipeConfigInfo.AirPortHeight,100);
                     string strFanHoleMark = ThFanLayoutDealService.GetFanHoleMark(1, info.AirPipeConfigInfo.AirPortMarkHeight);
-                    InsertFanHole(acadDatabase, point2, fanAngle + Math.PI, fontHeight, info.AirPipeConfigInfo.AirPortLength + 100.0, strFanHoleSize, strFanHoleMark);
+                    InsertFanHole(acadDatabase, point2, fanAngle + Math.PI, fontHeight, info.AirPipeConfigInfo.AirPortLength + 50.0, strFanHoleSize, strFanHoleMark);
                 }
                 //插入风口
                 InsertAirPort(acadDatabase, point2, fanAngle, info.AirPipeConfigInfo.AirPortLength, info.AirPipeConfigInfo.AirPortDeepth, "外墙防雨百叶", 1);
@@ -440,7 +440,7 @@ FocusToCAD();
             {
                 string strAirPortHoleSize = ThFanLayoutDealService.GetFanHoleSize(info.AirPortSideConfigInfo.AirPortLength, info.AirPortSideConfigInfo.AirPortHeight);
                 string strAirPortHoleMark = ThFanLayoutDealService.GetFanHoleMark(info.AirPortSideConfigInfo.MarkHeigthType, info.AirPortSideConfigInfo.AirPortMarkHeight - 0.05);
-                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 100, strAirPortHoleSize, strAirPortHoleMark);
+                InsertFanHole(acadDatabase, point3, airPortAngle - Math.PI, fontHeight, info.AirPortSideConfigInfo.AirPortLength + 50, strAirPortHoleSize, strAirPortHoleMark);
             }
             //插入防火阀
             if (info.AirPortSideConfigInfo.IsInsertValve)

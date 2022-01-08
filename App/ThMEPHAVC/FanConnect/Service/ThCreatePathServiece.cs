@@ -57,19 +57,14 @@ namespace ThMEPHVAC.FanConnect.Service
             collection.Add(model.FanObb);
             //根据model的类型，先走一步
             var clostPt0 = line.GetClosestPointTo(model.FanPoint, false);
-            var stepPt = TakeStep(model.FanObb, model.FanPoint,300);
-            if(clostPt0.DistanceTo(model.FanPoint) <= 300.0)
-            {
-                stepPt = model.FanPoint;
-            }
-            var clostPt1 = line.GetClosestPointTo(stepPt, false);
-            if(stepPt.DistanceTo(clostPt1) < 10.0)
+            if(clostPt0.DistanceTo(model.FanPoint) <= 500.0)
             {
                 var pl = new Polyline();
                 pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
-                pl.AddVertexAt(1, clostPt1.ToPoint2D(), 0.0, 0.0, 0.0);
+                pl.AddVertexAt(1, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
                 return pl;
             }
+            var stepPt = TakeStep(model.FanObb, model.FanPoint, 300);
             //根据model位置和line，构建一个框frame
             var frame = ThFanConnectUtils.CreateMapFrame(line, stepPt,10000);
             //提取frame里面的hole和room
