@@ -42,30 +42,12 @@ namespace ThMEPLighting.Garage.Engine
             // 预处理
             Preprocess(regionBorder);
 
-            ThArrangeService arrange;
-            switch (ArrangeParameter.ArrangeEdition)
-            {
-                case ArrangeEdition.First:
-                    arrange = new ThFirstwayArrangeService(regionBorder, ArrangeParameter);
-                    break;
-                case ArrangeEdition.Second:
-                    arrange = new ThSecondwayArrangeService(regionBorder, ArrangeParameter);
-                    break;
-                case ArrangeEdition.Third:
-                    arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter);
-                    break;
-                default:
-                    return;
-            }
-
-            if(arrange!=null)
-            {
-                arrange.Arrange();
-                Graphs = arrange.Graphs;
-                LoopNumber = arrange.LoopNumber;
-                CenterSideDicts = arrange.CenterSideDicts;
-                CenterGroupLines = arrange.CenterGroupLines;
-            }
+            var arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter); ;
+            arrange.Arrange();
+            Graphs = arrange.Graphs;
+            LoopNumber = arrange.LoopNumber;
+            CenterSideDicts = arrange.CenterSideDicts;
+            CenterGroupLines = arrange.CenterGroupLines;
         }
     }
 }
