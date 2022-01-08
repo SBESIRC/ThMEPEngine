@@ -7,13 +7,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Uitl;
-using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
@@ -96,18 +94,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     LabelPosition.Add(new Line(pt1,pt2));
                 }
             }
-            //if(labelLines.Count != 0)
-            //{
-            //    foreach (var db in labelLines)
-            //    {
-            //        var line = db as Line;
-            //        var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
-            //        var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
-            //        LabelPosition.Add(new Line(pt1, pt2));
-            //    }
-            //}
             
-            //LabelPosition = PipeLineList.CleanLaneLines3(LabelPosition);
 #if DEBUG
             
             using (AcadDatabase currentDb = AcadDatabase.Active())
@@ -180,7 +167,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 ent is DBText ||//文字
                 ent is Circle ||//圆
                 ent.IsTCHText() ||//天正单行文字
-                ent.IsTCHPipe() ||//天正阀
+                ent.IsTCHValve() ||//天正阀
                 ent is DBPoint ||//db点
                 ent is Hatch ||//填充
                 ent is BlockReference)//块
