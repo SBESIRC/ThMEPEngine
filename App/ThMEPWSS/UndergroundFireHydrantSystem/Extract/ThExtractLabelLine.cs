@@ -8,7 +8,9 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.UndergroundFireHydrantSystem.Service;
@@ -17,7 +19,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 {
     public class ThExtractLabelLine//引线提取
     {
-        public DBObjectCollection DbTextCollection { get; private set; }
+        public double LengthThresh = 500;//线长最小阈值
+        public DBObjectCollection LabelLineCollection { get; private set; }
         public DBObjectCollection Extract(Database database, Point3dCollection polygon)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
@@ -25,41 +28,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<Entity>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer)).ToList();
+                   .Where(o => IsHYDTPipeLayer(o.Layer))
+                   .Where(o => IsTargetObject(o)).ToList();
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var DBObjs = spatialIndex.SelectWindowPolygon(polygon.ToGRect().ToPolygon().ToDbEntity());
 
-                DbTextCollection = new DBObjectCollection();
+                LabelLineCollection = new DBObjectCollection();
 
-                var bkrCollection = new DBObjectCollection();
+                var dbObjColl = new DBObjectCollection();
                 DBObjs.Cast<Entity>()
                     .Where(o => o is Entity)
-                    .ForEach(o => bkrCollection.Add(o));
-                foreach (var bkr in bkrCollection)
+                    .ForEach(o => dbObjColl.Add(o));
+                foreach (var dbObj in dbObjColl)
                 {
-                    if (bkr is Entity ent)
+                    if(dbObj is BlockReference blk)
                     {
-                        try
-                        {
-                            ExplodeLabelLine(ent, DbTextCollection);
-                        }
-                        catch (Exception ex)
-                        {
-
-                        }
+                        GetLineInBlock(acadDatabase, blk, LabelLineCollection);
+                        continue;
                     }
+                    ExplodeLabelLine(dbObj as Entity, LabelLineCollection);
                 }
-
-                foreach(var db in DbTextCollection)
-                {
-                    var line = db as Line;
-                    if(line.Length < 10)
-                    {
-                        ;
-                    }
-                }
-                return DbTextCollection;
+                var cleanServiec = new ThLaneLineCleanService();
+                LabelLineCollection = cleanServiec.CleanNoding(LabelLineCollection);
+                return LabelLineCollection;
             }
         }
         private bool IsHYDTPipeLayer(string layer)
@@ -77,114 +69,77 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    layer.ToUpper() == "TWT_TEXT";
         }
 
-        
+        private static bool IsTargetObject(Entity ent)
+        {
+            var type = ent.GetType().Name;
+            return type.Equals("BlockReference")
+                || type.Equals("ImpEntity")
+                || type.Equals("ImpCurve")
+                || type.Equals("Line");
+        }
+
         public List<Line> CreateLabelLineList(DBObjectCollection labelLines)
         {
             var LabelPosition = new List<Line>();
 
-            if (DbTextCollection.Count != 0)
+            if (LabelLineCollection.Count != 0)
             {
-                foreach (var db in DbTextCollection)
+                foreach (var db in LabelLineCollection)
                 {
                     var line = db as Line;
+                    if(line.Length < LengthThresh)
+                    {
+                        continue;
+                    }
                     var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
                     var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
                     LabelPosition.Add(new Line(pt1,pt2));
                 }
             }
-            if(labelLines.Count != 0)
+            //if(labelLines.Count != 0)
+            //{
+            //    foreach (var db in labelLines)
+            //    {
+            //        var line = db as Line;
+            //        var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
+            //        var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
+            //        LabelPosition.Add(new Line(pt1, pt2));
+            //    }
+            //}
+            
+            //LabelPosition = PipeLineList.CleanLaneLines3(LabelPosition);
+#if DEBUG
+            
+            using (AcadDatabase currentDb = AcadDatabase.Active())
             {
-                foreach (var db in labelLines)
+                string layerName = "标注线图层";
+                try
                 {
-                    var line = db as Line;
-                    var pt1 = new Point3d(line.StartPoint.X, line.StartPoint.Y, 0);
-                    var pt2 = new Point3d(line.EndPoint.X, line.EndPoint.Y, 0);
-                    LabelPosition.Add(new Line(pt1, pt2));
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, layerName, 30);
+                }
+                catch { }
+                foreach (var line in LabelPosition)
+                {
+                    line.LayerId = DbHelper.GetLayerId(layerName);
+                    currentDb.CurrentSpace.Add(line);
                 }
             }
-            LabelPosition = PipeLineList.CleanLaneLines3(LabelPosition);
+#endif
             return LabelPosition;
         }
 
         private void ExplodeLabelLine(Entity ent, DBObjectCollection dBObjects)
         {
-            if (ent == null) return;
-
+            if (NotNeedDeal(ent))//炸出不需要关注对象就退出
+            {
+                return;
+            }
             if (ent is Line line)// Line 直接添加
             {
-                if (!line.Layer.ToUpper().Contains("DEFPOINTS"))
+                if(line.Length > LengthThresh)
                 {
                     dBObjects.Add(line);
                 }
-                return;
-            }
-            if(ent is BlockReference br)
-            {
-                try
-                {
-                    if (br.Name.Contains("SDRFSETEW"))
-                    {
-                        var objs = new DBObjectCollection();
-                        br.Explode(objs);
-                        foreach (var obj in objs)
-                        {
-                            if (obj.GetType().Name.Contains("ImpEntity"))
-                            {
-                                var objs1 = new DBObjectCollection();
-                                (obj as Entity).Explode(objs1);
-                                objs1.Cast<Entity>()
-                                    .Where(e => e is Line)
-                                    .ForEach(e => dBObjects.Add(e));
-                            }
-                            if (obj is Line)
-                            {
-                                dBObjects.Add((DBObject)obj);
-                            }
-                        }
-                        return;
-                    }
-                }
-                catch (Exception ex)
-                {
-
-                }
-                
-            }
-
-            if(ent.IsTCHPipe())
-            {
-                try
-                {
-                    var dbObjs = new DBObjectCollection();
-                    ent.Explode(dbObjs);
-                    foreach (var db in dbObjs)
-                    {
-                        if (db is Line line1)
-                        {
-                            dBObjects.Add(line1);
-                        }
-                    }
-                }
-                catch
-                { 
-                    //
-                }
-            }
-            if (ent is Polyline pline)
-            {
-                if (pline.Layer.ToUpper().Contains("DEFPOINTS"))
-                {
-                    return;
-                }
-            }
-            if (ent is AlignedDimension || 
-                ent is Arc || 
-                ent is DBText || 
-                ent is Circle || 
-                ent.IsTCHText() || 
-                ent is DBPoint ||
-                ent is Hatch)//炸出圆 和 天正单行文字 就退出
-            {
                 return;
             }
             try
@@ -201,8 +156,63 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             catch (Exception ex)
             {
-
+                ;
             }
+        }
+
+        private bool NotNeedExplode(BlockReference bkr)
+        {
+            var blockName = bkr.GetEffectiveName();
+            if (blockName.Contains("灭火器") ||
+                blockName.Contains("消火栓") ||
+                blockName.Contains("立管"))
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool NotNeedDeal(Entity ent)//
+        {
+            if (ent == null ||
+                ent is AlignedDimension ||//
+                ent is Arc ||//弧
+                ent is DBText ||//文字
+                ent is Circle ||//圆
+                ent.IsTCHText() ||//天正单行文字
+                ent.IsTCHPipe() ||//天正阀
+                ent is DBPoint ||//db点
+                ent is Hatch ||//填充
+                ent is BlockReference)//块
+            {
+                return true;
+            }
+            return false;
+        }
+        private void GetLineInBlock(AcadDatabase acadDatabase, BlockReference bkr, DBObjectCollection LabelLineCollection)
+        {
+            if(NotNeedExplode(bkr))//不需要炸的块，直接跳过
+            {
+                return;
+            }
+            var blockRecordId = bkr.BlockTableRecord;
+            var btr = acadDatabase.Blocks.Element(blockRecordId);
+            foreach (var entId in btr)
+            {
+                var obj = acadDatabase.Element<Entity>(entId);
+                if (obj is BlockReference)
+                {
+                    GetLineInBlock(acadDatabase, obj as BlockReference, LabelLineCollection);
+                }
+                if(obj is Line line)
+                {
+                    if(line.Length > LengthThresh)
+                    {
+                        LabelLineCollection.Add(obj as Line);
+                    }
+                }
+            }
+            return;
         }
     }
 }
