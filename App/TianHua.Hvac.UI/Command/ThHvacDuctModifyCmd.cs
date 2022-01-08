@@ -34,10 +34,16 @@ namespace TianHua.Hvac.UI.Command
                     new ThDuctPortsModifyDuct(dlg.ductSize, objIds, curDuctParam);
                 }
                 else
-                    new ThFanModifyVBypass(dlg.ductSize, objIds, curDuctParam);
+                {
+                    //TODO:
+                    //暂时不支持其他类型
+                    throw new NotSupportedException();
+                }
             }
             else
+            {
                 ThMEPHVACService.PromptMsg("请选择管段");
+            }
         }
         private ObjectId[] GetModifyDuctId(string prompt)
         {
