@@ -90,11 +90,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var crossLines = BuildCrossLinks();
             var tTypeLines = BuildTTypeLinks();
-            var lines = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.IsDX).Select(o=>o.Edge).ToList();
-            lines.AddRange(FdxLines);
+            var lines = Graphs.SelectMany(g => g.GraphEdges).Where(o=>o.IsDX).Select(o=>o.Edge.Clone() as Line).ToList();
+            lines.AddRange(FdxLines.Select(o=>o.Clone() as Line).ToList());
             lines.AddRange(crossLines);
             lines.AddRange(tTypeLines);
-            lines.AddRange(SingleRowCableTrunking);
+            lines.AddRange(SingleRowCableTrunking.Select(o => o.Clone() as Line).ToList());
             var cableTrayEngine = new ThCableTrayBuilder(lines, ArrangeParameter.Width);
             cableTrayEngine.Build();
             return cableTrayEngine;

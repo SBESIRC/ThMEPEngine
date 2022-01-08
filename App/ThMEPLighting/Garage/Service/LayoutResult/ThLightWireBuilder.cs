@@ -145,7 +145,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
             jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildCrossLinks();
+            jumpWireFactory.BuildStraitLinks();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
@@ -167,11 +167,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
             jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildCrossLinks();
+            jumpWireFactory.BuildStraitLinks();
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
-
         protected List<ThLightNodeLink> GetThreeWayCornerStraitLinks()
         {
             // 创建T型路口跳接线
@@ -186,7 +185,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-
         protected DBObjectCollection FilerLinkWire(DBObjectCollection linkWires)
         {
             var lightLines = ThBuildLightLineService.Build(LightPositionDict, ArrangeParameter.LampLength);
@@ -219,11 +217,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .SelectMany(g => g.GraphEdges)
                 .ToList();
         }
-        protected List<ThLightNodeLink> FindLightNodeLinks(List<ThLinkPath> links)
+        protected List<ThLightNodeLink> FindLightNodeLinkOnSamePath(List<ThLinkPath> links)
         {
             var linkService = new ThLightNodeSameLinkService(links);
-            return linkService.FindLightNodeLink1();
+            return linkService.FindLightNodeLinkOnSamePath();
         }
+
+        protected List<ThLightNodeLink> FindLightNodeLinkOnBranchCorner(List<ThLinkPath> links)
+        {
+            var linkService = new ThLightNodeSameLinkService(links);
+            return linkService.FindLightNodeLinkOnBranchCorner();
+        }
+
         protected List<ThLightEdge> AddLinkCrossEdges()
         {
             // 将十字处、T字处具有相同EdgePattern的边直接连接

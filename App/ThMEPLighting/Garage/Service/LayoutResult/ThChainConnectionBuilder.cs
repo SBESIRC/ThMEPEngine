@@ -8,6 +8,7 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -45,7 +46,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkWireObjs = CreateSingleRowLinkWire();
 
             // 建议允许最大的回路编号是4
-            var jumpWireRes = CreateJumpWire(Graphs);
+            var jumpWireRes = CreateSingleRowJumpWire(Graphs);
 
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);
@@ -66,7 +67,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkWireObjs = CreateDoubleRowLinkWire(totalEdges);
 
             // 创建直段上的跳线(类似于拱形)
-            var jumpWireRes = CreateJumpWire(totalEdges);
+            var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);
 
             // 连接T型跨区
             var threewayJumpWireRes = CreateThreeWayCornerJumpWire();
@@ -80,41 +81,63 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = Wires.Union(threewayJumpWireRes);
             Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
+        }
 
-            // 创建灯文字
-            NumberTexts = BuildNumberText(
-                ArrangeParameter.JumpWireOffsetDistance,
-                ArrangeParameter.LightNumberTextGap,
-                ArrangeParameter.LightNumberTextHeight,
-                ArrangeParameter.LightNumberTextWidthFactor);
-        }
-        
-        private DBObjectCollection CreateJumpWire(List<ThLightEdge> edges)
+        private DBObjectCollection CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
         {
-            // 创建跳接线
-            var graphs = BuildGraphs(edges);
-            return CreateJumpWire(graphs);
-        }
-        private DBObjectCollection CreateJumpWire(List<ThLightGraphService> graphs)
-        {
-            // 创建跳接线
             var results = new DBObjectCollection();
             graphs.ForEach(g =>
             {
-                var lightNodeLinks = FindLightNodeLinks(g.Links);
-                var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-                {
-                    DefaultNumbers = this.DefaultNumbers,
-                    CenterSideDicts = this.CenterSideDicts,
-                    DirectionConfig = this.DirectionConfig,
-                    LampLength = this.ArrangeParameter.LampLength,
-                    LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                    OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-                };
-                jumpWireFactory.Build();
+                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
+                BuildSameLink(sameLinks);
+                var branchCornerLinks = FindLightNodeLinkOnBranchCorner(g.Links);
+                BuildBranchCornerLink(branchCornerLinks);
+                sameLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                branchCornerLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            });
+            return results;
+        }
+
+        private DBObjectCollection CreateDoubleRowJumpWire(List<ThLightEdge> edges)
+        {
+            var results = new DBObjectCollection();
+            // 创建跳接线
+            var graphs = BuildGraphs(edges);
+            graphs.ForEach(g =>
+            {
+                var lightNodeLinks = FindLightNodeLinkOnSamePath(g.Links);
+                BuildSameLink(lightNodeLinks);
                 lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             });
             return results;
+        }
+
+        private void BuildSameLink(List<ThLightNodeLink> lightNodeLinks)
+        {
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                DefaultNumbers = this.DefaultNumbers,
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.Build();
+        }
+
+        private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
+        {
+            // 用于单排布置
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.BuildStraitLinks();
         }
 
         public override void Reset()

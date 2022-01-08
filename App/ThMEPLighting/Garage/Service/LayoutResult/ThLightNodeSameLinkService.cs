@@ -20,14 +20,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public ThLightNodeSameLinkService(List<ThLinkPath> links)
         {
             Links = links;
-        }
-        
-        public List<ThLightNodeLink> FindLightNodeLink1()
-        {
-            var results = new List<ThLightNodeLink>();
             // 信息打平，便于后期查询
             BuildLightNodePositionDict();
+        }
 
+        public List<ThLightNodeLink> FindLightNodeLinkOnSamePath()
+        {
+            var results = new List<ThLightNodeLink>();
             // 对每一个链路开始编号
             Links.ForEach(l =>
             {
@@ -36,14 +35,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 lightNodeLinks.ForEach(o => o.OnLinkPath = IsOnSamePath(o.Edges));
                 results.AddRange(lightNodeLinks);
             });
+            return results;
+        }
 
+        public List<ThLightNodeLink> FindLightNodeLinkOnBranchCorner()
+        {
+            var results = new List<ThLightNodeLink>();
             // 分支拐弯处
             Links.ForEach(l =>
             {
                 var lightNodeLinks = FindCornerLightNodeLink(l);
                 results.AddRange(lightNodeLinks);
             });
-
             return results;
         }
 
