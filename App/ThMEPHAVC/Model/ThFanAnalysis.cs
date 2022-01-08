@@ -644,24 +644,34 @@ namespace ThMEPHVAC.CAD
             iRoomP = ThMEPHVACService.RoundPoint(roomP, 6);
             iNotRoomP = ThMEPHVACService.RoundPoint(notRoomP, 6);
             centerLine = GetStartLine(iRoomP, iNotRoomP, centerLine, out roomLine, out notRoomLine);
-            
-            if (isExhaust)
+            if (isExhaust) 
             {
-                if (fan.IntakeForm.Contains("上进") || fan.IntakeForm.Contains("下进") ||
-                    fan.IntakeForm.Contains("上出") || fan.IntakeForm.Contains("下出"))
+                // 排风时room_p -> fan_intlet_p not_room_p -> fan_outlet_p
+                if (fan.IntakeForm.Contains("上进") || fan.IntakeForm.Contains("下进"))
                 {
+                    // 进风口加上翻，出风口变径
                     UpdateInStartInfo(centerLine, fanParam.roomDuctSize, ref roomLine, ref iRoomP);
                     DoAddInnerDuct(roomLine, iRoomP, fanParam.roomDuctSize);
+                    UpdateOutStartInfo(false, fan.fanOutWidth, info, centerLine, ref notRoomLine, ref iNotRoomP);
+
+                }
+                else if (fan.IntakeForm.Contains("上出") || fan.IntakeForm.Contains("下出"))
+                {
+                    // 出风口加上翻，进风口变径
+                    UpdateInStartInfo(centerLine, fanParam.notRoomDuctSize, ref notRoomLine, ref iNotRoomP);
+                    DoAddInnerDuct(notRoomLine, iNotRoomP, fanParam.notRoomDuctSize);
+                    UpdateOutStartInfo(true, fan.fanInWidth, info, centerLine, ref roomLine, ref iRoomP);
                 }
                 else
                 {
+                    // 两边变径
                     UpdateOutStartInfo(true, fan.fanInWidth, info, centerLine, ref roomLine, ref iRoomP);
+                    UpdateOutStartInfo(false, fan.fanOutWidth, info, centerLine, ref notRoomLine, ref iNotRoomP);
                 }
-                UpdateOutStartInfo(false, fan.fanOutWidth, info, centerLine, ref notRoomLine, ref iNotRoomP);
             }
             else
             {
-                // 非排风时room_p -> fan_outlet_p not_room_p -> fan_inlet_p
+                //非排风时room_p->fan_outlet_p not_room_p->fan_inlet_p
                 if (fan.IntakeForm.Contains("上进") || fan.IntakeForm.Contains("下进"))
                 {
                     // 进风口加上翻，出风口变径
@@ -682,7 +692,7 @@ namespace ThMEPHVAC.CAD
                     UpdateOutStartInfo(true, fan.fanOutWidth, info, centerLine, ref roomLine, ref iRoomP);
                     UpdateOutStartInfo(false, fan.fanInWidth, info, centerLine, ref notRoomLine, ref iNotRoomP);
                 }
-            }            
+            }
         }
         private void UpdateInStartInfo(DBObjectCollection lines, string ductSize, ref Line startLine, ref Point3d srtP)
         {

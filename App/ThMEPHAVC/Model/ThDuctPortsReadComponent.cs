@@ -490,7 +490,7 @@ namespace ThMEPHVAC.Model
                     ThDuctPortsDrawService.GetVerticalPipeDynBlockProperity(blk.Id, out double pipeWidth, out double pipeHeight);
                     len = Math.Max(pipeWidth, pipeHeight) * 0.5 + 10;
                 }
-                bound.CreatePolygon(p.ToPoint2D(), 4, len); // 断线可能需要小一点，但这边统一用200
+                bound.CreatePolygon(p.ToPoint2D(), 4, len);
                 var strVolume = blk.Id.GetAttributeInBlockReference("风量");
                 double airVolume = GetAirVolume(strVolume);
                 var polygon = new DBObjectCollection() { bound }.BuildMPolygon();

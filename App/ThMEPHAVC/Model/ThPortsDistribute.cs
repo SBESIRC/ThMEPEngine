@@ -194,7 +194,8 @@ namespace ThMEPHVAC.Model
                 {
                     if (seg.portNum == 1)
                     {
-                        seg.portsInfo.FirstOrDefault().position = ThMEPHVACService.GetMidPoint(seg.seg.l.StartPoint, seg.seg.l.EndPoint);
+                        var dirVec = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
+                        seg.portsInfo.FirstOrDefault().position = seg.seg.l.EndPoint - dirVec * firstOftDis;
                     }
                     else
                     {

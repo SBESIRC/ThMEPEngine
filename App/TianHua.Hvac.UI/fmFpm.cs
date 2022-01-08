@@ -49,6 +49,7 @@ namespace TianHua.Hvac.UI
             comboScale.SelectedItem = "1:100";
             ThDuctPortsInterpreter.GetFanDic(out shadowFansDic);
             allFansDic = new Dictionary<Polyline, ObjectId>();
+            SetPortSpeed();
         }
 
         private void btnSelectFan_Click(object sender, EventArgs e)
@@ -431,7 +432,7 @@ namespace TianHua.Hvac.UI
 
         private void radioNotRoomCustom_CheckedChanged(object sender, EventArgs e)
         {
-            if (radioRoomCustom.Checked)
+            if (radioNotRoomCustom.Checked)
             {
                 textNotRoomWidth.Enabled = true;
                 textNotRoomHeight.Enabled = true;
