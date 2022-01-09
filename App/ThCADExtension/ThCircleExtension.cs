@@ -46,7 +46,7 @@ namespace ThCADExtension
         {
             // Circle - Arc Length from Chord Length and Radius
             // https://www.vcalc.com/equation/?uuid=7d9b22c3-5fe3-11ea-a7e4-bc764e203090
-            return 2 * radius * Math.Asin(chordLength / radius * 2);
+            return 2 * radius * Math.Asin(chordLength / (2 * radius));
         }
 
         public static double ArcLength2ChordLength(double chordLength, double radius)
