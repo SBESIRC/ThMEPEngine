@@ -114,10 +114,11 @@ namespace ThMEPHVAC.CAD
 
         private void DrawHoseInDWG(List<ThIfcDistributionElement> hoses, string modellayer)
         {
+            var hoseLayer = ThDuctUtils.HoseLayerName(modellayer);
             foreach (ThIfcDuctHose hose in hoses)
             {
-                ThValvesAndHolesInsertEngine.InsertHose(hose, modellayer);
-                ThValvesAndHolesInsertEngine.EnableHoseLayer(hose, modellayer);
+                ThValvesAndHolesInsertEngine.InsertHose(hose, hoseLayer);
+                ThValvesAndHolesInsertEngine.EnableHoseLayer(hoseLayer);
             }
         }
     }
