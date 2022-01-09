@@ -98,7 +98,7 @@ namespace ThCADExtension
         public static bool PointInLineSegment(this Point3d point, Point3d startPoint, Point3d endPoint, double extendTolerance = 1, double outTolerance = 1)
         {
             extendTolerance = extendTolerance < 0 ? 0 : extendTolerance;
-            outTolerance = outTolerance < 0 ? 0 : extendTolerance;
+            outTolerance = outTolerance < 0 ? 0 : outTolerance;
             var lineDir = (endPoint - startPoint).GetNormal();
             var prjPoint = point.PointToLine(startPoint, lineDir);
             if (prjPoint.DistanceTo(point) > outTolerance)

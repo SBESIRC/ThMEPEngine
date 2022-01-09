@@ -35,6 +35,7 @@
     <Compile Include="Algorithm\ThPolygonlizerCurveLine.cs" />
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
+    <Compile Include="Command\IndoorFanChange.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
     <Compile Include="Common\ThRoomLoadTable.cs" />
@@ -74,6 +75,7 @@
     <Compile Include="IndoorFanLayout\Models\FanLayoutModels.cs" />
     <Compile Include="IndoorFanLayout\Models\FanLoad.cs" />
     <Compile Include="IndoorFanLayout\Models\FanRectangle.cs" />
+    <Compile Include="IndoorFanLayout\Models\IndoorFanBlock.cs" />
     <Compile Include="IndoorFanModels\AirConditioninFan.cs" />
     <Compile Include="IndoorFanModels\CoilUnitFan.cs" />
     <Compile Include="IndoorFanModels\EnumAirReturnType.cs" />

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using ThMEPHVAC.IndoorFanLayout.Models;
 using ThMEPHVAC.IndoorFanModels;
-using ThMEPHVAC.ParameterService;
 
 namespace ThMEPHVAC.IndoorFanLayout
 {
@@ -45,39 +44,40 @@ namespace ThMEPHVAC.IndoorFanLayout
             }
             return null;
         }
-        public FanRectangle GetFanRectangle(string fanTypeName, double correctionFactor) 
+        public FanRectangle GetFanRectangle(string fanTypeName, EnumFanType fanType,bool isCold, double correctionFactor) 
         {
             
             FanRectangle fanRectangle =null;
             var fanModel = GetFanModel(fanTypeName);
-            switch (IndoorFanParameter.Instance.LayoutModel.FanType) 
+            switch (fanType) 
             {
                 case EnumFanType.FanCoilUnitTwoControls:
                 case EnumFanType.FanCoilUnitFourControls:
-                    fanRectangle = CoilFanRectangle(fanModel as CoilUnitFan, correctionFactor);
+                    fanRectangle = CoilFanRectangle(fanModel as CoilUnitFan,isCold, correctionFactor);
                     break;
                 case EnumFanType.VRFConditioninConduit:
-                    fanRectangle = VRFFanRectangle(fanModel as VRFFan, correctionFactor);
+                    fanRectangle = VRFFanRectangle(fanModel as VRFFan,isCold, correctionFactor);
                     break;
                 case EnumFanType.VRFConditioninFourSides:
-                    fanRectangle = VRFFourSideRectangle(fanModel as VRFFan, correctionFactor);
+                    fanRectangle = VRFFourSideRectangle(fanModel as VRFFan,isCold, correctionFactor);
                     break;
             }
+            if (fanRectangle != null)
+                fanRectangle.Name = fanTypeName;
             return fanRectangle;
         }
-        private FanRectangle CoilFanRectangle(CoilUnitFan coilUnitFan, double correctionFactor) 
+        private FanRectangle CoilFanRectangle(CoilUnitFan coilUnitFan,bool isCold, double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
             //计算负荷
-            switch (IndoorFanParameter.Instance.LayoutModel.HotColdType) 
+            if (isCold)
             {
-                case EnumHotColdType.Cold:
-                    double.TryParse(coilUnitFan.CoolTotalHeat, out load);
-                    break;
-                case EnumHotColdType.Hot:
-                    double.TryParse(coilUnitFan.HotHeat, out load);
-                    break;
+                double.TryParse(coilUnitFan.CoolTotalHeat, out load);
+            }
+            else 
+            {
+                double.TryParse(coilUnitFan.HotHeat, out load);
             }
             load *= correctionFactor;
             fanRectangle.Load = load;
@@ -105,19 +105,18 @@ namespace ThMEPHVAC.IndoorFanLayout
             fanRectangle.VentRect.VentMinDistanceToPrevious = 2000;
             return fanRectangle;
         }
-        private FanRectangle VRFFanRectangle(VRFFan fan, double correctionFactor) 
+        private FanRectangle VRFFanRectangle(VRFFan fan, bool isCold,double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
             //计算负荷
-            switch (IndoorFanParameter.Instance.LayoutModel.HotColdType)
+            if (isCold)
             {
-                case EnumHotColdType.Cold:
-                    double.TryParse(fan.CoolRefrigeratingCapacity, out load);
-                    break;
-                case EnumHotColdType.Hot:
-                    double.TryParse(fan.HotRefrigeratingCapacity, out load);
-                    break;
+                double.TryParse(fan.CoolRefrigeratingCapacity, out load);
+            }
+            else 
+            {
+                double.TryParse(fan.HotRefrigeratingCapacity, out load);
             }
             load *= correctionFactor;
             fanRectangle.Load = load;
@@ -145,19 +144,18 @@ namespace ThMEPHVAC.IndoorFanLayout
             fanRectangle.VentRect.VentMinDistanceToPrevious = 1000;
             return fanRectangle;
         }
-        private FanRectangle VRFFourSideRectangle(VRFFan fan, double correctionFactor) 
+        private FanRectangle VRFFourSideRectangle(VRFFan fan,bool isCold, double correctionFactor) 
         {
             var fanRectangle = new FanRectangle();
             double load = 0.0;
             //计算负荷
-            switch (IndoorFanParameter.Instance.LayoutModel.HotColdType)
+            if (isCold)
             {
-                case EnumHotColdType.Cold:
-                    double.TryParse(fan.CoolRefrigeratingCapacity, out load);
-                    break;
-                case EnumHotColdType.Hot:
-                    double.TryParse(fan.HotRefrigeratingCapacity, out load);
-                    break;
+                double.TryParse(fan.CoolRefrigeratingCapacity, out load);
+            }
+            else
+            {
+                double.TryParse(fan.HotRefrigeratingCapacity, out load);
             }
             load *= correctionFactor;
             fanRectangle.Load = load;

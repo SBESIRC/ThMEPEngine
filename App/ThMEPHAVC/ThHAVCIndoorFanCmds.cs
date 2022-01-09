@@ -2,7 +2,6 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
-using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -16,21 +15,53 @@ namespace ThMEPHVAC
 {
     class ThHAVCIndoorFanCmds
     {
+        string layerName = "AI-圈注";
         [CommandMethod("TIANHUACAD", "THSNJBZ", CommandFlags.Modal)]
         public void THIndoorFanLayout()
         {
-            string layerName = "AI-圈注";
             //Step1 选择房间框线 获取房间内外轮廓信息
-            var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            
+                var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
             var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,false);
             indoorFanLayout.Execute();
             var cloudLines = indoorFanLayout.ErrorRoomPolylines;
             if (null == cloudLines || cloudLines.Count < 1)
                 return;
-            var cloudIds = new List<ObjectId>();
+            ShowErrorRooms(cloudLines);
+        }
+        [CommandMethod("TIANHUACAD", "THSNJFZ", CommandFlags.Modal)]
+        public void THIndoorFanPlace() 
+        {
+            var placeFan = new IndoorFanPlace();
+            placeFan.Execute();
+        }
+        [CommandMethod("TIANHUACAD", "THSNJJHXG", CommandFlags.Modal)]
+        public void THIndoorFanChange()
+        {
+            var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            var selectAreas = SelectPolyline();
+            var fanChange = new IndoorFanChange(selectAreas);
+            fanChange.Execute();
+            var cloudLines = fanChange.ErrorRoomPolylines;
+            if (null == cloudLines || cloudLines.Count < 1)
+                return;
+            ShowErrorRooms(cloudLines);
+        }
+        [CommandMethod("TIANHUACAD", "THSNJArea", CommandFlags.Modal)]
+        public void THIndoorFanTest()
+        {
+            var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            var selectAreas = SelectPolyline();
+            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis, true);
+            indoorFanLayout.Execute();
+        }
+        private void ShowErrorRooms(List<Polyline> cloudLines) 
+        {
             using (var acdb = AcadDatabase.Active())
             {
+                var cloudIds = new List<ObjectId>();
+
                 LayerTableRecord layerRecord = null;
                 foreach (var layer in acdb.Layers)
                 {
@@ -56,22 +87,8 @@ namespace ThMEPHVAC
                     item.Layer = layerName;
                     cloudIds.Add(id);
                 }
+                ShowErrroPolylines(cloudIds);
             }
-            ShowErrroPolylines(cloudIds);
-        }
-        [CommandMethod("TIANHUACAD", "THSNJFZ", CommandFlags.Modal)]
-        public void THIndoorFanPlace() 
-        {
-            var placeFan = new IndoorFanPlace();
-            placeFan.Execute();
-        }
-        [CommandMethod("TIANHUACAD", "THSNJArea", CommandFlags.Modal)]
-        public void THIndoorFanTest()
-        {
-            var ucs = Active.Editor.CurrentUserCoordinateSystem;
-            var selectAreas = SelectPolyline();
-            var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis, true);
-            indoorFanLayout.Execute();
         }
         private void ShowErrroPolylines(List<ObjectId> cloudLineIds) 
         {

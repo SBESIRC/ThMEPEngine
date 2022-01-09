@@ -1,10 +1,13 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Linq2Acad;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using ThMEPHVAC.IndoorFanLayout.Models;
 
 namespace ThMEPHVAC.IndoorFanLayout.DataEngine
 {
@@ -29,6 +32,7 @@ namespace ThMEPHVAC.IndoorFanLayout.DataEngine
                 IndoorFanBlockServices.CoilFanTwoBlackName,
                 IndoorFanBlockServices.VRFFanBlackName,
                 IndoorFanBlockServices.VRFFanFourSideBlackName,
+                IndoorFanBlockServices.AirConditionFanBlackName,
             };
             var retBlocks = new List<BlockReference>();
             using (AcadDatabase acdb = AcadDatabase.Active())
@@ -39,6 +43,8 @@ namespace ThMEPHVAC.IndoorFanLayout.DataEngine
                     if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
                         continue;
                     var blockName = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
+                    if (blockName.Contains("*"))
+                        blockName = IndoorFanCommon.GetEffectiveBlkByName(block);
                     if (!fanBlockNames.Any(c => c == blockName))
                         continue;
                     retBlocks.Add(block);
@@ -46,6 +52,105 @@ namespace ThMEPHVAC.IndoorFanLayout.DataEngine
             }
             return retBlocks;
         }
+        public List<IndoorFanBlock> GetIndoorFanBlockModels() 
+        {
+            List<string> fanBlockNames = new List<string>()
+            {
+                IndoorFanBlockServices.CoilFanFourBlackName,
+                IndoorFanBlockServices.CoilFanTwoBlackName,
+                IndoorFanBlockServices.VRFFanBlackName,
+                IndoorFanBlockServices.VRFFanFourSideBlackName,
+                IndoorFanBlockServices.AirConditionFanBlackName,
+            };
+            var retBlocks = new List<IndoorFanBlock>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                foreach (var block in blocks)
+                {
+                    if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                        continue;
+                    var blockName = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
+                    if (blockName.Contains("*"))
+                        blockName = IndoorFanCommon.GetEffectiveBlkByName(block);
+                    if (!fanBlockNames.Any(c => c == blockName))
+                        continue;
+                    
+                    var copy = (BlockReference)block.GetTransformedCopy(_originTransformer.Displacement);
+                    var addBlock = new IndoorFanBlock(block.ObjectId,blockName, copy);
+                    addBlock.FanName = block.Id.GetAttributeInBlockReference("设备编号");
+                    var value = block.Id.GetDynBlockValue("设备深度");
+                    double.TryParse(value, out double length);
+                    addBlock.FanLength = length;
+                    string load = block.Id.GetAttributeInBlockReference("制冷量/制热量");
+                    var splits = load.Split('/').ToList();
+                    if (splits.Count > 0)
+                    {
+                        var coolStr = splits[0];
+                        coolStr = Regex.Replace(coolStr, @"[^\d.\d]", "");
+                        double.TryParse(coolStr, out double coolLoad);
+                        addBlock.CoolLoad = coolLoad;
+                        if (splits.Count > 1)
+                        {
+                            var hotStr = splits[1];
+                            hotStr = Regex.Replace(hotStr, @"[^\d.\d]", "");
+                            double.TryParse(hotStr, out double hotLoad);
+                            addBlock.HotLoad = hotLoad;
+                        }
+                    }
+                    retBlocks.Add(addBlock);
+                }
+            }
+            return retBlocks;
+        }
+        public List<IndoorFanVentBlock> GetIndoorFanVent() 
+        {
+            List<string> fanBlockNames = new List<string>()
+            {
+                IndoorFanBlockServices.FanVentBlackName,
+            };
+            var retBlocks = new List<IndoorFanVentBlock>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var blocks = acdb.ModelSpace.OfType<BlockReference>().ToList();
+                foreach (var block in blocks)
+                {
+                    if (block == null || block.BlockTableRecord == null || !block.BlockTableRecord.IsValid)
+                        continue;
+                    var blockName = ThMEPXRefService.OriginalFromXref(block.GetEffectiveName());
+                    if (blockName.Contains("*"))
+                        blockName = IndoorFanCommon.GetEffectiveBlkByName(block);
+                    if (!fanBlockNames.Any(c => c == blockName))
+                        continue;
+                    var copy = (BlockReference)block.GetTransformedCopy(_originTransformer.Displacement);
+                    var addBlock = new IndoorFanVentBlock(block.ObjectId,blockName, copy);
+                    addBlock.VentName = block.Id.GetDynBlockValue("风口类型");
+                    retBlocks.Add(addBlock);
+                }
+            }
+            return retBlocks;
+        }
+        public Dictionary<ObjectId,Polyline> GetIndoorFanPolylines() 
+        {
+            List<string> layerNames = new List<string>()
+            {
+                IndoorFanBlockServices.FanBoxLayerName,
+            };
+            var retPLines = new Dictionary<ObjectId, Polyline>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var polylines = acdb.ModelSpace.OfType<Polyline>().ToList();
+                foreach (var pLine in polylines)
+                {
+                    if (!layerNames.Any(c => c == pLine.Layer))
+                        continue;
+                    var copy = (Polyline)pLine.GetTransformedCopy(_originTransformer.Displacement);
+                    retPLines.Add(pLine.ObjectId,copy);
+                }
+            }
+            return retPLines;
+        }
+
         public List<Curve> GetAllAxisCurves()
         {
             var retAxisCurves = new List<Curve>();

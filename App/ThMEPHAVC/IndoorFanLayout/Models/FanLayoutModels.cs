@@ -96,6 +96,30 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
         public Vector3d FanDirection { get; set; }
         public List<FanInnerVentRect> InnerVentRects { get; }
     }
+    class FanLayoutDetailed 
+    {
+        public string FanId { get; }
+        public string FanLayoutName { get; set; }
+        public List<Point3d> FanInnerVents { get; }
+        public Point3d StartPoint { get; }
+        public Point3d EndPoint { get; }
+        public Point3d FanPoint { get; set; }
+        public Point3d FanReturnVentCenterPoint { get; set; }
+        public double Length { get; }
+        public double Width { get; }
+        public bool HaveReturnVent { get; set; }
+        public Vector3d FanDirection { get; set; }
+        public FanLayoutDetailed(Point3d startPoint,Point3d endPoint, double width, Vector3d lengthDir)
+        {
+            this.FanId = Guid.NewGuid().ToString();
+            this.FanInnerVents = new List<Point3d>();
+            this.Length = startPoint.DistanceTo(endPoint);
+            this.Width = width;
+            this.FanDirection = lengthDir;
+            this.StartPoint = startPoint;
+            this.EndPoint = endPoint;
+        }
+    }
     class FanInnerVentRect
     {
         public string VentId { get; }
@@ -107,6 +131,5 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
             this.VentPolyline = polyline;
             this.CenterPoint = IndoorFanCommon.PolylinCenterPoint(polyline);
         }
-        
     }
 }
