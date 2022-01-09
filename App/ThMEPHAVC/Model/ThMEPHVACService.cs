@@ -106,7 +106,8 @@ namespace ThMEPHVAC.Model
         }
         public static bool IsVertical(Vector3d v1, Vector3d v2)
         {
-            return Math.Abs(v1.DotProduct(v2)) < 1e-3;
+            var angle = v1.GetAngleTo(v2);
+            return Math.Abs(angle - Math.PI * 0.5) < (5 / 180.0 * Math.PI);
         }
         public static bool IsVertical(Line l)
         {
@@ -440,6 +441,12 @@ namespace ThMEPHVAC.Model
         public static Point3d GetOtherPoint(Line l, Point3d p, Tolerance tor)
         {
             return p.IsEqualTo(l.StartPoint, tor) ? l.EndPoint : l.StartPoint;
+        }
+        public static Polyline CreateDetector(Point3d p, double len)
+        {
+            var pl = new Polyline();
+            pl.CreatePolygon(p.ToPoint2D(), 4, len);
+            return pl;
         }
         public static Polyline CreateDetector(Point3d p)
         {

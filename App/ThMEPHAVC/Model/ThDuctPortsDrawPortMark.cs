@@ -18,7 +18,7 @@ namespace ThMEPHVAC.Model
             this.portMarkName = portMarkName;
             this.portMarkLayer = portMarkLayer;
         }
-        public void InsertMark(ThMEPHVACParam param, double portWidth, double portHeight, Point3d p)
+        public void InsertMark(ThMEPHVACParam param, double portWidth, double portHeight, double textAngle, Point3d p)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -37,11 +37,15 @@ namespace ThMEPHVAC.Model
                     av = (Math.Ceiling(av / 10)) * 10;
                     strVolume = av.ToString("0.") + "/" + strVolume;
                 }
+                if (textAngle >= Math.PI)
+                    textAngle -= Math.PI;
                 var attr = new Dictionary<string, string> { { "风口名称", param.portName },
                                                             { "尺寸", portSize },
                                                             { "数量", portNum.ToString() },
-                                                            { "风量", strVolume} };
-                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, 1), textAngle, attr);
+                                                            { "风量", strVolume},
+                                                            { "安装属性", "风口底边距地*.**m"} };
+                var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, 1), textAngle, attr);
                 ThMEPHVACService.SetAttr(obj, attr, textAngle);
             }
         }

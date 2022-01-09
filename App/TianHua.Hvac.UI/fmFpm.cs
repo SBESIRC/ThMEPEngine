@@ -34,7 +34,7 @@ namespace TianHua.Hvac.UI
         private Matrix3d ucsMat;
         private ThHvacCmdService cmdService;
         private string preKey;//fan的listBox选项更新时需要延迟一下选择
-        
+        private double firstRange = 200;
         public fmFpm()
         {
             InitializeComponent();
@@ -559,7 +559,7 @@ namespace TianHua.Hvac.UI
             }
             linesDic.Clear();
             centerlines.Clear();
-            var tor = new Tolerance(1.5, 1.5);
+            var tor = new Tolerance(firstRange, firstRange);
             foreach (var lines in procLines)
             {
                 foreach (Line l in lines)
@@ -572,6 +572,8 @@ namespace TianHua.Hvac.UI
                     }
                 }
             }
+            if (centerlines.Count == 0)
+                throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
         }
         private Dictionary<int, DBObjectCollection> SepLineByColor()
         {
@@ -584,6 +586,22 @@ namespace TianHua.Hvac.UI
                     dic.Add(l.ColorIndex, new DBObjectCollection() { l });
             }
             return dic;
+        }
+        private void CheckCenterLine(Point3d roomP, Point3d notRoomP)
+        {
+            var index = new ThCADCoreNTSSpatialIndex(centerlines);
+            var roomPl = ThMEPHVACService.CreateDetector(roomP, firstRange);
+            var roomRes = index.SelectCrossingPolygon(roomPl);
+            if (roomRes.Count != 1)
+                throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+            var notRoomPl = ThMEPHVACService.CreateDetector(notRoomP, firstRange);
+            var notRoomRes = index.SelectCrossingPolygon(notRoomPl);
+            if (notRoomRes.Count != 1)
+                throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
+            var roomLine = roomRes[0] as Line;
+            var notRoomLine = notRoomRes[0] as Line;
+            if (roomLine.Equals(notRoomLine))
+                throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
         }
         private void GetFanConnectLine()
         {
@@ -599,6 +617,7 @@ namespace TianHua.Hvac.UI
                 var roomNotPoint = fanModel.isExhaust ? fanModel.FanOutletBasePoint : fanModel.FanInletBasePoint;
                 roomPoint = roomPoint.TransformBy(mat);
                 roomNotPoint = roomNotPoint.TransformBy(mat);
+                CheckCenterLine(roomPoint, roomNotPoint);
                 var roomDetector = new ThFanCenterLineDetector(false);
                 // 服务侧搜索全部的线
                 roomDetector.SearchCenterLine(centerlines, ref roomPoint, SearchBreakType.breakWithEndline);

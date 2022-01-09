@@ -103,9 +103,9 @@ namespace ThMEPHVAC.Model
             const double PI = 3.15;//Math.PI + 0.01
             const double HALFPI = 1.56;//0.5 * Math.PI - 0.01 
             if (openAngle > 0 && openAngle <= HALFPI) //不处理锐角
-                throw new NotImplementedException("[CheckError]: Elbow open angle is less than PI/2 !");
+                throw new NotImplementedException("不支持弯头带锐角！！！");
             else if (openAngle > PI)
-                throw new NotImplementedException("[CheckError]: Elbow open angle is large than PI !");
+                throw new NotImplementedException("不支持弯头大于平角！！！");
             else
                 return Math.Abs(K * width * Math.Tan(0.5 * (Math.PI - openAngle))) + 50;
         }
@@ -333,7 +333,8 @@ namespace ThMEPHVAC.Model
         public static double GetReducingLen(double big, double small)
         {
             double reducinglength = 0.5 * Math.Abs(big - small) / Math.Tan(20 * Math.PI / 180);
-            return reducinglength < 200 ? 200 : reducinglength > 1000 ? 1000 : reducinglength;
+            var a = reducinglength < 200 ? 200 : reducinglength > 1000 ? 1000 : reducinglength;
+            return ThMEPHVACService.RoundNum(a, 10);
         }
     }
 }

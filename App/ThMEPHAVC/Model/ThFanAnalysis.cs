@@ -188,7 +188,7 @@ namespace ThMEPHVAC.CAD
                 GetSpecialShapeInfo(iNotRoomP, notRoomLine, notRoomLines, fanParam.notRoomDuctSize);
             }
             else
-                throw new NotImplementedException("[Check Error]: Select generation side!");
+                throw new NotImplementedException("未选择要生成室外侧或服务侧！！！");
         }
 
         private void PreSearchConnLines(Point3d iRoomP, 
@@ -212,7 +212,7 @@ namespace ThMEPHVAC.CAD
                 GetDuctInfo(iNotRoomP, notRoomLine, notRoomLines);
             }
             else
-                throw new NotImplementedException("[Check Error]: Select generation side!");
+                throw new NotImplementedException("未选择要生成室外侧或服务侧！！！");
         }
 
         private void SeperateFanInsideAndOutSide(DBObjectCollection wallLines, Point3d iRoomP, Point3d roomP)
@@ -259,7 +259,7 @@ namespace ThMEPHVAC.CAD
                         break;
                 }
                 if (String.IsNullOrEmpty(sepInfo1.ductSize) || String.IsNullOrEmpty(sepInfo2.ductSize))
-                    throw new NotImplementedException("风机进出口旁通未找到打断的旁通");
+                    throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
                 UpdateCenterLine(sepInfo1, sepInfo2);
             }
         }
@@ -343,7 +343,7 @@ namespace ThMEPHVAC.CAD
                     return searchPoint + (dirVec * dis);
                 }
             }
-            throw new NotImplementedException("Start point is not in the line set");
+            throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
         }
         private void CollectLines()
         {
@@ -586,6 +586,8 @@ namespace ThMEPHVAC.CAD
         }
         private void GetDuctInfo(Point3d startPoint, Line startLine, HashSet<Line> lines)
         {
+            if (startLine.Length < 1)
+                throw new NotImplementedException("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点！！！");
             var searchPoint = startPoint.IsEqualTo(startLine.StartPoint, tor) ? startLine.EndPoint : startLine.StartPoint;
             DoSearchDuct(searchPoint, startLine, lines);
             lines.Add(new Line(startPoint, searchPoint));
