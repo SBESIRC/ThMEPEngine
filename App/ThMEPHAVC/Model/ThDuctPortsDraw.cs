@@ -108,17 +108,20 @@ namespace ThMEPHVAC.Model
             if (endlines.Count == 0)
                 return;
             var p = Point3d.Origin;
+            double textAngle = 0;
             foreach (var seg in endlines[0].endlines.Values)
             {
                 if (seg.portNum > 0)
                 {
                     p = seg.portsInfo[0].position;
+                    var dir = ThMEPHVACService.GetEdgeDirection(seg.seg.l);
+                    textAngle = ThMEPHVACService.GetPortRotateAngle(dir);
                     break;
                 }
             }
-            var markP = p + new Vector3d(1500, 2000, 0) + orgDisVec;
-            service.markService.InsertMark(portParam.param, portWidth, portHeight, markP);
-            service.markService.InsertLeader(p + orgDisVec, markP);
+            var markP = p + orgDisVec;
+            service.markService.InsertMark(portParam.param, portWidth, portHeight, textAngle - 0.5 * Math.PI, markP);
+            //service.markService.InsertLeader(p + orgDisVec, markP);
         }
         private void DrawMainlines(Dictionary<int, SegInfo> mainLinesInfos)
         {

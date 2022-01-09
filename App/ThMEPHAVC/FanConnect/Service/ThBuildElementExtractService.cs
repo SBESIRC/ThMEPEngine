@@ -15,7 +15,7 @@ using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThBuildElementExtractServiece
+    public class ThBuildElementExtractService
     {
         /// <summary>
         /// 提取剪力墙

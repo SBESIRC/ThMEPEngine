@@ -73,7 +73,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 plineList.Add(line);
             }
             var plineSpatialIndex = new ThCADCoreNTSSpatialIndex(plineList.ToCollection());
-            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
+            foreach (var pt in fireHydrantSysIn.PtDic.Keys.ToList())
             {
                 if (pt._pt.DistanceTo(new Point3d(9449431.4796, 3379390.4115, 0)) < 1)
                 {
@@ -94,6 +94,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             var edist = ept._pt.DistanceTo(pt._pt);
                             if (sdist > 1 && edist > 1)
                             {
+                                if (!fireHydrantSysIn.PtDic.ContainsKey(pt)) fireHydrantSysIn.PtDic.Add(pt,new List<Point3dEx>());
+                                if (!fireHydrantSysIn.PtDic.ContainsKey(spt)) fireHydrantSysIn.PtDic.Add(spt, new List<Point3dEx>());
+                                if (!fireHydrantSysIn.PtDic.ContainsKey(ept)) fireHydrantSysIn.PtDic.Add(ept, new List<Point3dEx>());
                                 fireHydrantSysIn.PtDic[pt].Add(ept);
                                 fireHydrantSysIn.PtDic[ept].Add(pt);
 

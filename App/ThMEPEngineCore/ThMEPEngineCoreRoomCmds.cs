@@ -92,7 +92,6 @@ namespace ThMEPEngineCore
                 frame.TransformBy(Active.Editor.UCS2WCS());
                 var engine = new ThDB3RoomMarkRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
-                acadDatabase.Database.CreateAIRoomMarkLayer();
                 var markLayerId = acadDatabase.Database.CreateAIRoomMarkLayer();
                 engine.Elements.Cast<ThIfcTextNote>().ForEach(o =>
                 {

@@ -47,7 +47,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //提取风管路由
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                 ////水管干路和支干路
                 if (pipes.Count == 0)
                 {
@@ -60,11 +60,11 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
 
                 //获取剪力墙
-                var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
+                var shearWalls = ThBuildElementExtractService.GetShearWalls();
                 //获取结构柱
-                var columns = ThBuildElementExtractServiece.GetColumns();
+                var columns = ThBuildElementExtractService.GetColumns();
                 //获取房间框线
-                var rooms = ThBuildElementExtractServiece.GetBuildRooms();
+                var rooms = ThBuildElementExtractService.GetBuildRooms();
             }
         }
     }

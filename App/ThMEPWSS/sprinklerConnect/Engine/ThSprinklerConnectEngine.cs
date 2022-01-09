@@ -3,11 +3,10 @@ using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-
+using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore;
+
 using ThMEPWSS.SprinklerConnect.Model;
 using ThMEPWSS.SprinklerConnect.Service;
 
@@ -46,13 +45,73 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                 service.LaneLine = new List<Line>();
             }
 
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
             // < netList.Count
             for (int i = 0; i < netList.Count; i++)
             {
                 // < netList[i].PtsGraph.Count
                 for (int j = 0; j < netList[i].PtsGraph.Count; j++)
                 {
-                    rowConnection.AddRange(service.GraphPtsConnect(netList[i], j, pipeScatters, isVertical));
+                    var graphPtsConnect = service.GraphPtsConnect(netList[i], j, pipeScatters, isVertical);
+                    var addLines = new DBObjectCollection();
+                    for (int k = 0; k < graphPtsConnect.Count; k++)
+                    {
+                        if (graphPtsConnect[k].Base.Length > 15.0)
+                        {
+                            var frame = graphPtsConnect[k].Base.ExtendLine(-10.0).Buffer(1.0);
+                            var filter = spatialIndex.SelectCrossingPolygon(frame);
+                            if (filter.Count == 0)
+                            {
+                                rowConnection.Add(graphPtsConnect[k]);
+                                addLines.Add(graphPtsConnect[k].Base);
+                            }
+                            else if (filter.Count == 1)
+                            {
+                                var filterLine = filter.OfType<Line>().First();
+                                var filterRow = rowConnection.Where(row => row.Base.StartPoint == filterLine.StartPoint
+                                    && row.Base.EndPoint == filterLine.EndPoint).FirstOrDefault();
+                                if (filterRow != null)
+                                {
+                                    if (graphPtsConnect[k].Count > filterRow.Count)
+                                    {
+                                        rowConnection.Add(graphPtsConnect[k]);
+                                        addLines.Add(graphPtsConnect[k].Base);
+
+                                        filterRow.OrderDict.Values.ForEach(list =>
+                                        {
+                                            pipeScatters.Remove(list[0]);
+                                            service.SprinklerSearched.Remove(list[0]);
+                                        });
+                                        rowConnection.Remove(filterRow);
+                                        spatialIndex.Update(new DBObjectCollection(), new DBObjectCollection { filterLine });
+                                    }
+                                    else
+                                    {
+                                        graphPtsConnect[k].OrderDict.Values.ForEach(list =>
+                                        {
+                                            pipeScatters.Remove(list[0]);
+                                            service.SprinklerSearched.Remove(list[0]);
+                                        });
+                                    }
+                                }
+                                else
+                                {
+                                    rowConnection.Add(graphPtsConnect[k]);
+                                    addLines.Add(graphPtsConnect[k].Base);
+                                }
+                            }
+                            else
+                            {
+                                graphPtsConnect[k].OrderDict.Values.ForEach(list =>
+                                {
+                                    pipeScatters.Remove(list[0]);
+                                    service.SprinklerSearched.Remove(list[0]);
+                                });
+                            }
+                        }
+                    }
+
+                    spatialIndex.Update(addLines, new DBObjectCollection());
                 }
             }
 
@@ -98,7 +157,6 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             results = results.Where(o => o.Length > 1.0).ToList();
             service.BreakMainLine(results);
 
-            // 最终散点处理
             return results;
         }
 

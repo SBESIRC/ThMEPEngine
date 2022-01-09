@@ -60,11 +60,11 @@ namespace ThMEPHVAC.FanConnect.Command
                     return;
                 }
                 //获取剪力墙
-                var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
+                var shearWalls = ThBuildElementExtractService.GetShearWalls();
                 //获取结构柱
-                var columns = ThBuildElementExtractServiece.GetColumns();
+                var columns = ThBuildElementExtractService.GetColumns();
                 //获取房间框线
-                var rooms = ThBuildElementExtractServiece.GetBuildRooms();
+                var rooms = ThBuildElementExtractService.GetBuildRooms();
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeStartPt = startPt;

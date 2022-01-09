@@ -27,7 +27,7 @@ namespace TianHua.Hvac.UI.Command
         {
             if (portParam.centerLines.Count == 0)
             {
-                ThMEPHVACService.PromptMsg("无用于布置风口的中心线");
+                ThMEPHVACService.PromptMsg("风机出入口未搜寻到正确的风管路由线，请确保风管路由线的起点为进、出风口夹点!!!");
                 return;
             }
             var excludeLines = GetExcludeLine();

@@ -1,25 +1,21 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
+﻿using System;
+using AcHelper;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
+using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SecurityPlaneSystem.Utls;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Common;
 using ThMEPEngineCore.Model.Electrical;
+using ThMEPElectrical.SecurityPlaneSystem.Utls;
 
 namespace ThMEPElectrical.StructureHandleService
 {
@@ -107,16 +103,24 @@ namespace ThMEPElectrical.StructureHandleService
         /// <param name="walls"></param>
         public List<Polyline> GetDoorInfo(Polyline polyline)
         {
-            var doors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var MSdoors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => (x.Clone() as Polyline).FlattenRectangle()).Where(o => o.Area > 25000).ToList();
+                //获取"AI-门"图层中的门
+                var MSdoors = acdb.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(x => x.Layer == ThMEPEngineCoreLayerUtils.DOOR)
+                    .Where(x => x != null && x.Area > 25000)
+                    .Select(x => ThMEPFrameService.NormalizeEx(x,10.0))//加Normalize使其闭合
+                    .Where(x => x != null && x.Area > 25000)//再过滤一遍 过滤之前非闭合的'门'
+                    .Select(x => x.OBB())
+                    .ToList();
                 //新逻辑，目的是为了把所有的门做一个去重操作
                 var boundary = polyline.Clone() as Polyline;
                 originTransformer.Reset(boundary);
                 var doorRecognitionEngine = new ThDB3DoorRecognitionEngine();
                 doorRecognitionEngine.Recognize(acdb.Database, boundary.Vertices());
                 MSdoors = MSdoors.Union(doorRecognitionEngine.Elements.Select(o => o.Outline as Polyline)).ToList();
+                var doors = new List<Polyline>();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(MSdoors.ToCollection());
                 while (MSdoors.Count > 0)
                 {
@@ -126,7 +130,7 @@ namespace ThMEPElectrical.StructureHandleService
                     objs = objs.Cast<Polyline>().Where(o => MSdoors.Contains(o)).ToCollection();
                     if (objs.Count > 0)
                     {
-                        if(objs.Count == 1)
+                        if (objs.Count == 1)
                         {
                             doors.Add(objs[0] as Polyline);
                         }
@@ -140,12 +144,11 @@ namespace ThMEPElectrical.StructureHandleService
                     MSdoors.Remove(door);
                 }
                 doors.ForEach(x => originTransformer.Transform(x));
+                return doors;
             }
-
-            return doors;
         }
 
-        public List<Entity> GetOldLayout(Polyline polyline,List<string> blockNames,string LineLayer)
+        public List<Entity> GetOldLayout(Polyline polyline, List<string> blockNames, string LineLayer)
         {
             var vmInfo = new List<Entity>();
             using (AcadDatabase acdb = AcadDatabase.Active())
@@ -246,7 +249,7 @@ namespace ThMEPElectrical.StructureHandleService
             var bufferPoly = polyline.Buffer(100)[0] as Polyline;
             var storeysRecognitionEngine = new ThEStoreysRecognitionEngine();
             using (AcadDatabase db = AcadDatabase.Active())
-            {   
+            {
                 storeysRecognitionEngine.Recognize(db.Database, bufferPoly.Vertices());
             }
             if (storeysRecognitionEngine.Elements.Count > 0)

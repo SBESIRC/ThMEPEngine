@@ -178,18 +178,19 @@ namespace ThMEPHVAC.Model
                     var curInfo = seg.portsInfo[i];
                     var preInfo = seg.portsInfo[i - 1];
                     var dis = curInfo.position.DistanceTo(preInfo.position);
-                    if (dis >= 1000)
+                    var reducingLen = ThDuctPortsShapeService.GetReducingLen(ThMEPHVACService.GetWidth(ductSize), ThMEPHVACService.GetWidth(seg.portsInfo[i].ductSize));
+                    if (dis >= reducingLen)
                     {
                         // 够放1000的变径
                         var midP = ThMEPHVACService.GetMidPoint(curInfo.position, preInfo.position);
-                        var curSrtP = midP + dirVec * 500;//缩一半
+                        var curSrtP = midP + dirVec * reducingLen * 0.5;//缩一半
                         var l = new Line(curSrtP, nextEndP);
                         double ductHeight = ThMEPHVACService.GetHeight(preInfo.ductSize);
                         double num = (portParam.param.elevation * 1000 + mainHeight - ductHeight) / 1000;
                         var info = new SegInfo() { l = l, ductSize = preInfo.ductSize, airVolume = preInfo.portAirVolume, elevation = num.ToString() };
                         textAlignment.Add(new TextAlignLine() { l =  l, ductSize = ductSize, isRoom = true });
                         breakedDucts.Add(info);
-                        nextEndP = midP - dirVec * 500;
+                        nextEndP = midP - dirVec * reducingLen * 0.5;
                         var reduingLine = new Line(nextEndP, curSrtP);
                         reducingInfos.Add(new ReducingInfo() { l = reduingLine, bigSize = curInfo.ductSize, smallSize = preInfo.ductSize });
                         ductSize = curInfo.ductSize;

@@ -34,7 +34,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                    .Where(o => IsTargetLayer(o.Layer));
 
             var Results2 = ExtractBlocks(acadDatabase.Database, "定位立管");
-            
+
             var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
             var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
@@ -44,10 +44,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             var spatialIndex1 = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
             var DBObjs1 = spatialIndex1.SelectCrossingPolygon(polygon);
 
-            var spatialIndex2 = new ThCADCoreNTSSpatialIndex(Results2);
-            var DBObjs2 = spatialIndex2.SelectCrossingPolygon(polygon);
-
             DBobjsResults = new DBObjectCollection();
+
             foreach (DBObject db in DBObjs)
             {
                 if(db is BlockReference br)//图块
@@ -61,14 +59,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
             foreach (var db in DBObjs1)//添加圆
             {
-                DBobjsResults.Add(map[db as Polyline]);
+                var circle = map[db as Polyline];
+                var dbPt = new DBPoint(circle.Center);
+                DBobjsResults.Add(dbPt);
             }
-            foreach(var db in DBObjs2)
+            foreach (var db in Results2)
             {
                 ExplodeDWLG(db as BlockReference, DBobjsResults);//添加定位立管
             }
 
-            return DBobjsResults;
+            var rstSpatialIndex = new ThCADCoreNTSSpatialIndex(DBobjsResults);
+
+            return rstSpatialIndex.SelectCrossingPolygon(polygon);
         }
 
         private static bool IsTargetLayer(string layer)//立管图层
@@ -104,7 +106,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     {
                         if (IsTargetLayer(circle.Layer))
                         {
-                            DBobjsResults.Add(circle);
+                            var dbPt = new DBPoint(circle.Center);
+                            DBobjsResults.Add(dbPt);
                         }
                     }
                     if (obj is BlockReference)//块
@@ -124,7 +127,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 if (obj is Circle circle)//圆
                 {
-                    DBobjsResults.Add(circle);
+                    var dbPt = new DBPoint(circle.Center);
+                    DBobjsResults.Add(dbPt);
                 }
                 if (ent.GetType().Name.Equals("ImpEntity"))//天正对象
                 {
@@ -134,7 +138,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         }
         private static bool IsDWLGBlock(BlockReference br)
         {
-            return br.Name.Contains("定位立管");
+            try
+            {
+                return br.GetEffectiveName().Contains("定位立管");
+            }
+            catch (Exception ex)
+            {
+                return br.Name.Contains("定位立管");
+            }
         }
         public static void ExplodeDWLG(BlockReference br, DBObjectCollection DBobjsResults)//炸定位立管
         {
@@ -146,7 +157,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             if(circles.Count() > 0)
             {
                 var circle = circles.First();
-                DBobjsResults.Add(new Circle(new Point3d(circle.Center.X, circle.Center.Y, 0), new Vector3d(0, 0, 1), 50));
+                var dbPt = new DBPoint(circle.Center);
+                DBobjsResults.Add(dbPt);
             }
         }
 
@@ -178,7 +190,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             foreach (var db in DBobjsResults)
             {
-                var centerPt = (db as Circle).Center;
+                ;
+                var centerPt = (db as DBPoint).Position;
                 var pt = new Point3dEx(new Point3d(centerPt.X, centerPt.Y, 0));
                 if (!VerticalPts.Contains(pt))
                 {

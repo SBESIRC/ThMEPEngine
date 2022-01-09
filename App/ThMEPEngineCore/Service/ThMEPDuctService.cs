@@ -80,7 +80,7 @@ namespace ThMEPEngineCore.Service
             foreach (var id in geometryDictionary.Keys)
             {
                 var param = ThHvacAnalysisComponent.GetConnectorParamById(id);
-                if (param.handle != ObjectId.Null.Handle)
+                if (param.handle != ObjectId.Null.Handle && param.portWidths.Count() == 0)
                 {
                     dic.Add(geometryDictionary[id], param);
                 }

@@ -13,8 +13,6 @@ namespace ThMEPWSS.SprinklerConnect.Engine
 {
     public class ThSprinklerPtNetworkEngine
     {
-        // public static Point3d TransformerPt { get; set; }
-
         /// <summary> 
         /// 获取点位分片图
         /// </summary>
@@ -23,6 +21,11 @@ namespace ThMEPWSS.SprinklerConnect.Engine
         {
             var sprinkPts = sprinklerParameter.SprinklerPt;
             var dtOrthogonalSeg = ThSprinklerNetworkService.FindOrthogonalAngleFromDT(sprinkPts, out var dtSeg);
+            if(dtOrthogonalSeg.Count == 0)
+            {
+                DTTol = 1600.0;
+                return new List<ThSprinklerNetGroup>();
+            }
             DTTol = ThSprinklerNetworkService.GetDTLength(dtOrthogonalSeg);
             ThSprinklerNetworkService.FilterTooLongSeg(ref dtOrthogonalSeg, DTTol * 3);
             var netList = CreateSegGroup(dtOrthogonalSeg, dtSeg, sprinkPts, sprinklerParameter.SubMainPipe, DTTol, geometry);

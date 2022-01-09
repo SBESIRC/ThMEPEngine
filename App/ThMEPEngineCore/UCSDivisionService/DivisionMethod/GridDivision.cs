@@ -98,12 +98,10 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                     gridModel.GridPolygon = polygon;
                     if (gridTypes[polygonKey] == GridType.ArcGrid)
                     {
-                        gridModel.gridType = GridType.ArcGrid;
                         gridModel.centerPt = (gridLines[polygonKey].First(x => x is Arc) as Arc).Center;
                     }
                     else if (gridTypes[polygonKey] == GridType.LineGrid)
                     {
-                        gridModel.gridType = GridType.LineGrid;
                         var firLine = gridLines[polygonKey].First(x => x is Line) as Line;
                         gridModel.vector = (firLine.EndPoint - firLine.StartPoint).GetNormal();
                     }

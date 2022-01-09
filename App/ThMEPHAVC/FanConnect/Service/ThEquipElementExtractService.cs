@@ -16,7 +16,7 @@ using ThMEPHVAC.FanConnect.Model;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThEquipElementExtractServiece
+    public class ThEquipElementExtractService
     {
         public static List<ThFanCUModel> GetFCUModels()
         {

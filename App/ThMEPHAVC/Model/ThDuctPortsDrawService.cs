@@ -52,7 +52,7 @@ namespace ThMEPHVAC.Model
             airValveName = "风阀";
             fireValveName = "防火阀";
             startName = "AI-风管起点";
-            portMarkName = "风口标注";
+            portMarkName = "AI-风口标注1";
             portName = "AI-风口";
             airValveVisibility = "多叶调节风阀";
             electrycityValveVisibility = "电动多叶调节风阀";

@@ -92,7 +92,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 //提取水管路由
                 var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                 foreach(var p in pipes)
                 {
                     p.TransformBy(mt);
@@ -105,7 +105,10 @@ namespace ThMEPHVAC.FanConnect.Command
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
                 var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-
+                foreach (var p in pipes)
+                {
+                    p.TransformBy(mt.Inverse());
+                }
                 var tmpLines = new List<Line>();
                 foreach (var l in lineColl)
                 {
@@ -113,17 +116,18 @@ namespace ThMEPHVAC.FanConnect.Command
                     line.TransformBy(mt.Inverse());
                     tmpLines.Add(line);
                 }
+
                 var fucs = ThFanConnectUtils.SelectFanCUModel();
                 if(fucs.Count == 0)
                 {
                     return;
                 }
                 //获取剪力墙
-                var shearWalls = ThBuildElementExtractServiece.GetShearWalls();
+                var shearWalls = ThBuildElementExtractService.GetShearWalls();
                 //获取结构柱
-                var columns = ThBuildElementExtractServiece.GetColumns();
+                var columns = ThBuildElementExtractService.GetColumns();
                 //获取房间框线
-                var rooms = ThBuildElementExtractServiece.GetBuildRooms();
+                var rooms = ThBuildElementExtractService.GetBuildRooms();
                 //生成管路路由
                 var pipeService = new ThCreatePipeService();
                 pipeService.PipeWidth = pipeWidth;
@@ -147,6 +151,26 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     toDbServiece.InsertEntity(pl , "AI-水管路由");
                 }
+
+                //添加需求ID:1001796
+                var allLines = new List<Line>();
+                allLines.AddRange(pipes);
+                foreach(var pl in plines)
+                {
+                    allLines.AddRange(pl.ToLines());
+                }
+                var tmpFcus = ThEquipElementExtractService.GetFCUModels();
+                if (tmpFcus.Count == 0)
+                {
+                    return;
+                }
+                var remSurplusPipe = new ThRemSurplusPipe()
+                {
+                    StartPoint = startPt,
+                    AllLine = allLines,
+                    AllFan = tmpFcus
+                };
+                remSurplusPipe.RemSurplusPipe();
                 return;
             }
         }

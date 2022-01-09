@@ -23,6 +23,8 @@ namespace ThMEPEngineCore.Service.Hvac
                 var ids = new List<ObjectId>();
                 foreach (var g in db.Groups)
                 {
+                    if (g.NumEntities < 1)
+                        continue;
                     var id = g.ObjectId;
                     var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)
@@ -50,6 +52,8 @@ namespace ThMEPEngineCore.Service.Hvac
                 var connectors = new List<ObjectId>();
                 foreach (var g in db.Groups)
                 {
+                    if (g.NumEntities < 1)
+                        continue;
                     var id = g.ObjectId;
                     var list = id.GetXData(ThHvacCommon.RegAppName_Duct_Info);
                     if (list != null)

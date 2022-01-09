@@ -11,23 +11,22 @@ namespace ThMEPElectrical.ConnectPipe.Service
 {
     public static class CheckService
     {
-        static readonly double tol = 3500;   //3.5米以内我们认为不相交
         /// <summary>
         /// 检查连接线
         /// </summary>
         /// <returns></returns>
-        public static bool CheckConnectLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, Polyline usePoly, List<Polyline> endingPolys)
+        public static bool CheckConnectLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, Polyline usePoly, List<Polyline> endingPolys, double intersectTol = 3500)
         {
-            return CheckUsefulLine(usePoly, endingPolys) && CheckFrameLine(holeInfo.Key, usePoly) && CheckHolesLine(holeInfo.Value, usePoly);
+            return CheckUsefulLine(usePoly, endingPolys, intersectTol) && CheckFrameLine(holeInfo.Key, usePoly) && CheckHolesLine(holeInfo.Value, usePoly);
         }
 
         /// <summary>
         /// 检查副车道连接线
         /// </summary>
         /// <returns></returns>
-        public static bool CheckOtherConnectLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, Polyline usePoly, List<Polyline> endingPolys)
+        public static bool CheckOtherConnectLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, Polyline usePoly, List<Polyline> endingPolys, double intersectTol = 3500)
         {
-            return CheckUsefulLine(usePoly, endingPolys) && CheckFrameLine(holeInfo.Key, usePoly) &&
+            return CheckUsefulLine(usePoly, endingPolys, intersectTol) && CheckFrameLine(holeInfo.Key, usePoly) &&
                 CheckHolesLine(holeInfo.Value, usePoly) && CheckConnectPtNum(usePoly.EndPoint, endingPolys);
         }
 
@@ -66,11 +65,13 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <param name="usePoly"></param>
         /// <param name="endingPolys"></param>
         /// <returns></returns>
-        public static bool CheckUsefulLine(Polyline usePoly, List<Polyline> endingPolys)
+        public static bool CheckUsefulLine(Polyline usePoly, List<Polyline> endingPolys, double tol)
         {
             ///Line connectLine = new Line(usePoly.StartPoint, usePoly.EndPoint);
             foreach (var poly in endingPolys)
             {
+                Point3dCollection pts = new Point3dCollection();
+                usePoly.IntersectWith(poly, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                 var intersectPt = usePoly.IntersectWithEx(poly);
                 foreach (Point3d pt in intersectPt)
                 {

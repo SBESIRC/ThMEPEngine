@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPHVAC.IndoorFanModels;
 using TianHua.Hvac.UI.IndoorFanModels;
@@ -290,6 +288,10 @@ namespace TianHua.Hvac.UI.ViewModels
         }
         private void SelectFanTypeChange() 
         {
+            if (!CanLayer) 
+            {
+                CorrectionFactor = 1;
+            }
             var fanWorkings = _indoorFanFile.FileFanDatas.Where(c => c.FanType == SelectFanType).ToList();
             SelectWorkingCodition = null;
             TabItemWorkingCoditions.Clear();

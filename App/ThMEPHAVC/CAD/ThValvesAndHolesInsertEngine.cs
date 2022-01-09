@@ -1,11 +1,11 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
 using Linq2Acad;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Model;
-using ThMEPEngineCore.Model.Hvac;
-using ThMEPHVAC.Duct;
 
 namespace ThMEPHVAC.CAD
 {
@@ -75,12 +75,11 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public static ObjectId InsertHose(ThIfcDuctHose hose,string modellayer)
+        public static ObjectId InsertHose(ThIfcDuctHose hose,string layerName)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var blockName = ThHvacCommon.HOSE_BLOCK_NAME;
-                var layerName = ThDuctUtils.HoseLayerName(modellayer);
                 Active.Database.ImportLayer(layerName);
                 Active.Database.ImportValve(blockName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
@@ -100,33 +99,16 @@ namespace ThMEPHVAC.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var layerName = holeModel.ValveBlockLayer;
-                var layerObj = acadDatabase.Layers.ElementOrDefault(layerName, true);
-                if (layerObj != null)
-                {
-                    EnableLayer(layerObj);
-                }
+                DbHelper.EnsureLayerOn(holeModel.ValveBlockLayer);
             }
         }
 
-        public static void EnableHoseLayer(ThIfcDuctHose hose, string modellayer)
+        public static void EnableHoseLayer(string layerName)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var layerName = ThDuctUtils.HoseLayerName(modellayer);
-                var layerObj = acadDatabase.Layers.ElementOrDefault(layerName, true);
-                if (layerObj != null)
-                {
-                    EnableLayer(layerObj);
-                }
+                DbHelper.EnsureLayerOn(layerName);
             }
-        }
-
-        private static void EnableLayer(LayerTableRecord ltr)
-        {
-            ltr.IsOff = false;
-            ltr.IsFrozen = false;
-            ltr.IsLocked = false;
         }
     }
 }

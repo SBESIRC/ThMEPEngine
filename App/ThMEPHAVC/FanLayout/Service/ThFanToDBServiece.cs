@@ -23,10 +23,7 @@ namespace ThMEPHVAC.FanLayout.Service
             attNameValues.Add("尺寸", airPortMark.AirPortMarkSize);
             attNameValues.Add("数量", airPortMark.AirPortMarkCount);
             attNameValues.Add("风量", airPortMark.AirPortMarkVolume);
-            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-DIMS-DUCT", "风口标注", airPortMark.AirPortMarkPosition, new Scale3d(airPortMark.FontHeight, airPortMark.FontHeight, airPortMark.FontHeight), 0, attNameValues);
-            var markLine = new Line(airPortMark.FanPosition, airPortMark.AirPortMarkPosition);
-            markLine.LayerId = DbHelper.GetLayerId("H-DIMS-DUCT");
-            acadDatabase.CurrentSpace.Add(markLine);
+            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("H-DIMS-DUCT", "AI-风口标注1", airPortMark.AirPortMarkPosition, new Scale3d(airPortMark.FontHeight, airPortMark.FontHeight, airPortMark.FontHeight), 0, attNameValues);
         }
         public void InsertAirPort(AcadDatabase acadDatabase,ThFanAirPortModel airPort)
         {

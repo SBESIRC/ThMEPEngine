@@ -36,18 +36,22 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
             datas.ForEach(o => Elements.Add(ThIfcLineBeam.Create(o.Data as ThIfcBeamAnnotation)));
+            Recognize(Elements, polygon);
+        }
+        public void Recognize(List<ThIfcBuildingElement> datas, Point3dCollection polygon)
+        {
             if (polygon.Count > 0)
             {
-                DBObjectCollection dbObjs = new DBObjectCollection();
-                Elements.ForEach(o => dbObjs.Add(o.Outline));
-                ThCADCoreNTSSpatialIndex beamSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                var dbObjs = new DBObjectCollection();
+                datas.ForEach(o => dbObjs.Add(o.Outline));
+                var beamSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 var pline = new Polyline()
                 {
                     Closed = true,
                 };
                 pline.CreatePolyline(polygon);
                 var filterObjs = beamSpatialIndex.SelectCrossingPolygon(pline);
-                Elements = Elements.Where(o => filterObjs.Contains(o.Outline)).ToList();
+                Elements = datas.Where(o => filterObjs.Contains(o.Outline)).ToList();
             }
         }
     }

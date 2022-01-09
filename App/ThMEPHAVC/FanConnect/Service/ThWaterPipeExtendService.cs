@@ -16,7 +16,7 @@ using ThMEPHVAC.FanConnect.Command;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
-    public class ThWaterPipeExtendServiece : ThPipeExtendBaseServiece
+    public class ThWaterPipeExtendService : ThPipeExtendBaseService
     {
         public ThWaterPipeConfigInfo ConfigInfo { set; get; }//界面输入信息
         public override void PipeExtend(ThFanTreeModel tree)

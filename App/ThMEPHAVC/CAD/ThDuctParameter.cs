@@ -39,7 +39,7 @@ namespace ThMEPHVAC.CAD
                     double height = Double.Parse(s[1]);
                     var r = width / height;
                     var t = Math.Abs(r - ratio);
-                    if (t < minRatio)
+                    if (t < minRatio && height <= 500)
                     {
                         minRatio = t;
                         selectSize = size;

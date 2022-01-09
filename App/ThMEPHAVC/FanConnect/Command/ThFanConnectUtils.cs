@@ -462,6 +462,15 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Point3d pt)
         {
+            foreach (var item in node.Children)
+            {
+                FindFcuNode(item, pt);
+            }
+            if(node.Children.Count != 0)
+            {
+                return;
+            }
+
             var box = node.Item.PLine.ExtendLine(10).Buffer(10);
 
             if (box.Contains(pt))
@@ -478,10 +487,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 return;
             }
 
-            foreach (var item in node.Children)
-            {
-                FindFcuNode(item, pt);
-            }
+
         }
         public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
         {

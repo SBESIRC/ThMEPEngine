@@ -10,7 +10,6 @@ using NFox.Cad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPWSS.SprinklerConnect.Model;
-using NetTopologySuite.Geometries;
 
 namespace ThMEPWSS.SprinklerConnect.Service
 {
@@ -264,6 +263,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 {
                     var connectionTempClone = connectionTemp.Select(row => row.Clone() as ThSprinklerRowConnect).ToList();
                     var overCountClone = false;
+                    var closeToStall = false;
                     var sprinklerSearchedClone = new List<Point3d>();
                     sprinklerSearched.ForEach(pt => sprinklerSearchedClone.Add(pt));
                     for (int cycle = 0; cycle < 2; cycle++)
@@ -294,7 +294,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     }
 
                                     var hasScatter = false;
-                                    firstPt.IsNoisePoint(sprinklerSearchedClone, realPts, ref hasScatter);
+                                    firstPt.IsNoisePoint(SprinklerSearched, sprinklerSearchedClone, realPts, ref hasScatter);
 
                                     var rowConnect = new ThSprinklerRowConnect();
                                     if (LaneLine.Count > 0 && edge.GetCloseLaneLine(LaneLine).Item1 < 5000.0)
@@ -322,7 +322,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                                     var edgeIndex = edgeNode.EdgeIndex;
                                     while (KeepSearching2(graph, net, edgeIndex, SprinklerParameter.SprinklerPt, realPts, out var newIdx,
-                                        ref hasScatter, realPtsSearchedTemp, sprinklerSearched, dirction, virtualPts, virtualPt, rowConnect,
+                                        ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, dirction, virtualPts, virtualPt, rowConnect,
                                         order))
                                     {
                                         order++;
@@ -349,6 +349,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     {
                                         virtualPtsSearched.Add(i);
                                         ThSprinklerConnectTools.HandleSecondRow(connectionTempClone, rowConnect, sprinklerSearchedClone, realPtsSearchedTemp);
+                                        if(rowConnect.Base.CloseToStall(LaneLine, DTTol))
+                                        {
+                                            closeToStall = true;
+                                        }
                                     }
 
                                     edgeNode = edgeNode.Next;
@@ -357,7 +361,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         }
                     }
 
-                    if (sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.1)
+                    if (sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.1
+                        || sprinklerSearchedClone.Count > sprinklerSearched.Count + pipeScattersTemp.Count && !closeToStall)
                     {
                         sprinklerSearched = sprinklerSearchedClone;
                         connectionTemp = connectionTempClone;
@@ -400,7 +405,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     }
 
                                     var hasScatter = false;
-                                    firstPt.IsNoisePoint(sprinklerSearchedClone, realPts, ref hasScatter);
+                                    firstPt.IsNoisePoint(SprinklerSearched,sprinklerSearchedClone, realPts, ref hasScatter);
 
                                     var rowConnect = new ThSprinklerRowConnect();
                                     if (LaneLine.Count > 0 && edge.GetCloseLaneLine(LaneLine).Item1 < 5000.0)
@@ -431,7 +436,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                                         var edgeIndex = edgeNode.EdgeIndex;
                                         while (KeepSearching2(graph, net, edgeIndex, SprinklerParameter.SprinklerPt, realPts, out var newIdx,
-                                            ref hasScatter, realPtsSearchedTemp, sprinklerSearched, dirction, virtualPts, virtualPt, rowConnect, order))
+                                            ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, dirction, virtualPts, virtualPt, rowConnect, order))
                                         {
                                             order++;
                                             edgeIndex = newIdx;
@@ -593,10 +598,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 for (int i = 0; i < ptList.Count; i++)
                 {
-                    if (i == 9)
-                    {
-
-                    }
                     if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                     {
                         continue;
@@ -624,9 +625,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             var realClosePt = rowConnection[n].Base.GetClosestPointTo(ptList[i], false);
                             var extendClosePt = rowConnection[n].Base.GetClosestPointTo(ptList[i], true);
                             var realLine = new Line(realClosePt, ptList[i]);
+                            var extendLine = new Line(realClosePt, extendClosePt);
 
                             // 判断线是否与管线相交
-                            if (realLine.Length < 1.0 || realLine.IsIntersectsWithPipe(SprinklerParameter.AllPipe))
+                            if (realLine.Length < 1.0 || realLine.IsIntersectsWithPipe(SprinklerParameter.AllPipe)
+                                || (extendLine.Length > 1.0 && extendLine.IsIntersectsWithPipe(SprinklerParameter.AllPipe)))
                             {
                                 continue;
                             }
@@ -1300,7 +1303,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <returns></returns>
         private bool KeepSearching2(ThSprinklerGraph graph, ThSprinklerNetGroup net, int edgeIndex, List<Point3d> sprinklers,
             List<Point3d> realPts, out int newIdx, ref bool hasScatter, List<Point3d> realPtsSearchedTemp, List<Point3d> sprinklerSearched,
-            Vector3d dirction, List<Point3d> virtualPts, Point3d virtualPt, ThSprinklerRowConnect rowConnect, int order)
+            List<Point3d> allSprinklerSearched, Vector3d dirction, List<Point3d> virtualPts, Point3d virtualPt,
+            ThSprinklerRowConnect rowConnect, int order)
         {
             if (edgeIndex == -1)
             {
@@ -1393,7 +1397,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             else
             {
-                ptNext.IsNoisePoint(sprinklerSearched, realPts, ref hasScatter);
+                ptNext.IsNoisePoint(allSprinklerSearched, sprinklerSearched, realPts, ref hasScatter);
 
                 //if (LaneLine.Count == 0 && order >= 8)
                 //{
@@ -1554,8 +1558,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             var removeLine = row.ConnectLines.Where(l => l.EndPoint == line.StartPoint).FirstOrDefault();
                             if (removeLine != null)
                             {
-                                row.ConnectLines.Remove(removeLine);
-                                row.ConnectLines.Add(new Line(removeLine.StartPoint, line.EndPoint));
+                                if(line.DistanceTo(removeLine.StartPoint,false) < 10.0)
+                                {
+                                    row.ConnectLines.Remove(removeLine);
+                                    row.ConnectLines.Add(new Line(removeLine.StartPoint, line.EndPoint));
+                                }
                             }
                             row.ConnectLines.Add(line);
                         }
@@ -1644,6 +1651,31 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 row.ConnectLines.Add(new Line(ptsTemp[ptsTemp.Count - 1].Item1, closePt));
                                 row.ConnectLines.Add(new Line(closePt, row.OrderDict[-2][j - 1]));
                                 row.ConnectLines.Add(new Line(closePt, row.OrderDict[-2][j]));
+                            }
+                            else if (ptsTemp[ptsTemp.Count - 1].Item2
+                                && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02
+                                && closePt.DistanceTo(ptsTemp[ptsTemp.Count - 2].Item1) < connTolerance / 2)
+                            {
+                                var scrCenter = scrLine.GetCenterPoint();
+                                var moveVector = scrCenter - ptsTemp[ptsTemp.Count - 2].Item1;
+                                var startPointTidal = line.StartPoint + moveVector;
+                                var endPointTidal = line.EndPoint + moveVector;
+
+                                row.ConnectLines.RemoveAll(l => l.StartPoint == ptsTemp[ptsTemp.Count - 2].Item1 && l.EndPoint == ptsTemp[ptsTemp.Count - 1].Item1);
+                                row.ConnectLines.Add(new Line(ptsTemp[ptsTemp.Count - 2].Item1, scrCenter));
+                                row.ConnectLines.Add(new Line(scrCenter, ptsTemp[ptsTemp.Count - 1].Item1));
+                                if(scrCenter.DistanceTo(startPointTidal) < scrCenter.DistanceTo(endPointTidal))
+                                {
+                                    row.ConnectLines.Add(new Line(scrCenter, startPointTidal));
+                                    row.ConnectLines.Add(new Line(startPointTidal, endPointTidal));
+                                }
+                                else
+                                {
+                                    row.ConnectLines.Add(new Line(scrCenter, endPointTidal));
+                                    row.ConnectLines.Add(new Line(endPointTidal, startPointTidal));
+                                }
+                                row.ConnectLines.Add(new Line(startPointTidal, line.StartPoint));
+                                row.ConnectLines.Add(new Line(endPointTidal, line.EndPoint));
                             }
                             else if (ptsTemp[ptsTemp.Count - 1].Item2
                                 && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02)

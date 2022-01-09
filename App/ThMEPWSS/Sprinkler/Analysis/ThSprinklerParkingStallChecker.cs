@@ -42,11 +42,19 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var frameEx = frame.Clone() as Entity;
             if(frame is Polyline polyline)
             {
-                frameEx = polyline.Buffer(3000.0).OfType<Polyline>().OrderByDescending(o => o.Area).First();
+                var frameExTemp = polyline.Buffer(3000.0).OfType<Polyline>().OrderByDescending(o => o.Area).FirstOrDefault();
+                if(frameExTemp != null)
+                {
+                    frameEx = frameExTemp;
+                }
             }
             else if(frame is MPolygon polygon)
             {
-                frameEx = polygon.Buffer(3000.0).OfType<MPolygon>().OrderByDescending(o => o.Area).First();
+                var frameExTemp = polygon.Buffer(3000.0).OfType<MPolygon>().OrderByDescending(o => o.Area).FirstOrDefault();
+                if(frameExTemp != null)
+                {
+                    frameEx = frameExTemp;
+                }
             }
             var results = new DBObjectCollection();
             var objs = sprinklers
@@ -64,7 +72,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var sprinklersInStall = sprinklerIndex.SelectCrossingPolygon(parkingStallEx);
                 if (sprinklersInStall.Count < 2)
                 {
-                    results.Add(o);
+                    results.Add(o.Clone() as Entity);
                 }
             });
             return results;

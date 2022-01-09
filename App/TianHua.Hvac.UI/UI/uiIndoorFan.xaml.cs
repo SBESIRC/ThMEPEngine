@@ -179,6 +179,26 @@ namespace TianHua.Hvac.UI.UI
             uiIndoorFanCheck fanCheck = new uiIndoorFanCheck();
             fanCheck.ShowDialog();
         }
+        private void btnChange_Click(object sender, RoutedEventArgs e)
+        {
+            //校核修改
+            try
+            {
+                FormUtil.DisableForm(gridForm);
+                //设置参数，发送命令
+                IndoorFanParameter.Instance.ChangeLayoutModel = indoorFanViewModel.FanLayoutModel;
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THSNJJHXG");
+                FocusToCAD();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "天华-错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                FormUtil.EnableForm(gridForm);
+            }
+        }
         private void btnMaterialList_Click(object sender, RoutedEventArgs e)
         {
             //材料表
@@ -217,6 +237,7 @@ namespace TianHua.Hvac.UI.UI
             var filePath = indoorFanViewModel.SelectInfoFanFile.FilePath;
             SaveCurrentDataToFile(filePath);
         }
+        
         private void SaveCurrentDataToFile(string savePath)
         {
             if (!CheckPathAndDelFile(savePath))
@@ -676,5 +697,7 @@ namespace TianHua.Hvac.UI.UI
             hotWorking = tempHot as T;
             return coolWorking;
         }
+
+       
     }
 }

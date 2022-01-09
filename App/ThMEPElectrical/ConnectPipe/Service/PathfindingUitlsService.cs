@@ -20,7 +20,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
             var checkPolys = endingPolys.SelectMany(x => x).ToList();
             double maxLength = double.PositiveInfinity;
             Polyline maxPoly = null;
-            List<Polyline> allPolys = new List<Polyline>(); ;
+            List<Polyline> allPolys = new List<Polyline>();
             foreach (var sPt in sPts)
             {
                 foreach (var polyPt in polyPts)
@@ -30,7 +30,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     connectPoly.AddVertexAt(0, sPt.ToPoint2D(), 0, 0, 0);
                     connectPoly.AddVertexAt(1, connectPt.ToPoint2D(), 0, 0, 0);
                     allPolys.Add(connectPoly);
-                    if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys))
+                    if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys, 10))
                     {
                         continue;
                     }

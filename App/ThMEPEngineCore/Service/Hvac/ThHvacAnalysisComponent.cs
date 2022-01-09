@@ -98,7 +98,7 @@ namespace ThMEPEngineCore.Service.Hvac
                 {
                     var g = db.Element<Group>(groupId);
                     var ids = g.GetAllEntityIds();
-                    if (ids.IsNull())
+                    if (ids.IsNull() || ids.Count() == 0)
                         return param;
                     var idxInfo = GetGroupStartIdxByType(param.type, ids.Count());
                     var centerLines = GetConnectorCenterLine(ids, idxInfo);

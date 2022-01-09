@@ -1,9 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
+using ThMEPHVAC.IndoorFanLayout.DataEngine;
 
 namespace ThMEPHVAC.IndoorFanLayout
 {
@@ -15,6 +17,54 @@ namespace ThMEPHVAC.IndoorFanLayout
         {
             var allPoints = GetPolylinePoints(polyline);
             return ThPointVectorUtil.PointsAverageValue(allPoints);
+        }
+        public static bool RoomLoadTableReadLoad(Table roomTable,bool isCold, out double roomArea, out double roomLoad)
+        {
+            var roomLoadTable = new LoadTableRead();
+            roomLoad = 0.0;
+            roomArea = 0.0;
+            bool haveValue = roomLoadTable.ReadRoomLoad(roomTable, out string roomAreaStr, out string roomLoadStr);
+            if (!haveValue)
+                return false;
+            double.TryParse(roomAreaStr, out roomArea);
+            var spliteLoads = roomLoadStr.Split('/').ToList();
+            if (spliteLoads.Count < 2)
+                return false;
+            var roomCoolLoadStr = spliteLoads[0];
+            var roomHotLoadStr = spliteLoads[1];
+            if (isCold)
+            {
+                if (string.IsNullOrEmpty(roomCoolLoadStr) || roomCoolLoadStr.Contains("-"))
+                    return false;
+                double.TryParse(roomCoolLoadStr, out roomLoad);
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(roomHotLoadStr) || roomHotLoadStr.Contains("-"))
+                    return false;
+                double.TryParse(roomHotLoadStr, out roomLoad);
+            }
+            return true;
+        }
+        public static string GetEffectiveBlkByName(BlockReference blockReference)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                if (blockReference.BlockTableRecord.IsNull)
+                {
+                    return string.Empty;
+                }
+                string name;
+                if (blockReference.DynamicBlockTableRecord.IsValid)
+                {
+                    name = db.Element<BlockTableRecord>(blockReference.DynamicBlockTableRecord).Name;
+                }
+                else
+                {
+                    name = blockReference.Name;
+                }
+                return name;
+            }
         }
         public static Polyline PointsAABBByVector(List<Point3d> points,Vector3d xVector,Vector3d normal) 
         {

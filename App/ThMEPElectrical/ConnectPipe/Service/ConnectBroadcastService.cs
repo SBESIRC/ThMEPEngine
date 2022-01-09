@@ -29,7 +29,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
             //将副车道和单个点主车道都连接上
             var allConnectPolys = ConnectOtherParkingLines(holeInfo, connectPolys, secondBroadcasts, thirdBroadcasts);
-
+             
             return allConnectPolys;
         }
 

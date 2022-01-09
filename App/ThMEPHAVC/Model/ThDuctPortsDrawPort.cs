@@ -57,7 +57,8 @@ namespace ThMEPHVAC.Model
             {
                 var attr = new Dictionary<string, string> { { "风量", portAirVolume.ToString() + "m3/h" } };
                 var obj = db.ModelSpace.ObjectId.InsertBlockReference(portLayer, portName, pos, new Scale3d(), angle, attr);
-                ThMEPHVACService.SetAttr(obj, attr, angle);
+                ThMEPHVACService.SetAttr(obj, attr, 0);
+                textAngle = angle <= (1.5 * Math.PI) ? angle - Math.PI : angle;
                 ThDuctPortsDrawService.SetPortDynBlockProperity(obj, portWidth, portHeight, portRange, textAngle, attr);
             }
         }

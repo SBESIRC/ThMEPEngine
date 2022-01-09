@@ -15,7 +15,7 @@ namespace ThMEPWSS
         {
             using (var cmd = new ThFireHydrantCmd(null))
             {
-                cmd.Execute();
+                cmd.Test();
             }
         }
     }

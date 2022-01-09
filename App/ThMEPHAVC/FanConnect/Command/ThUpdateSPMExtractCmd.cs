@@ -124,13 +124,13 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                 //提取水管路由
-                var pipes = ThEquipElementExtractServiece.GetFanPipes(startPt);
+                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                 foreach(var p in pipes)
                 {
                     p.TransformBy(mt);
                 }
                 //提取风机
-                var fcus = ThEquipElementExtractServiece.GetFCUModels();
+                var fcus = ThEquipElementExtractService.GetFCUModels();
                 //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                 ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
                 var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
@@ -162,16 +162,16 @@ namespace ThMEPHVAC.FanConnect.Command
                     ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
                 }
                 //提取各种线
-                var csPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-CS");
-                var crPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-CR");
-                var hsPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-HS");
-                var hrPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-HR");
-                var cPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-C");
-                var chsPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-CHS");
-                var chrPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-CHR");
-                var rPipes = ThEquipElementExtractServiece.GetWaterSpm("H-PIPE-R");
+                var csPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CS");
+                var crPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CR");
+                var hsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HS");
+                var hrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HR");
+                var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
+                var chsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHS");
+                var chrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHR");
+                var rPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-R");
                 //提取结点标记
-                var dims = ThEquipElementExtractServiece.GetPipeDims("H-PIPE-APPE");
+                var dims = ThEquipElementExtractService.GetPipeDims("H-PIPE-APPE");
                 RemoveSPMLine(treeModel.RootNode, ref dims, ref csPipes);
                 RemoveSPMLine(treeModel.RootNode, ref dims, ref crPipes);
                 RemoveSPMLine(treeModel.RootNode, ref dims, ref hsPipes);
@@ -182,7 +182,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 RemoveSPMLine(treeModel.RootNode, ref dims, ref cPipes);
 
                 //扩展管路
-                ThWaterPipeExtendServiece pipeExtendServiece = new ThWaterPipeExtendServiece();
+                ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                 pipeExtendServiece.ConfigInfo = ConfigInfo;
                 pipeExtendServiece.PipeExtend(treeModel);
 
@@ -192,9 +192,9 @@ namespace ThMEPHVAC.FanConnect.Command
                 {
                     return;
                 }
-                var markes = ThEquipElementExtractServiece.GetPipeMarkes("H-PIPE-DIMS");
+                var markes = ThEquipElementExtractService.GetPipeMarkes("H-PIPE-DIMS");
                 //标记流量
-                ThWaterPipeMarkServiece pipeMarkServiece = new ThWaterPipeMarkServiece();
+                ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                 pipeMarkServiece.ConfigInfo = ConfigInfo;
                 pipeMarkServiece.UpdateMark(pointTreeModel, markes);
             }

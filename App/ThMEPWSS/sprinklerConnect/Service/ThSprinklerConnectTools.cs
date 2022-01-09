@@ -42,15 +42,17 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <returns></returns>
         public static bool IsIntersectsWithPipe(this Line line, List<Line> lineList)
         {
-            var lineExtend = line.ExtendLine(1.0);
-            for (int i = 0; i < lineList.Count; i++)
+            var lineExtendFrame = line.ExtendLine(1.0).Buffer(10.0);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lineList.ToCollection());
+            var filter = spatialIndex.SelectCrossingPolygon(lineExtendFrame);
+            if(filter.Count > 0)
             {
-                if (lineList[i].LineIsIntersection(lineExtend))
-                {
-                    return true;
-                }
+                return true;
             }
-            return false;
+            else
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -147,7 +149,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             {
                 return new Vector3d();
             }
-            var orderList = new List<Tuple<double, double, Vector3d>>();
+            var orderList = new List<Tuple<double, double,int, Vector3d>>();
             for (int i = 0; i < trim.Count; i++)
             {
                 var angle = trim[i].Angle > Math.PI ? trim[i].Angle - Math.PI : trim[i].Angle;
@@ -158,8 +160,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 {
                     if (Math.Abs(angle - orderList[j].Item1) < Math.PI / 180.0)
                     {
-                        var lengthTotal = orderList[j].Item2 + length;
-                        var tuple = new Tuple<double, double, Vector3d>(orderList[j].Item1, lengthTotal, orderList[j].Item3);
+                        var count = orderList[j].Item3 + 1;
+                        var lengthTotal = orderList[j].Item2 + length / count;
+                        var tuple = Tuple.Create(orderList[j].Item1, lengthTotal, count, orderList[j].Item4);
                         orderList[j] = tuple;
                         break;
                     }
@@ -167,12 +170,12 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 if (j == orderList.Count)
                 {
                     var dirction = trim[i].LineDirection();
-                    var tuple = new Tuple<double, double, Vector3d>(angle, length, dirction);
+                    var tuple = Tuple.Create(angle, length,1, dirction);
                     orderList.Add(tuple);
                 }
             }
             orderList = orderList.OrderByDescending(o => o.Item2).ToList();
-            return orderList.First().Item3;
+            return orderList.First().Item4;
         }
 
         public static Polyline GetConvexHull(this List<Point3d> pts)
@@ -369,9 +372,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <summary>
         /// 判断散点是否为噪音
         /// </summary>
-        public static void IsNoisePoint(this Point3d point, List<Point3d> sprinklerSearchedClone, List<Point3d> realPts, ref bool hasScatter)
+        public static void IsNoisePoint(this Point3d point, List<Point3d> sprinklerSearched, List<Point3d> sprinklerSearchedClone,
+            List<Point3d> realPts, ref bool hasScatter)
         {
-            var scatterList = realPts.Where(pt => !sprinklerSearchedClone.Contains(pt)).ToList();
+            var scatterList = realPts
+                .Where(pt => !sprinklerSearchedClone.Contains(pt) && !sprinklerSearched.Contains(pt)).ToList();
             if (!sprinklerSearchedClone.Contains(point))
             {
                 var square = CreateSquare(point, 2400.0 * 1.5);
@@ -418,14 +423,14 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     }
                     var k = 1;
                     var orderDict = filterRow.OrderDict.OrderChange(true);
-                    for (;k< orderDict.Count - 1;k++)
+                    for (; k < orderDict.Count - 1; k++)
                     {
                         if (frame.Contains(orderDict[k][0]))
                         {
                             break;
                         }
                     }
-                    if(k > i)
+                    if (k > i)
                     {
                         i = k;
                         filterRow.OrderDict = orderDict;
@@ -933,6 +938,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 return false;
             }
 
+            ptList.ChangeListOrder(rowConn.EndPoint);
+
             for (int num = 2; ; num++)
             {
                 if (!rowConn.OrderDict.ContainsKey(-num))
@@ -1029,6 +1036,33 @@ namespace ThMEPWSS.SprinklerConnect.Service
             var kdTree = new ThCADCoreNTSKdTree(10.0);
             list.ForEach(o => kdTree.InsertPoint(o));
             return kdTree.SelectAll().OfType<Point3d>().ToList();
+        }
+
+        private static void ChangeListOrder(this List<Point3d> list, Point3d targetPt)
+        {
+            if (list.Count > 2 && list[0].DistanceTo(targetPt) > list[list.Count - 1].DistanceTo(targetPt))
+            {
+                list.Reverse();
+            }
+        }
+
+        public static bool CloseToStall(this Line line, List<Line> laneLine, double dtTol)
+        {
+            if (line.Length > 10.0)
+            {
+                var frame = line.Buffer(dtTol);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(laneLine.ToCollection());
+                var filter = spatialIndex.SelectCrossingPolygon(frame);
+                if (filter.Count > 0)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }
