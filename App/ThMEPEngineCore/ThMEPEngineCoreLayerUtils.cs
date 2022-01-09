@@ -1,5 +1,6 @@
 ﻿using Linq2Acad;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore
@@ -117,9 +118,16 @@ namespace ThMEPEngineCore
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
+                // 创建图层
                 var layerId = database.AddLayer(name);
-                OpenAILayer(database, name);                
+
+                // 设置图层颜色
                 database.SetLayerColor(name, colorIndex);
+
+                // 设置图层状态
+                database.OpenAILayer(name);
+
+                // 返回图层
                 return layerId;
             }
         }
@@ -134,11 +142,7 @@ namespace ThMEPEngineCore
         {
             using (var acadDb = AcadDatabase.Use(database))
             {
-                acadDb.Database.UnHidden(layer);
-                acadDb.Database.UnOffLayer(layer);
-                acadDb.Database.UnLockLayer(layer);
-                acadDb.Database.UnPrintLayer(layer);
-                acadDb.Database.UnFrozenLayer(layer);
+                DbHelper.EnsureLayerOn(layer);
             }
         }
     }

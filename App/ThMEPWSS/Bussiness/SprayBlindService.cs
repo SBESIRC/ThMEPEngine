@@ -1,11 +1,11 @@
 ﻿using System;
 using NFox.Cad;
-using DotNetARX;
 using Linq2Acad;
 using System.Data;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPWSS.Model;
 using ThMEPWSS.Utils;
 using ThMEPWSS.Service;
@@ -126,37 +126,13 @@ namespace ThMEPWSS.Bussiness
         {
             using (var db = AcadDatabase.Active())
             {
-                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Blind_Zone_LayerName);
-                LayerTools.SetLayerColor(db.Database, ThWSSCommon.Blind_Zone_LayerName, 1);
-                db.Database.UnFrozenLayer(ThWSSCommon.Blind_Zone_LayerName);
-                db.Database.UnLockLayer(ThWSSCommon.Blind_Zone_LayerName);
-                db.Database.UnOffLayer(ThWSSCommon.Blind_Zone_LayerName);
-                db.Database.UnPrintLayer(ThWSSCommon.Blind_Zone_LayerName);
-
+                db.Database.CreateAILayer(ThWSSCommon.Blind_Zone_LayerName, 1);
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
-                    area.Layer = ThWSSCommon.Blind_Zone_LayerName;
-                    area.ColorIndex = 256;
                     area.ConstantWidth = 50;
+                    area.ColorIndex = (int)ColorIndex.BYLAYER;
+                    area.Layer = ThWSSCommon.Blind_Zone_LayerName;
                     db.ModelSpace.Add(area);
-
-                    //// 外圈轮廓
-                    //ObjectIdCollection objIdColl = new ObjectIdCollection();
-                    //objIdColl.Add(area.Id);
-
-                    //// 填充面积框线
-                    //Hatch hatch = new Hatch();
-                    //hatch.LayerId = layerId;
-                    //db.ModelSpace.Add(hatch);
-                    //hatch.ColorIndex = 10;
-                    //hatch.SetHatchPattern(HatchPatternType.PreDefined, "Solid");
-                    //hatch.Associative = true;
-                    //hatch.AppendLoop(HatchLoopTypes.Default, objIdColl);
-                    //// 重新生成Hatch纹理
-                    //hatch.EvaluateHatch(true);
-
-                    //ObjectIdList ids = new ObjectIdList(new ObjectId[2] { area.Id, hatch.Id });
-                    //db.Database.CreateGroup(area.Id.ToString(), ids);
                 }
             }
         }
