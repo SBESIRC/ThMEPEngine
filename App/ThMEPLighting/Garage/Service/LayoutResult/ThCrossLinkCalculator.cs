@@ -31,6 +31,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<Tuple<Point3d, Dictionary<Line, Vector3d>>> CenterGroupLines { get; set; }
         protected ThQueryLineService CenterQuery { get; set; }
         protected ThQueryLineService EdgeQuery { get; set; }
+        protected ThCrossLinkCalculator()
+        {
+        }
         public ThCrossLinkCalculator(List<ThLightEdge> edges,
             Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts)
         {
@@ -47,11 +50,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CenterGroupLines = centerGroupLines;
             CenterQuery = ThQueryLineService.Create(CenterSideDicts.Select(o => o.Key).ToList());
         }
-
+        protected List<Line> CenterLines
+        {
+            get
+            {
+                return CenterSideDicts.Select(o => o.Key).ToList();
+            }
+        }
         public List<List<Line>> LinkCableTrayCross()
         {
             var results = new List<List<Line>>();
-            var crosses = GetCrosses();
+            var crosses = CenterLines.GetCrosses();
             crosses.ForEach(c =>
             {
                 var res = Sort(c);
@@ -73,8 +82,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                         {
                             continue;
                         }
-                        var currentArea = CreateParallelogram(current.Item1, current.Item2);
-                        var currentSides = GroupSides(currentArea, sides); // 分组
+                        var currentArea = current.Item1.CreateParallelogram(current.Item2);
+                        var currentSides = currentArea.GroupSides(sides); // 分组
                         var lineRoadService = new ThLineRoadQueryService(currentSides);
                         var cornerPts = lineRoadService.GetCornerPoints();
                         if (cornerPts.Count > 0)
@@ -93,12 +102,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public List<List<Line>> LinkCableTrayTType()
         {
             var results = new List<List<Line>>();
-            var threeways = GetThreeWays();
+            var threeways = CenterLines.GetThreeWays();
             threeways.ForEach(o =>
             {
                 var pairs = GetLinePairs(o);
-                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1, k.Item2)).First();
-                if (IsMainBranch(mainPair.Item1, mainPair.Item2))
+                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
                     var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
                     results.Add(LinkTType(mainPair.Item1, mainPair.Item2, branch));
@@ -110,7 +119,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public List<ThLightEdge> BuildCrossLinkEdges()
         {
             // 把十字型单边同为1 or 2号线 连起来
-            var crosses = GetCrosses();
+            var crosses = CenterLines.GetCrosses();
             return crosses
                 .Where(o => o.Count == 4)
                 .SelectMany(c => BuildCrossLinkEdges(c))
@@ -121,12 +130,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             // 把T字型单边同为1 or 2号线 连起来
             var results = new List<ThLightEdge>();
-            var threeways = GetThreeWays();
+            var threeways = CenterLines.GetThreeWays();
             threeways.Where(o=>o.Count==3).ForEach(o =>
             {
                 var pairs = GetLinePairs(o);
-                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1, k.Item2)).First();
-                if (IsMainBranch(mainPair.Item1, mainPair.Item2))
+                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
                     var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
                     results.AddRange(BuildLinkEges(mainPair.Item1, mainPair.Item2, branch));
@@ -170,8 +179,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var secondEdge = MergeNeibour(second, neibourDict);
             var branchEdge = MergeNeibour(branch, neibourDict);
 
-            var firstArea = CreateParallelogram(firstEdge, branchEdge);
-            var secondArea = CreateParallelogram(secondEdge, branchEdge);
+            var firstArea = firstEdge.CreateParallelogram(branchEdge);
+            var secondArea = secondEdge.CreateParallelogram(branchEdge);
 
             var firstEdges = GroupEdges(firstArea, edges); // 分组
             var secondEdges = GroupEdges(secondArea, edges);// 分组
@@ -206,8 +215,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private List<Point3d> GetCornerPts(Line adjacentA, Line adjacentB, List<Line> sides)
         {
-            var area = CreateParallelogram(adjacentA, adjacentB);
-            var groupSides = GroupSides(area, sides); // 分组
+            var area = adjacentA.CreateParallelogram(adjacentB);
+            var groupSides = area.GroupSides(sides); // 分组
             var lineRoadService = new ThLineRoadQueryService(groupSides);
             return lineRoadService.GetCornerPoints();
         }
@@ -226,22 +235,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
-        protected bool IsMainBranch(Line first, Line second)
-        {
-            return ThGarageUtils.IsLessThan45Degree(
-                first.StartPoint, first.EndPoint,
-                second.StartPoint, second.EndPoint);
-        }
-        protected List<List<Line>> GetCrosses()
-        {
-            var centerSidesQuery = new ThLineRoadQueryService(CenterSideDicts.Select(o => o.Key).ToList());
-            return centerSidesQuery.GetCross();
-        }
-        protected List<List<Line>> GetThreeWays()
-        {
-            var centerSidesQuery = new ThLineRoadQueryService(CenterSideDicts.Select(o => o.Key).ToList());
-            return centerSidesQuery.GetThreeWay();
-        }
         protected List<List<Line>> FilterByCenterWithoutSides(List<List<Line>> threeWays)
         {
             var centers = FindCentersWithoutSides();
@@ -335,12 +328,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
-        protected double GetLineOuterAngle(Line first, Line second)
-        {
-            return ThGarageUtils.CalculateTwoLineOuterAngle(
-                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint);
-        }
-
         private List<Line> Link(List<Line> crosses, List<Point3d> pts)
         {
             var results = new List<Line>();
@@ -355,7 +342,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     var mainBranch = FindMainBranch(lineDirs.Select(o => Tuple.Create(o.Item1, o.Item2.Value)).ToList());
                     if (mainBranch != null)
                     {
-                        var frame = CreatePolyline(pts);
+                        var frame = pts.CreatePolyline();
                         return DrawCrossLinkLines(mainBranch, frame);
                     }
                 }
@@ -401,13 +388,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
-        private Polyline CreatePolyline(List<Point3d> pts, bool isClosed = true)
-        {
-            var newPts = new Point3dCollection();
-            pts.ForEach(p => newPts.Add(p));
-            return newPts.CreatePolyline(isClosed);
-        }
-
         private Tuple<Line, Vector3d, Line, Vector3d> FindMainBranch(List<Tuple<Line, Vector3d>> lineDirs)
         {
             for (int i = 0; i < lineDirs.Count - 1; i++)
@@ -450,28 +430,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return current;
         }
-        /// <summary>
-        /// 创建平行四边形
-        /// </summary>
-        /// <param name="a">邻边a</param>
-        /// <param name="b">邻边b</param>
-        /// <returns></returns>
-        protected Polyline CreateParallelogram(Line a, Line b)
-        {
-            var pts = a.IntersectWithEx(b, Intersect.ExtendBoth);
-            if (pts.Count == 0)
-            {
-                return new Polyline();
-            }
-            var first = pts[0];
-            var second = first.GetNextLinkPt(a.StartPoint, a.EndPoint);
-            var four = first.GetNextLinkPt(b.StartPoint, b.EndPoint);
-            var vec1 = first.GetVectorTo(second);
-            var vec2 = first.GetVectorTo(four);
-            var third = first + vec1 + vec2;
-            var points = new Point3dCollection() { first, second, third, four };
-            return points.CreatePolyline();
-        }
+        
         protected List<Line> Sort(List<Line> centers)
         {
             // 把十字路口车道线按照逆时针排序
@@ -565,7 +524,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var neibours = FindNeibours(center, port);
             var tolerance = ThGarageLightCommon.RepeatedPointDistance;
             neibours = neibours
-                .Where(o => IsCollinear(center, o, tolerance))
+                .Where(o => center.IsCollinear(o, tolerance))
                 .OrderBy(o => center.CalculateTwoLineOuterAngle(o))
                 .ToList();
             if(neibours.Count>0)
@@ -586,13 +545,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
-        private bool IsCollinear(Line first,Line second,double tolerance)
-        {
-            return ThGeometryTool.IsCollinearEx(
-                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint, tolerance);
-        }
-
-
         protected List<Tuple<Line, Line>> CreatePartition(List<Line> lines)
         {
             var partitions = new List<Tuple<Line, Line>>();
@@ -609,27 +561,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return partitions;
         }
 
-        protected List<Tuple<Line, Line>> CreateAdjacentPartition(List<Line> lines)
-        {
-            var partitions = new List<Tuple<Line, Line>>();
-            int count = lines.Count;
-            for (int i = 0; i < count; i++)
-            {
-                var adjacentEdgeA = lines[i];
-                var adjacentEdgeB = lines[(i + 1) % count];
-                if (!adjacentEdgeA.IsParallelToEx(adjacentEdgeB))
-                {
-                    partitions.Add(Tuple.Create(adjacentEdgeA, adjacentEdgeB));
-                }
-            }
-            return partitions;
-        }
-        protected virtual List<Line> GroupSides(Polyline partition, List<Line> sides)
-        {
-            return sides
-                .Where(e => partition.EntityContains(e.StartPoint) || partition.EntityContains(e.EndPoint))
-                .ToList();
-        }
         protected List<Tuple<Line, Line>> GetLinePairs(List<Line> lines)
         {
             var results = new List<Tuple<Line, Line>>();
@@ -670,26 +601,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-        private Point3d GetMidPt(Line line)
-        {
-            return line.StartPoint.GetMidPt(line.EndPoint);
-        }
-
+        
         protected Point3d GetSameDirectionClosestPt(List<Line> edges, Point3d sp, Point3d ep)
         {
             // 根据sp到ep的方向
             var vec = sp.GetVectorTo(ep);
             return edges
-                .SelectMany(o => GetPoints(o))
+                .SelectMany(o => o.GetPoints())
                 .Where(o => sp.GetVectorTo(o)
                 .IsSameDirection(vec))
                 .OrderBy(o => o.DistanceTo(sp))
                 .FirstOrDefault();
-        }
-
-        private List<Point3d> GetPoints(Line line)
-        {
-            return new List<Point3d> { line.StartPoint, line.EndPoint };
         }
 
         #region --------- 对边的操作 ----------
@@ -725,7 +647,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             // 根据sp到ep的方向
             return edges
-                .OrderBy(e => GetMidPt(e.Edge).GetProjectPtOnLine(sp, ep).DistanceTo(sp))
+                .OrderBy(e => e.Edge.GetMidPt().GetProjectPtOnLine(sp, ep).DistanceTo(sp))
                 .ToList();
         }
         protected ThLightEdge CreateEdge(Point3d sp, Point3d ep)

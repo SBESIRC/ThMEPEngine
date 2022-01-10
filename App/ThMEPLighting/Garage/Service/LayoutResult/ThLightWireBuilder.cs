@@ -223,10 +223,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return linkService.FindLightNodeLinkOnSamePath();
         }
 
-        protected List<ThLightNodeLink> FindLightNodeLinkOnBranchCorner(List<ThLinkPath> links)
+        protected List<ThLightNodeLink> FindLightNodeLinkOnBranchCorner(ThLightGraphService graph)
         {
-            var linkService = new ThLightNodeSameLinkService(links);
-            return linkService.FindLightNodeLinkOnBranchCorner();
+            var linkService = new ThLightNodeBranchLinkService(graph)
+            {
+                NumberLoop = ArrangeParameter.GetLoopNumber(graph.CalculateLightNumber()),
+                DefaultStartNumber = DefaultNumbers.Count > 0 ? DefaultNumbers.First() : "",
+            };
+            return linkService.Link();
         }
 
         protected List<ThLightEdge> AddLinkCrossEdges()

@@ -24,7 +24,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public List<ThLightNodeLink> LinkOppositeCross()
         {
             var results = new List<ThLightNodeLink>();
-            var crosses = GetCrosses();
+            var crosses = CenterLines.GetCrosses();
             crosses.Where(o => o.Count == 4).ForEach(c => results.AddRange(LinkOppositeCross(c)));
             return results;
         }
@@ -38,13 +38,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                (main1)     (main2)
             */
             var results = new List<ThLightNodeLink>();
-            var threeWays = GetThreeWays();
+            var threeWays = CenterLines.GetThreeWays();
             threeWays = FilterByCenterWithoutSides(threeWays);
             threeWays.ForEach(o =>
             {
                 var pairs = GetLinePairs(o);
-                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1, k.Item2)).First();
-                if (IsMainBranch(mainPair.Item1, mainPair.Item2))
+                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
                     var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
                     var oppositeBranch = GetOpposite(mainPair.Item1, branch);
@@ -57,19 +57,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public List<ThLightNodeLink> LinkCrossCorner()
         {
             var results = new List<ThLightNodeLink>();
-            var crosses = GetCrosses();
+            var crosses = CenterLines.GetCrosses();
             crosses.Where(o => o.Count == 4).ForEach(c => results.AddRange(LinkCrossCorner(c)));
             return results;
         }
         public List<ThLightNodeLink> LinkThreeWayCorner()
         {
             var results = new List<ThLightNodeLink>();
-            var threeWays = GetThreeWays();
+            var threeWays = CenterLines.GetThreeWays();
             threeWays.Where(o=>o.Count==3).ForEach(o =>
             {
                 var pairs = GetLinePairs(o);
-                var mainPair = pairs.OrderBy(k => GetLineOuterAngle(k.Item1, k.Item2)).First();
-                if (IsMainBranch(mainPair.Item1, mainPair.Item2))
+                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
                     var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
                     results.AddRange(LinkThreewayCorner(mainPair.Item1, mainPair.Item2, branch));
@@ -158,7 +158,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var adjacentA = MergeNeibour(line1, neibourDict);
             var adjacentB = MergeNeibour(line2, neibourDict);
-            return CreateParallelogram(adjacentA, adjacentB);
+            return adjacentA.CreateParallelogram(adjacentB);
         }
 
         private List<ThLightNodeLink> LinkCrossCorner(List<Line> cross)
@@ -230,7 +230,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 把有Sides的中心线与其相邻的线合并
             var firstExtent = MergeNeibour(first, neibourDict);
             var secondExtent = MergeNeibour(second, neibourDict);
-            var cornerArea = CreateParallelogram(firstExtent, secondExtent);
+            var cornerArea = firstExtent.CreateParallelogram(secondExtent);
             
             // 获取与first、second平行的边
             var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
