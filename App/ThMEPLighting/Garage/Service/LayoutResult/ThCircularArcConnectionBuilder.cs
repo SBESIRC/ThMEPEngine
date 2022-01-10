@@ -129,18 +129,33 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             jumpWireFactory.Build();
         }
 
+
         private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
         {
-            var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+            // 用于单排布置
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
             {
                 CenterSideDicts = this.CenterSideDicts,
                 DirectionConfig = this.DirectionConfig,
                 LampLength = this.ArrangeParameter.LampLength,
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
-            jumpWireFactory.BuildCrossLinks();
+            jumpWireFactory.BuildStraitLinks();
         }
+
+        //private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
+        //{
+        //    var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
+        //    {
+        //        CenterSideDicts = this.CenterSideDicts,
+        //        DirectionConfig = this.DirectionConfig,
+        //        LampLength = this.ArrangeParameter.LampLength,
+        //        LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+        //        Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
+        //    };
+        //    jumpWireFactory.BuildCrossLinks();
+        //}
 
         public override void Reset()
         {
