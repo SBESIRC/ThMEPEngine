@@ -373,10 +373,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// 判断散点是否为噪音
         /// </summary>
         public static void IsNoisePoint(this Point3d point, List<Point3d> sprinklerSearched, List<Point3d> sprinklerSearchedClone,
-            List<Point3d> realPts, ref bool hasScatter)
+            List<Point3d> realPts, List<Point3d> everScatter, ref bool hasScatter)
         {
             var scatterList = realPts
                 .Where(pt => !sprinklerSearchedClone.Contains(pt) && !sprinklerSearched.Contains(pt)).ToList();
+            scatterList.AddRange(everScatter);
             if (!sprinklerSearchedClone.Contains(point))
             {
                 var square = CreateSquare(point, 2400.0 * 1.5);
@@ -391,6 +392,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 if (scatterCount > 1)
                 {
                     hasScatter = true;
+                    everScatter.Add(point);
                 }
             }
         }
