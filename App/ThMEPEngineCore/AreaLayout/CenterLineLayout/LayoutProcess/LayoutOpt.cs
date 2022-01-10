@@ -77,11 +77,20 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return ans;
             }
 
-            var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
-            movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
+            ////将点移到中点附近。会变大很多盲区暂时去掉。
+            //var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
+            //movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
 
-            List<Point3d> fourPoints = FourStep(movePtToLayoutCt); //4、移点：修补需求：将一些点更加靠近中心线
+            List<Point3d> fourPoints = FourStep(sndHalfPoints); //4、移点：修补需求：将一些点更加靠近中心线
             fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6ptMoveToCL", 141, 25, 30));
+
+            ////再次检查大盲区
+            //List<Point3d> ptCLBigBlind = SndHalfStep(fourPoints); //2.5、加点：针对大盲区
+            //ptCLBigBlind.ForEach(x => DrawUtils.ShowGeometry(x, "l6.5ptCoverBigBlind", 212, 25, 30));
+
+            //List<Point3d> ptMorePts = FourStep(ptCLBigBlind); //4、移点：修补需求：将一些点更加靠近中心线
+            //fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6.6ptMoveToCL", 141, 25, 30));
+
 
             List<Point3d> thdPoints = ThdStep(fourPoints); //5、删点
             thdPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l7ptDelet", 41, 25, 30));
@@ -128,9 +137,14 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 
         //}
 
+        /// <summary>
+        /// 获取可布置点位
+        /// 如果以较大距离则比较点位比例和面积比例，差距太大（rateThreshold)则用更小的离散距离获取可布置点位。避免过细的走廊因为距离太大而没有初始点位。
+        /// </summary>
         private void GetPosiblePositionsNew()
         {
             var rateThreshold = 0.04; //试了几个奇怪的带洞区域或者很窄区域的经验值
+            var rectangleThreshold = 0.8; //obb和实际面积比值界定。用来简单判断是不是像矩形
             List<Point3d> ans = new List<Point3d>();
 
             for (int i = 0; i < LayoutWithHole.Count; i++)
@@ -141,25 +155,26 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 if (layout.Area > Radius * Radius * 0.2)
                 //if(disX > radius || disY > radius)
                 {
-                    var obb = (layout.Shell()).CalObb();
-                    areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 400, out var ptsInOBB);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+                    areaPoints = PointsDealer.PointsInUncoverArea(layout, 400, out var ptsInOBB);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
 
+                    var obb = (layout.Shell()).CalObb();
                     double rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
                     var rateArea = layout.Area / obb.Area;
                     var pt0 = obb.GetPoint3dAt(0);
                     DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
                     DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, layout.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
-                    ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
+                    //ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
                     
-                    if (Math.Abs(rate - rateArea) > rateThreshold)
+                    //比值差异过大且越不像四边形
+                    if (Math.Abs(rate - rateArea) > rateThreshold && rateArea < rectangleThreshold)
                     {
-                        areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 100, out ptsInOBB);
+                        areaPoints = PointsDealer.PointsInUncoverArea(layout, 100, out ptsInOBB);
                     }
                 }
                 else
                 {
                     //areaPoints = PointsInArea(poly, radius);
-                    areaPoints = PointsDealer.PointsInUncoverAreaNew(layout, 100, out var ptsInOBB);
+                    areaPoints = PointsDealer.PointsInUncoverArea(layout, 100, out var ptsInOBB);
                 }
 
                 ans.AddRange(areaPoints);
@@ -357,12 +372,29 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
             List<Point3d> pointsInUncoverAreas = new List<Point3d>();
             foreach (Entity obj in unCoverRegion.ToDbCollection())
             {
-                if (obj.GetArea() > 500000)
+                MPolygon objMpoly = null;
+                if (obj is Polyline pl)
                 {
-                    DrawUtils.ShowGeometry(obj, "l4BigBlind", 3);
-                    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(obj, 400);//-------------------
-                    pointsInUncoverAreas.AddRange(tmpPoints);
+                    objMpoly = ThMPolygonTool.CreateMPolygon(pl);
                 }
+                if (obj is MPolygon mpl)
+                {
+                    objMpoly = mpl;
+                }
+                DrawUtils.ShowGeometry(objMpoly, "l4BlindTestLarge", 3);
+                if (objMpoly != null && objMpoly.Area > 500000)
+                {
+                    DrawUtils.ShowGeometry(objMpoly, "l4BigBlind", 3);
+                    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(objMpoly, 400, out var ptInObb);//-------------------
+                    pointsInUncoverAreas.AddRange(tmpPoints);
+
+                }
+                //if (obj.GetArea() > 500000)
+                //{
+                //    DrawUtils.ShowGeometry(obj, "l4BigBlind", 3);
+                //    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverAreaNew(obj, 400,out var ptInObb);//-------------------
+                //    pointsInUncoverAreas.AddRange(tmpPoints);
+                //}
             }
             //2、找到以上获得的点（radius或者radius / 2）最近的可布置点
             foreach (Point3d pt in pointsInUncoverAreas)

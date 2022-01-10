@@ -22,10 +22,11 @@ namespace ThMEPElectrical.AFAS.Service
 {
     internal class ThHandlePlaceConverage
     {
-        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, bool referBeam,double wallThickness)
+        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, bool referBeam, double wallThickness)
         {
             var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
             var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
+            var archiWallExtract = extractors.Where(x => x is ThAFASArchitectureWallExtractor).FirstOrDefault() as ThAFASArchitectureWallExtractor;
             var columnExtract = extractors.Where(x => x is ThAFASColumnExtractor).FirstOrDefault() as ThAFASColumnExtractor;
             var beamExtract = extractors.Where(x => x is ThAFASBeamExtractor).FirstOrDefault() as ThAFASBeamExtractor;
             var holeExtract = extractors.Where(x => x is ThAFASHoleExtractor).FirstOrDefault() as ThAFASHoleExtractor;
@@ -41,6 +42,7 @@ namespace ThMEPElectrical.AFAS.Service
                 Transformer = transformer,
                 WallThickness = wallThickness,
             };
+            placeConverageExtract.Walls.AddRange(archiWallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList());
 
             placeConverageExtract.Extract(null, new Point3dCollection());
 

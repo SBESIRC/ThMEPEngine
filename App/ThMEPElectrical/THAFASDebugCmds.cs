@@ -443,7 +443,48 @@ namespace ThMEPElectrical
             }
         }
 
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestIntPoint", CommandFlags.Modal)]
+        public void THTestIntPoint()
+        {
+            var rateThreshold = 0.035;
+            var rectangleThreshold = 0.80;
+            var Radius = 3000;
+            var frame = ThAFASSelectFrameUtil.GetMPolygon();
 
+            var dis = 400;
+            var areaPoints = new List<Point3d>();
 
+            if (frame.Area > Radius * Radius * 0.2)
+            {
+                areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 400, out var ptsInOBB);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+
+                var obb = (frame.Shell()).CalObb();
+                double rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
+                var rateArea = frame.Area / obb.Area;
+                var pt0 = obb.GetPoint3dAt(0);
+                DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, frame.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
+                areaPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptLarge", colorIndex: 40, r: 30));
+
+                //比值差异过大且越不像四边形
+                if (Math.Abs(rate - rateArea) > rateThreshold && rateArea < rectangleThreshold)
+                {
+                    areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 100, out ptsInOBB);
+                    rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
+                    DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 2 * 35, 0), string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+
+                }
+            }
+            else
+            {
+                //areaPoints = PointsInArea(poly, radius);
+                areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 100, out var ptsInOBB);
+            }
+
+            areaPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptFinal", colorIndex: 1, r: 30));
+
+        }
     }
 }
