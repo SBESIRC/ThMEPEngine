@@ -208,6 +208,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
                 var passEdge = CreateEdge(firstClosePt, secondClosePt);
                 passEdge.EdgePattern = firstEdges[0].EdgePattern;
+                results.Add(passEdge);
             }
             return results;
         }
