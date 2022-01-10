@@ -118,7 +118,7 @@ namespace ThMEPWSS.SprinklerConnect.Engine
             // 处理环
             service.HandleLoopRow(rowConnection);
             // 散点处理
-            service.HandleScatter(rowConnection, pipeScatters);
+            service.HandleScatter(rowConnection, pipeScatters, sprinklerParameter.SubMainPipe);
             // 列分割
             rowConnection = service.RowSeparation(rowConnection, isVertical);
 

@@ -162,6 +162,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         continue;
                     }
 
+                    SprinklerFilter(subMainLine, sprinklerPts);
+
                     var sprinklerParameter = new ThSprinklerParameter
                     {
                         SprinklerPt = sprinklerPts.DistinctPoints(),
@@ -261,7 +263,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             }
         }
 
-        public void CleanPipe(string layerName, Polyline polyline)
+        private void CleanPipe(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -289,7 +291,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             }
         }
 
-        public void CleanPline(string layerName, Polyline polyline)
+        private void CleanPline(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -329,6 +331,24 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
         public void Dispose()
         {
             //
+        }
+
+        private void SprinklerFilter(List<Line> subMainPipe, List<Point3d> sprinklerPt)
+        {
+
+            var index = new ThCADCoreNTSSpatialIndex(sprinklerPt.Select(pt => new DBPoint(pt)).ToCollection());
+            subMainPipe.ForEach(p =>
+            {
+                var frame = p.Buffer(10.0);
+                var filter = index.SelectCrossingPolygon(frame);
+                if (filter.Count > 0)
+                {
+                    filter.OfType<DBPoint>().ForEach(pt =>
+                    {
+                        sprinklerPt.Remove(pt.Position);
+                    });
+                }
+            });
         }
     }
 }

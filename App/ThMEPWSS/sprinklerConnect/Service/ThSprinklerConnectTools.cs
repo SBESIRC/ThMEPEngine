@@ -1066,5 +1066,23 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             return true;
         }
+
+        public static double CloseDistToPipe(this Point3d point, List<Line> subMainPipe)
+        {
+            if(subMainPipe.Count == 0)
+            {
+                return 10000.0;
+            }
+            var closeDist = subMainPipe[0].DistanceTo(point, false);
+            for(int i =1;i<subMainPipe.Count;i++)
+            {
+                var distance = subMainPipe[i].DistanceTo(point, false);
+                if(distance < closeDist + 1)
+                {
+                    closeDist = distance;
+                }
+            }
+            return closeDist;
+        }
     }
 }
