@@ -335,16 +335,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var radiusStep = 200;
             var radiusStart = 800;
             var radiusEnd = 5000;
-            //using (var adb = AcadDatabase.Active())
-            //{
-            //    foreach (var ent in GetInput.entities)
-            //    {
-            //        if (ent.ObjectId.IsValid)
-            //        {
-            //            adb.Element<Entity>(ent.ObjectId, true).Erase();
-            //        }
-            //    }
-            //}
             using (var adb = AcadDatabase.Active())
             {
                 var results = adb.ModelSpace.OfType<Entity>().ToCollection();

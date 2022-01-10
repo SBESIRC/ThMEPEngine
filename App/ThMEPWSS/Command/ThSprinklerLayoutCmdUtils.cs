@@ -116,7 +116,6 @@ namespace ThMEPWSS.Command
                 var frames = new List<Polyline>() { frame };
 
                 resPolys.AddRange(GetAllFramePolys(frames));
-                resPolys.Remove(frame);
                 return resPolys;
             }
         }

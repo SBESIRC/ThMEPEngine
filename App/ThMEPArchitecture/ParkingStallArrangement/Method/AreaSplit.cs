@@ -18,7 +18,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
     {
         public static List<Polyline> SplitByLine(this Line line, Polyline polygon, double tor = 5.0)
         {
-            var lines = polygon.ToLines();
+            var defaultTesselateLength = 100;
+            var lines = polygon.ToLines(defaultTesselateLength);
             lines.Add(line);
 
             //return new List<Polyline>();
@@ -50,7 +51,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var rst = new List<Polyline>();
 
             var allLines = new List<Line>();
-            var boundlines = polyLines.SelectMany(pl=>pl.ToLines());
+
+            var defaultTesselateLength = 100;
+            var boundlines = polyLines.SelectMany(pl=>pl.ToLines(defaultTesselateLength));
             allLines.AddRange(splitterLines);
             allLines.AddRange(boundlines);
             var extendLineStrings = allLines.Select(l => {
@@ -77,7 +80,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
         public static List<Polyline> SplitByExtentedLine(this Line line, Polyline polygon, double tor = 1.0)
         {
-            var lines = polygon.ToLines();
+            var defaultTesselateLength = 100;
+            var lines = polygon.ToLines(defaultTesselateLength);
             var lineEx = line.ExtendLine(1e6);
             lines.Add(lineEx);
 

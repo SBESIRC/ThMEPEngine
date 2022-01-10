@@ -67,7 +67,15 @@ namespace ThMEPWSS.SprinklerConnect.Data
                             .OfType<Polyline>()
                             .Select(o => o.OBB().Buffer(-200).OfType<Polyline>().OrderByDescending(poly => poly.Area).First())
                             .ToList();
-                        parkingStalls.AddRange(doubleRow);
+
+                        doubleRow.ForEach(o =>
+                        {
+                            var doubleRowfilter = spatialIndex.SelectCrossingPolygon(o);
+                            if(doubleRowfilter.OfType<Polyline>().Select(pline => pline.Area).Sum() > o.Area * 0.8)
+                            {
+                                parkingStalls.Add(o);
+                            }
+                        });
                     });
                 }
 

@@ -131,7 +131,7 @@ namespace ThCADCore.NTS
             }
             else if (geometry is Polygon polygon)
             {
-                if (keepHoles && polygon.NumInteriorRings > 0)
+                if (keepHoles)
                 {
                     objs.Add(polygon.ToDbMPolygon());
                 }
@@ -139,6 +139,14 @@ namespace ThCADCore.NTS
                 {
                     objs.AddRange(polygon.ToDbPolylines());
                 }
+                //if (keepHoles && polygon.NumInteriorRings > 0)
+                //{
+                //    objs.Add(polygon.ToDbMPolygon());
+                //}
+                //else
+                //{
+                //    objs.AddRange(polygon.ToDbPolylines());
+                //}
             }
             else if (geometry is MultiLineString lineStrings)
             {

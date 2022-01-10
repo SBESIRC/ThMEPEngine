@@ -1,6 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using GeometryExtensions;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -75,10 +77,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var plineSpatialIndex = new ThCADCoreNTSSpatialIndex(plineList.ToCollection());
             foreach (var pt in fireHydrantSysIn.PtDic.Keys.ToList())
             {
-                if (pt._pt.DistanceTo(new Point3d(9449431.4796, 3379390.4115, 0)) < 1)
-                {
-                    ;
-                }
                 if (fireHydrantSysIn.PtDic[pt].Count == 1)
                 {
                     var rect = GetRect(pt._pt);
@@ -242,42 +240,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-
-        public static void CreateTermPtDicOrg(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
-            List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
-            ThCADCoreNTSSpatialIndex fhSpatialIndex)
-        {
-            int indxx = 0;
-            foreach (var pt in fireHydrantSysIn.VerticalPosition)//每个圈圈的中心点
-            {
-                var pttt = new Point3dEx(1439132.4, 683015.4, 0);
-                if(pt.DistanceToEx(pttt) <5)
-                {
-                    ;
-                }
-                try
-                {
-                    CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
-
-                }
-                catch
-                {
-                    ;
-                }
-            }
-            foreach (var pt in pointList)
-            {
-                try
-                {
-                    CreateTermPtDic3(pt, ref fireHydrantSysIn, labelLine, textSpatialIndex, fhSpatialIndex);
-                }
-                catch
-                {
-                    ;
-                }   
-            }
-        }
-
         public static void CreateTermPtDic(ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, Dictionary<Point3dEx, string> ptTextDic,
             ThCADCoreNTSSpatialIndex fhSpatialIndex)
@@ -288,18 +250,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 try
                 {
                     CreateTermPtDic2(ref indxx, pt, ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, fhSpatialIndex);
-
-                }
-                catch
-                {
-                    ;
-                }
-            }
-            foreach (var pt in pointList)
-            {
-                try
-                {
-                    CreateTermPtDic3(pt, ref fireHydrantSysIn, labelLine, textSpatialIndex, fhSpatialIndex);
                 }
                 catch
                 {
@@ -311,12 +261,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
         private static void CreateTermPtDic2(ref int indxx, Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Point3dEx> pointList,
             List<Line> labelLine, ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
         {
+            if(pt._pt.DistanceTo(new Point3d(1298342.5, 620554.6, 0)) < 10)
+            {
+                ;
+            }
             indxx += 1;
             var tpt = new Point3dEx(new Point3d());
             if (!pt.GetNearestPt(ref tpt, pointList))
             {
                 return;
             }
+            fireHydrantSysIn.TermPtDic.Add(tpt);//把带立管的端点加入末端点列表
             var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
             var termPoint = new TermPoint(pt);
             termPoint.SetLines(fireHydrantSysIn, labelLine);
@@ -406,72 +361,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             }
         }
 
-        private static void CreateTermPtDic3(Point3dEx pt, ref FireHydrantSystemIn fireHydrantSysIn, List<Line> labelLine,
-            ThCADCoreNTSSpatialIndex textSpatialIndex, ThCADCoreNTSSpatialIndex fhSpatialIndex)
-        {
-            var verticalHasHydrant = fireHydrantSysIn.VerticalHasHydrant.Contains(pt);
-            if (!fireHydrantSysIn.PtDic.ContainsKey(pt))
-            {
-                return;//点集里面没有的点，很危险！！！
-            }
-            if (fireHydrantSysIn.PtDic[pt].Count == 1)//只有一个邻接点
-            {
-                if (!fireHydrantSysIn.TermPointDic.ContainsKey(pt))//手漏了没画圆圈
-                {
-                    var termPoint = new TermPoint(pt);
-                    termPoint.SetLines(fireHydrantSysIn, labelLine);
-                    termPoint.SetType(verticalHasHydrant);
-                    if (termPoint.StartLine is null)
-                    {
-                        var pt1 = fireHydrantSysIn.PtDic[pt].First();//找这条线的邻接点
-                        var termPoint1 = new TermPoint(pt1);
-                        termPoint1.SetLines(fireHydrantSysIn, labelLine);
-                        if (termPoint1.StartLine is null)
-                        {
-                            return;
-                        }
-                        if (termPoint1.TextLine is null)
-                        {
-                            return;
-                        }
-                        termPoint1.SetPipeNumber(textSpatialIndex);
-                        if (termPoint1.PipeNumber is null)
-                        {
-                            return;
-                        }
-                        termPoint1.SetType(verticalHasHydrant);
-                        if (fireHydrantSysIn.TermPointDic.ContainsKey(pt1))
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            fireHydrantSysIn.TermPointDic.Add(pt, termPoint1);
-                            return;
-                        }
-                    }
-                    if (termPoint.TextLine is null)
-                    {
-                        return;
-                    }
-                    termPoint.SetPipeNumber(textSpatialIndex);
-                    if (termPoint.PipeNumber is null)
-                    {
-                        return;
-                    }
-                    termPoint.SetType(verticalHasHydrant);
-                    if (fireHydrantSysIn.TermPointDic.ContainsKey(pt))
-                    {
-                        return;
-                    }
-                    else
-                    {
-                        fireHydrantSysIn.TermPointDic.Add(pt, termPoint);
-                    }
-                }
-            }
-            
-        }
         private static Dictionary<Point3dEx, DBText> GetOriginTermStartPtEx(FireHydrantSystemIn fireHydrantSysIn, Point3dEx termPtEx,
             ThCADCoreNTSSpatialIndex textIndex, List<Line> labelLine)
         {
@@ -842,6 +731,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         while (q.Count > 0)
                         {
                             var curPt = q.Dequeue();
+                            if(fireHydrantSysIn.TermPtDic.Contains(curPt))//当前点是末端点
+                            {
+                                termPts.Add(curPt);
+                                continue;
+                            }
                             if (fireHydrantSysIn.PtTypeDic.ContainsKey(curPt))
                             {
                                 if (fireHydrantSysIn.PtTypeDic[curPt].Contains("Valve"))

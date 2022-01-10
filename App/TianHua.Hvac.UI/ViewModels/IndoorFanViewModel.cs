@@ -84,6 +84,7 @@ namespace TianHua.Hvac.UI.ViewModels
             {
                 indoorFanModel.FanType = value;
                 CanLayer = indoorFanModel.FanType != EnumFanType.IntegratedAirConditionin;
+                HaveAirPipe = indoorFanModel.FanType != EnumFanType.VRFConditioninFourSides;
                 this.RaisePropertyChanged();
                 RaisePropertyChanged("ShowFanType");
                 SelectFanTypeChange();
@@ -239,7 +240,16 @@ namespace TianHua.Hvac.UI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
-
+        private bool havePipe { get; set; }
+        public bool HaveAirPipe 
+        {
+            get { return havePipe; }
+            set
+            {
+                havePipe = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
         private TabRadioItem _layoutWorkingCodition { get; set; }
         public TabRadioItem LayoutSelectWorkingCodition

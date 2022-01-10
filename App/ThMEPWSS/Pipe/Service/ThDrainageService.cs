@@ -384,7 +384,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<string> TlLabels;
         public int MinTl;
         public int MaxTl;
-        public bool HasTl => TlLabels != null && TlLabels.Count > THESAURUSSTAMPEDE;
+        public bool HasTl;
         public PipeType PipeType;
         public List<DrainageGroupingPipeItem.Hanging> Hangings;
         public bool IsSingleOutlet;
@@ -3371,7 +3371,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             {
                 return getWaterPortLabel(label) != null;
             }
-            int getMinTl()
+            int getMinTl(string label)
             {
                 var scores = new List<int>();
                 for (int i = THESAURUSSTAMPEDE; i < storeysItems.Count; i++)
@@ -3382,7 +3382,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         var score = GetStoreyScore(s);
                         if (score < ushort.MaxValue)
                         {
-                            if (drData.VerticalPipeLabels.Any(IsTL)) scores.Add(score);
+                            if (drData.VerticalPipeLabels.Contains(label)) scores.Add(score);
                         }
                     }
                 }
@@ -3391,7 +3391,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 if (ret <= THESAURUSSTAMPEDE) return THESAURUSHOUSING;
                 return ret;
             }
-            int getMaxTl()
+            int getMaxTl(string label)
             {
                 var scores = new List<int>();
                 for (int i = THESAURUSSTAMPEDE; i < storeysItems.Count; i++)
@@ -3402,7 +3402,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         var score = GetStoreyScore(s);
                         if (score < ushort.MaxValue)
                         {
-                            if (drData.VerticalPipeLabels.Any(IsTL)) scores.Add(score);
+                            if (drData.VerticalPipeLabels.Contains(label)) scores.Add(score);
                         }
                     }
                 }
@@ -3743,8 +3743,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                 item.HasWrappingPipe = hasOutletlWrappingPipe(pl);
                 item.OutletWrappingPipeRadius = getOutletWrappingPipeRadius(pl);
                 {
-                    item.MinTl = getMinTl();
-                    item.MaxTl = getMaxTl();
+                    item.TlLabel = pl.Replace(THESAURUSDECLAIM, THESAURUSCONFIRM);
+                    item.MinTl = getMinTl(item.TlLabel);
+                    item.MaxTl = getMaxTl(item.TlLabel);
                     item.HasTL = THESAURUSOBSTINACY;
                     if (item.MinTl <= THESAURUSSTAMPEDE || item.MaxTl <= THESAURUSHOUSING || item.MinTl >= item.MaxTl)
                     {
@@ -3755,7 +3756,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         item.MoveTlLineUpper = THESAURUSOBSTINACY;
                     }
-                    item.TlLabel = pl.Replace(THESAURUSDECLAIM, THESAURUSCONFIRM);
                 }
                 item.Items = new List<DrainageGroupingPipeItem.ValueItem>();
                 item.Hangings = new List<DrainageGroupingPipeItem.Hanging>();
@@ -4111,6 +4111,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     PipeType = PipeType.PL,
                     MinTl = g.Key.MinTl,
                     MaxTl = g.Key.MaxTl,
+                    HasTl = g.Key.HasTL,
                     TlLabels = g.Select(x => x.TlLabel).Where(x => x != null).ToList(),
                     Hangings = g.Key.Hangings.ToList(),
                     IsSingleOutlet = g.Key.IsSingleOutlet,
@@ -7194,7 +7195,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             d.TryGetValue(THESAURUSFLAGRANT, out string ret);
             return ret;
         }
-        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() is THESAURUSSTICKY && x.IsDynamicBlock).ToList();
+        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.BlockTableRecord.IsValid && x.GetEffectiveName() is THESAURUSSTICKY).ToList();
         public static Point2d GetContraPoint(BlockReference br)
         {
             double dx = double.NaN;

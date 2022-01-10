@@ -1,19 +1,19 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System;
+using AcHelper;
 using System.IO;
-using System.Text.RegularExpressions;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using System.Data;
+using AcHelper.Commands;
 using ThCADExtension;
-using ThControlLibraryWPF.CustomControl;
-using ThMEPElectrical.Service;
+using System.Windows;
+using System.Windows.Data;
+using System.Windows.Controls;
 using ThMEPEngineCore.Config;
-using ThMEPEngineCore.IO.ExcelService;
+using ThMEPElectrical.Service;
+using System.Collections.Generic;
 using ThMEPEngineCore.IO.IOService;
+using ThMEPEngineCore.IO.ExcelService;
+using System.Text.RegularExpressions;
+using ThControlLibraryWPF.CustomControl;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI.SecurityPlaneUI
@@ -23,12 +23,11 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
+        static string defaultFile = "住宅安防配置表（上海）.xlsx";
+        static string roaming = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX");
+        static string configFolderUrl = Path.Combine(roaming, "SecurityPlaneConfig");
         static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "SecurityPlaneConfig");
-        static string defaultFile = "上海地区住宅-安防配置表.xlsx";
-        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-        static string installUrl = urlFolder + "\\" + defaultFile;
-        static string configFolderUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\SecurityPlaneConfig";
-        static string configFileUrl = configFolderUrl + "\\" + defaultFile;
+        static string installUrl = Path.Combine(urlFolder, defaultFile);
 
         DataSet configSet = null;
         public SecurityPlaneSystemUI()
@@ -44,6 +43,9 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
 
             //创建默认Url
             CheckDefaultUrl();
+
+            //转移配置文件
+            TransferConfiguration();
 
             //设置默认值
             SetDefaultValue();
@@ -121,7 +123,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// </summary>
         private void ReadRoomConfigTable()
         {
-            var dataSet = GetExcelContent(roomConfigUrl);
+            var dataSet = GetExcelContent(ThCADCommon.RoomConfigPath());
             var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
             if (table != null)
             {
@@ -134,13 +136,38 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         }
 
         /// <summary>
+        /// 转移配置文件
+        /// </summary>
+        private void TransferConfiguration()
+        {
+            FileInfo[] urlfiles = new DirectoryInfo(urlFolder).GetFiles("*.xls");
+            FileInfo[] configfiles = new DirectoryInfo(configFolderUrl).GetFiles("*.xls");
+            foreach (FileInfo file in urlfiles)
+            {
+                var fileName = file.Name;
+                int index = -1;
+                if ((index= configfiles.FindIndex(o => o.Name == fileName)) > -1)
+                {
+                    if (!file.LastWriteTime.Equals(configfiles[index].LastWriteTime))
+                    {
+                        File.Copy(file.FullName, configfiles[index].FullName, true);
+                    }
+                }
+                else
+                {
+                    File.Copy(file.FullName, Path.Combine(configFolderUrl, fileName), false);
+                }
+            }
+        }
+
+        /// <summary>
         /// 检查并创建默认url
         /// </summary>
         private void CheckDefaultUrl()
         {
             IOOperateService.CreateFolder(configFolderUrl);
             //更新配置文件至ROAMABLEROOTPREFIX
-            SavaExcel(configFileUrl);
+            //SavaExcel(configFileUrl);
         }
 
         /// <summary>
@@ -198,7 +225,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         private void SetDefaultValue()
         {
             scale.ItemsSource = new List<string>() { "100", "150" };
-
+            inGroup.ItemsSource = new List<string>() { "是", "否" };
             string[] files = Directory.GetFiles(configFolderUrl + @"\", "*.xls");
             List<string> fileLst = new List<string>();
             foreach (string file in files)
@@ -214,6 +241,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             videaMaxArea.Text = ThElectricalUIService.Instance.Parameter.videaMaxArea.ToString();
             gtDistance.Text = ThElectricalUIService.Instance.Parameter.gtDistance.ToString();
             scale.SelectedValue = ThElectricalUIService.Instance.Parameter.scale.ToString();
+            inGroup.SelectedValue = ThElectricalUIService.Instance.Parameter.withinInGroup ? "是" : "否";
         }
 
         /// <summary>
@@ -352,7 +380,8 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             //聚焦到CAD
             SetFocusToDwgView();
 
-            ThElectricalUIService.Instance.Parameter.scale = double.Parse(scale.SelectedItem.ToString()); 
+            ThElectricalUIService.Instance.Parameter.scale = double.Parse(scale.SelectedItem.ToString());
+            ThElectricalUIService.Instance.Parameter.withinInGroup = inGroup.SelectedItem.ToString().Equals("是") ? true : false; 
             //发送命令
             if ((SecurityPlaneTab.SelectedItem as TabItem).Header.ToString() == ThElectricalUIService.Instance.Parameter.VideoMonitoringSystem)
             {
@@ -386,6 +415,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
             //聚焦到CAD
             SetFocusToDwgView();
             ThElectricalUIService.Instance.Parameter.scale = double.Parse(scale.SelectedItem.ToString());
+            ThElectricalUIService.Instance.Parameter.withinInGroup = inGroup.SelectedItem.ToString().Equals("是") ? true : false;
             CommandHandlerBase.ExecuteFromCommandLine(false, "THSPPIPE");
             this.Hide();
         }

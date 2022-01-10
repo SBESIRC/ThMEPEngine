@@ -595,6 +595,8 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const int THESAURUSREPERCUSSION = 4096;
         public const string DISORGANIZATION = "TCH_PIPE";
         public const int HYPERDISYLLABLE = 100;
+        public const string THESAURUSWINDFALL = "TCH_VPIPEDIM";
+        public const string THESAURUSSPECIFICATION = "-";
         public const string THESAURUSDURESS = "TCH_TEXT";
         public const string THESAURUSFACILITATE = "TCH_MTEXT";
         public const string THESAURUSINHARMONIOUS = "TCH_MULTILEADER";
@@ -632,6 +634,10 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const string QUOTATIONPURKINJE = "DIMENSION";
         public const double THESAURUSTROUPE = 1e6;
         public const double THESAURUSBACKER = 180.0;
+        public const string CHESTERFIELDIAN = "W-FRPT-HYDT-DIMS";
+        public const string THESAURUSAFFECTATION = "X";
+        public const string THESAURUSREALLY = "L";
+        public const string QUOTATION1BFIRST = "标注线图层";
         public static void Generate(FireHydrantSystemUIViewModel vm)
         {
             int @case = THESAURUSSTAMPEDE;
@@ -746,6 +752,44 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             var ctx = GetCtx();
             if (ctx == null) return;
 { ThRainSystemService.ImportElementsFromStdDwg(); }
+            using (DocLock)
+            using (var adb = AcadDatabase.Active())
+            {
+                var tokills = new HashSet<Entity>();
+                foreach (var entity in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer is THESAURUSBLEMISH or CHESTERFIELDIAN))
+                {
+                    var dxfName = entity.GetRXClass().DxfName.ToUpper();
+                    if (dxfName is THESAURUSWINDFALL)
+                    {
+                        dynamic o = entity.AcadObject;
+                        string DimStyleText = o.DimStyleText;
+                        string VPipeNum = o.VPipeNum;
+                        var str = (DimStyleText + THESAURUSSPECIFICATION + VPipeNum).ToUpper();
+                        if (str.Contains(THESAURUSAFFECTATION) && str.Contains(THESAURUSREALLY))
+                        {
+                            tokills.Add(entity);
+                            continue;
+                        }
+                    }
+                    if (dxfName is THESAURUSINHARMONIOUS)
+                    {
+                        dynamic o = entity.AcadObject;
+                        string UpText = o.UpText;
+                        string DownText = o.DownText;
+                        var str = THESAURUSDEPLORE + UpText + DownText;
+                        if (str.Contains(THESAURUSAFFECTATION) && str.Contains(THESAURUSREALLY))
+                        {
+                            tokills.Add(entity);
+                            continue;
+                        }
+                    }
+                }
+                tokills.AddRange(adb.ModelSpace.OfType<Entity>().Where(x => x.Layer is QUOTATION1BFIRST or LeaderLayer));
+                foreach (var e in tokills)
+                {
+                    e.Erase(adb);
+                }
+            }
             using (DocLock)
             using (var adb = AcadDatabase.Active())
             using (var tr = new _DrawingTransaction(adb))

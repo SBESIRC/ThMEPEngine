@@ -61,6 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void AfterExecute()
         {
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+            base.AfterExecute();
         }
 
         public void Run(AcadDatabase acadDatabase)
@@ -170,7 +171,5 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Draw.DrawSeg(solution);
             //layoutPara.Dispose();
         }
-
-        
     }
 }

@@ -230,7 +230,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         double SelectionRate;
         int FirstPopulationSizeMultiplyFactor = 2;
         int SelectionSize;
-
+        int MaxCount = 10;//出现相同车位数的最大次数
         double MutationRate;
         double GeneMutationRate;
 
@@ -382,7 +382,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 int maxNums = 0;
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                while (curIteration++ < IterationCount && maxCount < 5 && stopWatch.Elapsed.TotalMinutes < MaxTime)
+                while (curIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
                 {
                     var strCurIterIndex = $"迭代次数：{curIteration}";
                     //Active.Editor.WriteMessage(strCurIterIndex);
@@ -588,11 +588,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             stopWatch.Start();
             int lamda;
 
-            while (curIteration++ < IterationCount && maxCount < 10 && stopWatch.Elapsed.Minutes < MaxTime)
+            while (curIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
             {
                 var strCurIterIndex = $"迭代次数：{curIteration}";
                 //Active.Editor.WriteMessage(strCurIterIndex);
                 Logger?.Information(strCurIterIndex);
+                Logger?.Information($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                 System.Diagnostics.Debug.WriteLine(strCurIterIndex);
                 System.Diagnostics.Debug.WriteLine($"Total seconds: {stopWatch.Elapsed.TotalSeconds}");
                 selected = Selection2(pop, out int CurNums);
@@ -623,7 +624,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Active.Editor.WriteMessage(strBest);
             Logger?.Information(strBest);
             stopWatch.Stop();
-            var strTotalMins = $"运行总时间: {stopWatch.Elapsed.Minutes} 分";
+            var strTotalMins = $"运行总时间: {stopWatch.Elapsed.TotalMinutes} 分";
             Logger?.Information(strTotalMins);
             return selected;
         }

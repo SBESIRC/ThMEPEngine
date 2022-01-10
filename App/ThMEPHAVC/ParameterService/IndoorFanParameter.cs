@@ -11,6 +11,8 @@ namespace ThMEPHVAC.ParameterService
     {
         IndoorFanParameter()
         {
+            PlaceModel = new IndoorFanPlaceModel();
+            PlaceModel.HisVentCount = 1;
         }
         public static IndoorFanParameter Instance = new IndoorFanParameter();
         public IndoorFanLayoutModel LayoutModel { get; set; }

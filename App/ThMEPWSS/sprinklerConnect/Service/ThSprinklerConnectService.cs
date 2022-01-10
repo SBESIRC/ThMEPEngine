@@ -265,6 +265,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var overCountClone = false;
                     var closeToStall = false;
                     var sprinklerSearchedClone = new List<Point3d>();
+                    var everScater = new List<Point3d>();
                     sprinklerSearched.ForEach(pt => sprinklerSearchedClone.Add(pt));
                     for (int cycle = 0; cycle < 2; cycle++)
                     {
@@ -294,7 +295,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     }
 
                                     var hasScatter = false;
-                                    firstPt.IsNoisePoint(SprinklerSearched, sprinklerSearchedClone, realPts, ref hasScatter);
+                                    firstPt.IsNoisePoint(SprinklerSearched, sprinklerSearchedClone, realPts, everScater, ref hasScatter);
 
                                     var rowConnect = new ThSprinklerRowConnect();
                                     if (LaneLine.Count > 0 && edge.GetCloseLaneLine(LaneLine).Item1 < 5000.0)
@@ -322,8 +323,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                                     var edgeIndex = edgeNode.EdgeIndex;
                                     while (KeepSearching2(graph, net, edgeIndex, SprinklerParameter.SprinklerPt, realPts, out var newIdx,
-                                        ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, dirction, virtualPts, virtualPt, rowConnect,
-                                        order))
+                                        ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, everScater,
+                                        dirction, virtualPts, virtualPt, rowConnect, order))
                                     {
                                         order++;
                                         edgeIndex = newIdx;
@@ -361,7 +362,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         }
                     }
 
-                    if (sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.1
+                    if (sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.05
                         || sprinklerSearchedClone.Count > sprinklerSearched.Count + pipeScattersTemp.Count && !closeToStall)
                     {
                         sprinklerSearched = sprinklerSearchedClone;
@@ -380,6 +381,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var connectionTempClone = connectionTemp.Select(row => row.Clone() as ThSprinklerRowConnect).ToList();
                     var overCountClone = false;
                     var sprinklerSearchedClone = new List<Point3d>();
+                    var everScater = new List<Point3d>();
                     sprinklerSearched.ForEach(pt => sprinklerSearchedClone.Add(pt));
                     for (int cycle = 0; cycle < 2; cycle++)
                     {
@@ -405,7 +407,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     }
 
                                     var hasScatter = false;
-                                    firstPt.IsNoisePoint(SprinklerSearched,sprinklerSearchedClone, realPts, ref hasScatter);
+                                    firstPt.IsNoisePoint(SprinklerSearched,sprinklerSearchedClone, realPts,everScater, ref hasScatter);
 
                                     var rowConnect = new ThSprinklerRowConnect();
                                     if (LaneLine.Count > 0 && edge.GetCloseLaneLine(LaneLine).Item1 < 5000.0)
@@ -436,7 +438,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                                         var edgeIndex = edgeNode.EdgeIndex;
                                         while (KeepSearching2(graph, net, edgeIndex, SprinklerParameter.SprinklerPt, realPts, out var newIdx,
-                                            ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, dirction, virtualPts, virtualPt, rowConnect, order))
+                                            ref hasScatter, realPtsSearchedTemp, sprinklerSearchedClone, SprinklerSearched, everScater,
+                                            dirction, virtualPts, virtualPt, rowConnect, order))
                                         {
                                             order++;
                                             edgeIndex = newIdx;
@@ -526,6 +529,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
                 else
                 {
+                    SprinklerSearched.AddRange(connection[1].Item2);
                     pipeScatters.AddRange(connection[1].Item3);
                     return connection[1].Item1;
                 }
@@ -538,6 +542,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
                 else
                 {
+                    SprinklerSearched.AddRange(connection[0].Item2);
                     pipeScatters.AddRange(connection[0].Item3);
                     return connection[0].Item1;
                 }
@@ -907,13 +912,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public void ConnScatterToPipe(List<ThSprinklerRowConnect> rowSeparation, List<Point3d> pipeScatters)
         {
             var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(ptList.Select(pt => new DBPoint(pt)).ToCollection());
+            var ptIndex = new ThCADCoreNTSSpatialIndex(ptList.Select(pt => new DBPoint(pt)).ToCollection());
+            var rowIndex = new ThCADCoreNTSSpatialIndex(rowSeparation.Select(row => row.Base).ToCollection());
             for (int i = 0; i < ptList.Count; i++)
             {
-                if (i == 3 || i == 8)
-                {
-
-                }
                 if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                 {
                     continue;
@@ -928,8 +930,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         {
                             continue;
                         }
-                        var filter = spatialIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
-                        if (filter.Count == 0 && !newLine.IsLineInWall(Geometry))
+                        var ptFilter = ptIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
+                        var rowFilter  = rowIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
+                        if (ptFilter.Count == 0 && rowFilter.Count == 0 && !newLine.IsLineInWall(Geometry))
                         {
                             var row = new Dictionary<int, List<Point3d>>
                             {
@@ -937,10 +940,12 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 {1, new List<Point3d>{ ptList[i]} },
                             };
 
-                            var rowConn = new ThSprinklerRowConnect();
-                            rowConn.StartPoint = closePt;
-                            rowConn.EndPoint = ptList[i];
-                            rowConn.OrderDict = row;
+                            var rowConn = new ThSprinklerRowConnect
+                            {
+                                StartPoint = closePt,
+                                EndPoint = ptList[i],
+                                OrderDict = row
+                            };
                             rowConn.Count++;
                             rowSeparation.Add(rowConn);
                             pipeScatters.Add(ptList[i]);
@@ -993,7 +998,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     {
                         continue;
                     }
-
                     var edgeIndex = graph.SearchNodeIndex(net.Pts.IndexOf(realPts[i]));
                     var vertexNode = graph.SprinklerVertexNodeList[edgeIndex];
                     var ptNext = net.Pts[graph.SprinklerVertexNodeList[vertexNode.FirstEdge.EdgeIndex].NodeIndex];
@@ -1303,7 +1307,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <returns></returns>
         private bool KeepSearching2(ThSprinklerGraph graph, ThSprinklerNetGroup net, int edgeIndex, List<Point3d> sprinklers,
             List<Point3d> realPts, out int newIdx, ref bool hasScatter, List<Point3d> realPtsSearchedTemp, List<Point3d> sprinklerSearched,
-            List<Point3d> allSprinklerSearched, Vector3d dirction, List<Point3d> virtualPts, Point3d virtualPt,
+            List<Point3d> allSprinklerSearched, List<Point3d> everScatter, Vector3d dirction, List<Point3d> virtualPts,
+            Point3d virtualPt,
             ThSprinklerRowConnect rowConnect, int order)
         {
             if (edgeIndex == -1)
@@ -1323,6 +1328,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
             // 如果点位已被检索，或之间连线角度偏大，或节点为虚拟点，则进入循环
             while (realPtsSearchedTemp.Contains(ptNext)
+                || allSprinklerSearched.Contains(ptNext)
                 || virtualPt.IsEqualTo(ptNext)
                 || edgeNext.LineDirection().DotProduct(dirction) < 0.998)
             {
@@ -1397,7 +1403,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             else
             {
-                ptNext.IsNoisePoint(allSprinklerSearched, sprinklerSearched, realPts, ref hasScatter);
+                ptNext.IsNoisePoint(allSprinklerSearched, sprinklerSearched, realPts,everScatter, ref hasScatter);
 
                 //if (LaneLine.Count == 0 && order >= 8)
                 //{
@@ -1703,7 +1709,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 // 两线平行且中心连线
                                 if (extendLine.Length < connTolerance)
                                 {
-                                    var crossLine = new Line(ptsTemp[ptsTemp.Count - 1].Item1, closePt);
+                                    var scrCenter = scrLine.GetCenter();
+                                    var lineCenter = line.GetClosestPointTo(scrCenter, false);
+                                    var crossLine = new Line(scrCenter, lineCenter);
                                     if (!row.IsSmallRoom)
                                     {
                                         var filter = wallIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
@@ -1720,17 +1728,22 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                             goingOn = false;
                                         }
                                     }
-                                    if (closePt.DistanceTo(row.OrderDict[-2][j - 1]) > connTolerance
-                                        && closePt.DistanceTo(row.OrderDict[-2][j]) > connTolerance)
+                                    
+                                    if(!goingOn)
                                     {
-                                        if (!goingOn)
+                                        if(lineCenter.DistanceTo(row.OrderDict[-2][j - 1]) > connTolerance
+                                            && lineCenter.DistanceTo(row.OrderDict[-2][j]) > connTolerance)
                                         {
                                             row.ConnectLines.Add(crossLine);
-                                            row.ConnectLines.Add(new Line(closePt, row.OrderDict[-2][j - 1]));
-                                            row.ConnectLines.Add(new Line(closePt, row.OrderDict[-2][j]));
+                                            row.ConnectLines.Add(new Line(lineCenter, row.OrderDict[-2][j - 1]));
+                                            row.ConnectLines.Add(new Line(lineCenter, row.OrderDict[-2][j]));
+                                        }
+                                        else
+                                        {
+                                            goingOn = true;
                                         }
                                     }
-                                    if (goingOn)
+                                    if(goingOn)
                                     {
                                         var ptOnScrLine = new Point3d();
                                         for (int exp = 1; exp < 3 && goingOn; exp++)
@@ -1738,7 +1751,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                             for (int num = 1; num < Math.Pow(2, exp) && goingOn; num++)
                                             {
                                                 closePtTemp = row.OrderDict[-2][j - 1] + num / Math.Pow(2, exp) * line.Length * line.LineDirection();
-                                                ptOnScrLine = closePtTemp + (ptsTemp[ptsTemp.Count - 1].Item1 - closePt);
+                                                ptOnScrLine = scrLine.GetClosestPointTo(closePtTemp, false);
                                                 crossLine = new Line(closePtTemp, ptOnScrLine);
                                                 if (!row.IsSmallRoom)
                                                 {

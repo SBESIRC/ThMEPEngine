@@ -915,11 +915,11 @@ namespace ThMEPWSS.Assistant
                 return f();
             }
         }
-        public static IEnumerable<Point2d> GetPoints(Geometry geo)
+        public static IEnumerable<Point> GetPoints(Geometry geo)
         {
             if (geo is Point pt)
             {
-                yield return pt.ToPoint2d();
+                yield return pt;
             }
             else if (geo is GeometryCollection mls)
             {

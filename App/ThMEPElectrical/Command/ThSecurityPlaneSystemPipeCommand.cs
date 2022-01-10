@@ -125,6 +125,18 @@ namespace ThMEPElectrical.Command
 
                     //获取线槽
                     var trunkings = getPrimitivesService.GetTrunkings(frame, trunkingLayer);
+
+                    var ACEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.AC_BLOCK_NAMES, ThMEPCommon.AC_PIPE_LAYER_NAME, true);
+                    var GTEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.GT_BLOCK_NAMES, ThMEPCommon.GT_PIPE_LAYER_NAME, true);
+                    var IAEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.IA_BLOCK_NAMES, ThMEPCommon.IA_PIPE_LAYER_NAME, true);
+                    var vmEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.VM_BLOCK_NAMES, ThMEPCommon.VM_PIPE_LAYER_NAME, true);
+
+                    //删除旧图块
+                    DeleteBlock(ACEntitys);
+                    DeleteBlock(GTEntitys);
+                    DeleteBlock(IAEntitys);
+                    DeleteBlock(vmEntitys);
+
                     //连线
                     ConnectPipeService connectPipeService = new ConnectPipeService();
                     var Lines=connectPipeService.ConnectPipe(frame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
@@ -189,6 +201,18 @@ namespace ThMEPElectrical.Command
                 });
 
                 return resBlocks;
+            }
+        }
+
+        private void DeleteBlock(List<Entity> vmEntitys)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                vmEntitys.ForEach(vmEntity =>
+                {
+                    vmEntity.UpgradeOpen();
+                    vmEntity.Erase();
+                });
             }
         }
     }
