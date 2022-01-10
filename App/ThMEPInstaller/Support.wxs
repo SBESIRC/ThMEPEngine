@@ -108,9 +108,12 @@
                 <File Id="FILE_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" Source="$(var.AutoloaderContentsPath)\Support\DesignData\SmokeDischargeScenario.xlsx" KeyPath="yes" />
             </Component>
         </DirectoryRef>
-        <DirectoryRef Id="DIR_Autoloader_Contents_Support_SecurityPlaneConfig">
-            <Component Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig" Guid="{A09DBEB0-8F03-4C30-A17B-B61DB45F2722}" Win64="yes">
-                <File Id="FILE_Autoloader_PackageContents_Support_SecurityPlaneConfig" Source="$(var.AutoloaderContentsPath)\Support\SecurityPlaneConfig\上海地区住宅-安防配置表.xlsx" KeyPath="yes" />
+        <DirectoryRef Id="DIR_Autoloader_Contents_Support_SecurityPlaneConfig">  
+            <Component Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_Common" Guid="{04E28000-301B-4A71-9A14-E0156E82CFEA}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_SecurityPlaneConfig_Common" Source="$(var.AutoloaderContentsPath)\Support\SecurityPlaneConfig\住宅安防配置表.xlsx" KeyPath="yes" />
+            </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_SH" Guid="{D2B83637-2F52-457B-BC1B-F21A24396049}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_SecurityPlaneConfig_SH" Source="$(var.AutoloaderContentsPath)\Support\SecurityPlaneConfig\住宅安防配置表（上海）.xlsx" KeyPath="yes" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_LoadCalculationConfig">
@@ -135,7 +138,8 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Discharge_Scenario" />
-            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_SH" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_SecurityPlaneConfig_Common" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan_Parameter" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_AXIAL_Fan" />

@@ -23,11 +23,11 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
     /// </summary>
     public partial class SecurityPlaneSystemUI : ThCustomWindow
     {
+        static string defaultFile = "住宅安防配置表（上海）.xlsx";
+        static string roaming = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX");
+        static string configFolderUrl = Path.Combine(roaming, "SecurityPlaneConfig");
         static string urlFolder = Path.Combine(ThCADCommon.SupportPath(), "SecurityPlaneConfig");
-        static string defaultFile = "上海地区住宅-安防配置表.xlsx";
-        static string roomConfigUrl = ThCADCommon.SupportPath() + "\\房间名称分类处理.xlsx";
-        static string installUrl = urlFolder + "\\" + defaultFile;
-        static string configFolderUrl = (string)AcadApp.GetSystemVariable("ROAMABLEROOTPREFIX") + "\\SecurityPlaneConfig";
+        static string installUrl = Path.Combine(urlFolder, defaultFile);
 
         DataSet configSet = null;
         public SecurityPlaneSystemUI()
@@ -123,7 +123,7 @@ namespace TianHua.Electrical.UI.SecurityPlaneUI
         /// </summary>
         private void ReadRoomConfigTable()
         {
-            var dataSet = GetExcelContent(roomConfigUrl);
+            var dataSet = GetExcelContent(ThCADCommon.RoomConfigPath());
             var table = dataSet.Tables[ThElectricalUIService.Instance.Parameter.RoomNameControl];
             if (table != null)
             {

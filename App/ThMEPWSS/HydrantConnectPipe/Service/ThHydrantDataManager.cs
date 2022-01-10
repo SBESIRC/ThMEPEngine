@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using System.Data;
 using ThMEPEngineCore.Config;
-using ThMEPEngineCore.IO.ExcelService;
 using ThMEPWSS.HydrantConnectPipe.Model;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
@@ -69,16 +68,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             var buildRoomService = new ThBuildRoomService();
             return buildRoomService.GetBuildRoom(selectArea);
-        }
-        public static List<ThBuildRoom> GetBuildRoom(Point3dCollection selectArea,string strKey)
-        {
-            string path = "D:\\DATA\\Git\\ThMEPEngine\\AutoLoader\\Contents\\Support\\上海地区住宅-安防配置表.xlsx";
-            var buildRoomService = new ThBuildRoomService();
-            ReadExcelService excelSrevice = new ReadExcelService();
-            var dataSet = excelSrevice.ReadExcelToDataSet(path, true);
-            var tableTree = GetRoomTableTree(dataSet);
-            var rooList = tableTree.CalRoomLst(strKey);
-            return buildRoomService.GetBuildRoom(selectArea, rooList);
         }
         public static List<Line> ConnectLine(Point3dCollection selectArea)
         {
