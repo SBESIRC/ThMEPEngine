@@ -8094,7 +8094,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             d.TryGetValue(THESAURUSFLAGRANT, out string ret);
             return ret;
         }
-        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.GetEffectiveName() is THESAURUSSTICKY && x.IsDynamicBlock).ToList();
+        public static List<BlockReference> GetStoreyBlockReferences(AcadDatabase adb) => adb.ModelSpace.OfType<BlockReference>().Where(x => x.BlockTableRecord.IsValid && x.GetEffectiveName() is THESAURUSSTICKY).ToList();
         public static Point2d GetContraPoint(BlockReference br)
         {
             double dx = double.NaN;
