@@ -90,7 +90,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
                 BuildSameLink(sameLinks);
-                var branchCornerLinks = FindLightNodeLinkOnBranchCorner(g.Links);
+                var branchCornerLinks = FindLightNodeLinkOnBranchCorner(g);
                 BuildBranchCornerLink(branchCornerLinks);
                 sameLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
                 branchCornerLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
