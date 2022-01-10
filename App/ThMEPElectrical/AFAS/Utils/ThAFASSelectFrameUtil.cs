@@ -171,6 +171,23 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
+        public static MPolygon GetMPolygon()
+        {
+            var frameTemp = GetPolyline();
+
+
+            MPolygon frame = null;
+            if (frameTemp is Polyline pl)
+            {
+                frame = ThMPolygonTool.CreateMPolygon(pl);
+            }
+            if (frameTemp is MPolygon mpl)
+            {
+                frame = mpl;
+            }
+            return frame;
+        }
+
         public static Polyline GetRoomFramePolyline()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())

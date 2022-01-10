@@ -205,7 +205,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                 ptsInUncoverRectangle.Add(ptBC);//
             }
             ptsInUncoverRectangle = ptsInUncoverRectangle.Distinct().ToList();
-            ptsInUncoverRectangle.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptsInRectangle", colorIndex: 150, r: 30));
+
             //只将在覆盖区域中的点加入ans
             List<Point3d> ptss = new List<Point3d>();
             foreach (var pt in ptsInUncoverRectangle)
@@ -221,9 +221,9 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             return ptss;
         }
 
-        public static List<Point3d> PointsInUncoverAreaNew(MPolygon uncoverArea, double dis,out List<Point3d > ptsInUncoverRectangle)
+        public static List<Point3d> PointsInUncoverAreaNew(MPolygon uncoverArea, double dis, out List<Point3d> ptsInObb)
         {
-             ptsInUncoverRectangle = new List<Point3d>();
+            ptsInObb = new List<Point3d>();
             var obb = (uncoverArea.Shell()).CalObb();
             List<Point3d> pts = PointsOnPolyline(obb);
             Point3d pt0 = pts[0];
@@ -233,7 +233,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             Point3d pt23 = CenterOfTwoPoints(pts[2], pts[3]);
             Point3d pt3 = pts[3];
             Point3d p02 = CenterOfTwoPoints(pt0, pt2);
-            ptsInUncoverRectangle.Add(p02);
+            ptsInObb.Add(p02);
             double disX = pt0.DistanceTo(pt1);
             double disY = pt1.DistanceTo(pt2);
             int Xcnt = (int)(disX / dis);
@@ -267,26 +267,26 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
                     if (flag)
                     {
                         flag = false;
-                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_A, ptBC_B));
-                        ptsInUncoverRectangle.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
+                        ptsInObb.Add(CenterOfTwoPoints(ptAD_A, ptBC_B));
+                        ptsInObb.Add(CenterOfTwoPoints(ptAD_D, ptBC_C));
                     }
-                    ptsInUncoverRectangle.Add(ptAD_A);//ptAD_A
-                    ptsInUncoverRectangle.Add(ptAD_D);//ptAD_D
-                    ptsInUncoverRectangle.Add(ptBC_B);//ptBC_B
-                    ptsInUncoverRectangle.Add(ptBC_C);//ptBC_C
+                    ptsInObb.Add(ptAD_A);//ptAD_A
+                    ptsInObb.Add(ptAD_D);//ptAD_D
+                    ptsInObb.Add(ptBC_B);//ptBC_B
+                    ptsInObb.Add(ptBC_C);//ptBC_C
                 }
                 for (int j = 0; j < Ycnt; ++j)
                 {
-                    ptsInUncoverRectangle.Add(new Point3d(((Ycnt - j) * pt01.X + j * pt23.X) / Ycnt, ((Ycnt - j) * pt01.Y + j * pt23.Y) / Ycnt, 0));
+                    ptsInObb.Add(new Point3d(((Ycnt - j) * pt01.X + j * pt23.X) / Ycnt, ((Ycnt - j) * pt01.Y + j * pt23.Y) / Ycnt, 0));
                 }
-                ptsInUncoverRectangle.Add(ptAD);//
-                ptsInUncoverRectangle.Add(ptBC);//
+                ptsInObb.Add(ptAD);//
+                ptsInObb.Add(ptBC);//
             }
-            ptsInUncoverRectangle = ptsInUncoverRectangle.Distinct().ToList();
-         
+            ptsInObb = ptsInObb.Distinct().ToList();
+
             //只将在覆盖区域中的点加入ans
             List<Point3d> ptss = new List<Point3d>();
-            foreach (var pt in ptsInUncoverRectangle)
+            foreach (var pt in ptsInObb)
             {
                 if (uncoverArea.Contains(pt))
                 {

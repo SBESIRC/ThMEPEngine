@@ -92,9 +92,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
                 //--------------布置广播
                 var geojson = ThGeoOutput.Output(dataQuery.Data);
-                var fileInfo = new FileInfo(Active.Document.Name);
-                var path1 = fileInfo.Directory.FullName;
-                ThGeoOutput.Output(geos, path1, fileInfo.Name);
 
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()

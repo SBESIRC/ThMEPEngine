@@ -411,65 +411,6 @@ namespace ThMEPElectrical
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
-        public void ThCleanDebugLayer()
-        {
-            // 调试按钮关闭且图层不是保护半径有效图层
-            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
-            if (debugSwitch)
-            {
-                ClearDrawing();
-            }
-
-        }
-        public static void ClearDrawing()
-        {
-            System.Text.RegularExpressions.Regex rx = new System.Text.RegularExpressions.Regex(@"l[0-9]+");
-
-            using (var db = AcadDatabase.Active())
-            {
-                foreach (var layer in db.Layers)
-                {
-
-                    if (rx.IsMatch(layer.Name))
-                    {
-                        ClearDrawing(layer.Name);
-                    }
-                }
-            }
-        }
-
-        private static void ClearDrawing(string layerName)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                LayerTable lt = (LayerTable)acadDatabase.Database.LayerTableId.GetObject(OpenMode.ForRead);
-                if (lt.Has(layerName))
-                {
-
-                    DotNetARX.LayerTools.UnFrozenLayer(acadDatabase.Database, layerName);
-                    DotNetARX.LayerTools.UnLockLayer(acadDatabase.Database, layerName);
-                    DotNetARX.LayerTools.UnOffLayer(acadDatabase.Database, layerName);
-
-                    var items = acadDatabase.ModelSpace
-                        .OfType<Entity>()
-                        .Where(o => o.Layer == layerName);
-
-                    foreach (var line in items)
-                    {
-                        line.UpgradeOpen();
-                        line.Erase();
-                    }
-
-                    DotNetARX.LayerTools.DeleteLayer(acadDatabase.Database, layerName);
-                }
-            }
-        }
-
-
-
-
-        [System.Diagnostics.Conditional("DEBUG")]
         [CommandMethod("TIANHUACAD", "THTestPolygon", CommandFlags.Modal)]
         public void THTestPolygon()
         {
@@ -489,7 +430,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                MPolygon mPolygon = getMpolygon();
+                MPolygon mPolygon = ThAFASSelectFrameUtil.GetMPolygon();
 
                 var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), 300);
                 //删除之前生成的带动多边形，以防影响之后操作
@@ -501,70 +442,8 @@ namespace ThMEPElectrical
                 centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
             }
         }
-        private static MPolygon getMpolygon()
-        {
-            MPolygon mPolygon;
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return null;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acdb.Element<Entity>(obj));
-                }
-                mPolygon = objs.BuildMPolygon();
-                acdb.ModelSpace.Add(mPolygon);
-                mPolygon.SetDatabaseDefaults();
-            }
-            return mPolygon;
-        }
 
 
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "THTestShrink", CommandFlags.Modal)]
-        public void THTestShrink()
-        {
-            var frame = ThAFASSelectFrameUtil.GetRoomFramePolyline();
-            var radius = 6500;
-            var beamGridWidth = 2600;
-            var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea2(frame, new List<Polyline>(), beamGridWidth, 0.75);
-
-            var sCenterLine = bIsAisleArea == true ? "centerline" : "grid";
-            var pt = frame.GetCentroidPoint();
-            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
-            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
-            DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", "data", sCenterLine), "l0Info", 3, 25, 200);
-
-        }
-
-        [System.Diagnostics.Conditional("DEBUG")]
-        [CommandMethod("TIANHUACAD", "THTestIntPoint", CommandFlags.Modal)]
-        public void THTestIntPoint()
-        {
-            var frameTemp = ThAFASSelectFrameUtil.GetPolyline();
-            //Polyline frame = (frameTemp is Polyline) ? frameTemp as Polyline : (frameTemp as MPolygon).Shell();
-            MPolygon frame = null;
-            if (frameTemp is Polyline pl)
-            {
-                frame = ThMPolygonTool.CreateMPolygon(pl);
-            }
-            if (frameTemp is MPolygon mpl)
-            {
-                frame = mpl;
-            }
-
-            var dis = 400;
-            var ptInLayoutArea = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverAreaNew(frame, dis);
-
-            ptInLayoutArea.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptFinal", colorIndex: 1, r: 30));
-
-        }
 
     }
 }
