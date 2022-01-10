@@ -248,7 +248,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 prevHalfs.Add(lines[i]);
             }
-            for (int i = index + 1; i <= lines.Count; i++)
+            for (int i = index + 1; i < lines.Count; i++)
             {
                 nextHalfs.Add(lines[i]);
             }
@@ -282,7 +282,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var sameLink = new List<ThLightEdge>();
                 sameLink.Add(sameLinkEdges[i]);
-                for (int j = i + 1; j < sameLinkEdges.Count; j++)
+                int j = i + 1;
+                for (; j < sameLinkEdges.Count; j++)
                 {
                     if (sameLinkEdges[j].Edge.IsLessThan45Degree(sameLink.Last().Edge))
                     {
@@ -290,10 +291,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     }
                     else
                     {
-                        i = j - 1;
                         break;
                     }
                 }
+                i = j - 1;
                 links.Add(sameLink);
             }
             return links;
