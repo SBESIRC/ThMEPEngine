@@ -536,6 +536,8 @@ namespace ThMEPHVAC.Model
 
         private static double GetAirVolume(string s)
         {
+            if (s.IsNullOrEmpty())
+                return 0;
             var str = s.Split('m');
             return str.Count() > 0 ? Double.Parse(str[0]) : 0;
         }
