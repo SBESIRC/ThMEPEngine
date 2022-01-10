@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.SecurityPlaneSystem.ConnectPipe.Model;
+using ThMEPElectrical.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Electrical;
 
@@ -25,27 +26,23 @@ namespace ThMEPElectrical.SecurityPlaneSystem.ConnectPipe
             AccessControlConnectService accessControlConnectService = new AccessControlConnectService();
             var acPipes = accessControlConnectService.ConnectPipe(connectBlock, rooms, columns, doors, floor);
             ConnectLines.AddRange(InsertConnectPipeService.InsertConnectPipe(acPipes, ThMEPCommon.AC_PIPE_LAYER_NAME, ThMEPCommon.AC_PIPE_LINETYPE));
-
-            var blockModels = ModelClassifyService.ClassifyBlock(connectBlock);
-            var connectBlocks = GetConnectBlocks(blockModels);
-            var otherBlocks = blockModels.Except(connectBlocks).ToList();
-
-            trunking = trunking.Where(o => o.Length > 400).ToList();
-            SystemConnectPipeService systemConnectPipeService = new SystemConnectPipeService();
-            var resPolyDic = systemConnectPipeService.Connect(polyline, columns, blockModels, trunking, ConnectLines, connectBlocks, holes);
-            resPolyDic = systemConnectPipeService.ChooseTrunking(trunking, resPolyDic);
-            var resPolys = systemConnectPipeService.AdjustEndRoute(columns, blockModels.Select(o => o.Boundary).ToList(), resPolyDic);
-            //断开有交叉的连线
-            var resLines = systemConnectPipeService.DisconnectRoute(resPolys, blockModels.Select(o => o.Boundary).ToList());
             res.AddRange(ConnectLines);
-            res.AddRange(resLines);
-            //using (AcadDatabase db = AcadDatabase.Active())
-            //{
-            //    foreach (var polys in resLines)
-            //    {
-            //        db.ModelSpace.Add(polys);
-            //    }
-            //}
+            if (!ThElectricalUIService.Instance.Parameter.withinInGroup)
+            {
+                var blockModels = ModelClassifyService.ClassifyBlock(connectBlock);
+                var connectBlocks = GetConnectBlocks(blockModels);
+                var otherBlocks = blockModels.Except(connectBlocks).ToList();
+
+                trunking = trunking.Where(o => o.Length > 400).ToList();
+                SystemConnectPipeService systemConnectPipeService = new SystemConnectPipeService();
+                var resPolyDic = systemConnectPipeService.Connect(polyline, columns, blockModels, trunking, ConnectLines, connectBlocks, holes);
+                resPolyDic = systemConnectPipeService.ChooseTrunking(trunking, resPolyDic);
+                var resPolys = systemConnectPipeService.AdjustEndRoute(columns, blockModels.Select(o => o.Boundary).ToList(), resPolyDic);
+                //断开有交叉的连线
+                var resLines = systemConnectPipeService.DisconnectRoute(resPolys, blockModels.Select(o => o.Boundary).ToList());
+
+                res.AddRange(resLines);
+            }    
             return res;
         }
 

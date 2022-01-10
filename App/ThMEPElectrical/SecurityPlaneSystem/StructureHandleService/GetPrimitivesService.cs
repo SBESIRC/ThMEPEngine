@@ -148,14 +148,17 @@ namespace ThMEPElectrical.StructureHandleService
             }
         }
 
-        public List<Entity> GetOldLayout(Polyline polyline, List<string> blockNames, string LineLayer)
+        public List<Entity> GetOldLayout(Polyline polyline, List<string> blockNames, string LineLayer,bool OnlyLine = false)
         {
             var vmInfo = new List<Entity>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var vmBlockInfo = acdb.ModelSpace.OfType<BlockReference>().Where(x => blockNames.Contains(x.GetEffectiveName())).ToList();
+                if (!OnlyLine)
+                {
+                    var vmBlockInfo = acdb.ModelSpace.OfType<BlockReference>().Where(x => blockNames.Contains(x.GetEffectiveName())).ToList();
+                    vmInfo.AddRange(vmBlockInfo);
+                }
                 var vmLineInfo = acdb.ModelSpace.OfType<Line>().Where(x => x.Layer == LineLayer).ToList();
-                vmInfo.AddRange(vmBlockInfo);
                 vmInfo.AddRange(vmLineInfo);
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(vmInfo.ToCollection());

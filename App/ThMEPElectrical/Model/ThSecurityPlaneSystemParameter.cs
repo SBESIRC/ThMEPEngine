@@ -42,6 +42,11 @@ namespace ThMEPElectrical.Model
         public double scale = 100;
 
         /// <summary>
+        /// 仅绘制组内连线
+        /// </summary>
+        public bool withinInGroup = false;
+
+        /// <summary>
         /// 出入口控制系统配置表
         /// </summary>
         public DataTable accessControlSystemTable { get; set; }
