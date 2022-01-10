@@ -95,6 +95,7 @@ namespace ThMEPEngineCore.Engine
             var engine = new ThDB3BeamRecognitionEngine();
             engine.Recognize(lineBeams.OfType<ThIfcBuildingElement>().ToList(), newPts);
 
+            // 恢复到原始位置
             Elements = engine.Elements;
             Matrix3d inverse = transformer.Displacement.Inverse();
             Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(inverse));
@@ -109,8 +110,11 @@ namespace ThMEPEngineCore.Engine
             var newPts = transformer.Transform(pts);
             var engine = new ThRawBeamRecognitionEngine();
             engine.Recognize(datas, newPts);
+
+            // 恢复到原始位置
             Elements = engine.Elements;
-            Elements.ForEach(o => transformer.Reset(o.Outline));
+            Matrix3d inverse = transformer.Displacement.Inverse();
+            Elements.OfType<ThIfcLineBeam>().ForEach(o => o.TransformBy(inverse));
         }
 
         public override void Transform(Matrix3d matrix)
