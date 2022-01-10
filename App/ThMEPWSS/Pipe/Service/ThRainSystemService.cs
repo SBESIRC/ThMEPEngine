@@ -4423,6 +4423,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                         {
                                             var p1 = basePt + new Vector2d(-REPRESENTATIONAL, -THESAURUSBELLOW);
                                             var p2 = p1.OffsetY(-DOCTRINARIANISM);
+                                            if (gpItem.HasOutletWrappingPipe && gpItem.HasSingleFloorDrainDrainageForWaterWell && gpItem.IsFloorDrainShareDrainageWithVerticalPipeForWaterWell)
+                                            {
+                                                p2 = p2.OffsetY(-THESAURUSEUPHORIA);
+                                            }
                                             var p3 = p2.OffsetX(QUOTATIONWITTIG);
                                             var layer = CIRCUMCONVOLUTION;
                                             DrawLine(layer, new GLineSegment(p1, p2));
@@ -4505,6 +4509,19 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                                     {
                                                                         Dr.DrawSimpleLabel(p, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
                                                                     }
+                                                                }
+                                                                {
+                                                                    var seg = new List<Vector2d> { new Vector2d(THESAURUSPLEASING, THESAURUSSTAMPEDE), new Vector2d(THESAURUSIMPOSING, THESAURUSSTAMPEDE) }.ToGLineSegments(p).Last();
+                                                                    var pt1 = seg.StartPoint.ToPoint3d();
+                                                                    var pt2 = seg.EndPoint.ToPoint3d();
+                                                                    var dim = new AlignedDimension();
+                                                                    dim.XLine1Point = pt1;
+                                                                    dim.XLine2Point = pt2;
+                                                                    dim.DimLinePoint = GeTools.MidPoint(pt1, pt2).OffsetY(-THESAURUSEUPHORIA);
+                                                                    dim.DimensionText = METACOMMUNICATION;
+                                                                    dim.Layer = THESAURUSINVOICE;
+                                                                    ByLayer(dim);
+                                                                    DrawEntityLazy(dim);
                                                                 }
                                                             }
                                                         }
@@ -8444,6 +8461,8 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string THESAURUSABUNDANT = @"^P\d?L";
         public const string THESAURUSOPTIONAL = @"^T\d?L";
         public const string DIASTEREOISOMER = @"^D\d?L";
+        public const int THESAURUSEUPHORIA = 1300;
+        public const string METACOMMUNICATION = ">1500";
         public const string THESAURUSEMPHASIS = "$TwtSys$00000132";
         public const string THESAURUSPITILESS = "A$C01E86F30";
         public const string QUOTATIONMALTESE = "沟";
@@ -8455,6 +8474,8 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const int THESAURUSFORESHADOW = 182;
         public const string THESAURUSPROLONG = "侧";
         public const string THESAURUSBANKRUPT = "暗沟";
+        public const int THESAURUSPLEASING = 31;
+        public const int THESAURUSIMPOSING = 1019;
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;
