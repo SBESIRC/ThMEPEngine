@@ -147,6 +147,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public Dictionary<Point3dEx, string> TermDnDic { get; set; }
         public List<Point3dEx> StartEndPts { get; set; }
         public HashSet<Point3dEx> VerticalHasHydrant { get; set; }
+        public HashSet<Point3dEx> TermPtDic { get; set; }
         public FireHydrantSystemIn(double floorHeight = 5000)
         {
             FloorHeight = floorHeight;
@@ -165,6 +166,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
             TermDnDic = new Dictionary<Point3dEx, string>();//端点的标注
             StartEndPts = new List<Point3dEx>();//环管的起始终结点
             VerticalHasHydrant = new HashSet<Point3dEx>();//立管有消火栓设备
+            TermPtDic = new HashSet<Point3dEx>();//是立管的管道末端
         }
     }
 }
