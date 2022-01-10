@@ -19,14 +19,14 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         ThDuctPortsDrawService drawServiceReturnAir;
         List<FanLoadBase> _allFanLoad;
         EnumFanType _enumFanType;
-        double ReducingLength = 150.0;
+        double _fanPipLevel = 3000.0;
         IndoorFanLayoutModel _indoorFanLayout;
-        public FanRectangleToBlock(List<FanLoadBase> allFanLoad, ThMEPOriginTransformer originTransformer, IndoorFanLayoutModel indoorFanLayout) 
+        public FanRectangleToBlock(List<FanLoadBase> allFanLoad, ThMEPOriginTransformer originTransformer, IndoorFanLayoutModel indoorFanLayout)
         {
             _allFanLoad = new List<FanLoadBase>();
             _originTransformer = originTransformer;
             _indoorFanLayout = indoorFanLayout;
-            foreach (var item in allFanLoad) 
+            foreach (var item in allFanLoad)
             {
                 _allFanLoad.Add(item);
             }
@@ -44,7 +44,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 {
                     if (null == item || null == item.FanDirection)
                         continue;
-                    switch (enumFanType) 
+                    switch (enumFanType)
                     {
                         case EnumFanType.FanCoilUnitFourControls:
                         case EnumFanType.FanCoilUnitTwoControls:
@@ -77,48 +77,54 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         return;
                     var startPoint = layoutRect.StartPoint;
                     var endPoint = layoutRect.EndPoint;
-                    endPoint = _originTransformer.Reset(endPoint);
-                    startPoint = _originTransformer.Reset(startPoint);
+                    if (null != _originTransformer)
+                    {
+                        endPoint = _originTransformer.Reset(endPoint);
+                        startPoint = _originTransformer.Reset(startPoint);
+                    }
                     var fanDir = layoutRect.FanDirection;
                     var otherDir = fanDir.CrossProduct(Vector3d.ZAxis);
                     var coolAngle = Vector3d.YAxis.GetAngleTo(layoutRect.FanDirection, Vector3d.ZAxis);
                     coolAngle = coolAngle % (Math.PI * 2);
+                    var addFanId = AddFanBlock(acdb, fanLoad, layoutRect.FanPoint, coolAngle);
+                    if (addFanId == null || !addFanId.IsValid)
+                        continue;
+                    var value = addFanId.GetDynBlockValue("设备深度");
+                    double.TryParse(value, out double fanLength);
                     switch (enumFanType)
                     {
                         case EnumFanType.FanCoilUnitFourControls:
                         case EnumFanType.FanCoilUnitTwoControls:
-                            var fanId= AddCoilFan(acdb, fanLoad, layoutRect.FanPoint, coolAngle);
                             var coonectorWidth = fanLoad.FanWidth;
                             var centerWidth = coonectorWidth - 134.0 - 15 * 2;
-                            if (layoutRect.HaveReturnVent) 
+                            if (layoutRect.HaveReturnVent)
                             {
                                 AddRetrunAirPort(acdb, layoutRect.FanReturnVentCenterPoint, fanLoad, coolAngle);
                                 //根据连接件计算变径
-                                var value = fanId.GetDynBlockValue("设备深度");
-                                double.TryParse(value, out double length);
-                                length = length - 135.0 + 19.0;
+                                fanLength = fanLength - 135.0 + 19.0;
                                 if (_indoorFanLayout.AirReturnType == EnumAirReturnType.AirReturnPipe)
                                 {
                                     //回风管
-                                    var SectionEnd = layoutRect.FanPoint - fanDir.MultiplyBy(length + ReducingLength);
-                                    SectionEnd = _originTransformer.Reset(SectionEnd);
-                                    AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, 3000.00, true);
+                                    var SectionEnd = layoutRect.FanPoint - fanDir.MultiplyBy(fanLength + IndoorFanCommon.ReducingLength);
+                                    if (null != _originTransformer)
+                                        SectionEnd = _originTransformer.Reset(SectionEnd);
+                                    AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, _fanPipLevel, true);
                                     //连接件变径
                                     var startReducingSPoint = SectionEnd;
-                                    var startReducingEPoint = SectionEnd + layoutRect.FanDirection.MultiplyBy(ReducingLength);
+                                    var startReducingEPoint = SectionEnd + layoutRect.FanDirection.MultiplyBy(IndoorFanCommon.ReducingLength);
                                     AddDuctReducing(new Line(startReducingSPoint, startReducingEPoint), layoutRect.Width, centerWidth, false);
                                 }
                                 else
                                 {
                                     //回风箱
-                                    var boxLength = layoutRect.FanPoint.DistanceTo(layoutRect.StartPoint) - length;
+                                    var boxLength = layoutRect.FanPoint.DistanceTo(layoutRect.StartPoint) - fanLength;
                                     var pt1 = startPoint - otherDir.MultiplyBy(centerWidth / 2);
                                     var pt2 = startPoint + otherDir.MultiplyBy(centerWidth / 2);
                                     var pt1End = pt1 + fanDir.MultiplyBy(boxLength);
                                     var pt2End = pt2 + fanDir.MultiplyBy(boxLength);
                                     var poly = new Polyline();
                                     poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
-                                    poly.Closed = false;
+                                    poly.Closed = true;
                                     poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                                     poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
                                     poly.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
@@ -129,26 +135,25 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                             if (layoutRect.FanInnerVents.Count < 1)
                                 continue;
                             var centerPoint1 = layoutRect.FanPoint;
-                            centerPoint1 = _originTransformer.Reset(centerPoint1);
-                            var centerPoint2 = centerPoint1 + fanDir.MultiplyBy(ReducingLength);
+                            if (null != _originTransformer)
+                                centerPoint1 = _originTransformer.Reset(centerPoint1);
+                            var centerPoint2 = centerPoint1 + fanDir.MultiplyBy(IndoorFanCommon.ReducingLength);
                             AddDuctReducing(new Line(centerPoint1, centerPoint2), centerWidth, layoutRect.Width, true);
                             //第二段风管 送风管
                             var secondStart = centerPoint2; //startPoint + dir.MultiplyBy(startSectionLength + secondSectionLenght);
-                            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, 3000.00, false);
+                            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, _fanPipLevel, false);
                             break;
                         case EnumFanType.VRFConditioninConduit:
-                            var vafFanId = AddVRFFan(acdb, fanLoad, layoutRect.FanPoint, coolAngle);
-                            var vafValue = vafFanId.GetDynBlockValue("设备深度");
-                            double.TryParse(vafValue, out double vafLength);
+                            //var vafFanId = AddVRFFan(acdb, fanLoad, layoutRect.FanPoint, coolAngle);
                             if (layoutRect.HaveReturnVent)
                             {
                                 AddRetrunAirPort(acdb, layoutRect.FanReturnVentCenterPoint, fanLoad, coolAngle);
-                                var SectionEnd = startPoint + fanDir.MultiplyBy(layoutRect.StartPoint.DistanceTo(layoutRect.FanPoint) - vafLength);
+                                var SectionEnd = startPoint + fanDir.MultiplyBy(layoutRect.StartPoint.DistanceTo(layoutRect.FanPoint) - fanLength);
                                 //根据连接件计算变径
                                 if (_indoorFanLayout.AirReturnType == EnumAirReturnType.AirReturnPipe)
                                 {
                                     //回风管
-                                    AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, 3000.00, true);
+                                    AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, _fanPipLevel, true);
                                 }
                                 else
                                 {
@@ -160,7 +165,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                                     var pt2End = pt2 + fanDir.MultiplyBy(boxLength);
                                     var poly = new Polyline();
                                     poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
-                                    poly.Closed = false;
+                                    poly.Closed = true;
                                     poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                                     poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
                                     poly.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
@@ -171,19 +176,55 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                             if (layoutRect.FanInnerVents.Count < 1)
                                 continue;
                             var vrfStart = layoutRect.FanPoint;
-                            vrfStart = _originTransformer.Reset(vrfStart);
-                            AddAirDuct(new Line(vrfStart, endPoint), layoutRect.Width, 10.0, 3000.00, false);
+                            if (null != _originTransformer)
+                                vrfStart = _originTransformer.Reset(vrfStart);
+                            AddAirDuct(new Line(vrfStart, endPoint), layoutRect.Width, 10.0, _fanPipLevel, false);
                             break;
-                        case EnumFanType.VRFConditioninFourSides:
-                            AddVRFFourFan(acdb, fanLoad, layoutRect.FanPoint, coolAngle);
+                        case EnumFanType.IntegratedAirConditionin:
+                            var airFanWidth = fanLoad.FanWidth - 200;
+                            if (layoutRect.HaveReturnVent)
+                            {
+                                AddRetrunAirPort(acdb, layoutRect.FanReturnVentCenterPoint, fanLoad, coolAngle);
+                                //根据连接件计算变径
+                                if (_indoorFanLayout.AirReturnType == EnumAirReturnType.AirReturnPipe)
+                                {
+                                    fanLength = fanLength + 60;
+                                    //回风管
+                                    var SectionEnd = layoutRect.FanPoint - fanDir.MultiplyBy(fanLength + IndoorFanCommon.ReducingLength);
+                                    if (null != _originTransformer)
+                                        SectionEnd = _originTransformer.Reset(SectionEnd);
+                                    AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, _fanPipLevel, true);
+                                    //连接件变径
+                                    var startReducingSPoint = SectionEnd;
+                                    var startReducingEPoint = SectionEnd + layoutRect.FanDirection.MultiplyBy(IndoorFanCommon.ReducingLength);
+                                    AddDuctReducing(new Line(startReducingSPoint, startReducingEPoint), layoutRect.Width, airFanWidth, false);
+                                }
+                                else
+                                {
+                                    //回风箱
+                                    var boxLength = layoutRect.FanPoint.DistanceTo(layoutRect.StartPoint) - fanLength;
+                                    var pt1 = startPoint - otherDir.MultiplyBy(fanLoad.FanWidth / 2);
+                                    var pt2 = startPoint + otherDir.MultiplyBy(fanLoad.FanWidth / 2);
+                                    var pt1End = pt1 + fanDir.MultiplyBy(boxLength);
+                                    var pt2End = pt2 + fanDir.MultiplyBy(boxLength);
+                                    var poly = new Polyline();
+                                    poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
+                                    poly.Closed = true;
+                                    poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
+                                    poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
+                                    poly.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
+                                    poly.AddVertexAt(0, pt2End.ToPoint2D(), 0, 0, 0);
+                                    acdb.ModelSpace.Add(poly);
+                                }
+                            }
+
                             break;
                     }
-
                     AddAirPort(acdb, fanLoad, layoutRect.FanInnerVents, coolAngle);
                 }
             }
         }
-        private void AddCoilFan(AcadDatabase acdb, FanLayoutRect layoutRect) 
+        private void AddCoilFan(AcadDatabase acdb, FanLayoutRect layoutRect)
         {
             string fanName = layoutRect.FanLayoutName;
             var fanLoad = _allFanLoad.Where(c => c.FanNumber == fanName).FirstOrDefault();
@@ -223,7 +264,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             if (null == connectorId || !connectorId.IsValid)
                 return;
             SetBlockDynAttrs(connectorId, connectorDynAttrs);
-            ChangeBlockTextAttrAngle(connectorId, connectorAttrs.Select(c=>c.Key).ToList(), angle);
+            ChangeBlockTextAttrAngle(connectorId, connectorAttrs.Select(c => c.Key).ToList(), angle);
 
             //第一段风管,回风管或风箱
             var startPoint = center - dir.MultiplyBy(length / 2);
@@ -235,23 +276,23 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             {
                 //回风管
                 var SectionEnd = startPoint + dir.MultiplyBy(startSectionLength);
-                AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, 3000.00, true);
+                AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, _fanPipLevel, true);
                 //连接件变径
                 var startReducingSPoint = SectionEnd;
-                var startReducingEPoint = SectionEnd + dir.MultiplyBy(ReducingLength);
+                var startReducingEPoint = SectionEnd + dir.MultiplyBy(IndoorFanCommon.ReducingLength);
                 AddDuctReducing(new Line(startReducingSPoint, startReducingEPoint), layoutRect.Width, centerWidth, false);
             }
-            else 
+            else
             {
                 //回风箱
-                var boxLength = startSectionLength + ReducingLength;
+                var boxLength = startSectionLength + IndoorFanCommon.ReducingLength;
                 var pt1 = startPoint - otherDir.MultiplyBy(centerWidth / 2);
                 var pt2 = startPoint + otherDir.MultiplyBy(centerWidth / 2);
                 var pt1End = pt1 + dir.MultiplyBy(boxLength);
                 var pt2End = pt2 + dir.MultiplyBy(boxLength);
                 var poly = new Polyline();
                 poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
-                poly.Closed = false;
+                poly.Closed = true;
                 poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
@@ -262,14 +303,14 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return;
             //送风管和风机的变径
             var centerPoint1 = connectorPoint;
-            var centerPoint2 = connectorPoint + dir.MultiplyBy(ReducingLength);
+            var centerPoint2 = connectorPoint + dir.MultiplyBy(IndoorFanCommon.ReducingLength);
             AddDuctReducing(new Line(centerPoint1, centerPoint2), centerWidth, layoutRect.Width, true);
             //第二段风管 送风管
             var secondStart = centerPoint2; //startPoint + dir.MultiplyBy(startSectionLength + secondSectionLenght);
             var endPoint = center + dir.MultiplyBy(length / 2);
-            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, 3000.00, false);
+            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, _fanPipLevel, false);
 
-            AddAirPort(acdb,fanLoad,layoutRect.InnerVentRects.Select(c=>c.CenterPoint).ToList(),angle);
+            AddAirPort(acdb, fanLoad, layoutRect.InnerVentRects.Select(c => c.CenterPoint).ToList(), angle);
         }
         private void AddVRFImpellerFan(AcadDatabase acdb, FanLayoutRect layoutRect)
         {
@@ -282,10 +323,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             double fanLength = fanLoad.ReturnAirSizeLength;
             var volume = fanLoad.FanAirVolumeDouble;
             var vrfFan = fanLoad as VRFImpellerFanLoad;
-            double startSectionLength = 100+ fanLoad.ReturnAirSizeLength + 50;
+            double startSectionLength = 100 + fanLoad.ReturnAirSizeLength + 50;
             double secondSectionLenght = fanLoad.FanLength;//vrfFan.;
             var center = layoutRect.CenterPoint;
-            center = _originTransformer.Reset(center);
+            if (null != _originTransformer)
+                center = _originTransformer.Reset(center);
             var dir = layoutRect.FanDirection;
             var otherDir = Vector3d.ZAxis.CrossProduct(dir);
             var length = layoutRect.Length;
@@ -307,7 +349,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             {
                 //回风管
                 var SectionEnd = startPoint + dir.MultiplyBy(startSectionLength);
-                AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, 3000.00, true);
+                AddAirDuct(new Line(startPoint, SectionEnd), layoutRect.Width, 10.00, _fanPipLevel, true);
             }
             else
             {
@@ -319,7 +361,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 var pt2End = pt2 + dir.MultiplyBy(boxLength);
                 var poly = new Polyline();
                 poly.Layer = IndoorFanBlockServices.FanBoxLayerName;
-                poly.Closed = false;
+                poly.Closed = true;
                 poly.AddVertexAt(0, pt1End.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt1.ToPoint2D(), 0, 0, 0);
                 poly.AddVertexAt(0, pt2.ToPoint2D(), 0, 0, 0);
@@ -340,24 +382,24 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             if (null == connectorId || !connectorId.IsValid)
                 return;
             SetBlockDynAttrs(connectorId, connectorDynAttrs);
-            ChangeBlockTextAttrAngle(connectorId, new List<string> { "设备编号" }, angle+Math.PI/2);
+            ChangeBlockTextAttrAngle(connectorId, new List<string> { "设备编号" }, angle + Math.PI / 2);
             ChangeBlockTextAttrAngle(connectorId, new List<string> { "设备电量", "制冷量/制热量" }, angle);
             if (!_indoorFanLayout.CreateBlastPipe)
                 return;
             //第二段风管 送风管
             var secondStart = startPoint + dir.MultiplyBy(startSectionLength + secondSectionLenght);
             var endPoint = center + dir.MultiplyBy(length / 2);
-            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, 3000.00, false);
-            AddAirPort(acdb, fanLoad, layoutRect.InnerVentRects.Select(c=>c.CenterPoint).ToList(), angle);
+            AddAirDuct(new Line(secondStart, endPoint), layoutRect.Width, 10.0, _fanPipLevel, false);
+            AddAirPort(acdb, fanLoad, layoutRect.InnerVentRects.Select(c => c.CenterPoint).ToList(), angle);
         }
-        private void AddVRFFourSide(AcadDatabase acdb, FanLayoutRect layoutRect) 
+        private void AddVRFFourSide(AcadDatabase acdb, FanLayoutRect layoutRect)
         {
             //VRF室内机，四面出风型
             string fanName = layoutRect.FanLayoutName;
             var fanLoad = _allFanLoad.Where(c => c.FanNumber == fanName).FirstOrDefault();
             if (fanLoad == null)
                 return;
-            var center = _originTransformer.Reset(layoutRect.CenterPoint);
+            var center = null != _originTransformer ? _originTransformer.Reset(layoutRect.CenterPoint) : layoutRect.CenterPoint;
             var connectorDynAttrs = new Dictionary<string, object>();
             var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
             var angle = Vector3d.YAxis.GetAngleTo(layoutRect.FanDirection, Vector3d.ZAxis);
@@ -374,67 +416,33 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             SetBlockDynAttrs(connectorId, connectorDynAttrs);
             ChangeBlockTextAttrAngle(connectorId, new List<string> { "制冷量/制热量", "设备电量", "设备编号" }, angle);
         }
-        private ObjectId AddCoilFan(AcadDatabase acdb, FanLoadBase fanLoad, Point3d fanPoint,double angle) 
+
+        private ObjectId AddFanBlock(AcadDatabase acdb, FanLoadBase fanLoad, Point3d fanPoint, double angle) 
         {
-            string blockName = _enumFanType == EnumFanType.FanCoilUnitTwoControls ? IndoorFanBlockServices.CoilFanTwoBlackName : IndoorFanBlockServices.CoilFanFourBlackName;
-            var connectorPoint = fanPoint;
-            connectorPoint = _originTransformer.Reset(connectorPoint);
+            var createPoint = null != _originTransformer ? _originTransformer.Reset(fanPoint) : fanPoint;
             var connectorDynAttrs = new Dictionary<string, object>();
             var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
-            var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                IndoorFanBlockServices.CoilFanLayerName,
-                blockName,
-                connectorPoint,
-                new Scale3d(1),
-                angle,
-                connectorAttrs);
-            if (null == connectorId || !connectorId.IsValid)
+
+            string layerName = "";
+            string blockName = "";
+            blockName = IndoorFanBlockServices.GetBlockLayerNameTextAngle(_enumFanType, out layerName, out double textAngle);
+
+            var addId = acdb.ModelSpace.ObjectId.InsertBlockReference(
+                                layerName, blockName,
+                                createPoint,
+                                new Scale3d(1, 1, 1),
+                                angle,
+                                connectorAttrs);
+            if (null == addId || !addId.IsValid)
                 return new ObjectId();
-            SetBlockDynAttrs(connectorId, connectorDynAttrs);
-            ChangeBlockTextAttrAngle(connectorId, connectorAttrs.Select(c => c.Key).ToList(), angle);
-            return connectorId;
-        }
-        private ObjectId AddVRFFan(AcadDatabase acdb, FanLoadBase fanLoad, Point3d fanPoint, double angle)
-        {
-            var connectorPoint = fanPoint;
-            connectorPoint = _originTransformer.Reset(connectorPoint);
-            var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
-            var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                IndoorFanBlockServices.VRFFanLayerName,
-                IndoorFanBlockServices.VRFFanBlackName,
-                connectorPoint,
-                new Scale3d(1),
-                angle,
-                connectorAttrs);
-            if (null == connectorId || !connectorId.IsValid)
-                return new ObjectId();
-            SetBlockDynAttrs(connectorId, connectorDynAttrs);
-            ChangeBlockTextAttrAngle(connectorId, new List<string> { "设备编号" }, angle + Math.PI / 2);
-            ChangeBlockTextAttrAngle(connectorId, new List<string> { "设备电量", "制冷量/制热量" }, angle);
-            return connectorId;
-        }
-        private ObjectId AddVRFFourFan(AcadDatabase acdb, FanLoadBase fanLoad, Point3d fanPoint, double angle) 
-        {
-            var center = _originTransformer.Reset(fanPoint);
-            var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
-            var connectorId = acdb.ModelSpace.ObjectId.InsertBlockReference(
-                IndoorFanBlockServices.VRFFanLayerName,
-                IndoorFanBlockServices.VRFFanFourSideBlackName,
-                center,
-                new Scale3d(1),
-                angle,
-                connectorAttrs);
-            if (null == connectorId || !connectorId.IsValid)
-                return new ObjectId();
-            SetBlockDynAttrs(connectorId, connectorDynAttrs);
-            ChangeBlockTextAttrAngle(connectorId, new List<string> { "制冷量/制热量", "设备电量", "设备编号" }, angle);
-            return connectorId;
+            SetBlockDynAttrs(addId, connectorDynAttrs);
+            ChangeBlockTextAttrAngle(addId, connectorAttrs.Select(c => c.Key).ToList(), angle);
+            ChangeBlockTextAttrAngle(addId, new List<string> { "设备编号" }, angle + textAngle);
+            return addId;
         }
         private void AddRetrunAirPort(AcadDatabase acdb,Point3d portPoint, FanLoadBase fanLoad, double angle) 
         {
-            var fanPoint = _originTransformer.Reset(portPoint);
+            var fanPoint = null != _originTransformer ? _originTransformer.Reset(portPoint):portPoint;
             var attr = new Dictionary<string, string>();
             attr.Add("风量", string.Format("{0}m3/h", fanLoad.FanAirVolumeDouble));
             var dynAttr = new Dictionary<string, object>();
@@ -455,7 +463,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             foreach (var portPoint in portPoints)
             {
                 var ventCenter = portPoint;
-                ventCenter = _originTransformer.Reset(ventCenter);
+                if(null != _originTransformer)
+                    ventCenter = _originTransformer.Reset(ventCenter);
                 var ventAttrs = new Dictionary<string, string>();
                 ventAttrs.Add("风量", string.Format("{0}m3/h", ventVolume));
                 var ventDynAttrs = new Dictionary<string, object>();

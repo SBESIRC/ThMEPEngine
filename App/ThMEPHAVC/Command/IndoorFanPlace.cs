@@ -1,8 +1,6 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
 using GeometryExtensions;
 using Linq2Acad;
 using System;
@@ -10,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThMEPEngineCore.Command;
 using ThMEPHVAC.IndoorFanLayout;
+using ThMEPHVAC.IndoorFanLayout.Business;
 using ThMEPHVAC.IndoorFanLayout.Models;
 using ThMEPHVAC.IndoorFanModels;
 using ThMEPHVAC.ParameterService;
@@ -21,10 +20,17 @@ namespace ThMEPHVAC.Command
     /// </summary>
     class IndoorFanPlace: ThMEPBaseCommand
     {
+        int ventCount = 1;
+        double FirstVentDistanceToFan = 1000.0;
+        double VentDistanceToPreVent = 2700.0;
+        double ReturnSideDistanceToStartAdd = 100.0;
+        double LastVentDistanceToEndAdd = 200;
+        double MultipleValue = 50.0;
         public IndoorFanPlace() 
         {
             CommandName = "THSNJFZ";
             ActionName = "室内机放置";
+            ventCount = IndoorFanParameter.Instance.PlaceModel.HisVentCount;
         }
         public override void SubExecute()
         {
@@ -38,76 +44,211 @@ namespace ThMEPHVAC.Command
             
             var fanData = IndoorFanParameter.Instance.PlaceModel.TargetFanInfo;
             FanLoadBase fanLoad = null;
-            switch (IndoorFanParameter.Instance.PlaceModel.FanType) 
+            var fanType = IndoorFanParameter.Instance.PlaceModel.LayoutModel.FanType;
+            double correctionFactor = IndoorFanParameter.Instance.PlaceModel.LayoutModel.CorrectionFactor;
+            bool haveVent = false;
+            
+            switch (fanType) 
             {
                 case EnumFanType.FanCoilUnitFourControls:
                 case EnumFanType.FanCoilUnitTwoControls:
-                    fanLoad = new CoilFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    haveVent = true;
+                    fanLoad = new CoilFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
                     break;
                 case EnumFanType.IntegratedAirConditionin:
-                    fanLoad = new AirConditionFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    fanLoad = new AirConditionFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
                     break;
                 case EnumFanType.VRFConditioninConduit:
                 case EnumFanType.VRFConditioninFourSides:
-                    fanLoad = new VRFImpellerFanLoad(fanData, IndoorFanParameter.Instance.PlaceModel.FanType, EnumHotColdType.Cold, IndoorFanParameter.Instance.PlaceModel.CorrectionFactor);
+                    haveVent = fanType == EnumFanType.VRFConditioninConduit;
+                    fanLoad = new VRFImpellerFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
                     break;
             }
-            var connectorDynAttrs = new Dictionary<string, object>();
-            var connectorAttrs = IndoorFanBlockServices.GetFanBlockAttrDynAttrs(fanLoad, out connectorDynAttrs);
-
-            string layerName = "";
-            string blockName = "";
-            blockName = IndoorFanBlockServices.GetBlockLayerNameTextAngle(IndoorFanParameter.Instance.PlaceModel.FanType, out layerName, out double textAngle);
-
-            var xVector = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis;
-            var angle = Vector3d.XAxis.GetAngleTo(xVector, Vector3d.ZAxis);
-            angle %= (Math.PI * 2);
+            bool canChange = true; ;
+            if (haveVent) 
+            {
+                if (fanLoad.FanVentSizeCount > 1)
+                {
+                    if (!IndoorFanParameter.Instance.PlaceModel.LayoutModel.CreateBlastPipe)
+                        canChange = false;
+                    else
+                        canChange = true;
+                }
+                else
+                {
+                    IndoorFanParameter.Instance.PlaceModel.HisVentCount = 1;
+                    ventCount = 1;
+                    canChange = false; 
+                }
+            }
+            var yVecotr = Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Yaxis;
+            var fanRectangleToBlock = new FanRectangleToBlock(new List<FanLoadBase> { fanLoad }, null, IndoorFanParameter.Instance.PlaceModel.LayoutModel);
             while (true)
             {
+               
                 //using放到while外部会有using未结束，ucs下显示文字重叠问题
                 using (var acadDatabase = AcadDatabase.Active())
                 {
-                    var opt = new PromptPointOptions("点击进行放置风机");
-                    var propmptResult = Active.Editor.GetPoint(opt);
-                    if (propmptResult.Status != PromptStatus.OK)
+                    var isTrue = SelectLayoutPoint(haveVent, canChange, out Point3d createPoint);
+                    if (!isTrue)
                         break;
-                    var createPoint = propmptResult.Value.TransformBy(Active.Editor.UCS2WCS());
-                    var addId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                        layerName, blockName,
-                        createPoint,
-                        new Scale3d(1, 1, 1),
-                        angle,
-                        connectorAttrs);
-                    if (null == addId || !addId.IsValid)
-                        continue;
-                    SetBlockDynAttrs(addId, connectorDynAttrs);
-                    ChangeBlockTextAttrAngle(addId, connectorAttrs.Select(c => c.Key).ToList(), angle);
-                    ChangeBlockTextAttrAngle(addId, new List<string> { "设备编号" }, angle + textAngle);
+                    
+                    var addFans =new List<FanLayoutDetailed>();
+                    switch (fanType) 
+                    {
+                        case EnumFanType.FanCoilUnitFourControls:
+                        case EnumFanType.FanCoilUnitTwoControls:
+                            var addFan = CoilFanLayoutData(fanLoad, createPoint, yVecotr, ventCount);
+                            addFans.Add(addFan);
+                            break;
+                        case EnumFanType.VRFConditioninConduit:
+                            var addVrfFan = VRFFanLayoutData(fanLoad, createPoint, yVecotr, ventCount);
+                            addFans.Add(addVrfFan);
+                            break;
+                        case EnumFanType.VRFConditioninFourSides:
+                            var addVrfFourFan = VRFFourSideLayoutData(fanLoad, createPoint, yVecotr);
+                            addFans.Add(addVrfFourFan);
+                            break;
+                        case EnumFanType.IntegratedAirConditionin:
+                            var addAirFan = AirFanLayoutData(fanLoad, createPoint, yVecotr);
+                            addFans.Add(addAirFan);
+                            break;
+                    }
+                    fanRectangleToBlock.AddBlock(addFans, fanType);
                 }
             }
+            IndoorFanParameter.Instance.PlaceModel.HisVentCount =ventCount;
         }
-        private void SetBlockDynAttrs(ObjectId blockId, Dictionary<string, object> dynAttr)
+        bool SelectLayoutPoint(bool haveVentCount,bool canChangeCount,out Point3d createPoint) 
         {
-            if (null == blockId || !blockId.IsValid)
-                return;
-            foreach (var dyAttr in dynAttr)
+            createPoint = new Point3d();
+            string showMsg = haveVentCount? string.Format("\n点击进行放置风机,当前风口{0}个", ventCount): "\n点击进行放置风机";
+            var opt = new PromptPointOptions(showMsg);
+            if(haveVentCount && canChangeCount)
+                opt.Keywords.Add("C", "C", "设置个数(C)");
+            opt.AppendKeywordsToMessage = true;
+
+            var propmptResult = Active.Editor.GetPoint(opt);
+            if (propmptResult.Status == PromptStatus.Keyword)
             {
-                if (dyAttr.Key == null || dyAttr.Value == null)
-                    continue;
-                blockId.SetDynBlockValue(dyAttr.Key, dyAttr.Value);
+                if (propmptResult.StringResult.ToUpper() == "C")
+                {
+                    if (!haveVentCount || !canChangeCount)
+                        return false;
+                    //输入出图比例
+                    var options = new PromptKeywordOptions("选择风口个数");
+                    options.Keywords.Add("1", "1", "1个风口(1)");
+                    options.Keywords.Add("2", "2", "2个风口(1)");
+                    options.Keywords.Default = ventCount.ToString();
+                    var result = Active.Editor.GetKeywords(options);
+                    if (result.Status == PromptStatus.OK)
+                    {
+                        int.TryParse(result.StringResult, out ventCount);
+                    }
+                }
+                bool isTrue = SelectLayoutPoint(haveVentCount, canChangeCount, out createPoint);
+                return isTrue;
             }
+            if (propmptResult.Status != PromptStatus.OK)
+                return false;
+            createPoint = propmptResult.Value.TransformBy(Active.Editor.UCS2WCS());
+            return true;
         }
-        private void ChangeBlockTextAttrAngle(ObjectId blockId, List<string> changeAngleAttrs, double angle)
+        FanLayoutDetailed CoilFanLayoutData(FanLoadBase fanLoad,Point3d fanPoint, Vector3d fanDir,int ventCount)
         {
-            var block = blockId.GetDBObject<BlockReference>();
-            // 遍历块参照的属性
-            foreach (ObjectId attId in block.AttributeCollection)
+            var returnVentCenterDisTonFan = fanLoad.FanLength+ MultipleValue + fanLoad.ReturnAirSizeLength / 2;
+            if (IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType == EnumAirReturnType.AirReturnPipe)
+                returnVentCenterDisTonFan += IndoorFanCommon.ReducingLength -100;
+            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
+            var remainder = returnVentCenterDisTonFan % MultipleValue;
+            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var ep = fanPoint;
+            var ventPoints = new List<Point3d>();
+            for (int i = 0; i < ventCount; i++)
             {
-                AttributeReference attRef = attId.GetDBObject<AttributeReference>();
-                if (!changeAngleAttrs.Any(c => c.Equals(attRef.Tag)))
-                    continue;
-                attRef.Rotation = angle;
+                var ventPoint = ep + fanDir.MultiplyBy(FirstVentDistanceToFan) + fanDir.MultiplyBy((i) * VentDistanceToPreVent);
+                ventPoints.Add(ventPoint);
             }
+            if (ventPoints.Count > 0) 
+            {
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth/2+ LastVentDistanceToEndAdd);
+            }
+                
+            var fanLayout = new FanLayoutDetailed(sp,ep, fanLoad.FanWidth,fanDir);
+            fanLayout.FanPoint = fanPoint;
+            fanLayout.FanLayoutName = fanLoad.FanNumber;
+            fanLayout.FanInnerVents.AddRange(ventPoints);
+            fanLayout.HaveReturnVent = true;
+            fanLayout.FanReturnVentCenterPoint = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan);
+            return fanLayout;
+        }
+        FanLayoutDetailed VRFFanLayoutData(FanLoadBase fanLoad, Point3d fanPoint, Vector3d fanDir, int ventCount) 
+        {
+            var returnVentCenterDisTonFan = fanLoad.FanLength + MultipleValue + fanLoad.ReturnAirSizeLength / 2;
+            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
+            var remainder = returnVentCenterDisTonFan % MultipleValue;
+            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
+
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var ep = fanPoint;
+            var ventPoints = new List<Point3d>();
+            for (int i = 0; i < ventCount; i++)
+            {
+                var ventPoint = ep + fanDir.MultiplyBy(FirstVentDistanceToFan) + fanDir.MultiplyBy((i) * VentDistanceToPreVent);
+                ventPoints.Add(ventPoint);
+            }
+            if (ventPoints.Count > 0) 
+            {
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
+            }
+            var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);
+            fanLayout.FanPoint = fanPoint;
+            fanLayout.FanLayoutName = fanLoad.FanNumber;
+            fanLayout.FanInnerVents.AddRange(ventPoints);
+            fanLayout.HaveReturnVent = true;
+            fanLayout.FanReturnVentCenterPoint = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan);
+            return fanLayout;
+        }
+        FanLayoutDetailed VRFFourSideLayoutData(FanLoadBase fanLoad, Point3d fanPoint, Vector3d fanDir)
+        {
+            var posion = fanPoint;
+            var fanLayout = new FanLayoutDetailed(posion, posion, fanLoad.FanWidth, fanDir);
+            fanLayout.FanLayoutName = fanLoad.FanNumber;
+            fanLayout.HaveReturnVent = false;
+            fanLayout.FanPoint = posion;
+            return fanLayout;
+        }
+        FanLayoutDetailed AirFanLayoutData(FanLoadBase fanLoad, Point3d fanPoint, Vector3d fanDir)
+        {
+            var returnVentCenterDisTonFan = fanLoad.FanLength + MultipleValue+50.0 + fanLoad.ReturnAirSizeLength / 2;
+            if (IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType == EnumAirReturnType.AirReturnPipe)
+                returnVentCenterDisTonFan += IndoorFanCommon.ReducingLength;
+            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
+            var remainder = returnVentCenterDisTonFan % MultipleValue;
+            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
+            var posion = fanPoint;
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var ep = fanPoint;
+            var ventPoints = new List<Point3d>();
+            for (int i = 0; i < ventCount; i++)
+            {
+                var ventPoint = ep + fanDir.MultiplyBy(FirstVentDistanceToFan) + fanDir.MultiplyBy((i) * VentDistanceToPreVent);
+                ventPoints.Add(ventPoint);
+            }
+            if (ventPoints.Count > 0)
+            {
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
+            }
+            var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);
+            fanLayout.FanLayoutName = fanLoad.FanNumber;
+            fanLayout.HaveReturnVent = true;
+            fanLayout.FanPoint = posion;
+            fanLayout.FanReturnVentCenterPoint = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan);
+            return fanLayout;
         }
     }
 }

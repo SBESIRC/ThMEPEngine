@@ -11,7 +11,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
     {
         public IndoorFanBase FanBase { get; }
         public string FanNumber { get; }
-        public double FanAirVolumeDouble 
+        public double FanAirVolumeDouble
         {
             get
             {
@@ -28,7 +28,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
         public string FanAirVolume { get; protected set; }
         public double ReturnAirSizeWidth { get; protected set; }
         public double ReturnAirSizeLength { get; protected set; }
-        public double FanLoad { get;protected set; }
+        public double FanLoad { get; protected set; }
         /// <summary>
         /// 风机制冷量
         /// </summary>
@@ -40,14 +40,15 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
         public double FanHotLoad { get; protected set; }
         public double FanRealHotLoad { get; protected set; }
         public double FanWidth { get; protected set; }
-        public double FanHeight  { get; protected set; }
+        public double FanHeight { get; protected set; }
         public double FanLength { get; protected set; }
+        public int FanVentSizeCount { get; protected set; }
         /// <summary>
         /// 风机功率（W）
         /// </summary>
         public double FanPower { get; set; }
         public string AirSupplyOutletType { get { return FanBase.AirSupplyOutletType; } }
-        public FanLoadBase(IndoorFanBase indoorFan,EnumFanType fanType, EnumHotColdType hotColdType, double correctionFactor)
+        public FanLoadBase(IndoorFanBase indoorFan, EnumFanType fanType, EnumHotColdType hotColdType, double correctionFactor)
         {
             this.FanBase = indoorFan;
             this.FanType = fanType;
@@ -57,6 +58,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
             this.FanAirVolume = indoorFan.FanAirVolume;
             CalcFanReturnAirSize();
             CalcFanSize();
+            CalcFanCount();
             double.TryParse(indoorFan.Power, out double power);
             FanPower = power;
         }
@@ -78,20 +80,15 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
         {
             //这里是正方形
             double width = 0.0;
-            var oneSize = FanBase.AirSupplyOutletOneSize.ToLower();
-            var twoSize = FanBase.AirSupplyOutletTwoSize.ToLower();
-            if (fanCount == 1 && string.IsNullOrEmpty(oneSize))
+            var sizeStr = fanCount>1? FanBase.AirSupplyOutletTwoSize: FanBase.AirSupplyOutletOneSize;
+            if (string.IsNullOrEmpty(sizeStr))
                 return width;
-            if (fanCount >1 && string.IsNullOrEmpty(twoSize))
-                return width;
-            string sizeStr = oneSize;
-            if (fanCount > 1)
-                sizeStr = twoSize;
+            sizeStr = sizeStr.ToLower();
             var spliteVentWidth = sizeStr.Split('x');
             double.TryParse(spliteVentWidth[0], out width);
             return width;
         }
-        void CalcFanSize() 
+        void CalcFanSize()
         {
             double width = 0.0;
             double.TryParse(FanBase.OverallDimensionWidth, out width);
@@ -102,6 +99,24 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
             FanHeight = height;
             FanLength = length;
             FanWidth = width;
+        }
+        void CalcFanCount() 
+        {
+            FanVentSizeCount = 0;
+            var oneSize = FanBase.AirSupplyOutletOneSize;
+            if (string.IsNullOrEmpty(oneSize))
+                return;
+            oneSize = oneSize.ToLower().Trim();
+            FanVentSizeCount = 1;
+            var twoSize = FanBase.AirSupplyOutletTwoSize;
+            if (string.IsNullOrEmpty(oneSize))
+                return;
+            twoSize = twoSize.ToLower().Trim();
+            if (string.IsNullOrEmpty(twoSize))
+                return;
+            if (!twoSize.Contains("x"))
+                return;
+            FanVentSizeCount = 2;
         }
     }
     class CoilFanLoad : FanLoadBase

@@ -537,11 +537,9 @@ namespace TianHua.Hvac.UI.UI
             try
             {
                 FormUtil.DisableForm(gridForm);
-                //设置参数，发送命名
+                //室内机，放置 设置参数，发送命名
                 IndoorFanParameter.Instance.PlaceModel = new IndoorFanPlaceModel();
-                //室内机，放置
-                IndoorFanParameter.Instance.PlaceModel.FanType = indoorFanViewModel.SelectFanType;
-                IndoorFanParameter.Instance.PlaceModel.CorrectionFactor = indoorFanViewModel.CorrectionFactor;
+                IndoorFanParameter.Instance.PlaceModel.LayoutModel = indoorFanViewModel.FanLayoutModel;
                 IndoorFanParameter.Instance.PlaceModel.TargetFanInfo = indoorFanViewModel.SelectIndoorFan;
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THSNJFZ");
                 FocusToCAD();

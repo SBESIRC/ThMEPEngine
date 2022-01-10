@@ -300,68 +300,75 @@
                 </DataGrid>
                 <!--End - 吊顶一体式 -->
             </Grid>
-            <StackPanel Orientation="Vertical" Margin="5,0,10,0" IsEnabled="{Binding CanLayer}">
-                <Label Content="布置参数:"  Padding="0" VerticalContentAlignment="Center" Height="20"></Label>
-                <StackPanel Orientation="Horizontal" Margin="10,0,0,0" >
-                    <Label Content="工况：" Padding="0" VerticalContentAlignment="Center"></Label>
-                    <ComboBox Height="22" Width="80" 
+            <StackPanel Orientation="Vertical" Margin="5,0,10,0">
+                <StackPanel Orientation="Vertical" IsEnabled="{Binding CanLayer}">
+                    <Label Content="布置参数:"  Padding="0" VerticalContentAlignment="Center" Height="20"></Label>
+                    <StackPanel Orientation="Horizontal" Margin="10,0,0,0" >
+                        <Label Content="工况：" Padding="0" VerticalContentAlignment="Center"></Label>
+                        <ComboBox Height="22" Width="80" 
                               DisplayMemberPath="Content"
                               ItemsSource ="{Binding TabItemWorkingCoditions,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                               SelectedItem="{Binding LayoutSelectWorkingCodition,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="10,5,0,5">
-                    <Label Content="按：" Padding="0" VerticalContentAlignment="Center"></Label>
-                    <RadioButton Content="冷量" VerticalContentAlignment="Center" GroupName="fanType"
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="10,5,0,5">
+                        <Label Content="按：" Padding="0" VerticalContentAlignment="Center"></Label>
+                        <RadioButton Content="冷量" VerticalContentAlignment="Center" GroupName="fanType"
                                  IsChecked="{Binding HotColdType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
-                    <RadioButton Content="热量选型" Margin="10,0,0,0" VerticalContentAlignment="Center" GroupName="fanType"
+                        <RadioButton Content="热量选型" Margin="10,0,0,0" VerticalContentAlignment="Center" GroupName="fanType"
                                  IsChecked="{Binding HotColdType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
-                </StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="10,0,0,0" >
-                    <Label Content="修正系数：" Padding="0" VerticalContentAlignment="Center"></Label>
-                    <cus:InputTextBox TextBoxInputType="InputDouble"  Width="70" Height="22" CornerRadius="0" HintText="" Text="{Binding CorrectionFactor}"/>
-                </StackPanel>
-                <CheckBox Content="生成送风管" Margin="10,5,0,0"  VerticalContentAlignment="Center" IsChecked="{Binding CreateBlastPipe}" Padding="5,0,0,0"/>
-                <Label Content="接回风口形式:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center" ></Label>
-                <StackPanel Orientation="Horizontal" Margin="10,5,0,0" VerticalAlignment="Center">
-                    <RadioButton Content="回风管" VerticalContentAlignment="Center" GroupName="outletType"
-                                 IsChecked="{Binding AirReturnType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
-                    <RadioButton Content="回风箱" Margin="10,0,0,0" VerticalContentAlignment="Center" GroupName="outletType"
-                                 IsChecked="{Binding AirReturnType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
-                </StackPanel>
-                <Label Content="最大机组型号:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center"/>
-                <StackPanel Margin="10,0,0,0">
-                    <RadioButton Content="自动" Height="22" 
-                                 IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"
-                                 GroupName="maxFanModel" VerticalContentAlignment="Center"/>
-                    <StackPanel Orientation="Horizontal" Height="22" VerticalAlignment="Center">
-                        <RadioButton Content="指定" x:Name="rBtnMax" 
-                                     IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"
-                                     GroupName="maxFanModel" VerticalContentAlignment="Center"/>
-                        <ComboBox Margin="10,0,0,0" IsEnabled="{Binding ElementName=rBtnMax,Path=IsChecked}" VerticalAlignment="Center" Height="22" Width="80"
-                                  ItemsSource="{Binding LayoutMaxFanInfos}" DisplayMemberPath="FanNumber" 
-                                  SelectedItem="{Binding LayoutMaxFan,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="10,0,0,0" >
+                        <Label Content="修正系数：" Padding="0" VerticalContentAlignment="Center"></Label>
+                        <cus:InputTextBox TextBoxInputType="InputDouble"  Width="70" Height="22" CornerRadius="0" HintText="" Text="{Binding CorrectionFactor}"/>
                     </StackPanel>
                 </StackPanel>
-                <Label Content="布置优先朝向:" Padding="0,5,0,0"></Label>
-                <WrapPanel Orientation="Horizontal" Margin="10,5,0,0" Width="160">
-                    <RadioButton Content="南" GroupName="priorityDirection"
-                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=0}"/>
-                    <RadioButton Content="北"  GroupName="priorityDirection" Margin="10,0,0,0"
-                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
-                    <RadioButton Content="西"  GroupName="priorityDirection" Margin="10,0,0,0"
-                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
-                    <RadioButton Content="东"  GroupName="priorityDirection" Margin="10,0,0,0"
-                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=3}"/>
-                    <RadioButton Content="沿用已布置区域"  GroupName="priorityDirection" Margin="0,5,0,0"
-                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=99}"/>
-                </WrapPanel>
 
+                <StackPanel Orientation="Vertical" IsEnabled="{Binding HaveAirPipe}">
+                    <CheckBox Content="生成送风管" Margin="10,5,0,0"  VerticalContentAlignment="Center" IsChecked="{Binding CreateBlastPipe}" Padding="5,0,0,0"/>
+                    <Label Content="接回风口形式:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center" ></Label>
+                    <StackPanel Orientation="Horizontal" Margin="10,5,0,0" VerticalAlignment="Center">
+                        <RadioButton Content="回风管" VerticalContentAlignment="Center" GroupName="outletType"
+                                 IsChecked="{Binding AirReturnType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
+                        <RadioButton Content="回风箱" Margin="10,0,0,0" VerticalContentAlignment="Center" GroupName="outletType"
+                                 IsChecked="{Binding AirReturnType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Orientation="Vertical" IsEnabled="{Binding CanLayer}">
+                    <Label Content="最大机组型号:" Margin="10,5,0,0" Padding="0" VerticalContentAlignment="Center"/>
+                    <StackPanel Margin="10,0,0,0">
+                        <RadioButton Content="自动" Height="22" 
+                                 IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"
+                                 GroupName="maxFanModel" VerticalContentAlignment="Center"/>
+                        <StackPanel Orientation="Horizontal" Height="22" VerticalAlignment="Center">
+                            <RadioButton Content="指定" x:Name="rBtnMax" 
+                                     IsChecked="{Binding MaxFanType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"
+                                     GroupName="maxFanModel" VerticalContentAlignment="Center"/>
+                            <ComboBox Margin="10,0,0,0" IsEnabled="{Binding ElementName=rBtnMax,Path=IsChecked}" VerticalAlignment="Center" Height="22" Width="80"
+                                  ItemsSource="{Binding LayoutMaxFanInfos}" DisplayMemberPath="FanNumber" 
+                                  SelectedItem="{Binding LayoutMaxFan,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True}"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <Label Content="布置优先朝向:" Padding="0,5,0,0"></Label>
+                    <WrapPanel Orientation="Horizontal" Margin="10,5,0,0" Width="160">
+                        <RadioButton Content="南" GroupName="priorityDirection"
+                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=0}"/>
+                        <RadioButton Content="北"  GroupName="priorityDirection" Margin="10,0,0,0"
+                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
+                        <RadioButton Content="西"  GroupName="priorityDirection" Margin="10,0,0,0"
+                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
+                        <RadioButton Content="东"  GroupName="priorityDirection" Margin="10,0,0,0"
+                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=3}"/>
+                        <RadioButton Content="沿用已布置区域"  GroupName="priorityDirection" Margin="0,5,0,0"
+                                 IsChecked="{Binding FanLayoutDirction,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=99}"/>
+                    </WrapPanel>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="5" HorizontalAlignment="Right" Margin="0,5,10,5" Height="25">
             <cus:ImageButton Content="批量布置" TextMargin="10,0,10,0" IsEnabled="{Binding CanLayer}" Name="btnLayout" Click="btnLayout_Click" />
             <cus:ImageButton Content="校核" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnCheck" Click="btnCheck_Click" Visibility="Collapsed"/>
-            <cus:ImageButton Content="校核修改" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnChange" Click="btnChange_Click"/>
+            <cus:ImageButton Content="校核修改" TextMargin="10,0,10,0" Margin="10,0,0,0" IsEnabled="{Binding CanLayer}" Name="btnChange" Click="btnChange_Click"/>
             <cus:ImageButton Content="材料表" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnMaterialList" Click="btnMaterialList_Click" Visibility="Collapsed"/>
         </StackPanel>
     </Grid>
