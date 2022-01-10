@@ -191,6 +191,12 @@ namespace ThCADCore.NTS
             var locator = new SimplePointInAreaLocator(polygon.ToNTSGeometry());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
+
+        public static bool Intersects(this MPolygon mPolygon, Entity entity)
+        {
+            return mPolygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());
+        }
+
         public static DBObjectCollection MakeValid(this MPolygon mPolygon,bool keepHoles=false)
         {
             // zero-width buffer trick:

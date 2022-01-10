@@ -114,7 +114,7 @@ namespace ThMEPWSS.Service
         /// 打印可布置区域
         /// </summary>
         /// <param name="polylines"></param>
-        public static void PrintLayoutArea(List<Polyline> polylines, Matrix3d matrix)
+        public static void PrintLayoutArea(List<MPolygon> polylines, Matrix3d matrix)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {

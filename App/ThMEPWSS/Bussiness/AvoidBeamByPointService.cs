@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Model;
@@ -61,7 +63,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveSprays"></param>
         /// <param name="layoutAreas"></param>
         /// <param name="allSprays"></param>
-        private void MoveSpray(List<SprayLayoutData> moveSprays, List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, Dictionary<Line, List<SprayLayoutData>> bSprays)
+        private void MoveSpray(List<SprayLayoutData> moveSprays, List<MPolygon> layoutAreas, List<SprayLayoutData> allSprays, Dictionary<Line, List<SprayLayoutData>> bSprays)
         {
             foreach (var spray in moveSprays)
             {
@@ -83,7 +85,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="allSprays"></param>
         /// <param name="spray"></param>
         /// <returns></returns>
-        private bool GetMoveInfo(List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, SprayLayoutData spray, Dictionary<Line, List<SprayLayoutData>> bSprays, 
+        private bool GetMoveInfo(List<MPolygon> layoutAreas, List<SprayLayoutData> allSprays, SprayLayoutData spray, Dictionary<Line, List<SprayLayoutData>> bSprays, 
             out List<KeyValuePair<SprayLayoutData, Point3d>> moveInfo)
         {
             moveInfo = null;
@@ -95,7 +97,7 @@ namespace ThMEPWSS.Bussiness
             }
 
             //计算可布置区域
-            var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Distance(spray.Position)).ToList();
+            var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Outline().Distance(spray.Position)).ToList();
 
             CheckService checkService = new CheckService();
             //检测主要方向上是否能移动
@@ -170,7 +172,7 @@ namespace ThMEPWSS.Bussiness
             foreach (var area in lAreas)
             {
                 List<Point3d> resPTs = new List<Point3d>();
-                resPTs.Add(area.GetClosestPointTo(spray.Position, true));
+                resPTs.Add(area.Outline().GetClosestPointTo(spray.Position, true));
 
                 var closePt = resPTs.OrderBy(x => x.DistanceTo(spray.Position)).First();
                 var newPosition = MoveSpray(spray, closePt, 100);
@@ -263,11 +265,11 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveDir"></param>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        private bool CheckMoveResult(List<SprayLayoutData> allSprays, List<Polyline> allAreas, SprayLayoutData spray, Polyline area, Point3d newPosition,
+        private bool CheckMoveResult(List<SprayLayoutData> allSprays, List<MPolygon> allAreas, SprayLayoutData spray, MPolygon area, Point3d newPosition,
             out List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo)
         {
             movePtInfo = new List<KeyValuePair<SprayLayoutData, Point3d>>();
-            if (!area.ContainsOrOnBoundary(newPosition))
+            if (!area.Intersects(new DBPoint(newPosition)))
             {
                 return false;
             }
@@ -302,7 +304,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="newPosition"></param>
         /// <param name="allAreas"></param>
         /// <returns></returns>
-        private bool AdjustAroundSprays(List<SprayLayoutData> allSprays, List<SprayLayoutData> checkSprays, Point3d newPosition, List<Polyline> allAreas, 
+        private bool AdjustAroundSprays(List<SprayLayoutData> allSprays, List<SprayLayoutData> checkSprays, Point3d newPosition, List<MPolygon> allAreas, 
             List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo)
         {
             foreach (var cSpray in checkSprays)
@@ -327,7 +329,7 @@ namespace ThMEPWSS.Bussiness
                 }
 
                 Point3d movePosition = cSpray.Position + moveLength * moveDir;
-                if (allAreas.Where(x => x.ContainsOrOnBoundary(movePosition)).Count() <= 0)
+                if (allAreas.Where(x => x.Intersects(new DBPoint(movePosition))).Count() <= 0)
                 {
                     return false;
                 }
@@ -354,7 +356,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="spray"></param>
         /// <param name="layoutAreas"></param>
         /// <returns></returns>
-        private List<Polyline> GetSprayLayoutArea(SprayLayoutData spray, List<Polyline> layoutAreas)
+        private List<MPolygon> GetSprayLayoutArea(SprayLayoutData spray, List<MPolygon> layoutAreas)
         {
             Polyline polyline = new Polyline() { Closed = true };
             double sprayRange = 400 + spcing * 2;
@@ -363,7 +365,7 @@ namespace ThMEPWSS.Bussiness
             polyline.AddVertexAt(0, (spray.Position - spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, (spray.Position + spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
 
-            return layoutAreas.Where(x => x.Intersects(polyline) || polyline.Contains(x)).ToList();
+            return layoutAreas.Where(x => x.Intersects(polyline)).ToList();
         }
 
         /// <summary>
@@ -372,9 +374,21 @@ namespace ThMEPWSS.Bussiness
         /// <param name="sprays"></param>
         /// <param name="layoutAreas"></param>
         /// <returns></returns>
-        private List<SprayLayoutData> CalIllegalSpary(List<SprayLayoutData> sprays, List<Polyline> layoutAreas)
+        private List<SprayLayoutData> CalIllegalSpary(List<SprayLayoutData> sprays, List<MPolygon> layoutAreas)
         {
-            return sprays.Where(x => layoutAreas.Where(y => y.ContainsOrOnBoundary(x.Position)).Count() <= 0).ToList();
+            var IllegaleSprays = new List<SprayLayoutData>(sprays);
+            var sprayDic = IllegaleSprays.ToDictionary(x => new DBPoint(x.Position), y => y);
+            var sprayPts = sprayDic.Keys.ToCollection();
+            ThCADCoreNTSSpatialIndex cADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(sprayPts);
+            foreach (var area in layoutAreas)
+            {
+                var legalSprays = cADCoreNTSSpatialIndex.SelectCrossingPolygon(area);
+                foreach (DBPoint sp in legalSprays)
+                {
+                    IllegaleSprays.Remove(sprayDic[sp]);
+                }
+            }
+            return IllegaleSprays;
         }
     }
 }
