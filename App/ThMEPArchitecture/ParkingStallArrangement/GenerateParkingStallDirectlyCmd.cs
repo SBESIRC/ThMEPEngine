@@ -26,14 +26,14 @@ using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
-    public class OneGenerationCmd : ThMEPBaseCommand, IDisposable
+    public class GenerateParkingStallDirectlyCmd : ThMEPBaseCommand, IDisposable
     {
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
-        public OneGenerationCmd()
+        public GenerateParkingStallDirectlyCmd()
         {
             CommandName = "-THDXQYFG2";
             ActionName = "生成";
@@ -49,7 +49,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
                     Run(currentDb);
-
                 }
             }
             catch (Exception ex)
@@ -61,6 +60,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void AfterExecute()
         {
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
+            base.AfterExecute();
         }
 
         public void Run(AcadDatabase acadDatabase)

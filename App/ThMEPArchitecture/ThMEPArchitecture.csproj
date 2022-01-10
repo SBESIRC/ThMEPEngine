@@ -59,7 +59,7 @@
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionSucceed.cs" />
     <Compile Include="PartitionLayout\PartitionFast.cs" />
-    <Compile Include="ParkingStallArrangement\OneGenerationCmd.cs" />
+    <Compile Include="ParkingStallArrangement\GenerateParkingStallDirectlyCmd.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionMain.cs" />
     <Compile Include="PartitionLayout\TestCommond.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

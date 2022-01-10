@@ -117,7 +117,7 @@ namespace ThMEPArchitecture
         [CommandMethod("TIANHUACAD", "-THDXQYFG2", CommandFlags.Modal)]
         public void ThArrangeParkingStall2()
         {
-            using (var cmd = new ThMEPArchitecture.ParkingStallArrangement.OneGenerationCmd())
+            using (var cmd = new ThMEPArchitecture.ParkingStallArrangement.GenerateParkingStallDirectlyCmd())
             {
                 cmd.Execute();
             }
