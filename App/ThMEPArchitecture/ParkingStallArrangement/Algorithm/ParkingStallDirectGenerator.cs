@@ -5,11 +5,11 @@ using ThMEPArchitecture.ParkingStallArrangement.Model;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
-    public class GA2 : IDisposable
+    public class ParkingStallDirectGenerator : IDisposable
     {
         GaParameter GaPara;
 
-        public GA2(GaParameter gaPara)
+        public ParkingStallDirectGenerator(GaParameter gaPara)
         {
             GaPara = gaPara;
         }

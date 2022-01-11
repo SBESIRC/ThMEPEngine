@@ -24,7 +24,7 @@ using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
-
+using ThMEPArchitecture.ViewModel;
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -32,13 +32,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
 
+        public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
+
+        private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
         public ThParkingStallArrangementCmd()
         {
             CommandName = "-THDXQYFG";
             ActionName = "生成";
+            ParameterViewModel = new ParkingStallArrangementViewModel();
+            _CommandMode = CommandMode.WithoutUI;
         }
+
+        public ThParkingStallArrangementCmd(ParkingStallArrangementViewModel vm)
+        {
+            CommandName = "THDXCW";
+            ActionName = "迭代生成";
+            ParameterViewModel = vm;
+            _CommandMode = CommandMode.WithUI;
+        }
+
         public void Dispose()
         {
         }
@@ -60,6 +74,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public override void AfterExecute()
         {
+            base.AfterExecute();
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
@@ -109,21 +124,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var flag = random.NextDouble() < 0.5;
                 directionList.Add(num, flag);//默认给全横向
             }
-
-            var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
-            if (!dirSetted)
-                return;
-
+            ParkingStallGAGenerator geneAlgorithm = null;
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
 
-            var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
-            if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
 
-            var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
-            if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+                if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
-            geneAlgorithm.Logger = Logger;  
+                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+                if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            }
+            else
+            {
+                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel.IterationCount, ParameterViewModel.PopulationCount);
+            }
+            geneAlgorithm.Logger = Logger;
+
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             bool recordprevious = false;

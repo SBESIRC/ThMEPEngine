@@ -115,7 +115,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             try
@@ -269,7 +269,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var geneAlgorithm = new GA(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             try
