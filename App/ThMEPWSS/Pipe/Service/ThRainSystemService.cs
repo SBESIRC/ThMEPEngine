@@ -4436,7 +4436,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     vsels.Add(pt.ToPoint3d());
                                                     vkills.Add(pt.OffsetY(ASSOCIATIONISTS).ToPoint3d());
                                                     var vecs = new List<Vector2d> { new Vector2d(-THESAURUSMAGNETIC, THESAURUSSTRIPE), new Vector2d(-THESAURUSFOREGONE, THESAURUSFOREGONE), new Vector2d(-ADMINISTRATIVELY + THESAURUSFLAGSTONE, THESAURUSSTAMPEDE) };
-                                                    var segs = vecs.ToGLineSegments(basePt).Skip(THESAURUSHOUSING).ToList();
+                                                    var segs = vecs.ToGLineSegments(basePt.OffsetXY(DISSOCIABLENESS, -DISSOCIABLENESS)).Skip(THESAURUSHOUSING).ToList();
                                                     Dr.SetLabelStylesForRainNote(DrawLineSegmentsLazy(segs).ToArray());
                                                     var pt1 = segs.Last().EndPoint;
                                                     var pt2 = pt1.OffsetXY(THESAURUSENTREPRENEUR, -THESAURUSDOMESTIC);
@@ -4979,6 +4979,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     {
                                                         var fixV = new Vector2d(QUOTATIONWITTIG, THESAURUSSTAMPEDE);
                                                         var p = vecs.GetLastPoint(bsPt.OffsetY(-CONSCRIPTIONIST - VÖLKERWANDERUNG) + v + fixV);
+                                                        if (gpItem.PipeType is PipeType.NL)
+                                                        {
+                                                            p = p.OffsetX(-QUOTATIONWITTIG);
+                                                        }
                                                         var _vecs = new List<Vector2d> { new Vector2d(-MISAPPREHENSIVE, THESAURUSSTAMPEDE), new Vector2d(-THESAURUSPERVADE, -THESAURUSUNCOMMITTED), new Vector2d(THESAURUSSTAMPEDE, -DISCOURTEOUSNESS), new Vector2d(THESAURUSPERVADE, -THESAURUSUNCOMMITTED) };
                                                         var segs = _vecs.ToGLineSegments(p);
                                                         _drawFloorDrain(p, THESAURUSOBSTINACY, INTRAVASCULARLY, THESAURUSDEPLORE);
@@ -8533,6 +8537,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const int THESAURUSIMPOSING = 1019;
         public const string INTERROGATORIUS = "阳台立管";
         public const double ALSOLATREUTICAL = 82.8;
+        public const double DISSOCIABLENESS = 4.9;
         public static bool IsRainLabel(string label)
         {
             if (label == null) return INTRAVASCULARLY;
