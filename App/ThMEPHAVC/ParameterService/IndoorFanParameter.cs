@@ -18,5 +18,6 @@ namespace ThMEPHVAC.ParameterService
         public IndoorFanLayoutModel LayoutModel { get; set; }
         public IndoorFanLayoutModel ChangeLayoutModel { get; set; }
         public IndoorFanPlaceModel PlaceModel { get; set; }
+        public IndoorFanCheckModel CheckModel { get; set; }
     }
 }

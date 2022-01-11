@@ -6,26 +6,40 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
                     ResizeMode="NoResize"
                     SizeToContent="WidthAndHeight"
+                    xmlns:cusLocal="clr-namespace:ThControlLibraryWPF;assembly=ThControlLibraryWPF"
                     mc:Ignorable="d"
                     Title="校核修改">
-    <StackPanel Orientation="Vertical" Margin="10,5,10,10">
-        <StackPanel Orientation="Horizontal">
-            <Label Content="校核内容:"/>
-            <CheckBox Content="冷量" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-            <CheckBox Content="热量" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10,0,0,0"/>
-        </StackPanel>
-        <StackPanel Orientation="Vertical" Margin="5">
-            <CheckBox Content="标记负荷不满足的房间框线" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="25"/>
-            <StackPanel Orientation="Horizontal" Height="25">
-                <CheckBox Content="标记负荷超配" VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-                <cus:InputTextBox TextBoxInputType="InputDouble" Text="30" HintText="" Width="40" CornerRadius="0" Margin="5,0,0,0" Height="20"/>
-                <Label Content="%的房间"></Label>
+    <Window.Resources>
+        <ResourceDictionary>
+            <cusLocal:EnumIntToBoolConverter x:Key="enumRadioBtnChecked"/>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid Name="gridForm">
+        <StackPanel Orientation="Vertical" Margin="10,5,10,10" >
+            <StackPanel Orientation="Horizontal">
+                <Label Content="校核内容:"/>
+                <RadioButton Content="冷量" VerticalAlignment="Center" VerticalContentAlignment="Center"
+                         IsChecked="{Binding HotColdType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=1}"/>
+                <RadioButton Content="热量" VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="10,0,0,0"
+                         IsChecked="{Binding HotColdType,Converter={StaticResource enumRadioBtnChecked},ConverterParameter=2}"/>
+            </StackPanel>
+            <StackPanel Orientation="Vertical" Margin="5">
+                <CheckBox Content="标记负荷不满足的房间框线" VerticalAlignment="Center" VerticalContentAlignment="Center" Height="25"
+                          IsChecked="{Binding MarkNotEnoughRoom}"/>
+                <StackPanel Orientation="Horizontal" Height="25">
+                    <CheckBox Content="标记负荷超配" VerticalAlignment="Center" VerticalContentAlignment="Center" x:Name="markOver"
+                              IsChecked="{Binding MarkOverRoom}"/>
+                    <cus:InputTextBox TextBoxInputType="InputDouble" NumCanMinus="False" 
+                                      Text="{Binding MarkOverPercentage,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" 
+                                      HintText="" Width="40" CornerRadius="0" Margin="5,0,0,0" Height="20"
+                                      IsEnabled="{Binding ElementName=markOver,Path=IsChecked}" />
+                    <Label Content="%的房间"></Label>
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <cus:ImageButton Content="校核" Height="22" Width="50" x:Name="CheckLoad" Click="CheckLoad_Click"></cus:ImageButton>
             </StackPanel>
         </StackPanel>
-        
-        <StackPanel>
-            <cus:ImageButton Content="修改" Height="22" Width="50" HorizontalAlignment="Right" ></cus:ImageButton>
-            <cus:ImageButton Content="校核" Height="22" Width="50" HorizontalAlignment="Right" ></cus:ImageButton>
-        </StackPanel>
-    </StackPanel>
+    </Grid>
 </cus:ThCustomWindow>

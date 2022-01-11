@@ -162,6 +162,7 @@
       <DependentUpon>uiIndoorFan.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\FanDataShowViewModel.cs" />
+    <Compile Include="ViewModels\IndoorFanCheckViewModel.cs" />
     <Compile Include="ViewModels\IndoorFanViewModel.cs" />
   </ItemGroup>
   <Choose>
