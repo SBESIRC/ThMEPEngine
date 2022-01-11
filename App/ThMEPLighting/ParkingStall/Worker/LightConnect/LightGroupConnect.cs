@@ -644,7 +644,8 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                 if (isParallel)
                 {
                     var nearDir = (first - nearPoint).GetNormal();
-                    if (Math.Abs(nearDir.DotProduct(hisGroup.LineDir)) > 0.5)
+                    var dot = Math.Abs(nearDir.DotProduct(hisGroup.LineDir));
+                    if (dot > 0.5 || dot<0.01)
                         hisGroupoint = first;
                     else if (first.DistanceTo(hisGroupBasePoint) < 10)
                         hisGroupoint = first;
