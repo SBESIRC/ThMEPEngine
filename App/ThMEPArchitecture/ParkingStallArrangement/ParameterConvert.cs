@@ -89,5 +89,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 return false;
             }
         }
+
+        public static void DebugParkingPartitionO(LayoutParameter layoutPara, int j, ref ParkingPartitionBackup partition)
+        {
+            int index = layoutPara.AreaNumber[j];
+            layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
+            layoutPara.Id2AllSubAreaDic.TryGetValue(index, out Polyline boundary);
+            layoutPara.SubAreaId2ShearWallsDic.TryGetValue(index, out List<List<Polyline>> buildingObstacleList);
+            layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> orgBuildingBoxes);
+            layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> outerWallLines);
+            layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
+            var bound = GeoUtilities.JoinCurves(outerWallLines, inilanes)[0];
+            var ObstaclesSpatialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
+#if DEBUG
+            string w = "";
+            string l = "";
+            foreach (var e in outerWallLines)
+            {
+                foreach (var pt in e.Vertices().Cast<Point3d>().ToList())
+                    w += pt.X.ToString() + "," + pt.Y.ToString() + ",";
+            }
+            foreach (var e in inilanes)
+            {
+                l += e.StartPoint.X.ToString() + "," + e.StartPoint.Y.ToString() + ","
+                    + e.EndPoint.X.ToString() + "," + e.EndPoint.Y.ToString() + ",";
+            }
+            FileStream fs1 = new FileStream("D:\\GALog.txt", FileMode.Create, FileAccess.Write);
+            StreamWriter sw = new StreamWriter(fs1);
+            sw.WriteLine(w);
+            sw.WriteLine(l);
+            sw.Close();
+            fs1.Close();
+#endif
+            inilanes = inilanes.Distinct().ToList();
+            var obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(bound).Cast<Polyline>().ToList();
+            partition = new ParkingPartitionBackup(outerWallLines, inilanes, obstacles, bound);
+            partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+        }
+
     }
 }

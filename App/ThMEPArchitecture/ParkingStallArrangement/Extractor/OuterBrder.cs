@@ -59,9 +59,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             block.Explode(dbObjs);
             foreach(var obj in dbObjs)
             {
-                if(obj is Hatch hatch)
+                if (obj is Polyline pline)
                 {
-                    plines.Add(hatch.Boundaries()[0] as Polyline);
+                    plines.Add(pline);
                 }
             }
             return plines;

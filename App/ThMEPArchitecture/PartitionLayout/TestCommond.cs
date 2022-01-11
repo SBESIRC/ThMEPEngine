@@ -68,7 +68,9 @@ namespace ThMEPArchitecture.PartitionLayout
             //Cutters.Add(boundary);
             var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
             ParkingPartition partition = new ParkingPartition(walls, iniLanes, obstacles, boundary, buildingBox);
+            partition.Obstacles=new List<Polyline>(obstacles);
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+            partition.ObstaclesMPolygonSpatialIndex = ObstaclesSpatialIndex;
             partition.GenerateParkingSpaces();
             partition.Display();
         }
