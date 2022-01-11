@@ -486,7 +486,7 @@ namespace ThMEPHVAC.Model
         {
             if (mainLines.Count > 0)
             {
-                if (smokeFlag)
+                if (smokeFlag && portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
                     AccMainDuctWithExhaust();
                 else
                     AccMainDuctWithNotExhaust();
@@ -502,7 +502,7 @@ namespace ThMEPHVAC.Model
             foreach (Line l in mainLines)
                 endSegs.Add(l);
             var smokeIndex = new ThCADCoreNTSSpatialIndex(smokeMpBounds);
-
+            double k = 1;
             foreach (Line l in mainLines)
             {
                 endSegs.Remove(l);
@@ -510,7 +510,7 @@ namespace ThMEPHVAC.Model
                 airVolumes.Sort();
                 var airVolume = airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2])
                                                       : airVolumes[0];
-                mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume + airVolumes.Count(), l = l });
+                mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume + (k++), l = l });
                 endSegs.Add(l);
             }
         }
@@ -555,10 +555,18 @@ namespace ThMEPHVAC.Model
         }
         private DBObjectCollection GetSmokeZone(DBObjectCollection smokeLines)
         {
-            var zone = smokeLines.Polygonize();
+            var t = new DBObjectCollection();
+            foreach (Line l in smokeLines)
+            {
+                var dirVec = ThMEPHVACService.GetEdgeDirection(l) * 5;
+                var exL = new Line(l.StartPoint - dirVec, l.EndPoint + dirVec);
+                t.Add(exL);
+            }
+            var zone = t.Polygonize();
             var bounds = new DBObjectCollection();
             foreach (Polygon pl in zone)
-                bounds.Add(pl.ToDbEntity());
+                if (pl.Area > 100)
+                    bounds.Add(pl.ToDbEntity());
             return bounds;
         }
 

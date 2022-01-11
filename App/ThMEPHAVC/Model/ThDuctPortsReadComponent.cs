@@ -10,6 +10,7 @@ using ThMEPHVAC.Algorithm;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model.Hvac;
 using NFox.Cad;
+using ThCADExtension;
 
 namespace ThMEPHVAC.Model
 {
@@ -523,14 +524,51 @@ namespace ThMEPHVAC.Model
             }
             return bounds;
         }
-
+        private static void SplitArc(Arc arc, DBObjectCollection lines)
+        {
+            var pl = arc.TessellateArcWithChord(300);
+            var arcLines = ThMEPHVACLineProc.Explode(new DBObjectCollection() { pl });
+            foreach (Line l in arcLines)
+                lines.Add(l);
+        }
+        private static DBObjectCollection ProcLines(DBObjectCollection curves)
+        {
+            var lines = new DBObjectCollection();
+            foreach (Curve c in curves)
+            {
+                if (c is Line)
+                    lines.Add(c);
+                else if (c is Polyline polyline)
+                {
+                    polyline = polyline.DPSimplify(1);
+                    var t = ThMEPHVACLineProc.Explode(new DBObjectCollection() { polyline });
+                    foreach (Curve l in t)
+                    {
+                        if (l is Line)
+                            lines.Add(l);
+                        else if ((l is Arc))
+                        {
+                            var arc = l as Arc;
+                            SplitArc(arc, lines);
+                        }
+                    }    
+                }
+                else if (c is Arc)
+                {
+                    var arc = c as Arc;
+                    SplitArc(arc, lines);
+                }
+            }
+            return lines;
+        }
         public static DBObjectCollection ReadSmokeLine()
         {
             var wallBounds = GetBoundsByLayer(ThHvacCommon.AI_ROOM_BOUNDS);
             var broker = GetCenterlineByLayer(ThHvacCommon.AI_SMOKE_BROKE);
-            var lines = ThMEPHVACLineProc.Explode(wallBounds);
-            foreach (Curve c in broker)
-                lines.Add(c);
+            var lines = ProcLines(wallBounds);
+            var t = ProcLines(broker);
+            foreach (Line l in t)
+                lines.Add(l);
             return lines;
         }
 

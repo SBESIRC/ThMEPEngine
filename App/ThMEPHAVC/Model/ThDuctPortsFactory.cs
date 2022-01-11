@@ -10,6 +10,12 @@ namespace ThMEPHVAC.Model
         public DBObjectCollection geo;
         public DBObjectCollection flg;
         public DBObjectCollection centerLines;
+        public LineGeoInfo()
+        {
+            geo = new DBObjectCollection();
+            flg = new DBObjectCollection();
+            centerLines = new DBObjectCollection();
+        }
         public LineGeoInfo(DBObjectCollection geo, 
                            DBObjectCollection flg, 
                            DBObjectCollection centerLines)

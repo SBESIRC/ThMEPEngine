@@ -10,7 +10,6 @@ namespace ThMEPHVAC.Model
     public class ThShrinkDuct
     {
         private Tolerance tor;
-        private HashSet<Point3d> shrinkPSet;
         private HashSet<Point3d> connectorPSet;
         public List<EndlineInfo> endLinesInfos;
         public List<ReducingInfo> reducingInfos;
@@ -21,7 +20,6 @@ namespace ThMEPHVAC.Model
                             Dictionary<int, SegInfo> mainLinesInfos)
         {
             tor = new Tolerance(1.5, 1.5);
-            shrinkPSet = new HashSet<Point3d>();
             connectorPSet = new HashSet<Point3d>();
             connectors = new List<EntityModifyParam>();
             this.reducingInfos = reducingInfos;
@@ -46,9 +44,7 @@ namespace ThMEPHVAC.Model
         {
             var srtPl = ThMEPHVACService.CreateDetector(p);
             var crossLines = index.SelectCrossingPolygon(srtPl);
-            if (!connectorPSet.Add(p))
-                return;
-            if (crossLines.Count > 1)
+            if (connectorPSet.Add(p) && crossLines.Count > 1)
                 CreateConnector(p, crossLines, dic);
             crossLines.Remove(currLine);
             switch (crossLines.Count)
@@ -65,8 +61,6 @@ namespace ThMEPHVAC.Model
                                  DBObjectCollection crossLines,
                                  Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
-            if (!shrinkPSet.Add(detectP))
-                return;
             var otherLine1 = crossLines[0] as Line;
             var otherLine2 = crossLines[1] as Line;
             var otherLine3 = crossLines[2] as Line;
@@ -97,8 +91,6 @@ namespace ThMEPHVAC.Model
                                DBObjectCollection crossLines,
                                Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
-            if (!shrinkPSet.Add(detectP))
-                return;
             var otherLine1 = crossLines[0] as Line;
             var otherLine2 = crossLines[1] as Line;
             var curInfo = dic[currLine.GetHashCode()][detectP];
@@ -154,8 +146,6 @@ namespace ThMEPHVAC.Model
                                  DBObjectCollection crossLines,
                                  Dictionary<int, Dictionary<Point3d, Tuple<double, string>>> dic)
         {
-            if (!shrinkPSet.Add(detectP))
-                return;
             var otherLine = crossLines[0] as Line;
             // detectP为currLine的startPoint则一定为otherLine的endPoint
             var isStart = detectP.IsEqualTo(currLine.StartPoint, tor);
@@ -183,24 +173,17 @@ namespace ThMEPHVAC.Model
                     var shrinkLen = ThDuctPortsShapeService.GetElbowShrink(openAngle, curW);
                     UpdateMainLineShrink(currLine, shrinkLen, isStart);
                     UpdateEndLineShrink(currLine, shrinkLen, isStart);
-                    var reducingLen = GetMainElbowReducingShrink(otherLine, isStart);
-                    if (reducingLen < 0)
-                        reducingLen = GetEndLineElbowReducingShrink(otherLine, isStart);
-                    var totalShrink = shrinkLen + reducingLen;
-                    RecordReducingWithElbow(otherLine, totalShrink, shrinkLen, otherDuctSize, curDuctSize);
-                    UpdateMainLineShrink(otherLine, totalShrink, !isStart);
-                    UpdateEndLineShrink(otherLine, totalShrink, !isStart);
                 }
                 else
                 {
-                    var shrinkLen = ThDuctPortsShapeService.GetElbowShrink(openAngle, otherW);
-                    UpdateMainLineShrink(otherLine, shrinkLen, !isStart);
-                    UpdateEndLineShrink(otherLine, shrinkLen, !isStart);
-                    var reducingLen = GetMainElbowReducingShrink(currLine, isStart);
+                    var elbowShrink = ThDuctPortsShapeService.GetElbowShrink(openAngle, otherW);
+                    UpdateMainLineShrink(otherLine, elbowShrink, !isStart);
+                    UpdateEndLineShrink(otherLine, elbowShrink, !isStart);
+                    var reducingLen = GetMainElbowReducingShrink(currLine, elbowShrink);
                     if (reducingLen < 0)
-                        reducingLen = GetEndLineElbowReducingShrink(otherLine, isStart);
-                    var totalShrink = shrinkLen + reducingLen;
-                    RecordReducingWithElbow(currLine, totalShrink, shrinkLen, curDuctSize, otherDuctSize);
+                        reducingLen = GetEndLineElbowReducingShrink(otherLine, elbowShrink);
+                    var totalShrink = elbowShrink + reducingLen;
+                    RecordReducingWithElbow(currLine, totalShrink, elbowShrink, curDuctSize, otherDuctSize);
                     UpdateMainLineShrink(currLine, totalShrink, isStart);
                     UpdateEndLineShrink(currLine, totalShrink, isStart);
                 }
@@ -238,15 +221,15 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private double GetEndLineElbowReducingShrink(Line l, bool isStart)
+        private double GetEndLineElbowReducingShrink(Line l, double elbowShrink)
         {
             var key = l.GetHashCode();
             foreach (var endlines in endLinesInfos)
             {
                 if (endlines.endlines.ContainsKey(key))
                 {
-                    var haveShrinkedLen = isStart ? endlines.endlines[key].seg.srcShrink : endlines.endlines[key].seg.dstShrink;
-                    var diff1 = l.Length - haveShrinkedLen;
+                    var haveShrinkedLen = mainLinesInfos[key].srcShrink + mainLinesInfos[key].dstShrink;
+                    var diff1 = l.Length - (haveShrinkedLen + elbowShrink);
                     var diff2 = diff1 - 1000;
                     if (diff2 > 0)
                         return 1000;// 够放 1000 的变径
@@ -258,14 +241,14 @@ namespace ThMEPHVAC.Model
             }
             return 0;
         }
-        private double GetMainElbowReducingShrink(Line l, bool isStart)
+        private double GetMainElbowReducingShrink(Line l, double elbowShrink)
         {
             // 弯头后接变径，判断变径长度是否够1000
             var key = l.GetHashCode();
             if (mainLinesInfos.ContainsKey(key))
             {
-                var haveShrinkedLen = isStart ? mainLinesInfos[key].srcShrink : mainLinesInfos[key].dstShrink;
-                var diff1 = l.Length - haveShrinkedLen;
+                var haveShrinkedLen = mainLinesInfos[key].srcShrink + mainLinesInfos[key].dstShrink;
+                var diff1 = l.Length - (haveShrinkedLen + elbowShrink);
                 var diff2 = diff1 - 1000;
                 if (diff2 > 0)
                     return 1000;// 够放 1000 的变径
