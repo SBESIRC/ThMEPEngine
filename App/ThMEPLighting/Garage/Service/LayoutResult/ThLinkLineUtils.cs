@@ -100,5 +100,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return path;
         }
+        public static bool IsGeometryEqual(Point3d firstSp,Point3d firstEp,Point3d secondSp,Point3d secondEp,double tolerance= 1.0)
+        {
+            if(firstSp.IsEqualTo(secondSp,new Tolerance(tolerance, tolerance)) && 
+                firstEp.IsEqualTo(secondEp, new Tolerance(tolerance, tolerance)))
+            {
+                return true;
+            }
+            if (firstSp.IsEqualTo(secondEp, new Tolerance(tolerance, tolerance)) &&
+                firstEp.IsEqualTo(secondSp, new Tolerance(tolerance, tolerance)))
+            {
+                return true;
+            }
+            return false;
+        }
     }
 }

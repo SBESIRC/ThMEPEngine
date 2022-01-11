@@ -88,15 +88,20 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new DBObjectCollection();
             graphs.ForEach(g =>
             {
-                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
+                var sameLinks = FindLightNodeLinkOnSamePath(g.Links);               
+                var branchCornerLinks = FindLightNodeLinkOnMainBranch(g);                
+                var branchBwtweenLinks = FindLightNodeLinkOnBetweenBranch(g);
+                branchBwtweenLinks=branchBwtweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
                 BuildSameLink(sameLinks);
-                var branchCornerLinks = FindLightNodeLinkOnMainBranch(g);
-                BuildBranchCornerLink(branchCornerLinks);
+                BuildMainBranchLink(branchCornerLinks);
+                BuildSameLink(branchBwtweenLinks);
                 sameLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
                 branchCornerLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                branchBwtweenLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             });
             return results;
         }
+
 
         private DBObjectCollection CreateDoubleRowJumpWire(List<ThLightEdge> edges)
         {
@@ -106,8 +111,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             graphs.ForEach(g =>
             {
                 var lightNodeLinks = FindLightNodeLinkOnSamePath(g.Links);
+                var branchBwtweenLinks = FindLightNodeLinkOnBetweenBranch(g);
+                branchBwtweenLinks = branchBwtweenLinks.Where(o => !IsExsited(lightNodeLinks, o)).ToList();
                 BuildSameLink(lightNodeLinks);
+                BuildSameLink(branchBwtweenLinks);
                 lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                branchBwtweenLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             });
             return results;
         }
@@ -126,7 +135,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             jumpWireFactory.Build();
         }
 
-        private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
+        private void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
         {
             // 用于单排布置
             var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)

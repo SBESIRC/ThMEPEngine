@@ -233,6 +233,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return linkService.LinkMainBranch();
         }
 
+        protected List<ThLightNodeLink> FindLightNodeLinkOnBetweenBranch(ThLightGraphService graph)
+        {
+            var linkService = new ThLightNodeBranchLinkService(graph);
+            return linkService.LinkBetweenBranch();
+        }
+
         protected List<ThLightEdge> AddLinkCrossEdges()
         {
             // 将十字处、T字处具有相同EdgePattern的边直接连接
@@ -289,6 +295,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             graphs.AddRange(firstEdges.CreateGraphs());
             graphs.AddRange(secondEdges.CreateGraphs());
             return graphs;
+        }
+        protected bool IsExsited(List<ThLightNodeLink> links, ThLightNodeLink link)
+        {
+            return links.Where(o => ThLinkLineUtils.IsGeometryEqual(
+                o.First.Position, o.Second.Position, link.First.Position, link.Second.Position))
+                .Any();
         }
         #region----------Printer----------
         protected void SetDatabaseDefault(Database db)

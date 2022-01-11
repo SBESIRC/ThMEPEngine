@@ -74,11 +74,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<ThLightNodeLink>();
             var firstEdge = FindEdge(firstEdgeId);
             var secondEdge = FindEdge(secondEdgeId);
-            if(!firstEdge.Direction.IsSameDirection(secondEdge.Direction))
+            if(firstEdge.Direction.IsSameDirection(secondEdge.Direction))
             {
                 return results;
             }
-            if(!firstEdge.Edge.IsLessThan45Degree(firstEdge.Edge))
+            if(firstEdge.Edge.IsLessThan45Degree(firstEdge.Edge))
             {
                 return results;
             }
@@ -342,7 +342,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             return Links
                 .Where(o => IsValid(o.PreEdge))
-                .Select(o => o.PreEdge.Id).ToList();
+                .Select(o => o.PreEdge.Id)
+                .Distinct()
+                .ToList();
         }
 
         private ThLinkPath FindLinkPath(string id)

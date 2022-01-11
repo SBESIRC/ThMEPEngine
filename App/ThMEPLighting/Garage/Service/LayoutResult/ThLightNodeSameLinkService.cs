@@ -110,9 +110,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 for (int j = 0; j < nextNodes.Count; j++)
                 {
-                    if(preNodes[i].Number== preNodes[j].Number)
+                    if(preNodes[i].Number == nextNodes[j].Number)
                     {
-                        results.Add(Tuple.Create(preNodes[i], preNodes[j]));
+                        results.Add(Tuple.Create(preNodes[i], nextNodes[j]));
                     }
                 }
             }
