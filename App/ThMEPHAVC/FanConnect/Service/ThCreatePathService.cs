@@ -57,9 +57,20 @@ namespace ThMEPHVAC.FanConnect.Service
             var clostPt0 = line.GetClosestPointTo(model.FanPoint, false);
             if(clostPt0.DistanceTo(model.FanPoint) <= 500.0)
             {
+                //----简单的一条延伸线且不穿洞
                 var pl = new Polyline();
-                pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
-                pl.AddVertexAt(1, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                var clostPt1 = line.GetClosestPointTo(model.FanPoint, true);
+                if (clostPt0.DistanceTo(clostPt1) > 10.0)
+                {
+                    pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(1, clostPt1.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(2, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                }
+                else
+                {
+                    pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(1, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                }
                 return pl;
             }
             var stepPt = TakeStep(model.FanObb, model.FanPoint, 300);
