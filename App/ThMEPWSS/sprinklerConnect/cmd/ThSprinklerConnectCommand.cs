@@ -77,7 +77,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
                 // 测试使用
                 // transformerPt = new Point3d();
-                
+
                 var transformer = new ThMEPOriginTransformer(transformerPt);
 
                 // 提取数据
@@ -135,6 +135,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         }
                     });
                     sprinklerPts.AddRange(sprinklersTran.Where(pt => frame.Contains(pt)).ToList());
+                    sprinklerPts = sprinklerPts.DistinctPoints();
 
                     var exactFrame = exactFrames.Outline().OfType<Polyline>().OrderByDescending(o => o.Area).First();
                     transformer.Reset(exactFrame);
@@ -160,14 +161,13 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         continue;
                     }
 
-                    subMainLine = SprinklerFilter(subMainLine, sprinklerPts);
                     var allLines = new List<Line>();
                     allLines.AddRange(mainLine);
-                    allLines.AddRange(subMainLine);
+                    subMainLine = SprinklerFilter(subMainLine, allLines, mainLine, sprinklerPts);
 
                     var sprinklerParameter = new ThSprinklerParameter
                     {
-                        SprinklerPt = sprinklerPts.DistinctPoints(),
+                        SprinklerPt = sprinklerPts,
                         MainPipe = mainLine,
                         SubMainPipe = subMainLine,
                         AllPipe = allLines
@@ -334,7 +334,8 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             //
         }
 
-        private List<Line> SprinklerFilter(List<Line> subMainPipe, List<Point3d> sprinklerPt)
+        private List<Line> SprinklerFilter(List<Line> subMainPipe, List<Line> allLines, List<Line> mainLines, 
+            List<Point3d> sprinklerPt,   double connTolerance = 300.0)
         {
             var newPipe = new List<Line>();
             var index = new ThCADCoreNTSSpatialIndex(sprinklerPt.Select(pt => new DBPoint(pt)).ToCollection());
@@ -354,11 +355,39 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     newPts.Add(p.EndPoint);
                     for (int i = 1; i < newPts.Count; i++)
                     {
-                        newPipe.Add(new Line(newPts[i - 1], newPts[i]));
+                        var newLine = new Line(newPts[i - 1], newPts[i]);
+                        allLines.Add(newLine);
+                        if (i == 1 && newLine.Length > connTolerance)
+                        {
+                            var indent = new Line(newPts[i - 1], newPts[i] - newLine.LineDirection() * connTolerance);
+                            newPipe.Add(indent);
+
+                            var remainder = new Line(newPts[i] - newLine.LineDirection() * connTolerance, newPts[i]);
+                            mainLines.Add(remainder);
+                        }
+                        else if (i > 1 && i < newPts.Count - 1 && newLine.Length > 2 * connTolerance)
+                        {
+                            var indent = newLine.ExtendLine(-connTolerance);
+                            newPipe.Add(indent);
+
+                            var firstRemainder = new Line(newPts[i - 1], newPts[i - 1] + newLine.LineDirection() * connTolerance);
+                            mainLines.Add(firstRemainder);
+                            var secondRemainder = new Line(newPts[i] - newLine.LineDirection() * connTolerance, newPts[i]);
+                            mainLines.Add(secondRemainder);
+                        }
+                        else if (i == newPts.Count - 1 && newLine.Length > connTolerance)
+                        {
+                            var indent = new Line(newPts[i - 1] + newLine.LineDirection() * connTolerance, newPts[i]);
+                            newPipe.Add(indent);
+
+                            var remainder = new Line(newPts[i - 1], newPts[i - 1] + newLine.LineDirection() * connTolerance);
+                            mainLines.Add(remainder);
+                        }
                     }
                 }
                 else
                 {
+                    allLines.Add(p);
                     newPipe.Add(p);
                 }
             });

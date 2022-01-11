@@ -193,7 +193,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         virtualPtList.ForEach(virtualPt =>
                         {
                             var edge = new Line(virtualPt, realPts[i]);
-                            if (edge.VaildLine(SprinklerParameter.SprinklerPt, SprinklerParameter.AllPipe, Geometry))
+                            if (edge.Length > 15.0 && edge.VaildLine(SprinklerParameter.SprinklerPt, SprinklerParameter.AllPipe, Geometry))
                             {
                                 return;
                             }
@@ -1265,7 +1265,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var extendLine = new Line(originalPt - dirction, originalPt + 2.5 * dirction * DTTol);
                     var ptSearched = extendLine.SearchPointByDirction(sprinklers, realPts, originalPt, Geometry, out var firstPt);
                     var virtualPtSearched = extendLine.SearchVirtualPt(originalPt, Geometry, SprinklerParameter.SubMainPipe, out var firstVirtualPt);
-                    virtualPtSearched = false;
+                    //virtualPtSearched = false;
                     if (ptSearched && !virtualPtSearched)
                     {
                         ptNext = firstPt;
@@ -2409,16 +2409,19 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 continue;
                             }
                             // 判断是否撞障
-                            var lineBuffer = crossLine.ExtendLine(-10.0).Buffer(1.0);
-                            var crossRoom = roomIndex.SelectFence(lineBuffer);
-                            if (crossRoom.Count > 2)
+                            if(crossLine.Length > 10.0)
                             {
-                                continue;
-                            }
-                            var intersectObstacle = obstacleIndex.SelectFence(lineBuffer);
-                            if (intersectObstacle.Count > 0)
-                            {
-                                continue;
+                                var lineBuffer = crossLine.ExtendLine(-10.0).Buffer(1.0);
+                                var crossRoom = roomIndex.SelectFence(lineBuffer);
+                                if (crossRoom.Count > 2)
+                                {
+                                    continue;
+                                }
+                                var intersectObstacle = obstacleIndex.SelectFence(lineBuffer);
+                                if (intersectObstacle.Count > 0)
+                                {
+                                    continue;
+                                }
                             }
 
                             var rowConn = new ThSprinklerRowConnect();
@@ -2431,7 +2434,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 {
                                     continue;
                                 }
-                                var closePt = crossLine.GetClosestPointTo(realPts[i], true);
+                                var closePt = crossLine.StartPoint;
+                                if(crossLine.Length > 10.0)
+                                {
+                                    closePt = crossLine.GetClosestPointTo(realPts[i], true);
+                                }
                                 extendPts.Add(closePt);
                                 linesConn.Add(new Line(closePt, realPts[i]));
                                 SprinklerSearched.Add(realPts[i]);

@@ -350,7 +350,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <returns></returns>
         public static bool VaildLine(this Line line, List<Point3d> pts, List<Line> pipes, List<Polyline> geometry)
         {
-            var pline = line.ExtendLine(-10.0).Buffer(1.0);
+            var pline = line.ExtendLine(-15.0).Buffer(1.0);
             // 检测线上是否存在点
             var dbPoints = pts.Select(o => new DBPoint(o)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
@@ -971,8 +971,12 @@ namespace ThMEPWSS.SprinklerConnect.Service
             List<Polyline> geometry, out Point3d firstPt)
         {
             firstPt = new Point3d();
-            var pline = extendLine.Buffer(1.0);
+            if(extendLine.Length < 10.0)
+            {
+                return false;
+            }
 
+            var pline = extendLine.Buffer(1.0);
             var dbPoints = sprinklers.Select(o => new DBPoint(o)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             var filter = spatialIndex.SelectCrossingPolygon(pline);
