@@ -2135,10 +2135,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 continueConn = false;
                 for (int i = 0; i < ptList.Count; i++)
                 {
-                    if(i == 121)
-                    {
-
-                    }
                     if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                     {
                         continue;
