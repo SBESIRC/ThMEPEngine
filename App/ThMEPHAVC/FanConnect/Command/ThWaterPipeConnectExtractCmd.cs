@@ -50,129 +50,142 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public override void SubExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var database = AcadDatabase.Active())
+            try
             {
-                ImportBlockFile();
-                double pipeWidth = 300.0;
-                switch (ConfigInfo.WaterSystemConfigInfo.SystemType)//系统
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var database = AcadDatabase.Active())
                 {
-                    case 0://水系统
-                        {
-                            switch (ConfigInfo.WaterSystemConfigInfo.PipeSystemType)//管制
+                    ImportBlockFile();
+                    double pipeWidth = 300.0;
+                    switch (ConfigInfo.WaterSystemConfigInfo.SystemType)//系统
+                    {
+                        case 0://水系统
                             {
-                                case 0://两管制
-                                    {
-                                        pipeWidth = 200.0;
-                                    }
-                                    break;
-                                case 1://四管制
-                                    {
-                                        pipeWidth = 400.0;
-                                    }
-                                    break;
-                                default:
-                                    break;
+                                switch (ConfigInfo.WaterSystemConfigInfo.PipeSystemType)//管制
+                                {
+                                    case 0://两管制
+                                        {
+                                            pipeWidth = 200.0;
+                                        }
+                                        break;
+                                    case 1://四管制
+                                        {
+                                            pipeWidth = 400.0;
+                                        }
+                                        break;
+                                    default:
+                                        break;
+                                }
                             }
-                        }
-                        break;
-                    case 1://冷媒系统
-                        {
-                            pipeWidth = 200.0;
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                //获取风机设备
-                var startPt = ThFanConnectUtils.SelectPoint();
-                if (startPt.IsEqualTo(new Point3d()))
-                {
-                    return;
-                }
-                //提取水管路由
-                var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
-                foreach(var p in pipes)
-                {
-                    p.TransformBy(mt);
-                }
-                //水管干路和支干路
-                if (pipes.Count == 0)
-                {
-                    return;
-                }
-                //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-                var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-                foreach (var p in pipes)
-                {
-                    p.TransformBy(mt.Inverse());
-                }
-                var tmpLines = new List<Line>();
-                foreach (var l in lineColl)
-                {
-                    var line = l as Line;
-                    line.TransformBy(mt.Inverse());
-                    tmpLines.Add(line);
-                }
+                            break;
+                        case 1://冷媒系统
+                            {
+                                pipeWidth = 200.0;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    //获取风机设备
+                    var startPt = ThFanConnectUtils.SelectPoint();
+                    if (startPt.IsEqualTo(new Point3d()))
+                    {
+                        return;
+                    }
+                    //提取水管路由
+                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt);
+                    }
+                    //水管干路和支干路
+                    if (pipes.Count == 0)
+                    {
+                        return;
+                    }
+                    //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
+                    ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+                    var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt.Inverse());
+                    }
+                    var tmpLines = new List<Line>();
+                    foreach (var l in lineColl)
+                    {
+                        var line = l as Line;
+                        line.TransformBy(mt.Inverse());
+                        tmpLines.Add(line);
+                    }
 
-                var fucs = ThFanConnectUtils.SelectFanCUModel();
-                if(fucs.Count == 0)
-                {
-                    return;
-                }
-                //获取剪力墙
-                var shearWalls = ThBuildElementExtractService.GetShearWalls();
-                //获取结构柱
-                var columns = ThBuildElementExtractService.GetColumns();
-                //获取房间框线
-                var rooms = ThBuildElementExtractService.GetBuildRooms();
-                //生成管路路由
-                var pipeService = new ThCreatePipeService();
-                pipeService.PipeWidth = pipeWidth;
-                pipeService.EquipModel = fucs;
-                pipeService.TrunkLines = tmpLines;
-                foreach(var wall in shearWalls)
-                {
-                    pipeService.AddObstacleHole(wall.Outline);
-                }
-                foreach (var column in columns)
-                {
-                    pipeService.AddObstacleHole(column.Outline);
-                }
-                foreach (var room in rooms)
-                {
-                    pipeService.AddObstacleRoom(room);
-                }
-                var plines = pipeService.CreatePipeLine(0);
-                var toDbServiece = new ThFanToDBServiece();
-                foreach (var pl in plines)
-                {
-                    toDbServiece.InsertEntity(pl , "AI-水管路由");
-                }
+                    var fucs = ThFanConnectUtils.SelectFanCUModel(ConfigInfo.WaterSystemConfigInfo.SystemType);
+                    if (fucs.Count == 0)
+                    {
+                        return;
+                    }
+                    //获取剪力墙
+                    var shearWalls = ThBuildElementExtractService.GetShearWalls();
+                    //获取结构柱
+                    var columns = ThBuildElementExtractService.GetColumns();
+                    //获取房间框线
+                    var rooms = ThBuildElementExtractService.GetBuildRooms();
+                    //生成管路路由
+                    var pipeService = new ThCreatePipeService();
+                    pipeService.PipeWidth = pipeWidth;
+                    pipeService.EquipModel = fucs;
+                    pipeService.TrunkLines = tmpLines;
+                    foreach(var f in fucs)
+                    {
+                        pipeService.AddObstacleHole(f.FanObb);
+                    }
+                    foreach (var wall in shearWalls)
+                    {
+                        pipeService.AddObstacleHole(wall.Outline);
+                    }
+                    foreach (var column in columns)
+                    {
+                        pipeService.AddObstacleHole(column.Outline);
+                    }
+                    
+                    foreach (var room in rooms)
+                    {
+                        pipeService.AddObstacleRoom(room);
+                    }
+                    var plines = pipeService.CreatePipeLine(0);
+                    var toDbServiece = new ThFanToDBServiece();
+                    foreach (var pl in plines)
+                    {
+                        toDbServiece.InsertEntity(pl, "AI-水管路由");
+                    }
 
-                //添加需求ID:1001796
-                var allLines = new List<Line>();
-                allLines.AddRange(pipes);
-                foreach(var pl in plines)
-                {
-                    allLines.AddRange(pl.ToLines());
-                }
-                var tmpFcus = ThEquipElementExtractService.GetFCUModels();
-                if (tmpFcus.Count == 0)
-                {
+                    //添加需求ID:1001796
+                    var allLines = new List<Line>();
+                    allLines.AddRange(pipes);
+                    foreach (var pl in plines)
+                    {
+                        allLines.AddRange(pl.ToLines());
+                    }
+                    var tmpFcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
+                    if (tmpFcus.Count == 0)
+                    {
+                        return;
+                    }
+                    var remSurplusPipe = new ThRemSurplusPipe()
+                    {
+                        StartPoint = startPt,
+                        AllLine = allLines,
+                        AllFan = tmpFcus
+                    };
+                    remSurplusPipe.RemSurplusPipe();
                     return;
                 }
-                var remSurplusPipe = new ThRemSurplusPipe()
-                {
-                    StartPoint = startPt,
-                    AllLine = allLines,
-                    AllFan = tmpFcus
-                };
-                remSurplusPipe.RemSurplusPipe();
-                return;
             }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+
         }
     }
 }

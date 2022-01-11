@@ -279,12 +279,15 @@ namespace ThMEPHVAC.FanConnect.Model
                 if (node.Item.CntPoint.IsEqualTo(l.StartPoint))
                 {
                     var model = FindPipeModel(l, treeModel);
-                    var pointModel = new ThFanPointModel();
-                    pointModel.CntPoint = l.EndPoint;
-                    pointModel.IsFlag = model.IsFlag;
-                    var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
-                    node.InsertChild(pointNode);
-                    remLines.Add(l);
+                    if(model != null)
+                    {
+                        var pointModel = new ThFanPointModel();
+                        pointModel.CntPoint = l.EndPoint;
+                        pointModel.IsFlag = model.IsFlag;
+                        var pointNode = new ThFanTreeNode<ThFanPointModel>(pointModel);
+                        node.InsertChild(pointNode);
+                        remLines.Add(l);
+                    }
                 }
             }
             lines = lines.Except(remLines).ToList();

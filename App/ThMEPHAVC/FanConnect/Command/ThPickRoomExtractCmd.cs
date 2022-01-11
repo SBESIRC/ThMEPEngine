@@ -26,28 +26,36 @@ namespace ThMEPHVAC.FanConnect.Command
 
         public override void SubExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var database = AcadDatabase.Active())
+            try
             {
-                PromptSelectionOptions options = new PromptSelectionOptions()
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var database = AcadDatabase.Active())
                 {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择房间框线",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var result = Active.Editor.GetSelection(options);
-                if (result.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result.Value.GetObjectIds())
+                    PromptSelectionOptions options = new PromptSelectionOptions()
                     {
-                        var entity = database.Element<Entity>(obj);
-                        if(entity.Layer.Contains("AI-房间框线"))
+                        AllowDuplicates = false,
+                        MessageForAdding = "选择房间框线",
+                        RejectObjectsOnLockedLayers = true,
+                    };
+                    var result = Active.Editor.GetSelection(options);
+                    if (result.Status == PromptStatus.OK)
+                    {
+                        foreach (var obj in result.Value.GetObjectIds())
                         {
-                            ConfigInfo.WaterValveConfigInfo.RoomObb.Add(entity);
+                            var entity = database.Element<Entity>(obj);
+                            if (entity.Layer.Contains("AI-房间框线"))
+                            {
+                                ConfigInfo.WaterValveConfigInfo.RoomObb.Add(entity);
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+
         }
     }
 }

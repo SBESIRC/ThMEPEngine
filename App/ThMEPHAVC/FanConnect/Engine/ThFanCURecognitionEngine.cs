@@ -18,66 +18,36 @@ namespace ThMEPHVAC.FanConnect.Engine
 {
     public class ThFanCURecognitionEngine
     {
-        public List<ThFanCUModel> Extract(Database database)
+        public List<ThFanCUModel> Extract(Database database,int sysType)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var retModel = new List<ThFanCUModel>();
-                var Results = acadDatabase
-                   .ModelSpace
-                   .OfType<BlockReference>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsValveBlock(o));
-                foreach(var blk in Results)
+                var Results = acadDatabase.ModelSpace.OfType<BlockReference>();
+                foreach (var blk in Results)
                 {
-                    var tmpFan = new ThFanCUModel();
-                    var attrib =  blk.ObjectId.GetAttributesInBlockReference();
-                    if(attrib.ContainsKey("制冷量/制热量") && attrib.ContainsKey("冷水温差/热水温差"))
+                    if(sysType == 0)//水系统
                     {
-                        var strCapacity = attrib["制冷量/制热量"];
-                        ThFanConnectUtils.GetCoolAndHotCapacity(strCapacity, out double coolCapacity, out double hotCapacity);
-                        
-                        var strTempDiff = attrib["冷水温差/热水温差"];
-                        ThFanConnectUtils.GetCoolAndHotTempDiff(strTempDiff, out double coolTempDiff, out double hotTempDiff);
-                        tmpFan.CoolCapa = coolCapacity;
-                        tmpFan.CoolFlow = coolCapacity / 1.163 / coolTempDiff;
-                        tmpFan.HotFlow = hotCapacity / 1.163 / hotTempDiff;
+                        if(blk.GetEffectiveName() == "AI-FCU(两管制)" || blk.GetEffectiveName() == "AI-FCU(四管制)"
+                            || blk.GetEffectiveName() == "AI-吊顶式空调箱")
+                        {
+                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
+                        }
+                        else if(blk.GetEffectiveName() == "AI-水管断线")
+                        {
+                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
+                        }
                     }
-
-                    var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
-                    var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
-
-                    var offset1 = new Point3d(offset1x, offset1y, 0);
-
-                    var dbcollection = new DBObjectCollection();
-                    blk.Explode(dbcollection);
-                    dbcollection = dbcollection.OfType<Entity>().Where(O => O is Curve).ToCollection();
-
-                    tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
-                    tmpFan.FanObb = dbcollection.GetMinimumRectangle();
-                    retModel.Add(tmpFan);
+                    else if( sysType == 1)//冷媒系统
+                    {
+                        if(blk.GetEffectiveName() == "AI-中静压VRF室内机(风管机)" || blk.GetEffectiveName() == "AI-VRF室内机(四面出风型)")
+                        {
+                            retModel.Add(ThFanConnectUtils.GetFanFromBlockReference(blk));
+                        }
+                    }
                 }
                 return retModel;
             }
-        }
-
-        private bool IsHYDTPipeLayer(string layer)
-        {
-            if(layer.ToUpper() == "H-EQUP-FC" || layer.ToUpper() == "H-EQUP-AHU")
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        private bool IsValveBlock(BlockReference blockReference)
-        {
-            var blkName = blockReference.GetEffectiveName().ToUpper();
-            if(blkName.Contains("AI-FCU"))
-            {
-                return true;
-            }
-            return false;
         }
     }
 }

@@ -53,8 +53,6 @@ namespace ThMEPHVAC.FanConnect.Service
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
         {
-            var collection = ObstacleHoles.ToCollection();
-            collection.Add(model.FanObb);
             //根据model的类型，先走一步
             var clostPt0 = line.GetClosestPointTo(model.FanPoint, false);
             if(clostPt0.DistanceTo(model.FanPoint) <= 500.0)
@@ -68,7 +66,6 @@ namespace ThMEPHVAC.FanConnect.Service
             //根据model位置和line，构建一个框frame
             var frame = ThFanConnectUtils.CreateMapFrame(line, stepPt,10000);
             //提取frame里面的hole和room
-            HoleIndex.Reset(collection);
             var dbHoles = HoleIndex.SelectCrossingPolygon(frame);
             var holes = new List<Polyline>();
             foreach (var dbHole in dbHoles)
