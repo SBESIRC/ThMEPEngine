@@ -24,36 +24,119 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Graph = graph;
             DefaultStartNumber = "";
         }
-        public List<ThLightNodeLink> Link()
+
+        public List<ThLightNodeLink> LinkMainBranch()
         {
+            /*  
+             *          | (branch)
+             *          |
+             * -------------------
+             *  (first)   (second)
+             */
+            // eg.方向是从first -> second,连first->branch
             var results = new List<ThLightNodeLink>();
             var preIds = FindPreEdgeIds();
             preIds.ForEach(p =>
             {
                 var branches = FindBranches(p);
-                results.AddRange(LinkBranch(p, branches));
+                results.AddRange(LinkMainBranch(p, branches));
             });
             return results;
         }
-        
-        private List<ThLightNodeLink> LinkBranch(string preEdgeId,List<string> linkPathFirstEdgeIds)
+
+        public List<ThLightNodeLink> LinkBetweenBranch()
+        {
+            /*      (branch1)
+             *          | 
+             *          |
+             * -------------------
+             *  (first) | (second)
+             *          | 
+             *      (branch2)
+             */
+            // 对于
+            var results = new List<ThLightNodeLink>();
+            var preIds = FindPreEdgeIds();
+            preIds.ForEach(p =>
+            {
+                var branches = FindBranches(p);
+                if(branches.Count==2)
+                {
+                    results.AddRange(LinkBetweenBranch(branches[0], branches[1]));
+                }
+            });
+            return results;
+        }
+        private List<ThLightNodeLink> LinkBetweenBranch(string firstEdgeId, string secondEdgeId)
+        {
+            // firstEdgeId 第一个分支第一条边的Id
+            // secondEdgeId 第二个分支第一条边的Id
+            var results = new List<ThLightNodeLink>();
+            var firstEdge = FindEdge(firstEdgeId);
+            var secondEdge = FindEdge(secondEdgeId);
+            if(!firstEdge.Direction.IsSameDirection(secondEdge.Direction))
+            {
+                return results;
+            }
+            if(!firstEdge.Edge.IsLessThan45Degree(firstEdge.Edge))
+            {
+                return results;
+            }
+            var firstLinkPath = FindLinkPath(firstEdgeId);
+            var secondLinkPath = FindLinkPath(secondEdgeId);
+            var firstSamePathEdges = GetSamePathEdges(firstLinkPath.Edges);
+            var secondSamePathEdges = GetSamePathEdges(secondLinkPath.Edges);
+            return LinkBranchEdges(firstSamePathEdges, secondSamePathEdges);
+        }
+
+        private List<ThLightNodeLink> LinkBranchEdges(
+            List<ThLightEdge> firstBranchEdges, 
+            List<ThLightEdge> secondBranchEdges)
+        {
+            /* 
+             *   <-----------------  ---------------->
+             *    firstBranchEdges    secondBranchEdges
+             */
+            if (firstBranchEdges.Count > 0 && firstBranchEdges.Count > 0)
+            {
+                var samePathEdges = new List<ThLightEdge>();
+                firstBranchEdges.Reverse();
+                samePathEdges.AddRange(firstBranchEdges);
+                samePathEdges.AddRange(secondBranchEdges);
+                var path = samePathEdges.Select(o => o.Edge).ToList().ToPolyline();
+                var linkPath = new ThLinkPath()
+                {
+                    Edges = samePathEdges,
+                    Start = path.StartPoint,
+                };
+                if(path.Length>0.0)
+                {
+                    path.Dispose();
+                }
+                var sameLinkService = new ThLightNodeSameLinkService(new List<ThLinkPath> { linkPath });
+                return sameLinkService.FindLightNodeLinkOnSamePath();
+            }
+            return new List<ThLightNodeLink>();
+        }
+
+        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId,List<string> linkPathFirstEdgeIds)
         {
             if(linkPathFirstEdgeIds.Count==1)
             {
                 // 有一个分支
-                return LinkBranch(preEdgeId, linkPathFirstEdgeIds[0]);
+                return LinkMainBranch(preEdgeId, linkPathFirstEdgeIds[0]);
             }
             else if (linkPathFirstEdgeIds.Count == 2)
             {
                 // 有两个分支
-                return LinkBranch(preEdgeId, linkPathFirstEdgeIds[0], linkPathFirstEdgeIds[1]);
+                return LinkMainBranch(preEdgeId, linkPathFirstEdgeIds[0], linkPathFirstEdgeIds[1]);
             }
             else
             {
                 return new List<ThLightNodeLink>();
             }
         }
-        private List<ThLightNodeLink> LinkBranch(string preEdgeId, string firstEdgeId)
+        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId, string firstEdgeId)
         {
             var results = new List<ThLightNodeLink>();
             var currentLinkPath = FindLinkPath(preEdgeId);
@@ -65,7 +148,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
-        private List<ThLightNodeLink> LinkBranch(string preEdgeId,string firstEdgeId,string secondEdgeId)
+        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId,string firstEdgeId,string secondEdgeId)
         {
             var results=new List<ThLightNodeLink>();
             var currentLinkPath = FindLinkPath(preEdgeId);
