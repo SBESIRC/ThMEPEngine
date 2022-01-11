@@ -155,6 +155,8 @@ namespace ThMEPHVAC.Model
                 return "消防排烟";
             else if (geoLayer == "H-DUCT-VENT")
                 return "平时送风";
+            else if (geoLayer == "H-DUCT-ACON")
+                return "空调送风";
             else
                 throw new NotImplementedException("[CheckError]: No such geo layer!");
         }

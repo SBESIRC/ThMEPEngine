@@ -320,10 +320,21 @@ namespace ThMEPHVAC.Model
                 service.DrawReducingByReducing(reducing);
             }
         }
+        private Point3d SearchNearP(Dictionary<Point3d, double> portWidths, Point3d detectP)
+        {
+            var tor = new Tolerance(20, 20);
+            foreach (Point3d p in portWidths.Keys)
+            {
+                if (p.IsEqualTo(detectP, tor))
+                    return p;
+            }
+            throw new NotImplementedException("连接件入口点未找到检测点！！！");
+        }
         private void DoProcCross(EntityModifyParam cross, Point3d detectP)
         {
             // 将cross对应处的端口修改并更新管段
             var modifyWidth = ThMEPHVACService.GetWidth(curDuct.modifySize);
+            detectP = SearchNearP(cross.portWidths, detectP);
             var orgDuctSize = cross.portWidths[detectP];
             ThDuctPortsDrawService.ClearGraph(cross.handle);
             cross.portWidths[detectP] = modifyWidth;
@@ -336,6 +347,7 @@ namespace ThMEPHVAC.Model
         {
             // 将cross对应处的端口修改并更新管段
             var modifyWidth = ThMEPHVACService.GetWidth(curDuct.modifySize);
+            detectP = SearchNearP(tee.portWidths, detectP);
             var orgDuctSize = tee.portWidths[detectP];
             ThDuctPortsDrawService.ClearGraph(tee.handle);
             tee.portWidths[detectP] = modifyWidth;
@@ -343,10 +355,10 @@ namespace ThMEPHVAC.Model
             tee.portWidths[detectP] = orgDuctSize;
             UpdateTee(tee, detectP);
         }
-
         private void DoProcElbow(EntityModifyParam elbow, Point3d detectP)
         {
             var modifyWidth = ThMEPHVACService.GetWidth(curDuct.modifySize);
+            detectP = SearchNearP(elbow.portWidths, detectP);
             if (elbow.portWidths[detectP] > modifyWidth)
             {
                 var otherP = GetElbowOtherP(elbow, detectP);

@@ -10,6 +10,7 @@ using ThMEPHVAC.Algorithm;
 using NFox.Cad;
 using ThMEPEngineCore.Model.Hvac;
 using NetTopologySuite.Geometries;
+using ThCADExtension;
 
 namespace ThMEPHVAC.Model
 {
@@ -494,46 +495,81 @@ namespace ThMEPHVAC.Model
         }
         private void AccMainDuctWithExhaust()
         {
-            var dic = CountSmokeZoneAirVolume(out DBObjectCollection smokeMpBounds);
             var endSegs = new DBObjectCollection();
             foreach (var lines in endLines)
                 foreach (Line l in lines)
                     endSegs.Add(l);
             foreach (Line l in mainLines)
                 endSegs.Add(l);
+            var dic = CountSmokeZoneAirVolume(endSegs, out DBObjectCollection smokeMpBounds);
             var smokeIndex = new ThCADCoreNTSSpatialIndex(smokeMpBounds);
             double k = 1;
             foreach (Line l in mainLines)
             {
                 endSegs.Remove(l);
-                var airVolumes = GetZoneAirVolume(endSegs, l, smokeIndex, dic);
-                airVolumes.Sort();
-                var airVolume = airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2])
-                                                      : airVolumes[0];
+                double airVolume = GetSucceedSmokeZoneAirVolume(endSegs, l, smokeIndex, dic, out MPolygon curSmokeZone);
+                double preAirVolume = GetSameSmokeZonePreAirVolume(endSegs, l, curSmokeZone);
+                airVolume -= preAirVolume;
                 mainLinesInfos.Add(l.GetHashCode(), new SegInfo() { airVolume = airVolume + (k++), l = l });
                 endSegs.Add(l);
             }
         }
-        private List<double> GetZoneAirVolume(DBObjectCollection lines, 
-                                              Line l, 
-                                              ThCADCoreNTSSpatialIndex smokeIndex, 
-                                              Dictionary<int, double> dicZone2AirVolume)
+        private double GetSameSmokeZonePreAirVolume(DBObjectCollection lines, 
+                                                    Line l, 
+                                                    MPolygon curSmokeZone)
+        {
+            if (curSmokeZone.Area < 10)
+                return 0;
+            var detector = new ThFanCenterLineDetector(true);
+            detector.SearchCenterLine(lines, l.StartPoint, l);
+            var crossPort = portIndex.SelectCrossingPolygon(curSmokeZone);
+            var linesIndex = new ThCADCoreNTSSpatialIndex(detector.connectLines);
+            double airVolume = 0;
+            foreach (MPolygon portBound in crossPort)
+            {
+                var portSet = linesIndex.SelectCrossingPolygon(portBound);
+                if (portSet.Count > 0)
+                    airVolume += dicPlToAirVolume[portBound.GetHashCode()].portAirVolume;
+            }
+            return airVolume;
+        }
+
+        private double GetSucceedSmokeZoneAirVolume(DBObjectCollection lines, 
+                                        Line l, 
+                                        ThCADCoreNTSSpatialIndex smokeIndex, 
+                                        Dictionary<int, double> dicZone2AirVolume,
+                                        out MPolygon curSmokeZone)
         {
             var detector = new ThFanCenterLineDetector(true);
             detector.SearchCenterLine(lines, l.EndPoint, l);
             var airVolumes = new List<double>();
             var set = new HashSet<int>();
+            curSmokeZone = new MPolygon();
+            bool flag = true;
             foreach (Line connLine in detector.connectLines)
             {
                 var polyline = connLine.Buffer(1);
-                var t = new DBObjectCollection() { polyline };
-                var mp = t.BuildMPolygon();
-                var res = smokeIndex.SelectCrossingPolygon(mp);
-                foreach (MPolygon pl in res)
-                    if (set.Add(pl.GetHashCode()))
-                        airVolumes.Add(dicZone2AirVolume[pl.GetHashCode()]);
+                var crossPort = portIndex.SelectCrossingPolygon(polyline);
+                if (crossPort.Count > 0)
+                {
+                    var portBounds = crossPort[0] as MPolygon;
+                    var res = smokeIndex.SelectCrossingPolygon(portBounds);
+                    foreach (MPolygon pl in res)
+                    {
+                        if (flag)
+                        {
+                            curSmokeZone = pl;
+                            flag = false;// 第一个交到风口的防烟分区
+                        }
+                        if (set.Add(pl.GetHashCode()))
+                        {
+                            airVolumes.Add(dicZone2AirVolume[pl.GetHashCode()]);
+                        }
+                    }
+                }
             }
-            return airVolumes;
+            airVolumes.Sort();
+            return airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2]) : airVolumes[0];
         }
 
         private void AccMainDuctWithNotExhaust()
@@ -565,11 +601,30 @@ namespace ThMEPHVAC.Model
             var zone = t.Polygonize();
             var bounds = new DBObjectCollection();
             foreach (Polygon pl in zone)
+            {
                 if (pl.Area > 100)
-                    bounds.Add(pl.ToDbEntity());
+                {
+                    var e = pl.ToDbEntity();
+                    if (e is MPolygon)
+                    {
+                        var mpl = e as MPolygon;
+                        CovertMPolygon2Polyline(mpl, bounds);
+                    }
+                    else
+                    {
+                        bounds.Add(e);
+                    }
+                }
+            }
             return bounds;
         }
-
+        private void CovertMPolygon2Polyline(MPolygon mpl, DBObjectCollection bounds)
+        {
+            bounds.Add(mpl.Shell());
+            var holes = mpl.Holes();
+            foreach (Polyline hole in holes)
+                bounds.Add(hole);
+        }
         private double AccumAirVolume(DBObjectCollection lines, Dictionary<int, double> dicLineToParam)
         {
             double airVolume = 0;
@@ -703,8 +758,9 @@ namespace ThMEPHVAC.Model
             return count;
         }
 
-        private Dictionary<int, double> CountSmokeZoneAirVolume(out DBObjectCollection smokeMpBounds)
+        private Dictionary<int, double> CountSmokeZoneAirVolume(DBObjectCollection centerlines, out DBObjectCollection smokeMpBounds)
         {
+            var index = new ThCADCoreNTSSpatialIndex(centerlines);
             smokeMpBounds = new DBObjectCollection();
             var smokeLines = ThDuctPortsReadComponent.ReadSmokeLine();
             var mat = Matrix3d.Displacement(-portParam.srtPoint.GetAsVector());
@@ -721,8 +777,9 @@ namespace ThMEPHVAC.Model
                 double zoneAirVolume = 0;
                 foreach (MPolygon p in res)
                 {
-                    //connPort.Add(p.GetHashCode());
-                    zoneAirVolume += dicPlToAirVolume[p.GetHashCode()].portAirVolume;
+                    var crossLine = index.SelectCrossingPolygon(p);
+                    if (crossLine.Count > 0)
+                        zoneAirVolume += dicPlToAirVolume[p.GetHashCode()].portAirVolume;
                 }
                 dicSmokeZone.Add(mp.GetHashCode(), zoneAirVolume);
             }

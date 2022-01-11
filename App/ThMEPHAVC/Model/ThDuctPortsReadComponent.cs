@@ -419,10 +419,16 @@ namespace ThMEPHVAC.Model
                 var portIds = ReadPortComponents();
 
                 var portsBlk = portIds.Select(o => db.Element<BlockReference>(o)).ToList();
-                if (portParam.param.portRange.Contains("下"))
+                if (portParam.param.portRange.Contains("下") || 
+                    portParam.param.portRange == "方形散流器" ||
+                    portParam.param.portRange == "圆形风口")
                     GetDownPortBoundsByPortAirVolume(portParam, portBounds, portsBlk, dicPlToAirVolume);
-                else
+                else if (portParam.param.portRange.Contains("侧"))
                     GetSidePortBoundsByPortAirVolume(portParam, portBounds, portsBlk, dicPlToAirVolume);
+                else
+                {
+                    // 不处理
+                }
                 return portBounds;
             }
         }
