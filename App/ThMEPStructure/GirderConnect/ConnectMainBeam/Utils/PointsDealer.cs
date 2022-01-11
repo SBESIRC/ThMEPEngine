@@ -532,6 +532,84 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansPts;
         }
+        public static HashSet<Point3d> GetBorderPts(List<Polyline> outlines, HashSet<Point3d> points)
+        {
+            var borderPts = new HashSet<Point3d>();
+            var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            foreach (var outline in outlines)
+            {
+                var innerPoints = outline.Buffer(500).OfType<Polyline>()
+                    .Where(o => o.Area > 1.0)
+                    .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
+                    .OfType<DBPoint>()
+                    .Select(d => d.Position)).Distinct().ToList();
+                innerPoints.ForEach(o => borderPts.Add(o));
+            }
+            return borderPts;
+        }
+
+        /// <summary>
+        /// 生成一种数据结构，可以通过外框线找到其包含的边界点
+        /// </summary>
+        /// <param name="outlines"></param>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points)
+        {
+            var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
+            var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
+            foreach (var outline in outlines)
+            {
+                var innerPoints = outline.Buffer(500).OfType<Polyline>()
+                    .Where(o => o.Area > 1.0)
+                    .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
+                    .OfType<DBPoint>()
+                    .Select(d => d.Position)).Distinct().ToList();
+                outline2BorderPts.Add(outline, innerPoints.ToHashSet());
+            }
+            return outline2BorderPts;
+        }
+
+        /// <summary>
+        /// 获取outline2BorderNearPts
+        /// </summary>
+        /// <param name="dicTuples">注：此时的dicTuples不应包含close border lines</param>
+        /// <param name="polylines"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> CreateOutline2BorderNearPts(Dictionary<Point3d, HashSet<Point3d>> dicTuples, List<Polyline> polylines)
+        {
+            var outline2BorderPts = GetOutline2BorderPts(polylines.ToHashSet(), dicTuples.Keys.ToList());
+            var outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
+            foreach(var outline in outline2BorderPts.Keys)
+            {
+                if (!outline2BorderNearPts.ContainsKey(outline))
+                {
+                    outline2BorderNearPts.Add(outline, new Dictionary<Point3d, HashSet<Point3d>>());
+                }
+                foreach(var borderPt in outline2BorderPts[outline])
+                {
+                    if (!outline2BorderNearPts[outline].ContainsKey(borderPt))
+                    {
+                        outline2BorderNearPts[outline].Add(borderPt, new HashSet<Point3d>());
+                    }
+                    if (dicTuples.ContainsKey(borderPt))
+                    {
+                        foreach (var nearPt in dicTuples[borderPt])
+                        {
+                            if (!outline2BorderNearPts[outline][borderPt].Contains(nearPt))
+                            {
+                                outline2BorderNearPts[outline][borderPt].Add(nearPt);
+                            }
+                        }
+                    }
+                }
+            }
+            return outline2BorderNearPts;
+        }
+
+
         /// <summary>
         /// Update structure Outline2BorderNearPts
         /// </summary>
@@ -556,29 +634,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// 生成一种数据结构，可以通过外框线找到其包含的边界点
-        /// </summary>
-        /// <param name="outlines"></param>
-        /// <param name="points"></param>
-        /// <returns></returns>
-        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points)
-        {
-            var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
-            var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
-            foreach (var outline in outlines)
-            {
-                var innerPoints = outline.Buffer(500).OfType<Polyline>()
-                    .Where(o => o.Area > 1.0)
-                    .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
-                    .OfType<DBPoint>()
-                    .Select(d => d.Position)).Distinct().ToList();
-                outline2BorderPts.Add(outline, innerPoints.ToHashSet());
-            }
-            return outline2BorderPts;
         }
 
         public static Point3dCollection PointsDistinct(Point3dCollection pts, double deviation = 1.0)

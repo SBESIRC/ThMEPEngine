@@ -25,6 +25,18 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
+        /// 显示一个Tuples组成的多边形
+        /// </summary>
+        /// <param name="tuples"></param>
+        /// <param name="colerIndex"></param>
+        public static void ShowPolyline(List<Tuple<Point3d, Point3d>> tuples, int colerIndex = 1)
+        {
+            var polyline = LineDealer.Tuples2Polyline(tuples);
+            polyline.ColorIndex = colerIndex;
+            HostApplicationServices.WorkingDatabase.AddToModelSpace(polyline);
+        }
+
+        /// <summary>
         /// 显示设备所能探测的范围
         /// </summary>
         /// <param name="pt">设备位置</param>

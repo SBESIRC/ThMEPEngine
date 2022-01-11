@@ -69,7 +69,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 acdb.Database.UnOffLayer(layerName);
                 acdb.Database.UnFrozenLayer(layerName);
                 acdb.Database.UnPrintLayer(layerName);
-
             }
         }
 

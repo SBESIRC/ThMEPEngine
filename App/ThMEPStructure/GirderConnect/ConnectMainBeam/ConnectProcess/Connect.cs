@@ -6,10 +6,10 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Data;
 using ThMEPStructure.GirderConnect.ConnectMainBeam.Utils;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
 {
@@ -131,14 +131,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
             SimplifyDicTuples(zeroPts, SimilarPointsDis, Math.PI / 12);
             dicTuples = SplitAndMerge(dicTuples, allPts, closeBorderLines);
-            var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts); //这步可能outliborder错导致dictupe多添加一遍
+            var itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outlineWallsMerged.Keys.ToList(), ref outline2BorderNearPts);//////////////////////////////////////////////////////
             LineDealer.DeleteSameClassLine(itcBorderPts, ref dicTuples);
             LineDealer.DeleteDiffClassLine(itcBorderPts, borderPts, ref dicTuples);
+            //下面那个可能需要移动到这里
             LineDealer.AddSpecialLine(outline2BorderNearPts, ref dicTuples);
 
             SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle * 2);
             StructureDealer.AddConnectUpToFour(ref dicTuples, allPts, itcBorderPts, MaxBeamLength);
-            PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
+
+            outline2BorderNearPts = PointsDealer.CreateOutline2BorderNearPts(dicTuples, outline2BorderNearPts.Keys.ToList());
+
             StructureDealer.DeleteConnectUpToFourB(ref dicTuples, ref outline2BorderNearPts);
             foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
             {
@@ -164,11 +167,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             StructureDealer.RemoveLinesInterSectWithCloseBorderLines(closebdLines, ref dicTuples);
             closebdLines.ForEach(o => StructureDealer.DeleteFromDicTuples(o.Item1, o.Item2, ref dicTuples));
 
-            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
-            PointsDealer.UpdateOutline2BorderNearPts(ref outline2BorderNearPts, dicTuples);
-            itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outline2BorderNearPts.Keys.ToList(), ref outline2BorderNearPts);
+            outline2BorderNearPts = PointsDealer.CreateOutline2BorderNearPts(dicTuples, outline2BorderNearPts.Keys.ToList());
+            dicTuples = SplitAndMergeB(52000000);
+
+            itcBorderPts = PointsDealer.FindIntersectBorderPt(allPts, outline2BorderNearPts.Keys.ToList(), ref outline2BorderNearPts);////////////////////////////////////////////////////////////
             itcBorderPts = PointsDealer.PointsDistinct(itcBorderPts);
             LineDealer.DeleteSameClassLine(itcBorderPts, ref dicTuples);
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
             return dicTuples;
         }
 
@@ -189,7 +194,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
         /// <summary>
         /// 对现有的dicTuples结构进行多边形分割与合并
         /// </summary>
-        private Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts, Dictionary<Point3d, Point3d> closeBorderLines)
+        private Dictionary<Point3d, HashSet<Point3d>> SplitAndMerge(Dictionary<Point3d, HashSet<Point3d>> dicTuples, Point3dCollection allPts,
+            Dictionary<Point3d, Point3d> closeBorderLines)
         {
             //Split & Merge
             //LineDealer.DicTuplesStandardize(ref dicTuples, allPts);
@@ -296,6 +302,41 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             StructureDealer.ReduceSimilarLine(ref dicTuples, angle);
             StructureDealer.ReduceSimilarPoints(ref dicTuples, basePts);
             LineDealer.DicTuplesStandardize(ref dicTuples, basePts, deviation);
+        }
+
+        public Dictionary<Point3d, HashSet<Point3d>> SplitAndMergeB(double splitArea = 0.0)
+        {
+            //Split & Merge
+            SimplifyDicTuples(zeroPts, SimilarPointsDis, SimilarAngle);
+            var closeBorderLines = StructureDealer.CloseBorder(outline2BorderNearPts);
+            closeBorderLines.ForEach(o => StructureDealer.AddLineTodicTuples(o.Key, o.Value, ref dicTuples));
+            StructureDealer.RemoveIntersectLines(ref dicTuples);
+
+            //Split & Merge
+            var findPolylineFromLines = new Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>>();
+            StructureBuilder.BuildPolygonsB(dicTuples, ref findPolylineFromLines);
+            //splic polyline
+            StructureBuilder.SplitBlockB(ref findPolylineFromLines, closeBorderLines, splitArea);
+
+            //merge fragments and split if possible
+            var ptList = new HashSet<Point3d>();
+            foreach (var tup in findPolylineFromLines.Keys.ToList())
+            {
+                if (!ptList.Contains(tup.Item1))
+                    ptList.Add(tup.Item1);
+                if (!ptList.Contains(tup.Item2))
+                    ptList.Add(tup.Item2);
+            }
+            var borderPts = PointsDealer.GetBorderPts(outline2BorderNearPts.Keys.ToList(), ptList);
+
+            StructureBuilder.MergeFragmentsB(ref findPolylineFromLines, borderPts, closeBorderLines, splitArea);
+            //或许可以不用closeBorderLines，可以用findPolylineFromLines polyline 包含的 borderPt的数量来判断是否加入这条线，如果多边形有大于等于3个点，则不处理这个多边形
+            //Deal with Intersect Near Points
+            Dictionary<Point3d, HashSet<Point3d>> newDicTuples = LineDealer.TuplesStandardize(findPolylineFromLines.Keys.ToHashSet(), zeroPts, 100);
+            
+            var itcBorderPts = PointsDealer.FindIntersectBorderPt(newDicTuples.Keys.ToList(), outline2BorderNearPts.Keys.ToList());
+            LineDealer.DeleteSameClassLine(itcBorderPts, ref newDicTuples);
+            return newDicTuples;
         }
     }
 }
