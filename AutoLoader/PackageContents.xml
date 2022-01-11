@@ -315,6 +315,7 @@
                 <Command Local="THFJFZ" Global="THFJFZ" />
                 <Command Local="THSNJBZ" Global="THSNJBZ" />
                 <Command Local="THSNJFZ" Global="THSNJFZ" />
+                <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
             </Commands>
         </ComponentEntry>
@@ -330,6 +331,7 @@
                 <Command Local="THFJFZ" Global="THFJFZ" />
                 <Command Local="THSNJBZ" Global="THSNJBZ" />
                 <Command Local="THSNJFZ" Global="THSNJFZ" />
+                <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
             </Commands>
         </ComponentEntry>
@@ -345,6 +347,7 @@
                 <Command Local="THFJFZ" Global="THFJFZ" />
                 <Command Local="THSNJBZ" Global="THSNJBZ" />
                 <Command Local="THSNJFZ" Global="THSNJFZ" />
+                <Command Local="THSNJJH" Global="THSNJJH" />
                 <Command Local="THSNJJHXG" Global="THSNJJHXG" />
             </Commands>
         </ComponentEntry>
@@ -379,6 +382,30 @@
                 <Command Local="THZLSC" Global="THZLSC" />
                 <Command Local="THCLSC" Global="THCLSC" />
                 <Command Local="THSXSC" Global="THSXSC" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPArchitecture, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPStructure, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPStructure, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPArchitecture.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture" AppName="ThMEPArchitecture" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
             </Commands>
         </ComponentEntry>
     </Components>
@@ -544,6 +571,33 @@
                 <Command Local="THPTLGBZ" Global="THPTLGBZ" />
                 <Command Local="-THPTLGBZ" Global="-THPTLGBZ" />
                 <Command Local="THMEPOPTIONS" Global="THMEPOPTIONS" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Architecture.WPI.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXCW" Global="THDXCW" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Architecture.WPI.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXCW" Global="THDXCW" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, TianHua.Architecture.WPI.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXCW" Global="THDXCW" />
             </Commands>
         </ComponentEntry>
     </Components>
