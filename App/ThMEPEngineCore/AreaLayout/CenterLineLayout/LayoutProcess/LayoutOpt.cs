@@ -42,7 +42,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         public List<Point3d> Calculate()
         {
             //GetPosiblePositions();
-            GetPosiblePositionsNew();
+            GetPosiblePositions();
             SetEmptyDetect();
             SetDetectSptialIdx();
 
@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return new List<Point3d>();
             }
 
-            PointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
+            //PointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
 
             List<Point3d> fstPoints = FstStep(); //1、初选
             fstPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l1ptFirst", 3, 25, 30));
@@ -77,11 +77,11 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return ans;
             }
 
-            ////将点移到中点附近。会变大很多盲区暂时去掉。
-            //var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
-            //movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
+            //将点移到中点附近。会变大很多盲区暂时去掉。
+            var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
+            movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
 
-            List<Point3d> fourPoints = FourStep(sndHalfPoints); //4、移点：修补需求：将一些点更加靠近中心线
+            List<Point3d> fourPoints = FourStep(movePtToLayoutCt); //4、移点：修补需求：将一些点更加靠近中心线
             fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6ptMoveToCL", 141, 25, 30));
 
             ////再次检查大盲区
@@ -141,9 +141,9 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// 获取可布置点位
         /// 如果以较大距离则比较点位比例和面积比例，差距太大（rateThreshold)则用更小的离散距离获取可布置点位。避免过细的走廊因为距离太大而没有初始点位。
         /// </summary>
-        private void GetPosiblePositionsNew()
+        private void GetPosiblePositions()
         {
-            var rateThreshold = 0.04; //试了几个奇怪的带洞区域或者很窄区域的经验值
+            var rateThreshold = 0.03; //试了几个奇怪的带洞区域或者很窄区域的经验值
             var rectangleThreshold = 0.8; //obb和实际面积比值界定。用来简单判断是不是像矩形
             List<Point3d> ans = new List<Point3d>();
 
@@ -160,9 +160,9 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     var obb = (layout.Shell()).CalObb();
                     double rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
                     var rateArea = layout.Area / obb.Area;
-                    var pt0 = obb.GetPoint3dAt(0);
-                    DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
-                    DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, layout.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                    //var pt0 = obb.GetPoint3dAt(0);
+                    //DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                    //DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, layout.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
                     //ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
                     
                     //比值差异过大且越不像四边形
