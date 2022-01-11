@@ -23,7 +23,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="mainLine">打断后的干管</param>
         /// <param name="subMainLine">打断后的支干管</param>
         /// <param name="allLine">全部管线</param>
-        public void ThSprinklerPipeToLine(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine, out List<Line> allLine)
+        public void ThSprinklerPipeToLine(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine)
         {
             mainLine = new List<Line>();
             subMainLine = new List<Line>();
@@ -34,7 +34,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             allTemp.AddRange(mainTemp);
             allTemp.AddRange(subMainTemp);
 
-            allLine = SimplifyLine(allTemp);
+            var allLine = SimplifyLine(allTemp);
 
             foreach (var l in allLine)
             {
@@ -54,7 +54,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
         }
 
-        public void ThSprinklerPipeToLine2(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine, out List<Line> allLine)
+        public void ThSprinklerPipeToLine2(List<Polyline> mainPipe, List<Polyline> subMainPipe, out List<Line> mainLine, out List<Line> subMainLine)
         {
             mainLine = new List<Line>();
             subMainLine = new List<Line>();
@@ -65,7 +65,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             allTemp.AddRange(mainTemp);
             allTemp.AddRange(subMainTemp);
 
-            allLine = ThDrainageSDCleanLineService.simplifyLine(allTemp);
+            var allLine = ThDrainageSDCleanLineService.simplifyLine(allTemp);
 
             foreach (var l in allLine)
             {

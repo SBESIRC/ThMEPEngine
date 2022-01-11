@@ -348,18 +348,21 @@ namespace ThMEPWSS.SprinklerConnect.Service
         /// <param name="line"></param>
         /// <param name="firstPt"></param>
         /// <returns></returns>
-        public static bool VaildLine(this Line line, List<Point3d> pts, List<Polyline> geometry)
+        public static bool VaildLine(this Line line, List<Point3d> pts, List<Line> pipes, List<Polyline> geometry)
         {
             var pline = line.ExtendLine(-10.0).Buffer(1.0);
             // 检测线上是否存在点
             var dbPoints = pts.Select(o => new DBPoint(o)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             var filter = spatialIndex.SelectCrossingPolygon(pline);
+            // 判断是否与管线相交
+            var pipeIndex = new ThCADCoreNTSSpatialIndex(pipes.ToCollection());
+            var pipeFilter = pipeIndex.SelectCrossingPolygon(pline);
             // 检测是否与墙线相交
             var wallIndex = new ThCADCoreNTSSpatialIndex(geometry.ToCollection());
             var wallFilter = wallIndex.SelectCrossingPolygon(pline);
 
-            if (filter.Count + wallFilter.Count > 0)
+            if (filter.Count + pipeFilter.Count + wallFilter.Count > 0)
             {
                 return true;
             }

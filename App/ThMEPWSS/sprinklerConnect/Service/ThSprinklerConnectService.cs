@@ -193,7 +193,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         virtualPtList.ForEach(virtualPt =>
                         {
                             var edge = new Line(virtualPt, realPts[i]);
-                            if (edge.VaildLine(SprinklerParameter.SprinklerPt, Geometry))
+                            if (edge.VaildLine(SprinklerParameter.SprinklerPt, SprinklerParameter.AllPipe, Geometry))
                             {
                                 return;
                             }
@@ -640,10 +640,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var piptIndex = new ThCADCoreNTSSpatialIndex(subMainPipe.ToCollection());
                 for (int i = 0; i < ptList.Count; i++)
                 {
-                    if(i == 74)
-                    {
-
-                    }
                     if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                     {
                         continue;
@@ -712,7 +708,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             continue;
                         }
 
-                        if(closeDistToPipe * 1.5 < closeDistToRow)
+                        if (closeDistToPipe * 1.5 < closeDistToRow)
                         {
                             continue;
                         }
@@ -1104,7 +1100,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         continue;
                     }
 
-                    
+
 
                     var center = new Point3d((realPts[i].X + ptNext.X) / 2, (realPts[i].Y + ptNext.Y) / 2, 0);
                     var filter = spatialIndex.SelectCrossingPolygon(center.CreateSquare(3 * DTTol));
@@ -2452,8 +2448,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public void BreakMainLine(List<Line> results)
         {
             var spatialIndex = new ThCADCoreNTSSpatialIndex(results.ToCollection());
-            var subMainPipe = SprinklerParameter.AllPipe;
-            subMainPipe.ForEach(p =>
+            var pipes = SprinklerParameter.AllPipe;
+            pipes.ForEach(p =>
             {
                 var breakPts = new List<Point3d>
                 {
