@@ -2126,12 +2126,19 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public void HandleSingleScatter(List<ThSprinklerRowConnect> rowConnection, List<Point3d> pipeScatters, double connTolerance)
         {
             var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
-            for (int time = 0; time < 1; time++)
+            var continueConn = true;
+            var objs = rowConnection.Select(row => row.Base).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            int coefficient = 2;
+            while (continueConn && coefficient <= 8)
             {
-                var objs = rowConnection.Select(row => row.Base).ToCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                continueConn = false;
                 for (int i = 0; i < ptList.Count; i++)
                 {
+                    if(i == 121)
+                    {
+
+                    }
                     if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                     {
                         continue;
@@ -2139,7 +2146,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                     if (rowConnection.Count > 0)
                     {
-                        var filter = spatialIndex.SelectCrossingPolygon(ptList[i].CreateSquare(2 * DTTol)).OfType<Line>().ToList();
+                        var filter = spatialIndex.SelectCrossingPolygon(ptList[i].CreateSquare(coefficient * DTTol)).OfType<Line>().ToList();
                         if (filter.Count == 0)
                         {
                             continue;
@@ -2151,9 +2158,12 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var filterRow = rowConnection
                             .Where(row => startPoints.Contains(row.StartPoint) && endPoints.Contains(row.EndPoint)).ToList();
                         var obstacle = new DBObjectCollection();
+                        var wallObstacle = new DBObjectCollection();
                         filterRow.ForEach(row => row.ConnectLines.ForEach(line => obstacle.Add(line)));
-                        Geometry.ForEach(geometry => obstacle.Add(geometry));
+                        SprinklerParameter.SprinklerPt.ForEach(pt => obstacle.Add(new DBPoint(pt)));
+                        Geometry.ForEach(geometry => wallObstacle.Add(geometry));
                         var obstacleIndex = new ThCADCoreNTSSpatialIndex(obstacle);
+                        var wallIndex = new ThCADCoreNTSSpatialIndex(wallObstacle);
 
                         var validRow = filterRow.Where(row => row.Count < 8).ToList();
                         var map = new List<Tuple<double, Line, int>>();
@@ -2216,9 +2226,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             var obstacleCount = 0;
                             for (int k = 0; k < lines.Count; k++)
                             {
-                                var reducedFrame = lines[k].ExtendLine(-10.0).Buffer(1.0);
-                                var intersection = obstacleIndex.SelectFence(reducedFrame);
-                                obstacleCount += intersection.Count;
+                                var reducedFrame = lines[k].ExtendLine(-10.0).Buffer(20.0);
+                                var intersection = obstacleIndex.SelectCrossingPolygon(reducedFrame);
+                                var wallIntersection = wallIndex.SelectFence(reducedFrame);
+                                obstacleCount += (intersection.Count + wallIntersection.Count);
                             }
                             if (obstacleCount == 0)
                             {
@@ -2238,11 +2249,14 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 {
                                     validRow[map[mapNum].Item3].OrderDict.Add(10, new List<Point3d> { ptList[i] });
                                 }
+                                pipeScatters.Add(ptList[i]);
+                                continueConn = true;
                                 break;
                             }
                         }
                     }
                 }
+                coefficient++;
             }
         }
 
