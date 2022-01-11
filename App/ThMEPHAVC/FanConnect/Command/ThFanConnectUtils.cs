@@ -99,20 +99,20 @@ namespace ThMEPHVAC.FanConnect.Command
                     foreach (var obj in result.Value.GetObjectIds())
                     {
                         var entity = acadDb.Element<Entity>(obj);
-                        Point3d basePt = Point3d.Origin;
-                        if (entity.GeometricExtents != null)
-                        {
-                            basePt = entity.GeometricExtents.CenterPoint();
-                        }
-                        var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
-                        entity.UpgradeOpen();
-                        entity.TransformBy(mt);
-                        
                         if (entity is BlockReference)
                         {
                             var blk = entity as BlockReference;
                             if (blk.ObjectId.GetDynBlockValue("水管连接点1 X") != null && blk.ObjectId.GetDynBlockValue("水管连接点1 Y") != null)
                             {
+                                Point3d basePt = Point3d.Origin;
+                                if (entity.GeometricExtents != null)
+                                {
+                                    basePt = entity.GeometricExtents.CenterPoint();
+                                }
+                                var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
+                                entity.UpgradeOpen();
+                                entity.TransformBy(mt);
+
                                 var tmpFan = new ThFanCUModel();
                                 var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
                                 var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
@@ -127,10 +127,12 @@ namespace ThMEPHVAC.FanConnect.Command
                                 tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
                                 tmpFan.FanObb.TransformBy(mt.Inverse());
                                 retModeles.Add(tmpFan);
+
+                                entity.TransformBy(mt.Inverse());
+                                entity.DowngradeOpen();
                             }
                         }
-                        entity.TransformBy(mt.Inverse());
-                        entity.DowngradeOpen();
+
                     }
                 }
                 return retModeles;

@@ -191,7 +191,18 @@ namespace ThMEPWSS.FlatDiagramNs
         {
             if (segs.Count == THESAURUSSTAMPEDE) throw new ArgumentException();
             if (segs.Count == THESAURUSHOUSING) return segs[THESAURUSSTAMPEDE];
-            var angle = segs.Select(seg => seg.SingleAngle).Average();
+            var angles = segs.Select(seg => seg.SingleAngle).ToList();
+            if (angles.Max() - angles.Min() >= Math.PI / THESAURUSPERMUTATION)
+            {
+                for (int i = THESAURUSSTAMPEDE; i < angles.Count; i++)
+                {
+                    if (angles[i] > Math.PI / THESAURUSPERMUTATION)
+                    {
+                        angles[i] -= Math.PI;
+                    }
+                }
+            }
+            var angle = angles.Average();
             var r = Extents2dCalculator.Calc(segs.YieldPoints()).ToGRect();
             var m = Matrix2d.Displacement(-r.Center.ToVector2d()).PreMultiplyBy(Matrix2d.Rotation(-angle, default));
             r = Extents2dCalculator.Calc(segs.Select(seg => seg.TransformBy(m))).ToGRect();

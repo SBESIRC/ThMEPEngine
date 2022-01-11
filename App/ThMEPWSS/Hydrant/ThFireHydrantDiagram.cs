@@ -701,7 +701,8 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 using (DocLock)
                 using (var adb = AcadDatabase.Active())
                 {
-                    GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, _selectArea, loopStartPt);
+                    var ok = GetInput.GetFireHydrantSysInput(adb, ref fireHydrantSysIn, _selectArea, loopStartPt);
+                    if (!ok) return null;
                     var _mainPathList = MainLoop.Get(ref fireHydrantSysIn);
                     if (_mainPathList.Count == THESAURUSSTAMPEDE)
                     {

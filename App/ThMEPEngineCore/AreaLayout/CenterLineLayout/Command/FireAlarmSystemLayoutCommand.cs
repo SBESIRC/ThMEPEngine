@@ -51,41 +51,33 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 //}
                 //MPolygon roomForCenterLine = objs.BuildMPolygon();
 
-                GetRoomHoleMPoly(out var roomWithHole);
-                DrawUtils.ShowGeometry(roomWithHole, "l0roomWithOnlyHole", 123, 30);
+                GetRoomHoleMPoly(out var roomForCL);
+                DrawUtils.ShowGeometry(roomForCL, "l0roomForCL", 123, 30);
                 if (layoutList.Count == 0)
                 {
                     return;
                 }
 
-                List<Point3d> centerLinePts = CenterLineSimplify.CLSimplifyPts(roomWithHole);
+                List<Point3d> centerLinePts = CenterLineSimplify.CLSimplifyPts(roomForCL);
                 centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));
 
-                //List<Polyline> nonDeployableAreaOri = new List<Polyline>();
-                ////GetInputs(ref objs, nonDeployableAreaOri);
+                GetRoomMPoly(out var roomForBlind, out var nonDeployableArea);
+                DrawUtils.ShowGeometry(roomForBlind, "l0roomForBlind", 233, 30);
 
-                //MPolygon roomMP = objs.BuildMPolygon();
-                ////acdb.ModelSpace.Add(roomMP);
-                ////roomMP.SetDatabaseDefaults();
-
-                //DrawUtils.ShowGeometry(roomHoleMP, "l0roomHole", 3, 30);
-                //DrawUtils.ShowGeometry(roomMP, "l0roomMp", 210, 30);
-
-                GetRoomMPoly(out var roomWithAllHole, out var nonDeployableArea);
-                DrawUtils.ShowGeometry(roomWithAllHole, "l0roomWithAllHole", 233, 30);
+                GetLayoutMPoly(out var layoutForPlace);
+                layoutForPlace.ForEach(x => DrawUtils.ShowGeometry(x, "l0layoutForPlace", 190, 30));
 
                 //计算布置点位
                 var layoutServer = new LayoutOpt()
                 {
-                    // mPolygon = roomMP,
-                    //mPolygonShell = roomHoleMP,
-                    mRoom = roomWithAllHole,
-                    radius = radius,
-                    equipmentType = equipmentType,
-                    detectArea = detectArea,
-                    layoutList = layoutList,
-                    nonDeployableArea = nonDeployableArea,
-                    centerLinePts = centerLinePts,
+                    MRoom = roomForBlind,
+                    Radius = radius,
+                    EquipmentType = equipmentType,
+                    DetectArea = detectArea,
+                    LayoutList = layoutList,
+                    //nonDeployableArea = nonDeployableArea,
+                    LayoutWithHole = layoutForPlace,
+                    CenterLinePts = centerLinePts,
                 };
 
                 layoutPoints = layoutServer.Calculate();
@@ -97,7 +89,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 
                 //输出
                 blinds = new List<Polyline>();
-                var unCoverRegion = AreaCaculator.BlandArea(roomWithAllHole, layoutPoints, radius, equipmentType, layoutServer.detectSpatialIdx, layoutServer.EmptyDetect);
+                var unCoverRegion = AreaCaculator.BlandArea(roomForBlind, layoutPoints, radius, equipmentType, layoutServer.DetectSpatialIdx, layoutServer.EmptyDetect);
                 foreach (var ucr in unCoverRegion.ToDbCollection())
                 {
                     blinds.Add((Polyline)ucr);
@@ -209,7 +201,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
         /// 加入柱子会使中心线形状很奇怪
         /// </summary>
         /// <param name="roomForCenterLine"></param>
-        public void GetRoomHoleMPoly(out MPolygon roomForCenterLine)
+        private void GetRoomHoleMPoly(out MPolygon roomForCenterLine)
         {
 
             var room = frame.ToNTSPolygon();
@@ -249,7 +241,6 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
             nonDeployableArea.AddRange(wallList);
             nonDeployableArea.AddRange(columns);
 
-
             var room = frame.ToNTSPolygon();
             foreach (var hole in nonDeployableArea)
             {
@@ -287,6 +278,35 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
 
         }
 
+        public void GetLayoutMPoly(out List<MPolygon> layoutWithAllHole)
+        {
+            layoutWithAllHole = new List<MPolygon>();
 
+            var holeObj = new DBObjectCollection();
+            holeList.ForEach(x => holeObj.Add(x));
+            wallList.ForEach(x => holeObj.Add(x));
+            columns.ForEach(x => holeObj.Add(x));
+            prioritys.ForEach(x => holeObj.Add(x));
+
+            var holeGeom = holeObj.UnionGeometries();
+            for (int i = 0; i < layoutList.Count; i++)
+            {
+                var layout = layoutList[i];
+                var layoutWithHole = layout.DifferenceMP(holeObj);
+
+                for (int j = 0; j < layoutWithHole.Count; j++)
+                {
+                    var diff = layoutWithHole[j];
+                    if (diff is Polyline pl)
+                    {
+                        layoutWithAllHole.Add(ThMPolygonTool.CreateMPolygon(pl));
+                    }
+                    else if (diff is MPolygon mp)
+                    {
+                        layoutWithAllHole.Add(mp);
+                    }
+                }
+            }
+        }
     }
 }

@@ -736,9 +736,10 @@ namespace ThMEPHVAC.Model
             double branch = info.portWidths[points[branchIdx]];
             var branchVec = (points[branchIdx] - info.centerP).GetNormal();
             var judgeVec = (Vector3d.XAxis).RotateBy(rotateAngle, -Vector3d.ZAxis);
-            var tor = new Tolerance(1e-3, 1e-3);
+            var theta = branchVec.GetAngleTo(judgeVec);
+            var tor = 5.0 / 180.0 * Math.PI;// 旁通和主管段夹角在5°内的三通
             var flip = false;
-            if (!judgeVec.IsEqualTo(branchVec, tor))
+            if (theta > tor)
                 flip = true;
             var trans = new TransInfo() { rotateAngle = rotateAngle, centerPoint = info.centerP , flip = flip};
             return new TeeInfo() { mainWidth = inWidth, branch = branch, other = other, trans = trans };

@@ -112,7 +112,7 @@ namespace ThMEPArchitecture.PartitionLayout
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
         const double ScareFactorForCollisionCheck = 0.99;
 
-        public static int LayoutMode = ((int)LayoutDirection.VERTICAL);
+        public static int LayoutMode = ((int)LayoutDirection.HORIZONTAL);
 
         public void Dispose()
         {

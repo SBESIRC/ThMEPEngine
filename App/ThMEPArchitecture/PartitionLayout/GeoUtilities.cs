@@ -348,7 +348,7 @@ namespace ThMEPArchitecture.PartitionLayout
             SortAlongCurve(points, line);
             if (points.Count > 0)
                 return SplitLine(line, points).Where(e => e.Length > length_filter).ToArray();
-            else return new Line[] { line };
+            else return new Line[] { CreateLine(line) };
         }
 
         public static Line[] SplitLine(Line curve, List<Polyline> cutters, double length_filter = 1)
@@ -361,12 +361,31 @@ namespace ThMEPArchitecture.PartitionLayout
             if (points.Count > 0)
                 return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
             else
-                return new Line[] { curve };
+                return new Line[] { new Line(curve.StartPoint, curve.EndPoint) };
+        }
+
+        public static Line[] SplitLine(Line curve, List<Line> cutters, double length_filter = 1)
+        {
+            List<Point3d> points = new List<Point3d>();
+            foreach (var cutter in cutters)
+                points.AddRange(curve.Intersect(cutter, Intersect.OnBothOperands));
+            points = RemoveDuplicatePts(points, 1);
+            SortAlongCurve(points, curve);
+            if (points.Count > 0)
+                return SplitLine(curve, points).Where(e => e.Length > length_filter).ToArray();
+            else
+                return new Line[] { new Line(curve.StartPoint, curve.EndPoint) };
         }
 
         public static bool IsPerpLine(Line a, Line b, double degreetol = 1)
         {
             double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
+
+        public static bool IsPerpVector(Vector3d a, Vector3d b, double degreetol = 1)
+        {
+            double angle = a.GetAngleTo(b);
             return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
 
@@ -394,25 +413,23 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
         {
+            var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
             if (!allowOnEdge)
             {
-                if (ClosestPointInCurves(pt, pls) < 1) return false;
-            }
-            pls.OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
-            foreach (var p in pls)
-            {
-                if (p.Area < 1) continue;
-                if (p.Vertices().Count == 5)
+                foreach (var p in ps)
                 {
-                    if (p.GeometricExtents.IsPointIn(pt))
-                        return true;
+                    if (p.Vertices().Count == 5)
+                        if (p.GeometricExtents.IsPointIn(pt) && p.GetClosePoint(pt).DistanceTo(pt) > 10) return true;
+                    if (p.Contains(pt) && p.GetClosestPointTo(pt, false).DistanceTo(pt) > 10) return true;
                 }
-                else
+            }
+            else
+            {
+                foreach (var p in ps)
                 {
-                    if (/*p.IsPointInFast(pt)*/p.Contains(pt))
-                    {
-                        return true;
-                    }
+                    if (p.Vertices().Count == 5)
+                        if (p.GeometricExtents.IsPointIn(pt)) return true;
+                    if (p.Contains(pt)) return true;
                 }
             }
             return false;
@@ -424,7 +441,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 if (p.Area < 1) continue;
                 p.TransformBy(Matrix3d.Scaling(0.99, p.GetRecCentroid()));
-                if (p.GeometricExtents.IsPointIn(pt))
+                if (p.Contains(pt))
                 {
                     p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
                     return true;
@@ -466,6 +483,20 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     res = d;
                 }
+            }
+            return res;
+        }
+
+        public static double ClosestPointInVertLines(Point3d pt, Line line, IEnumerable<Line> lines, bool returninfinity = true)
+        {
+            var ls = lines.Where(e => IsPerpLine(line, e));
+            if (!returninfinity)
+                if (ls.Count() == 0) return -1;
+            var res = double.PositiveInfinity;
+            foreach (var l in ls)
+            {
+                var dis = l.GetClosestPointTo(pt, false).DistanceTo(pt);
+                if (res > dis) res = dis;
             }
             return res;
         }
@@ -552,6 +583,18 @@ namespace ThMEPArchitecture.PartitionLayout
             spatialIndex.Update(add, new DBObjectCollection());
 
             return;
+        }
+
+        public static bool IsHorizontalLine(Line line, double degreetol = 1)
+        {
+            double angle = CreateVector(line).GetAngleTo(Vector3d.YAxis);
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
+        }
+
+        public static bool IsVerticalLine(Line line, double degreetol = 1)
+        {
+            double angle = CreateVector(line).GetAngleTo(Vector3d.XAxis);
+            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
         }
 
         public static double GetDisOnPolyLine(Point3d pt, Polyline poly)

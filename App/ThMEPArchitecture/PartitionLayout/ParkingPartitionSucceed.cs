@@ -587,6 +587,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 points.AddRange(obj.Vertices().Cast<Point3d>().Where(e => pl.IsPointInFast(e)));
                 points.AddRange(obj.Intersect(pl, Intersect.OnBothOperands));
             }
+            points.AddRange(IniBoundary.Intersect(pl, Intersect.OnBothOperands));
             points = points.Where(e => pl.GeometricExtents.IsPointIn(e)).ToList();
             points = points.Select(e => line.GetClosestPointTo(e, false)).Distinct().ToList();
             //RemoveDuplicatePts(points);
@@ -686,7 +687,6 @@ namespace ThMEPArchitecture.PartitionLayout
                 pl = r.Buffer(DisLaneWidth / 2);
                 pl.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pl.Centroid()));
                 var crossedunder = ObstaclesSpatialIndex.SelectCrossingPolygon(pl);
-                underl.Dispose();
                 if (crossedunder.Count > 0) return false;
             }
             else
@@ -700,7 +700,15 @@ namespace ThMEPArchitecture.PartitionLayout
             }
 
             pl.Dispose();
-            var v = CreateVector(r).GetPerpendicularVector().GetNormal();
+            Vector3d v = new Vector3d();
+            try
+            {
+                v = CreateVector(r).GetPerpendicularVector().GetNormal();
+            }
+            catch
+            {
+                ;
+            }
             var p = r.StartPoint.TransformBy(Matrix3d.Displacement(v));
             if (lane.Line.GetClosestPointTo(p, true).DistanceTo(pt) > DisCarAndHalfLane) v = -v;
             var planes = IniLanes.Select(e => e.Line).Where(e => IsParallelLine(lane.Line, e)).Where(e => e.Length > r.Length / 2).ToList();
@@ -724,6 +732,7 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 for (int i = 1; i < segs.Count; i++) segs[i].Dispose();
             }
+            
             return generate_adj_lanes;
         }
 
@@ -919,17 +928,6 @@ namespace ThMEPArchitecture.PartitionLayout
             }
         }
 
-        private static bool IsHorizontalLine(Line line, double degreetol = 1)
-        {
-            double angle = CreateVector(line).GetAngleTo(Vector3d.YAxis);
-            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
-        }
-
-        private static bool IsVerticalLine(Line line, double degreetol = 1)
-        {
-            double angle = CreateVector(line).GetAngleTo(Vector3d.XAxis);
-            return Math.Abs(Math.Min(angle, Math.Abs(Math.PI * 2 - angle)) / Math.PI * 180 - 90) < degreetol;
-        }
 
     }
 }

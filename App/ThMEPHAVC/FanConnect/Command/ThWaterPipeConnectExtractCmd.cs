@@ -38,7 +38,7 @@ namespace ThMEPHVAC.FanConnect.Command
             {
                 if (blockDb.Layers.Contains("AI-水管路由"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("AI-水管路由"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("AI-水管路由"), false);
                 }
             }
             using (var acadDb = Linq2Acad.AcadDatabase.Active())

@@ -24,6 +24,7 @@ using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Command;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 #if (ACAD2016 || ACAD2018)
 using CLI;
@@ -187,12 +188,12 @@ namespace ThMEPElectrical
 #if (ACAD2016 || ACAD2018)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+                var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
                 var needConverage = referBeam == true ? true : false;
                 var wallThickness = 100.0;
                 if (referBeam == true)
                 {
-                    wallThickness = ThAFASUtils.SettingDouble("\n板厚");
+                    wallThickness = ThAFASUtils.SettingDouble("\n板厚", 0);
                 }
 
 
@@ -282,7 +283,7 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFaAreaData2", CommandFlags.Modal)]
         public void ThFaAreaData2()
         {
-            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = 0.0;
             var needDetective = true;
             if (referBeam == false)
@@ -291,8 +292,8 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
-                needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）");
+                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
+                needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）", 1);
             }
 
             var theta = 0;
@@ -304,9 +305,8 @@ namespace ThMEPElectrical
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
-            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
             var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
 
             if (selectPts.Count == 0)
             {
@@ -335,10 +335,13 @@ namespace ThMEPElectrical
             {
                 var radius = ThFaAreaLayoutParamterCalculationService.CalculateRadius(frame.Area, floorHight, theta, layoutType);//to do...frame.area need to remove hole's area
                 var beamGridWidth = ThFaAreaLayoutService.LayoutAreaWidth(data.FrameLayoutList[frame], radius);
-                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
+                var bIsAisleArea = ThFaAreaLayoutService.IsAisleArea2(frame, data.FrameHoleList[frame], beamGridWidth, 0.75);
 
-                var type = bIsAisleArea == true ? "centerline" : "grid";
-                var centPt = frame.GetCentroidPoint();
+                var sCenterLine = bIsAisleArea == true ? "centerline" : "grid";
+                var pt = frame.GetCentroidPoint();
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 0, 0), string.Format("r:{0}", radius), "l0Info", 3, 25, 200);
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 1, 0), string.Format("shrink：{0}", beamGridWidth), "l0Info", 3, 25, 200);
+                DrawUtils.ShowGeometry(new Point3d(pt.X, pt.Y - 350 * 2, 0), string.Format("process：{0}:{1}", "data", sCenterLine), "l0Info", 3, 25, 200);
 
                 DrawUtils.ShowGeometry(frame, string.Format("l0roomFrame"), 30);
                 DrawUtils.ShowGeometry(data.FrameHoleList[frame], string.Format("l0FrameHole"), 150);
@@ -347,9 +350,6 @@ namespace ThMEPElectrical
                 data.FrameLayoutList[frame].ForEach(x => DrawUtils.ShowGeometry(x, string.Format("l0Framelayout"), 6));
                 DrawUtils.ShowGeometry(data.FrameDetectAreaList[frame], string.Format("l0FrameDetec"), 91);
                 DrawUtils.ShowGeometry(data.FramePriorityList[frame], string.Format("l0FrameEquipment"), 152);
-
-                DrawUtils.ShowGeometry(new Point3d(centPt.X, centPt.Y - 350 * 0, 0), string.Format("r:{0} aisle type:{1}", radius, type), "l0lastInfo", 3, 25, 200);
-
 
             }
 
@@ -363,7 +363,7 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFAAllData", CommandFlags.Modal)]
         public void THFAAllData()
         {
-            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）");
+            var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = 0.0;
             var needDetective = referBeam;
             if (referBeam == false)
@@ -372,7 +372,7 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
             }
 
             var extractBlkList = ThFaCommon.BlkNameList;
@@ -410,6 +410,81 @@ namespace ThMEPElectrical
             }
         }
 
-       
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestPolygon", CommandFlags.Modal)]
+        public void THTestPolygon()
+        {
+            var frame = ThAFASSelectFrameUtil.GetRoomFramePolyline();
+
+            var room = frame.ToNTSPolygon();
+            var objs = room.ToDbCollection();
+            var roomForCenterLine = objs.BuildMPolygon();
+            DrawUtils.ShowGeometry(roomForCenterLine, "l0mpoly");
+
+            List<Point3d> centerLinePts = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.CenterLineSimplify.CLSimplifyPts(roomForCenterLine);
+            centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));
+
+        }
+        [CommandMethod("TIANHUACAD", "ThBuildMPolygonCenterLine", CommandFlags.Modal)]
+        public void ThBuildMPolygonCenterLine()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                MPolygon mPolygon = ThAFASSelectFrameUtil.GetMPolygon();
+
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(mPolygon.ToNTSPolygon(), 300);
+                //删除之前生成的带动多边形，以防影响之后操作
+                mPolygon.UpgradeOpen();
+                mPolygon.Erase();
+                mPolygon.DowngradeOpen();
+
+                // 生成、显示中线
+                centerlines.Cast<Entity>().ToList().CreateGroup(acdb.Database, 1);
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "THTestIntPoint", CommandFlags.Modal)]
+        public void THTestIntPoint()
+        {
+            var rateThreshold = 0.035;
+            var rectangleThreshold = 0.80;
+            var Radius = 3000;
+            var frame = ThAFASSelectFrameUtil.GetMPolygon();
+
+            var dis = 400;
+            var areaPoints = new List<Point3d>();
+
+            if (frame.Area > Radius * Radius * 0.2)
+            {
+                areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 400, out var ptsInOBB);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+
+                var obb = (frame.Shell()).CalObb();
+                double rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
+                var rateArea = frame.Area / obb.Area;
+                var pt0 = obb.GetPoint3dAt(0);
+                DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, frame.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
+                areaPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptLarge", colorIndex: 40, r: 30));
+
+                //比值差异过大且越不像四边形
+                if (Math.Abs(rate - rateArea) > rateThreshold && rateArea < rectangleThreshold)
+                {
+                    areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 100, out ptsInOBB);
+                    rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
+                    DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 2 * 35, 0), string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+
+                }
+            }
+            else
+            {
+                //areaPoints = PointsInArea(poly, radius);
+                areaPoints = ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils.PointsDealer.PointsInUncoverArea(frame, 100, out var ptsInOBB);
+            }
+
+            areaPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptFinal", colorIndex: 1, r: 30));
+
+        }
     }
 }

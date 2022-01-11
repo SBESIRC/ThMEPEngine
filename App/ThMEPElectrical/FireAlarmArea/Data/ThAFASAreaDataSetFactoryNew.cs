@@ -114,6 +114,7 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             var columnExtract = extractors.Where(x => x is ThAFASColumnExtractor).FirstOrDefault() as ThAFASColumnExtractor;
             var beamExtract = extractors.Where(x => x is ThAFASBeamExtractor).FirstOrDefault() as ThAFASBeamExtractor;
             var holeExtract = extractors.Where(x => x is ThAFASHoleExtractor).FirstOrDefault() as ThAFASHoleExtractor;
+            var archiWallExtract = extractors.Where(x => x is ThAFASArchitectureWallExtractor).FirstOrDefault() as ThAFASArchitectureWallExtractor;
 
             var detectionRegionExtract = new ThAFASDetectionRegionExtractor()
             {
@@ -125,6 +126,8 @@ namespace ThMEPElectrical.FireAlarmArea.Data
                 WallThickness = wallThick,
                 Transformer = Transformer,
             };
+
+            detectionRegionExtract.Walls.AddRange(archiWallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList());
 
             detectionRegionExtract.Extract(null, new Point3dCollection());
             detectionRegionExtract.Fix();

@@ -129,6 +129,8 @@ namespace ThMEPHVAC.Model
             {
                 var l = info.GetShrinkedLine();
                 var mainlines = GetMainDuct(info);
+                if (mainlines.centerLines.Count < 1)
+                    continue;// 管长太小
                 ThMEPHVACService.GetLinePosInfo(l, out double angle, out Point3d centerPoint);
                 var mat = Matrix3d.Displacement(centerPoint.GetAsVector()) * Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
                 mat = orgDisMat * mat;
@@ -147,6 +149,8 @@ namespace ThMEPHVAC.Model
         private LineGeoInfo GetMainDuct(SegInfo info)
         {
             var l = info.GetShrinkedLine();
+            if (l.Length < 10)
+                return new LineGeoInfo();
             var ductWidth = ThMEPHVACService.GetWidth(info.ductSize);
             var outlines = ThDuctPortsFactory.CreateDuct(l.Length, ductWidth);
             var centerLine = new DBObjectCollection { l };
