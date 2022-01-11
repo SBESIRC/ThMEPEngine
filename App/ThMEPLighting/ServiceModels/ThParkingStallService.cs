@@ -24,6 +24,7 @@ namespace ThMEPLighting.ServiceModels
         public double BlockScale { get; set; }
         public void SetLightDir(bool isLongSide) 
         {
+            //这里灯方向是沿着长边或短边
             this.LightDirection = isLongSide ? Light_Place_Type.LONG_EDGE : Light_Place_Type.SHORT_EDGE;
         }
     }
