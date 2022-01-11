@@ -3891,6 +3891,11 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     var linesKillers = new HashSet<Geometry>();
                     var iRF = allStoreys.IndexOf(THESAURUSARGUMENTATIVE);
                     var gpItem = pipeGroupItems[j];
+                    string getFDDN()
+                    {
+                        const string dft = QUOTATIONBREWSTER;
+                        return viewModel?.Params.BalconyFloorDrainDN ?? dft;
+                    }
                     string getHDN()
                     {
                         const string dft = THESAURUSDISREPUTABLE;
@@ -4978,7 +4983,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var p = segs.Last().EndPoint;
                                                     _drawFloorDrain(p, THESAURUSOBSTINACY, INTRAVASCULARLY, THESAURUSDEPLORE);
                                                     tryDrawWrappingPipe(p.OffsetX(THESAURUSATTACHMENT));
-                                                    drawDN(getHDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
+                                                    drawDN(getFDDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
                                                     ok = THESAURUSOBSTINACY;
                                                 }
                                             }
@@ -4993,7 +4998,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var p = segs.Last().EndPoint;
                                                     _drawFloorDrain(p, THESAURUSOBSTINACY, INTRAVASCULARLY, THESAURUSDEPLORE);
                                                     tryDrawWrappingPipe(p.OffsetX(THESAURUSATTACHMENT));
-                                                    drawDN(getHDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
+                                                    drawDN(getFDDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
                                                 }
                                                 else
                                                 {
@@ -5002,7 +5007,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var p = segs.Last().EndPoint;
                                                     _drawFloorDrain(p, THESAURUSOBSTINACY, INTRAVASCULARLY, THESAURUSDEPLORE);
                                                     tryDrawWrappingPipe(p.OffsetX(THESAURUSATTACHMENT));
-                                                    drawDN(getHDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
+                                                    drawDN(getFDDN(), segs[THESAURUSHOUSING].EndPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
                                                 }
                                             }
                                             {
@@ -5011,7 +5016,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                 var p = segs.Last().EndPoint;
                                                 _drawFloorDrain(p, INTRAVASCULARLY, INTRAVASCULARLY, THESAURUSDEPLORE);
                                                 tryDrawWrappingPipe(p.OffsetX(-MISAPPREHENSIVE));
-                                                drawDN(getHDN(), segs[THESAURUSHOUSING].StartPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
+                                                drawDN(getFDDN(), segs[THESAURUSHOUSING].StartPoint.OffsetXY(HYPERDISYLLABLE + fixW, HYPERDISYLLABLE));
                                             }
                                         }
                                     }
@@ -8461,6 +8466,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public const string THESAURUSABUNDANT = @"^P\d?L";
         public const string THESAURUSOPTIONAL = @"^T\d?L";
         public const string DIASTEREOISOMER = @"^D\d?L";
+        public const string QUOTATIONBREWSTER = "DN50";
         public const int THESAURUSEUPHORIA = 1300;
         public const string METACOMMUNICATION = ">1500";
         public const string THESAURUSEMPHASIS = "$TwtSys$00000132";
