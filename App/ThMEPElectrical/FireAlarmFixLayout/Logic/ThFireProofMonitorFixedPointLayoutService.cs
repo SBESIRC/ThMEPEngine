@@ -19,7 +19,7 @@ using ThMEPElectrical.FireAlarmFixLayout.Data;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
-    public class ThFireProofMonitorFixedPointLayoutService 
+    public class ThFireProofMonitorFixedPointLayoutService
     {
         /// <summary>
         /// 读取房间配置表设置
@@ -44,7 +44,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         //public ThMEPEngineCore.Algorithm.ThMEPOriginTransformer Transformer { get; set; }
 
-        public  List<KeyValuePair<Point3d, Vector3d>> Layout()
+        public List<KeyValuePair<Point3d, Vector3d>> Layout()
         {
 
             //List<int[][]> Priority = new List<int[][]> { undergroundPriority, firstFloorPriority, higherLevelPriority , roof};
@@ -88,7 +88,8 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 {
                     foreach (string o in MonitorRoomNameConfigMap[i])
                     {
-                        if (o.Contains(roomNameA))
+                        //if (o.Contains(roomNameA))
+                        if (RoomConfigTreeService.CompareRoom(roomNameA, o))
                         {
                             IndexA = i;
                             break;
@@ -101,11 +102,13 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
                 }
                 if (IndexA == -1)
                     continue;
+
                 for (int i = 0; i < MonitorRoomNameConfigMap.Count; ++i)
                 {
                     foreach (string o in MonitorRoomNameConfigMap[i])
                     {
-                        if (o.Contains(roomNameB))
+                        // if (o.Contains(roomNameB))
+                        if (RoomConfigTreeService.CompareRoom(roomNameB, o))
                         {
                             IndexB = i;
                             break;

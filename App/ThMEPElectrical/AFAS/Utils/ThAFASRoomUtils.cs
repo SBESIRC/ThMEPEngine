@@ -37,14 +37,46 @@ namespace ThMEPElectrical.AFAS.Utils
         public static bool IsRoom(List<RoomTableTree> roomTableTree, string name, string standardName)
         {
             var bReturn = false;
-            var nameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);
+            var standardNameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);
 
-            if (nameList.Contains(name))
+            //if (nameList.Contains(name))
+            //{
+            //    bReturn = true;
+            //}
+            var names = name.Split(',');
+            foreach (var n in names)
             {
-                bReturn = true;
+              var isRoom=  RoomConfigTreeService.CompareRoom(standardNameList, name);
+                if (isRoom == true)
+                {
+                    bReturn = true;
+                    break;
+                }
             }
+
             return bReturn;
         }
+
+        public static bool IsRoom(List<RoomTableTree> roomTableTree, string name, List<string> standardName)
+        {
+            var bReturn = false;
+            var standardNameList = RoomConfigTreeService.CalRoomLst(roomTableTree, standardName);
+
+            var names = name.Split(',');
+            foreach (var n in names)
+            {
+                var isRoom = RoomConfigTreeService.CompareRoom(standardNameList, name);
+                if (isRoom == true)
+                {
+                    bReturn = true;
+                    break;
+                }
+            }
+
+            return bReturn;
+        }
+
+
 
     }
 }
