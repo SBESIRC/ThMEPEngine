@@ -60,7 +60,8 @@ namespace TianHua.Hvac.UI.Command
         private void OpenLayer()
         {
             using (var acadDb = AcadDatabase.Active())
-            { 
+            {
+                acadDb.Database.OpenAILayer("0");
                 acadDb.Database.OpenAILayer(AirPortLayer);
             }
         }

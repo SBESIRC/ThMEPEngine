@@ -29,7 +29,7 @@ namespace TianHua.Hvac.UI.Command
         public override void SubExecute()
         {
             FGLGLayer = GetCurrentLayer();
-            OpenLayer(FGLGLayer);
+            OpenLayer();
             ImportBlocks();
             UserInteract();
         }
@@ -65,11 +65,12 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void OpenLayer(string layerName)
+        private void OpenLayer()
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                acadDb.Database.OpenAILayer(layerName);  
+                acadDb.Database.OpenAILayer("0");
+                acadDb.Database.OpenAILayer(FGLGLayer);  
             }
         }
         private string GetCurrentLayer()

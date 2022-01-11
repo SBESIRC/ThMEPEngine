@@ -109,6 +109,7 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var acadDb = AcadDatabase.Active())
             {
+                acadDb.Database.OpenAILayer("0");
                 acadDb.Database.OpenAILayer(FGDXLayer);
             }
         }
