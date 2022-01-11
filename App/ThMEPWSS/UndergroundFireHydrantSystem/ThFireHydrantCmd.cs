@@ -91,8 +91,11 @@ namespace ThMEPWSS.Command
                 if (exArea.Count == 0) return null;
                 return exArea;
             }
-            GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
-
+            var inputFlag = GetInput.GetFireHydrantSysInput(curDb, ref fireHydrantSysIn, selectArea, loopStartPt);//提取输入参数
+            if(!inputFlag)
+            {
+                return null;
+            }
             var mainPathList = MainLoop.Get(ref fireHydrantSysIn);//主环提取
             if (mainPathList.Count == 0)
             {

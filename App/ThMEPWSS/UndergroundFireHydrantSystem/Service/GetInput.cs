@@ -17,7 +17,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     public class GetInput
     {
-        public static void GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
+        public static bool GetFireHydrantSysInput(AcadDatabase acadDatabase, ref FireHydrantSystemIn fireHydrantSysIn, 
             Point3dCollection selectArea, Point3d startPt)
         {
             var lineList = new List<Line>();//管段列表
@@ -68,7 +68,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             nodeEngine.GetPointList(ref fireHydrantSysIn);
             
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
-            
+
+            var sitong = false;
+            foreach(var pt in fireHydrantSysIn.PtDic.Keys)
+            {
+                if(fireHydrantSysIn.PtDic[pt].Count > 3)
+                {
+                    sitong = true;
+                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
+                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
+                }
+            }
+            if(sitong)
+            {
+                return false;
+            }
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             
             var mark = markEngine.Extract(acadDatabase.Database, selectArea);
@@ -80,7 +94,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             if (!markBool)
             {
                 MessageBox.Show("找不到环管标记所在直线");
-                return;
+                return false;
             }
             var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
             var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
@@ -122,6 +136,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             PtDic.CreateTermPtDic(ref fireHydrantSysIn, pointList, labelLine, textSpatialIndex, ptTextDic, fhSpatialIndex);
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;
+            return true;
         }
 
         private static void GetEntType(AcadDatabase acadDatabase)
