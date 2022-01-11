@@ -125,13 +125,13 @@ namespace ThMEPElectrical
                     case (int)ThFaCommon.LayoutItemType.Smoke:
                         if (setBeam == false)
                         {
-                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
                             setBeam = true;
                         }
 
                         if (setWallThick == false && beam == 1)
                         {
-                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
                             setWallThick = true;
                         }
 
@@ -158,20 +158,20 @@ namespace ThMEPElectrical
                         break;
 
                     case (int)ThFaCommon.LayoutItemType.Broadcast:
-                        var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）");
+                        var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）", 1);
                         if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling && setBeam == false)
                         {
-                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
                             setBeam = true;
                         }
 
                         if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling && setWallThick == false && beam == 1)
                         {
-                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
                             setWallThick = true;
                         }
 
-                        var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：");
+                        var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：", 20000);
 
                         FireAlarmSetting.Instance.BroadcastLayout = isWallPa;
                         FireAlarmSetting.Instance.Beam = beam;
@@ -180,7 +180,7 @@ namespace ThMEPElectrical
 
                         break;
                     case (int)ThFaCommon.LayoutItemType.Display:
-                        var rst = ThAFASUtils.SettingInt("\n楼层显示器：住宅（0）公建（1）");
+                        var rst = ThAFASUtils.SettingInt("\n楼层显示器：住宅（0）公建（1）", 1);
                         FireAlarmSetting.Instance.DisplayBuilding = rst;
 
                         break;
@@ -189,22 +189,22 @@ namespace ThMEPElectrical
                     case (int)ThFaCommon.LayoutItemType.Gas:
                         if (setBeam == false)
                         {
-                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
+                            beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
                             setBeam = true;
                         }
                         if (setWallThick == false && beam == 1)
                         {
-                            wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                            wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
                             setWallThick = true;
                         }
-                        var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：");
+                        var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：", 5600);
                         FireAlarmSetting.Instance.Beam = beam;
                         FireAlarmSetting.Instance.GasProtectRadius = radius;
                         FireAlarmSetting.Instance.RoofThickness = wallThick;
 
                         break;
                     case (int)ThFaCommon.LayoutItemType.ManualAlarm:
-                        radius = ThAFASUtils.SettingDouble("\n手动报警步距：");
+                        radius = ThAFASUtils.SettingDouble("\n手动报警步距：", 20000);
                         FireAlarmSetting.Instance.StepLengthMA = radius;
 
                         break;
@@ -230,8 +230,8 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Session)]
         public void THFASmokeNoUI()
         {
-            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
-            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
+            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
             var hintStringHight = new Dictionary<string, (string, string)>()
                         {{"0",("0","h<=12(0)")},
                         {"1",("1","6<=h<=12(1)")},
@@ -270,7 +270,7 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFADisplayNoUI", CommandFlags.Session)]
         public void THFADisplayNoUI()
         {
-            var rst = ThAFASUtils.SettingInt("\n楼层显示器：住宅（0）公建（1）");
+            var rst = ThAFASUtils.SettingInt("\n楼层显示器：住宅（0）公建（1）", 1);
             FireAlarmSetting.Instance.DisplayBuilding = rst;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
@@ -330,9 +330,9 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFAGasNoUI", CommandFlags.Session)]
         public void THFAGasNoUI()
         {
-            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
-            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
-            var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：");
+            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
+            var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：", 5600);
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.GasProtectRadius = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
@@ -357,15 +357,15 @@ namespace ThMEPElectrical
         {
 #if (ACAD2016 || ACAD2018)
 
-            var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）");
+            var isWallPa = ThAFASUtils.SettingInt("\n广播：吊装（0）壁装（1）", 1);
             var beam = 0;
             double wallThick = 100;
             if ((ThAFASPlacementMountModeMgd)isWallPa == ThAFASPlacementMountModeMgd.Ceiling)
             {
-                beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
-                wallThick = ThAFASUtils.SettingDouble("\n板厚");
+                beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
+                wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
             }
-            var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：");
+            var stepDistanceP = ThAFASUtils.SettingDouble("\n广播步距：", 20000);
 
             FireAlarmSetting.Instance.BroadcastLayout = isWallPa;
             FireAlarmSetting.Instance.Beam = beam;
@@ -394,7 +394,7 @@ namespace ThMEPElectrical
         public void THFAManualAlarmNoUI()
         {
 #if (ACAD2016 || ACAD2018)
-            var radius = ThAFASUtils.SettingDouble("\n手动报警步距：");
+            var radius = ThAFASUtils.SettingDouble("\n手动报警步距：", 20000);
             FireAlarmSetting.Instance.StepLengthMA = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);

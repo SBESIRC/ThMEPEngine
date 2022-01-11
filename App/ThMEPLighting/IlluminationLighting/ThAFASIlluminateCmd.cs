@@ -18,11 +18,11 @@ namespace ThMEPLighting.IlluminationLighting
         public void THFAIlluminationNoUI()
         {
 
-            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）");
-            var wallThick = ThAFASUtils.SettingDouble("\n板厚");
-            var radiusN = ThAFASUtils.SettingDouble("\n正常照明灯具布置半径(mm)");
-            var radiusE = ThAFASUtils.SettingDouble("\n应急照明灯具布置半径(mm)");
-            var layoutEmg = ThAFASUtils.SettingInt("\n布置应急照明灯 否（0）是（1）");
+            var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
+            var wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
+            var radiusN = ThAFASUtils.SettingDouble("\n正常照明灯具布置半径(mm)", 3000);
+            var radiusE = ThAFASUtils.SettingDouble("\n应急照明灯具布置半径(mm)", 3000);
+            var layoutEmg = ThAFASUtils.SettingInt("\n布置应急照明灯 否（0）是（1）", 1);
 
             FireAlarmSetting.Instance.Scale = 100;
             FireAlarmSetting.Instance.Beam = beam;

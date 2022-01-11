@@ -14,27 +14,26 @@ using ThMEPEngineCore.Diagnostics;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils;
 using ThMEPEngineCore.AreaLayout.GridLayout.Data;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 {
     class LayoutOpt
     {
         //input
-        //  public MPolygon mPolygon { get; set; }
-        //  public MPolygon mPolygonShell { get; set; }
-        public MPolygon mRoom { get; set; }
-
-        public double radius { get; set; } = 0;
-        public BlindType equipmentType { get; set; } = BlindType.CoverArea;
-        public List<Polyline> detectArea { get; set; } = new List<Polyline>();
-        public List<MPolygon> layoutList { get; set; }
-        public List<Polyline> nonDeployableArea { get; set; } = new List<Polyline>();
-        public List<Point3d> centerLinePts { get; set; } = new List<Point3d>();
+        public MPolygon MRoom { get; set; }
+        public List<MPolygon> LayoutWithHole { get; set; }
+        public double Radius { get; set; } = 0;
+        public BlindType EquipmentType { get; set; } = BlindType.CoverArea;
+        public List<Polyline> DetectArea { get; set; } = new List<Polyline>();
+        public List<MPolygon> LayoutList { get; set; }
+        //public List<Polyline> nonDeployableArea { get; set; } = new List<Polyline>();
+        public List<Point3d> CenterLinePts { get; set; } = new List<Point3d>();
 
         //inner user
-        public List<Point3d> pointsInLayoutList { get; private set; } = new List<Point3d>();
+        public List<Point3d> PointsInLayoutList { get; private set; } = new List<Point3d>();
         public Geometry EmptyDetect { get; private set; }
-        public ThCADCoreNTSSpatialIndex detectSpatialIdx { get; private set; }
+        public ThCADCoreNTSSpatialIndex DetectSpatialIdx { get; private set; }
         public LayoutOpt()
         {
 
@@ -42,16 +41,17 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
 
         public List<Point3d> Calculate()
         {
+            //GetPosiblePositions();
             GetPosiblePositions();
             SetEmptyDetect();
             SetDetectSptialIdx();
 
-            if (pointsInLayoutList.Count == 0)
+            if (PointsInLayoutList.Count == 0)
             {
                 return new List<Point3d>();
             }
 
-            pointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
+            //PointsInLayoutList.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptIni", 1, 25, 30));
 
             List<Point3d> fstPoints = FstStep(); //1、初选
             fstPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l1ptFirst", 3, 25, 30));
@@ -68,7 +68,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
             List<Point3d> ans = new List<Point3d>();//2.7、针对一个房间只布置一个点
             if (sndHalfPoints.Count == 1)
             {
-                var temp = PointsDealer.GetNearestPoint(mRoom.ToNTSPolygon().Centroid.ToAcGePoint3d(), pointsInLayoutList, mRoom.Shell());
+                var temp = PointsDealer.GetNearestPoint(MRoom.ToNTSPolygon().Centroid.ToAcGePoint3d(), PointsInLayoutList, MRoom.Shell());
                 if (temp != Point3d.Origin)
                 {
                     ans.Add(temp);
@@ -77,11 +77,20 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 return ans;
             }
 
+            //将点移到中点附近。会变大很多盲区暂时去掉。
             var movePtToLayoutCt = MovePtToLayoutCt(sndHalfPoints);
             movePtToLayoutCt.ForEach(x => DrawUtils.ShowGeometry(x, "l5ptMoveToCT", 210, 25, 30));
 
             List<Point3d> fourPoints = FourStep(movePtToLayoutCt); //4、移点：修补需求：将一些点更加靠近中心线
             fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6ptMoveToCL", 141, 25, 30));
+
+            ////再次检查大盲区
+            //List<Point3d> ptCLBigBlind = SndHalfStep(fourPoints); //2.5、加点：针对大盲区
+            //ptCLBigBlind.ForEach(x => DrawUtils.ShowGeometry(x, "l6.5ptCoverBigBlind", 212, 25, 30));
+
+            //List<Point3d> ptMorePts = FourStep(ptCLBigBlind); //4、移点：修补需求：将一些点更加靠近中心线
+            //fourPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l6.6ptMoveToCL", 141, 25, 30));
+
 
             List<Point3d> thdPoints = ThdStep(fourPoints); //5、删点
             thdPoints.ForEach(x => DrawUtils.ShowGeometry(x, "l7ptDelet", 41, 25, 30));
@@ -89,74 +98,122 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
             return thdPoints;
         }
 
+        ///// <summary>
+        ///// 获取可布置点位
+        ///// </summary>
+        ///// <param name="nonDeployableArea"></param>
+        ///// <param name="layoutList"></param>
+        ///// <param name="radius"></param>
+        ///// <returns></returns>
+        //private void GetPosiblePositions()
+        //{
+        //    List<Point3d> ans = new List<Point3d>();
+        //    var ptInLayoutArea = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
+        //    Hashtable ht = new Hashtable();
+        //    foreach (var pt in ptInLayoutArea)
+        //    {
+        //        ht[pt] = true;
+        //    }
+        //    foreach (var pl in nonDeployableArea)
+        //    {
+        //        foreach (var pt in ptInLayoutArea)
+        //        {
+        //            if (pl.ContainsOrOnBoundary(pt))
+        //            {
+        //                ht[pt] = false;
+        //            }
+        //        }
+        //    }
+
+        //    foreach (DictionaryEntry xx in ht)
+        //    {
+        //        if ((bool)xx.Value == true)
+        //        {
+        //            ans.Add((Point3d)xx.Key);
+        //        }
+        //    }
+
+        //    pointsInLayoutList = ans.Distinct().ToList();
+
+        //}
+
         /// <summary>
         /// 获取可布置点位
+        /// 如果以较大距离则比较点位比例和面积比例，差距太大（rateThreshold)则用更小的离散距离获取可布置点位。避免过细的走廊因为距离太大而没有初始点位。
         /// </summary>
-        /// <param name="nonDeployableArea"></param>
-        /// <param name="layoutList"></param>
-        /// <param name="radius"></param>
-        /// <returns></returns>
         private void GetPosiblePositions()
         {
+            var rateThreshold = 0.03; //试了几个奇怪的带洞区域或者很窄区域的经验值
+            var rectangleThreshold = 0.8; //obb和实际面积比值界定。用来简单判断是不是像矩形
             List<Point3d> ans = new List<Point3d>();
-            var ptInLayoutArea = PointsDealer.PointsInAreas(layoutList, radius).Distinct().ToList();
-            Hashtable ht = new Hashtable();
-            foreach (var pt in ptInLayoutArea)
+
+            for (int i = 0; i < LayoutWithHole.Count; i++)
             {
-                ht[pt] = true;
-            }
-            foreach (var pl in nonDeployableArea)
-            {
-                foreach (var pt in ptInLayoutArea)
+                var layout = LayoutWithHole[i];
+                var areaPoints = new List<Point3d>();
+
+                if (layout.Area > Radius * Radius * 0.2)
+                //if(disX > radius || disY > radius)
                 {
-                    if (pl.ContainsOrOnBoundary(pt))
+                    areaPoints = PointsDealer.PointsInUncoverArea(layout, 400, out var ptsInOBB);//700------------------------------调参侠 此参数可以写一个计算函数，通过面积大小求根号 和半径比较算出 要有上下界(700是相对接近最好的值)
+
+                    var obb = (layout.Shell()).CalObb();
+                    double rate = (double)areaPoints.Count / (double)ptsInOBB.Count;
+                    var rateArea = layout.Area / obb.Area;
+                    //var pt0 = obb.GetPoint3dAt(0);
+                    //DrawUtils.ShowGeometry(pt0, string.Format("all:{0},in:{1},rate：{2}", ptsInOBB.Count, areaPoints.Count, rate), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                    //DrawUtils.ShowGeometry(new Point3d(pt0.X, pt0.Y - 1 * 35, 0), string.Format("obb:{0},frame:{1},rate：{2}", obb.Area, layout.Area, rateArea), "l0PtInitInfo", colorIndex: 3, hight: 30);
+                    //ptsInOBB.ForEach(x => DrawUtils.ShowGeometry(x, "l0ptInitInOBB", colorIndex: 150, r: 30));
+                    
+                    //比值差异过大且越不像四边形
+                    if (Math.Abs(rate - rateArea) > rateThreshold && rateArea < rectangleThreshold)
                     {
-                        ht[pt] = false;
+                        areaPoints = PointsDealer.PointsInUncoverArea(layout, 100, out ptsInOBB);
                     }
                 }
-            }
-
-            foreach (DictionaryEntry xx in ht)
-            {
-                if ((bool)xx.Value == true)
+                else
                 {
-                    ans.Add((Point3d)xx.Key);
+                    //areaPoints = PointsInArea(poly, radius);
+                    areaPoints = PointsDealer.PointsInUncoverArea(layout, 100, out var ptsInOBB);
                 }
+
+                ans.AddRange(areaPoints);
+
             }
 
-            pointsInLayoutList = ans.Distinct().ToList();
+            PointsInLayoutList = ans.Distinct().ToList();
 
         }
 
         private void SetDetectSptialIdx()
         {
-            if (detectArea.Count > 0)
+            if (DetectArea.Count > 0)
             {
                 DBObjectCollection dBObjectCollection = new DBObjectCollection();
-                foreach (var detect in detectArea)
+                foreach (var detect in DetectArea)
                 {
                     dBObjectCollection.Add(ThMPolygonTool.CreateMPolygon(detect));
                 }
 
-                detectSpatialIdx = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
+                DetectSpatialIdx = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
             }
         }
 
         private void SetEmptyDetect()
         {
-            if (detectArea.Count > 0)
+            if (DetectArea.Count > 0)
             {
                 var emptyDetect = new List<Polygon>();
                 var obj = new DBObjectCollection();
-                foreach (var p in pointsInLayoutList)
+                foreach (var p in PointsInLayoutList)
                 {
                     obj.Add(new DBPoint(p));
                 }
                 var pointIdx = new ThCADCoreNTSSpatialIndex(obj);
 
-                foreach (var d in detectArea)
+                foreach (var d in DetectArea)
                 {
-                    var hasLayout = layoutList.Where(x => d.Contains(x.Shell()));
+                    var hasLayout = LayoutList.Where(x => d.Contains(x.Shell()));
 
                     if (hasLayout.Count() == 0)
                     {
@@ -165,7 +222,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     else
                     {
                         hasLayout = hasLayout.OrderByDescending(x => x.Area);
-                        if (hasLayout.First().Area <= (radius * radius * 0.2 / 50)) //根据初始点位生成得出
+                        if (hasLayout.First().Area <= (Radius * Radius * 0.2 / 50)) //根据初始点位生成得出
                         {
                             var ptInDete = pointIdx.SelectCrossingPolygon(d);
                             if (ptInDete.Count == 0)
@@ -189,16 +246,16 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         {
             List<Point3d> fstPoints = new List<Point3d>();
             Hashtable ht = new Hashtable();
-            foreach (Point3d pt in pointsInLayoutList)
+            foreach (Point3d pt in PointsInLayoutList)
             {
                 ht.Add(pt, false);
             }
             bool flag;
-            double adaptRadius = radius * AdaptRadius(radius);
-            foreach (Point3d pt in pointsInLayoutList)
+            double adaptRadius = Radius * AdaptRadius(Radius);
+            foreach (Point3d pt in PointsInLayoutList)
             {
                 flag = false;
-                foreach (Point3d pt2 in pointsInLayoutList)
+                foreach (Point3d pt2 in PointsInLayoutList)
                 {
                     //距离在范围外，跳过
                     if (pt.DistanceTo(pt2) > adaptRadius)
@@ -232,14 +289,14 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
             returnPts.AddRange(points);
 
             var addPtInDetect = new List<Point3d>();
-            for (int i = 0; i < detectArea.Count; i++)
+            for (int i = 0; i < DetectArea.Count; i++)
             {
-                var detect = detectArea[i];
+                var detect = DetectArea[i];
                 var pInDetect = points.Where(x => detect.Contains(x));
                 if (pInDetect.Count() == 0)
                 {
                     var centerPt = detect.Centroid();
-                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, pointsInLayoutList, detect);
+                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, PointsInLayoutList, detect);
                     if (ptNearCenter != Point3d.Origin)
                     {
                         addPtInDetect.Add(ptNearCenter);
@@ -269,7 +326,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 ++loopCnt;
                 flag = false;
                 //当前未覆盖区域集合
-                var unCoverRegion = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
+                var unCoverRegion = AreaCaculator.BlandArea(MRoom, points, Radius, EquipmentType, DetectSpatialIdx, EmptyDetect);
 
                 //在未覆盖区域附近加点
                 foreach (Entity obj in unCoverRegion.ToDbCollection())
@@ -280,14 +337,14 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                         flag = true;
                         Point3d pt = ((Polyline)obj).Centroid();
                         var detect = new Polyline();
-                        if (detectArea.Count > 0)
+                        if (DetectArea.Count > 0)
                         {
-                            detect = AreaCaculator.GetDetectPolyline(pt, detectSpatialIdx);
+                            detect = AreaCaculator.GetDetectPolyline(pt, DetectSpatialIdx);
                         }
-                        Point3d pt1 = PointsDealer.GetNearestPoint(pt, pointsInLayoutList, detect);
+                        Point3d pt1 = PointsDealer.GetNearestPoint(pt, PointsInLayoutList, detect);
 
                         //如果存在永不可能覆盖的位置，放弃覆盖
-                        if (pt1 == Point3d.Origin || pt.DistanceTo(pt1) > radius)
+                        if (pt1 == Point3d.Origin || pt.DistanceTo(pt1) > Radius)
                         {
                             flag = false;
                             continue;
@@ -311,26 +368,43 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         private List<Point3d> SndHalfStep(List<Point3d> points)
         {
             //1、获得所有大面积未覆盖区域（多个）中所有的未覆盖区域中所有的未覆盖区域中的点（统一处理）
-            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
+            NetTopologySuite.Geometries.Geometry unCoverRegion = AreaCaculator.BlandArea(MRoom, points, Radius, EquipmentType, DetectSpatialIdx, EmptyDetect);
             List<Point3d> pointsInUncoverAreas = new List<Point3d>();
             foreach (Entity obj in unCoverRegion.ToDbCollection())
             {
-                if (obj.GetArea() > 500000)
+                MPolygon objMpoly = null;
+                if (obj is Polyline pl)
                 {
-                    DrawUtils.ShowGeometry(obj, "l4BigBlind", 3);
-                    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(obj, 400);//-------------------
-                    pointsInUncoverAreas.AddRange(tmpPoints);
+                    objMpoly = ThMPolygonTool.CreateMPolygon(pl);
                 }
+                if (obj is MPolygon mpl)
+                {
+                    objMpoly = mpl;
+                }
+                DrawUtils.ShowGeometry(objMpoly, "l4BlindTestLarge", 3);
+                if (objMpoly != null && objMpoly.Area > 500000)
+                {
+                    DrawUtils.ShowGeometry(objMpoly, "l4BigBlind", 3);
+                    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverArea(objMpoly, 400, out var ptInObb);//-------------------
+                    pointsInUncoverAreas.AddRange(tmpPoints);
+
+                }
+                //if (obj.GetArea() > 500000)
+                //{
+                //    DrawUtils.ShowGeometry(obj, "l4BigBlind", 3);
+                //    List<Point3d> tmpPoints = PointsDealer.PointsInUncoverAreaNew(obj, 400,out var ptInObb);//-------------------
+                //    pointsInUncoverAreas.AddRange(tmpPoints);
+                //}
             }
             //2、找到以上获得的点（radius或者radius / 2）最近的可布置点
             foreach (Point3d pt in pointsInUncoverAreas)
             {
                 var detect = new Polyline();
-                if (detectArea.Count > 0)
+                if (DetectArea.Count > 0)
                 {
-                    detect = AreaCaculator.GetDetectPolyline(pt, detectSpatialIdx);
+                    detect = AreaCaculator.GetDetectPolyline(pt, DetectSpatialIdx);
                 }
-                var newPt = PointsDealer.GetNearestPoint(pt, pointsInLayoutList, detect);
+                var newPt = PointsDealer.GetNearestPoint(pt, PointsInLayoutList, detect);
                 if (newPt != Point3d.Origin)
                 {
                     points.Add(newPt);
@@ -350,12 +424,12 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
             var movePtToCenter = new List<Point3d>();
             for (int i = 0; i < points.Count; i++)
             {
-                var layout = layoutList.Where(x => x.Contains(points[i])).First();
+                var layout = LayoutList.Where(x => x.Contains(points[i])).First();
                 var ptInLayout = points.Where(x => layout.Contains(x));
                 if (ptInLayout.Count() == 1)
                 {
                     var centerPt = layout.Shell().Centroid();
-                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, pointsInLayoutList, layout.Shell());
+                    var ptNearCenter = PointsDealer.GetNearestPoint(centerPt, PointsInLayoutList, layout.Shell());
                     if (ptNearCenter != Point3d.Origin)
                     {
                         movePtToCenter.Add(ptNearCenter);
@@ -381,8 +455,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         private List<Point3d> ThdStep(List<Point3d> points)
         {
             Hashtable ht = new Hashtable();
-            DeletePoints.ReducePoints(ht, points, radius);
-            DeletePoints.RemovePoints(mRoom, ht, points, radius, equipmentType, detectSpatialIdx, EmptyDetect);
+            DeletePoints.ReducePoints(ht, points, Radius);
+            DeletePoints.RemovePoints(MRoom, ht, points, Radius, EquipmentType, DetectSpatialIdx, EmptyDetect);
             return DeletePoints.SummaryPoints(ht);
         }
 
@@ -396,20 +470,20 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
         /// <returns></returns>
         private List<Point3d> FourStep(List<Point3d> points)
         {
-            double preBlandArea = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect).Area;
+            double preBlandArea = AreaCaculator.BlandArea(MRoom, points, Radius, EquipmentType, DetectSpatialIdx, EmptyDetect).Area;
 
             //key原始点，value原始点最近的中心点
             Dictionary<Point3d, Point3d> pt2center = new Dictionary<Point3d, Point3d>();
             foreach (var pt in points)
             {
-                pt2center[pt] = PointsDealer.GetNearestPoint(pt, centerLinePts, null);
+                pt2center[pt] = PointsDealer.GetNearestPoint(pt, CenterLinePts, null);
             }
             //key原始点，value原始点最近的中心点最近的可布置点
             Dictionary<Point3d, Point3d> pt2move = new Dictionary<Point3d, Point3d>();
             foreach (var node in pt2center)
             {
-                var layout = layoutList.Where(x => x.Contains(node.Key)).First();
-                pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, pointsInLayoutList, layout.Shell());
+                var layout = LayoutList.Where(x => x.Contains(node.Key)).First();
+                pt2move[node.Key] = PointsDealer.GetNearestPoint(node.Value, PointsInLayoutList, layout.Shell());
             }
             foreach (var node in pt2move)
             {
@@ -417,7 +491,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 {
                     points.Remove(node.Key);
                     points.Add(node.Value);
-                    double curBlandArea = AreaCaculator.BlandArea(mRoom, points, radius, equipmentType, detectSpatialIdx, EmptyDetect).Area;
+                    double curBlandArea = AreaCaculator.BlandArea(MRoom, points, Radius, EquipmentType, DetectSpatialIdx, EmptyDetect).Area;
                     if (Math.Abs(preBlandArea - curBlandArea) > 500000)
                     {
                         //points.Remove(node.Value);

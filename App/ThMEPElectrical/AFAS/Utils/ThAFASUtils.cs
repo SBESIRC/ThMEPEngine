@@ -210,7 +210,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 var transformer = dataPass.Transformer;
 
                 ///////////处理原始建筑数据,已转回原位置附近////////
-                var localDataFactory = new ThAFASAllSetTestDataFactory ()
+                var localDataFactory = new ThAFASAllSetTestDataFactory()
                 {
                     ReferBeam = referBeam,
                     WallThick = wallThick,
@@ -324,8 +324,8 @@ namespace ThMEPElectrical.AFAS.Utils
                 {
                     return;
                 }
-
                 var transformer = ThAFASUtils.GetTransformer(selectPts);
+                //transformer = new ThMEPOriginTransformer(new Point3d(0, 0, 0));
 
                 //-----------导入所有块，图层信息
                 var extractBlkList = ThFaCommon.BlkNameList;
@@ -351,10 +351,12 @@ namespace ThMEPElectrical.AFAS.Utils
         }
 
         /////-------for no UI mode setting
-        public static bool SettingBoolean(string hintString)
+        public static bool SettingBoolean(string hintString, int defaultValue)
         {
             var ans = false;
-            var value = Active.Editor.GetInteger(hintString);
+            var options = new PromptIntegerOptions(hintString);
+            options.DefaultValue = defaultValue;
+            var value = Active.Editor.GetInteger(options);
             if (value.Status == PromptStatus.OK)
             {
                 ans = value.Value == 1 ? true : false;
@@ -363,10 +365,12 @@ namespace ThMEPElectrical.AFAS.Utils
             return ans;
         }
 
-        public static int SettingInt(string hintString)
+        public static int SettingInt(string hintString, int defaultValue)
         {
             var ans = 0;
-            var value = Active.Editor.GetInteger(hintString);
+            var options = new PromptIntegerOptions(hintString);
+            options.DefaultValue = defaultValue;
+            var value = Active.Editor.GetInteger(options);
             if (value.Status == PromptStatus.OK)
             {
                 ans = value.Value;
@@ -387,11 +391,13 @@ namespace ThMEPElectrical.AFAS.Utils
             return ans;
         }
 
-        public static double SettingDouble(string hintString)
+        public static double SettingDouble(string hintString,double defaultValue)
         {
             var ans = 0.0;
 
-            var value = Active.Editor.GetDouble(hintString);
+            var options = new PromptDoubleOptions(hintString);
+            options.DefaultValue = defaultValue;
+            var value = Active.Editor.GetDouble(options);
             if (value.Status == PromptStatus.OK)
             {
                 ans = value.Value;
