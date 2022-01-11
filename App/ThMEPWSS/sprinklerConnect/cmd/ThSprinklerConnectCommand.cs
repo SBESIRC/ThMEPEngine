@@ -151,16 +151,19 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
 
                     //打散管线
                     var pipeService = new ThSprinklerPipeService();
-                    pipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine, out var allLines);
+                    pipeService.ThSprinklerPipeToLine(mainPipe, subMainPipe, out var mainLine, out var subMainLine);
                     mainLine.AddRange(mainPipeLine);
                     subMainLine.AddRange(subMainPipeLine);
-                    allLines.AddRange(mainPipeLine);
-                    allLines.AddRange(subMainPipeLine);
 
                     if (sprinklerPts.Count == 0 || subMainLine.Count == 0)
                     {
                         continue;
                     }
+
+                    subMainLine = SprinklerFilter(subMainLine, sprinklerPts);
+                    var allLines = new List<Line>();
+                    allLines.AddRange(mainLine);
+                    allLines.AddRange(subMainLine);
 
                     var sprinklerParameter = new ThSprinklerParameter
                     {
@@ -261,7 +264,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             }
         }
 
-        public void CleanPipe(string layerName, Polyline polyline)
+        private void CleanPipe(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -289,7 +292,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
             }
         }
 
-        public void CleanPline(string layerName, Polyline polyline)
+        private void CleanPline(string layerName, Polyline polyline)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -329,6 +332,37 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
         public void Dispose()
         {
             //
+        }
+
+        private List<Line> SprinklerFilter(List<Line> subMainPipe, List<Point3d> sprinklerPt)
+        {
+            var newPipe = new List<Line>();
+            var index = new ThCADCoreNTSSpatialIndex(sprinklerPt.Select(pt => new DBPoint(pt)).ToCollection());
+            subMainPipe.ForEach(p =>
+            {
+                var frame = p.Buffer(10.0);
+                var filter = index.SelectCrossingPolygon(frame);
+                if (filter.Count > 0)
+                {
+                    var newPts = new List<Point3d>();
+                    newPts.Add(p.StartPoint);
+                    filter.OfType<DBPoint>().OrderBy(pt => pt.Position.DistanceTo(p.StartPoint)).ForEach(pt =>
+                    {
+                        newPts.Add(pt.Position);
+                        sprinklerPt.Remove(pt.Position);
+                    });
+                    newPts.Add(p.EndPoint);
+                    for (int i = 1; i < newPts.Count; i++)
+                    {
+                        newPipe.Add(new Line(newPts[i - 1], newPts[i]));
+                    }
+                }
+                else
+                {
+                    newPipe.Add(p);
+                }
+            });
+            return newPipe;
         }
     }
 }
