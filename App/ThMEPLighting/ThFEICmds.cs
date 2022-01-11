@@ -139,23 +139,26 @@ namespace ThMEPLighting
                 {
                     var frameBlock = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
-                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame == null)
+                    var originframe = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    if (originframe == null)
                     {
                         continue;
                     }
-
+                    var frame = originframe.Clone() as Polyline;
                     var pt = frame.StartPoint;
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                     originTransformer.Transform(frame);
                     var outFrame = ThMEPFrameService.Normalize(frame);
+
+                    //清除原有构建
+                    ClearComponentService.ClearExitBlock(outFrame, originTransformer);
 
                     DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                     //获取房间
                     var rooms = dsFELGetPrimitivesService.GetRoomInfo(outFrame);
 
                     //获取门 
-                    var doors = dsFELGetPrimitivesService.GetDoor(outFrame);
+                    var doors = dsFELGetPrimitivesService.GetDoor(originframe);
 
                     //获取中心线
                     var centerLines = dsFELGetPrimitivesService.GetCenterLines(outFrame, rooms.Select(x => x.Key.Boundary).OfType<Polyline>().ToList());

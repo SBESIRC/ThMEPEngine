@@ -50,7 +50,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         {
             var closetPt = closetLane.GetClosestPointTo(startPt, false);
             Vector3d dir = Vector3d.ZAxis.CrossProduct((closetPt - startPt).GetNormal());
-            if ((closetLane.EndPoint - closetLane.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)))
+            if ((closetLane.EndPoint - closetLane.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)) || closetPt.DistanceTo(startPt) < 1)
             {
                 Polyline line = new Polyline();
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);

@@ -66,9 +66,10 @@ namespace ThMEPLighting.DSFEL.Service
         /// <returns></returns>
         public List<Polyline> GetDoor(Polyline polyline)
         {
-            var objs = new DBObjectCollection();
+            var getDoors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                var objs = new DBObjectCollection();
                 var doors = acdb.ModelSpace
                 .OfType<Polyline>()
                 .Where(o => o.Layer == ThMEPEngineCoreLayerUtils.DOOR);
@@ -78,10 +79,24 @@ namespace ThMEPLighting.DSFEL.Service
                     originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
+
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                getDoors = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+                var engine = new ThDoorBuilderEngine();
+                engine.Build(acdb.Database, polyline.Vertices());
+                var db3Doors = engine.Elements.Select(x => x.Outline).OfType<Polyline>().ToList();
+                db3Doors.ForEach(x => originTransformer.Transform(x));
+                foreach (var door in db3Doors)
+                {
+                    if (!getDoors.Any(x => x.Intersects(door)))
+                    {
+                        getDoors.Add(door);
+                    }
+                }
             }
 
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            return thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+            return getDoors;
         }
 
         /// <summary>
@@ -119,7 +134,7 @@ namespace ThMEPLighting.DSFEL.Service
                 {
                     continue;
                 }
-                resLines.AddRange(centerLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList());
+                resLines.AddRange(centerLines.SelectMany(x => polyline.Trim(x).OfType<Curve>().ToList()).ToList());
             }
 
             //处理车道线

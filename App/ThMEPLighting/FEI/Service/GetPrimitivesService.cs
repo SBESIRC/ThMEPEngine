@@ -36,7 +36,7 @@ namespace ThMEPLighting.FEI
             {
                 var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME);
+                .Where(o => o.Layer == ThMEPEngineCoreCommon.LANELINE_LAYER_NAME || o.Layer == ThMEPEngineCoreLayerUtils.CENTERLINE);
                 laneLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
@@ -178,7 +178,7 @@ namespace ThMEPLighting.FEI
             List<BlockReference> blocks = new List<BlockReference>();
             foreach (BlockReference obj in objs)
             {
-                if (polyline.Contains(obj.Position))
+                if (polyline.Contains(obj.Position) && !blocks.Any(x=>x.Position.DistanceTo(obj.Position) < 50))
                 {
                     blocks.Add(obj);
                 }
