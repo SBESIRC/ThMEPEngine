@@ -50,47 +50,47 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 if (blockDb.Layers.Contains("H-PIPE-DIMS"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-DIMS"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-DIMS"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-CS"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CS"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CS"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-CR"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CR"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CR"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-HS"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HS"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HS"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-HR"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HR"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HR"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-C"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-C"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-C"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-CHS"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHS"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHS"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-CHR"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHR"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHR"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-R"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-R"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-R"), false);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-APPE"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), false);
                 }
                 if (blockDb.Layers.Contains("H-PAPP-VALV"))
                 {
-                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PAPP-VALV"), true);
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PAPP-VALV"), false);
                 }
 
             }

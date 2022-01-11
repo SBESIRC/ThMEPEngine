@@ -17,6 +17,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPHVAC.FanConnect.Command;
 using ThMEPHVAC.FanConnect.Model;
+using ThMEPHVAC.FanLayout.Service;
 
 namespace ThMEPHVAC.FanConnect.Service
 {
@@ -39,6 +40,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 dbLine.UpgradeOpen();
                 dbLine.Erase();
                 dbLine.DowngradeOpen();
+                box.Dispose();
                 return true;
             }
             else if (box.Contains(startPt) && !box.Contains(entPt))
@@ -47,6 +49,8 @@ namespace ThMEPHVAC.FanConnect.Service
                 dbLine.UpgradeOpen();
                 dbLine.StartPoint = pts[0];
                 dbLine.DowngradeOpen();
+                box.Dispose();
+                return true;
             }
             else if (!box.Contains(startPt) && box.Contains(entPt))
             {
@@ -54,20 +58,58 @@ namespace ThMEPHVAC.FanConnect.Service
                 dbLine.UpgradeOpen();
                 dbLine.EndPoint = pts[0];
                 dbLine.DowngradeOpen();
+                box.Dispose();
+                return true;
             }
-            box.Dispose();
             return false;
         }
         public bool RemoveLine(Line remLine, Polyline dbLine)
         {
-            var dbObjs = new DBObjectCollection();
-            dbLine.Explode(dbObjs);
-            foreach(var db in dbObjs)
+            var startPt = dbLine.StartPoint;
+            var entPt = dbLine.EndPoint;
+            var box = remLine.ExtendLine(1.0).Buffer(10.0);
+            var plinePts = dbLine.Vertices();
+            if(box.Contains(startPt) && box.Contains(entPt))
             {
-                if(RemoveLine(remLine,db as Line))
+                dbLine.UpgradeOpen();
+                dbLine.Erase();
+                dbLine.DowngradeOpen();
+                box.Dispose();
+                return true;
+            }
+            else if (box.Contains(startPt) && !box.Contains(entPt))
+            {
+                var tempPts = box.IntersectWithEx(dbLine);
+                dbLine.UpgradeOpen();
+                dbLine.Erase();
+                dbLine.DowngradeOpen();
+                var toDbServiece = new ThFanToDBServiece();
+                var pline = new Polyline();
+                pline.AddVertexAt(0, tempPts[0].ToPoint2d(),0.0,0.0,0.0);
+                for(int i = 1; i < plinePts.Count;i++)
                 {
-                    return true;
+                    pline.AddVertexAt(i, plinePts[i].ToPoint2d(), 0.0, 0.0, 0.0);
                 }
+                toDbServiece.InsertEntity(pline, "AI-水管路由");
+                box.Dispose();
+                return true;
+            }
+            else if (!box.Contains(startPt) && box.Contains(entPt))
+            {
+                var tempPts = box.IntersectWithEx(dbLine);
+                dbLine.UpgradeOpen();
+                dbLine.Erase();
+                dbLine.DowngradeOpen();
+                var pline = new Polyline();
+                var toDbServiece = new ThFanToDBServiece();
+                for (int i = 0; i < plinePts.Count-1; i++)
+                {
+                    pline.AddVertexAt(i, plinePts[i].ToPoint2d(), 0.0, 0.0, 0.0);
+                }
+                pline.AddVertexAt(plinePts.Count - 1, tempPts[0].ToPoint2d(), 0.0, 0.0, 0.0);
+                toDbServiece.InsertEntity(pline, "AI-水管路由");
+                box.Dispose();
+                return true;
             }
             return false;
         }
