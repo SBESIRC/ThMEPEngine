@@ -288,7 +288,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var firstArea = CreateArea(first, branch, neibourDict);
             var secondArea = CreateArea(second, branch, neibourDict);
             var firstIncludeEdges = GroupEdges(firstArea, sideEdges); // firstArea包含的边
-            var secondIncludeEdges = GroupEdges(secondArea, sideEdges); // firstArea包含的边
+            var secondIncludeEdges = GroupEdges(secondArea, sideEdges); // secondArea包含的边
 
             var firstEdges = FilterEdges(firstIncludeEdges, first, neibourDict); 
             var branchEdges = FilterEdges(firstIncludeEdges, branch, neibourDict);
@@ -451,7 +451,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var direction = sp.GetVectorTo(ep).GetNormal();
             return lightNodes
-                .OrderByDescending(o => o.Position.GetProjectPtOnLine(sp, ep).DistanceTo(sp))
+                .OrderBy(o => o.Position.GetProjectPtOnLine(sp, ep).DistanceTo(sp))
                 .Where(o => 
                 {
                     var projectionPt = o.Position.GetProjectPtOnLine(sp, ep);
