@@ -7152,7 +7152,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         var side = new MultiPoint(geoData.SideFloorDrains.Select(x => x.ToNTSPoint()).ToArray());
                         var fdsf = F(item.FloorDrains.Where(x => !x.Intersects(side)).ToList());
                         var aloneFloorDrainInfos = new List<AloneFloorDrainInfo>();
-                        var bufSize = STURZKAMPFFLUGZEUG;
+                        var bufSize = 1e6;
                         foreach (var ditch in item.Ditches)
                         {
                             foreach (var wline in wlinesf(ditch.EnvelopeInternal.ToGRect().Expand(MISAPPREHENSIVE).ToPolygon()))
