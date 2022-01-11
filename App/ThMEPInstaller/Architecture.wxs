@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <?include Variable.wxi ?>
+    <Fragment>
+        <?if $(var.Configuration) = Debug ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Debug" Guid="{9DF63B85-1093-4804-9D1B-3619B0620D4A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" Guid="{0792C5BD-2D20-45ED-9E66-A22141C1E44D}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Debug" Guid="{1D602632-7F6C-4FBD-822E-B91738DF455C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" Guid="{F1C4A540-8912-4645-BFDF-76481DDC2F8C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Debug" Guid="{525A896A-DFD9-4F17-B465-E8D39C555EA0}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" Guid="{BACFE15A-D1CC-4B04-83AA-87C3A2D934CE}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?elseif $(var.Configuration) = Release ?>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+            <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Release" Guid="{33CE6757-4E72-4CC3-860A-15F802491FB3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" Guid="{8C5A9698-B6F0-402B-80B9-2FB3B2ADC718}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+            <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Release" Guid="{670575AB-D99A-49D6-A8A2-C50AB748C243}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" Guid="{79FE0FA4-1BE9-4FF0-9B95-373D5EC74F35}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>   
+        </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+            <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Release" Guid="{70165D36-9219-46D7-8282-F9E64BAD43E8}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPArchitecture.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" Guid="{9FDCE59A-E8B9-4BD8-91AC-064E9FEEB92A}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Architecture.WPI.UI.dll" />
+            </Component>
+        </DirectoryRef>
+        <?endif?>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponentsArchitectureWin64">
+            <?if $(var.Configuration) = Debug ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Debug" />
+            <?elseif $(var.Configuration) = Release ?>
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_CMD_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_CMD_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_CMD_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPArchitecture_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPArchitecture_UI_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPArchitecture_UI_Release" />
+            <?endif?>
+        </ComponentGroup>
+    </Fragment>
+</Wix>
