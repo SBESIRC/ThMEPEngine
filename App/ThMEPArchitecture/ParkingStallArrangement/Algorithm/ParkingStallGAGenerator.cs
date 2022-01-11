@@ -217,7 +217,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
     }
 
-    public class GA : IDisposable
+    public class ParkingStallGAGenerator : IDisposable
     {
         Random Rand = new Random();
 
@@ -249,7 +249,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
-        public GA(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
+        public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618

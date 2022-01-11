@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using AcHelper;
+using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
@@ -43,53 +44,61 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public override void SubExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var database = AcadDatabase.Active())
+            try
             {
-                ImportBlockFile();
-                //获取起点
-                var startPt = ThFanConnectUtils.SelectPoint();
-                if (startPt.IsEqualTo(new Point3d()))
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var database = AcadDatabase.Active())
                 {
+                    ImportBlockFile();
+                    //获取起点
+                    var startPt = ThFanConnectUtils.SelectPoint();
+                    if (startPt.IsEqualTo(new Point3d()))
+                    {
+                        return;
+                    }
+                    //获取风机设备
+                    var fucs = ThFanConnectUtils.SelectFanCUModel(0);
+                    if (fucs.Count == 0)
+                    {
+                        return;
+                    }
+                    //获取剪力墙
+                    var shearWalls = ThBuildElementExtractService.GetShearWalls();
+                    //获取结构柱
+                    var columns = ThBuildElementExtractService.GetColumns();
+                    //获取房间框线
+                    var rooms = ThBuildElementExtractService.GetBuildRooms();
+                    //生成管路路由
+                    var pipeService = new ThCreatePipeService();
+                    pipeService.PipeStartPt = startPt;
+                    pipeService.PipeWidth = 300.0;
+                    pipeService.EquipModel = fucs;
+                    foreach (var wall in shearWalls)
+                    {
+                        pipeService.AddObstacleHole(wall.Outline);
+                    }
+                    foreach (var column in columns)
+                    {
+                        pipeService.AddObstacleHole(column.Outline);
+                    }
+                    foreach (var room in rooms)
+                    {
+                        pipeService.AddObstacleRoom(room);
+                    }
+                    var plines = pipeService.CreatePipeLine(1);
+                    var toDbServiece = new ThFanToDBServiece();
+                    foreach (var pl in plines)
+                    {
+                        toDbServiece.InsertEntity(pl, "AI-水管路由");
+                    }
                     return;
                 }
-                //获取风机设备
-                var fucs = ThFanConnectUtils.SelectFanCUModel();
-                if (fucs.Count == 0)
-                {
-                    return;
-                }
-                //获取剪力墙
-                var shearWalls = ThBuildElementExtractService.GetShearWalls();
-                //获取结构柱
-                var columns = ThBuildElementExtractService.GetColumns();
-                //获取房间框线
-                var rooms = ThBuildElementExtractService.GetBuildRooms();
-                //生成管路路由
-                var pipeService = new ThCreatePipeService();
-                pipeService.PipeStartPt = startPt;
-                pipeService.PipeWidth = 300.0;
-                pipeService.EquipModel = fucs;
-                foreach (var wall in shearWalls)
-                {
-                    pipeService.AddObstacleHole(wall.Outline);
-                }
-                foreach (var column in columns)
-                {
-                    pipeService.AddObstacleHole(column.Outline);
-                }
-                foreach (var room in rooms)
-                {
-                    pipeService.AddObstacleRoom(room);
-                }
-                var plines = pipeService.CreatePipeLine(1);
-                var toDbServiece = new ThFanToDBServiece();
-                foreach (var pl in plines)
-                {
-                    toDbServiece.InsertEntity(pl, "AI-水管路由");
-                }
-                return;
             }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+
         }
     }
 }

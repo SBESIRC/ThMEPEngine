@@ -154,7 +154,7 @@ namespace ThMEPLighting.UI.UI
             {
                 ThParkingStallService.Instance.ParkingLayerNames.Clear();
                 ThParkingStallService.Instance.BlockScale = parkingLightView.ScaleSelect.Value;
-                ThParkingStallService.Instance.SetLightDir(parkingLightView.LightDirSelect.Value == 1);
+                ThParkingStallService.Instance.SetLightDir(parkingLightView.LightDirSelect.Value == 2);
                 ThParkingStallService.Instance.ParkingLayerNames.Clear();
                 ThParkingStallService.Instance.ParkingBlockNames.Clear();
                 ThParkingStallService.Instance.ParkingSource = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;

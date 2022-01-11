@@ -13,16 +13,9 @@ namespace ThMEPEngineCore.Command
 
         public void Execute()
         {
-            //try
-            //{
             BeforeExecute();
             SubExecute();
             AfterExecute();
-            //}
-            //catch (Exception ex)
-            //{
-            //    Active.Editor.WriteMessage(ex.Message + "\n");
-            //}
         }
 
         abstract public void SubExecute();

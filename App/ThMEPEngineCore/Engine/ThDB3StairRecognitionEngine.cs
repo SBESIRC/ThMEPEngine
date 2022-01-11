@@ -65,6 +65,12 @@ namespace ThMEPEngineCore.Engine
                 var ifcStair = new ThIfcStair();
                 ifcStair.SrcBlock = stair;
 
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+                var frameTidal = spatialIndex.SelectCrossingPolygon(stair.GeometricExtents.ToRectangle().Vertices());
+                if(frameTidal.Count == 0)
+                {
+                    return ifcStair;
+                }
                 var objs = new DBObjectCollection();
                 stair.Explode(objs);
                 var platforms = objs.OfType<Curve>()
@@ -91,8 +97,7 @@ namespace ThMEPEngineCore.Engine
                 var beamCenter = beams.GeometricExtents().CenterPoint();
                 var platform = new Polyline();
                 var halfPlatform = new Polyline();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
-                var frameTidal = spatialIndex.SelectCrossingPolygon(stair.GeometricExtents.ToRectangle().Vertices());
+                
                 if (platforms.Count == 0)
                 {
                     var frame = new Polyline();

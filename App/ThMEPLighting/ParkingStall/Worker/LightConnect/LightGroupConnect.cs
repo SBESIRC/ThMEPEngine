@@ -19,6 +19,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
         List<Polyline> _allWalls;
         List<Polyline> _allColumns;
         List<LightBlockReference> _areaLightBlocks;
+        double parallerConnectTolerance = Math.Cos(85 * Math.PI / 180.0);//平行分组找连接点，两个点接近垂直容差
         public LightGroupConnect(List<MaxGroupLight> laneGroupLights, List<LightBlockReference> areaLights, Polyline outPolyline, List<Polyline> innerPolylines)
         {
             _areaLightBlocks = new List<LightBlockReference>();
@@ -645,7 +646,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightConnect
                 {
                     var nearDir = (first - nearPoint).GetNormal();
                     var dot = Math.Abs(nearDir.DotProduct(hisGroup.LineDir));
-                    if (dot > 0.5 || dot<0.01)
+                    if (dot > 0.5 || dot< parallerConnectTolerance)
                         hisGroupoint = first;
                     else if (first.DistanceTo(hisGroupBasePoint) < 10)
                         hisGroupoint = first;

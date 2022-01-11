@@ -31,6 +31,7 @@ namespace TianHua.Hvac.UI.UI
         string defaultPath = "";
         string saveExtensionName = "thdata";
         SerializableHelper serializableHelper;
+        uiIndoorFanCheck fanCheck = null;
         public uiIndoorFan()
         {
             InitializeComponent();
@@ -175,9 +176,29 @@ namespace TianHua.Hvac.UI.UI
         }
         private void btnCheck_Click(object sender, RoutedEventArgs e)
         {
-            //校核
-            uiIndoorFanCheck fanCheck = new uiIndoorFanCheck();
-            fanCheck.ShowDialog();
+            //放置重复打开
+            if (null != fanCheck && fanCheck.IsLoaded)
+            {
+                fanCheck.ShowActivated = true;
+                return;
+            }
+            try
+            {
+                this.Hide();
+                fanCheck = new uiIndoorFanCheck();
+                fanCheck.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                fanCheck.Owner = this;
+                fanCheck.Closed += ChildWindowClosed;
+                fanCheck.Show();
+            }
+            catch
+            {
+                this.Show();
+            }
+        }
+        public void ChildWindowClosed(object sender, EventArgs e)
+        {
+            this.Show();
         }
         private void btnChange_Click(object sender, RoutedEventArgs e)
         {

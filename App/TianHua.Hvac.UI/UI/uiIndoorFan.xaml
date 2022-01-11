@@ -367,7 +367,7 @@
         </StackPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="5" HorizontalAlignment="Right" Margin="0,5,10,5" Height="25">
             <cus:ImageButton Content="批量布置" TextMargin="10,0,10,0" IsEnabled="{Binding CanLayer}" Name="btnLayout" Click="btnLayout_Click" />
-            <cus:ImageButton Content="校核" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnCheck" Click="btnCheck_Click" Visibility="Collapsed"/>
+            <cus:ImageButton Content="校核" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnCheck" Click="btnCheck_Click" />
             <cus:ImageButton Content="校核修改" TextMargin="10,0,10,0" Margin="10,0,0,0" IsEnabled="{Binding CanLayer}" Name="btnChange" Click="btnChange_Click"/>
             <cus:ImageButton Content="材料表" TextMargin="10,0,10,0" Margin="10,0,0,0" Name="btnMaterialList" Click="btnMaterialList_Click" Visibility="Collapsed"/>
         </StackPanel>

@@ -104,6 +104,7 @@ namespace ThMEPArchitecture
                 var pls = selected.OfType<Polyline>().ToList();
                 for (int i = 0; i < 10000; i++)
                 {
+                    
                     var areas = lines.SplitArea(pls);
                     areas.ForEach(a => a.Dispose());
                 }

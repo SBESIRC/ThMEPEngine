@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using AcHelper;
+using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
 using System;
@@ -37,35 +38,31 @@ namespace ThMEPHVAC.FanConnect.Command
         }
         public override void SubExecute()
         {
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var database = AcadDatabase.Active())
+            try
             {
-                ImportBlockFile();
-                var startPt = ThFanConnectUtils.SelectPoint();
-                if (startPt.IsEqualTo(new Point3d()))
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var database = AcadDatabase.Active())
                 {
-                    return;
+                    ImportBlockFile();
+                    var startPt = ThFanConnectUtils.SelectPoint();
+                    if (startPt.IsEqualTo(new Point3d()))
+                    {
+                        return;
+                    }
+                    //提取风管路由
+                    var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
+                    ////水管干路和支干路
+                    if (pipes.Count == 0)
+                    {
+                        return;
+                    }
                 }
-                //提取风管路由
-                var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
-                ////水管干路和支干路
-                if (pipes.Count == 0)
-                {
-                    return;
-                }
-                var fucs = ThFanConnectUtils.SelectFanCUModel();
-                if (fucs.Count == 0)
-                {
-                    return;
-                }
-
-                //获取剪力墙
-                var shearWalls = ThBuildElementExtractService.GetShearWalls();
-                //获取结构柱
-                var columns = ThBuildElementExtractService.GetColumns();
-                //获取房间框线
-                var rooms = ThBuildElementExtractService.GetBuildRooms();
             }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);
+            }
+
         }
     }
 }

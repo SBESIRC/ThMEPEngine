@@ -53,22 +53,30 @@ namespace ThMEPHVAC.FanConnect.Service
 
         public Polyline CreatePath(ThFanCUModel model, Line line)
         {
-            var collection = ObstacleHoles.ToCollection();
-            collection.Add(model.FanObb);
             //根据model的类型，先走一步
             var clostPt0 = line.GetClosestPointTo(model.FanPoint, false);
             if(clostPt0.DistanceTo(model.FanPoint) <= 500.0)
             {
+                //----简单的一条延伸线且不穿洞
                 var pl = new Polyline();
-                pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
-                pl.AddVertexAt(1, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                var clostPt1 = line.GetClosestPointTo(model.FanPoint, true);
+                if (clostPt0.DistanceTo(clostPt1) > 10.0)
+                {
+                    pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(1, clostPt1.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(2, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                }
+                else
+                {
+                    pl.AddVertexAt(0, model.FanPoint.ToPoint2D(), 0.0, 0.0, 0.0);
+                    pl.AddVertexAt(1, clostPt0.ToPoint2D(), 0.0, 0.0, 0.0);
+                }
                 return pl;
             }
             var stepPt = TakeStep(model.FanObb, model.FanPoint, 300);
             //根据model位置和line，构建一个框frame
             var frame = ThFanConnectUtils.CreateMapFrame(line, stepPt,10000);
             //提取frame里面的hole和room
-            HoleIndex.Reset(collection);
             var dbHoles = HoleIndex.SelectCrossingPolygon(frame);
             var holes = new List<Polyline>();
             foreach (var dbHole in dbHoles)

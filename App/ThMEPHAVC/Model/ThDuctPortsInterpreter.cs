@@ -53,7 +53,7 @@ namespace ThMEPHVAC.Model
             foreach (var id in id2geoDic.Keys)
             {
                 var param = ThHvacAnalysisComponent.GetConnectorParamById(id);
-                if (param.handle != ObjectId.Null.Handle && param.portWidths.Count() == 0)
+                if (param.handle != ObjectId.Null.Handle && param.portWidths.Count() != 0)
                     dic.Add(id2geoDic[id], param);
             }
         }     

@@ -1,4 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
 using NFox.Cad;
@@ -8,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.FEI.Service
@@ -55,6 +59,46 @@ namespace ThMEPLighting.FEI.Service
                     var sLine = transDic[transLine];
                     sLine.UpgradeOpen();
                     sLine.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 清楚上一次布置的出入口图块
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearExitBlock(this Polyline polyline, ThMEPOriginTransformer originTransformer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.CreateAILayer(ThMEPLightingCommon.EmgLightLayerName, (int)ColorIndex.BYLAYER);
+                //出入口图块
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filterlist = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.LayerName) == ThMEPLightingCommon.EmgLightLayerName &
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                var blocks = new List<BlockReference>();
+                var allBlocks = Active.Editor.SelectAll(filterlist);
+                if (allBlocks.Status == PromptStatus.OK)
+                {
+                    using (AcadDatabase acdb = AcadDatabase.Active())
+                    {
+                        foreach (ObjectId obj in allBlocks.Value.GetObjectIds())
+                        {
+                            blocks.Add(acdb.Element<BlockReference>(obj));
+                        }
+                    }
+                }
+                var objs = new DBObjectCollection();
+                blocks.Where(o => polyline.Contains(originTransformer.Transform(o.Position)))
+                .ForEachDbObject(o => objs.Add(o));
+                foreach (BlockReference block in objs)
+                {
+                    block.UpgradeOpen();
+                    block.Erase();
                 }
             }
         }

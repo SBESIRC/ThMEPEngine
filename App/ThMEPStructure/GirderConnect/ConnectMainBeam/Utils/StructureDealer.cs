@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 using ThCADCore.NTS;
+using DotNetARX;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -72,7 +73,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 var tmpTuplesA = new List<Tuple<Point3d, Point3d>>();
                 var tmpTuplesB = new List<Tuple<Point3d, Point3d>>();
-                Split2Order(tuples, splitA, splitB, tmpTuplesA, tmpTuplesB);
+                Split2Order(tuples, splitA, splitB, ref tmpTuplesA, ref tmpTuplesB);
                 if (curdis < mindis)
                 {
                     mindis = curdis;
@@ -84,6 +85,80 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             SplitPolyline(tuplesA, ref tupleLines);
             SplitPolyline(tuplesB, ref tupleLines);
         }
+        public static void SplitPolylineB(List<Tuple<Point3d, Point3d>> tuples, ref List<List<Tuple<Point3d, Point3d>>> tupleLines, double splitArea = 0.0)
+        {
+            //Recursion boundary
+            int n = tuples.Count;
+            if (n == 0 || n > 10)
+            {
+                return;
+            }
+            var polyline = LineDealer.Tuples2Polyline(tuples);
+
+            if (n < 5 || (n == 5 && polyline.Area < splitArea))
+            {
+                if (LineDealer.Tuples2Polyline(tuples).Closed == true)
+                {
+                    tupleLines.Add(tuples);
+                }
+                return;
+            }
+
+            //Initialization
+            tuples = LineDealer.OrderTuples(tuples);
+            n = tuples.Count;
+            int halfCnt = n / 2;
+            var tuplesA = new List<Tuple<Point3d, Point3d>>();
+            var tuplesB = new List<Tuple<Point3d, Point3d>>();
+            int splitA;
+            int splitB;
+            int flag;
+            double mindis = double.MaxValue;
+            //double minCross = double.MaxValue;
+            //double halfArea = polyline.Area / 2;
+            double curdis;
+
+            //Catulate
+            //find best split
+            int loopCnt = (n & 1) == 1 ? n : (n / 2);
+            for (int i = 0; i < loopCnt; ++i)
+            {
+                splitA = i;
+                splitB = (i + halfCnt) % n;
+                curdis = tuples[splitA].Item1.DistanceTo(tuples[splitB].Item1);
+                flag = 0;
+                var tmpTuple = new Tuple<Point3d, Point3d>(tuples[splitA].Item1, tuples[splitB].Item1);
+                foreach (var curTuple in tuples)
+                {
+                    if (LineDealer.IsIntersect(tmpTuple.Item1, tmpTuple.Item2, curTuple.Item1, curTuple.Item2))
+                    {
+                        flag = 1;
+                        break;
+                    }
+                }
+                if (flag == 1)
+                {
+                    continue;
+                }
+                var tmpTuplesA = new List<Tuple<Point3d, Point3d>>();
+                var tmpTuplesB = new List<Tuple<Point3d, Point3d>>();
+                Split2Order(tuples, splitA, splitB, ref tmpTuplesA, ref tmpTuplesB);
+                //var polylineA = LineDealer.Tuples2Polyline(tmpTuplesA);
+                //var polylineB = LineDealer.Tuples2Polyline(tmpTuplesB);
+                //var curCross = Math.Pow(curdis, 2) * (polylineA.Area - halfArea);
+                //if (curCross < minCross)
+                if (curdis < mindis)
+                {
+                    //minCross = curCross;
+                    mindis = curdis;
+                    tuplesA = tmpTuplesA;
+                    tuplesB = tmpTuplesB;
+                }
+            }
+            //Tail Recursion
+            SplitPolylineB(tuplesA, ref tupleLines, splitArea);
+            SplitPolylineB(tuplesB, ref tupleLines, splitArea);
+        }
 
         /// <summary>
         /// Split a polylin from certain point to two polyline
@@ -93,7 +168,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="splitB"></param>
         /// <param name="tuplesA">in & out</param>
         /// <param name="tuplesB">in & out</param>
-        public static void Split2Order(List<Tuple<Point3d, Point3d>> tuples, int splitA, int splitB, List<Tuple<Point3d, Point3d>> tuplesA, List<Tuple<Point3d, Point3d>> tuplesB)
+        public static void Split2Order(List<Tuple<Point3d, Point3d>> tuples, int splitA, int splitB, ref List<Tuple<Point3d, Point3d>> tuplesA, ref List<Tuple<Point3d, Point3d>> tuplesB)
         {
             tuplesA.Clear();
             tuplesB.Clear();
@@ -1410,6 +1485,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
         }
 
+        /// <summary>
+        /// 删减无用的“BorderPt与NearPt的连接”
+        /// </summary>
+        /// <param name="outline2BorderNearPts"></param>
+        /// <param name="priority1stDicTuples"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
         public static Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> UpdateBorder2NearPts(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts,
             Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples, double tolerance = Math.PI / 4)
         {

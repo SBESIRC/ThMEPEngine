@@ -23,6 +23,7 @@ using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -31,13 +32,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Hour).CreateLogger();
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
+        public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
+        private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
         public GenerateParkingStallDirectlyCmd()
         {
             CommandName = "-THDXQYFG2";
             ActionName = "生成";
+            ParameterViewModel = new ParkingStallArrangementViewModel();
+            _CommandMode = CommandMode.WithoutUI;
         }
+
+        public GenerateParkingStallDirectlyCmd(ParkingStallArrangementViewModel vm)
+        {
+            CommandName = "THDXCW";
+            ActionName = "直接生成";
+            ParameterViewModel = vm;
+            _CommandMode = CommandMode.WithUI;
+        }
+
         public void Dispose()
         {
         }
@@ -83,9 +97,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             stopwatch.Start();
             double threshSecond = 20;
 
-            var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
-            if (!dirSetted)
-                return;
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
+            }
+            else
+            {
+                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+
+            }
 
             var splitRst = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
             if (!splitRst)
@@ -114,7 +136,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
 
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
-            var geneAlgorithm = new GA2(gaPara);
+            var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 
             var rst = geneAlgorithm.Run();
 

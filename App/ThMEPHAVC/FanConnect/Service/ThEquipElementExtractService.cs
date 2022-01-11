@@ -18,12 +18,12 @@ namespace ThMEPHVAC.FanConnect.Service
 {
     public class ThEquipElementExtractService
     {
-        public static List<ThFanCUModel> GetFCUModels()
+        public static List<ThFanCUModel> GetFCUModels(int sysType)
         {
             using (var database = AcadDatabase.Active())
             {
                 var fcuEngine = new ThFanCURecognitionEngine();
-                var retFcu = fcuEngine.Extract(database.Database);
+                var retFcu = fcuEngine.Extract(database.Database, sysType);
                 return retFcu;
             }
         }
@@ -52,18 +52,23 @@ namespace ThMEPHVAC.FanConnect.Service
                     }
                 }
                 var retLines = new List<Line>();
-                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains(layer) && o.ColorIndex == colorIndex).ToList();
+
+                var tmpLines = database.ModelSpace.OfType<Entity>();//.Where(o => o.Layer.Contains(layer) && o.ColorIndex == colorIndex).ToList();
+
                 foreach(var l in tmpLines)
                 {
-                    if(l is Line)
+                    if(l.Layer == layer && l.ColorIndex == colorIndex)
                     {
-                        var line = (l as Line).Clone() as Line;
-                        retLines.Add(line);
-                    }
-                    else if(l is Polyline)
-                    {
-                        var pl = l as Polyline;
-                        retLines.AddRange(pl.ToLines());
+                        if (l is Line)
+                        {
+                            var line = (l as Line).Clone() as Line;
+                            retLines.Add(line);
+                        }
+                        else if (l is Polyline)
+                        {
+                            var pl = l as Polyline;
+                            retLines.AddRange(pl.ToLines());
+                        }
                     }
                 }
                 return retLines;

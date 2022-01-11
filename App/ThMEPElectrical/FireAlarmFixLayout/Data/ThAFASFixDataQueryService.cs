@@ -193,20 +193,29 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
             //                                                    "空调机房", "防排烟机房", "控制室", "电梯机房" };
 
             var FireLinkageNames = ThFaFixCommon.FireLinkageNames;
-            List<string> NameCollection = new List<string>();
-            foreach (string a in FireLinkageNames)
+            //List<string> NameCollection = new List<string>();
+            //foreach (string a in FireLinkageNames)
+            //{
+            //    NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(RoomTableConfig, a));
+            //}
+
+            //foreach (ThGeometry room in Rooms)
+            //{
+            //    foreach (string roomtag in NameCollection)
+            //    {
+            //        if (room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains(roomtag))
+            //        {
+            //            FireLinkageRooms.Add(room);
+            //            //continue;
+            //        }
+            //    }
+            //}
+            foreach (var room in Rooms)
             {
-                NameCollection.AddRange(RoomConfigTreeService.CalRoomLst(RoomTableConfig, a));
-            }
-            foreach (ThGeometry room in Rooms)
-            {
-                foreach (string roomtag in NameCollection)
+                var name = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
+                if (ThAFASRoomUtils.IsRoom(RoomTableConfig, name, FireLinkageNames))
                 {
-                    if (room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains(roomtag))
-                    {
-                        FireLinkageRooms.Add(room);
-                        continue;
-                    }
+                    FireLinkageRooms.Add(room);
                 }
             }
         }
@@ -337,12 +346,12 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
                         continue;
                     for (int j = 0; j < tempAvoid.Count - 1; ++j)
                     {
-                       
+
                         Line avoidOnWall = new Line(tempAvoid[j], tempAvoid[j + 1]);
-                        var dir = (avoidOnWall.EndPoint - avoidOnWall.StartPoint).GetNormal ();
+                        var dir = (avoidOnWall.EndPoint - avoidOnWall.StartPoint).GetNormal();
                         Line actualAvoid = new Line((avoidOnWall.StartPoint + dir.MultiplyBy(-reservedLength)),
                         (avoidOnWall.EndPoint + dir.MultiplyBy(reservedLength)));//实际不可布置区域
-                        if (actualAvoid.Length >1)
+                        if (actualAvoid.Length > 1)
                         {
                             result.Add(actualAvoid);
                         }

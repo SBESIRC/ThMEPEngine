@@ -37,10 +37,20 @@ namespace ThMEPHVAC
             var placeFan = new IndoorFanPlace();
             placeFan.Execute();
         }
+        [CommandMethod("TIANHUACAD", "THSNJJH", CommandFlags.Modal)]
+        public void THIndoorFanCheck()
+        {
+            var selectAreas = SelectPolyline();
+            var fanCheck = new IndoorFanCheck(selectAreas);
+            fanCheck.Execute();
+            var cloudLines = fanCheck.ErrorRoomPolylines;
+            if (null == cloudLines || cloudLines.Count < 1)
+                return;
+            ShowErrorRooms(cloudLines);
+        }
         [CommandMethod("TIANHUACAD", "THSNJJHXG", CommandFlags.Modal)]
         public void THIndoorFanChange()
         {
-            var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
             var fanChange = new IndoorFanChange(selectAreas);
             fanChange.Execute();

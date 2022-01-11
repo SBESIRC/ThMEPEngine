@@ -100,7 +100,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                     transformer.Reset(ref pt);
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
-
+                pairs.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.Key, x.Value, "l0TelResult", 3, 30));
                 //------------对插入真实块
                 ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
                 ThAFASUtils.TransformReset(transformer, geos);

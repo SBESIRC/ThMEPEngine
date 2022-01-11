@@ -81,7 +81,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return point1.Value.TransformBy(Active.Editor.UCS2WCS());
         }
-        public static List<ThFanCUModel> SelectFanCUModel()
+        public static List<ThFanCUModel> SelectFanCUModel(int sysType)
         {
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
@@ -102,37 +102,26 @@ namespace ThMEPHVAC.FanConnect.Command
                         if (entity is BlockReference)
                         {
                             var blk = entity as BlockReference;
-                            if (blk.ObjectId.GetDynBlockValue("水管连接点1 X") != null && blk.ObjectId.GetDynBlockValue("水管连接点1 Y") != null)
+                            if (sysType == 0)//水系统
                             {
-                                Point3d basePt = Point3d.Origin;
-                                if (entity.GeometricExtents != null)
+                                if (blk.GetEffectiveName() == "AI-FCU(两管制)" || blk.GetEffectiveName() == "AI-FCU(四管制)"
+                                    || blk.GetEffectiveName() == "AI-吊顶式空调箱")
                                 {
-                                    basePt = entity.GeometricExtents.CenterPoint();
+                                    retModeles.Add(GetFanFromBlockReference(blk));
                                 }
-                                var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
-                                entity.UpgradeOpen();
-                                entity.TransformBy(mt);
-
-                                var tmpFan = new ThFanCUModel();
-                                var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
-                                var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
-
-                                var offset1 = new Point3d(offset1x, offset1y, 0);
-                                var dbcollection = new DBObjectCollection();
-                                blk.Explode(dbcollection);
-                                dbcollection = dbcollection.OfType<Entity>().Where(O => O is Curve).ToCollection();
-
-                                tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
-                                tmpFan.FanObb = dbcollection.GetMinimumRectangle();
-                                tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
-                                tmpFan.FanObb.TransformBy(mt.Inverse());
-                                retModeles.Add(tmpFan);
-
-                                entity.TransformBy(mt.Inverse());
-                                entity.DowngradeOpen();
+                                else if (blk.GetEffectiveName() == "AI-水管断线")
+                                {
+                                    retModeles.Add(GetFanFromBlockReference(blk));
+                                }
+                            }
+                            else if (sysType == 1)//冷媒系统
+                            {
+                                if (blk.GetEffectiveName() == "AI-中静压VRF室内机(风管机)" || blk.GetEffectiveName() == "AI-VRF室内机(四面出风型)")
+                                {
+                                    retModeles.Add(GetFanFromBlockReference(blk));
+                                }
                             }
                         }
-
                     }
                 }
                 return retModeles;
@@ -521,6 +510,155 @@ namespace ThMEPHVAC.FanConnect.Command
             e2.TransformBy(mt);
             var pts = ThGeometryTool.IntersectWithEx(e1, e2, intersectType);
             return pts.OfType<Point3d>().Select(p => p.TransformBy(mt.Inverse())).ToCollection();
+        }
+        public static ThFanCUModel GetFanFromBlockReference(BlockReference blk)
+        {
+            Point3d basePt = Point3d.Origin;
+            if (blk.GeometricExtents != null)
+            {
+                basePt = blk.GeometricExtents.CenterPoint();
+            }
+            var mt = Matrix3d.Displacement(basePt.GetVectorTo(Point3d.Origin));
+            blk.UpgradeOpen();
+            blk.TransformBy(mt);
+            var tmpFan = new ThFanCUModel();
+            tmpFan.FanType = blk.GetEffectiveName();
+            //获取几何信息
+            if (blk.ObjectId.GetDynBlockValue("水管连接点1 X") != null && blk.ObjectId.GetDynBlockValue("水管连接点1 Y") != null)
+            {
+                var offset1x = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 X"));
+                var offset1y = Convert.ToDouble(blk.ObjectId.GetDynBlockValue("水管连接点1 Y"));
+                var offset1 = new Point3d(offset1x, offset1y, 0);
+                tmpFan.FanPoint = offset1.TransformBy(blk.BlockTransform);
+                tmpFan.FanObb = GetBlockReferenceAABB(blk);
+                tmpFan.FanPoint = tmpFan.FanPoint.TransformBy(mt.Inverse());
+                tmpFan.FanObb.TransformBy(mt.Inverse());
+            }
+            blk.TransformBy(mt.Inverse());
+            blk.DowngradeOpen();
+
+            var attrib = blk.ObjectId.GetAttributesInBlockReference();
+            if (attrib.ContainsKey("制冷量/制热量"))
+            {
+                var strCapacity = attrib["制冷量/制热量"];
+                GetCoolAndHotCapacity(strCapacity, out double coolCapacity, out double hotCapacity);
+                tmpFan.CoolCapa = Math.Max(coolCapacity, hotCapacity);
+
+                if (blk.GetEffectiveName() == "AI-水管断线")
+                {
+                    if (attrib.ContainsKey("冷/热水量"))
+                    {
+                        var strTempDiff = attrib["冷/热水量"];
+                        GetCoolAndHotTempDiff(strTempDiff, out double coolFlow, out double hotFlow);
+                        tmpFan.CoolFlow = coolFlow;
+                        tmpFan.HotFlow = hotFlow;
+                    }
+                }
+                else
+                {
+                    if (attrib.ContainsKey("冷水温差/热水温差"))
+                    {
+                        var strTempDiff = attrib["冷水温差/热水温差"];
+                        GetCoolAndHotTempDiff(strTempDiff, out double coolTempDiff, out double hotTempDiff);
+
+                        tmpFan.CoolFlow = coolCapacity / 1.163 / coolTempDiff;
+                        tmpFan.HotFlow = hotCapacity / 1.163 / hotTempDiff;
+                    }
+                }
+            }
+            return tmpFan;
+        }
+        public static Polyline GetBlockReferenceAABB(BlockReference blk)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(blk.BlockTableRecord);
+                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
+                rectangle.TransformBy(blk.BlockTransform);
+                return rectangle;
+            }
+        }
+        public static void ImportBlockFile()
+        {
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))//引用模块的位置
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                if (blockDb.Blocks.Contains("AI-水管多排标注(4排)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(4排)"));
+                }
+                if (blockDb.Blocks.Contains("AI-水管多排标注(2排)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(2排)"));
+                }
+                if (blockDb.Blocks.Contains("AI-分歧管"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-分歧管"));
+                }
+                if (blockDb.Blocks.Contains("AI-水阀"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水阀"));
+                }
+                if (blockDb.Layers.Contains("H-PIPE-DIMS"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-DIMS"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-CS"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CS"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-CR"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CR"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-HS"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HS"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-HR"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-HR"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-C"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-C"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-CHS"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHS"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-CHR"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-CHR"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-R"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-R"), false);
+                }
+                if (blockDb.Layers.Contains("H-PIPE-APPE"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PIPE-APPE"), false);
+                }
+                if (blockDb.Layers.Contains("H-PAPP-VALV"))
+                {
+                    acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("H-PAPP-VALV"), false);
+                }
+            }
+            using (var acadDb = Linq2Acad.AcadDatabase.Active())
+            {
+                EnsureLayerOn(acadDb, "0");
+                EnsureLayerOn(acadDb, "H-PIPE-DIMS");
+                EnsureLayerOn(acadDb, "H-PIPE-CS");
+                EnsureLayerOn(acadDb, "H-PIPE-CR");
+                EnsureLayerOn(acadDb, "H-PIPE-HS");
+                EnsureLayerOn(acadDb, "H-PIPE-HR");
+                EnsureLayerOn(acadDb, "H-PIPE-C");
+                EnsureLayerOn(acadDb, "H-PIPE-CHS");
+                EnsureLayerOn(acadDb, "H-PIPE-CHR");
+                EnsureLayerOn(acadDb, "H-PIPE-R");
+                EnsureLayerOn(acadDb, "H-PIPE-APPE");
+                EnsureLayerOn(acadDb, "H-PAPP-VALV");
+            }
         }
     }
 }

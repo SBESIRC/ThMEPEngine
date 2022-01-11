@@ -36,6 +36,7 @@
     <Compile Include="CAD\ThFanModelDataDbSource.cs" />
     <Compile Include="CAD\ThFanModelDataService.cs" />
     <Compile Include="Command\IndoorFanChange.cs" />
+    <Compile Include="Command\IndoorFanCheck.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
     <Compile Include="Common\ThRoomLoadTable.cs" />
@@ -83,6 +84,7 @@
     <Compile Include="IndoorFanModels\EnumFanType.cs" />
     <Compile Include="IndoorFanModels\EnumHotColdType.cs" />
     <Compile Include="IndoorFanModels\IndoorFanBase.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanCheckModel.cs" />
     <Compile Include="IndoorFanModels\IndoorFanLayoutModel.cs" />
     <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
     <Compile Include="IndoorFanModels\VRFFan.cs" />

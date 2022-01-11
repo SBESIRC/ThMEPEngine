@@ -451,9 +451,45 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     tmpPtA = tuple.Item1;
                 }
-                if (!dicTuples.ContainsKey(tmpPtA))
+
+                flag = 0;
+                foreach (Point3d ptB in basePts)
                 {
-                    dicTuples.Add(tmpPtA, new HashSet<Point3d>());
+                    if (ptB.DistanceTo(tuple.Item2) < deviation)
+                    {
+                        flag = 1;
+                        tmpPtB = ptB;
+                        break;
+                    }
+                }
+                if (flag == 0)
+                {
+                    tmpPtB = tuple.Item2;
+                }
+                StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
+            }
+            return dicTuples;
+        }
+        public static Dictionary<Point3d, HashSet<Point3d>> TuplesStandardize(HashSet<Tuple<Point3d, Point3d>> tuples, List<Point3d> basePts, double deviation = 1)
+        {
+            Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+            Point3d tmpPtA = new Point3d();
+            Point3d tmpPtB = new Point3d();
+            foreach (var tuple in tuples)
+            {
+                int flag = 0;
+                foreach (Point3d ptA in basePts)
+                {
+                    if (ptA.DistanceTo(tuple.Item1) < deviation)
+                    {
+                        flag = 1;
+                        tmpPtA = ptA;
+                        break;
+                    }
+                }
+                if (flag == 0)
+                {
+                    tmpPtA = tuple.Item1;
                 }
 
                 flag = 0;
@@ -470,10 +506,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     tmpPtB = tuple.Item2;
                 }
-                if (!dicTuples[tmpPtA].Contains(tmpPtB))
-                {
-                    dicTuples[tmpPtA].Add(tmpPtB);
-                }
+                StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
             }
             return dicTuples;
         }
@@ -498,10 +531,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     tmpPtA = tuple.Key;
                 }
-                if (!dicTuples.ContainsKey(tmpPtA))
-                {
-                    dicTuples.Add(tmpPtA, new HashSet<Point3d>());
-                }
 
                 flag = 0;
                 foreach (Point3d ptB in basePts)
@@ -517,10 +546,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 {
                     tmpPtB = tuple.Value;
                 }
-                if (!dicTuples[tmpPtA].Contains(tmpPtB))
-                {
-                    dicTuples[tmpPtA].Add(tmpPtB);
-                }
+                StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
             }
             return dicTuples;
         }
@@ -672,10 +698,5 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var direction = (tuple.Item2 - tuple.Item1).GetNormal();
             return new Tuple<Point3d, Point3d>(tuple.Item1 + direction * length, tuple.Item2 - direction * length);
         }
-        //public static Dictionary<Point3d, Point3d> TuplesListToDic(List<Tuple<Point3d, Point3d>> closebdLines)
-        //{
-        //    Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
-        //    foreach(var )
-        //}
     }
 }

@@ -602,11 +602,12 @@ namespace TianHua.Hvac.UI
             // radioRoomElvAlign3
             // 
             this.radioRoomElvAlign3.AutoSize = true;
-            this.radioRoomElvAlign3.Enabled = false;
+            this.radioRoomElvAlign3.Checked = true;
             this.radioRoomElvAlign3.Location = new System.Drawing.Point(185, 175);
             this.radioRoomElvAlign3.Name = "radioRoomElvAlign3";
             this.radioRoomElvAlign3.Size = new System.Drawing.Size(47, 16);
             this.radioRoomElvAlign3.TabIndex = 41;
+            this.radioRoomElvAlign3.TabStop = true;
             this.radioRoomElvAlign3.Text = "管顶";
             this.radioRoomElvAlign3.UseVisualStyleBackColor = true;
             // 
@@ -644,12 +645,11 @@ namespace TianHua.Hvac.UI
             // radioRoomElvAlign1
             // 
             this.radioRoomElvAlign1.AutoSize = true;
-            this.radioRoomElvAlign1.Checked = true;
+            this.radioRoomElvAlign1.Enabled = false;
             this.radioRoomElvAlign1.Location = new System.Drawing.Point(81, 175);
             this.radioRoomElvAlign1.Name = "radioRoomElvAlign1";
             this.radioRoomElvAlign1.Size = new System.Drawing.Size(47, 16);
             this.radioRoomElvAlign1.TabIndex = 39;
-            this.radioRoomElvAlign1.TabStop = true;
             this.radioRoomElvAlign1.Text = "管底";
             this.radioRoomElvAlign1.UseVisualStyleBackColor = true;
             // 
@@ -1095,11 +1095,12 @@ namespace TianHua.Hvac.UI
             // radioNotRoomElvAlign3
             // 
             this.radioNotRoomElvAlign3.AutoSize = true;
-            this.radioNotRoomElvAlign3.Enabled = false;
+            this.radioNotRoomElvAlign3.Checked = true;
             this.radioNotRoomElvAlign3.Location = new System.Drawing.Point(186, 175);
             this.radioNotRoomElvAlign3.Name = "radioNotRoomElvAlign3";
             this.radioNotRoomElvAlign3.Size = new System.Drawing.Size(47, 16);
             this.radioNotRoomElvAlign3.TabIndex = 59;
+            this.radioNotRoomElvAlign3.TabStop = true;
             this.radioNotRoomElvAlign3.Text = "管顶";
             this.radioNotRoomElvAlign3.UseVisualStyleBackColor = true;
             // 
@@ -1164,12 +1165,11 @@ namespace TianHua.Hvac.UI
             // radioNotRoomElvAlign1
             // 
             this.radioNotRoomElvAlign1.AutoSize = true;
-            this.radioNotRoomElvAlign1.Checked = true;
+            this.radioNotRoomElvAlign1.Enabled = false;
             this.radioNotRoomElvAlign1.Location = new System.Drawing.Point(82, 175);
             this.radioNotRoomElvAlign1.Name = "radioNotRoomElvAlign1";
             this.radioNotRoomElvAlign1.Size = new System.Drawing.Size(47, 16);
             this.radioNotRoomElvAlign1.TabIndex = 57;
-            this.radioNotRoomElvAlign1.TabStop = true;
             this.radioNotRoomElvAlign1.Text = "管底";
             this.radioNotRoomElvAlign1.UseVisualStyleBackColor = true;
             // 

@@ -19,7 +19,9 @@ namespace TianHua.Hvac.UI.Command
     public class ThHvacSGDXInsertCmd : ThMEPBaseCommand, IDisposable
     {
         private string SGDXBlkName = "";
-        private string AttributeDefinitionName = "冷/热水量";
+        private string Attribute1DefinitionName = "冷/热水量"; //Table中查询KeyWord
+        private string Attribute2DefinitionName = "冷/热负荷"; //Table中查询KeyWord
+
         private ThQueryRoomAirVolumeService RoomAirVolumeQuery { get; set; }
         public ThHvacSGDXInsertCmd()
         {
@@ -66,12 +68,11 @@ namespace TianHua.Hvac.UI.Command
                     var withInRooms = Contains(rooms, wcsPt);
                     if(withInRooms.Count==1)
                     {
-                        var volume = RoomAirVolumeQuery.Query(withInRooms[0], AttributeDefinitionName);
-                        var value = RoomAirVolumeQuery.ConvertToString(volume);
-                        if (!string.IsNullOrEmpty(value))
-                        {
-                            InsertBlock(wcsPt,value);
-                        }
+                        var attribute1 = RoomAirVolumeQuery.Query(withInRooms[0], Attribute1DefinitionName); // "冷/热水量"
+                        var attribute2 = RoomAirVolumeQuery.Query(withInRooms[0], Attribute2DefinitionName); // "冷/热负荷"
+                        var attribute1Str = RoomAirVolumeQuery.ConvertToString(attribute1);
+                        var attribute2Str = RoomAirVolumeQuery.ConvertToString(attribute2);
+                        InsertBlock(wcsPt, attribute1Str, attribute2Str);
                     }
                 }
                 else
@@ -85,7 +86,8 @@ namespace TianHua.Hvac.UI.Command
         {
             using (var acadDb = AcadDatabase.Active())
             {
-                if(!acadDb.Layers.Contains(ThMEPEngineCoreLayerUtils.Note))
+                acadDb.Database.OpenAILayer("0");
+                if (!acadDb.Layers.Contains(ThMEPEngineCoreLayerUtils.Note))
                 {
                     acadDb.Database.CreateAINoteLayer();
                 }
@@ -110,11 +112,16 @@ namespace TianHua.Hvac.UI.Command
             }
         }
 
-        private void InsertBlock(Point3d position, string volume)
+        private void InsertBlock(Point3d position, string attribute1Value,string attribute2Value)
         {
+            // attribute1Value->"冷/热水量",attribute2Value->"制冷量/制热量"
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
             {
-                var attNameValues = new Dictionary<string, string> { { AttributeDefinitionName, Format(volume)} };
+                var attNameValues = new Dictionary<string, string> 
+                { 
+                    { Attribute1DefinitionName, FormatAttribute1(attribute1Value)},
+                    { "制冷量/制热量", FormatAttribute2(attribute2Value)}
+                };
                 var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference(ThMEPEngineCoreLayerUtils.Note, SGDXBlkName, 
                     Point3d.Origin, new Scale3d(1.0), 0.0, attNameValues);
                 var blk = acadDb.Element<BlockReference>(blkId);
@@ -134,51 +141,73 @@ namespace TianHua.Hvac.UI.Command
             return results;
         }
 
-        private string Format(string volume)
+        private string FormatAttribute1(string value)
         {
-            var strs = volume.Split(';');
-            var firstStr = "";
-            var secondStr = "";
-            if (strs.Length>0)
+            string linkStr = "(" + "m3/h" + ")";
+            if (string.IsNullOrEmpty(value))
             {
-                var last = strs[strs.Length - 1];
-                var values = last.Split('/');
-                if(values.Length==2)
-                {
-                    firstStr = Convert(values[0]);
-                    secondStr = Convert(values[1]);
-                }
-                else if (values.Length == 1)
-                {
-                    firstStr = Convert(values[0]);
-                    secondStr = firstStr;
-                }
-                else
-                {
-                    //
-                }
+                return "-/-"+ linkStr;
             }
-            return "冷/热水量(m3/h)："+ firstStr+"/"+ secondStr;
-        }
-
-        private string Convert(string content)
-        {
-            if (content.Contains("-"))
+            string firstStr = "-";
+            string secondStr = "-";
+            string[] values = value.Split('/');
+            if(values.Length==1)
             {
-                return "-";
+                firstStr = GetDataStr(values[0]);
+            }
+            else if(values.Length == 2)
+            {
+                firstStr = GetDataStr(values[0]);
+                secondStr = GetDataStr(values[1]);
             }
             else
             {
-                double outValue = 0.0;
-                if(double.TryParse(content,out outValue))
-                {
-                    return outValue.ToString("#0.0");
-                }
-                else
-                {
-                    return content;
-                }
+                //
             }
+            return firstStr + "/" + secondStr+ linkStr;
+        }
+
+        private string GetDataStr(string number)
+        {
+            double firstValue = 0.0;
+            if (double.TryParse(number, out firstValue))
+            {
+                return number;
+            }
+            else
+            {
+                return "-";
+            }
+        }
+
+        private string FormatAttribute2(string value)
+        {
+            // value->"制冷量/制热量"
+            var firstStr = "-";
+            var secondStr = "-";
+            var values = value.Split('/');
+            if (values.Length == 1)
+            {
+                firstStr = GetDataStr(values[0]);
+            }
+            else if (values.Length == 2)
+            {
+                firstStr = GetDataStr(values[0]);
+                secondStr = GetDataStr(values[1]);
+            }
+            else
+            {
+                //
+            }
+            if (!string.IsNullOrEmpty(firstStr) && !firstStr.ToUpper().Contains("KW"))
+            {
+                firstStr += "kW";
+            }
+            if (!string.IsNullOrEmpty(secondStr) && !secondStr.ToUpper().Contains("KW"))
+            {
+                secondStr += "kW";
+            }
+            return firstStr + "/" + secondStr;
         }
     }
 }

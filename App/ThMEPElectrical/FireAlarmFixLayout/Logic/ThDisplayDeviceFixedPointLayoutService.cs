@@ -15,6 +15,8 @@ using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Diagnostics;
 using ThMEPElectrical.FireAlarmFixLayout.Data;
 using ThMEPElectrical.FireAlarmFixLayout.Service;
+using ThMEPElectrical.AFAS.Utils;
+using ThMEPElectrical.AFAS;
 
 namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 {
@@ -31,7 +33,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
         //{
         //}
 
-        public ThDisplayDeviceFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker, BuildingType buildingType )
+        public ThDisplayDeviceFixedPointLayoutService(ThAFASFixDataQueryService dataQueryWorker, BuildingType buildingType)
         {
             DataQueryWorker = dataQueryWorker;
             BuildingType = buildingType;
@@ -368,10 +370,16 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
 
         private DBObjectCollection FindRoomForResidentalBuildings()
         {
+            //var stairwell = DataQueryWorker.Rooms
+            //    .Where(o => o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
+            //    .Select(o => o.Boundary is MPolygon ? (o.Boundary as MPolygon).Shell() : o.Boundary)
+            //    .Cast<Polyline>().ToList().ToCollection();
+
             var stairwell = DataQueryWorker.Rooms
-                .Where(o => o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
-                .Select(o => o.Boundary is MPolygon ? (o.Boundary as MPolygon).Shell() : o.Boundary)
-                .Cast<Polyline>().ToList().ToCollection();
+               .Where(o => ThAFASRoomUtils.IsRoom(DataQueryWorker.RoomTableConfig, o.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString(), ThFaCommon.stairName))
+               .Select(o => o.Boundary is MPolygon ? (o.Boundary as MPolygon).Shell() : o.Boundary)
+               .Cast<Polyline>().ToList().ToCollection();
+
             var doorSet = DataQueryWorker.DoorOpenings.Select(x => x.Boundary).ToCollection();
             var rooms = DataQueryWorker.Rooms.Select(x => x.Boundary).ToCollection();
             var spatialCrossingDoorsIndex = new ThCADCoreNTSSpatialIndex(doorSet);
@@ -391,8 +399,16 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             {
                 var crossingRooms = spatialRoomsIndex.SelectCrossingPolygon(door);
                 foreach (Entity room in crossingRooms)
-                    if (!DataQueryWorker.Query(room).Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
+                {
+                    //if (!DataQueryWorker.Query(room).Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains("楼梯间"))
+                    //    locateRoomSet.Add(room is MPolygon ? (room as MPolygon).Shell() : room);
+
+                    var roomName = DataQueryWorker.Query(room).Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
+                    if (ThAFASRoomUtils.IsRoom(DataQueryWorker.RoomTableConfig, roomName, ThFaCommon.stairName) == false)
+                    {
                         locateRoomSet.Add(room is MPolygon ? (room as MPolygon).Shell() : room);
+                    }
+                }
             }
             return locateRoomSet;
         }
@@ -404,30 +420,46 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Logic
             var doorsArranged = DataQueryWorker.ClassifyByFireApart(DataQueryWorker.DoorOpenings);
             var selectOrder = ThFaFixCommon.DisplayPublicBuildingOrder;
             List<List<string>> selectOrderMap = new List<List<string>>();
-            //DataQueryWorker.roomTableConfig = ThFireAlarmUtils.ReadRoomConfigTable(DataQueryWorker.roomConfigUrl);
             selectOrderMap.AddRange(selectOrder.Select(o => RoomConfigTreeService.CalRoomLst(DataQueryWorker.RoomTableConfig, o)));
             foreach (string fireApartName in DataQueryWorker.FireApartMap) // 遍历每个防火分区
             {
                 if (!roomsArranged.ContainsKey(fireApartName))
                     continue;
+
                 var currentRoomSet = new List<ThGeometry>();
                 var tempRoomSet = new List<ThGeometry>();
                 currentRoomSet.AddRange(roomsArranged[fireApartName]);
-                foreach (List<string> tempNameList in selectOrderMap)  //按照selectOrder里的优先级按顺序选取匹配的房间
+
+                //foreach (List<string> tempNameList in selectOrderMap)  //按照selectOrder里的优先级按顺序选取匹配的房间
+                //{
+                //    foreach (ThGeometry room in currentRoomSet)
+                //    {
+                //        foreach (string name in tempNameList)
+                //        {
+                //            if (room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains(name))
+                //            {
+                //                tempRoomSet.Add(room);
+                //            }
+                //        }
+                //    }
+                //    if (tempRoomSet.Count != 0)
+                //        break;
+                //}
+
+                foreach (var order in selectOrder)
                 {
-                    foreach (ThGeometry room in currentRoomSet)
+                    foreach (var room in currentRoomSet)
                     {
-                        foreach (string name in tempNameList)
+                        var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
+                        if (ThAFASRoomUtils.IsRoom(DataQueryWorker.RoomTableConfig, roomName, order) == true)
                         {
-                            if (room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString().Contains(name))
-                            {
-                                tempRoomSet.Add(room);
-                            }
+                            tempRoomSet.Add(room);
                         }
                     }
                     if (tempRoomSet.Count != 0)
                         break;
                 }
+
                 if (tempRoomSet.Count != 0)  //同一类房间里选面积最小的房间布点
                 {
                     var polylineRoom = tempRoomSet
