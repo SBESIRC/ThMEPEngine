@@ -18,7 +18,10 @@ namespace ThMEPEngineCore.Stair
             // 提取楼梯块
             var engine = new ThDB3StairRecognitionEngine { Rooms = rooms };
             engine.Recognize(database, points);
-            var stairs = engine.Elements.Cast<ThIfcStair>().ToList();
+            var stairs = engine.Elements
+                .OfType<ThIfcStair>()
+                .Where(stair => stair.PlatForLayout.Count + stair.HalfPlatForLayout.Count > 0)
+                .ToList();
 
             // 计算布置位置
             return Calculate(stairs, obstacle, scale, equimentName, platOnly);
