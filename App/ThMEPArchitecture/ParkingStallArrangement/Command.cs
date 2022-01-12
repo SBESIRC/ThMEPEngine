@@ -41,7 +41,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         {
             CommandName = "-THDXQYFG";
             ActionName = "生成";
-            ParameterViewModel = new ParkingStallArrangementViewModel();
             _CommandMode = CommandMode.WithoutUI;
         }
 
