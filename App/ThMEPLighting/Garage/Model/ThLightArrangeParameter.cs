@@ -47,10 +47,6 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public double PaperRatio { get; set; } = 1.0;
         /// <summary>
-        /// 最小边的长度
-        /// </summary>
-        public double MinimumEdgeLength { get; set; } = 100.0;
-        /// <summary>
         /// 灯编号文字高度
         /// </summary>
         public double LightNumberTextHeight { get; set; } = 350;

@@ -346,7 +346,6 @@ namespace ThMEPLighting.Garage
             // 自定义
             arrangeParameter.Margin = 800.0;
             arrangeParameter.PaperRatio = 100;
-            arrangeParameter.MinimumEdgeLength = 2500;
             return arrangeParameter;
         }
         public static void SetDatabaseDefaults(this ThCableTrayParameter cableTrayParameter)
