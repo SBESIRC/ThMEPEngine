@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using Autodesk.AutoCAD.Geometry;
 using System.IO;
 using ThCADExtension;
@@ -15,50 +16,56 @@ using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using System.Text.RegularExpressions;
-
+using DotNetARX;
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class SegBreakParam
     {
         public List<Line> BreakedLines;//所有打断后的分割线，要导入迭代之后的值
         public List<Line> OtherLines;//其余所有线 （纵向打断则为横线，横向打断则为纵线）,要迭代之后的
-        public List<int> MinValues;//打断线的最大值
-        public List<int> MaxValues;//最小值
+        public List<double> MinValues;//打断线的最大值
+        public List<double> MaxValues;//最小值
         public int LineCount;
+        double BufferSize;// 寻找最大，最小值时候的范围
+        bool VerticalDirection;
+        private List<Polyline> BufferTanks;// 记录当前已做的buffer，需要判断是否相互重合
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
-        public SegBreakParam(List<Line> SegLines, Chromosome GASolution, Polyline WallLine, double BufferSize,bool VerticalDirection, bool GoPositive)
+        public SegBreakParam(List<Line> SegLines, Chromosome GASolution, OuterBrder outerbrder, double buffersize,bool verticaldirection, bool GoPositive)
         {
             // SegLine 初始分割线，必须严格符合相交关系
             // WallLine 地库框线
             // GASolution GA的结果，任意相交关系
             // GoPositive 从下至上打断，从左至右打断（坐标增加顺序）
-            //List<Line> VertLines = new List<Line>();//垂直线
+            List<Line> VertLines = new List<Line>();//垂直线
             List<int> VertLine_index = new List<int>();// 垂直线索引
-            //List<Line> HorzLines = new List<Line>();//水平线
+            List<Line> HorzLines = new List<Line>();//水平线
             List<int> HorzLines_index = new List<int>();// 垂直线索引
-            //foreach (Line line in SegLines)
+
+            BufferSize = buffersize;
+            VerticalDirection = verticaldirection;//垂直方向为true，水平为false
             for (int i = 0; i < SegLines.Count; ++i)
             {
                 var line = SegLines[i];
-                if (line.StartPoint.X== line.EndPoint.X)
+                if (Math.Abs(line.StartPoint.X- line.EndPoint.X) < 1e-5)
                 {
                     //横坐标相等，平行线
-                    //HorzLines.Add(new Line(line.StartPoint, line.EndPoint));
+                    HorzLines.Add(GASolution.Genome[i].ToLine());
                     HorzLines_index.Add(i);
                 }
                 else
                 {
-                    //VertLines.Add(new Line(line.StartPoint, line.EndPoint));
+                    VertLines.Add(GASolution.Genome[i].ToLine());
                     VertLine_index.Add(i);
                 }
             }
             BreakedLines = new List<Line>();
-            OtherLines = new List<Line>();
-            MinValues = new List<int>();// 打断线最小值，相对值
-            MaxValues = new List<int>();// 打断线最大值，相对值
+            //OtherLines = new List<Line>();
+            MinValues = new List<double>();// 打断线最小值，相对值
+            MaxValues = new List<double>();// 打断线最大值，相对值
             
             if (VerticalDirection)
             {
+                OtherLines = HorzLines;
                 // otherlines 添加横向线
                 //打断纵向线
                 //对于所有纵线
@@ -67,14 +74,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var line1 = SegLines[VertLine_index[k]];//初始纵向分割线
                     var GALine1 = GASolution.Genome[k].ToLine();//迭代后的纵分割线
                     List<Point3d> ptlist = new List<Point3d>();//断点列表
-                    List<Line> IntersectLines = new List<Line>();//交叉线列表
-                    
-                    var templ = line1.Intersect(WallLine, Intersect.OnBothOperands);
+                    List<Line> IntersectLines = new List<Line>();//交叉线列表，需要动态更新
+                    List<int> IntSecIndex = new List<int>();//交叉线在OtherLines中的索引
+                    var templ = line1.Intersect(outerbrder.WallLine, Intersect.OnBothOperands);
                     if (templ.Count != 0)//初始线和外包框有交点
                     {
-                        var pt = GALine1.Intersect(WallLine, Intersect.OnBothOperands);// GA 结果求交点
+                        var pt = GALine1.Intersect(outerbrder.WallLine, Intersect.OnBothOperands);// GA 结果求交点
                         ptlist.Add(pt.First());
                         IntersectLines.Add(new Line(pt.First(), pt.First()));// 创建长度为0的线，保证两个list结构一样
+                        IntSecIndex.Add(9999999);//添加不可能值，填充作用
                     }
                     for (int j = 0; j < HorzLines_index.Count; ++j)
                     {
@@ -85,93 +93,145 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             var GALine2 = GASolution.Genome[j].ToLine();//迭代后的横分割线
 
                             IntersectLines.Add(GALine2);// 记录产生相交的线，后续需要更新
-
+                            IntSecIndex.Add(j);// 添加索引，方便更新OtherLines
                             // 说明这俩线有交点，用GA的结果求交点
                             var pt = GALine1.Intersect(GALine2, Intersect.ExtendBoth);
 
                             ptlist.Add(pt.First());
-                            
                         }
                     }
-                    // sort ptlist and IntersectLines(base on pt list)按照纵坐标排序
-                    if (GoPositive)
+                    Point3d spt;//起始点
+                    Point3d ept;//终结点
+
+                    // sort ptlist and IntersectLines(base on pt list)按照纵坐标排序，两种排序可以都试一下，保留最合理排序
+                    if (GoPositive)//从小到大排序
                     {
                         ptlist = ptlist.OrderBy(s => s.Y).ToList();
-                        IntersectLines = IntersectLines.OrderBy(s => s.StartPoint.Y).ToList();
+
+                        var sorted = IntersectLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderBy(x => x.Key.StartPoint.Y).ToList();
+                        IntersectLines = sorted.Select(x => x.Key).ToList();
+                        var idx = sorted.Select(x => x.Value).ToList();// 索引值
+                        // 把IntSecIndex 按照IntersectLines 排序
+                        var newTndex = new List<int>();
+                        idx.ForEach(i => newTndex.Add(IntSecIndex[i]));
+                        IntSecIndex = newTndex;
+
+                        if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
+                        {
+                            spt = GALine1.StartPoint;
+                            ept = GALine1.EndPoint;
+                        }
+                        else
+                        {
+                            spt = GALine1.EndPoint;
+                            ept = GALine1.StartPoint;
+                        }
+                    }
+                    else//从大到小排序
+                    {
+                        ptlist = ptlist.OrderByDescending(s => s.Y).ToList();
+                        //IntersectLines = IntersectLines.OrderByDescending(s => s.StartPoint.Y).ToList();
+                        var sorted = IntersectLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderByDescending(x => x.Key.StartPoint.Y).ToList();
+                        IntersectLines = sorted.Select(x => x.Key).ToList();
+                        var idx = sorted.Select(x => x.Value).ToList();// 索引值
+                        // 把IntSecIndex 按照IntersectLines 排序
+                        var newTndex = new List<int>();
+                        idx.ForEach(i => newTndex.Add(IntSecIndex[i]));
+                        IntSecIndex = newTndex;
+
+                        if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
+                        {
+                            spt = GALine1.EndPoint;
+                            ept = GALine1.StartPoint;
+                        }
+                        else
+                        {
+                            spt = GALine1.StartPoint;
+                            ept = GALine1.EndPoint;
+                        }
+                    }
+                    List<int> InnerIndex = new List<int>();// 记录在当前断线上所有横线的索引
+
+                    if (IntersectLines[0].Length > 1e-5)//起始如果不贯穿边界，需要添加当前断线上横线的索引,后续更新横线范围
+                    {
+                        InnerIndex.Add(0);
                     }
                     if (ptlist.Count > 2)// 至少有一个中间断点可打断 
                     {
                         List<Line> cur_breakedlines = new List<Line>();// 打断后的纵线list
-                        List<int> cur_minvalues = new List<int>();// 打断线的下边界
-                        List<int> cur_maxvalues = new List<int>();// 打断线的上边界
+                        List<double> cur_minvalues = new List<double>();// 打断线的下边界
+                        List<double> cur_maxvalues = new List<double>();// 打断线的上边界
                         // 该纵线打断
-                        if (GoPositive)
-                        {
-                            // 2. 确定打断后的纵线
-                            Point3d spt;//起始点
-                            Point3d ept;//终结点
-                            if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
-                            {
-                                spt = GALine1.StartPoint;
-                                ept = GALine1.EndPoint;
-                            }
-                            else
-                            {
-                                spt = GALine1.EndPoint;
-                                ept = GALine1.StartPoint;
-                            }
-                            int CurCount = 0;
-                            List < int > InnerIndex = new List<int>();// 记录在当前断线上所有横线的索引
-                            Line BreakLine ;
-                            for (int i = 1; i < ptlist.Count-1; ++i)// 遍历中间的所有可能断点，不包含边界上的断点
-                            {
-                                // 双指针确定断线
-                                if (CurCount < 1)
-                                {
-                                    CurCount += 1;
-                                    InnerIndex.Add(i);
-                                }
-                                if (CurCount > 1 || ptlist.Count == 3)// 3个断点则中间需要打断
-                                {
-                                    // 新断线
-                                    InnerIndex.Add(i);
-                                    // 最后一个则跳过，结束后一起添加
-                                    if (i != ptlist.Count - 1)
-                                    {
-                                        BreakLine = new Line(spt, ptlist[i]);
-                                        //不为倒数第二个点，则直接添加
-                                        cur_breakedlines.Add(BreakLine);
-                                        spt = ptlist[i];//更新起始点
+                        // 2. 确定打断后的纵线
 
-                                        // TO DO: 确定断线范围，buffer，取建筑或者buffer值（添加 Lower & Upper Bound to Lower & upper Bounds)
-                                        // cur_minvalues.Add(minvalue)
-                                        // cur_maxvalues.Add(maxvalue)
-                                        // TO DO: 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
-                                        // OtherLines.AddRange(NewLines)
-
-                                        //重新计数
-                                        InnerIndex = new List<int>();
-                                        InnerIndex.Add(i);
-                                        CurCount = 0;
-                                    }
-                                }
-                            }
-                            // TO DO 添加最后的断线
-                        }
-                        else
+                        int CurCount = 0;
+                        
+                        Line BreakLine; 
+                        for (int i = 1; i < ptlist.Count-1; ++i)// 遍历中间的所有可能断点，不包含边界上的断点
                         {
-                            ;//对称逻辑
+                            // 双指针确定断线
+                            if (CurCount > 0 || ptlist.Count == 3)// 3个断点则中间需要打断,已经跳过一个点，也做打断。
+                            {
+                                // 新断线
+                                InnerIndex.Add(i);
+                                BreakLine = new Line(spt, ptlist[i]);
+                                    
+                                cur_breakedlines.Add(BreakLine);
+                                cur_breakedlines.Add(BreakLine);
+                                spt = ptlist[i];//更新起始点
+                                // 确定断线范围，buffer，取建筑或者buffer值（添加 Lower & Upper Bound to Lower & upper Bounds)
+                                GetMaxMinValue(BreakLine, outerbrder, out double MinValue, out double MaxValue);// TO DO
+                                cur_minvalues.Add(MinValue);
+                                cur_maxvalues.Add(MaxValue);
+                                // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
+                                var Value = BreakLine.StartPoint.X;
+                                ModifyOtherLines(IntSecIndex,InnerIndex, MinValue, MaxValue, Value);
+                                // OtherLines.AddRange(NewLines)
+
+                                //重新计数
+                                InnerIndex = new List<int>();
+                                InnerIndex.Add(i);
+                                CurCount = 0;
+                            }
+                            else 
+                            {
+                                CurCount += 1;
+                                InnerIndex.Add(i);
+                            }
                         }
+                        // 添加最后的断线,连接终点与上一个断点
+                        if (IntersectLines[ptlist.Count - 1].Length > 1e-5)//终点如果不贯穿边界，需要添加当前断线上横线的索引,后续更新横线范围
+                        {
+                            InnerIndex.Add(ptlist.Count - 1);
+                        }
+                        BreakLine = new Line(spt,ept);
+                        cur_breakedlines.Add(BreakLine);
+
+                        GetMaxMinValue(BreakLine, outerbrder, out double MinValue2, out double MaxValue2);// TO DO
+                        cur_minvalues.Add(MinValue2);
+                        cur_maxvalues.Add(MaxValue2);
+                        // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
+                        var Value2 = BreakLine.StartPoint.X;
+                        ModifyOtherLines(IntSecIndex, InnerIndex, MinValue2, MaxValue2, Value2);
+
+                        //将新的断线添加到所有断线
                         BreakedLines.AddRange(cur_breakedlines);
                         MinValues.AddRange(cur_minvalues);
                         MaxValues.AddRange(cur_maxvalues);
                     }
                     else// 虽然不能打断，但是也要迭代
                     {
+                        if(ptlist.Count == 2 && IntersectLines[ptlist.Count - 1].Length > 1e-5)//终点如果不贯穿边界，需要添加当前断线上横线的索引,后续更新横线范围
+                        {
+                            InnerIndex.Add(1);
+                        }
                         BreakedLines.Add(GALine1);
-                        // TO DO
-                        //MinValues.Add(minvalue);
-                        //MaxValues.Add(maxvalue);
+                        MinValues.Add(GASolution.Genome[k].MinValue);
+                        MaxValues.Add(GASolution.Genome[k].MaxValue);
+
+                        // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
+                        var Value2 = GALine1.StartPoint.X;
+                        ModifyOtherLines(IntSecIndex, InnerIndex, GASolution.Genome[k].MinValue, GASolution.Genome[k].MaxValue, Value2);
                     }
                     
                 }
@@ -182,6 +242,72 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
 
             LineCount = BreakedLines.Count;
+        }
+        private void ModifyOtherLines(List<int> IntSecIndex, List<int> InnerIndex,double MinValue, double MaxValue,double Value)
+        {
+            // 更新横向线，覆盖最大最小值
+            // Value 是纵向线的横坐标
+            foreach(int i in InnerIndex)
+            {
+                if (VerticalDirection)
+                {
+                    var idx = IntSecIndex[i];
+                    
+                    var line = OtherLines[idx];//交叉的线是横向线
+                    Point3d spt;
+                    Point3d ept;
+                    if (line.StartPoint.X< line.EndPoint.X)
+                    {
+                        spt = line.StartPoint;
+                        ept = line.EndPoint;
+                    }
+                    else
+                    {
+                        spt = line.EndPoint;
+                        ept = line.StartPoint;
+                    }
+
+                    if(spt.X > Value + MinValue)
+                    {
+                        spt = new Point3d(Value + MinValue, spt.Y,0);
+                    }
+                    if (ept.X < Value + MaxValue)
+                    {
+                        ept = new Point3d(Value + MaxValue, ept.Y, 0);
+                    }
+                    OtherLines[idx] = new Line(spt,ept);
+                }
+                else
+                {
+                    //对称逻辑
+                    //TO DO
+                }
+                
+            }
+        }
+        private void GetMaxMinValue(Line BreakLine, OuterBrder outerbrder, out double MinValue, out double MaxValue)
+        {
+            //TO DO 用BreakLine，outerbrder 以及BufferSize 求最大最小值（相对值）
+            // 然后判断和其他buffer是否有交集，如果有可能减少buffersize，再做运算
+            //算法：
+            //1.用起始线，以及向坐标减少方向做矩形，如果框选到建筑，则以建筑最近点 - 初始线点 - 半个车道宽作为下边界（minvalue)。未框选到则以-buffersize 作为边界
+            //2. 上边界同理
+            // 3.判断新的下延申buffer与上延申buffer是否与已有buffer相交，如果相交，需要减少buffersize（可以只减少当前buffer，或者调整之前加上现在buffer，使得结果与排列顺序无关）
+            MinValue = -BufferSize;
+            MaxValue = BufferSize;
+            //当前buffer
+            if (VerticalDirection)//纵向线
+            {
+                var points = new List<Point2d> {new Point2d(BreakLine.StartPoint.X + MinValue, BreakLine.StartPoint.Y) , 
+                                                new Point2d(BreakLine.StartPoint.X + MaxValue, BreakLine.StartPoint.Y) ,
+                                                new Point2d(BreakLine.EndPoint.X + MaxValue, BreakLine.EndPoint.Y),
+                                                new Point2d(BreakLine.EndPoint.X + MinValue, BreakLine.EndPoint.Y)};
+                var pline = new Polyline();
+                pline.CreatePolyline(points.ToArray());
+                
+                BufferTanks.Add(pline);
+            }
+            
         }
     }
 
