@@ -65,7 +65,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 count += curcount;
             }
-            PModuleBox.AddRange(plys);
+            //PModuleBox.AddRange(plys);
             result.Bounds = plys;
             result.Count = count;
             result.Lanes = ilanes;
@@ -113,7 +113,7 @@ namespace ThMEPArchitecture.PartitionLayout
             unittest.TransformBy(Matrix3d.Displacement(vec.GetNormal() * MaxDistance));
             var pltest = CreatePolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, unittest.EndPoint, unittest.StartPoint });
             ThCADCoreNTSSpatialIndex sindexwalls = new ThCADCoreNTSSpatialIndex(boundobstacles.ToCollection());
-            sindexwalls.Update(PModuleBox.ToCollection(), new DBObjectCollection());
+            //sindexwalls.Update(PModuleBox.ToCollection(), new DBObjectCollection());
             var pltestsc = pltest.Clone() as Polyline;
             pltestsc.TransformBy(Matrix3d.Scaling(ScareFactorForCollisionCheck, pltestsc.GetRecCentroid()));
             var crossed = sindexwalls.SelectCrossingPolygon(pltestsc).Cast<Polyline>().ToList();
@@ -153,9 +153,9 @@ namespace ThMEPArchitecture.PartitionLayout
             Point3d pta;
             Point3d ptb;
             if (pointsa.ToArray().Length == 0) pta = lane.StartPoint;
-            else pta = pointsa.OrderBy(e => e.DistanceTo(lane.StartPoint)).First();
+            else pta = pointsa.Where(e => e.DistanceTo(lane.StartPoint) > 1).OrderBy(e => e.DistanceTo(lane.StartPoint)).First();
             if (pointsb.ToArray().Length == 0) ptb = lane.StartPoint;
-            else ptb = pointsb.OrderBy(e => e.DistanceTo(lane.EndPoint)).First();
+            else ptb = pointsb.Where(e => e.DistanceTo(lane.EndPoint) > 1).OrderBy(e => e.DistanceTo(lane.EndPoint)).First();
             foreach (var la in IniLanes)
             {
                 var disa = la.Line.GetClosestPointTo(pta, false).DistanceTo(pta);
@@ -463,7 +463,7 @@ namespace ThMEPArchitecture.PartitionLayout
             Matrix3d mat6 = Matrix3d.Displacement(v6);
             Matrix3d mat7 = Matrix3d.Displacement(v7);
 
-            List<Matrix3d> mats = new List<Matrix3d>() { mat, mat2, mat3/*, mat4, mat5, mat6, mat7 */};
+            List<Matrix3d> mats = new List<Matrix3d>() { mat3, mat, mat2 /*, mat4, mat5, mat6, mat7 */};
             List<Curve> crvs2 = new List<Curve>();
             List<Vector3d> vecs2 = new List<Vector3d>();
             Point3d pto2 = new Point3d();
@@ -558,9 +558,13 @@ namespace ThMEPArchitecture.PartitionLayout
             for (int i = 0; i < vertcount; i++)
             {
                 var test = UpdataPMModlues(pMModlues, boundobstacles);
-                if (test.Count >= pMModlues.Count) pMModlues = test;
-                else break;
+                if (test.Count >= pMModlues.Count)
+                {
+                    pMModlues = test;
+                }
+                else continue;
             }
+            PModuleBox.AddRange(pMModlues.Bounds);
             ilanes.ForEach(e => e.Dispose());
             List<Line> restsegs = new List<Line>();
             if (pMModlues.Bounds.Count > 0)
@@ -969,6 +973,8 @@ namespace ThMEPArchitecture.PartitionLayout
                     else if (lanes.Count == 0 && line.StartPoint.Y - line.EndPoint.Y > 1000) line.ReverseCurve();
                 }
                 else if (ClosestPointInCurves(line.EndPoint, lanes) < DisCarAndHalfLane + 1 && ClosestPointInCurves(line.StartPoint, lanes) > DisCarAndHalfLane + 1) line.ReverseCurve();
+                else if (ClosestPointInCurves(line.EndPoint, lanes) < DisCarAndHalfLane + 1 && ClosestPointInCurves(line.StartPoint, lanes) < DisCarAndHalfLane + 1
+                    && ClosestPointInCurves(line.EndPoint, lanes) < ClosestPointInCurves(line.StartPoint, lanes)) line.ReverseCurve();
             }
             else
             {

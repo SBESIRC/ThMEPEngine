@@ -230,7 +230,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 }
                 return splited.Cast<Curve>().Where(e => e.GetLength() > 1).ToList();
             }
-            else return new List<Curve>() { curve };
+            else return new List<Curve>() { curve.Clone() as Curve };
         }
 
         public static Curve[] SplitCurve(Curve curve, Curve splitter)

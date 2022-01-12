@@ -221,20 +221,6 @@ namespace ThMEPArchitecture.PartitionLayout
         public void CheckObstacles()
         {
             Obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(Boundary).Cast<Polyline>().ToList();
-            //.Select(e =>
-            //{
-            //    try
-            //    {
-            //        var pl = (Polyline)(SplitCurve(e, Boundary).Where(t => Boundary.Contains(t.GetPointAtDist(t.GetLength() / 2))).First());
-            //        pl.Closed = true;
-            //        return pl;
-            //    }
-            //    catch
-            //    {
-            //        //The method "GetSplitCurve" is unstable.
-            //        return e;
-            //    }
-            //}).ToList();
         }
 
         /// <summary>
@@ -509,19 +495,46 @@ namespace ThMEPArchitecture.PartitionLayout
                 l.Dispose();
             }
 
-            IniLanes = IniLanes.OrderByDescending(e => e.RestLength).ToList();
+            var tmplanes = new List<Lane>();
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var lane = CreateLine(IniLanes[i].Line);
+                var matvec = IniLanes[i].Vec.GetNormal() * (DisLaneWidth / 2 + DisPillarDepth + 500);
+                lane.TransformBy(Matrix3d.Displacement(matvec));
+                var lbf = lane.Buffer(1);
+                lbf.Scale(lbf.GetRecCentroid(), ScareFactorForCollisionCheck);
+                var crosscars = CarSpatialIndex.SelectCrossingPolygon(lbf).Cast<Polyline>();
+                var segs = SplitLine(lane, crosscars.ToList());
+                segs.ForEach(e => e.TransformBy(Matrix3d.Displacement(-matvec)));
+                if (segs.Count() > 0)
+                {
+                    var vec = IniLanes[i].Vec;
+                    IniLanes.RemoveAt(i);
+                    i--;
+                    foreach (var seg in segs)
+                    {
+                        Lane ln = new Lane(seg, vec);
+                        tmplanes.Add(ln);
+                    }
+                }
+                lbf.Dispose();
+                lane.Dispose();
+            }
+            IniLanes.AddRange(tmplanes);
+            IniLanes=IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            //IniLanes = IniLanes.OrderByDescending(e => e.RestLength).ToList();
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var inilanelines = new List<Line>(IniLanes.Select(e => e.Line).Cast<Line>().ToList());
                 inilanelines.RemoveAt(i);
                 var lane = CreateLine(IniLanes[i].Line);
-                if (ClosestPointInCurves(lane.StartPoint, inilanelines) < 1)
+                if (ClosestPointInVertCurves(lane.StartPoint,lane, inilanelines) < 1)
                 {
                     if (lane.Length < DisCarAndHalfLane) continue;
                     else
                         lane = new Line(lane.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane.StartPoint, lane.EndPoint).GetNormal() * DisLaneWidth / 2)), lane.EndPoint);
                 }
-                if (ClosestPointInCurves(lane.EndPoint, inilanelines) < 1)
+                if (ClosestPointInVertCurves(lane.EndPoint, lane,inilanelines) < 1)
                 {
                     if (lane.Length < DisCarAndHalfLane) continue;
                     else
