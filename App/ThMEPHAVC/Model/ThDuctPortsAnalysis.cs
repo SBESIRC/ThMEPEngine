@@ -48,14 +48,14 @@ namespace ThMEPHVAC.Model
                 AutoDistributePort();
             else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
             {
-                //var conns = DeleteOrgGraph();
+                var conns = DeleteOrgGraph();
                 // 1.风口上带风量
                 CountEndlinePortAirVolume();
                 AccumMainDuctAirVolume();
                 SetFirstDuctSize();
                 SetMainDuctSize();
                 SetEndlinePortDuctSize();
-                //ThDuctPortsDrawService.ClearGraphs(conns);
+                ThDuctPortsDrawService.ClearGraphs(conns);
             }
             else if (portParam.genStyle == GenerationStyle.GenerationByPort)
             {
