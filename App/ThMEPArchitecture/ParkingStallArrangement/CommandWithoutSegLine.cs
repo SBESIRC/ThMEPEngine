@@ -21,11 +21,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
     {
+        public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
+        private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
+
         public WithoutSegLineCmd()//根据自动生成的分割线得到车位排布结果
         {
             CommandName = "-THWFGXCWBZ";//天华无分割线车位布置
             ActionName = "生成";
+            _CommandMode = CommandMode.WithoutUI;
+            ParameterViewModel = new ParkingStallArrangementViewModel();
         }
+
+        public WithoutSegLineCmd(ParkingStallArrangementViewModel vm)//根据自动生成的分割线得到车位排布结果
+        {
+            CommandName = "THDXCW";
+            ActionName = "自动分割线迭代";//天华无分割线车位布置
+            ParameterViewModel = vm;
+            _CommandMode = CommandMode.WithUI;
+        }
+
         public void Dispose()
         {
         }
@@ -100,19 +114,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 directionList.Add(num, flag);//默认给全横向
             }
 
+            ParkingStallGAGenerator geneAlgorithm = null;
             var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
 
-            var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
-            if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+                //输入
+                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+                if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
-            if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+                if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            //输入对象
-            ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
-            parameterViewModel.IterationCount = iterationCnt.Value;
-            parameterViewModel.PopulationCount = popSize.Value;
-            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
+                ParameterViewModel.IterationCount = iterationCnt.Value;
+                ParameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
+            else
+            {
+                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
 
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
@@ -142,7 +167,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, parameterViewModel))
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
                     {
                         try
                         {

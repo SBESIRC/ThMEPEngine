@@ -41,7 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public ThParkingStallArrangementCmd(ParkingStallArrangementViewModel vm)
         {
             CommandName = "THDXCW";
-            ActionName = "迭代生成";
+            ActionName = "手动分割线迭代生成";
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;
         }
@@ -137,7 +137,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
                 if (popSize.Status != PromptStatus.OK) return;
 
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+                ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
+                parameterViewModel.IterationCount = iterationCnt.Value;
+                parameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
             }
             else
             {

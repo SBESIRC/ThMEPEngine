@@ -8,7 +8,7 @@ using ThControlLibraryWPF.ControlUtils;
 namespace ThMEPArchitecture.ViewModel
 {
     public enum CommandMode { WithUI, WithoutUI}
-    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration}
+    public enum CommandTypeEnum {RunWithoutIteration, RunWithIteration, RunWithIterationAutomatically}//directly, with splitters, without splitters
     public enum CommandRunModeEnum { Auto, Horizental, Vertical }
     public enum CommandRunSpeedEnum { Fast, General, Slow, Advanced }
 
@@ -31,7 +31,7 @@ namespace ThMEPArchitecture.ViewModel
         {
             get
             {
-                return CommandType == CommandTypeEnum.RunWithIteration;
+                return CommandType != CommandTypeEnum.RunWithoutIteration;
             }
         }
 

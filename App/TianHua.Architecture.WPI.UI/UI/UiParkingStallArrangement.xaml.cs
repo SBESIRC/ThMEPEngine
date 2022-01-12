@@ -45,6 +45,13 @@ namespace TianHua.Architecture.WPI.UI.UI
                     cmd.Execute();
                 }
             }
+            else if(_ViewModel.CommandType == CommandTypeEnum.RunWithIteration)
+            {
+                using (var cmd = new ThParkingStallArrangementCmd(_ViewModel))
+                {
+                    cmd.Execute();
+                }
+            }
             else
             {
                 using (var cmd = new ThParkingStallArrangementCmd(_ViewModel))
