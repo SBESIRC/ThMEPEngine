@@ -462,9 +462,7 @@ namespace ThMEPHVAC.FanConnect.Command
                 return;
             }
 
-            var box = node.Item.PLine.ExtendLine(10).Buffer(10);
-
-            if (box.Contains(pt))
+            if (node.Item.PLine.EndPoint.DistanceTo(pt) < 200.0)
             {
                 node.Item.PipeWidth = 100.0;
                 node.Item.PipeLevel = PIPELEVEL.LEVEL4;
@@ -477,8 +475,6 @@ namespace ThMEPHVAC.FanConnect.Command
                 }
                 return;
             }
-
-
         }
         public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
         {

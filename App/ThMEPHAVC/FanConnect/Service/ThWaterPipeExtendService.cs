@@ -177,10 +177,25 @@ namespace ThMEPHVAC.FanConnect.Service
                                                 var closPt5 = ThFanConnectUtils.IntersectWithEx(pline5,cline3, Intersect.ExtendBoth);
                                                 if (closPt1.Count > 0 && closPt2.Count > 0 && closPt3.Count > 0 && closPt4.Count > 0 && closPt5.Count > 0)
                                                 {
-                                                    cline1.StartPoint = closPt2[0];
+                                                    if(cline1.EndPoint.DistanceTo(closPt1[0]) > cline1.EndPoint.DistanceTo(closPt2[0]))
+                                                    {
+                                                        cline1.StartPoint = closPt1[0];
+                                                    }
+                                                    else
+                                                    {
+                                                        cline1.StartPoint = closPt2[0];
+                                                    }
+                                                    
                                                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                                                     {
-                                                        cline2.StartPoint = closPt4[0];
+                                                        if(cline2.EndPoint.DistanceTo(closPt3[0]) > cline2.EndPoint.DistanceTo(closPt4[0]))
+                                                        {
+                                                            cline2.StartPoint = closPt3[0];
+                                                        }
+                                                        else
+                                                        {
+                                                            cline2.StartPoint = closPt4[0];
+                                                        }
                                                     }
                                                     else
                                                     {

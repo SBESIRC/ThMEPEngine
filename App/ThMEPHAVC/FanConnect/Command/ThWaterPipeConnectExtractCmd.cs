@@ -95,14 +95,19 @@ namespace ThMEPHVAC.FanConnect.Command
                     //提取水管路由
                     var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt);
-                    }
                     //水管干路和支干路
                     if (pipes.Count == 0)
                     {
                         return;
+                    }
+                    var fucs = ThFanConnectUtils.SelectFanCUModel(ConfigInfo.WaterSystemConfigInfo.SystemType);
+                    if (fucs.Count == 0)
+                    {
+                        return;
+                    }
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt);
                     }
                     //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                     ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
@@ -119,11 +124,7 @@ namespace ThMEPHVAC.FanConnect.Command
                         tmpLines.Add(line);
                     }
 
-                    var fucs = ThFanConnectUtils.SelectFanCUModel(ConfigInfo.WaterSystemConfigInfo.SystemType);
-                    if (fucs.Count == 0)
-                    {
-                        return;
-                    }
+
                     //获取剪力墙
                     var shearWalls = ThBuildElementExtractService.GetShearWalls();
                     //获取结构柱
