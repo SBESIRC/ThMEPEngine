@@ -254,10 +254,11 @@ namespace ThMEPHVAC.FanConnect.Model
             if (RootNode != null)
             {
                 CalNodeValue(RootNode, fan);
-                foreach (var fcu in fan)
-                {
-                    FindFcuNode(RootNode, fcu.FanPoint);
-                }
+                FindEndNode(RootNode);
+                //foreach (var fcu in fan)
+                //{
+                //    FindFcuNode(RootNode, fcu.FanPoint);
+                //}
                 RemBadNode(RootNode, PIPELEVEL.LEVEL2);
             }
         }
@@ -376,6 +377,10 @@ namespace ThMEPHVAC.FanConnect.Model
         }
         public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node, Point3d pt)
         {
+            foreach (var item in node.Children)
+            {
+                FindFcuNode(item, pt);
+            }
             if (node.Item.CntPoint.DistanceTo(pt) < 200.0)
             {
                 node.Item.Level = PIPELEVEL.LEVEL2;
@@ -388,10 +393,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
                 return;
             }
-            foreach (var item in node.Children)
-            {
-                FindFcuNode(item, pt);
-            }
         }
         public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node)
         {
@@ -401,6 +402,35 @@ namespace ThMEPHVAC.FanConnect.Model
                 if (node.Parent.Children.Count == 1)
                 {
                     FindFcuNode(node.Parent);
+                }
+            }
+        }
+        public void FindEndNode(ThFanTreeNode<ThFanPointModel> node)
+        {
+            foreach (var item in node.Children)
+            {
+                FindEndNode(item);
+            }
+            if(node.Children.Count == 0)
+            {
+                node.Item.Level = PIPELEVEL.LEVEL2;
+                if(node.Parent != null)
+                {
+                    if (node.Parent.Children.Count == 1)
+                    {
+                        FindEndNode1(node.Parent);
+                    }
+                }
+            }
+        }
+        public void FindEndNode1(ThFanTreeNode<ThFanPointModel> node)
+        {
+            node.Item.Level = PIPELEVEL.LEVEL2;
+            if (node.Parent != null)
+            {
+                if (node.Parent.Children.Count == 1)
+                {
+                    FindEndNode1(node.Parent);
                 }
             }
         }

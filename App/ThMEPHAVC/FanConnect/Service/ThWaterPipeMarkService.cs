@@ -529,7 +529,7 @@ namespace ThMEPHVAC.FanConnect.Service
             //遍历子结点
             foreach (var child in node.Children)
             {
-                BianLiTree(child);
+                BianLiTree(child,ref marks);
             }
             if (node.Parent == null)
             {
@@ -658,8 +658,11 @@ namespace ThMEPHVAC.FanConnect.Service
             var coolHotMarkes = new List<Entity>();
             foreach (var n in connectChild)
             {
-                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
-                coolHotMarkes.AddRange(FindMarkFromLine(line, ref marks));
+                if(n.Parent != null)
+                {
+                    var line = new Line(n.Item.CntPoint, n.Parent.Item.CntPoint);
+                    coolHotMarkes.AddRange(FindMarkFromLine(line, ref marks));
+                }
             }
             connectChild = connectChild.OrderBy(o => DistanceTo(o, o.Parent)).ToList();
             //判断该结点是否有mark
@@ -667,7 +670,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 var firstMark = coolHotMarkes.First();
                 coolHotMarkes.Remove(firstMark);
-                UpdateMark(node, firstMark as BlockReference, coolPipe, hotPipe, strMarkHeight);
+                UpdateMark(connectChild.Last(), firstMark as BlockReference, coolPipe, hotPipe, strMarkHeight);
                 foreach (var mark in coolHotMarkes)
                 {
                     mark.UpgradeOpen();
@@ -686,7 +689,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void UpdateCondMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks, string condPipe)
         {
-            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe  || node.Item.IsCondMarked)
             {
                 return;
             }
@@ -699,10 +702,13 @@ namespace ThMEPHVAC.FanConnect.Service
             var condMarkes = new List<Entity>();
             foreach (var n in connectChild)
             {
-                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
-                condMarkes.AddRange(FindTextFromLine(line, ref marks));
+                if (n.Parent != null)
+                {
+                    var line = new Line(n.Item.CntPoint, n.Parent.Item.CntPoint);
+                    condMarkes.AddRange(FindTextFromLine(line, ref marks));
+                }
             }
-            
+            connectChild = connectChild.OrderBy(o => DistanceTo(o, o.Parent)).ToList();
             if (condMarkes.Count > 0)//如果有，判断是否可以使用，如果不能使用删除，重新生成
             {
                 var firstMark = condMarkes.First();
@@ -717,7 +723,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             else//如果没有，新生成一个
             {
-                CondMark(node, condPipe);
+                CondMark(connectChild.Last(), condPipe);
             }
             foreach (var n in connectChild)
             {
@@ -726,6 +732,10 @@ namespace ThMEPHVAC.FanConnect.Service
         } 
         public void RemoveCoolHotMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
         {
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe || node.Item.IsCoolHotMarked)
+            {
+                return;
+            }
             var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
             var coolHotMarkes = FindMarkFromLine(line, ref marks);
             foreach (var mark in coolHotMarkes)
@@ -737,6 +747,10 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void RemoveCondMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
         {
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe || node.Item.IsCondMarked)
+            {
+                return;
+            }
             var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
             var condMarkes = FindTextFromLine(line, ref marks);
             foreach (var mark in condMarkes)
