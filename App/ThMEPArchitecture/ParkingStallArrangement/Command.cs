@@ -139,12 +139,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
                 if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else
             {
                 ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel.IterationCount, ParameterViewModel.PopulationCount);
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara,  ParameterViewModel);
             }
             geneAlgorithm.Logger = Logger;
 
@@ -178,7 +178,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
                     {
                         try
                         {

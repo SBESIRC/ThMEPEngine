@@ -12,12 +12,14 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public static class ParameterConvert
     {
-        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, Logger logger = null)
+        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition,
+            ParkingStallArrangementViewModel ParameterViewModel,Logger logger = null)
         {
             int index = layoutPara.AreaNumber[j];
             layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);

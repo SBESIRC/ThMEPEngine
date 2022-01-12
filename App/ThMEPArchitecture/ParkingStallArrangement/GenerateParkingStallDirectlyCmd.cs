@@ -163,7 +163,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     continue;
                 }
                 ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel, Logger))
                 {
                     try
                     {

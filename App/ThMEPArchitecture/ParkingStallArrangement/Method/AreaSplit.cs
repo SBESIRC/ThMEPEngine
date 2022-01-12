@@ -11,6 +11,10 @@ using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using System.Diagnostics;
 using NetTopologySuite.Geometries;
+using ThMEPArchitecture.ParkingStallArrangement.Extractor;
+using Linq2Acad;
+using ThMEPEngineCore;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -21,11 +25,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var defaultTesselateLength = 100;
             var lines = polygon.ToLines(defaultTesselateLength);
             lines.Add(line);
-
-            //return new List<Polyline>();
-
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
-           
             var areas = extendLines.PolygonsEx();
             foreach (DBObject e in extendLines)
             {
@@ -41,7 +41,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             foreach (DBObject area in areas)
             {
                 rst.Add(area as Polyline);
-                //area.Dispose();
             }
             return rst;
         }
@@ -49,7 +48,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static List<Polyline> SplitArea(this List<Line> splitterLines, List<Polyline> polyLines, double tor = 5.0)
         {
             var rst = new List<Polyline>();
-
             var allLines = new List<Line>();
 
             var defaultTesselateLength = 100;
@@ -94,14 +92,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             {
                 e.Dispose();
             }
-
             extendLines.Dispose();
             var rst = new List<Polyline>();
             foreach (var area in areas)
             {
                 rst.Add(area as Polyline);
             }
-
             return rst;
         }
 
@@ -170,10 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
                 var area = areas[k];
-
                 var segAreas = segLine.SplitByLine(area);             
-               
-                
                 if (segAreas.Count == 2)
                 {
                     foreach (var a in segAreas)
@@ -181,7 +174,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         if (a.Area < minArea)
                         {
                             breakFlag = true;
-                            //return false;
                         }
                     }
                     if (breakFlag)
@@ -277,10 +269,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var closedPts = new List<Point3d>();
             foreach(var build in buildLines)
             {
-                var br = build as BlockReference;
-                var pline = br.GetRect();
-                var pts = pline.GetPoints().ToList();
-                closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+                try
+                {
+                    var br = build as BlockReference;
+                    var pline = br.GetRect();
+                    var pts = pline.GetPoints().ToList();
+                    closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+                }
+                catch (Exception ex)
+                {
+                    ;
+                }
             }
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
@@ -331,7 +330,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     startX += laneWidth;
                     continue;//分割线穿墙直接删除
                 }
-                //var areas = new List<Polyline>() { area };
                 if (IsCorrectSegLines(segLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal))
                 {
                     return segLine;
@@ -340,6 +338,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return null;
         }
+        
         public static Line ThroughVerticalSeg(Polyline wallLine, ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
         {
             double dist = 5000;
@@ -459,6 +458,44 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             areas.AddRange(res);
             return true;
         }
+        public static bool IsCorrectSegLines(Line segLine, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
+          out double maxVal, out double minVal, out List<Polyline> rstAreas)
+        {
+            maxVal = 0;
+            minVal = 0;
+
+            var segAreas = segLine.SplitByLine(area);
+            rstAreas = new List<Polyline>();//分割线分割生成的区域
+            if (segAreas.Count < 2)
+            {
+                return false;
+            }
+            var buildingNums = new List<int>();//分割区域内的建筑物数目
+            var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
+            var res = sortedAreas.Take(2);
+            foreach (var segArea in res)
+            {
+                rstAreas.Add(segArea);
+                var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
+                var buildCnt = buildLines.Count;
+                if (buildCnt == 0)
+                {
+                    return false;//没有建筑物要他作甚
+                }
+                buildingNums.Add(buildCnt);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                if (segLine.GetValueType(boundPt))
+                {
+                    maxVal = segLine.GetMinDist(boundPt) - 2760;
+                }
+                else
+                {
+                    minVal = -segLine.GetMinDist(boundPt) + 2760;
+                }
+            }
+            return true;
+        }
+
         public static bool IsCorrectSegLines2(Line segLine, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
   out double maxVal, out double minVal)
         {
@@ -494,164 +531,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             areas.RemoveAt(0);
             areas.AddRange(res);
             return true;
-        }
-    }
-    public class Dfs
-    {
-        public static bool dfsSplit(ref HashSet<int> usedLines, ref List<Polyline> areas, ref List<Line> sortSegLines, 
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, GaParameter gaParameter, ref List<double> maxVals, ref List<double> minVals
-            , Stopwatch stopwatch, double thresholdSecond)
-        {
-            if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
-            {
-                return true;
-            }
-            if(stopwatch.Elapsed.TotalSeconds > thresholdSecond)
-            {
-                return false;
-            }
-            for (int i = 0; i < gaParameter.LineCount; i++)
-            {
-                if(usedLines.Contains(i))
-                {
-                    continue;
-                }
-                var line = gaParameter.SegLine[i];
-                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
-                {
-                    sortSegLines.Add(line);
-                    maxVals.Add(maxVal);
-                    minVals.Add(minVal);
-                    usedLines.Add(i);
-                }
-            }
-
-            //递归搜索
-            return dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaParameter, ref maxVals, ref minVals,
-                stopwatch, thresholdSecond);
-        }
-
-        public static bool dfsSplitWithoutSegline(Polyline wallLine, int throughBuildNums, ref List<Polyline> areas, ref List<Line> sortSegLines,
-    ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch, double threshSecond)
-        {
-            if (areas.Count + throughBuildNums == buildNums)//楼层分割完毕, 退出递归
-            {
-                return true;
-            }
-            if (stopwatch.Elapsed.TotalSeconds > threshSecond)
-            {
-                return false;
-            }
-            foreach (var area in areas)
-            {
-                var orgAreas = new List<Polyline>() { area };
-                var builds = buildLinesSpatialIndex.SelectCrossingPolygon(area);
-                if (builds.Count > 1)//建筑物数目大于1
-                {
-                    var verticalSegline = AreaSplit.VerticalSeg(ref orgAreas, buildLinesSpatialIndex, out double maxVal, out double minVal);
-                    if (!(verticalSegline is null))//分割线正好纵向分割区域
-                    {
-                        areas.Remove(area);
-                        areas.AddRange(orgAreas);
-                        sortSegLines.Add(verticalSegline);
-                        maxVals.Add(maxVal);
-                        minVals.Add(minVal);
-                        break;
-                    }
-                    var horizontalSegline = AreaSplit.HorizontalSeg(ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
-                    if (!(horizontalSegline is null))//分割线正好横向分割区域
-                    {
-                        areas.Remove(area);
-                        areas.AddRange(orgAreas);
-                        sortSegLines.Add(horizontalSegline);
-                        maxVals.Add(maxVal);
-                        minVals.Add(minVal);
-                        break;
-                    }
-                    var rhroughSegline = AreaSplit.ThroughVerticalSeg(wallLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
-                    if (!(rhroughSegline is null))//分割线纵向贯穿分割区域
-                    {
-                        throughBuildNums++;
-                        areas.Remove(area);
-                        areas.AddRange(orgAreas);
-                        sortSegLines.Add(rhroughSegline);
-                        maxVals.Add(maxVal);
-                        minVals.Add(minVal);
-                        break;
-                    }
-                }
-            }
-
-            //递归搜索
-            return dfsSplitWithoutSegline(wallLine, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex, buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
-        }
-
-
-        public static bool dfsSplitWithoutSegline2(int num, string prob, Polyline wallLine, int throughBuildNums, ref List<Polyline> areas, ref List<Line> sortSegLines,
-            ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch, double threshSecond)
-        {
-            if (areas.Count + throughBuildNums == buildNums)//楼层分割完毕
-            {
-                return true;
-            }
-            //if (stopwatch.Elapsed.TotalSeconds > threshSecond)
-            //{
-            //    return false;
-            //}
-            var dir = prob[num];//当前分割线的方向
-            var flag = false;
-            if (dir == '1')
-            {
-                foreach (var area in areas)
-                {
-                    var orgAreas = new List<Polyline>() { area };
-                    var builds = buildLinesSpatialIndex.SelectCrossingPolygon(area);
-                    if (builds.Count > 1)//建筑物数目大于1
-                    {
-                        var verticalSegline = AreaSplit.VerticalSeg(ref orgAreas, buildLinesSpatialIndex, out double maxVal, out double minVal);
-                        if (!(verticalSegline is null))//分割线正好纵向分割区域
-                        {
-                            areas.Remove(area);
-                            areas.AddRange(orgAreas);
-                            sortSegLines.Add(verticalSegline);
-                            maxVals.Add(maxVal);
-                            minVals.Add(minVal);
-                            flag = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                foreach (var area in areas)
-                {
-                    var orgAreas = new List<Polyline>() { area };
-                    var builds = buildLinesSpatialIndex.SelectCrossingPolygon(area);
-                    if (builds.Count > 1)//建筑物数目大于1
-                    {
-                        var horizontalSegline = AreaSplit.HorizontalSeg(ref orgAreas, buildLinesSpatialIndex, out double maxVal, out double minVal);
-                        if (!(horizontalSegline is null))//分割线正好横向分割区域
-                        {
-                            areas.Remove(area);
-                            areas.AddRange(orgAreas);
-                            sortSegLines.Add(horizontalSegline);
-                            maxVals.Add(maxVal);
-                            minVals.Add(minVal);
-                            flag = true;
-                            break;
-                        }
-                    }
-                }
-
-            }
-            if (!flag)
-            {
-                return false;
-            }
-            num++;
-            //递归搜索
-            return dfsSplitWithoutSegline2(num, prob, wallLine, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex, buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
         }
     }
 }

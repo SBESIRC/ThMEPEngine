@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class ParkingStallDirectGenerator : IDisposable
     {
         GaParameter GaPara;
-
         public ParkingStallDirectGenerator(GaParameter gaPara)
         {
             GaPara = gaPara;

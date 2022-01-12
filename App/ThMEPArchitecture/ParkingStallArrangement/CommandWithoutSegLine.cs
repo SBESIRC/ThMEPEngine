@@ -20,6 +20,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -40,7 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Test(currentDb);
+                    AutoDichotomyCmd(currentDb);
                 }
             }
             catch (Exception ex)
@@ -115,7 +116,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+            ParkingStallArrangementViewModel parameterViewModel = null;
+            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             try
@@ -145,7 +147,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition))
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, parameterViewModel))
                     {
                         try
                         {
@@ -269,7 +271,119 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
             if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
 
-            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, popSize.Value, iterationCnt.Value);
+
+            ParkingStallArrangementViewModel ParameterViewModel = null;
+            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            var rst = new List<Chromosome>();
+            var histories = new List<Chromosome>();
+            try
+            {
+                rst = geneAlgorithm.Run(histories, false);
+            }
+            catch
+            {
+
+            }
+
+            var solution = rst.First();
+            histories.Add(rst.First());
+            for (int k = 0; k < histories.Count; k++)
+            {
+                layoutPara.Set(histories[k].Genome);
+                var layerNames = "solutions" + k.ToString();
+                using (AcadDatabase adb = AcadDatabase.Active())
+                {
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                    }
+                    catch { }
+                }
+
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                {
+                    int index = layoutPara.AreaNumber[j];
+                    layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
+                    layoutPara.Id2AllSubAreaDic.TryGetValue(index, out Polyline boundary);
+                    layoutPara.SubAreaId2ShearWallsDic.TryGetValue(index, out List<List<Polyline>> obstaclesList);
+                    layoutPara.BuildingBoxes.TryGetValue(index, out List<Polyline> buildingBoxes);
+                    layoutPara.SubAreaId2OuterWallsDic.TryGetValue(index, out List<Polyline> walls);
+                    layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
+                    var obstacles = new List<Polyline>();
+                    obstaclesList.ForEach(e => obstacles.AddRange(e));
+
+                    var Cutters = new DBObjectCollection();
+                    obstacles.ForEach(e => Cutters.Add(e));
+                    var ObstaclesSpatialIndex = new ThCADCoreNTSSpatialIndex(Cutters);
+                    ParkingPartition partition = new ParkingPartition(walls, inilanes, obstacles, GeoUtilities.JoinCurves(walls, inilanes)[0], buildingBoxes);
+                    partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
+                    partition.ProcessAndDisplay(layerNames, 30);
+                }
+            }
+
+            layoutPara.Set(solution.Genome);
+            Draw.DrawSeg(solution);
+            layoutPara.Dispose();
+        }
+
+
+        public void AutoDichotomyCmd(AcadDatabase acadDatabase)
+        {
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            if (!rstDataExtract)
+            {
+                return;
+            }
+            var area = outerBrder.WallLine;
+            var areas = new List<Polyline>() { area };
+            var sortSegLines = new List<Line>();
+            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
+            var gaPara = new GaParameter(outerBrder.SegLines);
+
+            var usedLines = new HashSet<int>();
+            var maxVals = new List<double>();
+            var minVals = new List<double>();
+            var buildNums = outerBrder.Building.Count;
+            var stopwatch = new Stopwatch();
+            stopwatch.Start();
+            double threshSecond = 20;
+            int throughBuildNums = 0;
+
+            
+            
+            var allSeglines = new List<List<Line>>();
+            allSeglines = Dfs.GetDichotomySegline(outerBrder);
+            return;
+            sortSegLines = allSeglines[0];
+            gaPara.Set(sortSegLines, maxVals, minVals);
+
+            var segLineDic = new Dictionary<int, Line>();
+            for (int i = 0; i < sortSegLines.Count; i++)
+            {
+                segLineDic.Add(i, sortSegLines[i]);
+            }
+
+            var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
+            var linePtDic = Intersection.GetLinePtDic(ptDic);
+            var intersectPtCnt = ptDic.Count;//交叉点数目
+            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
+            foreach (var num in ptDic.Keys)
+            {
+                var random = new Random();
+                var flag = random.NextDouble() < 0.5;
+                directionList.Add(num, flag);//默认给全横向
+            }
+
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
+
+
+            var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+            if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+
+            var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+            if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+            ParkingStallArrangementViewModel ParameterViewModel = null;
+            var geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             try
