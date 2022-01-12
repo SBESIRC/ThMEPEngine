@@ -803,7 +803,7 @@ namespace ThMEPHVAC.Model
                     p.seg = new SegInfo() { l = l };
                     p.portsInfo = new List<PortInfo>();
                     // 最末端的风口放在第一个，方便累加风量
-                    var sortedDis = SortByDistance(l.EndPoint, res, dicPlToAirVolume, out Dictionary<string, PortInfo> dic);
+                    var sortedDis = SortByDistance(l.EndPoint, res, out Dictionary<string, PortInfo> dic);
                     foreach (var dis in sortedDis)
                     {
                         var info = dic[dis.ToString()];
@@ -832,7 +832,6 @@ namespace ThMEPHVAC.Model
         }
         private List<double> SortByDistance(Point3d baseP,
                                             DBObjectCollection res,
-                                            Dictionary<int, PortInfo> dicPlToAirVolume,
                                             out Dictionary<string, PortInfo> dic)
         {
             var distances = new List<double>();
