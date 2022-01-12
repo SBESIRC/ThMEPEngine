@@ -50,6 +50,7 @@ namespace ThMEPLighting.Garage.Factory
 
             // 设置方向
             SetEdgePattern();
+            //Print1();
         }
 
         private void SetEdgePattern()
@@ -72,6 +73,35 @@ namespace ThMEPLighting.Garage.Factory
                     UpdateSideLineNumberDict(o.Value.Item2, EdgePattern.First);
                 }
             });
+        }
+
+        private void Print1()
+        {
+            using (var acadDB= Linq2Acad.AcadDatabase.Active())
+            {
+                CenterSideDict.ForEach(o =>
+                {
+                    var lines = new List<Entity>();
+                    lines.Add(o.Key.Clone() as Line);
+                    lines.AddRange(o.Value.Item1.Select(l => l.Clone() as Line));
+                    lines.AddRange(o.Value.Item2.Select(l => l.Clone() as Line));
+                    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(lines, acadDB.Database,5);
+                });
+            }
+        }
+        private void Print2()
+        {
+            using (var acadDB = Linq2Acad.AcadDatabase.Active())
+            {
+                var centers = CenterSideDict.Select(o => o.Key.Clone() as Line).OfType<Entity>().ToList();
+                var item1= CenterSideDict.SelectMany(o=>o.Value.Item1)
+                    .Select(o => o.Clone() as Line).OfType<Entity>().ToList();
+                var item2 = CenterSideDict.SelectMany(o => o.Value.Item2)
+                    .Select(o => o.Clone() as Line).OfType<Entity>().ToList();
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(centers, acadDB.Database, 1);
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(item1, acadDB.Database, 5);
+                ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(item2, acadDB.Database, 6);
+            }
         }
     }
 }
