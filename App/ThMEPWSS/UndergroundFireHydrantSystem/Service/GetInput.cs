@@ -36,17 +36,34 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             var pipeEngine = new ThExtractHYDTPipeService();//提取供水管
             var dbObjs = pipeEngine.Extract(acadDatabase.Database, selectArea);
             PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
-            var stopEngine = new ThExtractStopLine();
 
+            var sitong = false;
+            foreach (var pt in fireHydrantSysIn.PtDic.Keys)
+            {
+                var cnt = fireHydrantSysIn.PtDic[pt].Count;
+                if (cnt > 3)
+                {
+                    sitong = true;
+                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
+                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
+                }
+            }
+            if (sitong)
+            {
+                return false;
+            }
+
+            var stopEngine = new ThExtractStopLine();
             var stopPts = stopEngine.Extract(acadDatabase.Database, selectArea);
 
-            PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
+            //PipeLineList.ConnectClosedPt(ref lineList, fireHydrantSysIn);
             PipeLineList.PipeLineAutoConnect(ref lineList, ref fireHydrantSysIn);//管线自动连接
             PipeLineList.RemoveFalsePipe(ref lineList, fireHydrantSysIn.VerticalPosition);//删除两个点都是端点的线段
             PipeLineList.ConnectBreakLineWithoutPtdic(ref lineList, fireHydrantSysIn, ref pointList, stopPts);//连接没画好的线段
 
             PipeLine.PipeLineSplit(ref lineList, pointList);//管线打断                                                                           
-            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新  
+            PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
+
             var valveEngine = new ThExtractValveService();//提取阀
             var valveDB = valveEngine.Extract(acadDatabase.Database, selectArea);
             //假定同一图纸只存在一种类型的阀
@@ -69,20 +86,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             
             PtDic.CreatePtDic(ref fireHydrantSysIn, lineList);//字典对更新
 
-            var sitong = false;
-            foreach(var pt in fireHydrantSysIn.PtDic.Keys)
-            {
-                if(fireHydrantSysIn.PtDic[pt].Count > 3)
-                {
-                    sitong = true;
-                    Active.Editor.WriteMessage($"\n在点{pt._pt.X},");
-                    Active.Editor.WriteMessage($"{pt._pt.Y}处存在四通!");
-                }
-            }
-            if(sitong)
-            {
-                return false;
-            }
+            
             var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
             
             var mark = markEngine.Extract(acadDatabase.Database, selectArea);
@@ -137,17 +141,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             fireHydrantSysIn.TextWidth = textWidth + 100;
             fireHydrantSysIn.PipeWidth = textWidth + 300;
             return true;
-        }
-
-        private static void GetEntType(AcadDatabase acadDatabase)
-        {
-            var entOpt = new PromptEntityOptions("\nPick entity in block:");
-            var entityResult = Active.Editor.GetEntity(entOpt);
-
-            var entId = entityResult.ObjectId;
-            var dbObj = acadDatabase.Element<Entity>(entId);
-            var objs = new DBObjectCollection();
-            dbObj.Explode(objs);
         }
     }
 }

@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Method
             visited.Add(fireHydrantSysIn.StartEndPts[0]);
             tempPath.Add(fireHydrantSysIn.StartEndPts[0]);
             //主环路深度搜索
-            DepthFirstSearch.dfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited,
+            var mainLoopFlag = DepthFirstSearch.dfsMainLoop(fireHydrantSysIn.StartEndPts[0], fireHydrantSysIn.StartEndPts[1], tempPath, visited,
                 ref mainPathList, fireHydrantSysIn, ref extraNodes);
             ThPointCountService.SetPointType(ref fireHydrantSysIn, mainPathList);
             return mainPathList;

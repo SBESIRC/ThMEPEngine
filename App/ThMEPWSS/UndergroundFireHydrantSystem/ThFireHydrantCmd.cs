@@ -16,6 +16,7 @@ using ThCADCore.NTS;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
+using System.Linq;
 
 namespace ThMEPWSS.Command
 {
@@ -129,27 +130,7 @@ namespace ThMEPWSS.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //var entOpt = new PromptEntityOptions("\nPick entity in block:");
-                //var entityResult = Active.Editor.GetEntity(entOpt);
-
-                //var entId = entityResult.ObjectId;
-                //var dbObj = acadDatabase.Element<Entity>(entId);
-
-                var selectArea = Common.Utils.SelectAreas();//生成候选区域
-                if (selectArea.Count == 0)
-                {
-                    return;
-                }
-                var labelEngine = new ThExtractLabelLine();//提取消火栓标记线
-                var labelDB = labelEngine.Extract(acadDatabase.Database, selectArea);
-                var labelLine = labelEngine.CreateLabelLineList(labelDB);
-
             }
-
         }
-
-
-       
-
     }
 }
