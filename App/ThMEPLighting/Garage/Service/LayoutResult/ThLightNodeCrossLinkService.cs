@@ -42,11 +42,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             threeWays = FilterByCenterWithoutSides(threeWays);
             threeWays.ForEach(o =>
             {
-                var pairs = GetLinePairs(o);
+                var pairs = o.GetLinePairs();
                 var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
                 if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
-                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
+                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
                     var oppositeBranch = GetOpposite(mainPair.Item1, branch);
                     var orders = new List<Line> { mainPair.Item1, branch, mainPair.Item2, oppositeBranch };
                     results.AddRange(LinkOppositeCross(orders));
@@ -67,11 +67,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var threeWays = CenterLines.GetThreeWays();
             threeWays.Where(o=>o.Count==3).ForEach(o =>
             {
-                var pairs = GetLinePairs(o);
+                var pairs = o.GetLinePairs();
                 var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
                 if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
-                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
+                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
                     results.AddRange(LinkThreewayCorner(mainPair.Item1, mainPair.Item2, branch));
                 }
             });

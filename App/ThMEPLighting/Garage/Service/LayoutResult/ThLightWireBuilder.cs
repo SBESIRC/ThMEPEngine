@@ -281,6 +281,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             results = results.Union(secondLinkWireObjs);
             return results;
         }
+        protected DBObjectCollection FilterDoubleRowLinkWire(DBObjectCollection linkWires)
+        {
+            var filter = new ThLinkWireFilter();
+            return filter.Filter(linkWires);
+        }
+
         protected List<ThLightGraphService> BuildGraphs(List<ThLightEdge> edges)
         {
             // 为了1、2号线使用

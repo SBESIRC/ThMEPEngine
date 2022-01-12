@@ -114,5 +114,31 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return false;
         }
+
+        public static List<Tuple<Line, Line>> GetLinePairs(this List<Line> lines)
+        {
+            var results = new List<Tuple<Line, Line>>();
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    results.Add(Tuple.Create(lines[i], lines[j]));
+                }
+            }
+            return results;
+        }
+        public static Line FindBranch(this List<Line> threeways, Line first, Line second)
+        {
+            int firstIndex = threeways.IndexOf(first);
+            int secondIndex = threeways.IndexOf(second);
+            for (int i = 0; i < threeways.Count; i++)
+            {
+                if (i != firstIndex && i != secondIndex)
+                {
+                    return threeways[i];
+                }
+            }
+            return null;
+        }
     }
 }

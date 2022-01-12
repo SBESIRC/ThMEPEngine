@@ -65,6 +65,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             // 将1、2线边上的灯线用灯块打断，并过滤末端
             var linkWireObjs = CreateDoubleRowLinkWire(totalEdges);
+            linkWireObjs = FilterDoubleRowLinkWire(linkWireObjs);
 
             // 创建直段上的跳线(类似于拱形)
             var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);

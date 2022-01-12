@@ -105,11 +105,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var threeways = CenterLines.GetThreeWays();
             threeways.ForEach(o =>
             {
-                var pairs = GetLinePairs(o);
+                var pairs = o.GetLinePairs();
                 var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
                 if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
-                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
+                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
                     results.Add(LinkTType(mainPair.Item1, mainPair.Item2, branch));
                 }
             });
@@ -133,11 +133,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var threeways = CenterLines.GetThreeWays();
             threeways.Where(o=>o.Count==3).ForEach(o =>
             {
-                var pairs = GetLinePairs(o);
+                var pairs = o.GetLinePairs();
                 var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
                 if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
                 {
-                    var branch = FindBranch(o, mainPair.Item1, mainPair.Item2);
+                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
                     results.AddRange(BuildLinkEges(mainPair.Item1, mainPair.Item2, branch));
                 }
             });
@@ -220,20 +220,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var groupSides = area.GroupSides(sides); // 分组
             var lineRoadService = new ThLineRoadQueryService(groupSides);
             return lineRoadService.GetCornerPoints();
-        }
-
-        protected Line FindBranch(List<Line> threeways, Line first, Line second)
-        {
-            int firstIndex = threeways.IndexOf(first);
-            int secondIndex = threeways.IndexOf(second);
-            for (int i = 0; i < threeways.Count; i++)
-            {
-                if (i != firstIndex && i != secondIndex)
-                {
-                    return threeways[i];
-                }
-            }
-            return null;
         }
 
         protected List<List<Line>> FilterByCenterWithoutSides(List<List<Line>> threeWays)
@@ -560,19 +546,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }
             return partitions;
-        }
-
-        protected List<Tuple<Line, Line>> GetLinePairs(List<Line> lines)
-        {
-            var results = new List<Tuple<Line, Line>>();
-            for (int i = 0; i < lines.Count - 1; i++)
-            {
-                for (int j = i + 1; j < lines.Count; j++)
-                {
-                    results.Add(Tuple.Create(lines[i], lines[j]));
-                }
-            }
-            return results;
         }
 
         protected Dictionary<Line, Line> CreateNeibourDict(List<Line> crosses)

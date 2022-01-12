@@ -152,6 +152,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThLineRoadQueryService.cs" />
     <Compile Include="Garage\Engine\ThGarageLightingEngine.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLinkLineUtils.cs" />
+    <Compile Include="Garage\Service\LayoutResult\ThLinkWireFilter.cs" />
     <Compile Include="Garage\Service\Number\ThPassNumberService.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
     <Compile Include="Garage\Service\ThDirectionLightGraphService.cs" />
