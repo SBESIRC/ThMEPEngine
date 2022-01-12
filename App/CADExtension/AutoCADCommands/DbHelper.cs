@@ -121,8 +121,8 @@ namespace Dreambuild.AutoCAD
                 layer.IsHidden = false;
                 layer.IsLocked = false;
                 //图层在CAD中使用时，无法冻结，也不能设置冻结。
-                //会报无效图层问题，如果在使用时就不用设置解冻属性
-                if(!layer.IsUsed)
+                //会报无效图层问题，如果已经被冻结，肯定不在使用，可以设置。
+                if(layer.IsFrozen)
                     layer.IsFrozen = false;
             });
         }
