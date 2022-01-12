@@ -26,9 +26,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<int> MaxValues;//最小值
         public int LineCount;
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
-        public void BreakLines(List<Line> SegLines, Chromosome GASolution, bool VerticalDirection, bool GoPositive)
+        public SegBreakParam(List<Line> SegLines, Chromosome GASolution, Polyline WallLine, double BufferSize,bool VerticalDirection, bool GoPositive)
         {
             // SegLine 初始分割线，必须严格符合相交关系
+            // WallLine 地库框线
             // GASolution GA的结果，任意相交关系
             // GoPositive 从下至上打断，从左至右打断（坐标增加顺序）
             //List<Line> VertLines = new List<Line>();//垂直线
@@ -60,32 +61,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 // otherlines 添加横向线
                 //打断纵向线
-                //foreach (Line line1 in VertLines)
+                //对于所有纵线
                 for (int k = 0; k < VertLine_index.Count; ++k)
                 {
-                    var line1 = SegLines[VertLine_index[k]];
-                    var GALine1 = GASolution.Genome[k].ToLine();
+                    var line1 = SegLines[VertLine_index[k]];//初始纵向分割线
+                    var GALine1 = GASolution.Genome[k].ToLine();//迭代后的纵分割线
                     List<Point3d> ptlist = new List<Point3d>();//断点列表
-                    //List<Line> IntersectLines = new List<Line>();//交叉线列表
-                    //foreach (Line line2 in HorzLines)
+                    List<Line> IntersectLines = new List<Line>();//交叉线列表
+                    
+                    var templ = line1.Intersect(WallLine, Intersect.OnBothOperands);
+                    if (templ.Count != 0)//初始线和外包框有交点
+                    {
+                        var pt = GALine1.Intersect(WallLine, Intersect.OnBothOperands);// GA 结果求交点
+                        ptlist.Add(pt.First());
+                        IntersectLines.Add(new Line(pt.First(), pt.First()));// 创建长度为0的线，保证两个list结构一样
+                    }
                     for (int j = 0; j < HorzLines_index.Count; ++j)
                     {
-                        var line2 = SegLines[HorzLines_index[j]];
-                        var templ = line1.Intersect(line2, Intersect.OnBothOperands);
-                        if (templ.Count != 0)
+                        var line2 = SegLines[HorzLines_index[j]];//初始横向分割线
+                        templ = line1.Intersect(line2, Intersect.OnBothOperands);
+                        if (templ.Count != 0)//初始线之间有交点
                         {
-                            //// 纵线打断则
-                            //ptlist.Add(templ.First());// 添加打断点
-                            //IntersectLines.Add(new Line(line2.StartPoint, line2.EndPoint));// 添加线的复制
+                            var GALine2 = GASolution.Genome[j].ToLine();//迭代后的横分割线
 
-                            // 说明这俩线有交点，拿gene求交点
-                            var pt = GALine1.Intersect(GASolution.Genome[j].ToLine(), Intersect.ExtendBoth);
+                            IntersectLines.Add(GALine2);// 记录产生相交的线，后续需要更新
+
+                            // 说明这俩线有交点，用GA的结果求交点
+                            var pt = GALine1.Intersect(GALine2, Intersect.ExtendBoth);
 
                             ptlist.Add(pt.First());
+                            
                         }
                     }
-
-                    if (ptlist.Count > 2) 
+                    // sort ptlist and IntersectLines(base on pt list)按照纵坐标排序
+                    if (GoPositive)
+                    {
+                        ptlist = ptlist.OrderBy(s => s.Y).ToList();
+                        IntersectLines = IntersectLines.OrderBy(s => s.StartPoint.Y).ToList();
+                    }
+                    if (ptlist.Count > 2)// 至少有一个中间断点可打断 
                     {
                         List<Line> cur_breakedlines = new List<Line>();// 打断后的纵线list
                         List<int> cur_minvalues = new List<int>();// 打断线的下边界
@@ -93,32 +107,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         // 该纵线打断
                         if (GoPositive)
                         {
-
-                            // 1.TODO:sort ptlist and IntersectLines(base on pt list)按照纵坐标排序
                             // 2. 确定打断后的纵线
-                                
-                            Point3d spt;
+                            Point3d spt;//起始点
+                            Point3d ept;//终结点
                             if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
                             {
                                 spt = GALine1.StartPoint;
+                                ept = GALine1.EndPoint;
                             }
                             else
                             {
                                 spt = GALine1.EndPoint;
+                                ept = GALine1.StartPoint;
                             }
                             int CurCount = 0;
                             List < int > InnerIndex = new List<int>();// 记录在当前断线上所有横线的索引
                             Line BreakLine ;
-                            for (int i = 0; i < ptlist.Count; ++i)
+                            for (int i = 1; i < ptlist.Count-1; ++i)// 遍历中间的所有可能断点，不包含边界上的断点
                             {
                                 // 双指针确定断线
-
                                 if (CurCount < 1)
                                 {
                                     CurCount += 1;
                                     InnerIndex.Add(i);
                                 }
-                                else
+                                if (CurCount > 1 || ptlist.Count == 3)// 3个断点则中间需要打断
                                 {
                                     // 新断线
                                     InnerIndex.Add(i);
@@ -153,7 +166,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         MinValues.AddRange(cur_minvalues);
                         MaxValues.AddRange(cur_maxvalues);
                     }
-                    else
+                    else// 虽然不能打断，但是也要迭代
                     {
                         BreakedLines.Add(GALine1);
                         // TO DO
