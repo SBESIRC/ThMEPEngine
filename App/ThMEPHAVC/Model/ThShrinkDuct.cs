@@ -228,7 +228,8 @@ namespace ThMEPHVAC.Model
             {
                 if (endlines.endlines.ContainsKey(key))
                 {
-                    var haveShrinkedLen = mainLinesInfos[key].srcShrink + mainLinesInfos[key].dstShrink;
+                    var endlineInfo = endlines.endlines[key].seg;
+                    var haveShrinkedLen = endlineInfo.srcShrink + endlineInfo.dstShrink;
                     var diff1 = l.Length - (haveShrinkedLen + elbowShrink);
                     var diff2 = diff1 - 1000;
                     if (diff2 > 0)
