@@ -1,5 +1,4 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
@@ -19,15 +18,6 @@ namespace ThMEPLighting.Garage.Engine
             ThLightArrangeParameter arrangeParameter)
             :base(arrangeParameter)
         {
-        }
-        protected override void Preprocess(ThRegionBorder regionBorder)
-        {
-            regionBorder.Trim(); // 裁剪           
-            regionBorder.Shorten(ThGarageLightCommon.RegionBorderBufferDistance); // 缩短
-            regionBorder.Clean(); // 清理
-            Filter(regionBorder); // 过滤
-            regionBorder.Normalize(); //单位化
-            regionBorder.Sort(); // 排序
         }
         public override void Arrange(ThRegionBorder regionBorder)
         {
@@ -64,7 +54,25 @@ namespace ThMEPLighting.Garage.Engine
                 g.Number(LoopNumber, true, base.DefaultStartNumber);
             });
         }
-
+        protected override void Preprocess(ThRegionBorder regionBorder)
+        {
+            regionBorder.Trim(); // 裁剪           
+            regionBorder.Shorten(ThGarageLightCommon.RegionBorderBufferDistance); // 缩短
+            regionBorder.Clean(); // 清理
+            Filter(regionBorder); // 过滤
+            regionBorder.Normalize(); //单位化
+            regionBorder.Sort(); // 排序
+        }
+        private void Filter(ThRegionBorder regionBorder)
+        {
+            // 对于较短的灯线且一段未连接任何线，另一端连接在线上
+            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
+                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
+            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
+                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
+            regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(
+                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
+        }
         private List<ThLightEdge> BuildEdges(Dictionary<Line, List<Point3d>> edgePoints)
         {
             var lightEdges = new List<ThLightEdge>();

@@ -20,12 +20,16 @@ namespace ThMEPLighting.Garage.Engine
             CenterSideDicts = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
             CenterGroupLines = new List<Tuple<Point3d, Dictionary<Line, Vector3d>>>();
         }
-        protected override void Filter(ThRegionBorder regionBorder)
+        public override void Arrange(ThRegionBorder regionBorder)
         {
-            base.Filter(regionBorder);
-            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
-                regionBorder.DxCenterLines, ArrangeParameter.DoubleRowOffsetDis / 2.0+ ArrangeParameter.Interval);
-            regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.MinimumEdgeLength);
+            // 预处理
+            Preprocess(regionBorder);
+            var arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter);
+            arrange.Arrange();
+            Graphs = arrange.Graphs;
+            LoopNumber = arrange.LoopNumber;
+            CenterSideDicts = arrange.CenterSideDicts;
+            CenterGroupLines = arrange.CenterGroupLines;
         }
         protected override void Preprocess(ThRegionBorder regionBorder)
         {
@@ -37,17 +41,16 @@ namespace ThMEPLighting.Garage.Engine
             regionBorder.Normalize(); //单位化
             regionBorder.Sort(); // 排序             
         }
-
-        public override void Arrange(ThRegionBorder regionBorder)
+        private void Filter(ThRegionBorder regionBorder)
         {
-            // 预处理
-            Preprocess(regionBorder);
-            var arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter);
-            arrange.Arrange();
-            Graphs = arrange.Graphs;
-            LoopNumber = arrange.LoopNumber;
-            CenterSideDicts = arrange.CenterSideDicts;
-            CenterGroupLines = arrange.CenterGroupLines;
+            // 对于较短的灯线且一段未连接任何线，另一端连接在线上
+            double filterLength = ArrangeParameter.LampLength + ArrangeParameter.DoubleRowOffsetDis / 2.0;
+            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
+                regionBorder.DxCenterLines, filterLength);
+            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
+                regionBorder.DxCenterLines, filterLength);
+            regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(
+                regionBorder.DxCenterLines, filterLength);
         }
     }
 }

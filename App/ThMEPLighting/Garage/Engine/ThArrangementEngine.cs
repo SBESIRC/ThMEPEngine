@@ -2,7 +2,6 @@
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
-using ThMEPLighting.Garage.Service;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -30,15 +29,6 @@ namespace ThMEPLighting.Garage.Engine
         }
         public abstract void Arrange(ThRegionBorder regionBorder);
         protected abstract void Preprocess(ThRegionBorder regionBorder);
-        
-        protected virtual void Filter(ThRegionBorder regionBorder)
-        {
-            double tTypeBranchFilterLength = Math.Max(ArrangeParameter.MinimumEdgeLength,
-                ArrangeParameter.Margin*2.0+ ArrangeParameter.Interval / 2.0);
-            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
-                regionBorder.DxCenterLines, tTypeBranchFilterLength);      
-        }        
-        
         public void SetDefaultStartNumber(int defaultStartNumber)
         {
             this.DefaultStartNumber = defaultStartNumber;
