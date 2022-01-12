@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using AcHelper;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;

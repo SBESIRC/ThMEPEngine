@@ -23,7 +23,8 @@ namespace ThMEPLighting.Garage.Engine
         protected override void Filter(ThRegionBorder regionBorder)
         {
             base.Filter(regionBorder);
-            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.DoubleRowOffsetDis / 2.0);
+            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
+                regionBorder.DxCenterLines, ArrangeParameter.DoubleRowOffsetDis / 2.0+ ArrangeParameter.Interval);
             regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(regionBorder.DxCenterLines, ArrangeParameter.MinimumEdgeLength);
         }
         protected override void Preprocess(ThRegionBorder regionBorder)
@@ -41,8 +42,7 @@ namespace ThMEPLighting.Garage.Engine
         {
             // 预处理
             Preprocess(regionBorder);
-
-            var arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter); ;
+            var arrange = new ThThirdwayArrangeService(regionBorder, ArrangeParameter);
             arrange.Arrange();
             Graphs = arrange.Graphs;
             LoopNumber = arrange.LoopNumber;
