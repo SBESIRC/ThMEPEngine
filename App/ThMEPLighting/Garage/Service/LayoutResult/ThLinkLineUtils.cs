@@ -140,5 +140,27 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return null;
         }
+        public static Line Merge(this Line first,Line second)
+        {
+            // 对于分支线可能对很短，需要与其相邻的线合并
+            // 将短线投影到长线上
+            var pts = new List<Point3d>();
+            if(first.Length< second.Length)
+            {
+                pts.Add(first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint));
+                pts.Add(first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint));
+                pts.Add(second.StartPoint);
+                pts.Add(second.EndPoint);
+            }
+            else
+            {
+                pts.Add(second.StartPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint));
+                pts.Add(second.EndPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint));
+                pts.Add(first.StartPoint);
+                pts.Add(first.EndPoint);
+            }
+            var pair = pts.GetCollinearMaxPts();
+            return new Line(pair.Item1,pair.Item2);
+        }
     }
 }

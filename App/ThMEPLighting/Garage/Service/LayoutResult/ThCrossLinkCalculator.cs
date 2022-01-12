@@ -412,8 +412,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             if (neibourDict.ContainsKey(current))
             {
-                var pair = ThGeometryTool.GetCollinearMaxPts(new List<Line> { current, neibourDict[current] });
-                return new Line(pair.Item1, pair.Item2);
+                return current.Merge(neibourDict[current]);
             }
             return current;
         }
@@ -555,7 +554,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var centerPt = GetCenter(crosses);
             if (centerPt.HasValue)
             {
-                crosses.Where(o => IsContains(o)).Where(o => GetCenterSides(o).Count == 0).ForEach(o =>
+                crosses.Where(o => IsContains(o)).Where(o => GetCenterSides(o).Count < 2).ForEach(o =>
                 {
                     var port = centerPt.Value.GetNextLinkPt(o.StartPoint, o.EndPoint);
                     var neibour = FindCollinearNeibour(o, port);
