@@ -298,8 +298,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             secondEdges.ForEach(o => o.IsTraversed = false);
 
             var graphs = new List<ThLightGraphService>();
-            graphs.AddRange(firstEdges.CreateGraphs());
-            graphs.AddRange(secondEdges.CreateGraphs());
+            graphs.AddRange(firstEdges.CreateCdzmGraphs());
+            graphs.AddRange(secondEdges.CreateCdzmGraphs());
             return graphs;
         }
         protected bool IsExsited(List<ThLightNodeLink> links, ThLightNodeLink link)

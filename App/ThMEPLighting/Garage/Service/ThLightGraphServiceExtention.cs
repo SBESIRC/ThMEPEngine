@@ -128,6 +128,31 @@ namespace ThMEPLighting.Garage.Service
             }
             return results;
         }
+        public static List<ThLightGraphService> CreateCdzmGraphs(this List<ThLightEdge> lightEdges)
+        {
+            // 传入的Edges是
+            var results = new List<ThLightGraphService>();
+            while (lightEdges.Count > 0)
+            {
+                if (lightEdges.Where(o => o.IsDX).Count() == 0)
+                {
+                    break;
+                }
+                Point3d findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
+                var priorityStart = lightEdges.Select(o => o.Edge).ToList().FindPriorityStart(ThGarageLightCommon.RepeatedPointDistance);
+                if (priorityStart != null)
+                {
+                    findSp = priorityStart.Item2;
+                }
+                //对灯线边建图,创建从findSp开始可以连通的图
+                var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
+                lightGraph.Build();
+
+                lightEdges = lightEdges.Where(o => o.IsTraversed == false).ToList();
+                results.Add(lightGraph);
+            }
+            return results;
+        }
         public static List<ThLightGraphService> CreateDirectionGraphs(this List<ThLightEdge> lightEdges)
         {
             // 双排布置：侧边的方向由中心线的方向传递的
