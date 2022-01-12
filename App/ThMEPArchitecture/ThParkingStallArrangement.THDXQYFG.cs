@@ -30,7 +30,7 @@ namespace ThMEPArchitecture
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "-THDXQYFG3", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "-THWFGXCWBZ", CommandFlags.Modal)]
         public void ThArrangeParkingStall3()
         {
             using (var cmd = new WithoutSegLineCmd())
@@ -38,6 +38,16 @@ namespace ThMEPArchitecture
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "-THDXFGXSC", CommandFlags.Modal)]
+        public void CreateAllSeglinesCmd()
+        {
+            using (var cmd = new CreateAllSeglinesCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "-THExtractTestData", CommandFlags.Modal)]
         public void THExtractTestData()
         {

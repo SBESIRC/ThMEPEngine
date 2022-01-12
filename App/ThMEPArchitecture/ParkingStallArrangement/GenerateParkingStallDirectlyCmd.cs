@@ -178,25 +178,5 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             layoutPara.Dispose();
             Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
         }
-
-        private static Point3dCollection SelectAreas()
-        {
-            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return new Point3dCollection();
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                return frame.Vertices();
-            }
-        }
     }
 }

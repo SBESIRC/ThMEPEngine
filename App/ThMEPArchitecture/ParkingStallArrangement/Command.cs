@@ -1,19 +1,13 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using Linq2Acad;
 using Serilog;
-using Serilog.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
@@ -128,21 +122,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             if (_CommandMode == CommandMode.WithoutUI)
             {
-                var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
+                var dirSetted = General.Utils.SetLayoutMainDirection();
                 if (!dirSetted)
                     return;
 
                 var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
-                if (iterationCnt.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+                if (iterationCnt.Status != PromptStatus.OK) return;
 
                 var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
-                if (popSize.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
+                if (popSize.Status != PromptStatus.OK) return;
 
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else
             {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara,  ParameterViewModel);
             }
             geneAlgorithm.Logger = Logger;

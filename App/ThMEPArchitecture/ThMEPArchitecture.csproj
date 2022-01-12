@@ -26,6 +26,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateAllSeglinesCmd.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\CommandWithoutSegLine.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\InputData.cs" />
