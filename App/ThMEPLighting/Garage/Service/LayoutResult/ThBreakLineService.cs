@@ -42,11 +42,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     .Where(o=>o is Line || o is Arc)
                     .Where(l => !breakLines.Contains(l)).ToCollection();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(otherCurves);
-                breakLines.Where(l => l.Length > Length).ForEach(l =>
+                breakLines.ForEach(l =>
                 {
-                    var onCurves = Query(l, spatialIndex);
-                    var res = Break(l, onCurves, Length);
-                    res.ForEach(o => results.Add(o));
+                    if(l.Length > Length)
+                    {
+                        var onCurves = Query(l, spatialIndex);
+                        var res = Break(l, onCurves, Length);
+                        res.ForEach(o => results.Add(o));
+                    }
+                    else
+                    {
+                        results.Add(l);
+                    }
                 });
                 results = results.Union(otherCurves);
                 return results;
