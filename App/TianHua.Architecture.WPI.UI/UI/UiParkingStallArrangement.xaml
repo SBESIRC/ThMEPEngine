@@ -88,7 +88,7 @@
                     <Label FontSize="16" FontWeight="Bold">运算参数设置：</Label>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Vertical" IsEnabled="{Binding IsComputationParaSetupEnabled}">
+            <StackPanel Orientation="Vertical" >
                 <StackPanel>
                     <StackPanel >
                         <Label>方向：</Label>
@@ -100,6 +100,7 @@
                     </StackPanel>
                     <Label></Label>
                 </StackPanel>
+                <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                 <StackPanel>
                     <StackPanel >
                         <Label>速度：</Label>
@@ -122,6 +123,7 @@
                             <TextBox Width="40" Margin="0,5,5,5" Text="{Binding MaxTimespan}"></TextBox>
                         <Label>分钟</Label>
                     </StackPanel>
+                </StackPanel>
                 </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,10,5,5">
