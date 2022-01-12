@@ -13,6 +13,8 @@ namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class ExtendLinesService
     {
+        double blaockTol = 200;
+        double lineMoveDis = 1000;
         double blockDistance = 600;
         double mergeAngle = Math.PI / 6;
         public List<ExtendLineModel> CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
@@ -21,6 +23,9 @@ namespace ThMEPLighting.FEI.EvacuationPath
             {
                 return new List<ExtendLineModel>();
             }
+
+            HandleCenterLine(ref xLanes, enterBlocks);
+            HandleCenterLine(ref yLanes, enterBlocks);
             List<Line> allLanes = new List<Line>(xLanes.SelectMany(x => x.Select(y => y)));
             allLanes.AddRange(yLanes.SelectMany(x => x.Select(y => y)));
 
@@ -88,6 +93,48 @@ namespace ThMEPLighting.FEI.EvacuationPath
             resLines.AddRange(connectIsolatedLane.ConnectIsolatedLane(resLines, allLineLanes, frame, holes));
 
             return resLines;
+        }
+
+        /// <summary>
+        /// 过滤中心线（防止端头线穿过了出入口块）
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="enterBlocks"></param>
+        private void HandleCenterLine(ref List<List<Line>> lanes, List<BlockReference> enterBlocks)
+        {
+            var handLines = new List<List<Line>>();
+            foreach (var lane in lanes)
+            {
+                var resLane = lane;
+                var firLane = resLane.First();
+                var orderBlockDis = enterBlocks.Where(x => firLane.GetClosestPointTo(x.Position, false).DistanceTo(x.Position) < blaockTol).ToList();
+                if (orderBlockDis.Count > 0)
+                {
+                    var dir = (firLane.EndPoint - firLane.StartPoint).GetNormal();
+                    var sPt = firLane.StartPoint.DistanceTo(orderBlockDis.First().Position) < firLane.EndPoint.DistanceTo(orderBlockDis.First().Position) ?
+                        firLane.StartPoint + lineMoveDis * dir : firLane.StartPoint;
+                    var ePt = firLane.EndPoint.DistanceTo(orderBlockDis.First().Position) < firLane.StartPoint.DistanceTo(orderBlockDis.First().Position) ?
+                        firLane.EndPoint - lineMoveDis * dir : firLane.EndPoint;
+                    resLane.Remove(firLane);
+                    resLane.Insert(0, new Line(sPt, ePt));
+                }
+
+                if (resLane.Count > 1)
+                {
+                    var lastLane = resLane.Last();
+                    var orderLastBlockDis = enterBlocks.Where(x => lastLane.GetClosestPointTo(x.Position, false).DistanceTo(x.Position) < blaockTol).ToList();
+                    if (orderLastBlockDis.Count > 0)
+                    {
+                        var dir = (lastLane.EndPoint - lastLane.StartPoint).GetNormal();
+                        var sPt = lastLane.StartPoint.DistanceTo(orderLastBlockDis.First().Position) < lastLane.EndPoint.DistanceTo(orderLastBlockDis.First().Position) ?
+                            lastLane.StartPoint + lineMoveDis * dir : lastLane.StartPoint;
+                        var ePt = lastLane.EndPoint.DistanceTo(orderLastBlockDis.First().Position) < lastLane.StartPoint.DistanceTo(orderLastBlockDis.First().Position) ?
+                            lastLane.EndPoint - lineMoveDis * dir : lastLane.EndPoint;
+                        resLane.Remove(lastLane);
+                        resLane.Add(new Line(sPt, ePt));
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -28,6 +28,7 @@ using Newtonsoft.Json.Linq;
 using System.IO;
 using ThMEPEngineCore.LaneLine;
 using ThMEPElectrical.Service;
+using System.Windows;
 
 namespace ThMEPElectrical
 {
@@ -90,6 +91,7 @@ namespace ThMEPElectrical
                     var lanes = GetLanes(plFrame, acdb, originTransformer);
                     if (lanes.Count <= 0)
                     {
+                        MessageBox.Show("未找到车道中心线！");
                         continue;
                     }
 
@@ -248,6 +250,11 @@ namespace ThMEPElectrical
 
                     //获取车道线
                     var lanes = GetLanes(pline.Key, acadDatabase, originTransformer);
+                    if (lanes.Count <= 0)
+                    {
+                        MessageBox.Show("未找到车道中心线！");
+                        continue;
+                    }
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);

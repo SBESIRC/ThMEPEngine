@@ -83,8 +83,10 @@ namespace ThMEPLighting.DSFEL.Service
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 getDoors = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
+                var oringinPolys = polyline.Clone() as Polyline;
+                originTransformer.Reset(oringinPolys);
                 var engine = new ThDoorBuilderEngine();
-                engine.Build(acdb.Database, polyline.Vertices());
+                engine.Build(acdb.Database, oringinPolys.Vertices());
                 var db3Doors = engine.Elements.Select(x => x.Outline).OfType<Polyline>().ToList();
                 db3Doors.ForEach(x => originTransformer.Transform(x));
                 foreach (var door in db3Doors)
