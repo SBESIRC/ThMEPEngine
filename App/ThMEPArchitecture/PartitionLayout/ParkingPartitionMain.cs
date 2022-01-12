@@ -108,8 +108,10 @@ namespace ThMEPArchitecture.PartitionLayout
         const double DisCarWidth = 2400;
         const double DisCarAndHalfLane = DisLaneWidth / 2 + DisCarLength;
         const double DisModulus = DisCarAndHalfLane * 2;
+        private static int MinCountAllowGVertCarOnLine = 4;
 
         const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
+        const double LenfthCanGAdjLaneConnectedDouble = DisLaneWidth + DisCarWidth * 6;
         const double ScareFactorForCollisionCheck = 0.99;
 
         public static int LayoutMode = ((int)LayoutDirection.HORIZONTAL);
@@ -191,7 +193,20 @@ namespace ThMEPArchitecture.PartitionLayout
         public void CheckObstacles()
         {
             Obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(Boundary).Cast<Polyline>().ToList();
-            //Obstacles=Obstacles.Where(e => e.Intersect(Boundary,Intersect.OnBothOperands).Count>0 || Boundary.IsPointInFast(e.GetCenter())).ToList();
+                //.Select(e =>
+                //{
+                //    try
+                //    {
+                //        var pl = (Polyline)(SplitCurve(e, Boundary).Where(t => Boundary.Contains(t.GetPointAtDist(t.GetLength() / 2))).First());
+                //        pl.Closed = true;
+                //        return pl;
+                //    }
+                //    catch
+                //    {
+                //        //The method "GetSplitCurve" is unstable.
+                //        return e;
+                //    }
+                //}).ToList();
         }
 
         /// <summary>
@@ -206,7 +221,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 GenerateCarSpots();
                 UndateDataToGenerateCarSpotsInMinPartitionUnits();
                 GenerateCarSpotsInMinPartitionUnits();
-                PostProcessCarSpots();
+                PostProcess();
             }
         }
 
@@ -498,10 +513,35 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <summary>
         /// Precess generated car spots finally.
         /// </summary>
-        private void PostProcessCarSpots()
+        private void PostProcess()
         {
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
+            RemoveInvalidPillars();
+        }
+
+        private void RemoveInvalidPillars()
+        {
+            CarSpatialIndex = new ThCADCoreNTSSpatialIndex(CarSpots.Select(e => e.ToNTSPolygon().ToDbMPolygon()).ToCollection());
+            Pillars = Pillars.Where(t =>
+              {
+                  var clone = t.Clone() as Polyline;
+                  clone.Scale(clone.GetRecCentroid(), 0.5);
+                  var cs = CarSpatialIndex.SelectCrossingPolygon(clone);
+                  if (cs.Count > 0)
+                  {
+                      clone.Dispose();
+                      return false;
+                  }
+
+                  if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength)
+                  {
+                      clone.Dispose();
+                      return false;
+                  }
+                  clone.Dispose();
+                  return true;
+              }).ToList();
         }
 
         /// <summary>

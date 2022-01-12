@@ -501,6 +501,12 @@ namespace ThMEPArchitecture.PartitionLayout
             return res;
         }
 
+        public static double ClosestPointInCurvesFast(Point3d pt, List<Polyline> crvs)
+        {
+            var pl = crvs.OrderBy(t => t.GetClosePoint(pt).DistanceTo(pt)).First();
+            return pl.GetClosePoint(pt).DistanceTo(pt);
+        }
+
         public static double ClosestPointInCurves(Point3d pt, List<Polyline> crvs)
         {
             if (crvs.Count == 0) return 0;
@@ -643,12 +649,15 @@ namespace ThMEPArchitecture.PartitionLayout
             }
             return s;
         }
+
         public static string AnalysisPolyList(List<Polyline> pls)
         {
             string s = "";
             foreach (var e in pls)
             {
-                s += AnalysisPoly(e) + ";";
+                s += AnalysisPoly(e);
+                s.Remove(s.Length - 1);
+                s += ";";
             }
             return s;
         }
