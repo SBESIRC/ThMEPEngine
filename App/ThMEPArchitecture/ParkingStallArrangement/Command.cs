@@ -75,7 +75,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public void Run(AcadDatabase acadDatabase)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
-            if(!rstDataExtract)
+            if (outerBrder.SegLines.Count == 0)//分割线数目为0
+            {
+                Active.Editor.WriteMessage("分割线不存在！");
+                return;
+            }
+            if (!rstDataExtract)
             {
                 return;
             }
