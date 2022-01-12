@@ -48,12 +48,14 @@ namespace ThMEPHVAC.Model
                 AutoDistributePort();
             else if (portParam.genStyle == GenerationStyle.GenerationWithPortVolume)
             {
+                //var conns = DeleteOrgGraph();
                 // 1.风口上带风量
                 CountEndlinePortAirVolume();
                 AccumMainDuctAirVolume();
                 SetFirstDuctSize();
                 SetMainDuctSize();
                 SetEndlinePortDuctSize();
+                //ThDuctPortsDrawService.ClearGraphs(conns);
             }
             else if (portParam.genStyle == GenerationStyle.GenerationByPort)
             {
@@ -785,12 +787,66 @@ namespace ThMEPHVAC.Model
             }
             return dicSmokeZone;
         }
+        private void MergeMainLine(ThCADCoreNTSSpatialIndex index, DBObjectCollection lines)
+        {
+            // 合并主管段
+            var firstLine = lines[lines.Count - 1] as Line;
+            var pl = ThMEPHVACService.CreateDetector(firstLine.StartPoint);
+            var res = index.SelectCrossingPolygon(pl);
+            if (res.Count == 2)
+            {
+                var l1 = res[0] as Line;
+                var l2 = res[1] as Line;
+                var v1 = ThMEPHVACService.GetEdgeDirection(l1);
+                var v2 = ThMEPHVACService.GetEdgeDirection(l2);
+                if (ThMEPHVACService.IsCollinear(v1, v2))
+                {
+                    int idx = mainLines.IndexOf(l1);
+                    mainLines.Remove(l1);
+                    mainLines.Remove(l2);
+                    ThMEPHVACService.GetLongestDis(l1, l2, out Point3d p1, out Point3d p2);
+                    // 以v1的方向作为新造出线的方向
+                    var dir = (p2 - p1).GetNormal();
+                    if (dir.IsEqualTo(v1))
+                        mainLines.Insert(idx, new Line(p1, p2));
+                    else
+                        mainLines.Insert(idx, new Line(p2, p1));
+                }
+            }
+        }
+        private void ExcludeNoPortEndline()
+        {
+            var filter = new List<DBObjectCollection>();
+            var index = new ThCADCoreNTSSpatialIndex(mainLines);
+            foreach (DBObjectCollection lines in endLines)
+            {
+                var t = new DBObjectCollection();
+                foreach (Line l in lines)
+                {
+                    var pl = CreateLineBound(l);
+                    var res = portIndex.SelectCrossingPolygon(pl);
+                    if (res.Count > 0)
+                        foreach (Line line in lines)
+                            t.Add(line);
+                    else
+                        MergeMainLine(index, lines);
+                    break;  //第一段为最末端线，如果最末端线不交风口，则删掉整段endline
+                }
+                if (t.Count > 0)
+                    filter.Add(t);
+            }
+            foreach (DBObjectCollection lines in endLines)
+                lines.Clear();
+            endLines.Clear();
+            endLines = filter;
+        }
 
         private void CountEndlinePortAirVolume()
         {
             var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out dicPlToAirVolume);
             portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
             connPort = new List<int>();
+            ExcludeNoPortEndline();
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -816,6 +872,7 @@ namespace ThMEPHVAC.Model
                 endLinesInfos.Add(new EndlineInfo() { endlines = endline, totalAirVolume = totalAirVolume });
             }
         }
+
         private Polyline CreateLineBound(Line l)
         {
             if (portParam.param.portName.Contains("侧"))

@@ -236,6 +236,14 @@ namespace ThMEPHVAC.Model
             return ((sp1.IsEqualTo(sp2, pointTor) && ep1.IsEqualTo(ep2, pointTor)) ||
                     (sp1.IsEqualTo(ep2, pointTor) && ep1.IsEqualTo(sp2, pointTor)));
         }
+        public static void GetLongestDis(Line l1, Line l2, out Point3d p1, out Point3d p2)
+        {
+            GetLongestDis(l1.StartPoint,
+                          l1.EndPoint,
+                          l2.StartPoint,
+                          l2.EndPoint,
+                          out p1, out p2);
+        }
         public static void GetLongestDis(Point3d sp1, Point3d ep1, Point3d sp2, Point3d ep2, out Point3d p1, out Point3d p2)
         {
             var sp_2D_1 = sp1.ToPoint2D();
