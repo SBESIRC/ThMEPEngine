@@ -787,7 +787,7 @@ namespace ThMEPWSS.Uitl
         public double X;
         public double Y;
         public double Radius;
-
+        public bool IsValid => Radius > 0 && !double.IsNaN(X) && !double.IsNaN(Y);
         public GCircle(double x, double y, double radius)
         {
             X = x;
