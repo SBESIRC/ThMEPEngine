@@ -99,6 +99,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 {
                     results.Add(Tuple.Create(l, l.EndPoint));
                 }
+                else if(startObjs.Count == 0 && endObjs.Count ==0)
+                {
+                    results.Add(Tuple.Create(l, l.StartPoint));
+                }
             });
             return results;
         }
