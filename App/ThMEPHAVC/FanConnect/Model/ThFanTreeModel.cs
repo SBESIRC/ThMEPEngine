@@ -313,7 +313,7 @@ namespace ThMEPHVAC.FanConnect.Model
                 foreach (var f in fans)
                 {
                     var distance = node.Item.CntPoint.DistanceTo(f.FanPoint);
-                    if (distance < 10.0)
+                    if (distance < 200.0)
                     {
                         node.Item.CoolCapa = f.CoolCapa;
                         node.Item.CoolFlow = f.CoolFlow;
