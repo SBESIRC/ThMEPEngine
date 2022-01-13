@@ -196,6 +196,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         protected DBObjectCollection BreakWire(DBObjectCollection objs, Matrix3d currentUserCoordinateSystem, double length)
         {
+            // 对存在交叉的线路进行短线，更偏向于Y轴的线路被更偏向于X轴的线路打断，短线间距300（弧线不打断）
             var breakService = new ThBreakLineService(currentUserCoordinateSystem, length);
             return breakService.Break(objs);
         }

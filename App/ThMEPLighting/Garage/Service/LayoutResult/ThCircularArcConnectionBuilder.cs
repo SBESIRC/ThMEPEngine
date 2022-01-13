@@ -51,6 +51,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);
             Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength);
         }
 
         private void BuildDoubleRow()
@@ -83,8 +84,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = Wires.Union(jumpWireRes);
             Wires = Wires.Union(crossJumpWireRes);
             Wires = Wires.Union(threewayJumpWireRes);
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
         }
 
         private DBObjectCollection CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
