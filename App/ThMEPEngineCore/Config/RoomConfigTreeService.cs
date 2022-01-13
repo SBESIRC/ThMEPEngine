@@ -18,8 +18,10 @@ namespace ThMEPEngineCore.Config
             if (RoomInfoMappingTable == null) { return resRoomTree; }
 
             List<string> levelColumns = new List<string>();
+            List<string> tagColumns = new List<string>();
             string synonym = "同义词";
             string tags = "标签";
+            string level = "级";
             foreach (DataColumn column in RoomInfoMappingTable.Columns)
             {
                 if (column.ColumnName.Contains(synonym))
@@ -30,9 +32,13 @@ namespace ThMEPEngineCore.Config
                 {
                     tags = column.ColumnName;
                 }
-                else
+                else if (column.ColumnName.Contains(level))
                 {
                     levelColumns.Add(column.ColumnName);
+                }
+                else
+                {
+                    tagColumns.Add(column.ColumnName);
                 }
             }
 
@@ -53,6 +59,15 @@ namespace ThMEPEngineCore.Config
                         if (!string.IsNullOrEmpty(row[tags].ToString()))
                         {
                             roomTableTree.tags.AddRange(row[tags].ToString().Split('；'));
+                        }
+                        for (int t = 0; t < tagColumns.Count; t++)
+                        {
+                            TagTree tagTree = new TagTree()
+                            {
+                                TagName = tagColumns[t],
+                                TagValue = row[tagColumns[t]].ToString(),
+                            };
+                            roomTableTree.tagTrees.Add(tagTree);
                         }
 
                         if (j == 0)
@@ -129,6 +144,24 @@ namespace ThMEPEngineCore.Config
         }
 
         /// <summary>
+        /// 查找特定值标签的房间名
+        /// </summary>
+        /// <param name="roomTree"></param>
+        /// <param name="tagName"></param>
+        /// <param name="tagValue"></param>
+        /// <returns></returns>
+        public static List<string> CalRoomLstByTag(this List<RoomTableTree> roomTree, string tagName, string tagValue)
+        {
+            List<string> roomInfo = new List<string>();
+            foreach (var treeNode in roomTree)
+            {
+                roomInfo.AddRange(GetTagtreeNodeInfo(treeNode, tagName, tagValue));
+            }
+
+            return roomInfo;
+        }
+
+        /// <summary>
         /// 判断是否是公共区域
         /// </summary>
         /// <param name="roomTree"></param>
@@ -176,7 +209,7 @@ namespace ThMEPEngineCore.Config
                     return treeNode.tags;
                 }
 
-               else if (thisNode.child.Count > 0)
+                else if (thisNode.child.Count > 0)
                 {
                     roomTages = GetSingleRoomTag(thisNode.child, roomName);
                     if (roomTages.Count > 0)
@@ -195,7 +228,7 @@ namespace ThMEPEngineCore.Config
         /// <param name="roomTree"></param>
         /// <param name="roomName"></param>
         /// <returns></returns>
-        public static List<string> getRoomTag(this List<RoomTableTree> roomTree, string roomName)
+        public static List<string> GetRoomTag(this List<RoomTableTree> roomTree, string roomName)
         {
             List<string> roomTages = new List<string>();
             List<string> roomNameList = roomName.Split(';').ToList();
@@ -229,7 +262,7 @@ namespace ThMEPEngineCore.Config
         }
 
         /// <summary>
-        /// 判断两个房间名是否相等
+        /// 判断两个房间名是否相等(b房间名模糊查询等于A房间名)
         /// </summary>
         /// <param name="roomA"></param>
         /// <param name="roomB"></param>
@@ -341,6 +374,34 @@ namespace ThMEPEngineCore.Config
 
             return nodeInfos;
         }
+
+        /// <summary>
+        /// 判断是否包含这个节点
+        /// </summary>
+        /// <param name="treeNode"></param>
+        /// <param name="tagName"></param>
+        /// <param name="tagValue"></param>
+        /// <returns></returns>
+        private static List<string> GetTagtreeNodeInfo(RoomTableTree treeNode, string tagName, string tagValue)
+        {
+            List<string> nodeInfos = new List<string>();
+            var tagTree = treeNode.tagTrees.FirstOrDefault(x => x.TagName == tagName);
+            if (tagTree != null)
+            {
+                if (tagTree.TagValue == tagValue)
+                {
+                    nodeInfos.Add(treeNode.nodeName);
+                    nodeInfos.AddRange(treeNode.synonym);
+                }
+            }
+
+            foreach (var tn in treeNode.child)
+            {
+                nodeInfos.AddRange(GetTagtreeNodeInfo(tn, tagName, tagValue));
+            }
+
+            return nodeInfos;
+        }
     }
 
     public class RoomTableTree
@@ -366,8 +427,26 @@ namespace ThMEPEngineCore.Config
         public List<string> tags = new List<string>();
 
         /// <summary>
+        /// 标签
+        /// </summary>
+        public List<TagTree> tagTrees = new List<TagTree>();
+
+        /// <summary>
         /// 下一层数据
         /// </summary>
         public List<RoomTableTree> child = new List<RoomTableTree>();
+    }
+
+    public class TagTree
+    {
+        /// <summary>
+        /// 标签名
+        /// </summary>
+        public string TagName { get; set; }
+
+        /// <summary>
+        /// 标签值
+        /// </summary>
+        public string TagValue { get; set; }
     }
 }

@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Electrical;
 using ThMEPLighting.DSFEL.ExitService;
 using ThMEPLighting.DSFEL.Model;
 using ThMEPLighting.DSFEL.Service;
@@ -15,11 +16,12 @@ namespace ThMEPLighting.DSFEL
 {
     public class LayoutService
     {
-        public List<RoomInfoModel> LayoutFELService(List<ThIfcRoom> roomInfo, List<Polyline> door, List<Line> centerLines, List<Polyline> holes, ThMEPOriginTransformer originTransformer)
+        public List<RoomInfoModel> LayoutFELService(List<ThIfcRoom> roomInfo, List<Polyline> door, List<Line> centerLines, List<Polyline> holes,
+            ThEStoreys floor, ThMEPOriginTransformer originTransformer)
         {
             //计算块出口
             CalExitService calExitService = new CalExitService();
-            var exitInfo = calExitService.CalExit(roomInfo, door);
+            var exitInfo = calExitService.CalExit(roomInfo, door, floor);
             
             //创建疏散路径
             CreateEvacuationPathService evacuationPath = new CreateEvacuationPathService();

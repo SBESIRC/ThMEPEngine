@@ -12,6 +12,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPLighting.DSFEL.Service
 {
@@ -272,6 +273,26 @@ namespace ThMEPLighting.DSFEL.Service
             }
 
             return blocks;
+        }
+
+        /// <summary>
+        /// 获取楼层信息
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public ThEStoreys GetFloorInfo(ObjectIdCollection objectId)
+        {
+            var storeysRecognitionEngine = new ThEStoreysRecognitionEngine();
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                storeysRecognitionEngine.RecognizeMS(db.Database, objectId);
+            }
+            if (storeysRecognitionEngine.Elements.Count > 0)
+            {
+                return storeysRecognitionEngine.Elements[0] as ThEStoreys;
+            }
+
+            return null;
         }
 
         /// <summary>

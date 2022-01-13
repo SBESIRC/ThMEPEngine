@@ -11,6 +11,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Electrical;
 using ThMEPLighting.DSFEL.Model;
 
 namespace ThMEPLighting.DSFEL.ExitService
@@ -26,11 +27,11 @@ namespace ThMEPLighting.DSFEL.ExitService
         /// </summary>
         /// <param name="roomInfo"></param>
         /// <param name="doors"></param>
-        public List<ExitModel> CalExit(List<ThIfcRoom> roomInfo, List<Polyline> doors)
+        public List<ExitModel> CalExit(List<ThIfcRoom> roomInfo, List<Polyline> doors, ThEStoreys floor)
         {
             var configData = GetExcelContent(roomConfigUrl);
             var roomTree = RoomConfigTreeService.CreateRoomTree(configData.Tables[roomConfidName]);
-            DSFELConfigCommon dSFELConfig = new DSFELConfigCommon(roomTree);
+            DSFELConfigCommon dSFELConfig = new DSFELConfigCommon(roomTree, floor);
 
             List<ExitModel> exitModels = new List<ExitModel>();
             List<Polyline> bufferDoors = doors.Select(x => x.Buffer(tol)[0] as Polyline).ToList();
