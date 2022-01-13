@@ -157,6 +157,7 @@
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
     <Compile Include="Garage\Service\ThDirectionLightGraphService.cs" />
     <Compile Include="Garage\Service\ThDxLineDirectionTransfer.cs" />
+    <Compile Include="Garage\Service\ThShortCenterLineFilter.cs" />
     <Compile Include="Garage\Service\ThFindCenterPairService.cs" />
     <Compile Include="Garage\Service\ThLightSideLineHandler.cs" />
     <Compile Include="Garage\Service\ThMergeLightLineService.cs" />
