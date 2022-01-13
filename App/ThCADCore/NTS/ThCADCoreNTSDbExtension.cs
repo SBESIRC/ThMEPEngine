@@ -171,12 +171,6 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        private static bool IsClosed(Polyline frame, double tolerance)
-        {
-            // 支持真实闭合或视觉闭合
-            return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= tolerance);
-        }
-
         public static LineString ToNTSLineString(this Polyline poly)
         {
             var points = new List<Coordinate>();
@@ -191,8 +185,11 @@ namespace ThCADCore.NTS
             // 对于处于“闭合”状态的多段线，要保证其首尾点一致
             if (points[0].Equals2D(points[points.Count - 1], ThCADCoreNTSService.Instance.AcadGlobalTolerance))
             {
-                points.RemoveAt(points.Count - 1);
-                points.Add(points[0]);
+                if (points.Count > 1)
+                {
+                    points.RemoveAt(points.Count - 1);
+                    points.Add(points[0]);
+                }
             }
             else
             {
