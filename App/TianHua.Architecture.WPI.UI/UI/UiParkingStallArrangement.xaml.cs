@@ -54,7 +54,7 @@ namespace TianHua.Architecture.WPI.UI.UI
             }
             else
             {
-                using (var cmd = new ThParkingStallArrangementCmd(_ViewModel))
+                using (var cmd = new WithoutSegLineCmd(_ViewModel))
                 {
                     cmd.Execute();
                 }

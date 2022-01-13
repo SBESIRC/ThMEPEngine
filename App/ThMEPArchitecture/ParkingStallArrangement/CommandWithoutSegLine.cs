@@ -86,7 +86,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             double threshSecond = 20;
             int throughBuildNums = 0;
 
-            var splitRst = Dfs.dfsSplitWithoutSegline(area, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex, buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
+            var splitRst = Dfs.dfsSplitWithoutSegline(area, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex, 
+                buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
             if(!splitRst)
             {
                 return;
