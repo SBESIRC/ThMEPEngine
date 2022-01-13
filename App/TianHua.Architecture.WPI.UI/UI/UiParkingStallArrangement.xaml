@@ -21,7 +21,8 @@
                 <Label FontSize="16" FontWeight="Bold">命令模式：</Label>
                 <StackPanel Orientation="Horizontal">
                     <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">无迭代速排</RadioButton>
-                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">迭代排布</RadioButton>
+                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">手动分割线迭代排布</RadioButton>
+                    <RadioButton GroupName="ModeGroup" IsChecked="{Binding CommandType, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">自动分割线迭代排布</RadioButton>
                 </StackPanel>
             </StackPanel>
             <StackPanel Orientation="Vertical">
@@ -88,7 +89,7 @@
                     <Label FontSize="16" FontWeight="Bold">运算参数设置：</Label>
                 </StackPanel>
             </StackPanel>
-            <StackPanel Orientation="Vertical" IsEnabled="{Binding IsComputationParaSetupEnabled}">
+            <StackPanel Orientation="Vertical" >
                 <StackPanel>
                     <StackPanel >
                         <Label>方向：</Label>
@@ -100,6 +101,7 @@
                     </StackPanel>
                     <Label></Label>
                 </StackPanel>
+                <StackPanel IsEnabled="{Binding IsComputationParaSetupEnabled}">
                 <StackPanel>
                     <StackPanel >
                         <Label>速度：</Label>
@@ -123,6 +125,7 @@
                         <Label>分钟</Label>
                     </StackPanel>
                 </StackPanel>
+                </StackPanel>
             </StackPanel>
             <StackPanel Margin="0,10,5,5">
                 <StackPanel Orientation="Horizontal">
@@ -130,6 +133,7 @@
                     <Button Name="btnRun" Width="40" FontSize="16" FontWeight="Bold" Click="btnRun_Click">运行</Button>
                     <Label></Label>
                     <Button Name="btnShowLog" Width="70" FontSize="16" FontWeight="Bold" Click="btnShowLog_Click">显示日志</Button>
+                    <Label></Label>
                 </StackPanel>
             </StackPanel>
         </StackPanel>

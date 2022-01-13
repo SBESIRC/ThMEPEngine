@@ -151,7 +151,7 @@ namespace ThMEPHVAC.FanConnect.Service
                 {
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
                     {
-                        markPt = markPt - direct * (300.0 * 3 + 140);
+                        markPt = markPt - direct * (300.0 * 2 + 140);
                     }
                     else
                     {
@@ -185,46 +185,58 @@ namespace ThMEPHVAC.FanConnect.Service
         public void UpdateMark(ThFanTreeNode<ThFanPointModel> node, BlockReference blk, string coolPipe, string hotPipe, string strMarkHeight)
         {
             var effName = blk.GetEffectiveName();
-            if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
+            if(ConfigInfo.WaterSystemConfigInfo.SystemType == 0)
             {
-                if (effName == "AI-水管多排标注(2排)")
+                if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 0)
                 {
-                    string strchs = "CHS " + coolPipe + strMarkHeight;
-                    string strchr = "CHR " + hotPipe + strMarkHeight;
-                    Dictionary<string, string> attNameValues = new Dictionary<string, string>();
-                    attNameValues.Add("水管标注1", strchs);
-                    attNameValues.Add("水管标注2", strchr);
-                    blk.ObjectId.UpdateAttributesInBlock(attNameValues);
+                    if (effName == "AI-水管多排标注(2排)")
+                    {
+                        string strchs = "CHS " + coolPipe + strMarkHeight;
+                        string strchr = "CHR " + hotPipe + strMarkHeight;
+                        Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                        attNameValues.Add("水管标注1", strchs);
+                        attNameValues.Add("水管标注2", strchr);
+                        blk.ObjectId.UpdateAttributesInBlock(attNameValues);
+                    }
+                    else
+                    {
+                        blk.UpgradeOpen();
+                        blk.Erase();
+                        blk.DowngradeOpen();
+                        CoolHotMark(node, coolPipe, hotPipe, strMarkHeight);
+                    }
                 }
-                else
+                else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
                 {
-                    blk.UpgradeOpen();
-                    blk.Erase();
-                    blk.DowngradeOpen();
-                    CoolHotMark(node, coolPipe, hotPipe, strMarkHeight);
+                    if (effName == "AI-水管多排标注(4排)")
+                    {
+                        string strcs = "CS " + coolPipe + strMarkHeight;
+                        string strcr = "CR " + coolPipe + strMarkHeight;
+                        string strhs = "HS " + hotPipe + strMarkHeight;
+                        string strhr = "HR " + hotPipe + strMarkHeight;
+                        Dictionary<string, string> attNameValues = new Dictionary<string, string>();
+                        attNameValues.Add("水管标注1", strcs);
+                        attNameValues.Add("水管标注2", strcr);
+                        attNameValues.Add("水管标注3", strhs);
+                        attNameValues.Add("水管标注4", strhr);
+                        blk.ObjectId.UpdateAttributesInBlock(attNameValues);
+                    }
+                    else
+                    {
+                        blk.UpgradeOpen();
+                        blk.Erase();
+                        blk.DowngradeOpen();
+                        CoolHotMark(node, coolPipe, hotPipe, strMarkHeight);
+                    }
                 }
             }
-            else if (ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
+            else if(ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统，如果之前有水管多排标注，全部删除
             {
-                if (effName == "AI-水管多排标注(4排)")
-                {
-                    string strcs = "CS " + coolPipe + strMarkHeight;
-                    string strcr = "CR " + coolPipe + strMarkHeight;
-                    string strhs = "HS " + hotPipe + strMarkHeight;
-                    string strhr = "HR " + hotPipe + strMarkHeight;
-                    Dictionary<string, string> attNameValues = new Dictionary<string, string>();
-                    attNameValues.Add("水管标注1", strcs);
-                    attNameValues.Add("水管标注2", strcr);
-                    attNameValues.Add("水管标注3", strhs);
-                    attNameValues.Add("水管标注4", strhr);
-                    blk.ObjectId.UpdateAttributesInBlock(attNameValues);
-                }
-                else
+                if (effName == "AI-水管多排标注(2排)" || effName == "AI-水管多排标注(4排)")
                 {
                     blk.UpgradeOpen();
                     blk.Erase();
                     blk.DowngradeOpen();
-                    CoolHotMark(node, coolPipe, hotPipe, strMarkHeight);
                 }
             }
         }
@@ -517,7 +529,7 @@ namespace ThMEPHVAC.FanConnect.Service
             //遍历子结点
             foreach (var child in node.Children)
             {
-                BianLiTree(child);
+                BianLiTree(child,ref marks);
             }
             if (node.Parent == null)
             {
@@ -535,6 +547,7 @@ namespace ThMEPHVAC.FanConnect.Service
                     UpdateNodeMark(child, ref marks);
                 }
             }
+
             ThQueryDNService queryDNServiece = new ThQueryDNService();
             //父结点冷水管管径
             var parentCoolPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Parent.Item.CoolFlow);
@@ -625,18 +638,10 @@ namespace ThMEPHVAC.FanConnect.Service
             var curHotPipe = queryDNServiece.QuerySupplyPipeDN(ConfigInfo.WaterSystemConfigInfo.FrictionCoeff, node.Item.HotFlow);
             //当前结点冷凝水管管径
             var curCondPipe = queryDNServiece.QueryCondPipeDN(node.Item.CoolCapa);
-            if (ConfigInfo.WaterSystemConfigInfo.SystemType == 0)//水系统
-            {
-                //标记冷热水管
-                UpdateCoolHotMark(node, ref marks, curCoolPipe, curHotPipe, strMarkHeight);
-                //标记冷凝水管
-                UpdateCondMark(node, ref marks, curCondPipe);
-            }
-            else if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
-            {
-                //标记冷凝水管
-                UpdateCondMark(node, ref marks, curCondPipe);
-            }
+            //标记冷热水管
+            UpdateCoolHotMark(node, ref marks, curCoolPipe, curHotPipe, strMarkHeight);
+            //标记冷凝水管
+            UpdateCondMark(node, ref marks, curCondPipe);
         }
         public void UpdateCoolHotMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks, string coolPipe, string hotPipe, string strMarkHeight)
         {
@@ -653,8 +658,11 @@ namespace ThMEPHVAC.FanConnect.Service
             var coolHotMarkes = new List<Entity>();
             foreach (var n in connectChild)
             {
-                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
-                coolHotMarkes.AddRange(FindMarkFromLine(line, ref marks));
+                if(n.Parent != null)
+                {
+                    var line = new Line(n.Item.CntPoint, n.Parent.Item.CntPoint);
+                    coolHotMarkes.AddRange(FindMarkFromLine(line, ref marks));
+                }
             }
             connectChild = connectChild.OrderBy(o => DistanceTo(o, o.Parent)).ToList();
             //判断该结点是否有mark
@@ -662,7 +670,7 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 var firstMark = coolHotMarkes.First();
                 coolHotMarkes.Remove(firstMark);
-                UpdateMark(node, firstMark as BlockReference, coolPipe, hotPipe, strMarkHeight);
+                UpdateMark(connectChild.Last(), firstMark as BlockReference, coolPipe, hotPipe, strMarkHeight);
                 foreach (var mark in coolHotMarkes)
                 {
                     mark.UpgradeOpen();
@@ -681,7 +689,7 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void UpdateCondMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks, string condPipe)
         {
-            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe  || node.Item.IsCondMarked)
             {
                 return;
             }
@@ -694,10 +702,13 @@ namespace ThMEPHVAC.FanConnect.Service
             var condMarkes = new List<Entity>();
             foreach (var n in connectChild)
             {
-                var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
-                condMarkes.AddRange(FindTextFromLine(line, ref marks));
+                if (n.Parent != null)
+                {
+                    var line = new Line(n.Item.CntPoint, n.Parent.Item.CntPoint);
+                    condMarkes.AddRange(FindTextFromLine(line, ref marks));
+                }
             }
-            
+            connectChild = connectChild.OrderBy(o => DistanceTo(o, o.Parent)).ToList();
             if (condMarkes.Count > 0)//如果有，判断是否可以使用，如果不能使用删除，重新生成
             {
                 var firstMark = condMarkes.First();
@@ -712,7 +723,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             else//如果没有，新生成一个
             {
-                CondMark(node, condPipe);
+                CondMark(connectChild.Last(), condPipe);
             }
             foreach (var n in connectChild)
             {
@@ -721,6 +732,10 @@ namespace ThMEPHVAC.FanConnect.Service
         } 
         public void RemoveCoolHotMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
         {
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe || node.Item.IsCoolHotMarked)
+            {
+                return;
+            }
             var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
             var coolHotMarkes = FindMarkFromLine(line, ref marks);
             foreach (var mark in coolHotMarkes)
@@ -732,6 +747,10 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public void RemoveCondMark(ThFanTreeNode<ThFanPointModel> node, ref List<Entity> marks)
         {
+            if (!ConfigInfo.WaterSystemConfigInfo.IsCWPipe || node.Item.IsCondMarked)
+            {
+                return;
+            }
             var line = new Line(node.Item.CntPoint, node.Parent.Item.CntPoint);
             var condMarkes = FindTextFromLine(line, ref marks);
             foreach (var mark in condMarkes)

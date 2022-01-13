@@ -905,13 +905,13 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
             }
 
-            var extendPt = edge.GetClosestPointTo(targetLine.EndPoint, true);
-            if (Math.Abs(edge.LineDirection().DotProduct(targetLine.LineDirection())) < 0.02
-                && (extendPt.DistanceTo(edge.StartPoint) < 150.0
-                    || extendPt.DistanceTo(edge.EndPoint) < 150.0))
-            {
-                return false;
-            }
+            //var extendPt = edge.GetClosestPointTo(targetLine.EndPoint, true);
+            //if (Math.Abs(edge.LineDirection().DotProduct(targetLine.LineDirection())) < 0.02
+            //    && (extendPt.DistanceTo(edge.StartPoint) < 150.0
+            //        || extendPt.DistanceTo(edge.EndPoint) < 150.0))
+            //{
+            //    return false;
+            //}
 
             var rowConn = rowConnection
                 .Where(row => row.Base.StartPoint == targetLine.StartPoint

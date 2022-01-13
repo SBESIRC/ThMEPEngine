@@ -12,12 +12,13 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public static class ParameterConvert
     {
-        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, Logger logger = null)
+        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, ParkingStallArrangementViewModel vm = null, Logger logger = null)
         {
             int index = layoutPara.AreaNumber[j];
             layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
@@ -28,10 +29,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             layoutPara.SubAreaId2SegsDic.TryGetValue(index, out List<Line> inilanes);
             List<Polyline> buildingBoxes = new List<Polyline>();
             var bound = GeoUtilities.JoinCurves(outerWallLines, inilanes)[0];
-            
-            for(int i = 0; i < orgBuildingBoxes.Count; ++i)
+
+            for (int i = 0; i < orgBuildingBoxes.Count; ++i)
             {
-                if(!bound.Intersects(orgBuildingBoxes[i]))
+                if (!bound.Intersects(orgBuildingBoxes[i]))
                 {
                     buildingBoxes.Add(orgBuildingBoxes[i]);
                 }
@@ -73,7 +74,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             fs1.Close();
 #endif
             inilanes = inilanes.Distinct().ToList();
-            partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes);
+            partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes, vm);
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
             partition.ObstaclesMPolygonSpatialIndex = ObstaclesMpolygonSpatialIndex;
             partition.CheckObstacles();
@@ -81,7 +82,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             if (partition.Validate())
             {
                 //partition.Dispose();
-                return true; 
+                return true;
             }
             else
             {

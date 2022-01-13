@@ -1,0 +1,39 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ThMEPArchitecture.ParkingStallArrangement.Method;
+
+namespace ThMEPArchitecture.ParkingStallArrangement.Model
+{
+    public class SegLineEx : IEquatable<SegLineEx>
+    {
+        public Line Segline { get; set; }
+        public double MaxVal { get; set; }
+        public double MinVal { get; set; }
+
+        public SegLineEx(Line segline, double maxVal, double minVal)
+        {
+            Segline = new Line(segline.StartPoint, segline.EndPoint);
+            MaxVal = maxVal;
+            MinVal = minVal;
+        }
+
+        public SegLineEx Clone()
+        {
+            return new SegLineEx(this.Segline, this.MaxVal, this.MinVal);
+        }
+
+        public override int GetHashCode()
+        {
+            return Segline.GetHashCode();
+        }
+        public bool Equals(SegLineEx other)
+        {
+            return Segline.EqualsTo(other.Segline);
+        }
+
+    }
+}

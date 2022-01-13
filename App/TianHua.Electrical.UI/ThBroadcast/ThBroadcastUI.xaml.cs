@@ -57,7 +57,7 @@ namespace TianHua.Electrical.UI.ThBroadcast
 
         private void btnGetBlindArea_Click(object sender, RoutedEventArgs e)
         {
-            ThElectricalUIService.Instance.thGBParameter.BlindRadius = double.Parse(blindArea.ToString());
+            ThElectricalUIService.Instance.thGBParameter.BlindRadius = double.Parse(blindArea.Text.ToString());
             CommandHandlerBase.ExecuteFromCommandLine(false, "THGBMQ");
         }
 

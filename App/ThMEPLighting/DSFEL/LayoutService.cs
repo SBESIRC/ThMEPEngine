@@ -30,8 +30,8 @@ namespace ThMEPLighting.DSFEL
             PrintBlock(exitInfo);
 
             //打印路径
-            PrintPathService printService = new PrintPathService();
-            printService.PrintPath(evaPaths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
+            //PrintPathService printService = new PrintPathService();
+            //printService.PrintPath(evaPaths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
 
             return evaPaths;
         }

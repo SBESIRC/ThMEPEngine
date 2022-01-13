@@ -40,8 +40,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         {
             CommandName = "-THDXQYFG2";
             ActionName = "生成";
-            ParameterViewModel = new ParkingStallArrangementViewModel();
             _CommandMode = CommandMode.WithoutUI;
+            ParameterViewModel = new ParkingStallArrangementViewModel();
         }
 
         public GenerateParkingStallDirectlyCmd(ParkingStallArrangementViewModel vm)
@@ -80,6 +80,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public void Run(AcadDatabase acadDatabase)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            if (outerBrder.SegLines.Count == 0)//分割线数目为0
+            {
+                Active.Editor.WriteMessage("分割线不存在！");
+                return;
+            }
             if (!rstDataExtract)
             {
                 return;
@@ -163,7 +168,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     continue;
                 }
                 ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel, Logger))
                 {
                     try
                     {
@@ -178,26 +183,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             layoutPara.Dispose();
             Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
-        }
-
-        private static Point3dCollection SelectAreas()
-        {
-            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
-            {
-                try
-                {
-                    pc.Collect();
-                }
-                catch
-                {
-                    return new Point3dCollection();
-                }
-                Point3dCollection winCorners = pc.CollectedPoints;
-                var frame = new Polyline();
-                frame.CreateRectangle(winCorners[0].ToPoint2d(), winCorners[1].ToPoint2d());
-                frame.TransformBy(Active.Editor.UCS2WCS());
-                return frame.Vertices();
-            }
         }
     }
 }

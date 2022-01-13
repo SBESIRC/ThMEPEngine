@@ -16,4 +16,5 @@
 	<module path="ThMEPHVAC.dll" />
 	<module path="ThMEPElectrical.dll" />
 	<module path="ThMEPWSS.dll" />
+	<module path="ThMEPArchitecture.dll" />
 </project>

@@ -1713,6 +1713,23 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             }
                             else if (ptsTemp[ptsTemp.Count - 1].Item2
                                 && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02
+                                && closePt.DistanceTo(ptsTemp[ptsTemp.Count - 2].Item1) > scrLine.Length
+                                && (closePt.DistanceTo(row.OrderDict[-2][j - 1]) < 10.0
+                                    || closePt.DistanceTo(row.OrderDict[-2][j]) < 10.0))
+                            {
+                                var closePtTidal = closePt - scrLine.LineDirection() * connTolerance;
+                                var extendLine = new Line(ptsTemp[ptsTemp.Count - 1].Item1, closePtTidal);
+                                row.ConnectLines.Add(extendLine);
+
+                                var firstPtTiadl = row.OrderDict[-2][j - 1] - scrLine.LineDirection() * connTolerance;
+                                row.ConnectLines.Add(new Line(extendLine.GetClosestPointTo(firstPtTiadl, false), firstPtTiadl));
+                                row.ConnectLines.Add(new Line(firstPtTiadl, row.OrderDict[-2][j - 1]));
+                                var secondPtTiald = row.OrderDict[-2][j] - scrLine.LineDirection() * connTolerance;
+                                row.ConnectLines.Add(new Line(extendLine.GetClosestPointTo(secondPtTiald, false), secondPtTiald));
+                                row.ConnectLines.Add(new Line(secondPtTiald, row.OrderDict[-2][j]));
+                            }
+                            else if (ptsTemp[ptsTemp.Count - 1].Item2
+                                && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) < 0.02
                                 && closePt.DistanceTo(ptsTemp[ptsTemp.Count - 2].Item1) < connTolerance / 2)
                             {
                                 var scrCenter = scrLine.GetCenterPoint();
@@ -2409,7 +2426,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 continue;
                             }
                             // 判断是否撞障
-                            if(crossLine.Length > 10.0)
+                            if (crossLine.Length > 10.0)
                             {
                                 var lineBuffer = crossLine.ExtendLine(-10.0).Buffer(1.0);
                                 var crossRoom = roomIndex.SelectFence(lineBuffer);
@@ -2435,7 +2452,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     continue;
                                 }
                                 var closePt = crossLine.StartPoint;
-                                if(crossLine.Length > 10.0)
+                                if (crossLine.Length > 10.0)
                                 {
                                     closePt = crossLine.GetClosestPointTo(realPts[i], true);
                                 }

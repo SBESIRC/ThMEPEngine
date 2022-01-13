@@ -7,24 +7,24 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
 {
     class DepthFirstSearch
     {
-        public static void dfsMainLoop(Point3dEx cur, Point3dEx target, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
+        public static bool dfsMainLoop(Point3dEx cur, Point3dEx target, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 
             ref List<List<Point3dEx>> rstPaths, FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> extraNodes)
         {
-            if(cur._pt.DistanceTo(new Autodesk.AutoCAD.Geometry.Point3d(1497661.8, 413291.9, 0)) < 10)
-            {
-                ;
-            }
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
                 var flag = true;
                 if(rstPath.Count < 5)
                 {
-                    return;
+                    return false;
                 }
                 if(rstPaths.Count == 0)//主环数为0
                 {
                     rstPaths.Add(rstPath);//把当前路径加入
+                    if(rstPath.Count > 100)
+                    {
+                        return true;
+                    }
                 }
                 else//存在主环
                 {
@@ -63,7 +63,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                         rstPaths.Add(rstPath);
                     }
                 }
-                return;
+                return true;
             }
 
             var neighbors = fireHydrantSysIn.PtDic[cur];//当前点的邻接点
@@ -91,17 +91,16 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
                 tempPath.Add(p);
                 visited.Add(p);
-               if(tempPath.Count > 93)
-                {
-                    ;
-                }
-                //递归搜索
-                dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
 
+                //递归搜索
+                var flag = dfsMainLoop(p, target, tempPath, visited, ref rstPaths, fireHydrantSysIn, ref extraNodes);
+                if (flag) return true;
                 //删除不符合要求的点
                 tempPath.RemoveAt(tempPath.Count - 1);
                 visited.Remove(p);
             }
+
+            return false;
         }
 
         public static void dfsSubLoop(Point3dEx cur, List<Point3dEx> tempPath, HashSet<Point3dEx> visited, 

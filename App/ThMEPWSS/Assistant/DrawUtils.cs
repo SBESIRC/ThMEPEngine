@@ -31,6 +31,7 @@ using NetTopologySuite.Algorithm;
 using ThCADCoreNTSService = ThCADCore.NTS.ThCADCoreNTSService;
 using NetTopologySuite.Geometries.Prepared;
 using NetTopologySuite;
+using GeometryExtensions;
 
 namespace ThMEPWSS.Assistant
 {
@@ -1916,7 +1917,7 @@ namespace ThMEPWSS.Assistant
         {
             Point2d vSize = GetCurrentViewSize();
             Point3d center = ((Point3d)Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("VIEWCTR")).
-                    TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                    TransformBy(Active.Editor.UCS2WCS());
             double w = vSize.X * shrinkScale;
             double h = vSize.Y * shrinkScale;
             Point2d minPoint = new Point2d(center.X - w / 2.0, center.Y - h / 2.0);
@@ -2220,7 +2221,7 @@ namespace ThMEPWSS.Assistant
                 pt = default;
                 return false;
             }
-            pt = rst.Value;
+            pt = rst.Value.TransformBy(Active.Editor.UCS2WCS());
             return true;
         }
 
@@ -2265,17 +2266,17 @@ namespace ThMEPWSS.Assistant
         {
             var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
             if (ptLeftRes.Status != PromptStatus.OK) return null;
-            Point3d leftDownPt = ptLeftRes.Value;
-            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            Point3d leftPt = ptLeftRes.Value;
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftPt);
             if (ptRightRes.Status != PromptStatus.OK) return null;
-            return new Tuple<Point3d, Point3d>(leftDownPt, ptRightRes.Value);
+            return new Tuple<Point3d, Point3d>(leftPt.TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.TransformBy(Active.Editor.UCS2WCS()));
         }
         public static Point3d SelectPoint()
         {
             var basePtOptions = new PromptPointOptions("\n选择图纸基点");
             var rst = Active.Editor.GetPoint(basePtOptions);
             if (rst.Status != PromptStatus.OK) return default;
-            var basePt = rst.Value;
+            var basePt = rst.Value.TransformBy(Active.Editor.UCS2WCS());
             return basePt;
         }
         public static GRect SelectGRect()
@@ -2293,17 +2294,17 @@ namespace ThMEPWSS.Assistant
             }
             else
             {
-                return Tuple.Create(leftDownPt, leftDownPt);
+                return Tuple.Create(leftDownPt.TransformBy(Active.Editor.UCS2WCS()), leftDownPt.TransformBy(Active.Editor.UCS2WCS()));
             }
 
             var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
+                return Tuple.Create(leftDownPt.TransformBy(Active.Editor.UCS2WCS()), ptRightRes.Value.TransformBy(Active.Editor.UCS2WCS()));
             }
             else
             {
-                return Tuple.Create(leftDownPt, leftDownPt);
+                return Tuple.Create(leftDownPt.TransformBy(Active.Editor.UCS2WCS()), leftDownPt.TransformBy(Active.Editor.UCS2WCS()));
             }
         }
         static ObjectId GetEntity()
@@ -2939,8 +2940,83 @@ namespace ThMEPWSS.Assistant
             }
         }
     }
-    public static class ThBlock
+    public static class EntityTool
     {
+        public static IEnumerable<Circle> GetCircles(Entity ent)
+        {
+            static bool canExplode(Entity entity)
+            {
+                var type = entity.GetType();
+                return !(type == typeof(Line) || type == typeof(Circle) || type == typeof(DBPoint) || type == typeof(DBText));
+            }
+            static IEnumerable<Entity> _explode(Entity entity)
+            {
+                try
+                {
+                    return entity.ExplodeToDBObjectCollection().OfType<Entity>();
+                }
+                catch
+                {
+                    return Enumerable.Empty<Entity>();
+                }
+            }
+            static IEnumerable<Entity> explode(Entity entity)
+            {
+                if (canExplode(entity))
+                {
+                    foreach (var ent in _explode(entity))
+                    {
+                        foreach (var e in explode(ent))
+                        {
+                            yield return e;
+                        }
+                    }
+                }
+                else
+                {
+                    yield return entity;
+                }
+            }
+            return explode(ent).OfType<Circle>();
+        }
+        public static IEnumerable<Polyline> GetPolylines(Entity ent)
+        {
+            static bool canExplode(Entity entity)
+            {
+                var type = entity.GetType();
+                if (type == typeof(Polyline)) return false;
+                return !(type == typeof(Line) || type == typeof(Circle) || type == typeof(DBPoint) || type == typeof(DBText));
+            }
+            static IEnumerable<Entity> _explode(Entity entity)
+            {
+                try
+                {
+                    return entity.ExplodeToDBObjectCollection().OfType<Entity>();
+                }
+                catch
+                {
+                    return Enumerable.Empty<Entity>();
+                }
+            }
+            static IEnumerable<Entity> explode(Entity entity)
+            {
+                if (canExplode(entity))
+                {
+                    foreach (var ent in _explode(entity))
+                    {
+                        foreach (var e in explode(ent))
+                        {
+                            yield return e;
+                        }
+                    }
+                }
+                else
+                {
+                    yield return entity;
+                }
+            }
+            return explode(ent).OfType<Polyline>();
+        }
         public static bool IsSupportedBlock(BlockTableRecord blockTableRecord)
         {
             // 暂时不支持动态块，外部参照，覆盖

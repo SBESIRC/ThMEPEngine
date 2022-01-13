@@ -265,7 +265,7 @@ namespace ThMEPHVAC.CAD
         }
         private void UpdateCenterLine(SegInfo info1, SegInfo info2)
         {
-            ThMEPHVACService.GetLongestDis(info1.l.StartPoint, info1.l.EndPoint, info2.l.StartPoint, info2.l.EndPoint, out Point3d p1, out Point3d p2);
+            ThMEPHVACService.GetLongestDis(info1.l, info2.l, out Point3d p1, out Point3d p2);
             var l = new Line(p1, p2);
             var newDuct = new SegInfo() { l = l, ductSize = fanParam.bypassSize, 
                                           srcShrink = info1.srcShrink, dstShrink = info2.srcShrink, 

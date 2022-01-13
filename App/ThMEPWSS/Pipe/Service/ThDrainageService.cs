@@ -3244,7 +3244,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public static void DrawDrainageSystemDiagram()
         {
             FocusMainWindow();
-            var range = TrySelectRange();
+            var range = TrySelectRangeEx();
             if (range == null) return;
             if (!TrySelectPoint(out Point3d point3D)) return;
             var basePoint = point3D.ToPoint2d();
@@ -5223,6 +5223,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     }
                 }
                 {
+                    if (name.Contains(THESAURUSSTRAIGHTFORWARD) || name.Contains(THESAURUSEMPTINESS) || name.Contains(THESAURUSHYPOCRISY) || name.Contains(THESAURUSRECIPE) || name.Contains(THESAURUSRAFFLE))
+                    {
+                        var bd = br.Bounds.ToGRect().Center.ToPoint3d().TransformBy(matrix).ToGRect(THESAURUSENTREPRENEUR);
+                        reg(fs, bd, pipes);
+                        return;
+                    }
                     if (isDrainageLayer(br.Layer))
                     {
                         if (name is SUPERINDUCEMENT or THESAURUSURBANITY)
@@ -7676,6 +7682,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string CYLINDRICALNESS = "坐便器";
         public const int THESAURUSASSURANCE = 505;
         public const int DETERMINATENESS = 239;
+        public const string THESAURUSSTRAIGHTFORWARD = "废水立管";
+        public const string THESAURUSEMPTINESS = "污水立管";
+        public const string THESAURUSHYPOCRISY = "污废合流立管";
+        public const string THESAURUSRECIPE = "沉箱立管";
+        public const string THESAURUSRAFFLE = "通气立管";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>

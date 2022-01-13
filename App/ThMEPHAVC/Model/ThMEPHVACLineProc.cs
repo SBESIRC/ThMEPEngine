@@ -43,7 +43,7 @@ namespace ThMEPHVAC.Model
                             {
                                 line_set.Remove(l);
                                 line_set.Remove(o_l);
-                                ThMEPHVACService.GetLongestDis(l.StartPoint, l.EndPoint, o_l.StartPoint, o_l.EndPoint, out Point3d p1, out Point3d p2);
+                                ThMEPHVACService.GetLongestDis(l, o_l, out Point3d p1, out Point3d p2);
                                 var s = (ThMEPHVACService.RoundPoint(p1, 6) + ThMEPHVACService.RoundPoint(p2, 6).GetAsVector()).ToString();
                                 if (set.Add(s))
                                     line_set.Add(new Line(p1, p2));

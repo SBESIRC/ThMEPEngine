@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
 
@@ -50,6 +51,7 @@ namespace ThMEPArchitecture.PartitionLayout
         HORIZONTAL = 1,
         VERTICAL = 2
     }
+
     public partial class ParkingPartition : IEquatable<ParkingPartition>
     {
         public ParkingPartition()
@@ -58,12 +60,33 @@ namespace ThMEPArchitecture.PartitionLayout
         }
 
         public ParkingPartition(List<Polyline> walls, List<Line> iniLanes,
-        List<Polyline> obstacles, Polyline boundary, List<Polyline> buildingBox, bool gpillars = true)
+        List<Polyline> obstacles, Polyline boundary, List<Polyline> buildingBox, ParkingStallArrangementViewModel vm = null)
         {
-            GeneratePillars = gpillars;
+            if (vm != null)
+            {
+                DisParallelCarLength = vm.ParallelSpotLength > vm.ParallelSpotWidth ? vm.ParallelSpotLength : vm.ParallelSpotWidth;
+                DisParallelCarWidth = vm.ParallelSpotLength > vm.ParallelSpotWidth ? vm.ParallelSpotWidth : vm.ParallelSpotLength;
+                DisVertCarLength = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotLength : vm.VerticalSpotWidth;
+                DisVertCarWidth = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotWidth : vm.VerticalSpotLength;
+                DisLaneWidth = vm.RoadWidth;
+                MaxPillarSpacing = vm.MaxColumnWidth;
+                PillarNetLength = vm.ColumnSizeOfParalleToRoad;
+                PillarNetDepth = vm.ColumnSizeOfPerpendicularToRoad;
+                ThicknessOfPillarConstruct = vm.ColumnAdditionalSize;
+                LayoutMode = ((int)vm.RunMode);
+            }
+            GeneratePillars = MaxPillarSpacing < DisVertCarWidth ? false : GeneratePillars;
+            DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
+            DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
+            CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
+            DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
+            DisModulus = DisCarAndHalfLane * 2;
+            MinCountAllowGVertCarOnLine = 4;
+            LengthCanGIntegralModules = 3 * DisVertCarWidth + DisLaneWidth / 2;
+            LengthCanGAdjLaneConnectedDouble = DisLaneWidth + DisVertCarWidth * 6;
+
             Walls = walls;
             IniLaneLines = iniLanes;
-            //Obstacles = obstacles;
             Boundary = boundary;
             BuildingBoxes = buildingBox;
             BoundingBox = Boundary.GeometricExtents.ToRectangle();
@@ -96,23 +119,30 @@ namespace ThMEPArchitecture.PartitionLayout
         private Polyline NewBound = new Polyline();
         private List<Curve> NewBoundEdges = new List<Curve>();
         private List<Polyline> PModuleBox = new List<Polyline>();
-        private bool GeneratePillars = false;
         private List<Polyline> Pillars = new List<Polyline>();
         public ThCADCoreNTSSpatialIndex ObstaclesMPolygonSpatialIndex;
 
-        const double DisPillarLength = 600;
-        const double DisPillarDepth = 600;
-        const int CountPillarDist = 3;
-        const double DisLaneWidth = 5500;
-        const double DisCarLength = 5100;
-        const double DisCarWidth = 2400;
-        const double DisCarAndHalfLane = DisLaneWidth / 2 + DisCarLength;
-        const double DisModulus = DisCarAndHalfLane * 2;
-
-        const double LengthCanGIntegralModules = 3 * DisCarWidth + DisLaneWidth / 2;
-        const double ScareFactorForCollisionCheck = 0.99;
-
+        public static bool GeneratePillars = true;
+        public static double PillarNetLength = 500;
+        public static double PillarNetDepth = 500;
+        public static double ThicknessOfPillarConstruct = 50;
+        public static double MaxPillarSpacing = 8000;
+        public static double DisVertCarLength = 5100;
+        public static double DisVertCarWidth = 2400;
+        public static double DisParallelCarLength = 6000;
+        public static double DisParallelCarWidth = 2400;
+        public static double DisLaneWidth = 5500;
+        public static double DisPillarLength = PillarNetLength + ThicknessOfPillarConstruct * 2;
+        public static double DisPillarDepth = PillarNetDepth + ThicknessOfPillarConstruct * 2;
+        public static int CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
+        public static double DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
+        public static double DisModulus = DisCarAndHalfLane * 2;
+        private static int MinCountAllowGVertCarOnLine = 4;
+        public static double LengthCanGIntegralModules = 3 * DisVertCarWidth + DisLaneWidth / 2;
+        public static double LengthCanGAdjLaneConnectedDouble = DisLaneWidth + DisVertCarWidth * 6;
         public static int LayoutMode = ((int)LayoutDirection.HORIZONTAL);
+
+        const double ScareFactorForCollisionCheck = 0.99;
 
         public void Dispose()
         {
@@ -191,7 +221,6 @@ namespace ThMEPArchitecture.PartitionLayout
         public void CheckObstacles()
         {
             Obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(Boundary).Cast<Polyline>().ToList();
-            //Obstacles=Obstacles.Where(e => e.Intersect(Boundary,Intersect.OnBothOperands).Count>0 || Boundary.IsPointInFast(e.GetCenter())).ToList();
         }
 
         /// <summary>
@@ -206,7 +235,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 GenerateCarSpots();
                 UndateDataToGenerateCarSpotsInMinPartitionUnits();
                 GenerateCarSpotsInMinPartitionUnits();
-                PostProcessCarSpots();
+                PostProcess();
             }
         }
 
@@ -428,7 +457,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 inilanelines.RemoveAt(i);
                 var inilane = IniLanes[i];
                 var l = CreateLine(inilane.Line);
-                l.TransformBy(Matrix3d.Displacement(inilane.Vec.GetNormal() * (DisLaneWidth / 2 + DisCarWidth * 3)));
+                l.TransformBy(Matrix3d.Displacement(inilane.Vec.GetNormal() * (DisLaneWidth / 2 + DisVertCarWidth * 3)));
                 var crossedmodules = SplitLine(l, ModuleBox).Cast<Line>().Where(e => !IsInAnyPolys(e.GetCenter(), ModuleBox)).ToList();
                 var boundobstacles = new List<Polyline>();
                 boundobstacles.AddRange(IniLanes.Select(e => CreatePolyFromLine(e.Line)));
@@ -438,7 +467,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 foreach (var cslane in crossedmodules)
                 {
                     var lane = CreateLine(cslane);
-                    lane.TransformBy(Matrix3d.Displacement(-inilane.Vec.GetNormal() * (DisLaneWidth / 2 + DisCarWidth * 3)));
+                    lane.TransformBy(Matrix3d.Displacement(-inilane.Vec.GetNormal() * (DisLaneWidth / 2 + DisVertCarWidth * 3)));
                     if (ClosestPointInCurves(lane.StartPoint, inilanelines) < 1)
                     {
                         if (lane.Length < DisCarAndHalfLane)
@@ -466,19 +495,46 @@ namespace ThMEPArchitecture.PartitionLayout
                 l.Dispose();
             }
 
-            IniLanes = IniLanes.OrderByDescending(e => e.RestLength).ToList();
+            var tmplanes = new List<Lane>();
+            for (int i = 0; i < IniLanes.Count; i++)
+            {
+                var lane = CreateLine(IniLanes[i].Line);
+                var matvec = IniLanes[i].Vec.GetNormal() * (DisLaneWidth / 2 + DisPillarDepth + 500);
+                lane.TransformBy(Matrix3d.Displacement(matvec));
+                var lbf = lane.Buffer(1);
+                lbf.Scale(lbf.GetRecCentroid(), ScareFactorForCollisionCheck);
+                var crosscars = CarSpatialIndex.SelectCrossingPolygon(lbf).Cast<Polyline>();
+                var segs = SplitLine(lane, crosscars.ToList());
+                segs.ForEach(e => e.TransformBy(Matrix3d.Displacement(-matvec)));
+                if (segs.Count() > 0)
+                {
+                    var vec = IniLanes[i].Vec;
+                    IniLanes.RemoveAt(i);
+                    i--;
+                    foreach (var seg in segs)
+                    {
+                        Lane ln = new Lane(seg, vec);
+                        tmplanes.Add(ln);
+                    }
+                }
+                lbf.Dispose();
+                lane.Dispose();
+            }
+            IniLanes.AddRange(tmplanes);
+            IniLanes=IniLanes.OrderByDescending(e => e.Line.Length).ToList();
+            //IniLanes = IniLanes.OrderByDescending(e => e.RestLength).ToList();
             for (int i = 0; i < IniLanes.Count; i++)
             {
                 var inilanelines = new List<Line>(IniLanes.Select(e => e.Line).Cast<Line>().ToList());
                 inilanelines.RemoveAt(i);
                 var lane = CreateLine(IniLanes[i].Line);
-                if (ClosestPointInCurves(lane.StartPoint, inilanelines) < 1)
+                if (ClosestPointInVertCurves(lane.StartPoint,lane, inilanelines) < 1)
                 {
                     if (lane.Length < DisCarAndHalfLane) continue;
                     else
                         lane = new Line(lane.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane.StartPoint, lane.EndPoint).GetNormal() * DisLaneWidth / 2)), lane.EndPoint);
                 }
-                if (ClosestPointInCurves(lane.EndPoint, inilanelines) < 1)
+                if (ClosestPointInVertCurves(lane.EndPoint, lane,inilanelines) < 1)
                 {
                     if (lane.Length < DisCarAndHalfLane) continue;
                     else
@@ -498,10 +554,35 @@ namespace ThMEPArchitecture.PartitionLayout
         /// <summary>
         /// Precess generated car spots finally.
         /// </summary>
-        private void PostProcessCarSpots()
+        private void PostProcess()
         {
             RemoveDuplicateCars();
             RemoveCarsIntersectedWithBoundary();
+            RemoveInvalidPillars();
+        }
+
+        private void RemoveInvalidPillars()
+        {
+            CarSpatialIndex = new ThCADCoreNTSSpatialIndex(CarSpots.Select(e => e.ToNTSPolygon().ToDbMPolygon()).ToCollection());
+            Pillars = Pillars.Where(t =>
+              {
+                  var clone = t.Clone() as Polyline;
+                  clone.Scale(clone.GetRecCentroid(), 0.5);
+                  var cs = CarSpatialIndex.SelectCrossingPolygon(clone);
+                  if (cs.Count > 0)
+                  {
+                      clone.Dispose();
+                      return false;
+                  }
+
+                  if (ClosestPointInCurvesFast(clone.GetRecCentroid(), CarSpots) > DisPillarLength)
+                  {
+                      clone.Dispose();
+                      return false;
+                  }
+                  clone.Dispose();
+                  return true;
+              }).ToList();
         }
 
         /// <summary>
@@ -532,7 +613,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 else continue;
                 splited = SplitLine(offsetlane, CarModuleBox).ToArray();
                 if (splited.Length > 1) offsetlane = (Line)splited.OrderBy(e => e.GetCenter().DistanceTo(lane.GetClosestPointTo(e.GetCenter(), false))).ToArray()[0];
-                if (offsetlane.Length < DisLaneWidth / 2 + DisCarWidth * 4) continue;
+                if (offsetlane.Length < DisLaneWidth / 2 + DisVertCarWidth * 4) continue;
                 if (IsInAnyPolys(offsetlane.GetCenter(), CarModuleBox)) continue;
                 var ply = CreatePolyFromPoints(new Point3d[] { lane.StartPoint, lane.EndPoint, offsetlane.EndPoint, offsetlane.StartPoint });
                 bool isConnected = false;
@@ -544,7 +625,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var hascollision = ObstaclesSpatialIndex.Intersects(plrsc, true);
                 if (ClosestPointInVertCurves(offsetlane.StartPoint, offsetlane, IniLanes.Select(e => e.Line).ToList()) < 1 &&
                     ClosestPointInVertCurves(offsetlane.EndPoint, offsetlane, IniLanes.Select(e => e.Line).ToList()) < 1 &&
-                    offsetlane.Length < DisLaneWidth + DisCarWidth * 6) continue;
+                    offsetlane.Length < DisLaneWidth + DisVertCarWidth * 6) continue;
                 if (isConnected && (!hascollision))
                 {
                     var test_l = CreateLine(offsetlane);
@@ -566,7 +647,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     if (!crossed)
                     {
                         var dis = IsUnderAndNearObstacles(BuildingBoxes, offsetlane);
-                        if (dis != -1 && dis - DisModulus > DisLaneWidth / 2 + DisCarWidth && IsHorizantal(offsetlane))
+                        if (dis != -1 && dis - DisModulus > DisLaneWidth / 2 + DisVertCarWidth && IsHorizantal(offsetlane))
                         {
                             generate_integral_modules = true;
                             IniLanes[i].CanBeMoved = false;
@@ -719,7 +800,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     laneb.TransformBy(Matrix3d.Displacement(-veca));
                     UnifyLaneDirection(ref lanea, IniLanes);
                     UnifyLaneDirection(ref laneb, IniLanes);
-                    veca = veca.GetNormal() * DisCarLength;
+                    veca = veca.GetNormal() * DisVertCarLength;
                     GenerateVertCars(lanea, veca);
                     GenerateVertCars(laneb, -veca);
                     lanea.Dispose();
@@ -747,7 +828,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var offset = CreateLine(line);
                 bool skip = false;
                 bool cont = false;
-                generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisCarWidth);
+                generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisVertCarWidth);
                 if (cont)
                 {
                     offset.Dispose();
@@ -757,7 +838,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 offset = CreateLine(line);
                 cont = false;
                 skip = false;
-                generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisCarWidth);
+                generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisCarAndHalfLane, DisVertCarWidth);
                 if (cont)
                 {
                     offset.Dispose();
@@ -782,7 +863,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
                 bool skip = false;
                 bool cont = false;
-                generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisCarWidth + DisLaneWidth / 2, DisCarLength);
+                generate_cars_in_single_dir(offset, vecs[i], ref cont, ref skip, DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength);
                 if (cont)
                 {
                     offset.Dispose();
@@ -792,7 +873,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 offset = CreateLine(line);
                 cont = false;
                 skip = false;
-                generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisCarWidth + DisLaneWidth / 2, DisCarLength);
+                generate_cars_in_single_dir(offset, -vecs[i], ref cont, ref skip, DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength);
                 if (cont)
                 {
                     offset.Dispose();
@@ -825,7 +906,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// </summary>
         private void RemoveCarsIntersectedWithBoundary()
         {
-            var obspls = Obstacles.Where(e => e.Closed).Where(e => e.Area > DisCarLength * DisLaneWidth * 5).ToList();
+            var obspls = Obstacles.Where(e => e.Closed).Where(e => e.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
             CarSpots = CarSpots.Where(e => IniBoundary.Contains(e.GetRecCentroid()) && !IsInAnyPolys(e.GetRecCentroid(), obspls)).ToList();
         }
 
@@ -845,7 +926,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             var hashcode = Boundary.NumberOfVertices;
             var thisVertices = this.Boundary.Vertices();
-            foreach(var vertex in thisVertices)
+            foreach (var vertex in thisVertices)
             {
                 hashcode ^= vertex.GetHashCode();
             }

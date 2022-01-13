@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
@@ -30,7 +31,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 var ept = (db as Polyline).EndPoint;
                 SegLines.Add(new Line(spt, ept));
             }
-
+            
             foreach(var obj in OuterLines)
             {
                 var pline = obj as Polyline;
@@ -42,12 +43,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 WallLine = pline;
                 break;
             }
-
+            if(WallLine.GetPoints().Count() == 0)//外框线不存在
+            {
+                Active.Editor.WriteMessage("地库边界不存在！");
+                return false;
+            }
+            if(Building.Count == 0)
+            {
+                Active.Editor.WriteMessage("障碍物不存在！");
+                return false;
+            }
             var buildingPlines = new List<List<Polyline>>();
             foreach(var block in Building)
             {
                 buildingPlines.Add(ExplodeBlock(block));
             }
+            
             return true;
         }
 

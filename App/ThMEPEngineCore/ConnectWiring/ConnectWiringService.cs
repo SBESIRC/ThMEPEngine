@@ -51,16 +51,10 @@ namespace ThMEPEngineCore.ConnectWiring
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull && !(x.Database is null)).ToList();
             BranchConnectingService branchConnecting = new BranchConnectingService();
-            //BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, !wall, !column);
 
             var CenterLine = new List<ThGeometry>();
-            //CenterLine.AddRange(GetCenterLinePolylines(out DBObjectCollection objs));
-            //CenterLine.AddRange(GetUCSPolylines(outFrame,objs));
-            //string path = @"D:\LogFile\Data{0}.geojson";
-            //string path1 = @"D:\LogFile\ReData{0}.geojson";
-            //int index = 0;
             foreach (var info in configInfo)
             {
                 var blockInfos = info.loopInfoModels.First().blocks;
@@ -91,14 +85,29 @@ namespace ThMEPEngineCore.ConnectWiring
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
-                    var res = thCableRouter.RouteCable(dataGeoJson, context);
-                    //ThMEPGeoJSONService.Export2File(dataGeoJson, string.Format(path, ++index));
-                    //ThMEPGeoJSONService.Export2File(res, string.Format(path1, index));
-                    if (!res.Contains("error"))
+
+#if DEBUG
+                    {
+
+                        string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
+                        File.WriteAllText(path, dataGeoJson);
+                    }
+#endif
+                    //--------------处理中
+                    var outJson = thCableRouter.RouteCable(dataGeoJson, context);
+
+#if DEBUG
+                    {
+                        string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
+                        File.WriteAllText(path, outJson);
+                    }
+#endif
+
+                    if (!outJson.Contains("error"))
                     {
                         var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
-                        using (var stringReader = new StringReader(res))
+                        using (var stringReader = new StringReader(outJson))
                         using (var jsonReader = new JsonTextReader(stringReader))
                         {
                             var features = serializer.Deserialize<FeatureCollection>(jsonReader);

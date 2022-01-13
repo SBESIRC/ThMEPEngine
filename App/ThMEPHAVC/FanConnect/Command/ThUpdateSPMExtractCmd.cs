@@ -42,9 +42,13 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     //提取水管路由
-                    var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
+                    var pipes = ThEquipElementExtractService.GetFanPipes(startPt, ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe, ConfigInfo.WaterSystemConfigInfo.IsCWPipe);
+                    if(pipes.Count == 0)
+                    {
+                        return;
+                    }
+                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     foreach (var p in pipes)
                     {
                         p.TransformBy(mt);
@@ -81,25 +85,33 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
                     }
-                    //提取各种线
-                    var csPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CS");
-                    var crPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CR");
-                    var hsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HS");
-                    var hrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HR");
-                    var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
-                    var chsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHS");
-                    var chrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHR");
-                    var rPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-R");
+
                     //提取结点标记
-                    var dims = ThEquipElementExtractService.GetPipeDims("H-PIPE-APPE");
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref csPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref crPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref hsPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref hrPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref chsPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref chrPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref rPipes);
-                    RemoveSPMLine(treeModel.RootNode, ref dims, ref cPipes);
+                    var pipeDims = ThEquipElementExtractService.GetPipeDims("H-PIPE-APPE");
+                    if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                    {
+                        var csPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CS");
+                        var crPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CR");
+                        var hsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HS");
+                        var hrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-HR");
+                        var chsPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHS");
+                        var chrPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-CHR");
+                        var rPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-R");
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref csPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref crPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref hsPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref hrPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref chsPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref chrPipes);
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref rPipes);
+                    }
+
+                    if(ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                    {
+                        //提取各种线
+                        var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
+                        RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
+                    }
 
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();

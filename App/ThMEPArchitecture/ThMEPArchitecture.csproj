@@ -26,6 +26,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CreateAllSeglinesCmd.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallGAGenerator.cs" />
     <Compile Include="ParkingStallArrangement\CommandWithoutSegLine.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\InputData.cs" />
@@ -38,10 +39,13 @@
     <Compile Include="ParkingStallArrangement\General\Utils.cs" />
     <Compile Include="ParkingStallArrangement\IO\ThParkingStallDataSetFactory.cs" />
     <Compile Include="ParkingStallArrangement\Method\AngleTools.cs" />
+    <Compile Include="ParkingStallArrangement\Method\Dfs.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
+    <Compile Include="ParkingStallArrangement\Model\AutoSegLines.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
     <Compile Include="ParkingStallArrangement\Model\LinePairs.cs" />
+    <Compile Include="ParkingStallArrangement\Model\SegLineEx.cs" />
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallDirectGenerator.cs" />

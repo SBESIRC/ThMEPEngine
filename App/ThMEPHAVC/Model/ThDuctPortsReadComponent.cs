@@ -437,11 +437,13 @@ namespace ThMEPHVAC.Model
             foreach (var port in portsBlk)
             {
                 var blkName = GetEffectiveBlkByName(port);
+                ThMEPHVACService.GetWidthAndHeight(portParam.param.portSize, out double w, out double h);
+                var extLen = Math.Min(w, h) * 0.5;
                 if (blkName == ThHvacCommon.AI_PORT)
                 {
                     var centerP = ThMEPHAVCBounds.GetDownPortCenterPoint(port, portParam);
                     var portBound = new Polyline();
-                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, 10);
+                    portBound.CreatePolygon(centerP.ToPoint2D(), 4, extLen);
                     var polygon = new DBObjectCollection() { portBound }.BuildMPolygon();
                     portBounds.Add(polygon);
                     var airVolume = GetAirVolume(port.Id.GetAttributeInBlockReference("风量"));

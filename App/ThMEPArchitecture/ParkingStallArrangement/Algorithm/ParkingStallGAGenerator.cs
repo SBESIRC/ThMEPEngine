@@ -15,6 +15,7 @@ using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using System.Text.RegularExpressions;
+using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
@@ -120,10 +121,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
 
         //Fitness method
-        public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara)
+        public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara, ParkingStallArrangementViewModel parameterViewModel)
         {
             layoutPara.Set(Genome);
-            int result = GetParkingNums(layoutPara);
+            int result = GetParkingNums(layoutPara, parameterViewModel);
             //Thread.Sleep(3);
             //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             Count = result;
@@ -174,13 +175,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
 
         
-        private int GetParkingNums(LayoutParameter layoutPara)
+        private int GetParkingNums(LayoutParameter layoutPara, ParkingStallArrangementViewModel ParameterViewModel)
         {
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
                 ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, Logger))
+                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel, Logger))
                 {
                     try
                     {
@@ -243,35 +244,37 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
+        ParkingStallArrangementViewModel ParameterViewModel;
 
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
-        public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, int popSize = 10, int iterationCnt = 10)
+        public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
-            IterationCount = iterationCnt;
+            IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
-            PopulationSize = popSize;//种群数量
+            PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
             MaxTime = 180;
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
-            GeneMutationRate = 1- GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
+            GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
 
             SelectionRate = 1- GoldenRatio;//保留因子0.382
-            SelectionSize = Math.Max(2, (int)(SelectionRate * popSize));
+            SelectionSize = Math.Max(2, (int)(SelectionRate * PopulationSize));
 
             //InputsF
             GaPara = gaPara;
             LayoutPara = layoutPara;
+            ParameterViewModel = parameterViewModel;
             // Run2 添加参数
-            Elite_popsize = Math.Max((int)(popSize * 0.2), 1);//精英种群数量,种群数要大于3
+            Elite_popsize = Math.Max((int)(PopulationSize * 0.2), 1);//精英种群数量,种群数要大于3
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
-            Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * popSize));//最大保留数量0.618
+            Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
             MutationUpperBound = 15700.0;// 最大变异范围，两排车道宽
             LowerUpperBound = new Dictionary<int, Tuple<double, double>>();//储存每条基因可变动范围，方便后续变异
             for (int i = 0; i < GaPara.LineCount; ++i)
@@ -439,7 +442,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int index = 0;
             inputSolution.ForEach(s =>
             {
-                s.GetMaximumNumber(LayoutPara, GaPara);
+                s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
                 System.Diagnostics.Debug.WriteLine($"{iterationIndex}.{index++}: { s.Count}");
             }
             );
@@ -631,7 +634,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
-            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara));
+            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel));
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
             var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
             maxNums = sorted.First().Count;
