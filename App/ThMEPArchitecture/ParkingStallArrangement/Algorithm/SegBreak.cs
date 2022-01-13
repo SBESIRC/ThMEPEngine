@@ -30,17 +30,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         bool VerticalDirection;
         private List<Polyline> BufferTanks;// 记录当前已做的buffer，需要判断是否相互重合
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
-        public SegBreakParam(List<Line> SegLines, Chromosome GASolution, OuterBrder outerbrder, double buffersize,bool verticaldirection, bool GoPositive)
+        public SegBreakParam( List<Gene> Genome, OuterBrder outerbrder, double buffersize,bool verticaldirection, bool GoPositive)
         {
+            BufferTanks = new List<Polyline>();
+
             // SegLine 初始分割线，必须严格符合相交关系
             // WallLine 地库框线
             // GASolution GA的结果，任意相交关系
             // GoPositive 从下至上打断，从左至右打断（坐标增加顺序）
             List<Line> VertLines = new List<Line>();//垂直线
-            List<int> VertLine_index = new List<int>();// 垂直线索引
+            List<int> VertLines_index = new List<int>();// 垂直线索引
             List<Line> HorzLines = new List<Line>();//水平线
             List<int> HorzLines_index = new List<int>();// 垂直线索引
-
+            var SegLines = outerbrder.SegLines;
             BufferSize = buffersize;
             VerticalDirection = verticaldirection;//垂直方向为true，水平为false
             for (int i = 0; i < SegLines.Count; ++i)
@@ -49,15 +51,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 if (Math.Abs(line.StartPoint.X- line.EndPoint.X) < 1e-5)
                 {
                     //横坐标相等，平行线
-                    HorzLines.Add(GASolution.Genome[i].ToLine());
-                    HorzLines_index.Add(i);
+                    VertLines.Add(Genome[i].ToLine());
+                    VertLines_index.Add(i);
                 }
                 else
                 {
-                    VertLines.Add(GASolution.Genome[i].ToLine());
-                    VertLine_index.Add(i);
+                    HorzLines.Add(Genome[i].ToLine());
+                    HorzLines_index.Add(i);
                 }
             }
+            //var sortedH = HorzLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderBy(x => x.Key.StartPoint.Y).ToList();
+            //HorzLines = sortedH.Select(x => x.Key).ToList();
+            //var idxH = sortedH.Select(x => x.Value).ToList();// 索引值
+            //                                               // 把IntSecIndex 按照IntersectLines 排序
+            //var newHidx = new List<int>();
+            //idxH.ForEach(i => newHidx.Add(HorzLines_index[i]));
+            //HorzLines_index = newHidx;
+
+            //var sortedV = VertLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderBy(x => x.Key.StartPoint.Y).ToList();
+            //VertLines = sortedV.Select(x => x.Key).ToList();
+            //var idxV = sortedV.Select(x => x.Value).ToList();// 索引值
+            //                                               // 把IntSecIndex 按照IntersectLines 排序
+            //var newVidx = new List<int>();
+            //idxV.ForEach(i => newVidx.Add(VertLines_index[i]));
+            //VertLines_index = newVidx;
+
+
             BreakedLines = new List<Line>();
             //OtherLines = new List<Line>();
             MinValues = new List<double>();// 打断线最小值，相对值
@@ -69,37 +88,46 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 // otherlines 添加横向线
                 //打断纵向线
                 //对于所有纵线
-                for (int k = 0; k < VertLine_index.Count; ++k)
+                for (int k = 0; k < VertLines_index.Count; ++k)
                 {
-                    var line1 = SegLines[VertLine_index[k]];//初始纵向分割线
-                    var GALine1 = GASolution.Genome[k].ToLine();//迭代后的纵分割线
+                    var line1 = SegLines[VertLines_index[k]];//初始纵向分割线
+                    var GALine1 = Genome[VertLines_index[k]].ToLine();//迭代后的纵分割线
                     List<Point3d> ptlist = new List<Point3d>();//断点列表
                     List<Line> IntersectLines = new List<Line>();//交叉线列表，需要动态更新
                     List<int> IntSecIndex = new List<int>();//交叉线在OtherLines中的索引
                     var templ = line1.Intersect(outerbrder.WallLine, Intersect.OnBothOperands);
                     if (templ.Count != 0)//初始线和外包框有交点
                     {
-                        var pt = GALine1.Intersect(outerbrder.WallLine, Intersect.OnBothOperands);// GA 结果求交点
-                        ptlist.Add(pt.First());
-                        IntersectLines.Add(new Line(pt.First(), pt.First()));// 创建长度为0的线，保证两个list结构一样
-                        IntSecIndex.Add(9999999);//添加不可能值，填充作用
+                        var ptl = GALine1.Intersect(outerbrder.WallLine, Intersect.OnBothOperands);// GA 结果求交点
+                        foreach (var pt in ptl)
+                        {
+                            ptlist.Add(pt);
+                            IntersectLines.Add(new Line(pt, pt));// 创建长度为0的线，保证两个list结构一样
+                            IntSecIndex.Add(9999999);//添加不可能值，填充作用
+                        }
                     }
+                    
                     for (int j = 0; j < HorzLines_index.Count; ++j)
                     {
                         var line2 = SegLines[HorzLines_index[j]];//初始横向分割线
                         templ = line1.Intersect(line2, Intersect.OnBothOperands);
                         if (templ.Count != 0)//初始线之间有交点
                         {
-                            var GALine2 = GASolution.Genome[j].ToLine();//迭代后的横分割线
+                            var GALine2 = Genome[HorzLines_index[j]].ToLine();//迭代后的横分割线
 
                             IntersectLines.Add(GALine2);// 记录产生相交的线，后续需要更新
                             IntSecIndex.Add(j);// 添加索引，方便更新OtherLines
                             // 说明这俩线有交点，用GA的结果求交点
                             var pt = GALine1.Intersect(GALine2, Intersect.ExtendBoth);
-
+                            if(pt.Count == 0)
+                            {
+                                ;
+                            }
                             ptlist.Add(pt.First());
+                            ;
                         }
                     }
+
                     Point3d spt;//起始点
                     Point3d ept;//终结点
 
@@ -118,13 +146,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
                         if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
                         {
-                            spt = GALine1.StartPoint;
-                            ept = GALine1.EndPoint;
+                            spt = GALine1.EndPoint;
+                            ept = GALine1.StartPoint;
                         }
                         else
                         {
-                            spt = GALine1.EndPoint;
-                            ept = GALine1.StartPoint;
+                            spt = GALine1.StartPoint;
+                            ept = GALine1.EndPoint;
                         }
                     }
                     else//从大到小排序
@@ -141,13 +169,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
                         if (GALine1.StartPoint.Y > GALine1.EndPoint.Y)
                         {
-                            spt = GALine1.EndPoint;
-                            ept = GALine1.StartPoint;
+                            spt = GALine1.StartPoint;
+                            ept = GALine1.EndPoint;
                         }
                         else
                         {
-                            spt = GALine1.StartPoint;
-                            ept = GALine1.EndPoint;
+                            spt = GALine1.EndPoint;
+                            ept = GALine1.StartPoint;
                         }
                     }
                     List<int> InnerIndex = new List<int>();// 记录在当前断线上所有横线的索引
@@ -163,7 +191,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         List<double> cur_maxvalues = new List<double>();// 打断线的上边界
                         // 该纵线打断
                         // 2. 确定打断后的纵线
-
                         int CurCount = 0;
                         
                         Line BreakLine; 
@@ -177,7 +204,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                 BreakLine = new Line(spt, ptlist[i]);
                                     
                                 cur_breakedlines.Add(BreakLine);
-                                cur_breakedlines.Add(BreakLine);
+
                                 spt = ptlist[i];//更新起始点
                                 // 确定断线范围，buffer，取建筑或者buffer值（添加 Lower & Upper Bound to Lower & upper Bounds)
                                 GetMaxMinValue(BreakLine, outerbrder, out double MinValue, out double MaxValue);// TO DO
@@ -226,12 +253,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             InnerIndex.Add(1);
                         }
                         BreakedLines.Add(GALine1);
-                        MinValues.Add(GASolution.Genome[k].MinValue);
-                        MaxValues.Add(GASolution.Genome[k].MaxValue);
+                        MinValues.Add(Genome[k].MinValue);
+                        MaxValues.Add(Genome[k].MaxValue);
 
                         // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
                         var Value2 = GALine1.StartPoint.X;
-                        ModifyOtherLines(IntSecIndex, InnerIndex, GASolution.Genome[k].MinValue, GASolution.Genome[k].MaxValue, Value2);
+                        ModifyOtherLines(IntSecIndex, InnerIndex, Genome[k].MinValue, Genome[k].MaxValue, Value2);
                     }
                     
                 }
@@ -242,6 +269,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
 
             LineCount = BreakedLines.Count;
+            ;
         }
         private void ModifyOtherLines(List<int> IntSecIndex, List<int> InnerIndex,double MinValue, double MaxValue,double Value)
         {
