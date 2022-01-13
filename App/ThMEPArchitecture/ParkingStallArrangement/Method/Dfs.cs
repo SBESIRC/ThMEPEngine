@@ -87,17 +87,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         minVals.Add(minVal);
                         break;
                     }
-                    var rhroughSegline = AreaSplit.ThroughVerticalSeg(wallLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
-                    if (!(rhroughSegline is null))//分割线纵向贯穿分割区域
-                    {
-                        throughBuildNums++;
-                        areas.Remove(area);
-                        areas.AddRange(orgAreas);
-                        sortSegLines.Add(rhroughSegline);
-                        maxVals.Add(maxVal);
-                        minVals.Add(minVal);
-                        break;
-                    }
+                    //var rhroughSegline = AreaSplit.ThroughVerticalSeg(wallLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
+                    //if (!(rhroughSegline is null))//分割线纵向贯穿分割区域
+                    //{
+                    //    throughBuildNums++;
+                    //    areas.Remove(area);
+                    //    areas.AddRange(orgAreas);
+                    //    sortSegLines.Add(rhroughSegline);
+                    //    maxVals.Add(maxVal);
+                    //    minVals.Add(minVal);
+                    //    break;
+                    //}
                 }
             }
 
