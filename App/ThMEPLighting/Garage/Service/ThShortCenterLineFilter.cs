@@ -20,7 +20,7 @@ namespace ThMEPLighting.Garage.Service
 
         public List<Line> Filter(List<Line> centers)
         {
-            var results = centers.Select(o=>o).ToList();
+            var results = centers.OrderBy(o=>o.Length).ToList();
             while (true)
             {
                 var unValid = FindUnValidLine(results);
@@ -82,8 +82,8 @@ namespace ThMEPLighting.Garage.Service
              *       (target)
              */
             var ang = source.LineDirection().GetAngleTo(target.LineDirection());
-            double l = OffsetDistance / Math.Sin(ang);
-            return (source.Length - l) >= LimitDistance;
+            return source.IsLessThan45Degree(target) && source.Length >= LimitDistance 
+                || (source.Length - OffsetDistance / Math.Sin(ang)) >= LimitDistance;
         }
     }
 }

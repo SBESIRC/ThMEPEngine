@@ -171,10 +171,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
              */
             var results = new List<ThLightEdge>();
             var centers = new List<Line>() { first, second };
-            var edges = GetCenterSideEdges(centers);
             // 对于没有边线的中心线，获取其符合条件的邻居
             var neibourDict = CreateNeibourDict(centers);
-
+            var edges = GetCenterSideEdges(centers);
+            edges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
             var firstEdge = MergeNeibour(first, neibourDict);
             var secondEdge = MergeNeibour(second, neibourDict);
             var branchEdge = MergeNeibour(branch, neibourDict);
