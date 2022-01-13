@@ -58,7 +58,15 @@ namespace ThMEPHVAC.FanConnect.Command
                     //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                     ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
                     var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-
+                    if (lineColl.Polygonize().Count > 0)
+                    {
+                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
+                        return;
+                    }
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt.Inverse());
+                    }
                     var tmpLines = new List<Line>();
                     foreach (var l in lineColl)
                     {
@@ -85,7 +93,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
                     }
-
                     //提取结点标记
                     var pipeDims = ThEquipElementExtractService.GetPipeDims("H-PIPE-APPE");
                     if (ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
@@ -105,21 +112,40 @@ namespace ThMEPHVAC.FanConnect.Command
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref chrPipes);
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref rPipes);
                     }
-
-                    if(ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
+                    if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                     {
                         //提取各种线
                         var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
                     }
 
+                    var remSurplusPipe = new ThRemSurplusPipe()
+                    {
+                        StartPoint = startPt,
+                        AllLine = pipes,
+                        AllFan = fcus
+                    };
+                    pipes = remSurplusPipe.RemSurplusPipe();
+                    //构建Tree
+                    ThFanTreeModel tmpModel = new ThFanTreeModel(startPt, pipes, space);
+                    if (tmpModel.RootNode == null)
+                    {
+                        return;
+                    }
+                    //标记4通结点
+                    ThFanConnectUtils.FindFourWay(tmpModel.RootNode);
+                    //
+                    foreach (var fcu in fcus)
+                    {
+                        ThFanConnectUtils.FindFcuNode(tmpModel.RootNode, fcu.FanPoint);
+                    }
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                     pipeExtendServiece.ConfigInfo = ConfigInfo;
-                    pipeExtendServiece.PipeExtend(treeModel);
+                    pipeExtendServiece.PipeExtend(tmpModel);
 
                     //计算流量
-                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
+                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(tmpModel.RootNode, fcus);
                     if (pointTreeModel.RootNode == null)
                     {
                         return;

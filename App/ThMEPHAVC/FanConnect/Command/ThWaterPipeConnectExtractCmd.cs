@@ -123,8 +123,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         line.TransformBy(mt.Inverse());
                         tmpLines.Add(line);
                     }
-
-
                     //获取剪力墙
                     var shearWalls = ThBuildElementExtractService.GetShearWalls();
                     //获取结构柱
@@ -154,12 +152,6 @@ namespace ThMEPHVAC.FanConnect.Command
                         pipeService.AddObstacleRoom(room);
                     }
                     var plines = pipeService.CreatePipeLine(0);
-                    var toDbServiece = new ThFanToDBServiece();
-                    foreach (var pl in plines)
-                    {
-                        toDbServiece.InsertEntity(pl, "AI-水管路由");
-                    }
-
                     //添加需求ID:1001796
                     var allLines = new List<Line>();
                     allLines.AddRange(pipes);
@@ -179,6 +171,12 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllFan = tmpFcus
                     };
                     remSurplusPipe.RemSurplusPipe();
+                    var toDbServiece = new ThFanToDBServiece();
+                    foreach (var pl in plines)
+                    {
+                        toDbServiece.InsertEntity(pl, "AI-水管路由");
+                    }
+                    
                     return;
                 }
             }

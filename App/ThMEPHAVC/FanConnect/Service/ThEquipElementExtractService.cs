@@ -57,7 +57,7 @@ namespace ThMEPHVAC.FanConnect.Service
 
                 foreach(var l in tmpLines)
                 {
-                    if(l.Layer == layer && l.ColorIndex == colorIndex)
+                    if(l.Layer.ToUpper() == layer && l.ColorIndex == colorIndex)
                     {
                         if (l is Line)
                         {
