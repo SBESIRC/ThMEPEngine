@@ -13,33 +13,30 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
             if (cur.Equals(target))//找到目标点，返回最终路径
             {
                 var rstPath = new List<Point3dEx>(tempPath);
+                //rstPaths.Add(rstPath);//把当前路径加入
                 var flag = true;
-                if(rstPath.Count < 5)
+                if (rstPath.Count < 20)
                 {
                     return false;
                 }
-                if(rstPaths.Count == 0)//主环数为0
+                if (rstPaths.Count == 0)//主环数为0
                 {
                     rstPaths.Add(rstPath);//把当前路径加入
-                    if(rstPath.Count > 100)
-                    {
-                        return true;
-                    }
                 }
                 else//存在主环
                 {
-                    foreach(var tmpPath in rstPaths.ToArray())//主环遍历
+                    foreach (var tmpPath in rstPaths.ToArray())//主环遍历
                     {
-                        if(tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())//存在同起点和终点的主环
+                        if (tmpPath[0] == rstPath[0] && tmpPath.Last() == rstPath.Last())//存在同起点和终点的主环
                         {
-                            if(tmpPath.Count < rstPath.Count)//取点数多的
+                            if (tmpPath.Count < rstPath.Count)//取点数多的
                             {
                                 rstPaths.Remove(tmpPath);
                                 rstPaths.Add(rstPath);
                                 flag = false;
-                                foreach(var pt in tmpPath)//额外的点加入列表
+                                foreach (var pt in tmpPath)//额外的点加入列表
                                 {
-                                    if(!rstPath.Contains(pt))
+                                    if (!rstPath.Contains(pt))
                                     {
                                         extraNodes.Add(pt);
                                     }
@@ -58,7 +55,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                             }
                         }
                     }
-                    if(flag)
+                    if (flag)
                     {
                         rstPaths.Add(rstPath);
                     }
