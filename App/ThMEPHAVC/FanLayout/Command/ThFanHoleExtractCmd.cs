@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -76,6 +77,7 @@ namespace ThMEPHVAC.FanLayout.Command
                     }
                 }
                 point1 = Active.Editor.GetPoint(tips1);
+
             }
             if(point1.Status!= PromptStatus.OK)
             {
@@ -94,7 +96,7 @@ namespace ThMEPHVAC.FanLayout.Command
                 return false;
             }
 
-            pts = Tuple.Create(point1.Value, point2.Value);
+            pts = Tuple.Create(point1.Value.TransformBy(Active.Editor.UCS2WCS()), point2.Value.TransformBy(Active.Editor.UCS2WCS()));
             return true;
         }
         public override void SubExecute()
