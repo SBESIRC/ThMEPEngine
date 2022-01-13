@@ -613,6 +613,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 {
                     results.Add(e);
                 }
+                else if (partition.IsContains(e.Edge.StartPoint) || partition.IsContains(e.Edge.EndPoint))
+                {
+                    results.Add(e);
+                }
             });
             return results;
         }
