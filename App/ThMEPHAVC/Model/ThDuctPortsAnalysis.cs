@@ -399,11 +399,17 @@ namespace ThMEPHVAC.Model
         }
         private void SetMainDuctSize()
         {
-            foreach (SegInfo info in mainLinesInfos.Values)
+            var infos = mainLinesInfos.Values.ToList();
+            int idx = infos.Count - 1;
+            string limit = portParam.param.inDuctSize;
+            // 倒着遍历，从根到末端设置管段
+            for (int i = idx; i >= 0; --i)
             {
+                var info = infos[i];
                 if (!String.IsNullOrEmpty(info.ductSize))
                     continue;//根管段
-                info.ductSize = SelectASize(info.airVolume, portParam.param.inDuctSize);
+                info.ductSize = SelectASize(info.airVolume, limit);
+                limit = info.ductSize;
             }
         }
         private string SelectASize(double airVolume, string favorite)
