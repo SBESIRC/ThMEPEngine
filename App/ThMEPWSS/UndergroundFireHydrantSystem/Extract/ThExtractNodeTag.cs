@@ -20,18 +20,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
+                try
+                {
+                    Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
                    .Where(o => IsNode(o.GetEffectiveName()));
-                if(Results.GetEnumerator().Current is null)
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                    DBobj = spatialIndex.SelectCrossingPolygon(polygon);
+
+                    return DBobj;
+                }
+                catch (Exception ex)
                 {
                     return new DBObjectCollection();
                 }
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBobj = spatialIndex.SelectCrossingPolygon(polygon);
-
-                return DBobj;
             }
         }
 
