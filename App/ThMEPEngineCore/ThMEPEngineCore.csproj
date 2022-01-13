@@ -117,6 +117,7 @@
     <Compile Include="Algorithm\GraphDomain\IGraphNode.cs" />
     <Compile Include="Algorithm\GraphDomain\PointGraphNode.cs" />
     <Compile Include="Algorithm\ThMEPConcaveBuilder.cs" />
+    <Compile Include="Algorithm\ThMEPFrameComparer.cs" />
     <Compile Include="Algorithm\ThMEPFittingLinetoPoints.cs" />
     <Compile Include="Algorithm\ThMEPMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPPolygonService.cs" />
