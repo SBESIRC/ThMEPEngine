@@ -66,12 +66,9 @@ namespace ThMEPLighting.Garage.Engine
         private void Filter(ThRegionBorder regionBorder)
         {
             // 对于较短的灯线且一段未连接任何线，另一端连接在线上
-            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
-                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
-            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
-                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
-            regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(
-                regionBorder.DxCenterLines, ArrangeParameter.LampLength);
+            var limitLength = ArrangeParameter.LampLength + ArrangeParameter.Margin * 2;
+            var filter = new ThShortCenterLineFilter(limitLength, 0.0);
+            regionBorder.DxCenterLines = filter.Filter(regionBorder.DxCenterLines);
         }
         private List<ThLightEdge> BuildEdges(Dictionary<Line, List<Point3d>> edgePoints)
         {
@@ -84,7 +81,6 @@ namespace ThMEPLighting.Garage.Engine
             });
             return lightEdges;
         }
-
         private List<Point3d> LayoutPoints(ThRegionBorder regionBorder)
         {
             // Curve 仅支持Line，和Line组成的多段线

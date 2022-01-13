@@ -44,13 +44,9 @@ namespace ThMEPLighting.Garage.Engine
         private void Filter(ThRegionBorder regionBorder)
         {
             // 对于较短的灯线且一段未连接任何线，另一端连接在线上
-            double filterLength = ArrangeParameter.LampLength + ArrangeParameter.DoubleRowOffsetDis / 2.0;
-            regionBorder.DxCenterLines = ThFilterTTypeCenterLineService.Filter(
-                regionBorder.DxCenterLines, filterLength);
-            regionBorder.DxCenterLines = ThFilterMainCenterLineService.Filter(
-                regionBorder.DxCenterLines, filterLength);
-            regionBorder.DxCenterLines = ThFilterElbowCenterLineService.Filter(
-                regionBorder.DxCenterLines, filterLength);
+            var limitLength = ArrangeParameter.LampLength + ArrangeParameter.Margin * 2;
+            var filter = new ThShortCenterLineFilter(limitLength, ArrangeParameter.DoubleRowOffsetDis / 2.0);
+            regionBorder.DxCenterLines = filter.Filter(regionBorder.DxCenterLines);
         }
     }
 }
