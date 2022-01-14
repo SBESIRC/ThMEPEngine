@@ -57,7 +57,7 @@ namespace ThMEPElectrical.AFAS.Data
             var geos = new List<ThGeometry>();
             DetectionRegion.ForEach(o =>
             {
-                if (o.GetArea() > tol)
+                if (o.EntityArea() > tol)
                 {
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);

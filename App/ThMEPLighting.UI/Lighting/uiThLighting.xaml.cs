@@ -5,7 +5,7 @@ using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPLighting.Garage;
 using ThMEPLighting.Command;
-using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.ViewModel;
 
 namespace TianHua.Lighting.UI
 {

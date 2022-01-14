@@ -55,6 +55,10 @@ namespace ThMEPEngineCore.ConnectWiring
             var data = GetData(holes, outFrame, block, !wall, !column);
 
             var CenterLine = new List<ThGeometry>();
+            if (Convert.ToInt16(Application.GetSystemVariable("USERR3")) == 1)
+            {
+                CenterLine = GetCenterLinePolylines(out DBObjectCollection objs);
+            }
             foreach (var info in configInfo)
             {
                 var blockInfos = info.loopInfoModels.First().blocks;
@@ -81,27 +85,25 @@ namespace ThMEPEngineCore.ConnectWiring
                     };
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(CenterLine);
-                    
                     allDatas.AddRange(blockGeos);
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
 
-#if DEBUG
+                    if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
 
                         string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
                         File.WriteAllText(path, dataGeoJson);
                     }
-#endif
+
                     //--------------处理中
                     var outJson = thCableRouter.RouteCable(dataGeoJson, context);
 
-#if DEBUG
+                    if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
                         string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
                         File.WriteAllText(path, outJson);
                     }
-#endif
 
                     if (!outJson.Contains("error"))
                     {

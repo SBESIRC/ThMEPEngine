@@ -62,7 +62,7 @@ namespace ThMEPLighting.IlluminationLighting.Service
                 }
                 else if (roomName != "")
                 {
-                    var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
+                    var tagList = RoomConfigTreeService.GetRoomTag(roomTableTree, roomName);
                     if (tagList.Contains(normalTag) && tagList.Contains(evacuationTag))
                     {
                         typeInt = ThIlluminationCommon.LayoutType.normalEvac;

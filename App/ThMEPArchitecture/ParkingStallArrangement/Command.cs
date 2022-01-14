@@ -19,6 +19,8 @@ using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -56,7 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Run(currentDb);
+                    RunWithWindmillSeglineSupported(currentDb);
                 }
             }
             catch (Exception ex)
@@ -163,6 +165,87 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             var solution = rst.First();
             histories.Add(rst.First());
+            for (int k = 0; k < histories.Count; k++)
+            {
+                layoutPara.Set(histories[k].Genome);
+                var layerNames = "solutions" + k.ToString();
+                using (AcadDatabase adb = AcadDatabase.Active())
+                {
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                    }
+                    catch { }
+                }
+
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                {
+                    ParkingPartition partition = new ParkingPartition();
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    {
+                        try
+                        {
+                            partition.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            partition.Dispose();
+                        }
+                    }
+                }
+            }
+            layoutPara.Set(solution.Genome);
+            Draw.DrawSeg(solution);
+            //layoutPara.Dispose();
+        }
+
+        public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
+        {
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara);
+            if (!dataprocessingFlag) return;
+            ParkingStallGAGenerator geneAlgorithm = null;
+
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
+
+                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+                if (iterationCnt.Status != PromptStatus.OK) return;
+
+                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+                if (popSize.Status != PromptStatus.OK) return;
+
+                ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
+                parameterViewModel.IterationCount = iterationCnt.Value;
+                parameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
+            }
+            else
+            {
+                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
+            geneAlgorithm.Logger = Logger;
+
+            var rst = new List<Chromosome>();
+            var histories = new List<Chromosome>();
+            bool recordprevious = false;
+            try
+            {
+                //rst = geneAlgorithm.Run(histories, recordprevious);
+                rst = geneAlgorithm.Run2(histories, recordprevious);
+            }
+            catch
+            {
+                ;
+            }
+            var solution = rst.First();
+            histories.Add(rst.First());
+            var parkingStallCount = solution.ParkingStallCount;
+            ParkingSpace.GetSingleParkingSpace(Logger,  layoutPara, parkingStallCount);
+
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);

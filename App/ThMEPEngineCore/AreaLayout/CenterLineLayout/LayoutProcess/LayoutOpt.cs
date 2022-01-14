@@ -331,7 +331,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                 //在未覆盖区域附近加点
                 foreach (Entity obj in unCoverRegion.ToDbCollection())
                 {
-                    if (obj.GetArea() > 500000)
+                    if (obj.EntityArea() > 500000)
                     {
                         DrawUtils.ShowGeometry(obj, "l3Blind", 3);
                         flag = true;

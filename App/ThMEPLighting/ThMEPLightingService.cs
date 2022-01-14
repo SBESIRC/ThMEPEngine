@@ -18,6 +18,7 @@ namespace ThMEPLighting
         static ThMEPLightingService() { }
         internal ThMEPLightingService() 
         {
+            LanelineLayers = new List<string>();
             LightArrangeUiParameter = new ThLightArrangeUiParameter();
         }
         public static ThMEPLightingService Instance { get { return instance; } }
@@ -75,5 +76,9 @@ namespace ThMEPLighting
             }
             return thFireAlarms;
         }
+        /// <summary>
+        /// 车道线使用的
+        /// </summary>
+        public List<string> LanelineLayers { get; set; }
     }
 }

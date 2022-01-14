@@ -251,6 +251,17 @@ namespace ThMEPHVAC.FanLayout.Service
                 entity.ColorIndex = (int)ColorIndex.BYLAYER;
             }
         }
+        public void InsertEntity(Entity entity, string layer,int colorIndex)
+        {
+            using (var database = AcadDatabase.Active())
+            {
+                database.ModelSpace.Add(entity);
+                entity.Layer = layer;
+                entity.Linetype = "ByLayer";
+                entity.LineWeight = LineWeight.ByLayer;
+                entity.ColorIndex = colorIndex;
+            }
+        }
         public void InsertPipeMark(string layer, string blockName, Point3d position,double angle,List<string> properties)
         {
             using (var database = AcadDatabase.Active())

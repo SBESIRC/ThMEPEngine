@@ -3165,6 +3165,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
+            geoData.StoreyItems.AddRange(storeysItems);
+            geoData.StoreyInfos.AddRange(storeys);
             DrainageService.CollectGeoData(adb, geoData, ctx);
             geoData.Flush();
         }
@@ -3193,7 +3195,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
+            geoData.StoreyInfos.AddRange(storeys);
             DrainageService.CollectGeoData(range, adb, geoData);
+            geoData.StoreyItems.AddRange(storeysItems);
             geoData.Flush();
         }
         public static void DrawDrainageSystemDiagram(DrainageSystemDiagramViewModel viewModel, bool focus)
@@ -3619,6 +3623,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         if (s == THESAURUSREGION)
                         {
                             var drData = drDatas[i];
+                            if (drData.HasOutletWrappingPipe.Contains(label)) return THESAURUSOBSTINACY;
                             return drData.OutletWrappingPipeDict.ContainsValue(label);
                         }
                     }
@@ -5419,6 +5424,73 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     geoData.DLines.AddRange(TempGeoFac.GetMinConnSegs(lst.Where(x => x.IsValid).Distinct().ToList()));
                 }
             }
+            foreach (var group in adb.Groups)
+            {
+                var lst = new List<Geometry>();
+                foreach (var id in group.GetAllEntityIds())
+                {
+                    var entity = adb.Element<Entity>(id);
+                    var dxfName = entity.GetRXClass().DxfName.ToUpper();
+                    if (entity.Layer is THESAURUSCONTROVERSY)
+                    {
+                        if (entity is Line line && line.Length > THESAURUSSTAMPEDE)
+                        {
+                            var seg = line.ToGLineSegment();
+                            if (seg.IsValid) lst.Add(seg.ToLineString());
+                            continue;
+                        }
+                        else if (entity is Polyline pl)
+                        {
+                            foreach (var ln in pl.ExplodeToDBObjectCollection().OfType<Line>())
+                            {
+                                var seg = ln.ToGLineSegment();
+                                if (seg.IsValid) lst.Add(seg.ToLineString());
+                            }
+                            continue;
+                        }
+                    }
+                    if (dxfName is DISORGANIZATION && GetEffectiveLayer(entity.Layer) is THESAURUSCONTROVERSY)
+                    {
+                        dynamic o = entity;
+                        var seg = new GLineSegment((Point3d)o.StartPoint, (Point3d)o.EndPoint);
+                        if (seg.IsValid) lst.Add(seg.ToLineString());
+                        continue;
+                    }
+                    var bd = entity.Bounds.ToGRect();
+                    if (bd.IsValid)
+                    {
+                        lst.Add(bd.ToPolygon());
+                        continue;
+                    }
+                    else
+                    {
+                        var ext = new Extents3d();
+                        try
+                        {
+                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>())
+                            {
+                                if (e.Bounds.HasValue)
+                                {
+                                    var v = e.Bounds.Value;
+                                    var r = v.ToGRect();
+                                    if (r.IsValid)
+                                    {
+                                        ext.AddExtents(v);
+                                    }
+                                }
+                            }
+                        }
+                        catch { }
+                        bd = ext.ToGRect();
+                        if (bd.IsValid && bd.Width < ALSOMONOSIPHONIC && bd.Height < ALSOMONOSIPHONIC)
+                        {
+                            lst.Add(bd.ToPolygon());
+                            continue;
+                        }
+                    }
+                }
+                if (lst.Count > THESAURUSSTAMPEDE) geoData.Groups.Add(lst);
+            }
             foreach (var entity in adb.ModelSpace.OfType<Entity>())
             {
                 {
@@ -6223,6 +6295,21 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         }).Count();
                     }
                     {
+                        var pts = lbDict.Where(x => IsDraiLabel(x.Value)).Select(x => x.Key.GetCenter().ToNTSPoint().Tag(x.Key)).ToList();
+                        var ptsf = GeoFac.CreateIntersectsSelector(pts);
+                        foreach (var g in geoData.Groups)
+                        {
+                            var geo = g.ToGeometry();
+                            if (wrappingPipesf(geo).Any())
+                            {
+                                foreach (var pt in ptsf(geo))
+                                {
+                                    drData.HasOutletWrappingPipe.Add(lbDict[pt.UserData as Geometry]);
+                                }
+                            }
+                        }
+                    }
+                    {
                         drData.OutletWrappingPipeDict = outletWrappingPipe;
                     }
                 }
@@ -6255,6 +6342,25 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     }
                 }
                 exItem.LabelDict = lbDict.Select(x => new Tuple<Geometry, string>(x.Key, x.Value)).ToList();
+                if (geoData.StoreyItems[si].Labels?.Contains(THESAURUSREGION) ?? INTRAVASCULARLY)
+                {
+                    for (int i = THESAURUSSTAMPEDE; i < geoData.StoreyItems.Count; i++)
+                    {
+                        if ((geoData.StoreyItems[i].Labels?.Contains(HYDROCHLOROFLUOROCARBON) ?? INTRAVASCULARLY) && i != si)
+                        {
+                            var v = geoData.StoreyInfos[i].ContraPoint - geoData.StoreyInfos[si].ContraPoint;
+                            foreach (var kv in lbDict)
+                            {
+                                if (IsFL(kv.Value) && !IsFL0(kv.Value))
+                                {
+                                    var p1 = kv.Key.GetCenter();
+                                    var p2 = p1 + v;
+                                    DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                                }
+                            }
+                        }
+                    }
+                }
                 var FLs = new List<Geometry>();
                 var FL0s = new List<Geometry>();
                 var pls = new List<Geometry>();
@@ -6770,6 +6876,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public HashSet<string> Merges;
         public Dictionary<int, string> OutletWrappingPipeDict;
         public Dictionary<int, string> OutletWrappingPipeRadiusStringDict;
+        public HashSet<string> HasOutletWrappingPipe;
         public HashSet<string> Shunts;
         public HashSet<string> _4tunes;
         public HashSet<string> HasRainPortSymbolsForFL0;
@@ -6794,10 +6901,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             Merges ??= new HashSet<string>();
             OutletWrappingPipeDict ??= new Dictionary<int, string>();
             OutletWrappingPipeRadiusStringDict ??= new Dictionary<int, string>();
+            HasOutletWrappingPipe ??= new HashSet<string>();
         }
     }
     public class DrainageGeoData
     {
+        public List<StoreyItem> StoreyItems;
         public List<GRect> Storeys;
         public List<KeyValuePair<string, Geometry>> RoomData;
         public List<CText> Labels;
@@ -6827,6 +6936,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<StoreyInfo> StoreyInfos;
         public List<GRect> zbqs;
         public List<GRect> xsts;
+        public List<List<Geometry>> Groups;
         public void Init()
         {
             Storeys ??= new List<GRect>();
@@ -6858,6 +6968,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             WrappingPipeLabelLines ??= new List<GLineSegment>();
             WrappingPipeLabels ??= new List<CText>();
             StoreyInfos ??= new List<StoreyInfo>();
+            Groups ??= new List<List<Geometry>>();
+            StoreyItems ??= new List<StoreyItem>();
         }
         Dictionary<Point2d, string> floorDrainTypeDict;
         public void UpdateFloorDrainTypeDict(Point2d bd, string v)
@@ -7682,11 +7794,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string CYLINDRICALNESS = "坐便器";
         public const int THESAURUSASSURANCE = 505;
         public const int DETERMINATENESS = 239;
+        public const double ALSOMONOSIPHONIC = 3e4;
         public const string THESAURUSSTRAIGHTFORWARD = "废水立管";
         public const string THESAURUSEMPTINESS = "污水立管";
         public const string THESAURUSHYPOCRISY = "污废合流立管";
         public const string THESAURUSRECIPE = "沉箱立管";
         public const string THESAURUSRAFFLE = "通气立管";
+        public const string HYDROCHLOROFLUOROCARBON = "2F";
         public static bool IsToilet(string roomName)
         {
             var roomNameContains = new List<string>
@@ -7762,6 +7876,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         {
             if (label == null) return INTRAVASCULARLY;
             return Regex.IsMatch(label, DIASTEREOISOMER);
+        }
+        public static bool IsDraiLabel(string label)
+        {
+            if (label == null) return INTRAVASCULARLY;
+            return (IsFL(label) && !IsFL0(label)) || IsPL(label) || IsTL(label) || IsDL(label);
         }
         public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
         {

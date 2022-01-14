@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ThMEPElectrical.AFAS;
-using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.IlluminationLighting
 {

@@ -126,34 +126,36 @@ namespace ThMEPLighting
                     return;
                 }
 
-                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
+                Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
+                { 
                     var frame = acdb.Element<BlockReference>(obj);
+                    var blk = frame.Clone() as BlockReference;
+                    var boundary = GetBlockInfo(blk).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
                     ObjectIdCollection dBObject = new ObjectIdCollection();
                     dBObject.Add(obj);
-                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
+                    frameLst.Add(boundary, dBObject);
                 }
 
+                var pt = frameLst.First().Key.StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frameBlock = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
-                    var originframe = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (originframe == null)
+                    //获取楼层框线和楼层信息
+                    var originframe = frameBlockDic.Key;
+                    var floor = dsFELGetPrimitivesService.GetFloorInfo(frameBlockId);
+                    if (originframe == null || floor.IsNull())
                     {
                         continue;
                     }
                     var frame = originframe.Clone() as Polyline;
-                    var pt = frame.StartPoint;
-                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                     originTransformer.Transform(frame);
                     var outFrame = ThMEPFrameService.Normalize(frame);
-
                     //清除原有构建
                     ClearComponentService.ClearExitBlock(outFrame, originTransformer);
 
-                    DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                     //获取房间
                     var rooms = dsFELGetPrimitivesService.GetRoomInfo(outFrame);
 
@@ -175,7 +177,7 @@ namespace ThMEPLighting
                     //布置
                     var thRooms = rooms.Select(x => x.Key).ToList();
                     LayoutService layoutService = new LayoutService();
-                    var paths = layoutService.LayoutFELService(thRooms, doors, centerLines, holes, originTransformer);
+                    var paths = layoutService.LayoutFELService(thRooms, doors, centerLines, holes, floor, originTransformer);
 
                     ////打印路径
                     //PrintPathService printService = new PrintPathService();

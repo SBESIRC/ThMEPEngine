@@ -1,8 +1,10 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -20,9 +22,7 @@ namespace ThMEPHVAC
         [CommandMethod("TIANHUACAD", "THSNJBZ", CommandFlags.Modal)]
         public void THIndoorFanLayout()
         {
-            //Step1 选择房间框线 获取房间内外轮廓信息
-            
-                var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
             var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,false);
             indoorFanLayout.Execute();
@@ -59,6 +59,16 @@ namespace ThMEPHVAC
                 return;
             ShowErrorRooms(cloudLines);
         }
+        [CommandMethod("TIANHUACAD", "THSNJDC", CommandFlags.Modal)]
+        public void THIndoorFanExport()
+        {
+            var fanChange = new ThHvacIndoorFanExportCmd();
+            fanChange.Execute();
+            var showMsg = fanChange.ShowMsg;
+            if (string.IsNullOrEmpty(showMsg))
+                return;
+            Active.Editor.WriteMessage(showMsg);
+        }
         [CommandMethod("TIANHUACAD", "THSNJArea", CommandFlags.Modal)]
         public void THIndoorFanTest()
         {
@@ -71,7 +81,7 @@ namespace ThMEPHVAC
         {
             using (var acdb = AcadDatabase.Active())
             {
-                var cloudIds = new List<ObjectId>();
+                var cloudIds = new Dictionary<ObjectId, Color>();
 
                 LayerTableRecord layerRecord = null;
                 foreach (var layer in acdb.Layers)
@@ -87,7 +97,7 @@ namespace ThMEPHVAC
                 if (layerRecord == null)
                 {
                     layerRecord = acdb.Layers.Create(layerName);
-                    layerRecord.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0); ;
+                    layerRecord.Color = Color.FromRgb(255, 0, 0); ;
                     layerRecord.IsPlottable = false;
                 }
                 foreach (var item in cloudLines)
@@ -96,12 +106,12 @@ namespace ThMEPHVAC
                     if (id == null || !id.IsValid)
                         continue;
                     item.Layer = layerName;
-                    cloudIds.Add(id);
+                    cloudIds.Add(id,item.Color);
                 }
                 ShowErrroPolylines(cloudIds);
             }
         }
-        private void ShowErrroPolylines(List<ObjectId> cloudLineIds) 
+        private void ShowErrroPolylines(Dictionary<ObjectId, Color> cloudLineIds) 
         {
             if (null == cloudLineIds || cloudLineIds.Count < 1)
                 return;
@@ -111,8 +121,9 @@ namespace ThMEPHVAC
             var oriLayer = Active.Database.Clayer;
             using (var acdb = AcadDatabase.Active())
             {
-                foreach (var id in cloudLineIds)
+                foreach (var keyValue in cloudLineIds)
                 {
+                    var id = keyValue.Key;
                     var pline = acdb.ModelSpace.Element(id);
                     if (null == pline)
                         continue;
@@ -143,7 +154,7 @@ namespace ThMEPHVAC
 
                     // 设置运行属性
                     var revcloudObj = acdb.Element<Entity>(revcloud, true);
-                    revcloudObj.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0);
+                    revcloudObj.Color = keyValue.Value;
                     revcloudObj.Layer = "AI-圈注";
                 }
             }
@@ -209,6 +220,7 @@ namespace ThMEPHVAC
             }
             return selectPLines;
         }
+        
         /// <summary>
         /// 计算外包框和其中的洞
         /// </summary>

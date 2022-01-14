@@ -33,6 +33,7 @@
     <Compile Include="DSFEL\ExitService\CalExitService.cs" />
     <Compile Include="DSFEL\LayoutService.cs" />
     <Compile Include="DSFEL\Model\ExitModel.cs" />
+    <Compile Include="DSFEL\Model\ExitRoomModel.cs" />
     <Compile Include="DSFEL\Model\FELModel.cs" />
     <Compile Include="DSFEL\Model\RoomInfoModel.cs" />
     <Compile Include="DSFEL\Service\CreateEvacuationPathService.cs" />
@@ -237,7 +238,7 @@
     <Compile Include="Common\ThGarageLightUtils.cs" />
     <Compile Include="IlluminationLighting\ThIlluminationCommon.cs" />
     <Compile Include="Command\ThLightingLayoutCommand.cs" />
-    <Compile Include="Lighting\LightingViewModel.cs" />
+    <Compile Include="ViewModel\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
     <Compile Include="ParkingStall\Business\Block\BlockInsertDBExtension.cs" />
@@ -322,6 +323,7 @@
     <Compile Include="IlluminationLighting\ThAFASIlluminateCmd.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThFEICmds.cs" />
+    <Compile Include="ThLaneLineCmds.cs" />
     <Compile Include="ThMEPWiringCmds.cs" />
     <Compile Include="ThMEPLightingService.cs" />
     <Compile Include="ThMEPGarageLightingCmds.cs" />

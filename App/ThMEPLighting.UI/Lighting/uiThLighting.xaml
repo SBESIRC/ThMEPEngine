@@ -16,7 +16,7 @@
                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                       xmlns:s="clr-namespace:System;assembly=mscorlib"
-                         xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
+                         xmlns:viewmodels="clr-namespace:ThMEPLighting.ViewModel;assembly=ThMEPLighting"
                                          Title="电气照明" SizeToContent="Manual" Height="650"
                                         Width="485" MaxWidth="600" MaxHeight="1000"
                          mc:Ignorable="d" Closing="ThCustomWindow_Closing">

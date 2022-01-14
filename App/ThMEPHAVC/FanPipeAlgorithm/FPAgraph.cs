@@ -34,10 +34,23 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
     public class graph
     {
+        //输入：排水管起点，终点，障碍物（图纸真实坐标）
+        public List<Point3d> real_end_points;
+        public Point3d real_start_point;
+        public List<edge> boundary;
+        public List<edge> hole;
+
+        //输出：管线变量
+        public List<edge> long_edges = new List<edge>();
+
+        //一图多用
+        public List<List<edge>> long_edges_list = new List<List<edge>>();
+        public List<List<Point3d>> important_pts_list = new List<List<Point3d>>();
+      
         //网格图
         public List<List<int>> board_0 = new List<List<int>>();
         public List<List<int>> start_distance = new List<List<int>>();
-        public int max_x, min_x, max_y, min_y;
+        public long max_x, min_x, max_y, min_y;
         public int width, height;
 
         //节点属性
@@ -48,12 +61,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
         public List<node> nodes_tmp = new List<node>();
         public Dictionary<node, int> indexmap_tmp = new Dictionary<node, int>();
 
-        //排水管起点，终点，障碍物 —— 图纸真实坐标
-        public List<Point3d> real_end_points;
-        public Point3d real_start_point;
-        public List<edge> boundary;
-        public List<edge> hole;
-
+ 
         //排水管起点，终点，障碍物 —— 区域网格坐标
 
         //List<Polyline> boundary;
@@ -64,10 +72,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
         public double space_min_x, space_min_y, space_max_x, space_max_y;
 
         //整理线条变量
-        public List<edge> long_edges = new List<edge>();
         public Dictionary<grid_point, List<int>> point_edge = new Dictionary<grid_point, List<int>>();
         public List<List<int>> edge_point = new List<List<int>>();
         public List<grid_point> new_node_list = new List<grid_point>(); 
+        
         //工具包
         tool tool0 = new tool();
 
@@ -163,31 +171,25 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             //获取min_x 和 max_x
             //待修改
+
+            List<Point3d> inter_points = new List<Point3d>();
+
             for (int i = 0; i < boundary.Count; i++)
             {
                 Point3d pt = new Point3d(boundary[i].rx1, boundary[i].ry1, 0);
-                if (pt.X > space_max_x)
-                {
-                    space_max_x = pt.X;
-                }
-                if (pt.X < space_min_x)
-                {
-                    space_min_x = pt.X;
-                }
-                if (pt.Y > space_max_y)
-                {
-                    space_max_y = pt.Y;
-                }
-                if (pt.Y < space_min_y)
-                {
-                    space_min_y = pt.Y;
-                }
+                inter_points.Add(pt);
             }
-
-
             for (int i = 0; i < hole.Count; i++)
             {
                 Point3d pt = new Point3d(hole[i].rx1, hole[i].ry1, 0);
+                inter_points.Add(pt);
+            }
+            inter_points.Add(real_start_point);
+
+
+            for (int i = 0; i < inter_points.Count; i++)
+            {
+                Point3d pt = inter_points[i];
                 if (pt.X > space_max_x)
                 {
                     space_max_x = pt.X;
@@ -210,10 +212,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             space_min_x = space_min_x - 1000;
             space_min_y = space_min_y - 1000;
 
-            min_x = (int)(space_min_x) / PublicValue.CELL;
-            max_x = (int)(space_max_x) / PublicValue.CELL;
-            min_y = (int)(space_min_y) / PublicValue.CELL;
-            max_y = (int)(space_max_y) / PublicValue.CELL;
+            min_x = (long)(space_min_x) / PublicValue.CELL;
+            max_x = (long)(space_max_x) / PublicValue.CELL;
+            min_y = (long)(space_min_y) / PublicValue.CELL;
+            max_y = (long)(space_max_y) / PublicValue.CELL;
 
             int start_x = (int)(real_start_point.X - space_min_x) / PublicValue.CELL;
             int start_y = (int)(real_start_point.Y - space_min_y) / PublicValue.CELL;
@@ -226,8 +228,8 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 end_points.Add(new grid_point(end_point_x, end_point_y));
             }
 
-            height = max_y - min_y + 10;
-            width = max_x - min_x + 10;
+            height = (int)(max_y - min_y + 10);
+            width = (int)(max_x - min_x + 10);
 
 
             //for (int i = 0; i < column.size(); i++)
@@ -1131,6 +1133,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             {
                 for (int j = 0; j < height; j++)
                 {
+                    //if (distance[i][j] != -1 && distance[i][j] != -100)
+                    //{
+                    //    distance[i][j] = 999999;
+                    //}
                     if (distance[i][j] != -1)
                     {
                         distance[i][j] = 999999;
@@ -1391,14 +1397,8 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
 
 
-
-
-
-
-
-
         //整线算法
-        public void analysis_edge_clear()
+        public void analysis_edge_clear(int index)
         {
             //工具包
             tool tool0 = new tool();
@@ -1411,10 +1411,20 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             initialize_board(ref tree_y, width, height, 0);
 
             List<edge> new_long_edges = new List<edge>();
+            List<edge> old_long_edges = new List<edge>();
 
-            for (int i = 0; i < long_edges.Count; i++)
+            if (index == -1)
             {
-                edge tmp_e = long_edges[i];
+                old_long_edges = long_edges;
+            }
+            else 
+            {
+                old_long_edges = long_edges_list[index]; 
+            }
+
+            for (int i = 0; i < old_long_edges.Count; i++)
+            {
+                edge tmp_e = old_long_edges[i];
                 if (tmp_e.x1 == tmp_e.x2 && tmp_e.y1 == tmp_e.y2) continue;
 
                 if (tmp_e.x1 == tmp_e.x2)
@@ -1533,7 +1543,15 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 }
             }
 
-            long_edges = new_long_edges;
+            if (index == -1)
+            {
+               long_edges = new_long_edges;
+            }
+            else
+            {
+                long_edges_list[index] = new_long_edges;
+            }
+
         }
 
         public void analysis_edge() 
@@ -1725,23 +1743,54 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             return flag;
         }
 
-        public void point_to_real() 
+        public void point_to_real(int index) 
         {
-            for (int i = 0; i < long_edges.Count; i++) 
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
             {
-                long_edges[i].rx1 = space_min_x + long_edges[i].x1 * PublicValue.CELL;
-                long_edges[i].ry1 = space_min_y + long_edges[i].y1 * PublicValue.CELL;
-                long_edges[i].rx2 = space_min_x + long_edges[i].x2 * PublicValue.CELL;
-                long_edges[i].ry2 = space_min_y + long_edges[i].y2 * PublicValue.CELL;
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
+
+            for (int i = 0; i < old_long_edges.Count; i++) 
+            {
+                if (PublicValue.center == 0)
+                {
+                    old_long_edges[i].rx1 = space_min_x + old_long_edges[i].x1 * PublicValue.CELL;
+                    old_long_edges[i].ry1 = space_min_y + old_long_edges[i].y1 * PublicValue.CELL;
+                    old_long_edges[i].rx2 = space_min_x + old_long_edges[i].x2 * PublicValue.CELL;
+                    old_long_edges[i].ry2 = space_min_y + old_long_edges[i].y2 * PublicValue.CELL;
+                }
+                else if(PublicValue.center == 1) 
+                {
+                    old_long_edges[i].rx1 = space_min_x + old_long_edges[i].x1 * PublicValue.CELL+150;
+                    old_long_edges[i].ry1 = space_min_y + old_long_edges[i].y1 * PublicValue.CELL+150;
+                    old_long_edges[i].rx2 = space_min_x + old_long_edges[i].x2 * PublicValue.CELL+150;
+                    old_long_edges[i].ry2 = space_min_y + old_long_edges[i].y2 * PublicValue.CELL+150;
+                }
             }
         }
 
-        public void find_point_edge_relation() 
+        public void find_point_edge_relation(int index) 
         {
-            for (int i = 0; i < long_edges.Count; i++) 
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
             {
-                grid_point pt1 = new grid_point(long_edges[i].x1, long_edges[i].y1);
-                grid_point pt2 = new grid_point(long_edges[i].x2, long_edges[i].y2);
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
+
+            for (int i = 0; i < old_long_edges.Count; i++) 
+            {
+                grid_point pt1 = new grid_point(old_long_edges[i].x1, old_long_edges[i].y1);
+                grid_point pt2 = new grid_point(old_long_edges[i].x2, old_long_edges[i].y2);
                 if (point_edge.ContainsKey(pt1) == false)
                 {
                     List<int> tmp = new List<int>();
@@ -1765,17 +1814,28 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
             new_node_list = point_edge.Keys.ToList<grid_point>();
 
-            find_edge_point_relation();
+            find_edge_point_relation(index);
         }
 
-        public void find_edge_point_relation()
+        public void find_edge_point_relation(int index)
         {
-            for (int i = 0; i < long_edges.Count; i++)
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
+
+            for (int i = 0; i < old_long_edges.Count; i++)
             {
                 List<int> tmp = new List<int>();
                 for(int j = 0; j < new_node_list.Count; j++) 
                 {
-                    if (on_edge(long_edges[i], new_node_list[j])) 
+                    if (on_edge(old_long_edges[i], new_node_list[j])) 
                     {
                         tmp.Add(j);
                     }
@@ -1784,63 +1844,73 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
         }
 
-        public void connect_edge() 
+        public void connect_edge(int index) 
         {
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
+
             try
             {
                 List<int> discarded_edge = new List<int>();
                 List<edge> new_edges = new List<edge>();
-                for (int i = 0; i < long_edges.Count; i++)
+                for (int i = 0; i < old_long_edges.Count; i++)
                 {
-                    if (long_edges[i].angle == 90 || discarded_edge.Contains(i)) continue;
-                    for (int j = i + 1; j < long_edges.Count; j++)
+                    if (old_long_edges[i].angle == 90 || discarded_edge.Contains(i)) continue;
+                    for (int j = i + 1; j < old_long_edges.Count; j++)
                     {
-                        if (long_edges[j].angle == 90 || discarded_edge.Contains(i) || discarded_edge.Contains(j)) continue;
-                        if (Math.Abs(long_edges[i].rx2 - long_edges[j].rx1) < 5)
+                        if (old_long_edges[j].angle == 90 || discarded_edge.Contains(i) || discarded_edge.Contains(j)) continue;
+                        if (Math.Abs(old_long_edges[i].rx2 - old_long_edges[j].rx1) < 5)
                         {
-                            if (Math.Abs(long_edges[i].ry1 - long_edges[j].ry2) < 500)
+                            if (Math.Abs(old_long_edges[i].ry1 - old_long_edges[j].ry2) < 500)
                             {
-                                double length1 = long_edges[i].rx2 - long_edges[i].rx1;
-                                double length2 = long_edges[j].rx2 - long_edges[j].rx1;
-                                if (length2 > length1 && !check_line_blocked(i, j, long_edges[i].angle))
+                                double length1 = old_long_edges[i].rx2 - old_long_edges[i].rx1;
+                                double length2 = old_long_edges[j].rx2 - old_long_edges[j].rx1;
+                                if (length2 > length1 && !check_line_blocked(i, j, old_long_edges[i].angle,index))
                                 {
                                     //edge[i] 要被删除了，需要将其他连接点都调整到新的边上
-                                    long_edges[j].rx1 = long_edges[i].rx1;
-                                    long_edges[j].x1 = long_edges[i].x1;
+                                    old_long_edges[j].rx1 = old_long_edges[i].rx1;
+                                    old_long_edges[j].x1 = old_long_edges[i].x1;
 
                                     //i是要被删除的
-                                    delete_edge(i, j, long_edges[i].angle);
+                                    delete_edge(i, j, old_long_edges[i].angle,index);
                                     discarded_edge.Add(i);
                                 }
                                 else
                                 {
-                                    if (check_line_blocked(j, i, long_edges[i].angle)) continue;
-                                    long_edges[i].rx2 = long_edges[j].rx2;
-                                    long_edges[i].x2 = long_edges[j].x2;
-                                    delete_edge(j, i, long_edges[i].angle);
+                                    if (check_line_blocked(j, i, old_long_edges[i].angle,index)) continue;
+                                    old_long_edges[i].rx2 = old_long_edges[j].rx2;
+                                    old_long_edges[i].x2 = old_long_edges[j].x2;
+                                    delete_edge(j, i, old_long_edges[i].angle,index);
                                     discarded_edge.Add(j);
                                 }
                             }
                         }
-                        else if (Math.Abs(long_edges[i].rx1 - long_edges[j].rx2) < 5)
+                        else if (Math.Abs(old_long_edges[i].rx1 - old_long_edges[j].rx2) < 5)
                         {
-                            if (Math.Abs(long_edges[i].ry1 - long_edges[j].ry2) < 500)
+                            if (Math.Abs(old_long_edges[i].ry1 - old_long_edges[j].ry2) < 500)
                             {
-                                double length1 = long_edges[i].rx2 - long_edges[i].rx1;
-                                double length2 = long_edges[j].rx2 - long_edges[j].rx1;
-                                if (length2 > length1 && !check_line_blocked(i, j, long_edges[i].angle))
+                                double length1 = old_long_edges[i].rx2 - old_long_edges[i].rx1;
+                                double length2 = old_long_edges[j].rx2 - old_long_edges[j].rx1;
+                                if (length2 > length1 && !check_line_blocked(i, j, old_long_edges[i].angle,index))
                                 {
-                                    long_edges[j].rx2 = long_edges[i].rx2;
-                                    long_edges[j].x2 = long_edges[i].x2;
-                                    delete_edge(i, j, long_edges[i].angle);
+                                    old_long_edges[j].rx2 = old_long_edges[i].rx2;
+                                    old_long_edges[j].x2 = old_long_edges[i].x2;
+                                    delete_edge(i, j, old_long_edges[i].angle,index);
                                     discarded_edge.Add(i);
                                 }
                                 else
                                 {
-                                    if (check_line_blocked(j, i, long_edges[i].angle)) continue;
-                                    long_edges[i].rx1 = long_edges[j].rx1;
-                                    long_edges[i].x1 = long_edges[j].x1;
-                                    delete_edge(j, i, long_edges[i].angle);
+                                    if (check_line_blocked(j, i, old_long_edges[i].angle,index)) continue;
+                                    old_long_edges[i].rx1 = old_long_edges[j].rx1;
+                                    old_long_edges[i].x1 = old_long_edges[j].x1;
+                                    delete_edge(j, i, old_long_edges[i].angle,index);
                                     discarded_edge.Add(j);
                                 }
                             }
@@ -1848,55 +1918,55 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     }
                 }
 
-                for (int i = 0; i < long_edges.Count; i++)
+                for (int i = 0; i < old_long_edges.Count; i++)
                 {
-                    if (long_edges[i].angle == 0 || discarded_edge.Contains(i)) continue;
-                    for (int j = i + 1; j < long_edges.Count; j++)
+                    if (old_long_edges[i].angle == 0 || discarded_edge.Contains(i)) continue;
+                    for (int j = i + 1; j < old_long_edges.Count; j++)
                     {
-                        if (long_edges[j].angle == 0 || discarded_edge.Contains(i) || discarded_edge.Contains(j)) continue;
-                        if (Math.Abs(long_edges[i].ry2 - long_edges[j].ry1) < 5)
+                        if (old_long_edges[j].angle == 0 || discarded_edge.Contains(i) || discarded_edge.Contains(j)) continue;
+                        if (Math.Abs(old_long_edges[i].ry2 - old_long_edges[j].ry1) < 5)
                         {
-                            if (Math.Abs(long_edges[i].rx1 - long_edges[j].rx2) < 500)
+                            if (Math.Abs(old_long_edges[i].rx1 - old_long_edges[j].rx2) < 500)
                             {
-                                double length1 = long_edges[i].ry2 - long_edges[i].ry1;
-                                double length2 = long_edges[j].ry2 - long_edges[j].ry1;
-                                if (length2 > length1 && !check_line_blocked(i, j, long_edges[i].angle))
+                                double length1 = old_long_edges[i].ry2 - old_long_edges[i].ry1;
+                                double length2 = old_long_edges[j].ry2 - old_long_edges[j].ry1;
+                                if (length2 > length1 && !check_line_blocked(i, j, old_long_edges[i].angle,index))
                                 {
                                    
-                                    long_edges[j].ry1 = long_edges[i].ry1;
-                                    long_edges[j].y1 = long_edges[i].y1;
-                                    delete_edge(i, j, long_edges[i].angle);
+                                    old_long_edges[j].ry1 = old_long_edges[i].ry1;
+                                    old_long_edges[j].y1 = old_long_edges[i].y1;
+                                    delete_edge(i, j, old_long_edges[i].angle,index);
                                     discarded_edge.Add(i);
                                 }
                                 else
                                 {
-                                    if (check_line_blocked(j, i, long_edges[i].angle)) continue;
-                                    long_edges[i].ry2 = long_edges[j].ry2;
-                                    long_edges[i].y2 = long_edges[j].y2;
-                                    delete_edge(j, i, long_edges[i].angle);
+                                    if (check_line_blocked(j, i, old_long_edges[i].angle,index)) continue;
+                                    old_long_edges[i].ry2 = old_long_edges[j].ry2;
+                                    old_long_edges[i].y2 = old_long_edges[j].y2;
+                                    delete_edge(j, i, old_long_edges[i].angle,index);
                                     discarded_edge.Add(j);
                                 }
                             }
                         }
-                        else if (Math.Abs(long_edges[i].ry1 - long_edges[j].ry2) < 5)
+                        else if (Math.Abs(old_long_edges[i].ry1 - old_long_edges[j].ry2) < 5)
                         {
-                            if (Math.Abs(long_edges[i].rx1 - long_edges[j].rx2) < 500)
+                            if (Math.Abs(old_long_edges[i].rx1 - old_long_edges[j].rx2) < 500)
                             {
-                                double length1 = long_edges[i].ry2 - long_edges[i].ry1;
-                                double length2 = long_edges[j].ry2 - long_edges[j].ry1;
-                                if (length2 > length1 && !check_line_blocked(i, j, long_edges[i].angle))
+                                double length1 = old_long_edges[i].ry2 - old_long_edges[i].ry1;
+                                double length2 = old_long_edges[j].ry2 - old_long_edges[j].ry1;
+                                if (length2 > length1 && !check_line_blocked(i, j, old_long_edges[i].angle,index))
                                 {                                    
-                                    long_edges[j].ry1 = long_edges[i].ry1;
-                                    long_edges[j].y1 = long_edges[i].y1;
-                                    delete_edge(i, j, long_edges[i].angle);
+                                    old_long_edges[j].ry1 = old_long_edges[i].ry1;
+                                    old_long_edges[j].y1 = old_long_edges[i].y1;
+                                    delete_edge(i, j, old_long_edges[i].angle,index);
                                     discarded_edge.Add(i);
                                 }
                                 else
                                 {
-                                    if (check_line_blocked(j, i, long_edges[i].angle)) continue;
-                                    long_edges[i].ry1 = long_edges[j].ry1;
-                                    long_edges[i].y1 = long_edges[j].y1;
-                                    delete_edge(j, i, long_edges[i].angle);
+                                    if (check_line_blocked(j, i, old_long_edges[i].angle,index)) continue;
+                                    old_long_edges[i].ry1 = old_long_edges[j].ry1;
+                                    old_long_edges[i].y1 = old_long_edges[j].y1;
+                                    delete_edge(j, i, old_long_edges[i].angle,index);
                                     discarded_edge.Add(j);
                                 }
                             }
@@ -1904,16 +1974,26 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     }
                 }
 
-                for (int i = 0; i < long_edges.Count; i++)
+                for (int i = 0; i < old_long_edges.Count; i++)
                 {
-                    if (discarded_edge.Contains(i) == false && (long_edges[i].x1 != long_edges[i].x2 || long_edges[i].y1 != long_edges[i].y2))
+                    if (discarded_edge.Contains(i) == false && (old_long_edges[i].x1 != old_long_edges[i].x2 || old_long_edges[i].y1 != old_long_edges[i].y2))
                     {
-                        new_edges.Add(long_edges[i]);
+                        new_edges.Add(old_long_edges[i]);
                     }
                 }
 
-                long_edges = new_edges;
+
+                if (index == -1)
+                {
+                    long_edges = new_edges;
+                }
+                else
+                {
+                    long_edges_list[index] = new_edges;
+                }
+
             }
+
             catch (Exception ex)
             {
 
@@ -1922,15 +2002,25 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
         }
 
-        public bool check_line_blocked(int i ,int j ,int angle)
+        public bool check_line_blocked(int i ,int j ,int angle,int index)
         {
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
 
             bool flag = false;
             if (angle == 0) 
             {
-                int fixed_axis = long_edges[j].y1;
-                int start = Math.Min(long_edges[i].x1, long_edges[j].x1);
-                int end = Math.Max(long_edges[i].x2, long_edges[j].x2);
+                int fixed_axis = old_long_edges[j].y1;
+                int start = Math.Min(old_long_edges[i].x1, old_long_edges[j].x1);
+                int end = Math.Max(old_long_edges[i].x2, old_long_edges[j].x2);
                 for (int n = start; n <= end; n++) 
                 {
                     if (board_0[n][fixed_axis] != 0) 
@@ -1943,9 +2033,9 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             }
             else if(angle == 90)
             {
-                int fixed_axis = long_edges[j].x1;
-                int start = Math.Min(long_edges[i].y1, long_edges[j].y1);
-                int end = Math.Max(long_edges[i].y2, long_edges[j].y2);
+                int fixed_axis = old_long_edges[j].x1;
+                int start = Math.Min(old_long_edges[i].y1, old_long_edges[j].y1);
+                int end = Math.Max(old_long_edges[i].y2, old_long_edges[j].y2);
                 for (int n = start; n <= end; n++)
                 {
                     if (board_0[fixed_axis][n] != 0)
@@ -1956,8 +2046,8 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 }
             }
 
-            //grid_point pt1 = new grid_point(long_edges[i].x1, long_edges[i].y1);
-            //grid_point pt2 = new grid_point(long_edges[i].x2, long_edges[i].y2);
+            //grid_point pt1 = new grid_point(old_long_edges[i].x1, old_long_edges[i].y1);
+            //grid_point pt2 = new grid_point(old_long_edges[i].x2, old_long_edges[i].y2);
 
             List<grid_point> points = new List<grid_point>();
             points.Add(start_point);
@@ -1965,12 +2055,22 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             {
                 points.Add(end_points[n]);
             }
-            if (points_on_edge(long_edges[i], points)) flag = true;
+            if (points_on_edge(old_long_edges[i], points)) flag = true;
 
             return flag;
         }
 
-        public bool important_point(int i) {
+        public bool important_point(int i,int index) {
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
 
             bool flag = false;
 
@@ -1980,13 +2080,24 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             {
                 points.Add(end_points[n]);
             }
-            if (points_on_edge(long_edges[i], points)) flag = true;
+            if (points_on_edge(old_long_edges[i], points)) flag = true;
 
             return flag;
         }
 
-        public void delete_edge(int i, int j ,int angle) 
+        public void delete_edge(int i, int j ,int angle,int index) 
         {
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
+
             if (angle == 0)
             {
                 for (int m = 0; m < edge_point[i].Count; m++) 
@@ -1995,14 +2106,14 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     for (int n = 0; n < point_edge[pt_tmp].Count; n++)
                     {
                         int edge_index = point_edge[pt_tmp][n];
-                        if (long_edges[edge_index].angle == long_edges[j].angle) continue;
-                        if (pt_tmp.x == long_edges[edge_index].x1 && pt_tmp.y == long_edges[edge_index].y1)
+                        if (old_long_edges[edge_index].angle == old_long_edges[j].angle) continue;
+                        if (pt_tmp.x == old_long_edges[edge_index].x1 && pt_tmp.y == old_long_edges[edge_index].y1)
                         {
-                            long_edges[edge_index].y1 = long_edges[j].y1;
+                            old_long_edges[edge_index].y1 = old_long_edges[j].y1;
                         }
                         else
                         {
-                            long_edges[edge_index].y2 = long_edges[j].y1;
+                            old_long_edges[edge_index].y2 = old_long_edges[j].y1;
                         }
                     }
 
@@ -2017,40 +2128,49 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     for (int n = 0; n < point_edge[pt_tmp].Count; n++)
                     {
                         int edge_index = point_edge[pt_tmp][n];
-                        if (long_edges[edge_index].angle == long_edges[j].angle) continue;
-                        if (pt_tmp.x == long_edges[edge_index].x1 && pt_tmp.y == long_edges[edge_index].y1)
+                        if (old_long_edges[edge_index].angle == old_long_edges[j].angle) continue;
+                        if (pt_tmp.x == old_long_edges[edge_index].x1 && pt_tmp.y == old_long_edges[edge_index].y1)
                         {
-                            long_edges[edge_index].x1 = long_edges[j].x1;
+                            old_long_edges[edge_index].x1 = old_long_edges[j].x1;
                         }
                         else
                         {
-                            long_edges[edge_index].x2 = long_edges[j].x1;
+                            old_long_edges[edge_index].x2 = old_long_edges[j].x1;
                         }
                     }
                 }              
             }
         }
 
-        public void post_processing()
+        public void post_processing(int index)
         {
-     
+
+            List<edge> old_long_edges = new List<edge>();
+            if (index == -1)
+            {
+                old_long_edges = long_edges;
+            }
+            else
+            {
+                old_long_edges = long_edges_list[index];
+            }
             // find all end_points attached to the edges
             List<List<int>> points_on_edge = new List<List<int>>();
-            for (int i = 0; i < long_edges.Count; i++)
+            for (int i = 0; i < old_long_edges.Count; i++)
             {
 
                 List<int> on_edge_point_index = new List<int>();
                
                     for (int j = 0; j < end_points.Count; j++)
                     {
-                        if (on_edge(long_edges[i], end_points[j]))
+                        if (on_edge(old_long_edges[i], end_points[j]))
                         {
                             on_edge_point_index.Add(j);
                         }
                     }
                 
 
-                if (on_edge(long_edges[i], start_point))
+                if (on_edge(old_long_edges[i], start_point))
                 {
                     on_edge_point_index.Add(-1);
                 }
@@ -2060,7 +2180,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             // 3. first stage
             for (int i = 0; i < points_on_edge.Count; i++)
             {
-                int angle = long_edges[i].angle;
+                int angle = old_long_edges[i].angle;
 
                 List<double> waiting_list  = new List<double>();
                 for (int j = 0; j < points_on_edge[i].Count; j++)
@@ -2093,36 +2213,36 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 {
                     waiting_list.Sort();
                     //int last_point = waiting_list.Count;
-                    //long_edges[i].fix_stage_one(waiting_list[last_point-1]);
-                    long_edges[i].fix_stage_one(waiting_list[0]);
+                    //old_long_edges[i].fix_stage_one(waiting_list[last_point-1]);
+                    old_long_edges[i].fix_stage_one(waiting_list[0]);
                 }
             }
 
             // 4. second stage
-            for (int i = 0; i < long_edges.Count; i++)
+            for (int i = 0; i < old_long_edges.Count; i++)
             {
-                int angle = long_edges[i].angle;
+                int angle = old_long_edges[i].angle;
                 double coord1 = 0, coord2 = 0;
                 // fix first point
-                grid_point pt1 = new grid_point(long_edges[i].x1, long_edges[i].y1); 
+                grid_point pt1 = new grid_point(old_long_edges[i].x1, old_long_edges[i].y1); 
                 bool pt1_fixed = false;
-                for (int j = 0; j < long_edges.Count; j++)
+                for (int j = 0; j < old_long_edges.Count; j++)
                 {
-                    if (angle == long_edges[j].angle)
+                    if (angle == old_long_edges[j].angle)
                     {
                         continue;
                     }
                     else
                     {
-                        if (on_edge(long_edges[j], pt1))
+                        if (on_edge(old_long_edges[j], pt1))
                         {
                             if (angle == 0)
                             {
-                                coord1 = long_edges[j].rx1;
+                                coord1 = old_long_edges[j].rx1;
                             }
                             else
                             {
-                                coord1 = long_edges[j].ry1;
+                                coord1 = old_long_edges[j].ry1;
                             }
                             pt1_fixed = true;
                             break;
@@ -2166,25 +2286,25 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 }
 
                 // fix second point
-                grid_point pt2 = new grid_point(long_edges[i].x2, long_edges[i].y2);
+                grid_point pt2 = new grid_point(old_long_edges[i].x2, old_long_edges[i].y2);
                 bool pt2_fixed = false;
-                for (int j = 0; j < long_edges.Count; j++)
+                for (int j = 0; j < old_long_edges.Count; j++)
                 {
-                    if (angle  == long_edges[j].angle)
+                    if (angle  == old_long_edges[j].angle)
                     {
                         continue;
                     }
                     else
                     {
-                        if (on_edge(long_edges[j], pt2))
+                        if (on_edge(old_long_edges[j], pt2))
                         {
                             if (angle == 0)
                             {
-                                coord2 = long_edges[j].rx1;
+                                coord2 = old_long_edges[j].rx1;
                             }
                             else
                             {
-                                coord2 = long_edges[j].ry1;
+                                coord2 = old_long_edges[j].ry1;
                             }
                             pt2_fixed = true;
                             break;
@@ -2227,7 +2347,7 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                     }
                 }
 
-                long_edges[i].fix_stage_two(coord1, coord2);
+                old_long_edges[i].fix_stage_two(coord1, coord2);
             }
 
 
@@ -2236,9 +2356,9 @@ namespace ThMEPHVAC.FanPipeAlgorithm
             {
                 List<edge> new_edges = new List<edge>();
                 List<Line> new_line = new List<Line>();
-                for (int i = 0; i < long_edges.Count; i++)
+                for (int i = 0; i < old_long_edges.Count; i++)
                 {
-                    new_line.Add(new Line(new Point3d(long_edges[i].rx1, long_edges[i].ry1, 0), new Point3d(long_edges[i].rx2, long_edges[i].ry2, 0)));
+                    new_line.Add(new Line(new Point3d(old_long_edges[i].rx1, old_long_edges[i].ry1, 0), new Point3d(old_long_edges[i].rx2, old_long_edges[i].ry2, 0)));
                 }
 
                 Point3d new_pt ;
@@ -2292,75 +2412,13 @@ namespace ThMEPHVAC.FanPipeAlgorithm
                 }
             
 
-                long_edges.AddRange(new_edges);
+                old_long_edges.AddRange(new_edges);
             }
-           
 
-
-
-
-            //vector<Edge> new_edges;
-
-            //for (int i = 0; i < output.size(); i++)
-            //{
-            //    point pt{ output[i]->coords[0].x, output[i]->coords[0].y};
-            //    double min_pt_edge_distance = MAX_LENGTH;
-            //    int min_pt_edge_index = -1;
-
-            //    for (int j = 0; j < edges.size(); j++)
-            //    {
-            //        point edge_pt1{ edges[j].ax1, edges[j].ay1};
-            //        point edge_pt2{ edges[j].ax2, edges[j].ay2};
-
-            //        double current_pt_edge_distance = point_wall_distance(edge_pt1, edge_pt2, pt);
-            //        if (current_pt_edge_distance < min_pt_edge_distance)
-            //        {
-            //            min_pt_edge_distance = current_pt_edge_distance;
-            //            min_pt_edge_index = j;
-            //        }
-            //    }
-
-            //    if (min_pt_edge_distance > THRES)
-            //    {
-            //        point edge_pt1{ edges[min_pt_edge_index].ax1, edges[min_pt_edge_index].ay1};
-            //        point edge_pt2{ edges[min_pt_edge_index].ax2, edges[min_pt_edge_index].ay2};
-            //        point intersection;
-            //        get_intersection(edge_pt1, edge_pt2, pt, intersection);
-            //        connect_to_space(pt, intersection, new_edges, -1);
-            //    }
-            //}
-
-            //point pt{ input->coords[0].x, input->coords[0].y};
-            //double min_pt_edge_distance = MAX_LENGTH;
-            //int min_pt_edge_index = -1;
-
-            //for (int j = 0; j < edges.size(); j++)
-            //{
-            //    point edge_pt1{ edges[j].ax1, edges[j].ay1};
-            //    point edge_pt2{ edges[j].ax2, edges[j].ay2};
-
-            //    double current_pt_edge_distance = point_wall_distance(edge_pt1, edge_pt2, pt);
-            //    if (current_pt_edge_distance < min_pt_edge_distance)
-            //    {
-            //        min_pt_edge_distance = current_pt_edge_distance;
-            //        min_pt_edge_index = j;
-            //    }
-            //}
-
-            //if (min_pt_edge_distance > THRES)
-            //{
-            //    point edge_pt1{ edges[min_pt_edge_index].ax1, edges[min_pt_edge_index].ay1};
-            //    point edge_pt2{ edges[min_pt_edge_index].ax2, edges[min_pt_edge_index].ay2};
-            //    point intersection;
-            //    get_intersection(edge_pt1, edge_pt2, pt, intersection);
-            //    connect_to_space(pt, intersection, new_edges, -1);
-            //}
-
-            //for (int i = 0; i < new_edges.size(); i++)
-            //{
-            //    edges.push_back(new_edges[i]);
-            //}
-
-        }
+            //清空
+            point_edge.Clear();
+            edge_point.Clear();
+            new_node_list.Clear(); 
+    }
     }
 }

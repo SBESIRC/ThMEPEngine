@@ -76,16 +76,18 @@ namespace ThMEPHVAC.IndoorFanLayout.Models
             this.ReturnAirSizeWidth = width;
             this.ReturnAirSizeLength = length;
         }
-        public double GetCoilFanVentSize(int fanCount)
+        public double GetCoilFanVentSize(int fanCount,out double length)
         {
             //这里是正方形
             double width = 0.0;
+            length = 0.0;
             var sizeStr = fanCount>1? FanBase.AirSupplyOutletTwoSize: FanBase.AirSupplyOutletOneSize;
             if (string.IsNullOrEmpty(sizeStr))
                 return width;
             sizeStr = sizeStr.ToLower();
             var spliteVentWidth = sizeStr.Split('x');
-            double.TryParse(spliteVentWidth[0], out width);
+            double.TryParse(spliteVentWidth[0], out length);
+            double.TryParse(spliteVentWidth[1], out width);
             return width;
         }
         void CalcFanSize()

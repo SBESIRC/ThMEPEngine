@@ -73,8 +73,6 @@ namespace ThMEPElectrical.Command
                 var pt = frameLst.First().Key.StartPoint;
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
-
-                
                 foreach (var frameBlockDic in frameLst)
                 {
                     var outFrame = frameBlockDic.Key;

@@ -189,33 +189,6 @@ namespace ThMEPEngineCore.CAD
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }
-        public static Point3dCollection EntityVertices(this Entity entity)
-        {
-            // 暂不支持弧
-            Point3dCollection pts = new Point3dCollection();
-            if (entity is Polyline polyline)
-            {
-                return polyline.Vertices();
-            }
-            else if (entity is Line line)
-            {
-                pts.Add(line.StartPoint);
-                pts.Add(line.EndPoint);
-            }
-            else if (entity is Arc arc)
-            {
-                return arc.ToPolyline().Vertices();
-            }
-            else if (entity is MPolygon mPolygon)
-            {
-                pts = mPolygon.Vertices();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return pts;
-        }
         public static bool IsPerpendicular(Vector3d firstVec, Vector3d secondVec, double tolerance = 1.0)
         {
             double rad = firstVec.GetAngleTo(secondVec);

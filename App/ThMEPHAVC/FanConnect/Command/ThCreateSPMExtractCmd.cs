@@ -52,15 +52,26 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt);
-                    }
                     //提取水管连接点
                     var fcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
                     if (fcus.Count == 0)
                     {
                         return;
+                    }
+                    var remSurplusPipe = new ThRemSurplusPipe()
+                    {
+                        StartPoint = startPt,
+                        AllLine = pipes,
+                        AllFan = fcus
+                    };
+                    pipes = remSurplusPipe.RemSurplusPipe();
+                    if(pipes == null)
+                    {
+                        return;
+                    }
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt);
                     }
                     //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
                     ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
@@ -70,7 +81,10 @@ namespace ThMEPHVAC.FanConnect.Command
                         Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
                         return;
                     }
-
+                    foreach (var p in pipes)
+                    {
+                        p.TransformBy(mt.Inverse());
+                    }
                     var tmpLines = new List<Line>();
                     foreach (var l in lineColl)
                     {

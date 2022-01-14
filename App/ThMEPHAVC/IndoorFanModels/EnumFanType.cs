@@ -10,9 +10,9 @@ namespace ThMEPHVAC.IndoorFanModels
         FanCoilUnitFourControls = 11,
         [Description("吊顶一体式空调箱")]
         IntegratedAirConditionin = 20,
-        [Description("VRF室内机(管道机)")]
+        [Description("VRF室内机（管道机）")]
         VRFConditioninConduit = 30,
-        [Description("VRF室内机(四面出风型)")]
+        [Description("VRF室内机（四面出风型）")]
         VRFConditioninFourSides = 31,
     }
 }

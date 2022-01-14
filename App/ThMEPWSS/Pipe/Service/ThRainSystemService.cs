@@ -7038,8 +7038,8 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         }
                         drData.HasRainPortSymbols = hasRainPortSymbols;
                     }
+                    var hasDitch = new HashSet<string>();
                     {
-                        var hasDitch = new HashSet<string>();
                         var ditchsf = F(item.Ditches);
                         var pipesf = F(item.VerticalPipes.Except(ok_vpipes).ToList());
                         var wpfsf = F(item.WrappingPipes);
@@ -7101,6 +7101,12 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         }
                     }
                     {
+                        var storey = geoData.Storeys[si].ToPolygon();
+                        var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(storey);
+                        var wlsegs = geoData.WLines.Select(x => x.Extend(-THESAURUSCOMMUNICATION)).Where(x => x.Length > THESAURUSHOUSING).ToList();
+                        var vertices = GeoFac.CreateEnvelopeSelector(wlsegs.Select(x => x.StartPoint.ToNTSPoint().Tag(x)).Concat(wlsegs.Select(x => x.EndPoint.ToNTSPoint().Tag(x))).ToList())(storey);
+                        var verticesf = GeoFac.CreateIntersectsSelector(vertices);
+                        wlsegs = vertices.Select(x => x.UserData).Cast<GLineSegment>().Distinct().ToList();
                         var pts = lbDict.Where(x => IsRainLabel(x.Value)).Select(x => x.Key.GetCenter().ToNTSPoint().Tag(x.Value)).ToList();
                         var ptsf = GeoFac.CreateIntersectsSelector(pts);
                         foreach (var g in geoData.Groups)
@@ -7120,6 +7126,15 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                         return;
                                     }
                                 }
+                                foreach (var ditch in item.Ditches)
+                                {
+                                    if (ditch.Intersects(geo))
+                                    {
+                                        ditchIdDict[label] = cadDataMain.Ditches.IndexOf(ditch);
+                                        hasDitch.Add(label);
+                                        return;
+                                    }
+                                }
                                 foreach (var well in item.WaterWells)
                                 {
                                     if (well.Buffer(MISAPPREHENSIVE).Intersects(geo))
@@ -7127,6 +7142,44 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                         var waterWellLabel = THESAURUSSPECIFICATION;
                                         waterwellLabelDict[label] = waterWellLabel;
                                         return;
+                                    }
+                                }
+                                var oksegs = GeoFac.GetManyLines(g, skipPolygon: THESAURUSOBSTINACY).ToHashSet();
+                                if (oksegs.Count > THESAURUSSTAMPEDE)
+                                {
+                                    for (int i = THESAURUSSTAMPEDE; i < THESAURUSCOMMUNICATION; i++)
+                                    {
+                                        var lst = verticesf(oksegs.YieldPoints().Select(x => x.ToGRect(THESAURUSPERMUTATION).ToPolygon()).ToGeometry()).Select(x => x.UserData).Cast<GLineSegment>().Except(oksegs).ToList();
+                                        if (lst.Count == THESAURUSSTAMPEDE) break;
+                                        oksegs.AddRange(lst);
+                                    }
+                                    var wlgeo = oksegs.Select(x => x.ToLineString()).ToGeometry();
+                                    foreach (var port in item.RainPortSymbols)
+                                    {
+                                        if (port.Intersects(wlgeo))
+                                        {
+                                            rainPortIdDict[label] = cadDataMain.RainPortSymbols.IndexOf(port);
+                                            hasRainPortSymbols.Add(label);
+                                            return;
+                                        }
+                                    }
+                                    foreach (var ditch in item.Ditches)
+                                    {
+                                        if (ditch.Intersects(wlgeo))
+                                        {
+                                            ditchIdDict[label] = cadDataMain.Ditches.IndexOf(ditch);
+                                            hasDitch.Add(label);
+                                            return;
+                                        }
+                                    }
+                                    foreach (var well in item.WaterWells)
+                                    {
+                                        if (well.Buffer(MISAPPREHENSIVE).Intersects(wlgeo))
+                                        {
+                                            var waterWellLabel = THESAURUSSPECIFICATION;
+                                            waterwellLabelDict[label] = waterWellLabel;
+                                            return;
+                                        }
                                     }
                                 }
                             }

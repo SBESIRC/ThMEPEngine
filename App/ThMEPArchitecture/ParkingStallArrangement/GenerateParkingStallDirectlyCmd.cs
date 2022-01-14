@@ -24,6 +24,8 @@ using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+using NFox.Cad;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -79,68 +81,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
-            if (outerBrder.SegLines.Count == 0)//分割线数目为0
-            {
-                Active.Editor.WriteMessage("分割线不存在！");
-                return;
-            }
-            if (!rstDataExtract)
-            {
-                return;
-            }
-            var area = outerBrder.WallLine;
-            var areas = new List<Polyline>() { area };
-            var sortSegLines = new List<Line>();
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-            var gaPara = new GaParameter(outerBrder.SegLines);
-
-            var usedLines = new HashSet<int>();
-            var maxVals = new List<double>();
-            var minVals = new List<double>();
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            double threshSecond = 20;
-
-            if (_CommandMode == CommandMode.WithoutUI)
-            {
-                var dirSetted = ThMEPArchitecture.ParkingStallArrangement.General.Utils.SetLayoutMainDirection();
-                if (!dirSetted)
-                    return;
-            }
-            else
-            {
-                ThMEPArchitecture.PartitionLayout.ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
-
-            }
-
-            var splitRst = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
-            if (!splitRst)
-            {
-                Logger?.Information("分割线不合理，分区失败！");
-                return;
-            }
-            gaPara.Set(sortSegLines, maxVals, minVals);
-
-            var segLineDic = new Dictionary<int, Line>();
-            for (int i = 0; i < sortSegLines.Count; i++)
-            {
-                segLineDic.Add(i, sortSegLines[i]);
-            }
-
-            var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
-            var linePtDic = Intersection.GetLinePtDic(ptDic);
-            var intersectPtCnt = ptDic.Count;//交叉点数目
-            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
-
-            foreach (var num in ptDic.Keys)
-            {
-                var random = new Random();
-                var flag = General.Utils.RandDouble() < 0.5;
-                directionList.Add(num, flag);//默认给全横向
-            }
-
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara);
+            if (!dataprocessingFlag) return;
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 
             var rst = geneAlgorithm.Run();
@@ -181,6 +123,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                 }
             }
+            ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();
             Active.Editor.WriteMessage("Count of car spots: " + count.ToString() + "\n");
         }

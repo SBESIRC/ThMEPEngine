@@ -493,7 +493,7 @@ namespace ThMEPHVAC.Model
             if (blkName == ThHvacCommon.AI_BROKEN_LINE || blkName == ThHvacCommon.AI_VERTICAL_PIPE)
             {
                 var p = blk.Position.TransformBy(mat);
-                double len = 10;
+                double len = 50;
                 if (blkName == ThHvacCommon.AI_VERTICAL_PIPE)
                 {
                     ThDuctPortsDrawService.GetVerticalPipeDynBlockProperity(blk.Id, out double pipeWidth, out double pipeHeight);

@@ -45,7 +45,7 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                 }
                 else if (roomName != "")
                 {
-                    var tagList = RoomConfigTreeService.getRoomTag(roomTableTree, roomName);
+                    var tagList = RoomConfigTreeService.GetRoomTag(roomTableTree, roomName);
                     if (tagList.Contains(smokeTag) && tagList.Contains(heatTag) && tagList.Contains(prfTag))
                     {
                         typeInt = ThFaSmokeCommon.layoutType.smokeHeatPrf;

@@ -853,17 +853,17 @@ namespace ThMEPWSS.Assistant
             }
             return GetCenterLine(segs);
         }
-        public static IEnumerable<LineString> GetNodedLineStrings(IEnumerable<Geometry> geos, bool distinct = true)
+        public static IEnumerable<LineString> GetNodedLineStrings(IEnumerable<Geometry> geos, bool distinct = true, bool skipPolygon = false)
         {
-            return ToNodedLineSegments(GetManyLines(geos, distinct)).Select(x => x.ToLineString());
+            return ToNodedLineSegments(GetManyLines(geos, distinct, skipPolygon)).Select(x => x.ToLineString());
         }
-        public static IEnumerable<LineString> GetManyLineStrings(IEnumerable<Geometry> geos, bool distinct = true)
+        public static IEnumerable<LineString> GetManyLineStrings(IEnumerable<Geometry> geos, bool distinct = true, bool skipPolygon = false)
         {
-            return GetManyLines(geos, distinct).Select(x => x.ToLineString());
+            return GetManyLines(geos, distinct, skipPolygon).Select(x => x.ToLineString());
         }
-        public static IEnumerable<GLineSegment> GetManyLines(IEnumerable<Geometry> geos, bool distinct = true)
+        public static IEnumerable<GLineSegment> GetManyLines(IEnumerable<Geometry> geos, bool distinct = true, bool skipPolygon = false)
         {
-            var q = geos.SelectMany(geo => GetLines(geo, false));
+            var q = geos.SelectMany(geo => GetLines(geo, false, skipPolygon));
             if (distinct)
             {
                 return q.Distinct();
@@ -873,7 +873,7 @@ namespace ThMEPWSS.Assistant
                 return q;
             }
         }
-        public static IEnumerable<GLineSegment> GetLines(Geometry geo, bool distinct = true)
+        public static IEnumerable<GLineSegment> GetLines(Geometry geo, bool distinct = true, bool skipPolygon = false)
         {
             IEnumerable<GLineSegment> f()
             {
@@ -891,16 +891,19 @@ namespace ThMEPWSS.Assistant
                 }
                 else if (geo is Polygon pl)
                 {
-                    foreach (var r in GetLines(pl.Shell))
+                    if (!skipPolygon)
                     {
-                        yield return r;
+                        foreach (var r in GetLines(pl.Shell, distinct: false, skipPolygon: skipPolygon))
+                        {
+                            yield return r;
+                        }
                     }
                 }
                 else if (geo is GeometryCollection mls)
                 {
                     foreach (var _g in mls.Geometries)
                     {
-                        foreach (var r in GetLines(_g))
+                        foreach (var r in GetLines(_g, distinct: false, skipPolygon: skipPolygon))
                         {
                             yield return r;
                         }
@@ -1071,6 +1074,18 @@ namespace ThMEPWSS.Assistant
                 Centre = center.ToNTSCoordinate(),
             };
             return shapeFactory.CreateCircle();
+        }
+        public static Geometry ToGeometry(this IEnumerable<Geometry> geos, object tag = null)
+        {
+            var geo = GeoFac.CreateGeometry(geos);
+            geo.UserData = tag;
+            return geo;
+        }
+        public static Geometry ToGeometryEx(this IList<Geometry> geos, object tag = null)
+        {
+            var geo = GeoFac.CreateGeometryEx(geos);
+            geo.UserData = tag;
+            return geo;
         }
         public static readonly PreparedGeometryFactory PreparedGeometryFactory = new PreparedGeometryFactory();
         public static Func<Geometry, bool> CreateIntersectsTester<T>(ICollection<T> geos) where T : Geometry

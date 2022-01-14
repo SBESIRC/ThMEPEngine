@@ -143,7 +143,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             foreach (var room in Rooms)
             {
                 var roomName = room.Properties[ThExtractorPropertyNameManager.NamePropertyName].ToString();
-                var roomTag = RoomConfigTreeService.getRoomTag(RoomConfigTree, roomName);
+                var roomTag = RoomConfigTreeService.GetRoomTag(RoomConfigTree, roomName);
                 var layoutTag = roomTag.Where(x => x.Contains(layoutType)).FirstOrDefault();
                 var added = false;
 

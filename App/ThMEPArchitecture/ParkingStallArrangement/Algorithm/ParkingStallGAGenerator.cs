@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public Serilog.Core.Logger Logger = null;
 
-        public int Count { get; set; }
+        public int ParkingStallCount { get; set; }
 
         static private Dictionary<PartitionBoundary,int> _cachedPartitionCnt = new Dictionary<PartitionBoundary, int>();
 
@@ -97,7 +97,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var clone = new Chromosome();
             clone.Logger = Logger;
             clone.Genome = new List<Gene>();
-            clone.Count = Count;
+            clone.ParkingStallCount = ParkingStallCount;
 
             foreach (var gene in Genome)
             {
@@ -116,7 +116,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             Random rand = new Random();
             int rst = rand.Next(200);
-            Count = rst;
+            ParkingStallCount = rst;
             return rst;
         }
 
@@ -127,7 +127,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int result = GetParkingNums(layoutPara, parameterViewModel);
             //Thread.Sleep(3);
             //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
-            Count = result;
+            ParkingStallCount = result;
             //System.Diagnostics.Debug.WriteLine(Count);
 
             return result;
@@ -142,7 +142,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             layoutPara.Set(Genome);
             int result = GetParkingNumsFast(layoutPara);
-            Count = result;
+            ParkingStallCount = result;
             return result;
         }
 
@@ -246,11 +246,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         LayoutParameter LayoutPara;
         ParkingStallArrangementViewModel ParameterViewModel;
 
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+        //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
-        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
+        //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+        //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
+        public Serilog.Core.Logger Logger = null;
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
@@ -411,7 +412,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     pop = CreateNextGeneration(selected);
                     Mutation(pop);
                 }
-                var strBest = $"最大车位数: {pop.First().Count}";
+                var strBest = $"最大车位数: {pop.First().ParkingStallCount}";
                 Active.Editor.WriteMessage(strBest);
                 Logger?.Information(strBest);
                 var strTotalMins = $"运行总时间: {stopWatch.Elapsed.TotalMinutes} 分";
@@ -443,14 +444,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             inputSolution.ForEach(s =>
             {
                 s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
-                System.Diagnostics.Debug.WriteLine($"{iterationIndex}.{index++}: { s.Count}");
+                System.Diagnostics.Debug.WriteLine($"{iterationIndex}.{index++}: { s.ParkingStallCount}");
             }
             );
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
 
-            var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
-            maxNums = sorted.First().Count;
-            var strBestCnt = $"当前最大车位数： {sorted.First().Count}\n";
+            var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
+            maxNums = sorted.First().ParkingStallCount;
+            var strBestCnt = $"当前最大车位数： {sorted.First().ParkingStallCount}\n";
             Logger?.Information(strBestCnt);
             System.Diagnostics.Debug.WriteLine(strBestCnt);
 
@@ -636,14 +637,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Logger?.Information("进行选择");
             inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel));
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
-            var sorted = inputSolution.OrderByDescending(s => s.Count).ToList();
-            maxNums = sorted.First().Count;
+            var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
+            maxNums = sorted.First().ParkingStallCount;
             //var strBestCnt = $"当前最大车位数： {sorted.First().Count}\n";
             //Logger?.Information(strBestCnt);
             var strCnt = $"当前车位数：";
             for (int k = 0; k < sorted.Count; ++k)
             {
-                strCnt += sorted[k].Count.ToString();
+                strCnt += sorted[k].ParkingStallCount.ToString();
                 strCnt += " ";
             }
             strCnt += "\n";

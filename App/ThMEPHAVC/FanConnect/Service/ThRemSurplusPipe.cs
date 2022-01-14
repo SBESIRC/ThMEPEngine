@@ -26,94 +26,7 @@ namespace ThMEPHVAC.FanConnect.Service
         public Point3d StartPoint { set; get; }
         public List<Line> AllLine { set; get; }
         public List<ThFanCUModel> AllFan { set; get; }
-        public bool RemoveLine(Line remLine ,Line dbLine)
-        {
-            if(!remLine.IsParallelToEx(dbLine))
-            {
-                return false;
-            }
-            var startPt = dbLine.StartPoint;
-            var entPt = dbLine.EndPoint;
-            var box = remLine.ExtendLine(1.0).Buffer(10.0);
-            if (box.Contains(startPt) && box.Contains(entPt))
-            {
-                dbLine.UpgradeOpen();
-                dbLine.Erase();
-                dbLine.DowngradeOpen();
-                box.Dispose();
-                return true;
-            }
-            else if (box.Contains(startPt) && !box.Contains(entPt))
-            {
-                var pts = box.IntersectWithEx(dbLine);
-                dbLine.UpgradeOpen();
-                dbLine.StartPoint = pts[0];
-                dbLine.DowngradeOpen();
-                box.Dispose();
-                return true;
-            }
-            else if (!box.Contains(startPt) && box.Contains(entPt))
-            {
-                var pts = box.IntersectWithEx(dbLine);
-                dbLine.UpgradeOpen();
-                dbLine.EndPoint = pts[0];
-                dbLine.DowngradeOpen();
-                box.Dispose();
-                return true;
-            }
-            return false;
-        }
-        public bool RemoveLine(Line remLine, Polyline dbLine)
-        {
-            var startPt = dbLine.StartPoint;
-            var entPt = dbLine.EndPoint;
-            var box = remLine.ExtendLine(1.0).Buffer(10.0);
-            var plinePts = dbLine.Vertices();
-            if(box.Contains(startPt) && box.Contains(entPt))
-            {
-                dbLine.UpgradeOpen();
-                dbLine.Erase();
-                dbLine.DowngradeOpen();
-                box.Dispose();
-                return true;
-            }
-            else if (box.Contains(startPt) && !box.Contains(entPt))
-            {
-                var tempPts = box.IntersectWithEx(dbLine);
-                dbLine.UpgradeOpen();
-                dbLine.Erase();
-                dbLine.DowngradeOpen();
-                var toDbServiece = new ThFanToDBServiece();
-                var pline = new Polyline();
-                pline.AddVertexAt(0, tempPts[0].ToPoint2d(),0.0,0.0,0.0);
-                for(int i = 1; i < plinePts.Count;i++)
-                {
-                    pline.AddVertexAt(i, plinePts[i].ToPoint2d(), 0.0, 0.0, 0.0);
-                }
-                toDbServiece.InsertEntity(pline, "AI-水管路由");
-                box.Dispose();
-                return true;
-            }
-            else if (!box.Contains(startPt) && box.Contains(entPt))
-            {
-                var tempPts = box.IntersectWithEx(dbLine);
-                dbLine.UpgradeOpen();
-                dbLine.Erase();
-                dbLine.DowngradeOpen();
-                var pline = new Polyline();
-                var toDbServiece = new ThFanToDBServiece();
-                for (int i = 0; i < plinePts.Count-1; i++)
-                {
-                    pline.AddVertexAt(i, plinePts[i].ToPoint2d(), 0.0, 0.0, 0.0);
-                }
-                pline.AddVertexAt(plinePts.Count - 1, tempPts[0].ToPoint2d(), 0.0, 0.0, 0.0);
-                toDbServiece.InsertEntity(pline, "AI-水管路由");
-                box.Dispose();
-                return true;
-            }
-            return false;
-        }
-        public void RemSurplusPipe()
+        public List<Line> RemSurplusPipe()
         {
             var mt = Matrix3d.Displacement(StartPoint.GetVectorTo(Point3d.Origin));
             foreach(var l in AllLine)
@@ -133,70 +46,53 @@ namespace ThMEPHVAC.FanConnect.Service
             ThFanTreeModel treeModel = new ThFanTreeModel(StartPoint, tmpAllLines, 300);
             if (treeModel.RootNode == null)
             {
-                return;
+                return null;
             }
             foreach (var fcu in AllFan)
             {
                 ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
             }
-            var remLine = FindEndLine(treeModel.RootNode);
+            FindBadNode(treeModel.RootNode);
             //找到图纸上对应的线，进行删除
-            var dbObjs = GetDbPipes(StartPoint);
-            foreach (var l in remLine)
+            string layer;
+            int colorIndex;
+            var dbObjs = GetDbPipes(StartPoint,out layer,out colorIndex);
+            var tmpLines = new List<Line>();
+            foreach(var obj in dbObjs)
             {
-                foreach (var obj in dbObjs)
+                if(obj is Line)
                 {
-                    if (obj is Line)
-                    {
-                        var line = obj as Line;
-                        if (RemoveLine(l,line))
-                        {
-                            break;
-                        }
-                    }
-                    else if (obj is Polyline)
-                    {
-                        var pline = obj as Polyline;
-                        if(RemoveLine(l,pline))
-                        {
-                            break;
-                        }
-                    }
+                    var line = (obj as Line).Clone() as Line;
+                    tmpLines.Add(line);
                 }
-            }
-        }
-        public List<Line> FindEndLine(ThFanTreeNode<ThFanPipeModel> node)
-        {
-            var retLine = new List<Line>();
-            foreach (var child in node.Children)
-            {
-                retLine.AddRange(FindEndLine(child));
-            }
-            if (node.Children.Count != 0)
-            {
-                return retLine;
-            }
-            if (node.Item.PipeLevel != PIPELEVEL.LEVEL4)
-            {
-                if (node.Parent != null)
+                else if(obj is Polyline)
                 {
-                    retLine.Add(node.Item.PLine);
+                    var lines = (obj as Polyline).ToLines();
+                    tmpLines.AddRange(lines);
                 }
+                obj.UpgradeOpen();
+                obj.Erase();
+                obj.DowngradeOpen();
             }
-
-            return retLine;
+            var badLines = GetBadLine(treeModel.RootNode);
+            foreach(var bad in badLines)
+            {
+                RemoveBadLine(bad, ref tmpLines);
+            }
+            DrawLines(tmpLines, layer, colorIndex);
+            return tmpLines;
         }
-        public List<Entity> GetDbPipes(Point3d startPt)
+        public List<Entity> GetDbPipes(Point3d startPt,out string layer,out int colorIndex)
         {
             using (var database = AcadDatabase.Active())
             {
-                string layer = "AI-水管路由";
+                string tmpLayer = "AI-水管路由";
+                int tmpIndex = 0;
                 var box = ThDrawTool.CreateSquare(startPt.TransformBy(Active.Editor.WCS2UCS()), 50.0);
                 //以pt为中心，做一个矩形
                 //找到改矩形内所有的Entity
                 //遍历Entity找到目标层
                 var psr = Active.Editor.SelectCrossingPolygon(box.Vertices());
-                int colorIndex = 0;
                 if (psr.Status == PromptStatus.OK)
                 {
                     foreach (var id in psr.Value.GetObjectIds())
@@ -204,15 +100,104 @@ namespace ThMEPHVAC.FanConnect.Service
                         var entity = database.Element<Entity>(id);
                         if (entity.Layer.Contains("AI-水管路由") || entity.Layer.Contains("H-PIPE-C"))
                         {
-                            layer = entity.Layer;
-                            colorIndex = entity.ColorIndex;
+                            tmpLayer = entity.Layer;
+                            tmpIndex = entity.ColorIndex;
                             break;
                         }
                     }
                 }
-                var retLines = new List<Line>();
-                var tmpLines = database.ModelSpace.OfType<Entity>().Where(o => o.Layer.Contains(layer) && o.ColorIndex == colorIndex).ToList();
-                return tmpLines;
+                layer = tmpLayer;
+                colorIndex = tmpIndex;
+                var retLines = new List<Entity>();
+                var tmpLines = database.ModelSpace.OfType<Entity>();
+                foreach(var l in tmpLines)
+                {
+                    if (l.Layer.ToUpper() == tmpLayer && l.ColorIndex == tmpIndex)
+                    {
+                        retLines.Add(l);
+                    }
+                }
+                return retLines;
+            }
+        }
+        public void FindBadNode(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            foreach (var item in node.Children)
+            {
+                FindBadNode(item);
+            }
+            if (node.Item.PipeLevel == PIPELEVEL.LEVEL1)
+            {
+                if(node.Children.Count == 0)
+                {
+                    node.Item.PipeLevel = PIPELEVEL.LEVEL2;
+                }
+                else
+                {
+                    bool isBad = true;
+                    foreach (var child in node.Children)
+                    {
+                        if (child.Item.PipeLevel != PIPELEVEL.LEVEL2)
+                        {
+                            isBad = false;
+                        }
+                    }
+                    if (isBad)
+                    {
+                        node.Item.PipeLevel = PIPELEVEL.LEVEL2;
+                    }
+                }
+            }
+        }
+        public List<Line> GetBadLine(ThFanTreeNode<ThFanPipeModel> node)
+        {
+            var retLine = new List<Line>();
+            foreach(var child in node.Children)
+            {
+                retLine.AddRange(GetBadLine(child));
+            }
+            if(node.Item.PipeLevel == PIPELEVEL.LEVEL2)
+            {
+                retLine.Add(node.Item.PLine);
+            }
+            return retLine;
+        }
+        public void RemoveBadLine(Line badLine ,ref List<Line> lines)
+        {
+            var remLines = new List<Line>();
+            foreach(var l in lines)
+            {
+                if (!badLine.IsParallelToEx(l))
+                {
+                    continue;
+                }
+                var startPt = l.StartPoint;
+                var entPt = l.EndPoint;
+                var box = badLine.ExtendLine(1.0).Buffer(10.0);
+                if (box.Contains(startPt) && box.Contains(entPt))
+                {
+                    remLines.Add(l);
+                }
+                else if (box.Contains(startPt) && !box.Contains(entPt))
+                {
+                    var pts = box.IntersectWithEx(l);
+                    l.StartPoint = pts[0];
+                }
+                else if (!box.Contains(startPt) && box.Contains(entPt))
+                {
+                    var pts = box.IntersectWithEx(l);
+                    l.EndPoint = pts[0];
+                }
+                box.Dispose();
+            }
+            lines = lines.Except(remLines).ToList();
+        }
+        public void DrawLines(List<Line> lines,string layer,int colorIndex)
+        {
+            var toDbServiece = new ThFanToDBServiece();
+            foreach(var l in lines)
+            {
+                toDbServiece.InsertEntity(l, layer, colorIndex);
             }
         }
     }

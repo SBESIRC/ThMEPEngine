@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
@@ -14,6 +15,8 @@ namespace ThMEPHVAC.IndoorFanLayout
         public const double FanSpaceMinDistance = 800;
         public const double RoomBufferOffSet = -500.0;
         public const double ReducingLength = 150.0;
+        public static Color RoomLoadOverLineColor = Color.FromRgb(255, 0, 0);
+        public static Color RoomLoadNotEnoughLineColor = Color.FromRgb(0, 0, 255);
         public static Point3d PolylinCenterPoint(Polyline polyline) 
         {
             var allPoints = GetPolylinePoints(polyline);

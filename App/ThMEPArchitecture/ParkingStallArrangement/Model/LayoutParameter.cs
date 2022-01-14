@@ -42,8 +42,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Dictionary<LinePairs, int> LinePtDic { get; set; }
         public ThCADCoreNTSSpatialIndex BuildingBlockSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
+        public Dictionary<int, List<int>> SeglineNeighborIndexDic { get; set; }//分割线临近线
 
         private ThCADCoreNTSSpatialIndex _AllShearwallSpatialIndex = null;
+
 
         public ThCADCoreNTSSpatialIndex AllShearwallsSpatialIndex
         {
@@ -95,9 +97,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 return _AllCuttersMPolygonSpatialIndex;
             }
         }
+        public LayoutParameter()
+        {
 
+        }
         public LayoutParameter(Polyline outerBoundary, DBObjectCollection buildingBlocks, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
-            Dictionary<LinePairs, int> linePtDic)
+            Dictionary<LinePairs, int> linePtDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null)
         {
             InitialWalls = outerBoundary.Clone() as Polyline;
             OuterBoundary = outerBoundary;
@@ -124,6 +129,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             SegLineIndexDic = new Dictionary<int, Line>();
             AreaSegLineDic = new Dictionary<int, List<int>>();
             LinePtDic = linePtDic;
+            SeglineNeighborIndexDic = seglineNeighborIndexDic;
         }
 
         public void Clear()
@@ -198,20 +204,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             Clear();//清空所有参数
 
-            var areas = new List<Polyline>();
+            //var areas = new List<Polyline>();
             var tmpBoundary = OuterBoundary.Clone() as Polyline;
-            areas.Add(tmpBoundary);
+            //areas.Add(tmpBoundary);
 
             //init splitting lines
+            //for (int i = 0; i < genome.Count; i++)
+            //{
+            //    Gene gene = genome[i];
+            //    Split(gene, ref areas);
+            //    var line = GetSegLine(gene);
+            //    SegLines.Add(line);
+            //    SegLineIndexDic.Add(i, line);
+            //}
+
             for (int i = 0; i < genome.Count; i++)
             {
                 Gene gene = genome[i];
-                Split(gene, ref areas);
                 var line = GetSegLine(gene);
                 SegLines.Add(line);
                 SegLineIndexDic.Add(i, line);
             }
             
+
+            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 

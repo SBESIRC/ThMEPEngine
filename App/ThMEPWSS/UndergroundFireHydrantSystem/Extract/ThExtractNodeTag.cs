@@ -20,15 +20,21 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         {
             using (var acadDatabase = AcadDatabase.Use(database))
             {
-                Results = acadDatabase
+                try
+                {
+                    Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
                    .Where(o => IsNode(o.GetEffectiveName()));
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+                    DBobj = spatialIndex.SelectCrossingPolygon(polygon);
 
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-                DBobj = spatialIndex.SelectCrossingPolygon(polygon);
-
-                return DBobj;
+                    return DBobj;
+                }
+                catch (Exception ex)
+                {
+                    return new DBObjectCollection();
+                }
             }
         }
 
@@ -40,6 +46,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
         public void GetPointList(ref FireHydrantSystemIn fireHydrantSysIn)
         {
+            if (DBobj is null) return;
             var PointList = new List<List<Point3dEx>>();
             double tolerance = 30;
             foreach (var db in DBobj)

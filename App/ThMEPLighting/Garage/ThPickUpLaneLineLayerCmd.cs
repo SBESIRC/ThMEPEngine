@@ -4,7 +4,7 @@ using Linq2Acad;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Command;
-using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.Garage
 {

@@ -294,6 +294,7 @@ namespace ThMEPHVAC.Command
                         {
                             if (null != _originTransformer)
                                 _originTransformer.Reset(addPLine);
+                            addPLine.Color = IndoorFanCommon.RoomLoadNotEnoughLineColor;
                             ErrorRoomPolylines.Add(addPLine);
                         }
                         color = Color.FromRgb(0, 255, 0);
@@ -479,7 +480,7 @@ namespace ThMEPHVAC.Command
             {
                 foreach (var region in showCurves)
                 {
-                    continue;
+                    //continue;
                     if (region == null)
                         continue;
                     var copy = region.Clone() as Curve;

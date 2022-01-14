@@ -36,12 +36,15 @@
     <Compile Include="ParkingStallArrangement\Extractor\ThBoundaryExtractionVisitor.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\ThUserDatasetFactory.cs" />
     <Compile Include="ParkingStallArrangement\General\DisplayTool.cs" />
+    <Compile Include="ParkingStallArrangement\General\ParkingSpace.cs" />
+    <Compile Include="ParkingStallArrangement\General\Preprocessing.cs" />
     <Compile Include="ParkingStallArrangement\General\Utils.cs" />
     <Compile Include="ParkingStallArrangement\IO\ThParkingStallDataSetFactory.cs" />
     <Compile Include="ParkingStallArrangement\Method\AngleTools.cs" />
     <Compile Include="ParkingStallArrangement\Method\Dfs.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
+    <Compile Include="ParkingStallArrangement\Method\WindmillSplit.cs" />
     <Compile Include="ParkingStallArrangement\Model\AutoSegLines.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
     <Compile Include="ParkingStallArrangement\Model\LinePairs.cs" />
@@ -49,7 +52,6 @@
     <Compile Include="ParkingStallArrangement\ParameterConvert.cs" />
     <Compile Include="PartitionLayout\GeoUtilities.cs" />
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallDirectGenerator.cs" />
-    <Compile Include="ParkingStallArrangement\Algorithm\RandInt2.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\OuterBrder.cs" />
     <Compile Include="ParkingStallArrangement\General\LineEx.cs" />

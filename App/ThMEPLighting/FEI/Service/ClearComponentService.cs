@@ -64,7 +64,7 @@ namespace ThMEPLighting.FEI.Service
         }
 
         /// <summary>
-        /// 清楚上一次布置的出入口图块
+        /// 清除上一次布置的出入口图块
         /// </summary>
         /// <param name="polyline"></param>
         public static void ClearExitBlock(this Polyline polyline, ThMEPOriginTransformer originTransformer)

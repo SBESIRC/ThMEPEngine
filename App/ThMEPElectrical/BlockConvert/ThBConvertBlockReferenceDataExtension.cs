@@ -86,13 +86,22 @@ namespace ThMEPElectrical.BlockConvert
                         .Where(e => e.Layer == "0")
                         .ToList();
                     lines = lines.OrderByDescending(o => o.Length).ToList();
-                    for (int i = 0; i < lines.Count; i++)
+
+                    if(lines.Count > 0)
                     {
-                        var distance = lines[i].DistanceTo(data.Position, false);
-                        if (distance < 1.0)
+                        var closeDist = lines[0].DistanceTo(data.Position, false);
+                        var closePt = GetLineCenter(lines[0].StartPoint, lines[0].EndPoint);
+                        for (int i = 1; i < lines.Count && i < 3; i++)
                         {
-                            return GetLineCenter(lines[i].StartPoint, lines[i].EndPoint);
+                            var distance = lines[i].DistanceTo(data.Position, false);
+                            var center = GetLineCenter(lines[i].StartPoint, lines[i].EndPoint);
+                            if (distance < closeDist + 1.0)
+                            {
+                                closeDist = distance;
+                                closePt = center;
+                            }
                         }
+                        return closePt;
                     }
                 }
                 else if (name.Contains("E-BFAS610"))

@@ -193,7 +193,7 @@
                   BorderBrush="{DynamicResource HeadLineColor}" HorizontalGridLinesBrush="{DynamicResource HeadLineColor}" Visibility="Collapsed"
                   RowHeaderWidth="0" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber}" MinWidth="60" Width="5*"/>
+                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="60" Width="5*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanAirVolume}" CellStyle="{StaticResource CellFanAirVolume}" MinWidth="200" Width="20*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadVRFCooling}" Width="20*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -205,25 +205,25 @@
                                              Background="Transparent"
                                              Padding="0"
                                              VerticalContentAlignment="Center"
-                                             Text="{Binding CoolRefrigeratingCapacity}" />
+                                             Text="{Binding CoolRefrigeratingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolAirInletDryBall}" />
+                                             Text="{Binding CoolAirInletDryBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 湿球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolAirInletWetBall}" />
+                                             Text="{Binding CoolAirInletWetBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 室外温度-->
                                 <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolOutdoorTemperature}" />
+                                             Text="{Binding CoolOutdoorTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
@@ -239,30 +239,30 @@
                                              Background="Transparent"
                                              VerticalContentAlignment="Center"
                                              Padding="0"
-                                             Text="{Binding HotRefrigeratingCapacity}" />
+                                             Text="{Binding HotRefrigeratingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding HotAirInletDryBall}" />
+                                             Text="{Binding HotAirInletDryBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 湿球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding HotOutdoorTemperature}" />
+                                             Text="{Binding HotOutdoorTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise}" MinWidth="40" Width="5*"/>
-                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight}" MinWidth="40" Width="5*"/>
+                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40" Width="5*"/>
+                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40" Width="5*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanSize}" CellStyle="{StaticResource CellFanSize}" Width="10*"/>
-                <DataGridTextColumn Header="送风管&#13;尺寸&#13;mmxmm" Binding="{Binding AirSupplyuctSize}" MinWidth="80" Width="5*"/>
+                <DataGridTextColumn Header="送风管&#13;尺寸&#13;mmxmm" Binding="{Binding AirSupplyuctSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="80" Width="5*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadAirOutlet}" CellStyle="{StaticResource CellAirOutlet}" Width="20*"/>
-                <DataGridTextColumn Header="回风口&#13;尺寸&#13;mmxmm" Binding="{Binding ReturnAirOutletSize}" MinWidth="80" Width="5*"/>
+                <DataGridTextColumn Header="回风口&#13;尺寸&#13;mmxmm" Binding="{Binding ReturnAirOutletSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="80" Width="5*"/>
             </DataGrid.Columns>
         </DataGrid>
         <!--VRF室内机四面出风型-->
@@ -273,7 +273,7 @@
                   BorderBrush="{DynamicResource HeadLineColor}" HorizontalGridLinesBrush="{DynamicResource HeadLineColor}" Visibility="Visible"
                   RowHeaderWidth="0" >
             <DataGrid.Columns>
-                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber}" MinWidth="60" Width="10*"/>
+                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="60" Width="10*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanAirVolume}" CellStyle="{StaticResource CellFanAirVolume}" MinWidth="160" Width="16*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadVRFCooling}" Width="20*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -285,25 +285,25 @@
                                              Background="Transparent"
                                              Padding="0"
                                              VerticalContentAlignment="Center"
-                                             Text="{Binding CoolRefrigeratingCapacity}" />
+                                             Text="{Binding CoolRefrigeratingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolAirInletDryBall}" />
+                                             Text="{Binding CoolAirInletDryBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 湿球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolAirInletWetBall}" />
+                                             Text="{Binding CoolAirInletWetBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 室外温度-->
                                 <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding CoolOutdoorTemperature}" />
+                                             Text="{Binding CoolOutdoorTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
@@ -319,26 +319,26 @@
                                              Background="Transparent"
                                              VerticalContentAlignment="Center"
                                              Padding="0"
-                                             Text="{Binding HotRefrigeratingCapacity}" />
+                                             Text="{Binding HotRefrigeratingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding HotAirInletDryBall}" />
+                                             Text="{Binding HotAirInletDryBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 湿球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
                                     <TextBox VerticalContentAlignment="Center"
                                              Background="Transparent" IsReadOnly="True"
-                                             Text="{Binding HotOutdoorTemperature}" />
+                                             Text="{Binding HotOutdoorTemperature,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise}" MinWidth="40" Width="5*"/>
-                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight}" MinWidth="40" Width="5*"/>
+                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40" Width="5*"/>
+                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40" Width="5*"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanSize}" CellStyle="{StaticResource CellFanSize}" Width="15*"/>
             </DataGrid.Columns>
         </DataGrid>

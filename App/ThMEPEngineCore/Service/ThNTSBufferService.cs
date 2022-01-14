@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.Service
             var polygons = mPolygon.Buffer(length, true);
             if (polygons.Count > 0)
             {
-                return polygons.Cast<Entity>().OrderByDescending(e => e.GetArea()).First() as MPolygon;
+                return polygons.Cast<Entity>().OrderByDescending(e => e.EntityArea()).First() as MPolygon;
             }
             return null;
         }

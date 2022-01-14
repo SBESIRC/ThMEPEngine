@@ -39,11 +39,13 @@
     <Compile Include="Command\IndoorFanCheck.cs" />
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
+    <Compile Include="Command\ThHvacIndoorFanExportCmd.cs" />
     <Compile Include="Common\ThRoomLoadTable.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
     <Compile Include="FanConnect\Service\ThAddValveService.cs" />
     <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
+    <Compile Include="FanPipeAlgorithm\ArrangePipe.cs" />
     <Compile Include="FanConnect\Service\ThRemSurplusPipe.cs" />
     <Compile Include="FanPipeAlgorithm\data_process.cs" />
     <Compile Include="FanPipeAlgorithm\edge.cs" />
@@ -67,6 +69,7 @@
     <Compile Include="IndoorFanLayout\Business\RoomLayoutFanBase.cs" />
     <Compile Include="IndoorFanLayout\CalcFanRectFormFanData.cs" />
     <Compile Include="IndoorFanLayout\CircleArcUtil.cs" />
+    <Compile Include="IndoorFanLayout\DataEngine\IndoorFanDataToDataSet.cs" />
     <Compile Include="IndoorFanLayout\DataEngine\LoadTableRead.cs" />
     <Compile Include="IndoorFanLayout\DataEngine\ThIndoorFanData.cs" />
     <Compile Include="IndoorFanLayout\IndoorFanCommon.cs" />
@@ -85,6 +88,7 @@
     <Compile Include="IndoorFanModels\EnumHotColdType.cs" />
     <Compile Include="IndoorFanModels\IndoorFanBase.cs" />
     <Compile Include="IndoorFanModels\IndoorFanCheckModel.cs" />
+    <Compile Include="IndoorFanModels\IndoorFanExportModel.cs" />
     <Compile Include="IndoorFanModels\IndoorFanLayoutModel.cs" />
     <Compile Include="IndoorFanModels\IndoorFanPlaceModel.cs" />
     <Compile Include="IndoorFanModels\VRFFan.cs" />

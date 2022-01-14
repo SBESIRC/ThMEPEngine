@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -170,7 +171,7 @@ FocusToCAD();
                 return false;
             }
 
-            pts = Tuple.Create(point1.Value, point2.Value);
+            pts = Tuple.Create(point1.Value.TransformBy(Active.Editor.UCS2WCS()), point2.Value.TransformBy(Active.Editor.UCS2WCS()));
             return true;
         }
         /// <summary>

@@ -311,9 +311,9 @@
                   SelectionMode="Single" Visibility="Visible"
                   RowHeaderWidth="0">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber}"/>
+                <DataGridTextColumn Header="设备编号" Binding="{Binding FanNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadAirConditionVolume}" CellStyle="{StaticResource CellAirConditionVolume}" Width="15*"/>
-                <DataGridTextColumn Header="盘管&#13;排数" Binding="{Binding FanCoilRow}" MinWidth="40"/>
+                <DataGridTextColumn Header="盘管&#13;排数" Binding="{Binding FanCoilRow,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40"/>
 
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadAirConditionCooling}" Width="15*">
                     <DataGridTemplateColumn.CellTemplate>
@@ -321,26 +321,26 @@
                             <UniformGrid Columns="7" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
                                 <!--制冷工况制冷量-->
                                 <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolCoolingCapacity}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolCoolingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletDryBall}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletDryBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletWetBall}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolAirInletWetBall,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolEnterPortWaterTEMP}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolEnterPortWaterTEMP,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding CoolExitWaterTEMP}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding CoolExitWaterTEMP,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding CoolFlow}" />
+                                    <TextBox Text="{Binding CoolFlow,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding CoolHydraulicResistance}" />
+                                    <TextBox Text="{Binding CoolHydraulicResistance,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
@@ -352,23 +352,23 @@
                             <UniformGrid Columns="6" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
                                 <!--制冷工况制冷量-->
                                 <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding HotHeatingCapacity}" />
+                                    <TextBox Text="{Binding HotHeatingCapacity,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <!--制冷工况 内机进风参数 干球温度-->
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding HotAirInletTEMP}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding HotAirInletTEMP,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding HotEnterPortWaterTEMP}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding HotEnterPortWaterTEMP,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox IsReadOnly="True" Text="{Binding HotExitWaterTEMP}" />
+                                    <TextBox IsReadOnly="True" Text="{Binding HotExitWaterTEMP,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding HotWorkXeF}" />
+                                    <TextBox Text="{Binding HotWorkXeF,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding HotFlow}" />
+                                    <TextBox Text="{Binding HotFlow,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
@@ -379,23 +379,23 @@
                         <DataTemplate>
                             <UniformGrid Columns="2" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
                                 <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox Text="{Binding BruchCollHotWaterPipeSize}" />
+                                    <TextBox Text="{Binding BruchCollHotWaterPipeSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                                 <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                                    <TextBox  Text="{Binding BruchCondensationPipeSize}" />
+                                    <TextBox  Text="{Binding BruchCondensationPipeSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
                                 </Border>
                             </UniformGrid>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise}" MinWidth="40"/>
-                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight}" MinWidth="40"/>
+                <DataGridTextColumn Header="噪声&#13;dBA" Binding="{Binding Noise,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40"/>
+                <DataGridTextColumn Header="重量&#13;kg" Binding="{Binding Weight,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40"/>
                 <DataGridTemplateColumn HeaderStyle="{StaticResource HeadFanSize}" CellStyle="{StaticResource CellFanSize}" Width="5*"/>
-                <DataGridTextColumn Header="送风管&#13;尺寸&#13;mmxmm" Binding="{Binding AirSupplyuctSize}" MinWidth="60"/>
-                <DataGridTextColumn Header="回风口&#13;尺寸&#13;mmxmm" Binding="{Binding ReturnAirOutletSize}" MinWidth="60"/>
-                <DataGridTextColumn Header="过滤器" Binding="{Binding Filter}" MinWidth="50"/>
-                <DataGridTextColumn Header="减震&#13;方式" Binding="{Binding DampingMode}" MinWidth="40"/>
-                <DataGridTextColumn Header="备注" Binding="{Binding Remarks}" MinWidth="40" MaxWidth="100"/>
+                <DataGridTextColumn Header="送风管&#13;尺寸&#13;mmxmm" Binding="{Binding AirSupplyuctSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="60"/>
+                <DataGridTextColumn Header="回风口&#13;尺寸&#13;mmxmm" Binding="{Binding ReturnAirOutletSize,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="60"/>
+                <DataGridTextColumn Header="过滤器" Binding="{Binding Filter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="50"/>
+                <DataGridTextColumn Header="减震&#13;方式" Binding="{Binding DampingMode,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40"/>
+                <DataGridTextColumn Header="备注" Binding="{Binding Remarks,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" MinWidth="40" MaxWidth="100"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Orientation="Vertical" Grid.Row="2" Height="35">

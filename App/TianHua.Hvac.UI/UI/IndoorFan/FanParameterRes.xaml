@@ -2,6 +2,7 @@
                     xmlns:sys="clr-namespace:System;assembly=mscorlib"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <x:Array x:Key="TypeList" Type ="sys:String">
+        <sys:String>双层百叶风口</sys:String>
         <sys:String>方形散流器</sys:String>
         <sys:String>圆形风口</sys:String>
     </x:Array>
@@ -93,17 +94,14 @@
             <Setter.Value>
                 <ControlTemplate TargetType="DataGridCell">
                     <UniformGrid Columns="3" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
-                        <!--制冷工况制冷量-->
                         <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding OverallDimensionWidth}" />
+                            <TextBox Text="{Binding OverallDimensionWidth,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
-                        <!--制冷工况 内机进风参数 干球温度-->
                         <Border BorderThickness="1,0,0,0"  BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox  Text="{Binding OverallDimensionHeight}" />
+                            <TextBox  Text="{Binding OverallDimensionHeight,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
-                        <!--制冷工况 内机进风参数 湿球温度-->
                         <Border BorderThickness="1,0,0,0" Margin="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox  Text="{Binding OverallDimensionLength}" />
+                            <TextBox  Text="{Binding OverallDimensionLength,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                     </UniformGrid>
                 </ControlTemplate>
@@ -184,19 +182,19 @@
                     <UniformGrid Columns="4" Background="Transparent" VerticalAlignment="Stretch" Height="25" Margin="0">
                         <!--风机信息 风量-->
                         <Border BorderThickness="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch" >
-                            <TextBox Text="{Binding FanAirVolume}" />
+                            <TextBox Text="{Binding FanAirVolume,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <!--风机信息 机外静压-->
                         <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding ExternalStaticVoltage}" />
+                            <TextBox Text="{Binding ExternalStaticVoltage,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <!--风机信息 电源-->
                         <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding PowerSupply}" />
+                            <TextBox Text="{Binding PowerSupply,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <!--风机信息 功率-->
                         <Border BorderThickness="1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding Power}" />
+                            <TextBox Text="{Binding Power,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                     </UniformGrid>
                 </ControlTemplate>
@@ -278,16 +276,14 @@
                         </Border>
                         <!--送风口尺寸 一个-->
                         <Border BorderThickness="1,0,0,0" Margin="-1,0,0,0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding AirSupplyOutletOneSize}" />
+                            <TextBox Text="{Binding AirSupplyOutletOneSize,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
                         <!--送风口尺寸 两个-->
                         <Border BorderThickness="1,0,0,0" Margin="0" BorderBrush="{DynamicResource HeadLineColor}" VerticalAlignment="Stretch">
-                            <TextBox Text="{Binding AirSupplyOutletTwoSize}" />
+                            <TextBox Text="{Binding AirSupplyOutletTwoSize,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}" />
                         </Border>
-
                     </UniformGrid>
                 </ControlTemplate>
-
             </Setter.Value>
         </Setter>
     </Style>

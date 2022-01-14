@@ -101,7 +101,7 @@ namespace ThMEPHVAC.Model
         {
             const double K = 0.7;
             const double PI = 3.15;//Math.PI + 0.01
-            const double HALFPI = 1.56;//0.5 * Math.PI - 0.01 
+            const double HALFPI = 1.5;//0.5 * Math.PI - 0.01 
             if (openAngle > 0 && openAngle <= HALFPI) //不处理锐角
                 throw new NotImplementedException("不支持弯头带锐角！！！");
             else if (openAngle > PI)

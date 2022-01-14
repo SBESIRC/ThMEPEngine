@@ -16,20 +16,6 @@ namespace ThMEPEngineCore.CAD
 {
     public static class ThAuxiliaryUtils
     {
-        public static void Print(this DBObjectCollection dbObjs, int colorIndex)
-        {
-            using (var db = Linq2Acad.AcadDatabase.Active())
-            {
-                for (int i = 0; i < dbObjs.Count; i++)
-                {
-                    var poly = dbObjs[i].Clone() as Entity;
-                    poly.ColorIndex = colorIndex;
-                    poly.SetDatabaseDefaults();
-                    db.ModelSpace.Add(poly);
-                }
-            }
-        }
-
         public static void CreateGroup(this List<Entity> entities, Database database, int colorIndex)
         {
             using (var db = AcadDatabase.Use(database))
@@ -47,7 +33,6 @@ namespace ThMEPEngineCore.CAD
                 }
             }
         }
-
         public static List<Line> GetEdges(this Polyline poly)
         {
             List<Line> lines = new List<Line>();
@@ -61,31 +46,6 @@ namespace ThMEPEngineCore.CAD
             }
             return lines;
         }
-
-        public static List<Line> FilterShortLines(this List<Line> lines, double length)
-        {
-            //过滤一端没连接任何物体，一端连接其他物体的线
-            Func<Point3d, double, ThCADCoreNTSSpatialIndex, bool> Query = (pt, len, index) =>
-            {
-                var square = ThDrawTool.CreateSquare(pt, len);
-                return index.SelectCrossingPolygon(square).Count > 1;             
-            };
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
-            return lines.Where(o =>
-            {
-                if (o.Length >= length)
-                {
-                    return true;
-                }
-                else
-                {
-                    double squareLength = o.Length > 2 ? 1 : 0.25 * o.Length;
-                    return Query(o.StartPoint, squareLength, spatialIndex) &&
-                    Query(o.EndPoint, squareLength, spatialIndex);
-                }
-            }).ToList();
-        }
-
         public static List<Line> NodingLines(this DBObjectCollection curves)
         {
             var results = new List<Line>();
@@ -104,7 +64,6 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
-
         public static List<Line> ExplodeLines(this DBObjectCollection curves,double tesslateLength=5.0)
         {
             //支持Line,Polyline,Arc,Circle
@@ -152,7 +111,6 @@ namespace ThMEPEngineCore.CAD
             }
             return lines;
         }
-
         public static double RadToAng(this double rad)
         {
             return rad / Math.PI * 180.0;
@@ -179,14 +137,6 @@ namespace ThMEPEngineCore.CAD
             double w = h * (screen.X / screen.Y);
             return new Point2d(w, h);
         }        
-        public static string PointToString(this Point3d pt)
-        {
-            return pt.X + "," + pt.Y + "," + pt.Z;
-        }
-        public static string PointToString(this Point2d pt)
-        {
-            return pt.X + "," + pt.Y;
-        }
         public static bool DoubleEquals(double value1, double value2,double DOUBLE_DELTA = 1E-6)
         {
             return value1 == value2 || Math.Abs(value1 - value2) < DOUBLE_DELTA;
@@ -208,49 +158,6 @@ namespace ThMEPEngineCore.CAD
                     return false;
                 }
             }).ToCollection();
-        }
-        public static DBObjectCollection BufferZeroPolyline(this DBObjectCollection objectCollection, double distance=0.1)
-        {
-            DBObjectCollection result = new DBObjectCollection();
-            foreach(DBObject obj in objectCollection)
-            {
-                if(obj is Polyline polyline && DoubleEquals(polyline.Area,0.0))
-                {
-                    var temp = polyline.Buffer(distance/2);
-                    foreach(DBObject dBObject in temp)
-                    {
-                        result.Add(dBObject);
-                    }
-                }
-                else
-                {
-                    result.Add(obj);
-                }
-            }
-            return result;
-        }
-        public static double GetArea(this Entity polygon)
-        {
-            if (polygon is Polyline polyline)
-            {
-                return polyline.Area;
-            }
-            else if (polygon is MPolygon mPolygon)
-            {
-                return mPolygon.Area;
-            }
-            else if (polygon is Circle circle)
-            {
-                return circle.Area;
-            }
-            else if (polygon is Ellipse ellipse)
-            {
-                return ellipse.Area;
-            }
-            else
-            {
-                throw new System.NotSupportedException();
-            }
         }
         public static DBObjectCollection Clone(this DBObjectCollection objs)
         {
