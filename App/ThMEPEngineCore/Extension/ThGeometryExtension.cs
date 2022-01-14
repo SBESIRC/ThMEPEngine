@@ -8,7 +8,13 @@ namespace ThMEPEngineCore.Extension
     {
         public static void ProjectOntoXYPlane(this List<ThGeometry> geos)
         {
-            geos.ForEach(g => g.Boundary.ProjectOntoXYPlane());
+            geos.ForEach(g =>
+            {
+                if (g.Boundary != null)
+                {
+                    g.Boundary.ProjectOntoXYPlane();
+                }
+            });
         }
     }
 }

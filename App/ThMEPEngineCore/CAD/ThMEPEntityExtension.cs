@@ -128,13 +128,10 @@ namespace ThMEPEngineCore.CAD
 
         public static void ProjectOntoXYPlane(this Entity geos)
         {
-            if (geos != null)
-            {
-                // Reference:
-                // https://knowledge.autodesk.com/support/autocad/learn-explore/caas/sfdcarticles/sfdcarticles/how-to-flatten-a-drawing-in-autocad.html
-                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
-                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
-            }
+            // Reference:
+            // https://knowledge.autodesk.com/support/autocad/learn-explore/caas/sfdcarticles/sfdcarticles/how-to-flatten-a-drawing-in-autocad.html
+            geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+            geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
         }
     }
 }
