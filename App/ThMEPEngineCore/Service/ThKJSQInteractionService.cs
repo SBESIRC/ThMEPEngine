@@ -309,7 +309,7 @@ namespace ThMEPEngineCore.Service
         private DBObjectCollection Rebuild(DBObjectCollection objs)
         {
             var results = new DBObjectCollection();
-            objs.OfType<Entity>().Where(e=>e.GetArea()>=1.0).ForEach(e =>
+            objs.OfType<Entity>().Where(e=>e.EntityArea()>=1.0).ForEach(e =>
             {
                 if (e is Polyline polyline)
                 {
@@ -356,7 +356,7 @@ namespace ThMEPEngineCore.Service
             }
             else
             {
-                return outlines.Cast<Entity>().OrderByDescending(e => e.GetArea()).ToCollection();
+                return outlines.Cast<Entity>().OrderByDescending(e => e.EntityArea()).ToCollection();
             }
         }
         private DBObjectCollection ContainsPoint(DBObjectCollection polygons, Point3d point)

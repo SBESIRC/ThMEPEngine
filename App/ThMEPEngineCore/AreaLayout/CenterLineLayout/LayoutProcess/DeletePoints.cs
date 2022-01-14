@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.LayoutProcess
                     bool flag = true;//默认删点,false不删点
                     foreach (Entity obj in unCoverRegion.ToDbCollection())
                     {
-                        if (obj.GetArea() > 500000.0 && unCoverRegion.Area - totalUncoverArea > 500000.0)//如果删除后面积变大超过要求
+                        if (obj.EntityArea() > 500000.0 && unCoverRegion.Area - totalUncoverArea > 500000.0)//如果删除后面积变大超过要求
                         {
                             flag = false;
                         }

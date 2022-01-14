@@ -235,7 +235,7 @@ namespace ThMEPStructure.GirderConnect.Data
         {
             Garbage = new DBObjectCollection();
             Results = new DBObjectCollection();
-            Objs = objs.OfType<Entity>().Where(o=>o.GetArea()>0.0).ToCollection();
+            Objs = objs.OfType<Entity>().Where(o=>o.EntityArea()>0.0).ToCollection();
             SpatialIndex = new ThCADCoreNTSSpatialIndex(Objs);
             Objs.OfType<Entity>().ForEach(o => PolygonDict.Add(o, ToPolygon(o)));
         }
@@ -250,7 +250,7 @@ namespace ThMEPStructure.GirderConnect.Data
                     var innerObjs = SpatialIndex.SelectWindowPolygon(enlarge);
                     innerObjs.Remove(o);
                     innerObjs.OfType<Entity>()
-                    .Where(e => IsClose(o.GetArea(), e.GetArea()))
+                    .Where(e => IsClose(o.EntityArea(), e.EntityArea()))
                     .Where(e => IsSimilar(PolygonDict[o], PolygonDict[e])).ForEach(e => Garbage.Add(e));
                     Results.Add(o);
                 }

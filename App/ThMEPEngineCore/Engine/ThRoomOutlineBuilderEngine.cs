@@ -319,7 +319,7 @@ namespace ThMEPEngineCore.Engine
             }
             else
             {
-                return outlines.Cast<Entity>().OrderByDescending(e => e.GetArea()).First();
+                return outlines.Cast<Entity>().OrderByDescending(e => e.EntityArea()).First();
             }
         }
 

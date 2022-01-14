@@ -64,7 +64,7 @@ namespace ThMEPWSS.Command
                 var covers = ThHydrantPolygonCleanService.Clean(
                     checkService.Covers
                     .SelectMany(o => o.Item3)
-                    .Where(o=>o.GetArea()>1e-6)
+                    .Where(o=>o.EntityArea()>1e-6)
                     .ToCollection());
                 var regionCheckService = new ThCheckRegionService()
                 {

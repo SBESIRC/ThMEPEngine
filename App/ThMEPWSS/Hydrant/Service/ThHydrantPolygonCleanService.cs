@@ -31,7 +31,7 @@ namespace ThMEPWSS.Hydrant.Service
         {
             return polygons
                 .OfType<Entity>()
-                .Where(o => o.GetArea() > AREATOLERANCE)
+                .Where(o => o.EntityArea() > AREATOLERANCE)
                 .ToCollection();
         }
 
