@@ -89,22 +89,21 @@ namespace ThMEPEngineCore.ConnectWiring
                     allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
 
-#if DEBUG
+                    if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
 
                         string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
                         File.WriteAllText(path, dataGeoJson);
                     }
-#endif
+
                     //--------------处理中
                     var outJson = thCableRouter.RouteCable(dataGeoJson, context);
 
-#if DEBUG
+                    if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
                         string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
                         File.WriteAllText(path, outJson);
                     }
-#endif
 
                     if (!outJson.Contains("error"))
                     {
