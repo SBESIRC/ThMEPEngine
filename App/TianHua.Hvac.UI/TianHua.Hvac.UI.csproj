@@ -42,6 +42,7 @@
     <Compile Include="Command\ThHvacExtractRoomFunctionCmd.cs" />
     <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="Command\ThHvacCRFKInsertCmd.cs" />
+    <Compile Include="Command\ThHvacIndoorFanService.cs" />
     <Compile Include="Command\ThHvacSGDXInsertCmd.cs" />
     <Compile Include="Command\ThHvacFGDXUiCmd.cs" />
     <Compile Include="Command\ThHvacFGDXInsertCmd.cs" />

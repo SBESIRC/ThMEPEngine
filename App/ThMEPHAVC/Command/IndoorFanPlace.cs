@@ -122,7 +122,7 @@ namespace ThMEPHVAC.Command
         bool SelectLayoutPoint(bool haveVentCount,bool canChangeCount,out Point3d createPoint) 
         {
             createPoint = new Point3d();
-            string showMsg = haveVentCount? string.Format("\n点击进行放置风机,当前风口{0}个", ventCount): "\n点击进行放置风机";
+            string showMsg = haveVentCount? string.Format("\n点击放置设备,当前送风口{0}个", ventCount): "\n点击进行放置风机";
             var opt = new PromptPointOptions(showMsg);
             if(haveVentCount && canChangeCount)
                 opt.Keywords.Add("C", "C", "设置个数(C)");
@@ -138,7 +138,7 @@ namespace ThMEPHVAC.Command
                     //输入出图比例
                     var options = new PromptKeywordOptions("选择风口个数");
                     options.Keywords.Add("1", "1", "1个风口(1)");
-                    options.Keywords.Add("2", "2", "2个风口(1)");
+                    options.Keywords.Add("2", "2", "2个风口(2)");
                     options.Keywords.Default = ventCount.ToString();
                     var result = Active.Editor.GetKeywords(options);
                     if (result.Status == PromptStatus.OK)
@@ -172,7 +172,7 @@ namespace ThMEPHVAC.Command
             }
             if (ventPoints.Count > 0) 
             {
-                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount,out double ventLength);
                 ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth/2+ LastVentDistanceToEndAdd);
             }
                 
@@ -201,7 +201,7 @@ namespace ThMEPHVAC.Command
             }
             if (ventPoints.Count > 0) 
             {
-                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount, out double ventLength);
                 ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
             }
             var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);
@@ -240,7 +240,7 @@ namespace ThMEPHVAC.Command
             }
             if (ventPoints.Count > 0)
             {
-                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount);
+                var ventWidth = fanLoad.GetCoilFanVentSize(ventCount, out double ventLength);
                 ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
             }
             var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);

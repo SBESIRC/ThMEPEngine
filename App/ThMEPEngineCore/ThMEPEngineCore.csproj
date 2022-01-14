@@ -187,6 +187,8 @@
     <Compile Include="GridOperation\Utils\GridLineMergeService.cs" />
     <Compile Include="GridOperation\Utils\GridLineSimplifyService.cs" />
     <Compile Include="IO\ExcelService\ExcelHelper.cs" />
+    <Compile Include="IO\ExcelService\NPOIExcelBase.cs" />
+    <Compile Include="IO\ExcelService\WriteExcelHelper.cs" />
     <Compile Include="IO\JSON\JsonHelper.cs" />
     <Compile Include="IO\ThMEPGeoJSONService.cs" />
     <Compile Include="Service\ThKJSQInteractionService.cs" />

@@ -479,7 +479,7 @@ namespace ThMEPHVAC.Command
             {
                 foreach (var region in showCurves)
                 {
-                    continue;
+                    //continue;
                     if (region == null)
                         continue;
                     var copy = region.Clone() as Curve;

@@ -1,13 +1,11 @@
-﻿using NPOI.HSSF.UserModel;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
+﻿using NPOI.SS.UserModel;
 using System;
 using System.Data;
 using System.IO;
 
 namespace ThMEPEngineCore.IO.ExcelService
 {
-    public class ExcelHelper
+    public class ExcelHelper: NPOIExcelBase
     {
         public DataSet ReadExcelToDataSet(string filePath, int startRow=0)
         {
@@ -37,7 +35,7 @@ namespace ThMEPEngineCore.IO.ExcelService
             var dataSet = new DataSet();
             if (null == workbook)
                 return dataSet;
-            for(int p = 0; p < workbook.NumberOfSheets; p++)
+            for (int p = 0; p < workbook.NumberOfSheets; p++)
             {
                 var sheet = workbook.GetSheetAt(p);  //获取第一个工作表
                 var dataTable = ReadDataFromIWorkBook(sheet, startRow);
@@ -58,7 +56,7 @@ namespace ThMEPEngineCore.IO.ExcelService
                 return dataTable;
             var columnCount = 1;
             var startCell = int.MaxValue;
-            for (int i = startRow; i <= rowCount; ++i) 
+            for (int i = startRow; i < rowCount; ++i) 
             {
                 var thisRow = sheet.GetRow(i);
                 var thisEnd = thisRow.LastCellNum;//获取总列数
@@ -69,13 +67,12 @@ namespace ThMEPEngineCore.IO.ExcelService
             //构建datatable的列
             for (int i = startCell; i < columnCount; ++i)
             {
-                //ICell cell = firstRow.GetCell(i);
-                //string columnName = isFirstLineColumnName ? cell.StringCellValue : "column" + (i + 1);
                 DataColumn column = new DataColumn();
                 dataTable.Columns.Add(column);
             }
+            
             //填充行
-            for (int i = startRow; i <= rowCount; ++i)
+            for (int i = startRow; i < rowCount; ++i)
             {
                 var row = sheet.GetRow(i);
                 if (row == null) continue;
@@ -91,24 +88,7 @@ namespace ThMEPEngineCore.IO.ExcelService
                     }
                     else
                     {
-                        //CellType(Unknown = -1,Numeric = 0,String = 1,Formula = 2,Blank = 3,Boolean = 4,Error = 5,)
-                        switch (cell.CellType)
-                        {
-                            case CellType.Blank:
-                                dataRow[dataRowIndex] = "";
-                                break;
-                            case CellType.Numeric:
-                                short format = cell.CellStyle.DataFormat;
-                                //对时间格式（2015.12.5、2015/12/5、2015-12-5等）的处理
-                                if (format == 14 || format == 31 || format == 57 || format == 58)
-                                    dataRow[dataRowIndex] = cell.DateCellValue;
-                                else
-                                    dataRow[dataRowIndex] = cell.NumericCellValue;
-                                break;
-                            case CellType.String:
-                                dataRow[dataRowIndex] = cell.StringCellValue;
-                                break;
-                        }
+                        dataRow[dataRowIndex] = GetValueType(cell);
                     }
                 }
                 dataTable.Rows.Add(dataRow);
@@ -145,42 +125,6 @@ namespace ThMEPEngineCore.IO.ExcelService
                     }
                     catch{ }
                 }
-            }
-        }
-        public IWorkbook ReadExcelToMemory(string filePath) 
-        {
-            IWorkbook workbook = null;  //新建IWorkbook对象
-            FileStream fileStream = null;
-            try
-            {
-                //这里不检查文件是否存在
-                var fileExt = Path.GetExtension(filePath);
-                fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-                if (fileExt.ToLower() == ".xlsx")
-                {
-                    workbook = new XSSFWorkbook(fileStream);  //xlsx数据读入workbook
-                }
-                else if (fileExt.ToLower() == ".xls")
-                {
-                    workbook = new HSSFWorkbook(fileStream);  //xls数据读入workbook
-                }
-                else 
-                {
-                    throw new Exception("格式不支持");
-                }
-                return workbook;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-            finally 
-            {
-                //防止解析报错内存资源没有释放
-                if (workbook != null)
-                    workbook.Close();
-                if (null != fileStream)
-                    fileStream.Close();
             }
         }
     }

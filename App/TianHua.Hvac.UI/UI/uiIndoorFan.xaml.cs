@@ -15,6 +15,7 @@ using ThMEPEngineCore.IO.ExcelService;
 using ThMEPEngineCore.IO.JSON;
 using ThMEPHVAC.IndoorFanModels;
 using ThMEPHVAC.ParameterService;
+using TianHua.Hvac.UI.Command;
 using TianHua.Hvac.UI.IndoorFanModels;
 using TianHua.Hvac.UI.LoadCalculation;
 using TianHua.Hvac.UI.UI.IndoorFan;
@@ -37,7 +38,7 @@ namespace TianHua.Hvac.UI.UI
             InitializeComponent();
             defaultPath = ThCADCommon.IndoorFanDataTablePath();
             this.MutexName = "THSNJ";
-            if (null == indoorFanViewModel) 
+            if (null == indoorFanViewModel)
             {
                 indoorFanViewModel = new IndoorFanViewModel();
                 //加载数据
@@ -222,7 +223,40 @@ namespace TianHua.Hvac.UI.UI
         }
         private void btnMaterialList_Click(object sender, RoutedEventArgs e)
         {
+
+            FocusToCAD();
+            var select = new ThHvacIndoorFanService();
+            var pline = select.SelectWindowRect();
+            if (null == pline)
+                return;
             //材料表
+            var time = DateTime.Now.ToString("HHmmss");
+            var fileName = "室内机风机数据" + time;
+            var fileDialog = new SaveFileDialog();
+            fileDialog.Title = "选择保存位置";
+            fileDialog.Filter = string.Format("风机数据文件(*.{0})|*.{0}", "xlsx");
+            fileDialog.OverwritePrompt = true;
+            fileDialog.DefaultExt = saveExtensionName;
+            fileDialog.FileName = fileName;
+            if (fileDialog.ShowDialog() == true)
+            {
+                string savePath = fileDialog.FileName;
+                if (!CheckPathAndDelFile(savePath))
+                {
+                    string eMsg = string.Format("文件：{0},删除失败，文件被打开占用，或没有在该位置的权限，请关闭后或修改保存位置", savePath);
+                    MessageBox.Show(eMsg, "天华-提醒", MessageBoxButton.OK);
+                    return;
+                }
+                //设置参数
+                IndoorFanParameter.Instance.ExportModel = new IndoorFanExportModel();
+                IndoorFanParameter.Instance.ExportModel.SavePath = savePath;
+                IndoorFanParameter.Instance.ExportModel.FanType = indoorFanViewModel.SelectFanType;
+                IndoorFanParameter.Instance.ExportModel.TargetFanInfo.AddRange(indoorFanViewModel.FanInfos);
+                IndoorFanParameter.Instance.ExportModel.ExportAreas.Clear();
+                IndoorFanParameter.Instance.ExportModel.ExportAreas.Add(pline, new List<Autodesk.AutoCAD.DatabaseServices.Polyline>());
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THSNJDC");
+                FocusToCAD();
+            }
         }
         private void btnSelectFile_Click(object sender, RoutedEventArgs e)
         {

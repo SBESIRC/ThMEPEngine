@@ -456,10 +456,10 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             if (portPoints == null || portPoints.Count < 1)
                 return;
             //添加出风口
-            double ventWidth = fanLoad.GetCoilFanVentSize(portPoints.Count);
+            double ventWidth = fanLoad.GetCoilFanVentSize(portPoints.Count, out double ventLength);
             double ventVolume = fanLoad.FanAirVolumeDouble / portPoints.Count;
-            string ventType = fanLoad.AirSupplyOutletType;
-            string attName = ventType.Contains("圆") ? "圆形风口直径" : "方形散流器喉部宽度";
+            string ventType = VentAttrName(fanLoad.AirSupplyOutletType);
+            var atts = VentAttrs(ventType,ventWidth, ventLength);
             foreach (var portPoint in portPoints)
             {
                 var ventCenter = portPoint;
@@ -469,10 +469,35 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 ventAttrs.Add("风量", string.Format("{0}m3/h", ventVolume));
                 var ventDynAttrs = new Dictionary<string, object>();
                 ventDynAttrs.Add("风口类型", ventType);
-                ventDynAttrs.Add(attName, ventWidth);
-
+                foreach(var keyValue in atts)
+                    ventDynAttrs.Add(keyValue.Key, keyValue.Value);
                 AddCoilAirPort(acdb, ventCenter, angle, ventAttrs, ventDynAttrs);
             }
+        }
+        private string VentAttrName(string ventType) 
+        {
+            string ventAttrName = ventType;
+            if (ventType.Contains("百叶"))
+                ventAttrName = "下送风口";
+            return ventAttrName;
+        }
+        private Dictionary<string,object> VentAttrs(string ventType,double width,double length)
+        {
+            var ventAttrs = new Dictionary<string, object>();
+            if (ventType.Contains("圆")) 
+            {
+                ventAttrs.Add("圆形风口直径", width);
+            }
+            else if (ventType.Contains("下送风口"))
+            {
+                ventAttrs.Add("风口宽度", width);
+                ventAttrs.Add("风口长度", length);
+            }
+            else 
+            {
+                ventAttrs.Add("方形散流器喉部宽度", width);
+            }
+            return ventAttrs;
         }
         private void AddCoilAirPort(AcadDatabase acdb, Point3d createPoint, double angle, Dictionary<string, string> attr, Dictionary<string, object> dynAttr, double textAngleOffSet =0)
         {

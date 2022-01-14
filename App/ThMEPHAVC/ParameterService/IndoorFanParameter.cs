@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPHVAC.IndoorFanModels;
+﻿using ThMEPHVAC.IndoorFanModels;
 
 namespace ThMEPHVAC.ParameterService
 {
@@ -13,11 +8,16 @@ namespace ThMEPHVAC.ParameterService
         {
             PlaceModel = new IndoorFanPlaceModel();
             PlaceModel.HisVentCount = 1;
+            ChangeLayoutModel = new IndoorFanLayoutModel();
+            PlaceModel = new IndoorFanPlaceModel();
+            CheckModel = new IndoorFanCheckModel();
+            ExportModel = new IndoorFanExportModel();
         }
         public static IndoorFanParameter Instance = new IndoorFanParameter();
         public IndoorFanLayoutModel LayoutModel { get; set; }
         public IndoorFanLayoutModel ChangeLayoutModel { get; set; }
         public IndoorFanPlaceModel PlaceModel { get; set; }
         public IndoorFanCheckModel CheckModel { get; set; }
+        public IndoorFanExportModel ExportModel { get; set; }
     }
 }

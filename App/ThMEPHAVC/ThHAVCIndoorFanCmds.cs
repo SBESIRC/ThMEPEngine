@@ -1,8 +1,12 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Windows;
 using DotNetARX;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -20,9 +24,7 @@ namespace ThMEPHVAC
         [CommandMethod("TIANHUACAD", "THSNJBZ", CommandFlags.Modal)]
         public void THIndoorFanLayout()
         {
-            //Step1 选择房间框线 获取房间内外轮廓信息
-            
-                var ucs = Active.Editor.CurrentUserCoordinateSystem;
+            var ucs = Active.Editor.CurrentUserCoordinateSystem;
             var selectAreas = SelectPolyline();
             var indoorFanLayout = new IndoorFanLayoutCmd(selectAreas, ucs.CoordinateSystem3d.Xaxis, ucs.CoordinateSystem3d.Yaxis,false);
             indoorFanLayout.Execute();
@@ -58,6 +60,16 @@ namespace ThMEPHVAC
             if (null == cloudLines || cloudLines.Count < 1)
                 return;
             ShowErrorRooms(cloudLines);
+        }
+        [CommandMethod("TIANHUACAD", "THSNJDC", CommandFlags.Modal)]
+        public void THIndoorFanExport()
+        {
+            var fanChange = new ThHvacIndoorFanExportCmd();
+            fanChange.Execute();
+            var showMsg = fanChange.ShowMsg;
+            if (string.IsNullOrEmpty(showMsg))
+                return;
+            Active.Editor.WriteMessage(showMsg);
         }
         [CommandMethod("TIANHUACAD", "THSNJArea", CommandFlags.Modal)]
         public void THIndoorFanTest()
@@ -209,6 +221,7 @@ namespace ThMEPHVAC
             }
             return selectPLines;
         }
+        
         /// <summary>
         /// 计算外包框和其中的洞
         /// </summary>
