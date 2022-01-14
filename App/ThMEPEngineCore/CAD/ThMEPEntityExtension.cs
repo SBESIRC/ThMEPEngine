@@ -57,5 +57,84 @@ namespace ThMEPEngineCore.CAD
                 throw new NotSupportedException();
             }
         }
+
+        public static bool EntityContains(this Entity ent, Point3d pt)
+        {
+            if (ent is Polyline polyline)
+            {
+                return polyline.Contains(pt);
+            }
+            else if (ent is MPolygon mPolygon)
+            {
+                return mPolygon.Contains(pt);
+            }
+            else if (ent is Circle circle)
+            {
+                return pt.DistanceTo(circle.Center) < circle.Radius;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static bool EntityContains(this Entity A, Entity B)
+        {
+            if (A is Polyline firstPoly)
+            {
+                return Contains(firstPoly, B);
+            }
+            else if (A is MPolygon mPolygon)
+            {
+                return Contains(mPolygon, B);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private static bool Contains(Polyline poly, Entity entity)
+        {
+            if (entity is Curve curve)
+            {
+                return poly.Contains(curve);
+            }
+            else if (entity is MPolygon mPolygon)
+            {
+                return poly.Contains(mPolygon);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private static bool Contains(MPolygon mPolygon, Entity entity)
+        {
+            if (entity is Curve curve)
+            {
+                return mPolygon.Contains(curve);
+            }
+            else if (entity is MPolygon mPolygon2)
+            {
+                return mPolygon.Contains(mPolygon2);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static void ProjectOntoXYPlane(this Entity geos)
+        {
+            if (geos != null)
+            {
+                // Reference:
+                // https://knowledge.autodesk.com/support/autocad/learn-explore/caas/sfdcarticles/sfdcarticles/how-to-flatten-a-drawing-in-autocad.html
+                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
+                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
+            }
+        }
     }
 }

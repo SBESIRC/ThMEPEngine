@@ -114,7 +114,7 @@ namespace ThMEPWSS.Hydrant.Data
             {
                 foreach (var room in rooms)
                 {
-                    if (room.Boundary.IsContains(o.Position))
+                    if (room.Boundary.EntityContains(o.Position))
                     {
                         results.Add(o);
                         break;
@@ -149,7 +149,7 @@ namespace ThMEPWSS.Hydrant.Data
                 {
                     var rotateVec = vec.RotateBy(ThAuxiliaryUtils.AngToRad(j * increAng), Vector3d.ZAxis).GetNormal();
                     var extendPt = pt + rotateVec.MultiplyBy(radius);
-                    if (room.IsContains(extendPt))
+                    if (room.EntityContains(extendPt))
                     {
                         return extendPt;
                     }

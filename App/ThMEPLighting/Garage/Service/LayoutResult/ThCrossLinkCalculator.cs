@@ -506,7 +506,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         protected virtual List<Line> GroupSides(Polyline partition, List<Line> sides)
         {
             return sides
-                .Where(e => partition.IsContains(e.StartPoint) || partition.IsContains(e.EndPoint))
+                .Where(e => partition.EntityContains(e.StartPoint) || partition.EntityContains(e.EndPoint))
                 .ToList();
         }
         protected List<Tuple<Line, Line>> GetLinePairs(List<Line> lines)

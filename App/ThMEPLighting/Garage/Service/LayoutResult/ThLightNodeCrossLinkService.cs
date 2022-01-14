@@ -237,7 +237,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var parallels = GetParallels(adjacentA, edges.Select(o => o.Edge).ToList());
             var parallelEdges = edges.Where(o => parallels.Contains(o.Edge)).ToList();
             var lightNodes = parallelEdges.SelectMany(o => o.LightNodes).ToList();
-            lightNodes = lightNodes.Where(o=>partitionArea.IsContains(o.Position)).ToList(); // 过滤在分区里的灯
+            lightNodes = lightNodes.Where(o=>partitionArea.EntityContains(o.Position)).ToList(); // 过滤在分区里的灯
 
             lightNodes = lightNodes
                 .OrderByDescending(o=> o.Position.GetProjectPtOnLine(
@@ -274,7 +274,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<ThLightEdge>();
             edges.ForEach(e =>
             {
-                if (e.LightNodes.Select(n => n.Position).Where(n => partition.IsContains(n)).Any())
+                if (e.LightNodes.Select(n => n.Position).Where(n => partition.EntityContains(n)).Any())
                 {
                     results.Add(e);
                 }

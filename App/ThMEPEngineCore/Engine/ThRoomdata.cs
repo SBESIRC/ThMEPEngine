@@ -438,7 +438,7 @@ namespace ThMEPEngineCore.Engine
         }
         private bool IsContains(DBObjectCollection polygons, Entity polygon)
         {
-            return polygons.OfType<Entity>().Where(o => o.IsContains(polygon)).Any();
+            return polygons.OfType<Entity>().Where(o => o.EntityContains(polygon)).Any();
         }
 
         private bool IsCloseToComponents(DBObjectCollection polygons, Point3d pt, double tolerance)
@@ -483,12 +483,12 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (polyline.Area > 1e-6)
                     {
-                        isIn = polyline.IsContains(pt);
+                        isIn = polyline.EntityContains(pt);
                     }
                 }
                 else if (obj is MPolygon mPolygon)
                 {
-                    isIn = mPolygon.IsContains(pt);
+                    isIn = mPolygon.EntityContains(pt);
                 }
                 if (isIn)
                 {

@@ -1,6 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Extension
@@ -9,25 +8,7 @@ namespace ThMEPEngineCore.Extension
     {
         public static void ProjectOntoXYPlane(this List<ThGeometry> geos)
         {
-            geos.ForEach(g =>
-            {
-                if (g.Boundary != null)
-                {
-                    // Reference:
-                    // https://knowledge.autodesk.com/support/autocad/learn-explore/caas/sfdcarticles/sfdcarticles/how-to-flatten-a-drawing-in-autocad.html
-                    g.Boundary.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
-                    g.Boundary.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
-                }
-            });
-        }
-
-        public static void ProjectOntoXYPlane(this Entity geos)
-        {
-            if (geos != null)
-            {
-                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1E99)));
-                geos.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1E99)));
-            }
+            geos.ForEach(g => g.Boundary.ProjectOntoXYPlane());
         }
     }
 }

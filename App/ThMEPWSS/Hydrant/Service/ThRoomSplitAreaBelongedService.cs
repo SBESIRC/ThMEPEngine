@@ -32,7 +32,7 @@ namespace ThMEPWSS.Hydrant.Service
         }        
         private List<Entity> BelongedProtectArea(Entity splitArea)
         {
-            return CoverAreas.Where(o => o.IsContains(splitArea)).ToList();
+            return CoverAreas.Where(o => o.EntityContains(splitArea)).ToList();
         }
     }
 }

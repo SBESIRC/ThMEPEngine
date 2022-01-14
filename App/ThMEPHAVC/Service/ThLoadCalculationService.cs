@@ -3,6 +3,7 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
@@ -37,7 +38,7 @@ namespace ThMEPHVAC.Service
                         //本身含有表格
                         Polyline tableBoundary = item as Polyline;
                         var existedTable = tableDic[tableBoundary];
-                        if (roomBoundary.IsContains(existedTable.Position))
+                        if (roomBoundary.EntityContains(existedTable.Position))
                         {
                             //找到表格
                             RoomMapping.Add((roomDic[roomBoundary], existedTable).ToTuple());
@@ -92,7 +93,7 @@ namespace ThMEPHVAC.Service
                     //本身含有表格
                     Polyline tableBoundary = item as Polyline;
                     Table existedTable = tableDic[tableBoundary];
-                    if (room.IsContains(existedTable.Position))
+                    if (room.EntityContains(existedTable.Position))
                     {
                         return existedTable;
                     }
@@ -122,20 +123,6 @@ namespace ThMEPHVAC.Service
                 }
             }
             return null;
-        }
-
-        private static bool IsContains(this Entity roomBoundary, Point3d position)
-        {
-            if (roomBoundary is Polyline polyline)
-            {
-                return polyline.Contains(position);
-            }
-            else if (roomBoundary is MPolygon mPolygon)
-            {
-                return mPolygon.Contains(position);
-            }
-            else
-                return false;
         }
     }
 }

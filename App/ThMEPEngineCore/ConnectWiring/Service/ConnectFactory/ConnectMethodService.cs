@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
         /// <returns></returns>
         private Polyline UpdateWiring(Polyline wiring, Point3d connectPt, Point3d turnPt, Circle circle)
         {
-            if (circle.IsContains(wiring.StartPoint))
+            if (circle.EntityContains(wiring.StartPoint))
             {
                 wiring.ReverseCurve();
             }
@@ -82,7 +82,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
         /// <returns></returns>
         private Polyline UpdateWiring(Polyline wiring, Point3d connectPt, Circle circle)
         {
-            if (circle.IsContains(wiring.StartPoint))
+            if (circle.EntityContains(wiring.StartPoint))
             {
                 wiring.ReverseCurve();
             }

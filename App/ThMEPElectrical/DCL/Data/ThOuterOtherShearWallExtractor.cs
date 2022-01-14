@@ -93,19 +93,5 @@ namespace ThMEPElectrical.DCL.Data
                 OtherShearWalls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
             }
         }
-        public void SetShearWallBelongArchOutlineId(Dictionary<Entity, string> archOutlineId)
-        {
-            OuterShearWalls.ForEach(o =>
-            {
-                foreach (Entity obj in archOutlineId.Keys)
-                {
-                    if (obj.IsContains(o))
-                    {
-                        BelongArchitectureIdDic.Add(o, archOutlineId[obj]);
-                        break;
-                    }
-                }
-            });
-        }
     }
 }

@@ -185,7 +185,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             minmumLength = Math.Min(2.0, minmumLength);
             var pt1 = firstMidPt + pendVec.MultiplyBy(minmumLength / 2.0);
             var pt2 = firstMidPt - pendVec.MultiplyBy(minmumLength / 2.0);
-            if(polygon.IsContains(pt1))
+            if(polygon.EntityContains(pt1))
             {
                 return firstMidPt.GetVectorTo(pt1);
             }

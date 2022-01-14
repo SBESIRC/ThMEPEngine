@@ -27,7 +27,7 @@ namespace ThMEPWSS.FlushPoint.Service
             var containers = new List<Entity>();
             if (objs.Count == 0)
             {
-                containers = Rooms.Where(r => r.IsContains(pt)).ToList();
+                containers = Rooms.Where(r => r.EntityContains(pt)).ToList();
             }
             else
             {

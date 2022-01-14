@@ -98,10 +98,6 @@ namespace ThMEPElectrical.AFAS.Data
             }
 
         }
-        public void Print(Database database)
-        {
-            HoleDic.Select(o => o.Key).Cast<Entity>().ToList().CreateGroup(database, ColorIndex);
-        }
 
         public void Set(List<ThStoreyInfo> storeyInfos)
         {
@@ -110,7 +106,7 @@ namespace ThMEPElectrical.AFAS.Data
 
         public ThStoreyInfo Query(Entity entity)
         {
-            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            var results = StoreyInfos.Where(o => o.Boundary.EntityContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
 
