@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
+using DotNetARX;
 using GeometryExtensions;
 using Linq2Acad;
 using System;
