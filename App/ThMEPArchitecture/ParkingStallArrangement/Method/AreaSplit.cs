@@ -258,7 +258,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
-        private static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea)
+        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea)
         {
             
             if (buildLines.Count == 0)//区域内没有建筑物
@@ -297,7 +297,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return pt.Y > line.StartPoint.Y;
             }
         }
-        private static double GetMinDist(this Line line, Point3d pt)
+        public static double GetMinDist(this Line line, Point3d pt)
         {
             var targetPt = line.GetClosestPointTo(pt, true);
             return pt.DistanceTo(targetPt);

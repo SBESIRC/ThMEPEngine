@@ -56,7 +56,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Run(currentDb);
+                    RunWithWindmillSeglineSupported(currentDb);
                 }
             }
             catch (Exception ex)
@@ -146,6 +146,122 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara,  ParameterViewModel);
+            }
+            geneAlgorithm.Logger = Logger;
+
+            var rst = new List<Chromosome>();
+            var histories = new List<Chromosome>();
+            bool recordprevious = false;
+            try
+            {
+                //rst = geneAlgorithm.Run(histories, recordprevious);
+                rst = geneAlgorithm.Run2(histories, recordprevious);
+            }
+            catch
+            {
+                ;
+            }
+            var solution = rst.First();
+            histories.Add(rst.First());
+            for (int k = 0; k < histories.Count; k++)
+            {
+                layoutPara.Set(histories[k].Genome);
+                var layerNames = "solutions" + k.ToString();
+                using (AcadDatabase adb = AcadDatabase.Active())
+                {
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                    }
+                    catch { }
+                }
+
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                {
+                    ParkingPartition partition = new ParkingPartition();
+                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    {
+                        try
+                        {
+                            partition.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            partition.Dispose();
+                        }
+                    }
+                }
+            }
+            layoutPara.Set(solution.Genome);
+            Draw.DrawSeg(solution);
+            //layoutPara.Dispose();
+        }
+
+        public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
+        {
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            if (outerBrder.SegLines.Count == 0)//分割线数目为0
+            {
+                Active.Editor.WriteMessage("分割线不存在！");
+                return;
+            }
+            if (!rstDataExtract)
+            {
+                return;
+            }
+            var area = outerBrder.WallLine;
+            var areas = new List<Polyline>() { area };
+            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
+            var gaPara = new GaParameter(outerBrder.SegLines);
+
+            var usedLines = new HashSet<int>();
+            var maxVals = new List<double>();
+            var minVals = new List<double>();
+
+            var seglineDic = new Dictionary<int, Line>();
+            var index = 0;
+            foreach (var line in outerBrder.SegLines)
+            {
+                seglineDic.Add(index++, line);
+            }
+            WindmillSplit.Split(area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, out Dictionary<int, List<int>> seglineIndexDic);
+
+            gaPara.Set(outerBrder.SegLines, maxVals, minVals);
+
+            var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
+            var linePtDic = Intersection.GetLinePtDic(ptDic);
+            var intersectPtCnt = ptDic.Count;//交叉点数目
+            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
+            foreach (var num in ptDic.Keys)
+            {
+                var random = new Random();
+                var flag = random.NextDouble() < 0.5;
+                directionList.Add(num, flag);//默认给全横向
+            }
+            ParkingStallGAGenerator geneAlgorithm = null;
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, seglineIndexDic);
+
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
+
+                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+                if (iterationCnt.Status != PromptStatus.OK) return;
+
+                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+                if (popSize.Status != PromptStatus.OK) return;
+
+                ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
+                parameterViewModel.IterationCount = iterationCnt.Value;
+                parameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
+            }
+            else
+            {
+                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             geneAlgorithm.Logger = Logger;
 
