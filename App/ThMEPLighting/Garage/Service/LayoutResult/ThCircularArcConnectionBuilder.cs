@@ -75,10 +75,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             jumpWireRes = avoidService.Results;
 
             // 连接T型跨区
-            var threewayJumpWireRes = CreateThreeWayCornerJumpWire();
+            var threewayJumpWireRes = CreateThreeWayCornerJumpWire(totalEdges);
 
             // 创建十字路口的线
-            var crossJumpWireRes = CreateCrossCornerStraitLinkJumpWire();
+            var crossJumpWireRes = CreateCrossCornerStraitLinkJumpWire(totalEdges);
 
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);

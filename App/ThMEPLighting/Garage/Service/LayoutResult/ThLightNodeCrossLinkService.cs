@@ -111,8 +111,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var current = partitions[i];
                 var currentNodes = new List<ThLightNode>();
                 var currentNeibourLinkPt = current.Item1.FindLinkPt(current.Item2);
-                var currentArea = CreateArea(current.Item1, current.Item2, neibourDict);
+                var currentAdjacentA = MergeNeibour(current.Item1, neibourDict);
+                var currentAdjacentB = MergeNeibour(current.Item2, neibourDict);       
+                var currentArea= currentAdjacentA.Item1.CreateParallelogram(currentAdjacentB.Item1);
                 var currentEdges = GroupEdges(currentArea, edges); // 分组
+                currentEdges = FilterEdgesByTriangle(new List<Polyline> { currentAdjacentA.Item2, currentAdjacentB.Item2},currentEdges);
+
                 var currentItem1Edges = FilterEdges(currentEdges, current.Item1, neibourDict);
                 currentNodes.AddRange(GetLinkNodes(current.Item1, currentNeibourLinkPt.Value, currentItem1Edges));
                 var currentItem2Edges = FilterEdges(currentEdges, current.Item2, neibourDict);
@@ -121,8 +125,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var opposite = partitions[i + half];
                 var oppositeNodes = new List<ThLightNode>();
                 var oppositeNeibourLinkPt = opposite.Item1.FindLinkPt(opposite.Item2);
-                var oppositeArea = CreateArea(opposite.Item1, opposite.Item2, neibourDict);
+                var oppositeAdjacentA = MergeNeibour(opposite.Item1, neibourDict);
+                var oppositeAdjacentB = MergeNeibour(opposite.Item2, neibourDict);
+                var oppositeArea = oppositeAdjacentA.Item1.CreateParallelogram(oppositeAdjacentB.Item1);
                 var oppositeEdges = GroupEdges(oppositeArea, edges);
+                oppositeEdges = FilterEdgesByTriangle(new List<Polyline> { oppositeAdjacentA.Item2, oppositeAdjacentB.Item2 }, oppositeEdges);
+
                 var oppositeItem1Edges = FilterEdges(currentEdges, current.Item1, neibourDict);
                 oppositeNodes.AddRange(GetLinkNodes(opposite.Item1, oppositeNeibourLinkPt.Value, oppositeItem1Edges));
                 var oppositeItem2Edges = FilterEdges(currentEdges, current.Item2, neibourDict);
@@ -152,13 +160,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var nodes = GetClosestNodes(linkPt, line1FarwayPt,
                 edges.SelectMany(o => o.LightNodes).ToList());
             return GetDifferntNumberNodes(nodes);
-        }
-
-        private Polyline CreateArea(Line line1,Line line2, Dictionary<Line, Line> neibourDict)
-        {
-            var adjacentA = MergeNeibour(line1, neibourDict);
-            var adjacentB = MergeNeibour(line2, neibourDict);
-            return adjacentA.CreateParallelogram(adjacentB);
         }
 
         private List<ThLightNodeLink> LinkCrossCorner(List<Line> cross)
@@ -230,10 +231,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 把有Sides的中心线与其相邻的线合并
             var firstExtent = MergeNeibour(first, neibourDict);
             var secondExtent = MergeNeibour(second, neibourDict);
-            var cornerArea = firstExtent.CreateParallelogram(secondExtent);
+            var cornerArea = firstExtent.Item1.CreateParallelogram(secondExtent.Item1);
             
             // 获取与first、second平行的边
             var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
+            includeEdges = FilterEdgesByTriangle(new List<Polyline> { firstExtent.Item2, secondExtent.Item2 }, includeEdges);
+
             var firstEdges = FilterEdges(includeEdges, first, neibourDict);
             var secondEdges = FilterEdges(includeEdges, second, neibourDict); 
 
@@ -254,6 +257,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 return results;
             }
+            firstEdges.Reverse();
             return FindCornerStraitLinks(firstEdges, secondEdges);
         }
 
@@ -285,10 +289,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
 
             // 把有Sides的中心线与其相邻的线合并(后期再优化)
-            var firstArea = CreateArea(first, branch, neibourDict);
-            var secondArea = CreateArea(second, branch, neibourDict);
+            var firstEdge = MergeNeibour(first, neibourDict);
+            var branchEdge = MergeNeibour(branch, neibourDict);
+            var secondEdge = MergeNeibour(second, neibourDict);
+
+            var firstArea = firstEdge.Item1.CreateParallelogram(branchEdge.Item1);
             var firstIncludeEdges = GroupEdges(firstArea, sideEdges); // firstArea包含的边
+            firstIncludeEdges = FilterEdgesByTriangle(new List<Polyline> { firstEdge.Item2, branchEdge.Item2 }, firstIncludeEdges);
+
+            var secondArea = secondEdge.Item1.CreateParallelogram(branchEdge.Item1);
             var secondIncludeEdges = GroupEdges(secondArea, sideEdges); // secondArea包含的边
+            secondIncludeEdges = FilterEdgesByTriangle(new List<Polyline> { secondEdge.Item2, branchEdge.Item2 }, secondIncludeEdges);
 
             var firstEdges = FilterEdges(firstIncludeEdges, first, neibourDict); 
             var branchEdges = FilterEdges(firstIncludeEdges, branch, neibourDict);
@@ -339,15 +350,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<ThLightEdge> FilterEdges(List<ThLightEdge> edges,Line center,Dictionary<Line,Line> neibourDict)
         {
             var results = new List<ThLightEdge>();
-            if(neibourDict.ContainsKey(center))
+            results.AddRange(edges.Where(o => o.Direction.IsParallelToEx(center.LineDirection())).ToList());
+            if (neibourDict.ContainsKey(center))
             {
-                // 表示center 没有侧边
-                return edges.Where(o => o.Direction.IsParallelToEx(neibourDict[center].LineDirection())).ToList();
+                var linkEdges = edges.Where(o => o.Direction.IsParallelToEx(neibourDict[center].LineDirection())).ToList();
+                linkEdges = linkEdges.Where(o => !results.Select(e => e.Id).Contains(o.Id)).ToList();
+                results.AddRange(linkEdges);
             }
-            else
-            {
-                return edges.Where(o => o.Direction.IsParallelToEx(center.LineDirection())).ToList();
-            }
+            return results;
         }
 
         private bool IsOnSameSide(Point3d start,Point3d end,Line branch)

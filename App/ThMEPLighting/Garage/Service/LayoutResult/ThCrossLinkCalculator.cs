@@ -179,11 +179,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var secondEdge = MergeNeibour(second, neibourDict);
             var branchEdge = MergeNeibour(branch, neibourDict);
 
-            var firstArea = firstEdge.CreateParallelogram(branchEdge);
-            var secondArea = secondEdge.CreateParallelogram(branchEdge);
+            var firstArea = firstEdge.Item1.CreateParallelogram(branchEdge.Item1);
+            var secondArea = secondEdge.Item1.CreateParallelogram(branchEdge.Item1);
 
             var firstEdges = GroupEdges(firstArea, edges); // 分组
+            firstEdges = FilterEdgesByTriangle(new List<Polyline> { firstEdge.Item2, branchEdge.Item2 }, firstEdges);
+
             var secondEdges = GroupEdges(secondArea, edges);// 分组
+            secondEdges = FilterEdgesByTriangle(new List<Polyline> { secondEdge.Item2, branchEdge.Item2 }, secondEdges);
+
             firstEdges = firstEdges.Where(o => o.Direction.IsParallelToEx(first.LineDirection())).ToList();
             secondEdges = secondEdges.Where(o => o.Direction.IsParallelToEx(second.LineDirection())).ToList();
 
@@ -208,6 +212,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
                 var passEdge = CreateEdge(firstClosePt, secondClosePt);
                 passEdge.EdgePattern = firstEdges[0].EdgePattern;
+                if(firstEdges[0].Direction.IsSameDirection(secondEdges[0].Direction))
+                {
+                    passEdge.Direction = firstEdges[0].Direction;
+                }
+                else
+                {
+                    //
+                }
                 results.Add(passEdge);
             }
             return results;
@@ -408,13 +420,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
-        protected Line MergeNeibour(Line current, Dictionary<Line,Line> neibourDict)
+        protected Tuple<Line,Polyline> MergeNeibour(Line current, Dictionary<Line,Line> neibourDict)
         {
             if (neibourDict.ContainsKey(current))
             {
-                return current.Merge(neibourDict[current]);
+                var res = current.Merge(neibourDict[current]);
+                var triangle = current.GetTwoLinkLineMergeTriangle(neibourDict[current]);
+                return Tuple.Create(res, triangle);
             }
-            return current;
+            return Tuple.Create(current, new Polyline() { Closed=true});
         }
         
         protected List<Line> Sort(List<Line> centers)
@@ -554,7 +568,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var centerPt = GetCenter(crosses);
             if (centerPt.HasValue)
             {
-                crosses.Where(o => IsContains(o)).Where(o => GetCenterSides(o).Count < 2).ForEach(o =>
+                crosses.Where(o => IsContains(o)).ForEach(o =>
                 {
                     var port = centerPt.Value.GetNextLinkPt(o.StartPoint, o.EndPoint);
                     var neibour = FindCollinearNeibour(o, port);
@@ -620,6 +634,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return results;
         }
+        private List<Line> FilterEdgesByTriangle(List<Polyline> triangles, List<Line> edges)
+        {
+            triangles = triangles.Where(o => o.Area > 1.0).ToList();
+            if(triangles.Count==0)
+            {
+                return edges;
+            }
+            return edges.Where(o => !triangles.Where(p => p.IsIntersects(o)).Any()).ToList();
+        }
+
+        protected List<ThLightEdge> FilterEdgesByTriangle(List<Polyline> triangles, List<ThLightEdge> edges)
+        {
+            var lines = FilterEdgesByTriangle(triangles, edges.Select(o => o.Edge).ToList());
+            return edges.Where(o=> lines.Contains(o.Edge)).ToList();
+        }
+
         protected List<ThLightEdge> Sort(List<ThLightEdge> edges, Point3d sp, Point3d ep)
         {
             // 根据sp到ep的方向

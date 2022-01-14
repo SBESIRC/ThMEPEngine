@@ -114,12 +114,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-        protected List<ThLightNodeLink> GetCrossCornerStraitLinks()
+        protected List<ThLightNodeLink> GetCrossCornerStraitLinks(List<ThLightEdge> edges)
         {
             // 创建十字路口同一域具有相同1、2线的跳接线
             if (CenterSideDicts.Count > 0)
-            {
-                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
+            {                
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
                 return crossLinker.LinkCrossCorner();
             }
@@ -128,10 +127,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-        protected DBObjectCollection CreateThreeWayCornerJumpWire()
+        protected DBObjectCollection CreateThreeWayCornerJumpWire(List<ThLightEdge> edges)
         {
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetThreeWayCornerStraitLinks();
+            var lightNodeLinks = GetThreeWayCornerStraitLinks(edges);
             if (lightNodeLinks.Count == 0)
             {
                 return results;
@@ -149,11 +148,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
-        protected DBObjectCollection CreateCrossCornerStraitLinkJumpWire()
+        protected DBObjectCollection CreateCrossCornerStraitLinkJumpWire(List<ThLightEdge> edges)
         {
             //绘制十字路口跨区具有相同编号的的跳线
             var results = new DBObjectCollection();
-            var lightNodeLinks = GetCrossCornerStraitLinks();
+            var lightNodeLinks = GetCrossCornerStraitLinks(edges);
             if (lightNodeLinks.Count == 0)
             {
                 return results;
@@ -171,12 +170,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             return results;
         }
-        protected List<ThLightNodeLink> GetThreeWayCornerStraitLinks()
+        protected List<ThLightNodeLink> GetThreeWayCornerStraitLinks(List<ThLightEdge> edges)
         {
             // 创建T型路口跳接线
             if (CenterSideDicts.Count > 0)
             {
-                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
                 return crossLinker.LinkThreeWayCorner(); // 连接T型拐角处
             }

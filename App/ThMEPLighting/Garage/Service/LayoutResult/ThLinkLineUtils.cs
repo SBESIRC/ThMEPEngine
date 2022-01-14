@@ -162,5 +162,54 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var pair = pts.GetCollinearMaxPts();
             return new Line(pair.Item1,pair.Item2);
         }
+        public static Polyline GetTwoLinkLineMergeTriangle(this Line first, Line second)
+        {
+            // 对于分支线可能对很短，需要与其相邻的线合并
+            // 将短线投影到长线上
+            var linkPt = first.FindLinkPt(second);
+            if(!linkPt.HasValue || first.IsCollinear(second,1.0))
+            {
+                return new Polyline() { Closed=true};
+            }            
+            var pts = new Point3dCollection();
+            if (first.Length < second.Length)
+            {
+                // 把first 投影到 second
+                if(linkPt.Value.DistanceTo(first.StartPoint)< linkPt.Value.DistanceTo(first.EndPoint))
+                {
+                    var projectionPt = first.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+                    pts.Add(first.StartPoint);
+                    pts.Add(projectionPt);
+                    pts.Add(first.EndPoint);
+                }
+                else
+                {
+                    var projectionPt = first.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+                    pts.Add(first.EndPoint);
+                    pts.Add(projectionPt);
+                    pts.Add(first.StartPoint);
+
+                }
+            }
+            else
+            {
+                // 把second 投影到 first
+                if (linkPt.Value.DistanceTo(second.StartPoint) < linkPt.Value.DistanceTo(second.EndPoint))
+                {
+                    var projectionPt = second.EndPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint);
+                    pts.Add(second.StartPoint);
+                    pts.Add(projectionPt);
+                    pts.Add(second.EndPoint);
+                }
+                else
+                {
+                    var projectionPt = second.StartPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint);
+                    pts.Add(second.EndPoint);
+                    pts.Add(projectionPt);
+                    pts.Add(second.StartPoint);
+                }
+            }            
+            return pts.CreatePolyline();
+        }
     }
 }
