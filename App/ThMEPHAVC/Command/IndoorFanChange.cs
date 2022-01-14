@@ -132,6 +132,7 @@ namespace ThMEPHVAC.Command
                         {
                             if (null != _originTransformer)
                                 _originTransformer.Reset(addPLine);
+                            addPLine.Color = IndoorFanCommon.RoomLoadNotEnoughLineColor;
                             ErrorRoomPolylines.Add(addPLine);
                         }
                         continue;

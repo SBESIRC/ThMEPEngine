@@ -1,11 +1,8 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Windows;
-using DotNetARX;
-using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Linq2Acad;
 using System;
@@ -83,7 +80,7 @@ namespace ThMEPHVAC
         {
             using (var acdb = AcadDatabase.Active())
             {
-                var cloudIds = new List<ObjectId>();
+                var cloudIds = new Dictionary<ObjectId, Color>();
 
                 LayerTableRecord layerRecord = null;
                 foreach (var layer in acdb.Layers)
@@ -99,7 +96,7 @@ namespace ThMEPHVAC
                 if (layerRecord == null)
                 {
                     layerRecord = acdb.Layers.Create(layerName);
-                    layerRecord.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0); ;
+                    layerRecord.Color = Color.FromRgb(255, 0, 0); ;
                     layerRecord.IsPlottable = false;
                 }
                 foreach (var item in cloudLines)
@@ -108,12 +105,12 @@ namespace ThMEPHVAC
                     if (id == null || !id.IsValid)
                         continue;
                     item.Layer = layerName;
-                    cloudIds.Add(id);
+                    cloudIds.Add(id,item.Color);
                 }
                 ShowErrroPolylines(cloudIds);
             }
         }
-        private void ShowErrroPolylines(List<ObjectId> cloudLineIds) 
+        private void ShowErrroPolylines(Dictionary<ObjectId, Color> cloudLineIds) 
         {
             if (null == cloudLineIds || cloudLineIds.Count < 1)
                 return;
@@ -123,8 +120,9 @@ namespace ThMEPHVAC
             var oriLayer = Active.Database.Clayer;
             using (var acdb = AcadDatabase.Active())
             {
-                foreach (var id in cloudLineIds)
+                foreach (var keyValue in cloudLineIds)
                 {
+                    var id = keyValue.Key;
                     var pline = acdb.ModelSpace.Element(id);
                     if (null == pline)
                         continue;
@@ -155,7 +153,7 @@ namespace ThMEPHVAC
 
                     // 设置运行属性
                     var revcloudObj = acdb.Element<Entity>(revcloud, true);
-                    revcloudObj.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(255, 0, 0);
+                    revcloudObj.Color = keyValue.Value;
                     revcloudObj.Layer = "AI-圈注";
                 }
             }

@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
@@ -113,6 +114,7 @@ namespace ThMEPHVAC.Command
                     {
                         if (null != _originTransformer)
                             _originTransformer.Reset(addPLine);
+                        addPLine.Color = realLoad<roomLoad? IndoorFanCommon.RoomLoadNotEnoughLineColor: IndoorFanCommon.RoomLoadOverLineColor;
                         ErrorRoomPolylines.Add(addPLine);
                     }
                 }
