@@ -93,6 +93,9 @@
             <Component Id="CMP_Autoloader_PackageContents_Support_Fan_Indoor_Configuration" Guid="{87579325-9ABE-416F-A3BB-9E121FC79F9A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_Fan_Indoor_Configuration" Source="$(var.AutoloaderContentsPath)\Support\室内机配置表.xlsx" KeyPath="yes" />
             </Component>
+            <Component Id="CMP_Autoloader_PackageContents_Support_Fan_Indoor_BOM" Guid="{424DC815-C91D-42CD-8C2D-727FE34BA2F1}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_Fan_Indoor_BOM" Source="$(var.AutoloaderContentsPath)\Support\室内机材料表模板.xlsx" KeyPath="yes" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
             <Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -160,6 +163,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Cable_Routing" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Parameters" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_BOM_Export" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Indoor_BOM" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Fan_Indoor_Configuration" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Config" />
