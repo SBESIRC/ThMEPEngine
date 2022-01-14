@@ -70,14 +70,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 创建直段上的跳线(类似于拱形)
             var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);
 
+            // 连接弯头跨区
+            var elbowJumpWireRes = CreateElbowStraitLinkJumpWire(totalEdges);
+
             // 连接T型跨区
-            var threewayJumpWireRes = CreateThreeWayCornerJumpWire(totalEdges);
+            var threewayJumpWireRes = CreateThreeWayCornerStraitLinksJumpWire(totalEdges);
 
             // 创建十字路口的线
             var crossJumpWireRes = CreateCrossCornerStraitLinkJumpWire(totalEdges);
 
             // 收集创建的线            
             Wires = Wires.Union(jumpWireRes);
+            Wires = Wires.Union(elbowJumpWireRes);
             Wires = Wires.Union(crossJumpWireRes);
             Wires = Wires.Union(threewayJumpWireRes);
             Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去

@@ -12,6 +12,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     public static class ThLinkLineUtils
     {
+        public static List<List<Line>> GetElbows(this List<Line> lines)
+        {
+            var centerSidesQuery = new ThLineRoadQueryService(lines);
+            return centerSidesQuery.GetCorner();
+        }
         public static List<List<Line>> GetCrosses(this List<Line> lines)
         {
             var centerSidesQuery = new ThLineRoadQueryService(lines);
@@ -21,7 +26,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var centerSidesQuery = new ThLineRoadQueryService(lines);
             return centerSidesQuery.GetThreeWay();
-        }
+        }        
         public static bool IsLessThan45Degree(this Line first, Line second)
         {
             return ThGarageUtils.IsLessThan45Degree(

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.CAD;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -93,7 +94,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var startLinks = Query(c.StartPoint, EnvelopeLength);
                 if (startLinks.Count == 2)
                 {
-                    if (!IsIn(startLinks, results))
+                    if (IsElbow(startLinks[0], startLinks[1],1.0) && !IsIn(startLinks, results))
                     {
                         results.Add(startLinks);
                     }
@@ -101,13 +102,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var endLinks = Query(c.EndPoint, EnvelopeLength);
                 if (endLinks.Count == 2)
                 {
-                    if (!IsIn(endLinks, results))
+                    if (IsElbow(endLinks[0], endLinks[1], 1.0) && !IsIn(endLinks, results))
                     {
                         results.Add(endLinks);
                     }
                 }
             });
             return results;
+        }
+
+        private bool IsElbow(Line first,Line second,double tolerance)
+        {
+            return !first.IsCollinear(second, tolerance);
         }
 
         public List<Point3d> GetCornerPoints()

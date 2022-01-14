@@ -78,6 +78,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
+        public List<ThLightNodeLink> LinkElbowCorner()
+        {
+            // 连接弯头拐角处，
+            var results = new List<ThLightNodeLink>();
+            var elbows = CenterLines.GetElbows();
+            elbows.Where(o => o.Count == 2).ForEach(o =>
+            {
+                results.AddRange(LinkElbowCorner(o[0], o[1]));
+            });
+            return results;
+        }
+
         private Line GetOpposite(Line main,Line branch)
         {
             var linkPtRes = main.FindLinkPt(branch);
@@ -175,6 +187,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
+        private List<ThLightNodeLink> LinkElbowCorner(Line first, Line second)
+        {
+            /*          
+             *     |
+             *     | < second
+             *     | 
+             *     ----------
+             *         ^          
+             *       first                  
+             */
+            var results = new List<ThLightNodeLink>();
+            var nodeLinks = GetElblowLightNodeLinks(first, second);
+            results.AddRange(nodeLinks);
+            return results;
+        }
+
         private List<ThLightNodeLink> LinkThreewayCorner(Line first, Line second, Line branch)
         {
             /*          
@@ -198,6 +226,79 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             results.AddRange(firstNodeLinks);
             results.AddRange(secondNodeLinks);
+            return results;
+        }
+
+        private List<ThLightNodeLink> GetElblowLightNodeLinks(Line first, Line second)
+        {
+            /*          
+             *  |
+             *  | < second
+             *  | 
+             *  -----------
+             *      ^        
+             *    first            
+             */
+            // 连接由first、second形成的区域内具有相同编号的灯,不跨区
+            // 对可以连接的边是要按条件筛选的，请仔细阅读代码
+            var results = new List<ThLightNodeLink>();
+            var linkPt = first.FindLinkPt(second, ThGarageLightCommon.RepeatedPointDistance);
+            if (!linkPt.HasValue)
+            {
+                return results;
+            }
+            var centers = new List<Line>() { first, second };
+            // 对于没有边线的中心线，获取其符合条件的邻居
+            var neibourDict = CreateNeibourDict(centers);
+
+            var sideEdges = new List<ThLightEdge>();
+            sideEdges.AddRange(GetCenterSideEdges(centers));
+            sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
+
+            // 把有Sides的中心线与其相邻的线合并
+            var firstExtent = MergeNeibour(first, neibourDict);
+            var secondExtent = MergeNeibour(second, neibourDict);
+            var cornerArea = firstExtent.Item1.CreateParallelogram(secondExtent.Item1);
+
+            // 获取与first、second平行的边
+            var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
+            includeEdges = FilterEdgesByTriangle(new List<Polyline> { firstExtent.Item2, secondExtent.Item2 }, includeEdges);
+
+            var firstEdges = FilterEdges(includeEdges, first, neibourDict);
+            var secondEdges = FilterEdges(includeEdges, second, neibourDict);
+
+            // 寻找可以连接的灯点
+            var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint, first.EndPoint);
+            firstEdges = Sort(firstEdges, linkPt.Value, firstFarwayPt);
+            firstEdges = Filter(firstEdges);
+
+            var secondFarwayPt = linkPt.Value.GetNextLinkPt(second.StartPoint, second.EndPoint);
+            secondEdges = Sort(secondEdges, linkPt.Value, secondFarwayPt);
+            secondEdges = Filter(secondEdges);
+
+            if (firstEdges.Count == 0 || secondEdges.Count == 0)
+            {
+                return results;
+            }
+            if (firstEdges[0].EdgePattern == secondEdges[0].EdgePattern)
+            {
+                return results;
+            }
+
+            var firstSecondNodes = new List<ThLightNode>(); // 由 first,second形成的区域包括的灯节点
+            firstSecondNodes.AddRange(GetLinkNodes(first, linkPt.Value, firstEdges));
+            firstSecondNodes.AddRange(GetLinkNodes(second, linkPt.Value, secondEdges));
+
+            // 获取与first、second下方且平行的边
+            var downNodes = new List<ThLightNode>();
+            var downEdges = sideEdges.Where(o => !includeEdges.Select(f => f.Id).Contains(o.Id)).ToList();
+            var firstOuterEdges = FilterEdges(downEdges, first, neibourDict);
+            var secondOuterEdges = FilterEdges(downEdges, second, neibourDict);
+            downNodes.AddRange(GetLinkNodes(first, linkPt.Value, firstOuterEdges));
+            downNodes.AddRange(GetLinkNodes(second, linkPt.Value, secondOuterEdges));
+
+            results = Link(firstSecondNodes, downNodes);
+            results.ForEach(l => l.CrossIntersectionPt = linkPt.Value);
             return results;
         }
 

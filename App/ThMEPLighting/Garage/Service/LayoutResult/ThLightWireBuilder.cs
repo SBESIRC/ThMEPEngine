@@ -127,7 +127,28 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-        protected DBObjectCollection CreateThreeWayCornerJumpWire(List<ThLightEdge> edges)
+        protected DBObjectCollection CreateElbowStraitLinkJumpWire(List<ThLightEdge> edges)
+        {
+            var results = new DBObjectCollection();
+            var lightNodeLinks = GetElbowStraitLinks(edges);
+            if (lightNodeLinks.Count == 0)
+            {
+                return results;
+            }
+            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
+            {
+                CenterSideDicts = this.CenterSideDicts,
+                DirectionConfig = this.DirectionConfig,
+                LampLength = this.ArrangeParameter.LampLength,
+                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
+                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
+            };
+            jumpWireFactory.BuildSideLinesSpatialIndex();
+            jumpWireFactory.BuildStraitLinks();
+            lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+            return results;
+        }
+        protected DBObjectCollection CreateThreeWayCornerStraitLinksJumpWire(List<ThLightEdge> edges)
         {
             var results = new DBObjectCollection();
             var lightNodeLinks = GetThreeWayCornerStraitLinks(edges);
@@ -177,6 +198,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
                 return crossLinker.LinkThreeWayCorner(); // 连接T型拐角处
+            }
+            else
+            {
+                return new List<ThLightNodeLink>();
+            }
+        }
+        protected List<ThLightNodeLink> GetElbowStraitLinks(List<ThLightEdge> edges)
+        {
+            // 创建弯头跨区跳接线
+            if (CenterSideDicts.Count > 0)
+            {
+                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
+                return crossLinker.LinkElbowCorner(); // 连接T型拐角处
             }
             else
             {
