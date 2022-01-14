@@ -97,7 +97,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 return _AllCuttersMPolygonSpatialIndex;
             }
         }
+        public LayoutParameter()
+        {
 
+        }
         public LayoutParameter(Polyline outerBoundary, DBObjectCollection buildingBlocks, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
             Dictionary<LinePairs, int> linePtDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null)
         {

@@ -16,6 +16,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Dictionary<int, double> MaxValues { get; set; }//上限值
         public Dictionary<int, double> StartValues { get; set; }//起始点另一维
         public Dictionary<int, double> EndValues { get; set; }//终止点另一维
+        public GaParameter()
+        {
+
+        }
         public GaParameter(List<Line> segLine)
         {
             LineNumber = new List<int>();

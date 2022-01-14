@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using ThMEPEngineCore.CAD;
 using ThCADCore.NTS;
 using NFox.Cad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPArchitecture.ParkingStallArrangement.Model;
-using System.Diagnostics;
-using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using Linq2Acad;
-using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
-using ThMEPArchitecture.ParkingStallArrangement.Method;
 using DotNetARX;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
@@ -138,7 +132,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 maxVals.Add(l.GetMinDist(boundPt1) - 2760);
                 minVals.Add(l.GetMinDist(boundPt2) + 2760);
             }
-
             return rstAreas;
         }
 
@@ -196,16 +189,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var areas = new List<Polyline>() { area };
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
+#if DEBUG
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
-                foreach(var seg in segLines)
+                foreach (var seg in segLines)
                 {
                     currentDb.CurrentSpace.Add(seg);
                 }
-                
-            }
-                var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
 
+            }
+#endif
+            var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
             return rstAreas;
         }
     }

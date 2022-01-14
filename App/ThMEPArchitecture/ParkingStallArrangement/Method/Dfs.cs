@@ -217,6 +217,40 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
+        public static void GetAreaRandSeglinesByDfs(Polyline area, int seglineCnt, List<SegLineEx> visited, 
+            ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg)
+        {
+            if (visited.Count == seglineCnt)
+            {
+                var tmp = new List<SegLineEx>();
+                visited.ForEach(seg => tmp.Add(seg.Clone()));
+                rstSegLines.AddRange(tmp);
+#if DEBUG
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    foreach (var line in visited)
+                    {
+                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
+                    }
+                }
+#endif
+                successedSeg = true;
+                return;
+            }
+            var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
+            if (spliters is null)  return;
+            var selectSegNum = General.Utils.RandInt(spliters.Count-1);
+            var spliter = spliters[selectSegNum];//选中的分割线
+            var segline = spliter.Seglines;
+            var subAreas = segline.SplitByLine(area); //split area
+            visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
+            foreach (var subArea in subAreas)
+            {
+                GetAreaRandSeglinesByDfs(subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
+                if (successedSeg) return;
+            }
+        }
+
         /// <summary>
         /// 判断两组分割线是否相等
         /// </summary>
@@ -282,6 +316,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
             }
             return seglinesList;
+        }
+
+        public static List<SegLineEx> GetRandomSeglines(OuterBrder outerBrder)
+        {
+            var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
+            var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
+
+            var area = outerBrder.WallLine;
+            var segs = new List<SegLineEx>();
+            var rstSegLines = new List<SegLineEx>();
+            var successedSeg = false;
+            GetAreaRandSeglinesByDfs(area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines,ref successedSeg);
+            
+            return rstSegLines;
         }
 
         private static List<AutoSegLines> GetAreaAllSeglines(Polyline area, ThCADCoreNTSSpatialIndex buildingSpatialIndex)

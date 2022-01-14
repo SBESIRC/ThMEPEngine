@@ -55,9 +55,8 @@ namespace ThMEPArchitecture
             {
                 return;
             }
-
             //TODO
-            var allSeglines = Dfs.GetDichotomySegline(outerBrder);//生成所有的分割线方案
+            var seglines = Dfs.GetRandomSeglines(outerBrder);//生成随机的分割线方案
         }
     }
 }

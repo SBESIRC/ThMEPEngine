@@ -19,6 +19,8 @@ using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThParkingStallArrangementCmd : ThMEPBaseCommand, IDisposable
@@ -199,47 +201,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
-            if (outerBrder.SegLines.Count == 0)//分割线数目为0
-            {
-                Active.Editor.WriteMessage("分割线不存在！");
-                return;
-            }
-            if (!rstDataExtract)
-            {
-                return;
-            }
-            var area = outerBrder.WallLine;
-            var areas = new List<Polyline>() { area };
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-            var gaPara = new GaParameter(outerBrder.SegLines);
-
-            var usedLines = new HashSet<int>();
-            var maxVals = new List<double>();
-            var minVals = new List<double>();
-
-            var seglineDic = new Dictionary<int, Line>();
-            var index = 0;
-            foreach (var line in outerBrder.SegLines)
-            {
-                seglineDic.Add(index++, line);
-            }
-            WindmillSplit.Split(area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, out Dictionary<int, List<int>> seglineIndexDic);
-
-            gaPara.Set(outerBrder.SegLines, maxVals, minVals);
-
-            var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
-            var linePtDic = Intersection.GetLinePtDic(ptDic);
-            var intersectPtCnt = ptDic.Count;//交叉点数目
-            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
-            foreach (var num in ptDic.Keys)
-            {
-                var random = new Random();
-                var flag = random.NextDouble() < 0.5;
-                directionList.Add(num, flag);//默认给全横向
-            }
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara);
+            if (!dataprocessingFlag) return;
             ParkingStallGAGenerator geneAlgorithm = null;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, seglineIndexDic);
 
             if (_CommandMode == CommandMode.WithoutUI)
             {
@@ -279,6 +243,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             var solution = rst.First();
             histories.Add(rst.First());
+            var parkingStallCount = solution.ParkingStallCount;
+            ParkingSpace.GetSingleParkingSpace(Logger,  layoutPara, parkingStallCount);
+
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
