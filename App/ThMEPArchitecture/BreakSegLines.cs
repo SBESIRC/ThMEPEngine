@@ -84,9 +84,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var rst = geneAlgorithm.Run();
 
-            var segbkparam =new SegBreakParam(rst, outerBrder,10000,true,true);
+            var segbkparam =new SegBreakParam(rst, outerBrder,10000,true,false);
             Draw.DrawSeg(segbkparam.BreakedLines,0);
             Draw.DrawSeg(segbkparam.OtherLines, 0);
+            foreach(Polyline pline in segbkparam.BufferTanks)
+            {
+                acadDatabase.CurrentSpace.Add(pline);
+            }
+            
+
 
         }
     }

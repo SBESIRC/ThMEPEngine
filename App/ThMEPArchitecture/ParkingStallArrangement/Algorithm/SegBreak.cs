@@ -17,6 +17,8 @@ using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using System.Text.RegularExpressions;
 using DotNetARX;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
     public class SegBreakParam
@@ -26,9 +28,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<double> MinValues;//打断线的最大值
         public List<double> MaxValues;//最小值
         public int LineCount;
-        double BufferSize;// 寻找最大，最小值时候的范围
+        double BufferSize;// 寻找最大，最小值时候的范围,默认无限大，不然有逻辑问题
         bool VerticalDirection;
-        private List<Polyline> BufferTanks;// 记录当前已做的buffer，需要判断是否相互重合
+        public List<Polyline> BufferTanks;// 记录当前已做的buffer，需要判断是否相互重合
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
         public SegBreakParam( List<Gene> Genome, OuterBrder outerbrder, double buffersize,bool verticaldirection, bool GoPositive)
         {
@@ -106,7 +108,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                             IntSecIndex.Add(9999999);//添加不可能值，填充作用
                         }
                     }
-                    
                     for (int j = 0; j < HorzLines_index.Count; ++j)
                     {
                         var line2 = SegLines[HorzLines_index[j]];//初始横向分割线
@@ -114,17 +115,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         if (templ.Count != 0)//初始线之间有交点
                         {
                             var GALine2 = Genome[HorzLines_index[j]].ToLine();//迭代后的横分割线
-
                             IntersectLines.Add(GALine2);// 记录产生相交的线，后续需要更新
                             IntSecIndex.Add(j);// 添加索引，方便更新OtherLines
                             // 说明这俩线有交点，用GA的结果求交点
                             var pt = GALine1.Intersect(GALine2, Intersect.ExtendBoth);
-                            if(pt.Count == 0)
-                            {
-                                ;
-                            }
                             ptlist.Add(pt.First());
-                            ;
                         }
                     }
 
@@ -193,7 +188,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         // 2. 确定打断后的纵线
                         int CurCount = 0;
                         
-                        Line BreakLine; 
+                        Line BreakLine;
+                        Line BufferLine;
                         for (int i = 1; i < ptlist.Count-1; ++i)// 遍历中间的所有可能断点，不包含边界上的断点
                         {
                             // 双指针确定断线
@@ -205,20 +201,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                                     
                                 cur_breakedlines.Add(BreakLine);
 
-                                spt = ptlist[i];//更新起始点
+                                
+                                if (spt.IsEqualTo(GALine1.StartPoint) || spt.IsEqualTo( GALine1.EndPoint))
+                                {
+                                    BufferLine = new Line(ptlist[0], ptlist[i]);//第一条断线，BufferLine以第一个断点作为起点
+                                }
+                                else
+                                {
+                                    BufferLine = new Line(spt, ptlist[i]);
+                                }
                                 // 确定断线范围，buffer，取建筑或者buffer值（添加 Lower & Upper Bound to Lower & upper Bounds)
-                                GetMaxMinValue(BreakLine, outerbrder, out double MinValue, out double MaxValue);// TO DO
+                                GetMaxMinValue(BufferLine, outerbrder, out double MinValue, out double MaxValue);// TO DO,不应该用breakline 求最大最小值，判断breakline是否过边线
                                 cur_minvalues.Add(MinValue);
                                 cur_maxvalues.Add(MaxValue);
                                 // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
                                 var Value = BreakLine.StartPoint.X;
                                 ModifyOtherLines(IntSecIndex,InnerIndex, MinValue, MaxValue, Value);
-                                // OtherLines.AddRange(NewLines)
 
+                                spt = ptlist[i];//更新起始点
                                 //重新计数
                                 InnerIndex = new List<int>();
                                 InnerIndex.Add(i);
                                 CurCount = 0;
+
                             }
                             else 
                             {
@@ -234,7 +239,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                         BreakLine = new Line(spt,ept);
                         cur_breakedlines.Add(BreakLine);
 
-                        GetMaxMinValue(BreakLine, outerbrder, out double MinValue2, out double MaxValue2);// TO DO
+                        BufferLine = new Line(spt, ptlist.Last());//最后断线，BufferLine以第最后断点作为终点
+
+                        GetMaxMinValue(BufferLine, outerbrder, out double MinValue2, out double MaxValue2);// TO DO
                         cur_minvalues.Add(MinValue2);
                         cur_maxvalues.Add(MaxValue2);
                         // 更新断线上所有横向线（拉伸，覆盖断线的最大范围）
@@ -279,7 +286,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 if (VerticalDirection)
                 {
-                    var idx = IntSecIndex[i];
+                    var idx = IntSecIndex[i];// 需要改动的横线idx
                     
                     var line = OtherLines[idx];//交叉的线是横向线
                     Point3d spt;
@@ -313,7 +320,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 
             }
         }
-        private void GetMaxMinValue(Line BreakLine, OuterBrder outerbrder, out double MinValue, out double MaxValue)
+        private void GetMaxMinValue(Line BufferLine, OuterBrder outerbrder, out double MinValue, out double MaxValue)
         {
             //TO DO 用BreakLine，outerbrder 以及BufferSize 求最大最小值（相对值）
             // 然后判断和其他buffer是否有交集，如果有可能减少buffersize，再做运算
@@ -326,12 +333,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             //当前buffer
             if (VerticalDirection)//纵向线
             {
-                var points = new List<Point2d> {new Point2d(BreakLine.StartPoint.X + MinValue, BreakLine.StartPoint.Y) , 
-                                                new Point2d(BreakLine.StartPoint.X + MaxValue, BreakLine.StartPoint.Y) ,
-                                                new Point2d(BreakLine.EndPoint.X + MaxValue, BreakLine.EndPoint.Y),
-                                                new Point2d(BreakLine.EndPoint.X + MinValue, BreakLine.EndPoint.Y)};
+                var points = new List<Point2d> {new Point2d(BufferLine.StartPoint.X + MinValue, BufferLine.StartPoint.Y) , 
+                                                new Point2d(BufferLine.StartPoint.X + MaxValue, BufferLine.StartPoint.Y) ,
+                                                new Point2d(BufferLine.EndPoint.X + MaxValue, BufferLine.EndPoint.Y),
+                                                new Point2d(BufferLine.EndPoint.X + MinValue, BufferLine.EndPoint.Y)};
                 var pline = new Polyline();
                 pline.CreatePolyline(points.ToArray());
+                pline.Closed = true;
                 
                 BufferTanks.Add(pline);
             }
