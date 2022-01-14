@@ -382,6 +382,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     {
                         break;
                     }
+                    if(!edges[i].Edge.FindLinkPt(results.Last().Edge).HasValue)
+                    {
+                        break;
+                    }
                     results.Add(edges[i]);
                 }
             }            

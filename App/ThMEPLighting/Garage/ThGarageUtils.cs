@@ -334,7 +334,8 @@ namespace ThMEPLighting.Garage
                 var linkPt = edges[0].FindLinkPt(edges[1],tolerance);
                 if(!linkPt.HasValue)
                 {
-                    return new Polyline();
+                    var pts = new Point3dCollection { edges[0].StartPoint, edges[0].EndPoint };
+                    return pts.CreatePolyline(false);
                 }
                 else
                 {                    
