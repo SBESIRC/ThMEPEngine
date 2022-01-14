@@ -576,8 +576,13 @@ namespace ThMEPHVAC.Model
                     }
                 }
             }
-            airVolumes.Sort();
-            return airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2]) : airVolumes[0];
+            if (airVolumes.Count > 0)
+            {
+                airVolumes.Sort();
+                return airVolumes.Count > 1 ? (airVolumes[airVolumes.Count - 1] + airVolumes[airVolumes.Count - 2]) : airVolumes[0];
+            }
+            else
+                return 0;
         }
 
         private void AccMainDuctWithNotExhaust()
@@ -793,66 +798,9 @@ namespace ThMEPHVAC.Model
             }
             return dicSmokeZone;
         }
-        private void MergeMainLine(ThCADCoreNTSSpatialIndex index, DBObjectCollection lines)
-        {
-            // 合并主管段
-            var firstLine = lines[lines.Count - 1] as Line;
-            var pl = ThMEPHVACService.CreateDetector(firstLine.StartPoint);
-            var res = index.SelectCrossingPolygon(pl);
-            if (res.Count == 2)
-            {
-                var l1 = res[0] as Line;
-                var l2 = res[1] as Line;
-                var v1 = ThMEPHVACService.GetEdgeDirection(l1);
-                var v2 = ThMEPHVACService.GetEdgeDirection(l2);
-                if (ThMEPHVACService.IsCollinear(v1, v2))
-                {
-                    int idx = mainLines.IndexOf(l1);
-                    mainLines.Remove(l1);
-                    mainLines.Remove(l2);
-                    ThMEPHVACService.GetLongestDis(l1, l2, out Point3d p1, out Point3d p2);
-                    // 以v1的方向作为新造出线的方向
-                    var dir = (p2 - p1).GetNormal();
-                    if (dir.IsEqualTo(v1))
-                        mainLines.Insert(idx, new Line(p1, p2));
-                    else
-                        mainLines.Insert(idx, new Line(p2, p1));
-                }
-            }
-        }
-        private void ExcludeNoPortEndline()
-        {
-            var filter = new List<DBObjectCollection>();
-            var index = new ThCADCoreNTSSpatialIndex(mainLines);
-            foreach (DBObjectCollection lines in endLines)
-            {
-                var t = new DBObjectCollection();
-                foreach (Line l in lines)
-                {
-                    var pl = CreateLineBound(l);
-                    var res = portIndex.SelectCrossingPolygon(pl);
-                    if (res.Count > 0)
-                        foreach (Line line in lines)
-                            t.Add(line);
-                    else
-                        MergeMainLine(index, lines);
-                    break;  //第一段为最末端线，如果最末端线不交风口，则删掉整段endline
-                }
-                if (t.Count > 0)
-                    filter.Add(t);
-            }
-            foreach (DBObjectCollection lines in endLines)
-                lines.Clear();
-            endLines.Clear();
-            endLines = filter;
-        }
-
         private void CountEndlinePortAirVolume()
         {
-            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out dicPlToAirVolume);
-            portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
             connPort = new List<int>();
-            ExcludeNoPortEndline();
             foreach (DBObjectCollection lines in endLines)
             {
                 var endline = new Dictionary<int, EndlineSegInfo>();
@@ -1087,10 +1035,10 @@ namespace ThMEPHVAC.Model
         {
             endLines = new List<DBObjectCollection>();
             mainLines = new DBObjectCollection();
-
-            var tmpEndLines = new DBObjectCollection();
+            endPoints = new Dictionary<Point3d, Point3d>();
             // GetAllEndPoint
             var pointDetector = new ThFanCenterLineDetector(false);
+            var tmpEndLines = new DBObjectCollection();
             // portParam.srtDisVec ThHvacCmdService.cs Line : 239更新
             var srtP = Point3d.Origin + portParam.srtDisVec;// 有上下翻时需要更新起始点
             pointDetector.SearchCenterLine(portParam.centerLines, ref srtP, SearchBreakType.breakWithEndline);
@@ -1102,18 +1050,46 @@ namespace ThMEPHVAC.Model
                 var pp = p;
                 endLineDetector.SearchCenterLine(pointDetector.connectLines, ref pp, SearchBreakType.breakWithTeeAndCross);
                 var set = new DBObjectCollection();
+                var orgLines = new DBObjectCollection();
                 for (int i = endLineDetector.connectLines.Count - 1; i >= 0; --i)
                 {
                     var l = endLineDetector.connectLines[i];
+                    orgLines.Add(l);
                     tmpEndLines.Add(l);
                     set.Add(l.Clone() as Line);
                 }
-                endLines.Add(set);
+                // 如果末端线与风口有交则添加，否则从搜索的中心线中删除所有到三通的线，主管段上共线的线也可以被过滤掉
+                FilterNoPortCenterLine(orgLines, set, pointDetector.connectLines, p, pointDetector.endPoints[p]);
+                //endLines.Add(set);
             }
-            foreach (Line l in tmpEndLines)
-                pointDetector.connectLines.Remove(l);
             mainLines = pointDetector.connectLines;
-            endPoints = pointDetector.endPoints;
+            foreach (Line l in tmpEndLines)
+                mainLines.Remove(l);
+        }
+        private void FilterNoPortCenterLine(DBObjectCollection orgLines, 
+                                            DBObjectCollection addLines,
+                                            DBObjectCollection hasDetectConnLines,
+                                            Point3d p,
+                                            Point3d otherP)
+        {
+            // endLines 已经被初始化过了
+            if (addLines.Count > 0)
+            {
+                var l = addLines[0] as Line;// 0是最末端线
+                var pl = l.Buffer(1);
+                var res = portIndex.SelectCrossingPolygon(pl);
+                if (res.Count > 0)
+                {
+                    endLines.Add(addLines);
+                    endPoints.Add(p, otherP);
+                }
+                else
+                {
+                    foreach (Line line in orgLines)
+                        hasDetectConnLines.Remove(line);
+                    endPoints.Remove(p);
+                }
+            }
         }
         private void Init(PortParam portParam, DBObjectCollection excludeLines, Dictionary<Polyline, ObjectId> allFansDic)
         {
@@ -1128,6 +1104,8 @@ namespace ThMEPHVAC.Model
             mainLinesInfos = new Dictionary<int, SegInfo>();
             textAlignment = new List<TextAlignLine>();
             smokeFlag = portParam.param.scenario.Contains("排烟") && !portParam.param.scenario.Contains("兼");
+            var portBounds = ThDuctPortsReadComponent.GetPortBoundsByPortAirVolume(portParam, out dicPlToAirVolume);
+            portIndex = new ThCADCoreNTSSpatialIndex(portBounds);
         }
     }
 }
