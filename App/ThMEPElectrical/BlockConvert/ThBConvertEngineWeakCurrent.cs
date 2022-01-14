@@ -115,8 +115,10 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetCentriodPoint = targetBlockData.GetBottomCenter().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var scrCentriodPoint = srcBlockData.GetBottomCenter().TransformBy(srcBlockData.OwnerSpace2WCS);
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
+                var bottomCenter = srcBlockData.GetBottomCenter() - srcBlockData.Position;
+                var scrCentriodPoint = Point3d.Origin
+                    .TransformBy(srcBlockData.OwnerSpace2WCS.Inverse().PostMultiplyBy(srcBlockData.BlockTransform));
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) - bottomCenter;
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
