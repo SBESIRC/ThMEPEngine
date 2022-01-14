@@ -242,10 +242,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
                 // 将网格坐标调整为真实坐标
                 sample.analysis_edge();
-                sample.point_to_real();
-                sample.find_point_edge_relation();
-                sample.connect_edge();
-                sample.post_processing();
+                sample.point_to_real(-1);
+                sample.find_point_edge_relation(-1);
+                sample.connect_edge(-1);
+                sample.post_processing(-1);
 
                 for (int i = 0; i < sample.long_edges.Count; i++)
                 {
