@@ -21,7 +21,7 @@ namespace ThMEPElectrical.Command
 {
     public class ThLaneLineCommand : IAcadCommand, IDisposable
     {
-        private List<string> LaneLineLayers;
+        public List<string> LaneLineLayers { get; set; }
 
         public ThLaneLineCommand()
         {
@@ -37,12 +37,6 @@ namespace ThMEPElectrical.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var pr = Active.Editor.GetString("\n请输入图层名，以逗号分隔");
-                if (pr.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                LaneLineLayers = pr.StringResult.Split(',').Where(o => !string.IsNullOrEmpty(o)).ToList();
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,

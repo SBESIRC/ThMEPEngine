@@ -363,7 +363,6 @@
     <Compile Include="ThGroundGridCmds.cs" />
     <Compile Include="ThAuxiliaryCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
-    <Compile Include="ThLaneLineCmds.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

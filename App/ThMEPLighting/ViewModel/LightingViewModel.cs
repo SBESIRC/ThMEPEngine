@@ -9,7 +9,7 @@ using ThControlLibraryWPF.ControlUtils;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Lighting.ViewModels
+namespace ThMEPLighting.ViewModel
 {
     public enum LightingLayoutTypeEnum
     {
@@ -512,19 +512,19 @@ namespace ThMEPLighting.Lighting.ViewModels
                     if (value != _isSelected)
                     {
                         _isSelected = value;
-                        OnPropertyChanged(nameof(IsSelected));
+                        OnPropertyChanged(nameof(IsSelected));                        
                     }
                 }
             }
         }
-        ObservableCollection<Item> _items = new ObservableCollection<Item>();
+        private ObservableCollection<Item> _items = new ObservableCollection<Item>();
         public ObservableCollection<Item> Items => _items;
         public void Add(string text)
         {
             if(_items.Where(o => o.Text == text).Any()==false)
             {
                 _items.Add(new Item() { Text = text ,IsSelected=true});
-            }
+            }            
         }
         private List<string> LaneLineLayers
         {
@@ -535,11 +535,8 @@ namespace ThMEPLighting.Lighting.ViewModels
         }
         public void ExtractTCD()
         {
-            var parameters = new string[]
-            {
-                string.Join(",", LaneLineLayers),
-            };
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD", parameters);
+            ThMEPLightingService.Instance.LanelineLayers = LaneLineLayers;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
         }
         public void UpdateLaneLineLayers()
         {

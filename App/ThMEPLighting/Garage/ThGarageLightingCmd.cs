@@ -7,7 +7,7 @@ using ThMEPEngineCore.Command;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Engine;
 using ThMEPLighting.Garage.Model;
-using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.Garage
 {

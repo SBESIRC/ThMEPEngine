@@ -14,7 +14,7 @@ using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPLighting.IlluminationLighting;
-using ThMEPLighting.Lighting.ViewModels;
+using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.Command
 {
