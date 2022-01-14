@@ -233,6 +233,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return breakService.Break(objs);
         }
 
+        protected DBObjectCollection MergeWire(DBObjectCollection linkWires)
+        {
+            var results = new DBObjectCollection();
+            var lines = linkWires.OfType<Line>().ToCollection();
+            var others = linkWires.Difference(lines);
+            var mergeRes = ThMergeLightLineService.Merge(lines.OfType<Line>().ToList());
+            results = results.Union(others);
+            results = results.Union(mergeRes.SelectMany(o=>o).ToCollection());
+            return results;
+        }
+
         protected List<ThLightEdge> GetEdges(EdgePattern edgePattern)
         {
             return GetEdges(Graphs.SelectMany(g => g.GraphEdges).ToList(), edgePattern);

@@ -108,6 +108,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var startLight = FindLight(arc.StartPoint);
             var endLight = FindLight(arc.EndPoint);
+            if(startLight==null || endLight==null )
+            {
+                return null;
+            }
             if(startLight.Length< LampLength/2.0 || endLight.Length < LampLength / 2.0)
             {
                 return null;
