@@ -18,10 +18,11 @@ using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using System.Text.RegularExpressions;
 using DotNetARX;
 using ThMEPArchitecture.ParkingStallArrangement.General;
-
+using ThMEPArchitecture.ViewModel;
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 {
-    public class SegBreakParam
+
+    public class SegBreakParam : IDisposable
     {
         public List<Line> BreakedLines;//所有打断后的分割线，要导入迭代之后的值
         public List<Line> OtherLines;//其余所有线 （纵向打断则为横线，横向打断则为纵线）,要迭代之后的
@@ -29,13 +30,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<double> MaxValues;//最小值
         public int LineCount;
         double BufferSize;// 寻找最大，最小值时候的范围,默认无限大，不然有逻辑问题
+        private double MaxBufferSize;
         bool VerticalDirection;
         public List<Polyline> BufferTanks;// 记录当前已做的buffer，需要判断是否相互重合
+        private List<Line> OtherGALine1s;// 其他同向线 ，对应GAline1
+        private int RoadWidth;
+        private ThCADCoreNTSSpatialIndex buildLinesSpatialIndex;// 障碍物
+        private void Clear()//清空非托管资源
+        { 
+        }
         //输入，初始分割线，以及打断的方向。输出，分割线与其交点
-        public SegBreakParam( List<Gene> Genome, OuterBrder outerbrder, double buffersize,bool verticaldirection, bool GoPositive)
+        public SegBreakParam( List<Gene> Genome, OuterBrder outerbrder,bool verticaldirection, bool GoPositive, ParkingStallArrangementViewModel parameterViewModel = null, double? buffersize = null)
         {
+            buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerbrder.BuildingLines);
             BufferTanks = new List<Polyline>();
-
+            VerticalDirection = verticaldirection;//垂直方向为true，水平为false
+            if (parameterViewModel is null) RoadWidth = 5500;
+            else RoadWidth = parameterViewModel.RoadWidth.Copy();
             // SegLine 初始分割线，必须严格符合相交关系
             // WallLine 地库框线
             // GASolution GA的结果，任意相交关系
@@ -45,23 +56,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Line> HorzLines = new List<Line>();//水平线
             List<int> HorzLines_index = new List<int>();// 垂直线索引
             var SegLines = outerbrder.SegLines;
-            BufferSize = buffersize;
-            VerticalDirection = verticaldirection;//垂直方向为true，水平为false
+
+            var pts = outerbrder.WallLine.GetPoints().ToList();
+            if (VerticalDirection) //横向buffer
+            {
+                pts = pts.OrderBy(e => e.X).ToList();
+                MaxBufferSize = pts.Last().X - pts.First().X + (RoadWidth/2);
+            }
+            else
+            {
+                pts = pts.OrderBy(e => e.Y).ToList();
+                MaxBufferSize = pts.Last().Y - pts.First().Y + (RoadWidth /2);
+            }
+            BufferSize = MaxBufferSize.Copy();
+            if (!(buffersize is null))
+            {
+                if (MaxBufferSize > (double)buffersize)
+                {
+                    BufferSize = (double)buffersize;
+                }
+            }
+
             for (int i = 0; i < SegLines.Count; ++i)
             {
                 var line = SegLines[i];
-                if (Math.Abs(line.StartPoint.X- line.EndPoint.X) < 1e-5)
+                if (Math.Abs(line.StartPoint.X - line.EndPoint.X) < 1e-5)
                 {
                     //横坐标相等，平行线
                     VertLines.Add(Genome[i].ToLine());
                     VertLines_index.Add(i);
                 }
-                else
+                else if (Math.Abs(line.StartPoint.Y - line.EndPoint.Y) < 1e-5)
                 {
                     HorzLines.Add(Genome[i].ToLine());
                     HorzLines_index.Add(i);
                 }
-            }
+                else throw new ArgumentException("Invaild Segline" +i.ToString() + "detected: SegLines must be Vertical or Horizontal!");
+            }    
             //var sortedH = HorzLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderBy(x => x.Key.StartPoint.Y).ToList();
             //HorzLines = sortedH.Select(x => x.Key).ToList();
             //var idxH = sortedH.Select(x => x.Value).ToList();// 索引值
@@ -86,6 +117,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             
             if (VerticalDirection)
             {
+                
                 OtherLines = HorzLines;
                 // otherlines 添加横向线
                 //打断纵向线
@@ -94,6 +126,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line1 = SegLines[VertLines_index[k]];//初始纵向分割线
                     var GALine1 = Genome[VertLines_index[k]].ToLine();//迭代后的纵分割线
+
+                    OtherGALine1s?.ForEach(l => l.Dispose());
+                    OtherGALine1s = new List<Line>();// 其他的纵分割线 TO DO otherlines 需要处理，切掉伸出去的部分
+                    for (int g = 0;g< VertLines_index.Count; ++g)
+                    {
+                        //其他纵分割线
+                        if (g != k)
+                        {
+                            OtherGALine1s.Add(Genome[VertLines_index[g]].ToLine());
+                        }
+                    }
                     List<Point3d> ptlist = new List<Point3d>();//断点列表
                     List<Line> IntersectLines = new List<Line>();//交叉线列表，需要动态更新
                     List<int> IntSecIndex = new List<int>();//交叉线在OtherLines中的索引
@@ -130,7 +173,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     if (GoPositive)//从小到大排序
                     {
                         ptlist = ptlist.OrderBy(s => s.Y).ToList();
-
                         var sorted = IntersectLines.Select((x, i) => new KeyValuePair<Line, int>(x, i)).OrderBy(x => x.Key.StartPoint.Y).ToList();
                         IntersectLines = sorted.Select(x => x.Key).ToList();
                         var idx = sorted.Select(x => x.Value).ToList();// 索引值
@@ -322,15 +364,58 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private void GetMaxMinValue(Line BufferLine, OuterBrder outerbrder, out double MinValue, out double MaxValue)
         {
+            Polyline Buffer;
             //TO DO 用BreakLine，outerbrder 以及BufferSize 求最大最小值（相对值）
             // 然后判断和其他buffer是否有交集，如果有可能减少buffersize，再做运算
-            //算法：
-            //1.用起始线，以及向坐标减少方向做矩形，如果框选到建筑，则以建筑最近点 - 初始线点 - 半个车道宽作为下边界（minvalue)。未框选到则以-buffersize 作为边界
+            //算法一：(如果指定buffersize）（必须确保与其他buffer不会相交）（不考虑分割线）
+            //1.用起始线，以及向坐标减少方向做矩形，如果框选到障碍物，则以建筑最近点 - 初始线点 - 半个车道宽作为下边界（minvalue)。
+            //未框选到则以-buffersize 作为边界
             //2. 上边界同理
-            // 3.判断新的下延申buffer与上延申buffer是否与已有buffer相交，如果相交，需要减少buffersize（可以只减少当前buffer，或者调整之前加上现在buffer，使得结果与排列顺序无关）
-            MinValue = -BufferSize;
-            MaxValue = BufferSize;
-            //当前buffer
+
+            //算法二：若未指定buffersize，使用无穷buffer
+            //1.用起始线，以及向坐标减少方向做矩形，如果“先”框选到障碍物，则以建筑最近点 - 初始线点 - 半个车道宽作为下边界（minvalue)。
+            //2.如果先框选到其他初始分割线(OtherGAlines，则以两个初始分割线的终点 - 半个车道宽作为边界
+            //3.另一个方向同理
+            //2.框选建筑
+
+            // 高级算法三：
+            // 不论是否指定buffersize，先执行算法二，计算分割线的最大上下边界，做记录
+            // 如果边界大于buffersize,取buffersize作为边界
+            // 否则取分割线的最大上下边界
+
+            MaxValue = 0;
+            MinValue = 0;
+            if (VerticalDirection)
+            {
+                //1.正方向拿buffer
+                var BuildingDis = GetDisToBuilding(BufferLine, MaxBufferSize, true);// 距离建筑的最短距离
+                var LineDis = MinBufferDisToRestLines(BufferLine, true);
+                var TempBufferSize = Math.Min(BuildingDis, LineDis);//与其他建筑和分割线的最短距离
+
+                MaxValue = Math.Min(TempBufferSize, BufferSize) - (RoadWidth / 2);
+                //1.反方向拿buffer
+                BuildingDis = GetDisToBuilding(BufferLine, MaxBufferSize, false);// 距离建筑的最短距离
+                LineDis = MinBufferDisToRestLines(BufferLine, false);
+                TempBufferSize = Math.Min(BuildingDis, LineDis);//与其他建筑和分割线的最短距离
+
+                MinValue = -Math.Min(TempBufferSize, BufferSize) + (RoadWidth / 2);
+
+                if (MaxValue <= 0 && MinValue >= 0) 
+                {
+                    throw new ArgumentException("Invaild Initial Buffer Line");
+                }
+                
+                if (MaxValue < 0)
+                {
+                    MaxValue = 0;
+                }
+                if (MinValue > 0)
+                {
+                    MinValue = 0;
+                }
+            }
+
+            // 当前buffer
             if (VerticalDirection)//纵向线
             {
                 var points = new List<Point2d> {new Point2d(BufferLine.StartPoint.X + MinValue, BufferLine.StartPoint.Y) , 
@@ -343,7 +428,111 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 
                 BufferTanks.Add(pline);
             }
+            else
+            {
+                //对称逻辑
+            }
             
+        }
+
+        private Polyline GetBuffer(Line BufferLine,double buffersize, bool PositiveDirection)
+        {
+            // 获取bufferline往正或负方向的buffer
+            var pline = new Polyline();
+            if (VerticalDirection)
+            {
+                double distance;
+                if (PositiveDirection) distance = buffersize;
+                else distance = -buffersize;
+                var points = new List<Point2d> {new Point2d(BufferLine.StartPoint.X , BufferLine.StartPoint.Y) ,
+                                                new Point2d(BufferLine.StartPoint.X + distance, BufferLine.StartPoint.Y) ,
+                                                new Point2d(BufferLine.EndPoint.X + distance, BufferLine.EndPoint.Y),
+                                                new Point2d(BufferLine.EndPoint.X , BufferLine.EndPoint.Y)};
+                pline.CreatePolyline(points.ToArray());
+            }
+            pline.Closed = true;
+            return pline;
+        }
+        private double GetMinDist(Line line, Point3d pt)
+        {
+            var targetPt = line.GetClosestPointTo(pt, true);
+            return pt.DistanceTo(targetPt);
+        }
+        private double GetDisToBuilding(Line BufferLine, double buffersize, bool PositiveDirection)
+        {
+            var buffer = GetBuffer(BufferLine, buffersize, PositiveDirection);
+            var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(buffer);
+            if (buildLines.Count == 0)
+            {
+                return buffersize;
+            }
+            var boundPt = BufferLine.GetBoundPt(buildLines);
+            return GetMinDist(BufferLine, boundPt);
+        }
+
+        private bool BufferDisToLine(Line line1, Line line2, bool PositiveDirection,out double distance)
+        {
+            //distance of this line to another line
+            // two line must be in same direction (vertical or horizontal) if not return null
+            // 如果从this line到line two的矩形框交不到，也retrn null
+            // 如果可以交到，return 矩形框伸出的长度
+            double factor;
+            distance = double.MaxValue;
+            if (PositiveDirection) factor = 1;
+            else factor = -1;
+            if (VerticalDirection)
+            {
+                var X1 = line1.StartPoint.X;
+                var X2 = line2.StartPoint.X;
+
+                var SP1Y = line1.StartPoint.Y;
+                var EP1Y = line1.EndPoint.Y;
+
+                var SP2Y = line2.StartPoint.Y;
+                var EP2Y = line2.EndPoint.Y;
+
+                bool SP1in = (SP1Y > SP2Y && SP1Y < EP2Y) || (SP1Y < SP2Y && SP1Y > EP2Y);
+                bool EP1in = (EP1Y > SP2Y && EP1Y < EP2Y) || (EP1Y < SP2Y && EP1Y > EP2Y);
+
+                if (SP1in || EP1in)// 至少有一个点在范围内
+                {
+                    distance = factor * (X2 - X1);
+                    if (distance > 0)
+                    {
+                        if (Math.Abs(distance) < 1e-5)
+                        {
+                            throw new ArgumentException("distance between lines is 0");
+                        }
+                        else return true;
+                    }
+                }
+            }
+            else
+            {
+                // 对称逻辑TO DO
+            }
+            return false;
+        }
+
+        private double MinBufferDisToRestLines(Line BufferLine,bool PositiveDirection)
+        {
+            //Buffer distance from Line1 to all other lines 
+            double Mindis = double.MaxValue;
+            bool FoundDistance;
+            foreach(Line line in OtherGALine1s)
+            {
+                FoundDistance = BufferDisToLine(BufferLine,line,PositiveDirection,out double distance);
+                if (FoundDistance && distance< Mindis)
+                {
+                    Mindis = distance;
+                }
+            }
+
+            return Mindis/2;// 返回到其他线的中点
+        }
+        public void Dispose()
+        {
+            Clear();
         }
     }
 
