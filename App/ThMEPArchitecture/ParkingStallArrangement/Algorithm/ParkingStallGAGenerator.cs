@@ -251,7 +251,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
         //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
-        private Serilog.Core.Logger Logger = null;
+        public Serilog.Core.Logger Logger = null;
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
