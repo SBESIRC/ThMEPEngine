@@ -24,8 +24,11 @@ namespace ThMEPHVAC.FanPipeAlgorithm
         //mode 0：基础整线
         //mode 1：终点不要附加线条
         public static int arrange_mode = 0;
-        
-        
+
+        //线条是否在中央
+        public static double deviation = 200;
+        public static int center = 0;
+
         //方向定义  SSS
         //右(x+1):0 
         //上(y+1):1 
