@@ -58,13 +58,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    var remSurplusPipe = new ThRemSurplusPipe()
-                    {
-                        StartPoint = startPt,
-                        AllLine = pipes,
-                        AllFan = fcus
-                    };
-                    pipes = remSurplusPipe.RemSurplusPipe();
                     if(pipes == null)
                     {
                         return;

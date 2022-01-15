@@ -118,34 +118,13 @@ namespace ThMEPHVAC.FanConnect.Command
                         var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
                     }
-
-                    var remSurplusPipe = new ThRemSurplusPipe()
-                    {
-                        StartPoint = startPt,
-                        AllLine = pipes,
-                        AllFan = fcus
-                    };
-                    pipes = remSurplusPipe.RemSurplusPipe();
-                    //构建Tree
-                    ThFanTreeModel tmpModel = new ThFanTreeModel(startPt, pipes, space);
-                    if (tmpModel.RootNode == null)
-                    {
-                        return;
-                    }
-                    //标记4通结点
-                    ThFanConnectUtils.FindFourWay(tmpModel.RootNode);
-                    //
-                    foreach (var fcu in fcus)
-                    {
-                        ThFanConnectUtils.FindFcuNode(tmpModel.RootNode, fcu.FanPoint);
-                    }
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                     pipeExtendServiece.ConfigInfo = ConfigInfo;
-                    pipeExtendServiece.PipeExtend(tmpModel);
+                    pipeExtendServiece.PipeExtend(treeModel);
 
                     //计算流量
-                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(tmpModel.RootNode, fcus);
+                    ThPointTreeModel pointTreeModel = new ThPointTreeModel(treeModel.RootNode, fcus);
                     if (pointTreeModel.RootNode == null)
                     {
                         return;
