@@ -167,8 +167,24 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
+                    {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        try
+                        {
+                            partitionpro.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                        continue;
+                    }
+
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
                     {
                         try
                         {

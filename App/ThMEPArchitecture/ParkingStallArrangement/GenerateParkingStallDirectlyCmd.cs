@@ -100,28 +100,37 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
-                if (false)
+                var use_partition_pro = true;
+                if (use_partition_pro)
                 {
-                    var partitiono = new ParkingPartitionBackup();
-                    DebugParkingPartitionO(layoutPara, j, ref partitiono);
-                    partitiono.GenerateParkingSpaces();
-                    partitiono.Display();
-                    partitiono.Dispose();
-                    continue;
-                }
-                ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel, Logger))
-                {
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                     try
                     {
-                        count += partition.ProcessAndDisplay(layerNames, 30);
+                        count += partitionpro.ProcessAndDisplay(layerNames, 30);
                     }
                     catch (Exception ex)
                     {
-                        Logger.Error(ex.Message);
-                        partition.Dispose();
+                        ;
                     }
+                    continue;
                 }
+                else
+                {
+                    ParkingPartition partition = new ParkingPartition();
+                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                    {
+                        try
+                        {
+                            count += partition.ProcessAndDisplay(layerNames, 30);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(ex.Message);
+                            partition.Dispose();
+                        }
+                    }
+                }          
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();
