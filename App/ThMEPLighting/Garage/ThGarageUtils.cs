@@ -173,6 +173,11 @@ namespace ThMEPLighting.Garage
                 return lines.Cast<Line>().ToList();
             }
         }
+        public static bool IsCollinear(this Line first, Line second, double tolerance)
+        {
+            return ThGeometryTool.IsCollinearEx(
+                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint, tolerance);
+        }
         /// <summary>
         /// 减去一根线上重叠的线
         /// </summary>

@@ -104,12 +104,39 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         protected List<Line> Merge(List<Line> lines)
         {
             var newLines = ThMergeLightLineService.Merge(lines);
-            return newLines.Select(o => CreateLine(o)).ToList();
+            return newLines
+                .SelectMany(o=>Split(o))
+                .Select(o => CreateLine(o))
+                .ToList();
         }
         private Line CreateLine(List<Line> collinearLines)
         {
             var ptPair = ThGeometryTool.GetCollinearMaxPts(collinearLines);
             return new Line(ptPair.Item1, ptPair.Item2);
+        }
+        private List<List<Line>> Split(List<Line> lines)
+        {
+            var links = new List<List<Line>>();
+            for (int i = 0; i < lines.Count; i++)
+            {
+                var sameLink = new List<Line>();
+                sameLink.Add(lines[i]);
+                int j = i + 1;
+                for (; j < lines.Count; j++)
+                {
+                    if (lines[j].FindLinkPt(sameLink.Last()).HasValue && lines[j].IsCollinear(sameLink.Last(),1.0))
+                    {
+                        sameLink.Add(lines[j]);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                i = j - 1;
+                links.Add(sameLink);
+            }
+            return links;
         }
     }
 

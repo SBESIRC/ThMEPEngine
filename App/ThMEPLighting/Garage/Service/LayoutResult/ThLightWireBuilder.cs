@@ -317,7 +317,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new DBObjectCollection();
             var firstEdges = GetEdges(edges, EdgePattern.First);
             var secondEdges = GetEdges(edges, EdgePattern.Second);
-            var firstLinkWireObjs = CreateLinkWire(firstEdges);
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);            
             firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
             var secondLinkWireObjs = CreateLinkWire(secondEdges);
             secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);

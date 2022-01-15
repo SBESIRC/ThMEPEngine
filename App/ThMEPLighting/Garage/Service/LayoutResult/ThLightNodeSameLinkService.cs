@@ -140,18 +140,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 var sameLink = new List<ThLightEdge>();
                 sameLink.Add(sameLinkEdges[i]);
-                for (int j = i + 1; j < sameLinkEdges.Count; j++)
+                int j = i + 1;
+                for (; j < sameLinkEdges.Count; j++)
                 {
                     if (sameLinkEdges[j].Edge.IsLessThan45Degree(sameLink.Last().Edge))
                     {
                         sameLink.Add(sameLinkEdges[j]);
                     }
                     else
-                    {
-                        i = j - 1;
+                    {                        
                         break;
                     }
                 }
+                i = j - 1;
                 links.Add(sameLink);
             }
             return links;

@@ -68,12 +68,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return points.CreatePolyline();
         }
 
-        public static bool IsCollinear(this Line first, Line second, double tolerance)
-        {
-            return ThGeometryTool.IsCollinearEx(
-                first.StartPoint, first.EndPoint, second.StartPoint, second.EndPoint, tolerance);
-        }
-
         public static List<Line> GroupSides(this Polyline partition, List<Line> sides)
         {
             return sides
