@@ -325,12 +325,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             results = results.Union(secondLinkWireObjs);
             return results;
         }
-        protected DBObjectCollection FilterDoubleRowLinkWire(DBObjectCollection linkWires)
+        protected DBObjectCollection FilterDoubleRowLinkWire(DBObjectCollection linkWires,List<ThLightEdge> edges)
         {
-            var filter = new ThLinkWireFilter();
-            return filter.Filter(linkWires);
+            var lightWireFactory = new ThLightBlockFactory(edges);
+            lightWireFactory.Build();
+            var filter = new ThLinkWireFilter(linkWires, 
+                edges.Select(o => o.Edge).ToList(), lightWireFactory.Results.Keys.ToCollection());
+            return filter.Filter();
         }
-
         protected List<ThLightGraphService> BuildGraphs(List<ThLightEdge> edges)
         {
             // 为了1、2号线使用
