@@ -166,6 +166,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             var solution = rst.First();
             histories.Add(rst.First());
+
+            var segbkparam = new SegBreakParam(solution.Genome, outerBrder, true, true);
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
