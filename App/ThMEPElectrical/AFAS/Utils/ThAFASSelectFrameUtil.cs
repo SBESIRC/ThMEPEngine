@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPElectrical.Service;
 
 namespace ThMEPElectrical.AFAS.Utils
 {
@@ -50,7 +48,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 };
                 var dxfNames = new string[]
                 {
-                RXClass.GetClass(typeof(BlockReference)).DxfName,
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
                 var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
@@ -59,18 +57,20 @@ namespace ThMEPElectrical.AFAS.Utils
                     return pts;
                 }
 
-
                 List<BlockReference> frameLst = new List<BlockReference>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
-                    var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
+                    var frame = acadDatabase.ElementOrDefault<BlockReference>(obj);
+                    if (frame != null)
+                    {
+                        frameLst.Add(frame);
+                    }
                 }
 
                 List<Polyline> frames = new List<Polyline>();
                 foreach (var frameBlock in frameLst)
                 {
-                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    var frame = ThElectricalCommonService.GetFrameBlkPolyline(frameBlock);
                     if (frame != null)
                     {
                         frames.Add(frame);
@@ -78,7 +78,6 @@ namespace ThMEPElectrical.AFAS.Utils
                 }
 
                 var frameL = frames.OrderByDescending(x => x.Area).FirstOrDefault();
-
                 if (frameL != null && frameL.Area > 10)
                 {
                     frameL = ProcessFrame(frameL);
@@ -202,7 +201,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 };
                 var dxfNames = new string[]
                 {
-                Autodesk.AutoCAD.Runtime.RXClass.GetClass(typeof(Polyline)).DxfName,
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
                 var filter = ThSelectionFilterTool.Build(dxfNames);
                 var result = Active.Editor.GetSelection(options, filter);
@@ -239,23 +238,6 @@ namespace ThMEPElectrical.AFAS.Utils
                 nFrame = nFrameNormal;
             }
             return nFrame;
-        }
-
-        private static List<Entity> GetBlockInfo(BlockReference blockReference)
-        {
-            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var results = new List<Entity>();
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                foreach (var objId in blockTableRecord)
-                {
-                    var dbObj = acadDatabase.Element<Entity>(objId).Clone() as Entity;
-                    dbObj.TransformBy(matrix);
-                    results.Add(dbObj);
-                }
-                return results;
-            }
         }
     }
 }

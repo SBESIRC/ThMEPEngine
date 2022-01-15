@@ -11,7 +11,6 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Model;
@@ -58,24 +57,18 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
-                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
+                Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    ObjectIdCollection dBObject = new ObjectIdCollection();
-                    dBObject.Add(obj);
-                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
+                    var boundary = ThElectricalCommonService.GetFrameBlkPolyline(frame);
+                    frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frameBlock = frameBlockDic.Key;
+                    var frame = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
-                    var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame == null)
-                    {
-                        continue;
-                    }
 
                     var pt = frame.StartPoint;
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);

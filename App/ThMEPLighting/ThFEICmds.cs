@@ -1,24 +1,22 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using DotNetARX;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.DSFEI.ThEmgPilotLamp;
+using ThMEPElectrical.Service;
 using ThMEPLighting.DSFEL;
 using ThMEPLighting.DSFEL.Service;
+using ThMEPLighting.DSFEI.ThEmgPilotLamp;
 using ThMEPLighting.FEI;
-using ThMEPLighting.FEI.EvacuationPath;
-using ThMEPLighting.FEI.PrintEntity;
 using ThMEPLighting.FEI.Service;
+using ThMEPLighting.FEI.PrintEntity;
+using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.ThEmgPilotLamp;
 
 namespace ThMEPLighting
@@ -128,13 +126,10 @@ namespace ThMEPLighting
 
                 Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
-                { 
+                {
                     var frame = acdb.Element<BlockReference>(obj);
-                    var blk = frame.Clone() as BlockReference;
-                    var boundary = GetBlockInfo(blk).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    ObjectIdCollection dBObject = new ObjectIdCollection();
-                    dBObject.Add(obj);
-                    frameLst.Add(boundary, dBObject);
+                    var boundary = ThElectricalCommonService.GetFrameBlkPolyline(frame);
+                    frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
                 var pt = frameLst.First().Key.StartPoint;
@@ -173,7 +168,7 @@ namespace ThMEPLighting
                     holes.AddRange(columns);
                     holes.AddRange(walls);
                     holes.AddRange(rooms.SelectMany(x => x.Value).ToList());
-                    
+
                     //布置
                     var thRooms = rooms.Select(x => x.Key).ToList();
                     LayoutService layoutService = new LayoutService();
@@ -182,7 +177,7 @@ namespace ThMEPLighting
                     ////打印路径
                     //PrintPathService printService = new PrintPathService();
                     //printService.PrintPath(paths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
-                }  
+                }
             }
         }
 
@@ -418,27 +413,5 @@ namespace ThMEPLighting
 
             return resPolys;
         }
-
-        /// <summary>
-        /// 获取块内信息
-        /// </summary>
-        /// <param name="blockReference"></param>
-        /// <returns></returns>
-        private List<Entity> GetBlockInfo(BlockReference blockReference)
-        {
-            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var results = new List<Entity>();
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                foreach (var objId in blockTableRecord)
-                {
-                    var dbObj = acadDatabase.Element<Entity>(objId).Clone() as Entity;
-                    dbObj.TransformBy(matrix);
-                    results.Add(dbObj);
-                }
-                return results;
-            }
-        }
     }
-}  
+}

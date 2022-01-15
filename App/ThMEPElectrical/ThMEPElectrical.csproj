@@ -301,13 +301,13 @@
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\LayoutService\LayoutHositingDetectorService.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\LayoutModel.cs" />
     <Compile Include="SecurityPlaneSystem\IntrusionAlarmSystem\Model\RoomInfoModel.cs" />
-    <Compile Include="SecurityPlaneSystem\StructureHandleService\CommonService.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
     <Compile Include="SecurityPlaneSystem\Utils\CheckService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\HandleVideoMonitoringRoomService.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\RoomInfoModel.cs" />
     <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideaoAdjust.cs" />
+    <Compile Include="Service\ThElectricalCommonService.cs" />
     <Compile Include="Service\ThElectricalUIService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAFASGraphEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThExtractLabelLine.cs" />
