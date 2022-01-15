@@ -46,10 +46,14 @@ namespace ThMEPHVAC.FanConnect.Command
                         return;
                     }
                     //提取水管路由
-                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     var pipes = ThEquipElementExtractService.GetFanPipes(startPt);
                     if(pipes.Count == 0)
                     {
+                        return;
+                    }
+                    if(pipes.ToCollection().Polygonize().Count > 0)
+                    {
+                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
                         return;
                     }
                     //提取水管连接点
@@ -58,43 +62,27 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    if(pipes == null)
+                    ///处理数据--删除不必要的线（图纸上不删除）
+                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    var handlePipeService = new ThHandleFanPipeService()
+                    {
+                        StartPoint = startPt,
+                        AllFan = fcus,
+                        AllLine = pipes
+                    };
+                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    if(tmpTree == null)
                     {
                         return;
                     }
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt);
-                    }
-                    //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                    ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-                    var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-                    if( lineColl.Polygonize().Count >0)
-                    {
-                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
-                        return;
-                    }
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt.Inverse());
-                    }
-                    var tmpLines = new List<Line>();
-                    foreach (var l in lineColl)
-                    {
-                        tmpLines.Add(l as Line);
-                    }
-                    var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
-                    foreach (var l in lines)
-                    {
-                        l.TransformBy(mt.Inverse());
-                    }
+                    var rightLines = handlePipeService.GetRightLine(tmpTree,mt);//已经处理好的线
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
                         space = 150.0;
                     }
                     //构建Tree
-                    ThFanTreeModel treeModel = new ThFanTreeModel(startPt, lines, space);
+                    ThFanTreeModel treeModel = new ThFanTreeModel(startPt, rightLines, space);
                     if (treeModel.RootNode == null)
                     {
                         return;
@@ -104,7 +92,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     //
                     foreach (var fcu in fcus)
                     {
-                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
+                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanObb);
                     }
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
@@ -116,7 +104,6 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-
                     //标记流量
                     ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                     pipeMarkServiece.ConfigInfo = ConfigInfo;

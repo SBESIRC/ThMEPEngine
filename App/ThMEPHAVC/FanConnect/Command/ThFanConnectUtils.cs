@@ -451,18 +451,18 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return false;
         }
-        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Point3d pt)
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Polyline obb)
         {
             foreach (var item in node.Children)
             {
-                FindFcuNode(item, pt);
+                FindFcuNode(item, obb);
             }
             if(node.Children.Count != 0)
             {
                 return;
             }
-
-            if (node.Item.PLine.EndPoint.DistanceTo(pt) < 200.0)
+            var box = ThDrawTool.CreateSquare(node.Item.PLine.EndPoint, 400.0);
+            if (IsIntersect(box,obb))
             {
                 node.Item.PipeWidth = 100.0;
                 node.Item.PipeLevel = PIPELEVEL.LEVEL4;
@@ -655,6 +655,30 @@ namespace ThMEPHVAC.FanConnect.Command
                 EnsureLayerOn(acadDb, "H-PIPE-APPE");
                 EnsureLayerOn(acadDb, "H-PAPP-VALV");
             }
+        }
+        public static bool IsParallelLine(Line a, Line b, double degreetol = 1)
+        {
+            double angle = CreateVector((Line)a).GetAngleTo(CreateVector((Line)b));
+            return Math.Min(angle, Math.Abs(Math.PI - angle)) / Math.PI * 180 < degreetol;
+        }
+        public static Vector3d CreateVector(Line line)
+        {
+            return CreateVector(line.StartPoint, line.EndPoint);
+        }
+        public static Vector3d CreateVector(Point3d ps, Point3d pe)
+        {
+            return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
+        }
+        public static bool IsIntersect(Polyline pl1,Polyline pl2)
+        {
+            var centerPt = pl1.GetCenter();
+            var mt = Matrix3d.Displacement(centerPt.GetVectorTo(Point3d.Origin));
+            pl1.TransformBy(mt);
+            pl2.TransformBy(mt);
+            bool isIntersect = pl1.IsIntersects(pl2);
+            pl1.TransformBy(mt.Inverse());
+            pl2.TransformBy(mt.Inverse());
+            return isIntersect;
         }
     }
 }

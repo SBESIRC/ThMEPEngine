@@ -45,6 +45,7 @@
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
     <Compile Include="FanConnect\Service\ThAddValveService.cs" />
     <Compile Include="FanConnect\Service\ThCreateDuctService.cs" />
+    <Compile Include="FanConnect\Service\ThHandleFanPipeService.cs" />
     <Compile Include="FanPipeAlgorithm\ArrangePipe.cs" />
     <Compile Include="FanConnect\Service\ThRemSurplusPipe.cs" />
     <Compile Include="FanPipeAlgorithm\data_process.cs" />

@@ -312,8 +312,8 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 foreach (var f in fans)
                 {
-                    var distance = node.Item.CntPoint.DistanceTo(f.FanPoint);
-                    if (distance < 200.0)
+                    var box = ThDrawTool.CreateSquare(node.Item.CntPoint, 400.0);
+                    if (ThFanConnectUtils.IsIntersect(box,f.FanObb))
                     {
                         node.Item.CoolCapa = f.CoolCapa;
                         node.Item.CoolFlow = f.CoolFlow;
@@ -374,25 +374,6 @@ namespace ThMEPHVAC.FanConnect.Model
                 }
             }
             return null;
-        }
-        public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node, Point3d pt)
-        {
-            foreach (var item in node.Children)
-            {
-                FindFcuNode(item, pt);
-            }
-            if (node.Item.CntPoint.DistanceTo(pt) < 200.0)
-            {
-                node.Item.Level = PIPELEVEL.LEVEL2;
-                if (node.Parent != null)
-                {
-                    if (node.Parent.Children.Count == 1)
-                    {
-                        FindFcuNode(node.Parent);
-                    }
-                }
-                return;
-            }
         }
         public void FindFcuNode(ThFanTreeNode<ThFanPointModel> node)
         {

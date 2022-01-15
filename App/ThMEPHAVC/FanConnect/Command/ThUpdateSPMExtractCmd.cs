@@ -48,40 +48,32 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt);
-                    }
                     //提取风机
                     var fcus = ThEquipElementExtractService.GetFCUModels(ConfigInfo.WaterSystemConfigInfo.SystemType);
-                    //处理pipes 1.清除重复线段 ；2.将同线的线段连接起来；
-                    ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
-                    var lineColl = cleanServiec.CleanNoding(pipes.ToCollection());
-                    if (lineColl.Polygonize().Count > 0)
+                    //获取标记
+                    var markes = ThEquipElementExtractService.GetPipeMarkes("H-PIPE-DIMS");
+                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
+                    var handlePipeService = new ThHandleFanPipeService()
                     {
-                        Active.Editor.WriteMessage("水管路由存在环路，请检查修改\n");
+                        StartPoint = startPt,
+                        AllFan = fcus,
+                        AllLine = pipes
+                    };
+                    var tmpTree = handlePipeService.HandleFanPipe(mt);
+                    if (tmpTree == null)
+                    {
                         return;
                     }
-                    foreach (var p in pipes)
-                    {
-                        p.TransformBy(mt.Inverse());
-                    }
-                    var tmpLines = new List<Line>();
-                    foreach (var l in lineColl)
-                    {
-                        var line = l as Line;
-                        line.TransformBy(mt.Inverse());
-                        tmpLines.Add(line);
-                    }
-                    var lines = ThFanConnectUtils.CleanLaneLines(tmpLines);
+                    var badLines = handlePipeService.GetBadLine(tmpTree, mt);//已经处理的坏线
+                    var rightLines = handlePipeService.GetRightLine(tmpTree, mt);//已经处理的好线
+                    
                     double space = 300.0;
                     if (ConfigInfo.WaterSystemConfigInfo.SystemType == 1)//冷媒系统
                     {
                         space = 150.0;
                     }
                     //构建Tree
-                    ThFanTreeModel treeModel = new ThFanTreeModel(startPt, lines, space);
+                    ThFanTreeModel treeModel = new ThFanTreeModel(startPt, rightLines, space);
                     if (treeModel.RootNode == null)
                     {
                         return;
@@ -91,7 +83,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     //
                     foreach (var fcu in fcus)
                     {
-                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
+                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanObb);
                     }
                     //提取结点标记
                     var pipeDims = ThEquipElementExtractService.GetPipeDims("H-PIPE-APPE");
@@ -111,12 +103,21 @@ namespace ThMEPHVAC.FanConnect.Command
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref chsPipes);
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref chrPipes);
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref rPipes);
+
+                        RemoveSPMLine(badLines, ref pipeDims, ref csPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref crPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref hsPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref hrPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref chsPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref chrPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref rPipes);
                     }
                     if (ConfigInfo.WaterSystemConfigInfo.IsCWPipe)
                     {
                         //提取各种线
                         var cPipes = ThEquipElementExtractService.GetWaterSpm("H-PIPE-C");
                         RemoveSPMLine(treeModel.RootNode, ref pipeDims, ref cPipes);
+                        RemoveSPMLine(badLines, ref pipeDims, ref cPipes);
                     }
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
@@ -129,7 +130,7 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
-                    var markes = ThEquipElementExtractService.GetPipeMarkes("H-PIPE-DIMS");
+                    
                     //标记流量
                     ThWaterPipeMarkService pipeMarkServiece = new ThWaterPipeMarkService();
                     pipeMarkServiece.ConfigInfo = ConfigInfo;
@@ -142,30 +143,43 @@ namespace ThMEPHVAC.FanConnect.Command
             }
 
         }
+        public void RemoveSPMLine(List<Line> baseLines, ref List<Entity> dims,ref List<Line> lines)
+        {
+            foreach(var l in baseLines)
+            {
+                RemoveSPMLine(l, ref dims, ref lines);
+            }
+        }
+        public void RemoveSPMLine(Line baseLine, ref List<Entity> dims, ref List<Line> lines)
+        {
+            var box = baseLine.Buffer(440);
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection())
+            {
+                AllowDuplicate = true,
+            };
+            var dbObjs = spatialIndex.SelectCrossingPolygon(box);
+            var remLines = new List<Line>();
+            foreach (var obj in dbObjs)
+            {
+                if (obj is Line)
+                {
+                    var line = obj as Line;
+                    if(ThFanConnectUtils.IsParallelLine(baseLine, line))
+                    {
+                        remLines.Add(line);
+                        RemoveDims(line, ref dims);
+                    }
+                }
+            }
+            lines = lines.Except(remLines).ToList();
+        }
         public void RemoveSPMLine(ThFanTreeNode<ThFanPipeModel> node,ref List<Entity> dims, ref List<Line> lines)
         {
             foreach(var child in node.Children)
             {
                 RemoveSPMLine(child, ref dims, ref lines);
             }
-            var box = node.Item.PLine.ExtendLine(440).Buffer(440);
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection())
-            {
-                AllowDuplicate = true,
-            };
-            var dbObjs = spatialIndex.SelectWindowPolygon(box);
-
-            var remLines = new List<Line>();
-            foreach (var obj in dbObjs)
-            {
-                if(obj is Line)
-                {
-                    var line = obj as Line;
-                    remLines.Add(line);
-                    RemoveDims(line,ref dims);
-                }
-            }
-            lines = lines.Except(remLines).ToList();
+            RemoveSPMLine(node.Item.PLine, ref dims, ref lines);
         }
         public void RemoveDims(Line line ,ref List<Entity> dims)
         {
