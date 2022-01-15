@@ -211,7 +211,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            //layoutPara.Dispose();
         }
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
