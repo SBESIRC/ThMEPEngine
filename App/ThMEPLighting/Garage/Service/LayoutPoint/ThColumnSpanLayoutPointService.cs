@@ -27,7 +27,9 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
             var results = new List<Point3d>();
-            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(L1Lines, L2Lines);
+            var newL1Lines = Merge(L1Lines);
+            var newL2Lines = Merge(L2Lines);
+            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(newL1Lines, newL2Lines);
             var l1PubLayoutPoints = Layout(l1l2PubExclusiveLines.L1Pubs); // L1上创建的点
             var l2PubLayoutPoints = GetL2LayoutPointByPass(l1PubLayoutPoints, L1Lines, L2Lines);
             var l1ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L1Exclusives);

@@ -1,6 +1,8 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
+using System.Linq;
 
 namespace ThMEPLighting.Garage.Service.LayoutPoint
 {
@@ -21,15 +23,24 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
             var results = new List<Point3d>();
-            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(L1Lines, L2Lines);
-            var l1PubLayoutPoints = Layout(l1l2PubExclusiveLines.L1Pubs); // L1上创建的点
-            var l2PubLayoutPoints = GetL2LayoutPointByPass(l1PubLayoutPoints, L1Lines, L2Lines);
-            var l1ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L1Exclusives);
+            var newL1Lines = Merge(L1Lines);
+            var newL2Lines = Merge(L2Lines);
+            var l1LayoutPoints = Layout(newL1Lines); // L1上创建的点
+            var l2LayoutPoints = GetL2LayoutPointByPass(l1LayoutPoints, newL1Lines, newL2Lines);
+            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(newL1Lines, newL2Lines);
             var l2ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L2Exclusives);
-            results.AddRange(l1PubLayoutPoints);
-            results.AddRange(l2PubLayoutPoints);
-            results.AddRange(l1ExclusiveLayoutPoints);
+            results.AddRange(l1LayoutPoints);
+            results.AddRange(l2LayoutPoints);
             results.AddRange(l2ExclusiveLayoutPoints);
+            //var l1l2PubExclusiveLines = CalculatePubExclusiveLines(L1Lines, L2Lines);
+            //var l1PubLayoutPoints = Layout(l1l2PubExclusiveLines.L1Pubs); // L1上创建的点
+            //var l2PubLayoutPoints = GetL2LayoutPointByPass(l1PubLayoutPoints, L1Lines, L2Lines);
+            //var l1ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L1Exclusives);
+            //var l2ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L2Exclusives);
+            //results.AddRange(l1PubLayoutPoints);
+            //results.AddRange(l2PubLayoutPoints);
+            //results.AddRange(l1ExclusiveLayoutPoints);
+            //results.AddRange(l2ExclusiveLayoutPoints);
             return results;
         }
     }

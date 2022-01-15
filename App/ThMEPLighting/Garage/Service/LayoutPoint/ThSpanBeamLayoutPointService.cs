@@ -91,10 +91,13 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
 
         public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
-            var results  = new List<Point3d>(); 
+            var results  = new List<Point3d>();
             // nonBeamIntervalLines,beamIntervalLines
-            var l1SplitLines = Calculate(L1Lines); // L1被梁分割的线
-            var l2SplitLines = Calculate(L2Lines); // L2被梁分割的线
+            var newL1Lines = Merge(L1Lines);
+            var newL2Lines = Merge(L2Lines);
+
+            var l1SplitLines = Calculate(newL1Lines); // L1被梁分割的线
+            var l2SplitLines = Calculate(newL2Lines); // L2被梁分割的线
 
             var nonBeamIntervalRes = CalculatePubExclusiveLines(l1SplitLines.Item1, l2SplitLines.Item1);            
             var l1PubLayoutPoints = LinearDistribute(nonBeamIntervalRes.L1Pubs, this.Margin, this.Interval);

@@ -101,6 +101,16 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         {
             return new L1L2LinesInfo(L1Lines, L2Lines, DoubleRowOffsetDis);
         }
+        protected List<Line> Merge(List<Line> lines)
+        {
+            var newLines = ThMergeLightLineService.Merge(lines);
+            return newLines.Select(o => CreateLine(o)).ToList();
+        }
+        private Line CreateLine(List<Line> collinearLines)
+        {
+            var ptPair = ThGeometryTool.GetCollinearMaxPts(collinearLines);
+            return new Line(ptPair.Item1, ptPair.Item2);
+        }
     }
 
     public class L1L2LinesInfo
