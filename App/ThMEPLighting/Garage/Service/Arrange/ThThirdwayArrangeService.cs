@@ -4,10 +4,12 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Factory;
 using ThMEPLighting.Garage.Service.Number;
+using ThMEPLighting.Garage.Service.LayoutResult;
 
 namespace ThMEPLighting.Garage.Service.Arrange
 {
@@ -37,7 +39,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             firstSeondEdges.ForEach(o =>
             {
                 // 建图
-                var firstGraphs = o.Item1.CreateDirectionGraphs();
+                var firstGraphs = o.Item1.CreateGraphs();
 
                 // 为1号线编号
                 firstGraphs.ForEach(f => f.Number1(base.LoopNumber, false, ArrangeParameter.DefaultStartNumber));
@@ -49,7 +51,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 ReNumberSecondEdges(o.Item2);
 
                 // 对2号线建图
-                var secondGraphs = o.Item2.CreateDirectionGraphs();
+                var secondGraphs = o.Item2.CreateGraphs();
                 Graphs.AddRange(firstGraphs);
                 Graphs.AddRange(secondGraphs);
             });
@@ -63,32 +65,47 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 var factory = BuildFirstSecondLines(g.Item2.Keys.ToList(), ArrangeParameter.DoubleRowOffsetDis);
                 // 把中心线对应的两边要记录下来，供后续交叉连接调用
                 factory.CenterSideDict.ForEach(o => CenterSideDicts.Add(o.Key, o.Value));
+                var firstLightEdges = BuildEdges(factory.FirstLines, EdgePattern.First);
+                var secondLightEdges  = BuildEdges(factory.SecondLines, EdgePattern.Second);
 
+                // 连接T型、十字型
+                if(ArrangeParameter.InstallWay != InstallWay.CableTray)
+                {
+                    var newAddEdges = AddLinkCrossEdges(firstLightEdges.Union(secondLightEdges).ToList(), factory.CenterSideDict);
+                    firstLightEdges.AddRange(newAddEdges.Where(o => o.EdgePattern == EdgePattern.First).ToList());
+                    secondLightEdges.AddRange(newAddEdges.Where(o => o.EdgePattern == EdgePattern.Second).ToList());
+                }
+                
                 // 通过1、2号线布点，返回带点的边
-                var edges = CreateDistributePointEdges(RegionBorder, factory.FirstLines, factory.SecondLines);
-
-                // 设置边的方向
-                edges.Item1.ForEach(o =>
-                {
-                    var center = FindCenter(o.Edge, factory.CenterSideDict);
-                    var dir = FindDirection(center, g.Item2);
-                    if (dir.HasValue)
-                    {
-                        o.Direction = dir.Value;
-                    }
-                });
-                edges.Item2.ForEach(o =>
-                {
-                    var center = FindCenter(o.Edge, factory.CenterSideDict);
-                    var dir = FindDirection(center, g.Item2);
-                    if (dir.HasValue)
-                    {
-                        o.Direction = dir.Value;
-                    }
-                });
-                firstSeondEdges.Add(edges);
+                CreateDistributePointEdges(firstLightEdges, secondLightEdges);
+                firstSeondEdges.Add(Tuple.Create(firstLightEdges, secondLightEdges));
             });
+
+             // 连边
             return firstSeondEdges;
+        }
+
+        private List<ThLightEdge> AddLinkCrossEdges(List<ThLightEdge> edges, 
+            Dictionary<Line, Tuple<List<Line>, List<Line>>> centerSideDicts)
+        {
+            // 将十字处、T字处具有相同EdgePattern的边直接连接
+            var results = new List<ThLightEdge>();
+            var calculator = new ThCrossLinkCalculator(edges, centerSideDicts);
+            calculator.BuildCrossLinkEdges().ForEach(o =>
+            {
+                if (!results.Select(e => e.Edge).ToList().GeometryContains(o.Edge, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE))
+                {
+                    results.Add(o);
+                }
+            });
+            calculator.BuildThreeWayLinkEdges().ForEach(o =>
+            {
+                if (!results.Select(e => e.Edge).ToList().GeometryContains(o.Edge, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE))
+                {
+                    results.Add(o);
+                }
+            });
+            return results;
         }
 
         private ThFirstSecondFactory BuildFirstSecondLines(List<Line> lines,double doubleRowOffsetDis)

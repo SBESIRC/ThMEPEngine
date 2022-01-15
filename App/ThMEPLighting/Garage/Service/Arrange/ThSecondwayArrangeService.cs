@@ -77,10 +77,12 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 // 对获得1、2号进行Noding
                 var firstLines = firstSecondEngine.FirstLines.Preprocess();
                 var secondLines = firstSecondEngine.SecondLines.Preprocess();
-         
+
                 // 通过1、2号线布点，返回带点的边
-                var edges = CreateDistributePointEdges(RegionBorder, firstLines, secondLines);
-                firstSeondEdges.Add(edges);
+                var firstLightEdges = BuildEdges(firstLines, EdgePattern.First);
+                var secondLightEdges = BuildEdges(secondLines, EdgePattern.Second);
+                CreateDistributePointEdges(firstLightEdges, secondLightEdges);
+                firstSeondEdges.Add(Tuple.Create(firstLightEdges, secondLightEdges));
             });
             return firstSeondEdges;
         }

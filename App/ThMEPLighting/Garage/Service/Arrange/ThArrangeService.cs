@@ -55,19 +55,20 @@ namespace ThMEPLighting.Garage.Service.Arrange
             });
             return results;
         }
-        protected Tuple<List<ThLightEdge>, List<ThLightEdge>> CreateDistributePointEdges(
-           ThRegionBorder regionBorder, List<Line> firstLines, List<Line> secondLines)
+        protected void CreateDistributePointEdges(
+            List<ThLightEdge> firstLightEdges, 
+            List<ThLightEdge> secondLightEdges)
         {
             // 创建带布点的边n
             var lightEdgeDistribute = new ThLightEdgeDistributePointService()
             {
-                FirstLines = firstLines,
-                SecondLines = secondLines,
+                FirstLightEdges = firstLightEdges,
+                SecondLightEdges = secondLightEdges,
                 ArrangeParameter = this.ArrangeParameter,
                 Beams = GetBeams(),
                 Columns = GetColumns(),
             };
-            return lightEdgeDistribute.Distribute();
+            lightEdgeDistribute.Distribute();
         }
         private DBObjectCollection GetBeams()
         {
@@ -102,12 +103,17 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 ArrangeParameter.DoubleRowOffsetDis);
             passNumberService.Pass();
         }
-
         protected void ReNumberSecondEdges(List<ThLightEdge> secondEdges)
         {
             var secondNumberService = new ThSecondNumberService(
                 secondEdges, LoopNumber, ArrangeParameter.DefaultStartNumber + 1);
             secondNumberService.Number();
+        }
+        protected List<ThLightEdge> BuildEdges(List<Line> lines, EdgePattern edgePattern)
+        {
+            var edges = new List<ThLightEdge>();
+            lines.ForEach(o => edges.Add(new ThLightEdge(o) { EdgePattern = edgePattern }));
+            return edges;
         }
     }
 }

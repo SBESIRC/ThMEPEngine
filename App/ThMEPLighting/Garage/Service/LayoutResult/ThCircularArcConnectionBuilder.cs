@@ -57,11 +57,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private void BuildDoubleRow()
         {
-            // 连接交叉处
-            var linkEdges = AddLinkCrossEdges();
-            var totalEdges = new List<ThLightEdge>();
-            totalEdges.AddRange(linkEdges);
-            totalEdges.AddRange(GetEdges());
+            var totalEdges = GetEdges();
 
             // 将1、2线边上的灯线用灯块打断，并过滤末端
             var linkWireObjs = CreateDoubleRowLinkWire(totalEdges);
@@ -70,10 +66,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 创建直段上的跳线(类似于拱形)
             var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);
             // 与灯具避梁
-            var avoidService = new ThCircularArcConflictAvoidService(
-                ArrangeParameter.LampLength, jumpWireRes, LightPositionDict);
-            avoidService.Avoid();
-            jumpWireRes = avoidService.Results;
+            //var avoidService = new ThCircularArcConflictAvoidService(
+            //    ArrangeParameter.LampLength, jumpWireRes, LightPositionDict);
+            //avoidService.Avoid();
+            //jumpWireRes = avoidService.Results;
 
             // 连接弯头跨区
             var elbowJumpWireRes = CreateElbowStraitLinkJumpWire(totalEdges);

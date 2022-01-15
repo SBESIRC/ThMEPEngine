@@ -40,10 +40,10 @@ namespace ThMEPLighting.Garage.Service.Arrange
             // 布点 + 返回1、2号边（包括布灯的点）
             var firstLines = innerOuterCircles.Select(o => o.First).ToList().Preprocess();
             var secondLines = innerOuterCircles.Select(o => o.Second).ToList().Preprocess();
-            var edgeResult = CreateDistributePointEdges(RegionBorder, firstLines, secondLines);
-            var firstLightEdges = edgeResult.Item1;
-            var secondLightEdges = edgeResult.Item2;
-
+            var firstLightEdges = BuildEdges(firstLines, Common.EdgePattern.First);
+            var secondLightEdges = BuildEdges(secondLines, Common.EdgePattern.Second);
+            CreateDistributePointEdges(firstLightEdges, secondLightEdges);
+         
             // 计算回路
             int lightNumber = firstLightEdges.CalculateLightNumber() +
             secondLightEdges.CalculateLightNumber();

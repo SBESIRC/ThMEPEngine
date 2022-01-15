@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -16,8 +15,8 @@ namespace ThMEPLighting.Garage.Service.Arrange
     internal class ThLightEdgeDistributePointService
     {
         #region ---------- input ----------
-        public List<Line> FirstLines { get; set; } = new List<Line>();
-        public List<Line> SecondLines { get; set; } = new List<Line>();
+        public List<ThLightEdge> FirstLightEdges { get; set; } = new List<ThLightEdge>();
+        public List<ThLightEdge> SecondLightEdges { get; set; } = new List<ThLightEdge>();
         public DBObjectCollection Beams { get; set; } = new DBObjectCollection();
         public DBObjectCollection Columns { get; set; } = new DBObjectCollection();
         public ThLightArrangeParameter ArrangeParameter { get; set; } = new ThLightArrangeParameter();
@@ -26,37 +25,37 @@ namespace ThMEPLighting.Garage.Service.Arrange
         {
         }
 
-        public Tuple<List<ThLightEdge>, List<ThLightEdge>> Distribute()
+        public void Distribute()
         {
-            // 创建边
-            var firstLightEdges = BuildEdges(FirstLines, EdgePattern.First);
-            var secondLightEdges = BuildEdges(SecondLines, EdgePattern.Second);
-
             // 布点
             var linePoints = new Dictionary<Line, List<Point3d>>();
             var points = LayoutPoints();
-            linePoints = ThQueryPointService.Query(points, Union(FirstLines, SecondLines));
+            linePoints = ThQueryPointService.Query(points, Union(GetEdges(FirstLightEdges), GetEdges(SecondLightEdges)));
             linePoints = Sort(linePoints);
 
             // 优化布置的点
             var optimizer = new ThLayoutPointOptimizeService(linePoints, ArrangeParameter.FilterPointDistance);
             optimizer.Optimize();
 
-            firstLightEdges.ForEach(f =>
+            FirstLightEdges.ForEach(f =>
             {
                 linePoints[f.Edge].ForEach(p =>
                 {
                     f.LightNodes.Add(new ThLightNode() { Position = p });
                 });
             });
-            secondLightEdges.ForEach(f =>
+            SecondLightEdges.ForEach(f =>
             {
                 linePoints[f.Edge].ForEach(p =>
                 {
                     f.LightNodes.Add(new ThLightNode() { Position = p });
                 });
             });
-            return Tuple.Create(firstLightEdges, secondLightEdges);
+        }
+
+        private List<Line> GetEdges(List<ThLightEdge> edges)
+        {
+            return edges.Select(o => o.Edge).ToList();
         }
 
         private List<Point3d> LayoutPoints()
@@ -86,7 +85,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
                 layoutPointService.Interval = ArrangeParameter.Interval;
                 layoutPointService.LampLength = ArrangeParameter.LampLength;
                 layoutPointService.DoubleRowOffsetDis = ArrangeParameter.DoubleRowOffsetDis;
-                results = layoutPointService.Layout(FirstLines, SecondLines);
+                results = layoutPointService.Layout(GetEdges(FirstLightEdges), GetEdges(SecondLightEdges));
             }
             return results;
         }
@@ -108,12 +107,6 @@ namespace ThMEPLighting.Garage.Service.Arrange
             results.AddRange(firstLines);
             results.AddRange(secondLines);
             return results;
-        }
-        private List<ThLightEdge> BuildEdges(List<Line> lines, EdgePattern edgePattern)
-        {
-            var edges = new List<ThLightEdge>();
-            lines.ForEach(o => edges.Add(new ThLightEdge(o) { EdgePattern = edgePattern }));
-            return edges;
         }
     }
 }
