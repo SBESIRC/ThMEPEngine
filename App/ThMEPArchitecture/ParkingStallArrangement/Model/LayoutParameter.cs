@@ -62,7 +62,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         {
                             foreach (var pline in cuttersInBuilding)
                             {
-                                //currentDb.CurrentSpace.Add(pline);
+                                currentDb.CurrentSpace.Add(pline);
                             }
                         }
 #endif

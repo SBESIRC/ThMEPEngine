@@ -62,6 +62,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             var intersectPtCnt = ptDic.Count;//交叉点数目
             var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
             foreach (var num in ptDic.Keys)
+
             {
                 var random = new Random();
                 var flag = random.NextDouble() < 0.5;

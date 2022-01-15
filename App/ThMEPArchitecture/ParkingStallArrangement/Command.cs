@@ -252,7 +252,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 //rst = geneAlgorithm.Run(histories, recordprevious);
                 rst = geneAlgorithm.Run2(histories, recordprevious);
             }
-            catch
+            catch(Exception ex)
             {
                 ;
             }
