@@ -71,7 +71,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             sw.WriteLine(w);
             sw.WriteLine(l);
             sw.Close();
+            sw.Dispose();
             fs1.Close();
+            fs1.Dispose();
 #endif
             inilanes = inilanes.Distinct().ToList();
             partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes, vm);

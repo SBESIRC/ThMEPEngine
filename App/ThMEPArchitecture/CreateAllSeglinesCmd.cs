@@ -18,7 +18,7 @@ namespace ThMEPArchitecture
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
-        public CreateAllSeglinesCmd()//自动生成全部分割线
+        public CreateAllSeglinesCmd()
         {
             CommandName = "-THDXFGXSC";//天华地下分割线生成
             ActionName = "生成";
@@ -48,7 +48,7 @@ namespace ThMEPArchitecture
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
-        public void Run(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase, bool randomFlag = true)//false 自动生成全部分割线, ture 生成随机分割线
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
             if (!rstDataExtract)
@@ -56,7 +56,19 @@ namespace ThMEPArchitecture
                 return;
             }
             //TODO
-            var seglines = Dfs.GetRandomSeglines(outerBrder);//生成随机的分割线方案
+            if(randomFlag)
+            {
+                var seglines = Dfs.GetRandomSeglines(outerBrder);//生成随机的分割线方案
+
+            }
+            else
+            {
+                var seglinesList = Dfs.GetDichotomySegline(outerBrder);//生成全部的分割线方案
+                foreach(var seglines in seglinesList)
+                {
+                    
+                }
+            }
         }
     }
 }
