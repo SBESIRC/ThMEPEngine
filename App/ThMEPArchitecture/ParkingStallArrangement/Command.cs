@@ -173,7 +173,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     try
                     {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                        if(!adb.Layers.Contains(layerNames))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
                     }
                     catch { }
                 }

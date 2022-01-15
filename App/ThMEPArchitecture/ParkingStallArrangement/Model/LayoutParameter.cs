@@ -506,6 +506,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
 
+            //获取分割线切割后的墙线
             var plines = new List<List<Point2d>>();
             var visited = new HashSet<Point3dEx>();
             while (termPts.Count() > 0)
@@ -516,7 +517,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 Dfs(spt, ref termPts, ref pts, ref visited, ptDic);
                 plines.Add(pts);
             }
-
             areaWalls = new List<Polyline>();
             foreach (var pts in plines)
             {
@@ -525,10 +525,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 pts.Clear();
                 areaWalls.Add(pline);
             }
+
             plines.Clear();
             visited.Clear();
             return segLines;
         }
+        /// <summary>
+        /// 基于深度优先搜索切割后的多段线
+        /// </summary>
+        /// <param name="cur"></param>
+        /// <param name="termPts"></param>
+        /// <param name="pts"></param>
+        /// <param name="visited"></param>
+        /// <param name="ptDic"></param>
         private void Dfs(Point3dEx cur, ref List<Point3dEx> termPts, ref List<Point2d> pts, ref HashSet<Point3dEx> visited, Dictionary<Point3dEx, List<Point3dEx>> ptDic)
         {
             if(termPts.Contains(cur))
@@ -539,7 +548,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 return;
             }
             pts.Add(new Point2d(cur.X, cur.Y));
-            visited.Add(cur);
+            if(!visited.Contains(cur)) visited.Add(cur);
             var neighbor = ptDic[cur];
             if(neighbor != null)
             {

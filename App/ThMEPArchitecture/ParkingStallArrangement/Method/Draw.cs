@@ -14,10 +14,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
     public static class Draw
     {
-        public static void DrawSeg(Chromosome chromosome, string layer = "0")
+        public static void DrawSeg(Chromosome chromosome, string layerNames = "最终分割线")
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                if (!acadDatabase.Layers.Contains(layerNames))
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 30);
+                }
                 for (int i = 0; i < chromosome.Genome.Count; i++)
                 {
 
@@ -35,11 +39,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         var ept = new Point3d(gene.EndValue, gene.Value, 0);
                         line = new Line(spt, ept);
                     }
-                    line.LayerId = DbHelper.GetLayerId(layer);
+                    line.LayerId = DbHelper.GetLayerId(layerNames);
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
-                
         }
 
         public static void DrawSeg(List<Line> lines, int index, string layer = "0")
