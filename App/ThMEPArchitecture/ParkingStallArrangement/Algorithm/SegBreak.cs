@@ -28,7 +28,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         public List<Line> OtherLines;//其余所有线 （纵向打断则为横线，横向打断则为纵线）,要迭代之后的
         public List<double> MinValues;//打断线的最大值
         public List<double> MaxValues;//最小值
-        public int LineCount;
+        public int BrLineCount;// 打断线的数量
         double BufferSize;// 寻找最大，最小值时候的范围,默认无限大，不然有逻辑问题
         private double MaxBufferSize;
         bool VerticalDirection;
@@ -244,7 +244,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 ;//与上面对称
             }
 
-            LineCount = BreakedLines.Count;
+            BrLineCount = BreakedLines.Count;
             ;
         }
 

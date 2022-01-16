@@ -59,6 +59,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
                     RunWithWindmillSeglineSupported(currentDb);
+                    //Run(currentDb);
                 }
             }
             catch (Exception ex)
@@ -167,7 +168,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var solution = rst.First();
             histories.Add(rst.First());
 
+            // test segbreak
             var segbkparam = new SegBreakParam(solution.Genome, outerBrder, true, true);
+            ParkingStallArrangementViewModel parameterViewModel2 = new ParkingStallArrangementViewModel();
+            parameterViewModel2.IterationCount = 2;
+            parameterViewModel2.PopulationCount = 3;
+            geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel2, segbkparam, outerBrder);
+            rst = new List<Chromosome>();
+            histories = new List<Chromosome>();
+            recordprevious = false;
+            try
+            {
+                //rst = geneAlgorithm.Run(histories, recordprevious);
+                rst = geneAlgorithm.Run2(histories, recordprevious);
+            }
+            catch
+            {
+                ;
+            }
+            solution = rst.First();
+            histories.Add(rst.First());
+            // test segbreak end
+
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
@@ -262,6 +284,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             var solution = rst.First();
             histories.Add(rst.First());
+
+            //// test segbreak
+            //var segbkparam = new SegBreakParam(solution.Genome, outerBrder, true, true);
+            //ParkingStallArrangementViewModel parameterViewModel2 = new ParkingStallArrangementViewModel();
+            //parameterViewModel2.IterationCount = 2;
+            //parameterViewModel2.PopulationCount = 3;
+            //geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel2, segbkparam, outerBrder);
+            //rst = new List<Chromosome>();
+            //histories = new List<Chromosome>();
+            //recordprevious = false;
+            //try
+            //{
+            //    //rst = geneAlgorithm.Run(histories, recordprevious);
+            //    rst = geneAlgorithm.Run2(histories, recordprevious);
+            //}
+            //catch
+            //{
+            //    ;
+            //}
+            //solution = rst.First();
+            //histories.Add(rst.First());
+            //// test segbreak end
+
             var parkingStallCount = solution.ParkingStallCount;
             ParkingSpace.GetSingleParkingSpace(Logger,  layoutPara, parkingStallCount);
 
