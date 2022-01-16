@@ -44,14 +44,16 @@ namespace ThMEPEngineCore.Service
             }
             return patterns[0] == "ROOM";
         }
+
         private static bool IsModelSpaceRoomLayer(string name)
         {
-            string[] patterns = name.ToUpper().Split('-').ToArray();
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).
+                ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 2)
             {
                 return false;
             }
-            return patterns[0] == "AI" && patterns[1] == "房间框线";
+            return patterns[1] == "AI" && patterns[0] == "房间框线";
         }
     }
 }
