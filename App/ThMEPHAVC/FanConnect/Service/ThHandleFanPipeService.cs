@@ -70,7 +70,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             foreach (var fcu in AllFan)
             {
-                ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanObb);
+                ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
             }
             FindBadNode(treeModel.RootNode);
             foreach (var l in AllLine)

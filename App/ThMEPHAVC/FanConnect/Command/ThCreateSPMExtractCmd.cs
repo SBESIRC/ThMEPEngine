@@ -92,8 +92,22 @@ namespace ThMEPHVAC.FanConnect.Command
                     //
                     foreach (var fcu in fcus)
                     {
-                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanObb);
+                        ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
                     }
+                    if(ConfigInfo.WaterSystemConfigInfo.IsCodeAndHotPipe)
+                    {
+                        double fanWidth = 600;
+                        //if(ConfigInfo.WaterSystemConfigInfo.PipeSystemType == 1)
+                        //{
+                        //    fanWidth = 1200.0;
+                        //}
+                        foreach (var fcu in fcus)
+                        {
+                            if(fcu.IsConnected)
+                                ThFanConnectUtils.UpdateFan(fcu, fanWidth);
+                        }
+                    }
+
                     //扩展管路
                     ThWaterPipeExtendService pipeExtendServiece = new ThWaterPipeExtendService();
                     pipeExtendServiece.ConfigInfo = ConfigInfo;

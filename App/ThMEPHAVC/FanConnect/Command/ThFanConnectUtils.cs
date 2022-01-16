@@ -451,46 +451,108 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             return false;
         }
-        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, Polyline obb)
+        public static void UpdateFan(ThFanCUModel fan,double width)
+        {
+            if(fan.FanType != "AI-水管断线")
+            {
+                return;
+            }
+            using (var database = AcadDatabase.Active())
+            {
+                fan.FanData.UpgradeOpen();
+                fan.FanData.ObjectId.SetDynBlockValue("断线宽度", width);//获得动态块的所有动态属性
+                fan.FanData.DowngradeOpen();
+            }
+        }
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node, ThFanCUModel fan)
         {
             foreach (var item in node.Children)
             {
-                FindFcuNode(item, obb);
+                FindFcuNode(item, fan);
             }
-            if(node.Children.Count != 0)
+            if(node.Children.Count == 0)
             {
-                return;
-            }
-            var box = ThDrawTool.CreateSquare(node.Item.PLine.EndPoint, 400.0);
-            if (IsIntersect(box,obb))
-            {
-                node.Item.PipeWidth = 100.0;
-                node.Item.PipeLevel = PIPELEVEL.LEVEL4;
-                if(node.Parent != null)
+                var closetPt = fan.FanObb.GetClosestPointTo(node.Item.PLine.EndPoint, false);
+                if (closetPt.DistanceTo(node.Item.PLine.EndPoint) < 400.0)
                 {
-                    if(node.Parent.Children.Count == 1)
+                    fan.IsConnected = true;
+                    node.Item.PipeWidth = 100.0;
+                    if (fan.FanType == "AI-水管断线")
                     {
-                        FindFcuNode(node.Parent);
+                        node.Item.PipeWidth = 300.0;
+                    }
+                    node.Item.PipeLevel = PIPELEVEL.LEVEL4;
+                    if (node.Parent != null)
+                    {
+                        if (node.Parent.Children.Count == 1)
+                        {
+                            FindFcuNode(node.Parent, node.Item.PipeWidth);
+                        }
                     }
                 }
-                return;
             }
+            else
+            {
+                if(node.Children.Count > 1)
+                {
+                    for(int i = 0; i < node.Children.Count;i++)
+                    {
+                        for(int j = i + 1;j < node.Children.Count;j++)
+                        {
+                            if(IsCollinear(node.Children[i].Item.PLine, node.Children[j].Item.PLine))
+                            {
+                                if(node.Children[i].Item.PipeWidth >= node.Children[j].Item.PipeWidth)
+                                {
+                                    node.Children[j].Item.PipeWidth = node.Children[i].Item.PipeWidth;
+                                }
+                                else
+                                {
+                                    node.Children[i].Item.PipeWidth = node.Children[j].Item.PipeWidth;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return;
         }
-        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node)
+        public static void FindFcuNode(ThFanTreeNode<ThFanPipeModel> node,double width)
         {
-            node.Item.PipeWidth = 100.0;
+            node.Item.PipeWidth = width;
             node.Item.PipeLevel = PIPELEVEL.LEVEL3;
             if (node.Parent != null)
             {
                 if (node.Parent.Children.Count == 1)
                 {
-                    FindFcuNode(node.Parent);
+                    FindFcuNode(node.Parent, width);
                 }
             }
         }
+        public static bool IsCollinear(Line firstLine,Line secondLine)
+        {
+            var centerPt = firstLine.GetCenter();
+            var mt = Matrix3d.Displacement(centerPt.GetVectorTo(Point3d.Origin));
+            firstLine.TransformBy(mt);
+            secondLine.TransformBy(mt);
+            var firstLine2d = new Line2d(firstLine.StartPoint.ToPoint2d(), firstLine.EndPoint.ToPoint2d());
+            var secondLine2d = new Line2d(secondLine.StartPoint.ToPoint2d(), secondLine.EndPoint.ToPoint2d());
+//            bool isIntersect = firstLine.IsCollinear(secondLine);
+            bool isIntersect = firstLine2d.IsColinearTo(secondLine2d);
+            firstLine.TransformBy(mt.Inverse());
+            secondLine.TransformBy(mt.Inverse());
+            return isIntersect;
+        }
         public static bool IsIntersects( Entity firstEnt, Entity secondEnt)
         {
-            return IntersectWithEx(firstEnt,secondEnt).Count > 0 ? true : false;
+            var centerPt = firstEnt.GetCenter();
+            var mt = Matrix3d.Displacement(centerPt.GetVectorTo(Point3d.Origin));
+            firstEnt.TransformBy(mt);
+            secondEnt.TransformBy(mt);
+            bool isIntersect = IntersectWithEx(firstEnt,secondEnt).Count > 0 ? true : false;
+            firstEnt.TransformBy(mt.Inverse());
+            secondEnt.TransformBy(mt.Inverse());
+            return isIntersect;
         }
         public static Point3dCollection IntersectWithEx(Entity firstEntity, Entity secondEntity, Intersect intersectType = Intersect.OnBothOperands)
         {
@@ -532,7 +594,7 @@ namespace ThMEPHVAC.FanConnect.Command
             }
             blk.TransformBy(mt.Inverse());
             blk.DowngradeOpen();
-
+            tmpFan.FanData = blk;
             var attrib = blk.ObjectId.GetAttributesInBlockReference();
             if (attrib.ContainsKey("制冷量/制热量"))
             {
@@ -581,19 +643,43 @@ namespace ThMEPHVAC.FanConnect.Command
             {
                 if (blockDb.Blocks.Contains("AI-水管多排标注(4排)"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(4排)"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(4排)"),true);
                 }
                 if (blockDb.Blocks.Contains("AI-水管多排标注(2排)"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(2排)"));
-                }
-                if (blockDb.Blocks.Contains("AI-分歧管"))
-                {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-分歧管"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管多排标注(2排)"), true);
                 }
                 if (blockDb.Blocks.Contains("AI-水阀"))
                 {
-                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水阀"));
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水阀"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-分歧管"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-分歧管"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-FCU(两管制)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-FCU(两管制)"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-FCU(四管制)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-FCU(四管制)"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-吊顶式空调箱"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-吊顶式空调箱"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-水管断线"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-水管断线"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-中静压VRF室内机(风管机)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-中静压VRF室内机(风管机)"), true);
+                }
+                if (blockDb.Blocks.Contains("AI-VRF室内机(四面出风型)"))
+                {
+                    acadDb.Blocks.Import(blockDb.Blocks.ElementOrDefault("AI-VRF室内机(四面出风型)"), true);
                 }
                 if (blockDb.Layers.Contains("H-PIPE-DIMS"))
                 {
@@ -669,16 +755,6 @@ namespace ThMEPHVAC.FanConnect.Command
         {
             return new Vector3d(pe.X - ps.X, pe.Y - ps.Y, pe.Z - ps.Z);
         }
-        public static bool IsIntersect(Polyline pl1,Polyline pl2)
-        {
-            var centerPt = pl1.GetCenter();
-            var mt = Matrix3d.Displacement(centerPt.GetVectorTo(Point3d.Origin));
-            pl1.TransformBy(mt);
-            pl2.TransformBy(mt);
-            bool isIntersect = pl1.IsIntersects(pl2);
-            pl1.TransformBy(mt.Inverse());
-            pl2.TransformBy(mt.Inverse());
-            return isIntersect;
-        }
+
     }
 }

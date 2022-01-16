@@ -312,8 +312,8 @@ namespace ThMEPHVAC.FanConnect.Model
             {
                 foreach (var f in fans)
                 {
-                    var box = ThDrawTool.CreateSquare(node.Item.CntPoint, 400.0);
-                    if (ThFanConnectUtils.IsIntersect(box,f.FanObb))
+                    var closetPt = f.FanObb.GetClosestPointTo(node.Item.CntPoint,false); 
+                    if (closetPt.DistanceTo(node.Item.CntPoint) < 400.0)
                     {
                         node.Item.CoolCapa = f.CoolCapa;
                         node.Item.CoolFlow = f.CoolFlow;
