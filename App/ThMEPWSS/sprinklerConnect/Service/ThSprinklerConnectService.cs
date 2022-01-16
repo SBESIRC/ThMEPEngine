@@ -53,7 +53,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             Vector3d mainDirction;
             if (LaneLine.Count > 0)
             {
-                mainDirction = graphPts.GetConvexHull().MainDirction(SprinklerParameter.SubMainPipe, LaneLine, 2 * DTTol);
+                mainDirction = graphPts.GetConvexHull().MainDirction(SprinklerParameter.SubMainPipe, LaneLine, 2 * DTTol, net.Angle);
                 if (!isVertical)
                 {
                     mainDirction = mainDirction.GetVerticalDirction();
@@ -61,7 +61,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
             else
             {
-                mainDirction = graphPts.GetConvexHull().MainDirction(SprinklerParameter.SubMainPipe, LaneLine, 10.0);
+                mainDirction = graphPts.GetConvexHull().MainDirction(SprinklerParameter.SubMainPipe, LaneLine, 10.0, net.Angle);
             }
 
             for (int time = 0; time < 2; time++)
@@ -377,8 +377,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         }
                     }
 
-                    if (sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.05
-                        || sprinklerSearchedClone.Count > sprinklerSearched.Count + pipeScattersTemp.Count && !closeToStall)
+                    if ((sprinklerSearchedClone.Count > (sprinklerSearched.Count + pipeScattersTemp.Count) * 1.05
+                        && sprinklerSearchedClone.Count - sprinklerSearched.Count - pipeScattersTemp.Count > 2)
+                        || sprinklerSearchedClone.Count > sprinklerSearched.Count + pipeScattersTemp.Count && 
+                            (!closeToStall || sprinklerSearched.Count + pipeScattersTemp.Count == 0))
                     {
                         sprinklerSearched = sprinklerSearchedClone;
                         connectionTemp = connectionTempClone;
@@ -389,9 +391,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
 
                 // 再次检索
-                if (secChecked
-                    && (sprinklerSearched.Count + pipeScattersTemp.Count) / (realPts.Count * 1.0) < 0.95
-                    || realPts.Count - sprinklerSearched.Count - pipeScattersTemp.Count > 3)
+                if (secChecked)
                 {
                     var connectionTempClone = connectionTemp.Select(row => row.Clone() as ThSprinklerRowConnect).ToList();
                     var overCountClone = false;
@@ -510,7 +510,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         }
                     }
 
-                    if (sprinklerSearchedClone.Count >= sprinklerSearched.Count)
+                    if (sprinklerSearchedClone.Count > 0 
+                        && sprinklerSearchedClone.Count - sprinklerSearched.Count >= -3
+                        || sprinklerSearchedClone.Count * 1.05 > sprinklerSearched.Count)
                     {
                         sprinklerSearched = sprinklerSearchedClone;
                         connectionTemp = connectionTempClone;
@@ -534,34 +536,51 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 }
             }
 
-            var firstRowCount = 0;
-            if (LaneLine.Count > 0)
-            {
-                connection[0].Item1.ForEach(item =>
-                {
-                    if (item.OrderDict.ContainsKey(-1))
-                    {
-                        firstRowCount++;
-                    }
-                });
-            }
-            var secondRowCount = 0;
-            if (LaneLine.Count > 0)
-            {
-                connection[1].Item1.ForEach(item =>
-                {
-                    if (item.OrderDict.ContainsKey(-1))
-                    {
-                        secondRowCount++;
-                    }
-                });
-            }
 
-            if (connection[0].Item1.Count == 0)
+            // 比较两次已检索点的数量，多的优先；当已检索点个数相同时，再比较生成支管数量，少的优先
+            if (LaneLine.Count == 0)
             {
+                if (connection[0].Item1.Count == 0)
+                {
+                    if (connection[1].Item1.Count == 0)
+                    {
+                        return new List<ThSprinklerRowConnect>();
+                    }
+                    else
+                    {
+                        SprinklerSearched.AddRange(connection[1].Item2);
+                        pipeScatters.AddRange(connection[1].Item3);
+                        return connection[1].Item1;
+                    }
+                }
                 if (connection[1].Item1.Count == 0)
                 {
-                    return new List<ThSprinklerRowConnect>();
+                    if (connection[0].Item1.Count == 0)
+                    {
+                        return new List<ThSprinklerRowConnect>();
+                    }
+                    else
+                    {
+                        SprinklerSearched.AddRange(connection[0].Item2);
+                        pipeScatters.AddRange(connection[0].Item3);
+                        return connection[0].Item1;
+                    }
+                }
+
+                var firstRowCountList = connection[0].Item1.Select(row => row.Count).ToList();
+                var firstAvg = firstRowCountList.Average();
+                var fitstVar = firstRowCountList.Sum(x => Math.Pow(x - firstAvg, 2)) / firstRowCountList.Count();
+
+                var secondRowCountList = connection[1].Item1.Select(row => row.Count).ToList();
+                var secondAvg = secondRowCountList.Average();
+                var secondVar = secondRowCountList.Sum(x => Math.Pow(x - secondAvg, 2)) / secondRowCountList.Count();
+
+                if (connection[0].Item2.Count > connection[1].Item2.Count
+                    || (connection[0].Item2.Count == connection[1].Item2.Count && fitstVar < secondVar))
+                {
+                    SprinklerSearched.AddRange(connection[0].Item2);
+                    pipeScatters.AddRange(connection[0].Item3);
+                    return connection[0].Item1;
                 }
                 else
                 {
@@ -570,40 +589,22 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     return connection[1].Item1;
                 }
             }
-            if (connection[1].Item1.Count == 0)
+            else
             {
-                if (connection[0].Item1.Count == 0)
-                {
-                    return new List<ThSprinklerRowConnect>();
-                }
-                else
+                if (connection[0].Item2.Count > 0 
+                    && connection[0].Item2.Count - connection[1].Item2.Count >= -3
+                    || connection[0].Item2.Count * 1.1 > connection[1].Item2.Count)
                 {
                     SprinklerSearched.AddRange(connection[0].Item2);
                     pipeScatters.AddRange(connection[0].Item3);
                     return connection[0].Item1;
                 }
-            }
-
-            var firstRowCountList = connection[0].Item1.Select(row => row.Count).ToList();
-            var firstAvg = firstRowCountList.Average();
-            var fitstVar = firstRowCountList.Sum(x => Math.Pow(x - firstAvg, 2)) / firstRowCountList.Count();
-
-            var secondRowCountList = connection[1].Item1.Select(row => row.Count).ToList();
-            var secondAvg = secondRowCountList.Average();
-            var secondVar = secondRowCountList.Sum(x => Math.Pow(x - secondAvg, 2)) / secondRowCountList.Count();
-            // 比较两次已检索点的数量，多的优先；当已检索点个数相同时，再比较生成支管数量，少的优先
-            if (connection[0].Item2.Count > connection[1].Item2.Count
-                || (connection[0].Item2.Count == connection[1].Item2.Count && fitstVar < secondVar))
-            {
-                SprinklerSearched.AddRange(connection[0].Item2);
-                pipeScatters.AddRange(connection[0].Item3);
-                return connection[0].Item1;
-            }
-            else
-            {
-                SprinklerSearched.AddRange(connection[1].Item2);
-                pipeScatters.AddRange(connection[1].Item3);
-                return connection[1].Item1;
+                else
+                {
+                    SprinklerSearched.AddRange(connection[1].Item2);
+                    pipeScatters.AddRange(connection[1].Item3);
+                    return connection[1].Item1;
+                }
             }
         }
 
@@ -637,7 +638,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             {
                 var objs = rowConnection.Select(row => row.Base).ToCollection();
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var piptIndex = new ThCADCoreNTSSpatialIndex(subMainPipe.ToCollection());
+                var pipeIndex = new ThCADCoreNTSSpatialIndex(subMainPipe.ToCollection());
                 for (int i = 0; i < ptList.Count; i++)
                 {
                     if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
@@ -648,7 +649,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     if (rowConnection.Count > 0)
                     {
                         var frame = ptList[i].CreateSquare(2 * DTTol);
-                        var pipeFilter = piptIndex.SelectCrossingPolygon(frame).OfType<Line>().ToList();
+                        var pipeFilter = pipeIndex.SelectCrossingPolygon(frame).OfType<Line>().ToList();
                         var closeDistToPipe = ptList[i].CloseDistToPipe(pipeFilter);
 
                         var filter = spatialIndex.SelectCrossingPolygon(frame).OfType<Line>().ToList();
@@ -676,6 +677,13 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             // 判断线是否与管线相交
                             if (realLine.Length < 1.0 || realLine.IsIntersectsWithPipe(SprinklerParameter.AllPipe)
                                 || (extendLine.Length > 1.0 && extendLine.IsIntersectsWithPipe(SprinklerParameter.AllPipe)))
+                            {
+                                continue;
+                            }
+
+                            // 判断线是否包含喷头
+                            if (realLine.Length < 1.0 || realLine.ContainSprinkler(SprinklerParameter.SprinklerPt)
+                                || (extendLine.Length > 1.0 && extendLine.ContainSprinkler(SprinklerParameter.SprinklerPt)))
                             {
                                 continue;
                             }
@@ -958,38 +966,52 @@ namespace ThMEPWSS.SprinklerConnect.Service
         public void ConnScatterToPipe(List<ThSprinklerRowConnect> rowSeparation, List<Point3d> pipeScatters)
         {
             var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
-            var ptIndex = new ThCADCoreNTSSpatialIndex(ptList.Select(pt => new DBPoint(pt)).ToCollection());
-            var rowIndex = new ThCADCoreNTSSpatialIndex(rowSeparation.Select(row => row.Base).ToCollection());
+            var objs = new DBObjectCollection();
+            ptList.ForEach(pt => objs.Add(new DBPoint(pt)));
+            rowSeparation.ForEach(row => objs.Add(row.Base));
+            Geometry.ForEach(g => objs.Add(g));
+            var index = new ThCADCoreNTSSpatialIndex(objs);
             for (int i = 0; i < ptList.Count; i++)
             {
                 if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
                 {
                     continue;
                 }
-
-                if (ThSprinklerNetworkService.SearchClosePt(ptList[i], SprinklerParameter.SubMainPipe, 1.2 * DTTol, out var virtualPtList, true))
+                
+                if (ThSprinklerNetworkService.SearchClosePt(ptList[i], SprinklerParameter.SubMainPipe, 1.2 * DTTol, 2 * 300.0, 
+                    out var virtualPtList))
                 {
-                    foreach (var closePt in virtualPtList)
+                    foreach (var ptTuple in virtualPtList)
                     {
-                        var newLine = new Line(closePt, ptList[i]).ExtendLine(-10.0);
-                        if (newLine.Length < 10.0)
+                        var lines = new List<Line>();
+                        for(int j =1;j< ptTuple.Item2.Count;j++)
                         {
-                            continue;
+                            lines.Add(new Line(ptTuple.Item2[j - 1], ptTuple.Item2[j]).ExtendLine(-10.0));
                         }
-                        var ptFilter = ptIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
-                        var rowFilter = rowIndex.SelectCrossingPolygon(newLine.Buffer(10.0));
-                        if (ptFilter.Count == 0 && rowFilter.Count == 0 && !newLine.IsLineInWall(Geometry))
+
+                        var filterCount = 0;
+                        lines.ForEach(line =>
+                        {
+                            var filter = index.SelectCrossingPolygon(line.Buffer(10.0));
+                            filterCount += filter.Count;
+                        });
+                        if (filterCount == 0)
                         {
                             var row = new Dictionary<int, List<Point3d>>
                             {
-                                {0, new List<Point3d> { closePt } },
-                                {1, new List<Point3d>{ ptList[i]} },
+                                {0, new List<Point3d> { ptTuple.Item2[0] } },
+                                {1, new List<Point3d>{ ptTuple.Item2[1] } },
                             };
+
+                            if(ptTuple.Item2.Count == 3)
+                            {
+                                row.Add(2, new List<Point3d> { ptTuple.Item2[2] });
+                            }
 
                             var rowConn = new ThSprinklerRowConnect
                             {
-                                StartPoint = closePt,
-                                EndPoint = ptList[i],
+                                StartPoint = ptTuple.Item2[0],
+                                EndPoint = ptTuple.Item2[1],
                                 OrderDict = row
                             };
                             rowConn.Count++;
@@ -1024,7 +1046,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
             // 判断喷头是否位于小房间中
             var isSprinklerInSmallRoom = realPts[0].IsSprinklerInSmallRoom(smallRooms);
             var sprinklerTol = 0;
-            if (isSprinklerInSmallRoom.Item1 == true)
+            if (isSprinklerInSmallRoom.Item1)
             {
                 sprinklerTol = SprinklerParameter.SprinklerPt.Where(pt => isSprinklerInSmallRoom.Item2.Contains(pt)).Count();
             }
@@ -1053,7 +1075,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     var vaildNode = 0;
                     if (!net.PtsVirtual.Contains(ptNext) && !seachedPts.Contains(ptNext) && !SprinklerSearched.Contains(ptNext))
                     {
-                        vaildNode++;
+                        if (!isSprinklerInSmallRoom.Item1 || !pipeScatters.Contains(ptNext))
+                        {
+                            vaildNode++;
+                        }
                     }
 
                     while (node.Next != null)
@@ -1062,8 +1087,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         var ptNextTemp = net.Pts[graph.SprinklerVertexNodeList[node.EdgeIndex].NodeIndex];
                         if (!net.PtsVirtual.Contains(ptNextTemp) && !seachedPts.Contains(ptNextTemp) && !SprinklerSearched.Contains(ptNextTemp))
                         {
-                            vaildNode++;
-                            ptNext = ptNextTemp;
+                            if (!isSprinklerInSmallRoom.Item1 || !pipeScatters.Contains(ptNextTemp))
+                            {
+                                vaildNode++;
+                                ptNext = ptNextTemp;
+                            }
                         }
                     }
 
@@ -1099,8 +1127,6 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     {
                         continue;
                     }
-
-
 
                     var center = new Point3d((realPts[i].X + ptNext.X) / 2, (realPts[i].Y + ptNext.Y) / 2, 0);
                     var filter = spatialIndex.SelectCrossingPolygon(center.CreateSquare(3 * DTTol));
@@ -1145,6 +1171,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     pipeScattersTemp.ForEach(pt => pipeScatters.RemoveAll(o => o == pt));
                                     if (isSprinklerInSmallRoom.Item1)
                                     {
+                                        obstacle.Add(isSprinklerInSmallRoom.Item2);
                                         smallRooms.Remove(isSprinklerInSmallRoom.Item2);
                                     }
                                     break;
@@ -1173,6 +1200,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     pipeScattersTemp.ForEach(pt => pipeScatters.RemoveAll(o => o == pt));
                                     if (isSprinklerInSmallRoom.Item1)
                                     {
+                                        obstacle.Add(isSprinklerInSmallRoom.Item2);
                                         smallRooms.Remove(isSprinklerInSmallRoom.Item2);
                                     }
                                     break;
@@ -1198,10 +1226,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     && edge.ConnectToRow(isSprinklerInSmallRoom.Item1, closeLines[count], Geometry, obstacle,
                                         SprinklerParameter.AllPipe, rowConnection, ptList, SprinklerSearched, sprinklerTol))
                                 {
-                                    pipeScattersTemp.ForEach(pt => rowConnection.RemoveAll(row => row.Base.EndPoint == pt));
+                                    pipeScattersTemp.ForEach(pt => rowConnection.RemoveAll(row => row.Base.EndPoint == pt && row.Count == 1));
                                     pipeScattersTemp.ForEach(pt => pipeScatters.RemoveAll(o => o == pt));
                                     if (isSprinklerInSmallRoom.Item1)
                                     {
+                                        obstacle.Add(isSprinklerInSmallRoom.Item2);
                                         smallRooms.Remove(isSprinklerInSmallRoom.Item2);
                                     }
                                     break;
@@ -1216,6 +1245,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     pipeScattersTemp.ForEach(pt => pipeScatters.RemoveAll(o => o == pt));
                                     if (isSprinklerInSmallRoom.Item1)
                                     {
+                                        obstacle.Add(isSprinklerInSmallRoom.Item2);
                                         smallRooms.Remove(isSprinklerInSmallRoom.Item2);
                                     }
                                     break;
@@ -1773,168 +1803,90 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 && Math.Abs(line.LineDirection().DotProduct(scrLine.LineDirection())) > 0.998)
                             {
                                 var goingOn = true;
-                                var closePtTemp = line.GetClosestPointTo(closePt, false);
-                                var extendLine = new Line(closePt, closePtTemp);
+                                var needReomve = false;
+                                var lines = new List<Line>();
 
-                                // 两线平行且中心连线
-                                if (extendLine.Length < connTolerance)
+                                for (int exp = 1; exp < 3 && goingOn; exp++)
                                 {
-                                    var scrCenter = scrLine.GetCenter();
-                                    var lineCenter = line.GetClosestPointTo(scrCenter, false);
-                                    var crossLine = new Line(scrCenter, lineCenter);
-                                    if (!row.IsSmallRoom)
+                                    for (int num = 1; num < Math.Pow(2, exp) && goingOn; num++)
                                     {
-                                        var filter = wallIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                        if (filter.Count == 0)
-                                        {
-                                            goingOn = false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var filter = obstacleIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                        if (filter.Count == 0)
-                                        {
-                                            goingOn = false;
-                                        }
-                                    }
+                                        lines = new List<Line>();
+                                        needReomve = false;
+                                        var lineCenter = line.StartPoint + num / Math.Pow(2, exp) * line.Length * line.LineDirection();                                        var mapOnScrLineEx = scrLine.GetClosestPointTo(lineCenter, true);
+                                        var mapOnScrLine = scrLine.GetClosestPointTo(mapOnScrLineEx, false);
+                                        var extendLine = new Line(mapOnScrLine, mapOnScrLineEx);
+                                        var crossLine = new Line(mapOnScrLineEx, lineCenter);
+                                        var checkLines = new List<Line>();
 
-                                    if (!goingOn)
-                                    {
-                                        if (lineCenter.DistanceTo(row.OrderDict[-2][j - 1]) > connTolerance
-                                            && lineCenter.DistanceTo(row.OrderDict[-2][j]) > connTolerance)
+                                        if (extendLine.Length < connTolerance)
                                         {
-                                            row.ConnectLines.Add(crossLine);
-                                            row.ConnectLines.Add(new Line(lineCenter, row.OrderDict[-2][j - 1]));
-                                            row.ConnectLines.Add(new Line(lineCenter, row.OrderDict[-2][j]));
+                                            // 最近点位于原线的中间位置
+                                            if (mapOnScrLineEx.DistanceTo(scrLine.StartPoint) > connTolerance
+                                               && mapOnScrLineEx.DistanceTo(scrLine.EndPoint) > connTolerance)
+                                            {
+                                                checkLines.Add(crossLine);
+
+                                                needReomve = true;
+                                                lines.Add(new Line(scrLine.StartPoint, mapOnScrLineEx));
+                                                lines.Add(new Line(mapOnScrLineEx, scrLine.EndPoint));
+                                                lines.Add(crossLine);
+                                                lines.Add(new Line(lineCenter, line.StartPoint));
+                                                lines.Add(new Line(lineCenter, line.EndPoint));
+                                            }
                                         }
+                                        // 在延伸线上
                                         else
                                         {
-                                            goingOn = true;
-                                        }
-                                    }
-                                    if (goingOn)
-                                    {
-                                        var ptOnScrLine = new Point3d();
-                                        for (int exp = 1; exp < 3 && goingOn; exp++)
-                                        {
-                                            for (int num = 1; num < Math.Pow(2, exp) && goingOn; num++)
+                                            checkLines.Add(extendLine);
+                                            checkLines.Add(crossLine);
+
+                                            if (scrLine.StartPoint.DistanceTo(mapOnScrLineEx) > scrLine.EndPoint.DistanceTo(mapOnScrLineEx))
                                             {
-                                                closePtTemp = row.OrderDict[-2][j - 1] + num / Math.Pow(2, exp) * line.Length * line.LineDirection();
-                                                ptOnScrLine = scrLine.GetClosestPointTo(closePtTemp, false);
-                                                crossLine = new Line(closePtTemp, ptOnScrLine);
+                                                lines.Add(new Line(scrLine.EndPoint, mapOnScrLineEx));
+                                            }
+                                            else
+                                            {
+                                                lines.Add(new Line(scrLine.StartPoint, mapOnScrLineEx));
+                                            }
+                                            lines.Add(crossLine);
+                                            lines.Add(new Line(lineCenter, line.StartPoint));
+                                            lines.Add(new Line(lineCenter, line.EndPoint));
+                                        }
+
+                                        checkLines.RemoveAll(l => l.Length < 10.0);
+                                        if (checkLines.Count > 0)
+                                        {
+                                            goingOn = false;
+                                            checkLines.ForEach(l =>
+                                            {
                                                 if (!row.IsSmallRoom)
                                                 {
-                                                    var filter = wallIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                                    if (filter.Count == 0)
+                                                    var filter = wallIndex.SelectCrossingPolygon(l.Buffer(1.0));
+                                                    if (filter.Count > 0)
                                                     {
-                                                        goingOn = false;
+                                                        goingOn = true;
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    var filter = obstacleIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                                    if (filter.Count == 0)
+                                                    var filter = obstacleIndex.SelectCrossingPolygon(l.Buffer(1.0));
+                                                    if (filter.Count > 1)
                                                     {
-                                                        goingOn = false;
+                                                        goingOn = true;
                                                     }
                                                 }
-                                            }
+                                            });
                                         }
-                                        row.ConnectLines.RemoveAll(l => l.StartPoint == ptsTemp[ptsTemp.Count - 2].Item1 && l.EndPoint == ptsTemp[ptsTemp.Count - 1].Item1);
-                                        row.ConnectLines.Add(new Line(ptsTemp[ptsTemp.Count - 2].Item1, ptOnScrLine));
-                                        row.ConnectLines.Add(new Line(ptOnScrLine, ptsTemp[ptsTemp.Count - 1].Item1));
-                                        row.ConnectLines.Add(new Line(ptOnScrLine, closePtTemp));
-                                        row.ConnectLines.Add(new Line(closePtTemp, row.OrderDict[-2][j - 1]));
-                                        row.ConnectLines.Add(new Line(closePtTemp, row.OrderDict[-2][j]));
                                     }
                                 }
-                                else
+
+                                if(!goingOn)
                                 {
-                                    var centerPoint = line.GetCenterPoint();
-                                    var ptOnScrLine = scrLine.GetClosestPointTo(centerPoint, true);
-                                    var lineList = new List<Line>();
-                                    extendLine = new Line(scrLine.EndPoint, ptOnScrLine);
-                                    var crossLine = new Line(ptOnScrLine, centerPoint);
-                                    lineList.Add(extendLine);
-                                    lineList.Add(crossLine);
-                                    lineList.RemoveAll(line => line.Length == 0);
-
-                                    if (!row.IsSmallRoom)
+                                    if(needReomve)
                                     {
-                                        for (int countTemp = 0; countTemp < lineList.Count; countTemp++)
-                                        {
-                                            var filter = wallIndex.SelectCrossingPolygon(lineList[countTemp].Buffer(1.0));
-                                            if (filter.Count == 0)
-                                            {
-                                                goingOn = false;
-                                            }
-                                            else
-                                            {
-                                                goingOn = true;
-                                                break;
-                                            }
-                                        }
+                                        row.ConnectLines.RemoveAll(l => l.StartPoint == ptsTemp[ptsTemp.Count - 2].Item1 && l.EndPoint == ptsTemp[ptsTemp.Count - 1].Item1);
                                     }
-                                    else
-                                    {
-                                        for (int countTemp = 0; countTemp < lineList.Count; countTemp++)
-                                        {
-                                            var filter = obstacleIndex.SelectCrossingPolygon(lineList[countTemp].Buffer(1.0));
-                                            if (filter.Count == 0)
-                                            {
-                                                goingOn = false;
-                                            }
-                                            else
-                                            {
-                                                goingOn = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if (!goingOn)
-                                    {
-                                        row.ConnectLines.Add(extendLine);
-                                        row.ConnectLines.Add(crossLine);
-                                        row.ConnectLines.Add(new Line(centerPoint, row.OrderDict[-2][j - 1]));
-                                        row.ConnectLines.Add(new Line(centerPoint, row.OrderDict[-2][j]));
-                                    }
-                                    if (goingOn)
-                                    {
-                                        ptOnScrLine = new Point3d();
-                                        var scrPtTemp = ptsTemp[ptsTemp.Count - 1].Item1 + scrLine.LineDirection() * connTolerance;
-                                        for (int exp = 1; exp < 3 && goingOn; exp++)
-                                        {
-                                            for (int num = 1; num < Math.Pow(2, exp) && goingOn; num++)
-                                            {
-                                                closePtTemp = row.OrderDict[-2][j - 1] + num / Math.Pow(2, exp) * line.Length * line.LineDirection();
-                                                ptOnScrLine = closePtTemp + (scrPtTemp - closePt);
-                                                crossLine = new Line(closePtTemp, ptOnScrLine);
-                                                if (!row.IsSmallRoom)
-                                                {
-                                                    var filter = wallIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                                    if (filter.Count == 0)
-                                                    {
-                                                        goingOn = false;
-                                                    }
-                                                }
-                                                else
-                                                {
-                                                    var filter = obstacleIndex.SelectCrossingPolygon(crossLine.Buffer(1.0));
-                                                    if (filter.Count == 0)
-                                                    {
-                                                        goingOn = false;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        row.ConnectLines.Add(new Line(ptsTemp[ptsTemp.Count - 1].Item1, scrPtTemp));
-                                        row.ConnectLines.Add(new Line(scrPtTemp, ptOnScrLine));
-                                        row.ConnectLines.Add(new Line(ptOnScrLine, closePtTemp));
-                                        row.ConnectLines.Add(new Line(closePtTemp, row.OrderDict[-2][j - 1]));
-                                        row.ConnectLines.Add(new Line(closePtTemp, row.OrderDict[-2][j]));
-                                    }
+                                    row.ConnectLines.AddRange(lines);
                                 }
                             }
                             else
@@ -2140,7 +2092,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
             });
         }
 
-        public void HandleSingleScatter(List<ThSprinklerRowConnect> rowConnection, List<Point3d> pipeScatters, double connTolerance)
+        public void HandleSingleScatter(List<ThSprinklerRowConnect> rowConnection, List<Point3d> pipeScatters,
+            List<Polyline> smallRooms, List<Polyline> obstacle, double connTolerance)
         {
             var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
             var continueConn = true;
@@ -2157,9 +2110,11 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         continue;
                     }
 
+                    var ptTuple = ptList[i].IsSprinklerInSmallRoom(smallRooms);
                     if (rowConnection.Count > 0)
                     {
-                        var filter = spatialIndex.SelectCrossingPolygon(ptList[i].CreateSquare(coefficient * DTTol)).OfType<Line>().ToList();
+                        var ptSquare = ptList[i].CreateSquare(coefficient * DTTol);
+                        var filter = spatialIndex.SelectCrossingPolygon(ptSquare).OfType<Line>().ToList();
                         if (filter.Count == 0)
                         {
                             continue;
@@ -2170,13 +2125,24 @@ namespace ThMEPWSS.SprinklerConnect.Service
 
                         var filterRow = rowConnection
                             .Where(row => startPoints.Contains(row.StartPoint) && endPoints.Contains(row.EndPoint)).ToList();
-                        var obstacle = new DBObjectCollection();
-                        var wallObstacle = new DBObjectCollection();
-                        filterRow.ForEach(row => row.ConnectLines.ForEach(line => obstacle.Add(line)));
-                        SprinklerParameter.SprinklerPt.ForEach(pt => obstacle.Add(new DBPoint(pt)));
-                        Geometry.ForEach(geometry => wallObstacle.Add(geometry));
-                        var obstacleIndex = new ThCADCoreNTSSpatialIndex(obstacle);
-                        var wallIndex = new ThCADCoreNTSSpatialIndex(wallObstacle);
+                        var obstacleObjs = new DBObjectCollection();
+                        filterRow.ForEach(row => row.ConnectLines.ForEach(line => obstacleObjs.Add(line)));
+                        SprinklerParameter.SprinklerPt.ForEach(pt => obstacleObjs.Add(new DBPoint(pt)));
+                        var sprinklerTol = 0;
+                        if (ptTuple.Item1)
+                        {
+                            obstacle.ForEach(o => obstacleObjs.Add(o));
+                            sprinklerTol = SprinklerParameter.SprinklerPt.Where(pt => ptTuple.Item2.Contains(pt)).Count();
+                            //if (sprinklerTol > 1)
+                            //{
+                            //    continue;
+                            //}
+                        }
+                        else
+                        {
+                            Geometry.ForEach(o => obstacleObjs.Add(o));
+                        }
+                        var obstacleIndex = new ThCADCoreNTSSpatialIndex(obstacleObjs);
 
                         var validRow = filterRow.Where(row => row.Count < 8).ToList();
                         var map = new List<Tuple<double, Line, int>>();
@@ -2184,6 +2150,10 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         {
                             if (validRow[rowNum].ConnectLines.Count > 0)
                             {
+                                if(!ptTuple.Item2.Contains(validRow[rowNum].EndPoint) && validRow[rowNum].Count + sprinklerTol > 8)
+                                {
+                                    continue;
+                                }
                                 var tuple = ptList[i].GetCloseDistToLines(validRow[rowNum].ConnectLines);
                                 map.Add(Tuple.Create(tuple.Item1, tuple.Item2, rowNum));
                             }
@@ -2195,6 +2165,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             var closePtTemp = map[mapNum].Item2.GetClosestPointTo(ptList[i], true);
                             var lines = new List<Line>();
                             var needRemoved = false;
+                            // 位于原线的延长线上
                             if (closePt.DistanceTo(closePtTemp) > connTolerance / 2)
                             {
                                 var extendLine = new Line(closePt, closePtTemp);
@@ -2210,10 +2181,35 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 {
                                     if (validRow[map[mapNum].Item3].OrderDict.ContainsKey(count))
                                     {
-                                        if (square.Contains(validRow[map[mapNum].Item3].OrderDict[count][0]))
+                                        for (int num = 0; num < validRow[map[mapNum].Item3].OrderDict[count].Count; num++)
                                         {
-                                            isSprinklerPt = true;
+                                            if (square.Contains(validRow[map[mapNum].Item3].OrderDict[count][num]))
+                                            {
+                                                isSprinklerPt = true;
+                                            }
                                         }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                for (int j = 2; ; j++)
+                                {
+                                    if (validRow[map[mapNum].Item3].OrderDict.ContainsKey(-j))
+                                    {
+                                        for (int num = 0; num < validRow[map[mapNum].Item3].OrderDict[-j].Count; num++)
+                                        {
+                                            if (square.Contains(validRow[map[mapNum].Item3].OrderDict[-j][num]))
+                                            {
+                                                isSprinklerPt = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
                                     }
                                 }
                                 if (isSprinklerPt)
@@ -2221,6 +2217,59 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                     needRemoved = true;
                                     closePt = map[mapNum].Item2.EndPoint - map[mapNum].Item2.LineDirection() * connTolerance;
                                     var realPtTidal = ptList[i] - map[mapNum].Item2.LineDirection() * connTolerance;
+                                    lines.Add(new Line(closePt, realPtTidal));
+                                    lines.Add(new Line(realPtTidal, ptList[i]));
+                                }
+                                else
+                                {
+                                    lines.Add(new Line(closePt, ptList[i]));
+                                }
+                            }
+                            else if (map[mapNum].Item2.StartPoint.DistanceTo(closePtTemp) < connTolerance / 2)
+                            {
+                                var square = map[mapNum].Item2.StartPoint.CreateSquare(10.0);
+                                var isSprinklerPt = false;
+                                for (int count = 1; count < 9; count++)
+                                {
+                                    if (validRow[map[mapNum].Item3].OrderDict.ContainsKey(count))
+                                    {
+                                        for (int num = 0; num < validRow[map[mapNum].Item3].OrderDict[count].Count; num++)
+                                        {
+                                            if (square.Contains(validRow[map[mapNum].Item3].OrderDict[count][num]))
+                                            {
+                                                isSprinklerPt = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                for(int j  = 2; ;j++)
+                                {
+                                    if(validRow[map[mapNum].Item3].OrderDict.ContainsKey(-j))
+                                    {
+                                        for (int num = 0; num < validRow[map[mapNum].Item3].OrderDict[-j].Count; num++)
+                                        {
+                                            if (square.Contains(validRow[map[mapNum].Item3].OrderDict[-j][num]))
+                                            {
+                                                isSprinklerPt = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                if (isSprinklerPt)
+                                {
+                                    needRemoved = true;
+                                    closePt = map[mapNum].Item2.StartPoint + map[mapNum].Item2.LineDirection() * connTolerance;
+                                    var realPtTidal = ptList[i] + map[mapNum].Item2.LineDirection() * connTolerance;
                                     lines.Add(new Line(closePt, realPtTidal));
                                     lines.Add(new Line(realPtTidal, ptList[i]));
                                 }
@@ -2241,9 +2290,9 @@ namespace ThMEPWSS.SprinklerConnect.Service
                             {
                                 var reducedFrame = lines[k].ExtendLine(-10.0).Buffer(20.0);
                                 var intersection = obstacleIndex.SelectCrossingPolygon(reducedFrame);
-                                var wallIntersection = wallIndex.SelectFence(reducedFrame);
-                                obstacleCount += (intersection.Count + wallIntersection.Count);
+                                obstacleCount += intersection.Count;
                             }
+
                             if (obstacleCount == 0)
                             {
                                 if (needRemoved)
@@ -2273,6 +2322,98 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
         }
 
+        // 处理小房间内的孤立点
+        public void ConnectSingleScatterToPipe(List<ThSprinklerRowConnect> rowConnection, List<Point3d> pipeScatters,
+            List<Polyline> smallRooms, List<Polyline> obstacle)
+        {
+            var ptList = SprinklerParameter.SprinklerPt.OrderBy(pt => pt.X).ToList();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(SprinklerParameter.SubMainPipe.ToCollection());
+            for (int i = 0; i < ptList.Count; i++)
+            {
+                if (SprinklerSearched.Contains(ptList[i]) || pipeScatters.Contains(ptList[i]))
+                {
+                    continue;
+                }
+
+                var ptTuple = ptList[i].IsSprinklerInSmallRoom(smallRooms);
+                if (!ptTuple.Item1)
+                {
+                    continue;
+                }
+
+                var sprinklerTol = 0;
+                if (ptTuple.Item1 == true)
+                {
+                    sprinklerTol = SprinklerParameter.SprinklerPt.Where(pt => ptTuple.Item2.Contains(pt)).Count();
+                }
+
+                var ptSquare = ptList[i].CreateSquare(2 * DTTol);
+                var filter = spatialIndex.SelectCrossingPolygon(ptSquare).OfType<Line>().ToList();
+                if (filter.Count == 0)
+                {
+                    continue;
+                }
+
+                var startPoints = filter.Select(line => line.StartPoint).ToList();
+                var endPoints = filter.Select(line => line.EndPoint).ToList();
+
+                var filterRow = SprinklerParameter.SubMainPipe
+                    .Where(row => startPoints.Contains(row.StartPoint) && endPoints.Contains(row.EndPoint)).ToList();
+                //SprinklerParameter.SprinklerPt.ForEach(pt => obstacle.Add(new DBPoint(pt)));
+                var obstacleIndex = new ThCADCoreNTSSpatialIndex(obstacle.ToCollection());
+
+                var map = new List<Tuple<double, Point3d, Point3d>>();
+                for (int pipeNum = 0; pipeNum < filterRow.Count; pipeNum++)
+                {
+                    var closePt = filterRow[pipeNum].GetClosestPointTo(ptList[i], false);
+                    var closePExtend = filterRow[pipeNum].GetClosestPointTo(ptList[i], true);
+                    var closeDist = ptList[i].DistanceTo(closePt);
+                    map.Add(Tuple.Create(closeDist, closePt, closePExtend));
+                }
+                map = map.OrderBy(x => x.Item1).ToList();
+
+                for (int mapNum = 0; mapNum < map.Count; mapNum++)
+                {
+                    var newLine = new Line(map[mapNum].Item3, ptList[i]);
+                    var extendLine = new Line(map[mapNum].Item2, map[mapNum].Item3);
+                    if (newLine.Length < 10.0)
+                    {
+                        continue;
+                    }
+                    var obstacleFilterCount = 0;
+                    var lineFrame = newLine.Buffer(1.0);
+                    var obstacleFilter = obstacleIndex.SelectFence(lineFrame);
+                    obstacleFilterCount += obstacleFilter.Count;
+                    if (extendLine.Length > 10.0)
+                    {
+                        var extendLineFrame = extendLine.Buffer(1.0);
+                        var extendLineFilter = obstacleIndex.SelectFence(extendLineFrame);
+                        obstacleFilterCount += extendLineFilter.Count;
+                    }
+                    if (obstacleFilterCount == 0)
+                    {
+                        var rowConn = new ThSprinklerRowConnect();
+                        rowConn.OrderDict.Add(0, new List<Point3d> { map[mapNum].Item2 });
+                        rowConn.OrderDict.Add(1, new List<Point3d> { ptList[i] });
+                        rowConn.Count = 1;
+                        rowConn.StartPoint = map[mapNum].Item2;
+                        rowConn.EndPoint = ptList[i];
+                        rowConn.IsSmallRoom = true;
+                        rowConn.ConnectLines.Add(newLine);
+                        if (extendLine.Length > 10.0)
+                        {
+                            rowConn.ConnectLines.Add(extendLine);
+                        }
+                        rowConnection.Add(rowConn);
+
+                        obstacle.Add(ptTuple.Item2);
+                        pipeScatters.Add(ptList[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
         // 处理小房间内未处理的喷头
         public void HandleSprinklerInSmallRoom(ThSprinklerNetGroup net, int graphIdx,
             List<ThSprinklerRowConnect> rowConnection, List<Polyline> smallRooms, List<Point3d> pipeScatters, List<Polyline> obstacle)
@@ -2293,9 +2434,19 @@ namespace ThMEPWSS.SprinklerConnect.Service
             // 判断喷头是否位于小房间中
             var sprinklerTol = 0;
             var isSprinklerInSmallRoom = realPts[0].IsSprinklerInSmallRoom(smallRooms);
-            if (isSprinklerInSmallRoom.Item1 == true)
+            if (isSprinklerInSmallRoom.Item1)
             {
-                sprinklerTol = SprinklerParameter.SprinklerPt.Where(pt => isSprinklerInSmallRoom.Item2.Contains(pt)).Count();
+                var roomSprinkler = SprinklerParameter.SprinklerPt.Where(pt => isSprinklerInSmallRoom.Item2.Contains(pt)).ToList();
+                for(int i =0;i<roomSprinkler.Count;i++)
+                {
+                    if (SprinklerSearched.Contains(roomSprinkler[i])
+                        || pipeScatters.Contains(roomSprinkler[i]))
+                    {
+                        return;
+                    }
+                }
+                
+                sprinklerTol = roomSprinkler.Count;
             }
             else
             {
@@ -2340,14 +2491,15 @@ namespace ThMEPWSS.SprinklerConnect.Service
                 var obstacleTemp = new DBObjectCollection();
                 filterRow.ForEach(row => row.ConnectLines.ForEach(line => obstacleTemp.Add(line)));
                 closePipeLines.ForEach(row => obstacleTemp.Add(row));
-                Geometry.ForEach(geometry => obstacle.Add(geometry));
+                SprinklerParameter.SprinklerPt.ForEach(pt => obstacleTemp.Add(new DBPoint(pt)));
+                obstacle.ForEach(o => obstacleTemp.Add(o));
                 var obstacleIndex = new ThCADCoreNTSSpatialIndex(obstacleTemp);
                 var roomIndex = new ThCADCoreNTSSpatialIndex(Geometry.ToCollection());
 
                 var closeLines = new List<Line>();
                 closeLines.AddRange(closeRowLines);
                 closeLines.AddRange(closePipeLines);
-                closeLines = closeLines.OrderBy(line => line.DistanceTo(roomCenter, false)).ToList();
+                closeLines = closeLines.OrderBy(line => line.DistanceTo(roomCenter, false) + line.DistanceTo(roomCenter, true) * 2).ToList();
 
                 for (int count = 0; count < closeLines.Count; count++)
                 {
@@ -2389,14 +2541,21 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 var linesConn = new List<Line>();
                                 for (int i = 0; i < realPts.Count; i++)
                                 {
-                                    if (SprinklerSearched.Contains(realPts[i])
-                                        || pipeScatters.Contains(realPts[i]))
-                                    {
-                                        continue;
-                                    }
+                                    
                                     var closePt = crossLine.GetClosestPointTo(realPts[i], true);
+                                    var extendLine = new Line(closePt, realPts[i]);
+                                    if(extendLine.Length > 10.0)
+                                    {
+                                        var extendLineFrame = extendLine.Buffer(1.0);
+                                        var lineFilter = roomIndex.SelectFence(extendLineFrame);
+                                        if (lineFilter.Count > 0)
+                                        {
+                                            continue;
+                                        }
+                                    }
+
                                     extendPts.Add(closePt);
-                                    linesConn.Add(new Line(closePt, realPts[i]));
+                                    linesConn.Add(extendLine);
                                     SprinklerSearched.Add(realPts[i]);
                                 }
                                 extendPts = extendPts.DistinctPoints().OrderBy(pt => pt.DistanceTo(closePtOnRow)).ToList();
@@ -2419,21 +2578,22 @@ namespace ThMEPWSS.SprinklerConnect.Service
                     {
                         if (sprinklerTol <= 8)
                         {
-                            var closePtOnPipe = closeLines[count].GetClosestPointTo(roomCenter, false);
-                            var crossLine = new Line(closePtOnPipe, roomCenter);
-                            if (!isSprinklerInSmallRoom.Item2.Contains(closePtOnPipe))
-                            {
-                                continue;
-                            }
+                            var closePtOnPipeExtend = closeLines[count].GetClosestPointTo(roomCenter, true);
+                            var closePtOnPipe = closeLines[count].GetClosestPointTo(closePtOnPipeExtend, false);
+                            var crossLine = new Line(closePtOnPipe, closePtOnPipeExtend);
+                            //if (!isSprinklerInSmallRoom.Item2.Contains(closePtOnPipe))
+                            //{
+                            //    continue;
+                            //}
                             // 判断是否撞障
                             if (crossLine.Length > 10.0)
                             {
                                 var lineBuffer = crossLine.ExtendLine(-10.0).Buffer(1.0);
-                                var crossRoom = roomIndex.SelectFence(lineBuffer);
-                                if (crossRoom.Count > 2)
-                                {
-                                    continue;
-                                }
+                                //var crossRoom = roomIndex.SelectFence(lineBuffer);
+                                //if (crossRoom.Count > 2)
+                                //{
+                                //    continue;
+                                //}
                                 var intersectObstacle = obstacleIndex.SelectFence(lineBuffer);
                                 if (intersectObstacle.Count > 0)
                                 {
@@ -2471,6 +2631,8 @@ namespace ThMEPWSS.SprinklerConnect.Service
                                 rowConn.Count += sprinklerTol;
                                 rowConn.IsSmallRoom = true;
                                 rowConn.ConnectLines.AddRange(linesConn);
+
+                                rowConnection.Add(rowConn);
                                 break;
                             }
                         }

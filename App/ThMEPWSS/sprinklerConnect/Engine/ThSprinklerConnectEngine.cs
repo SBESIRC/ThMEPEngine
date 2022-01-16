@@ -134,11 +134,9 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                     service.HandleConsequentScatter(netList[i], j, rowConnection, pipeScatters, smallRooms, obstacle);
                 }
             }
-
+            
             var connTolerance = 300.0;
             service.SprinklerConnect(rowConnection, geometry, obstacle, connTolerance);
-
-            service.HandleSingleScatter(rowConnection, pipeScatters, connTolerance);
 
             for (int i = 0; i < netList.Count; i++)
             {
@@ -148,6 +146,10 @@ namespace ThMEPWSS.SprinklerConnect.Engine
                     service.HandleSprinklerInSmallRoom(netList[i], j, rowConnection, smallRooms, pipeScatters, obstacle);
                 }
             }
+
+            service.HandleSingleScatter(rowConnection, pipeScatters, smallRooms, obstacle, connTolerance);
+
+            service.ConnectSingleScatterToPipe(rowConnection, pipeScatters, smallRooms, obstacle);
 
             var results = new List<Line>();
             rowConnection.ForEach(row =>

@@ -594,6 +594,50 @@ namespace ThMEPWSS.SprinklerConnect.Service
             }
         }
 
+        public static bool SearchClosePt(Point3d pt, List<Line> subMainPipe, double tol, double connectTol, 
+            out List<Tuple<double, List<Point3d>>> ptList)
+        {
+            ptList = new List<Tuple<double, List< Point3d>>>();
+            for (int i = 0; i < subMainPipe.Count; i++)
+            {
+                var closePtTidal = subMainPipe[i].GetClosestPointTo(pt, true);
+                var closePt = subMainPipe[i].GetClosestPointTo(closePtTidal, false);
+                if(closePtTidal.DistanceTo(closePt) < 15.0)
+                {
+                    var dist = closePt.DistanceTo(pt);
+                    if (dist < tol)
+                    {
+                        ptList.Add(Tuple.Create(dist, new List<Point3d> { closePt, pt }));
+                    }
+                }
+                else if(closePtTidal.DistanceTo(closePt) < connectTol)
+                {
+                    var dist = closePtTidal.DistanceTo(pt);
+                    if ( dist < tol)
+                    {
+                        if(dist > 15.0)
+                        {
+                            ptList.Add(Tuple.Create(dist, new List<Point3d> { closePt, closePtTidal, pt }));
+                        }
+                        else
+                        {
+                            ptList.Add(Tuple.Create(dist, new List<Point3d> { closePt, pt }));
+                        }
+                    }
+                }
+            }
+
+            ptList = ptList.OrderBy(list => list.Item1).ToList();
+            if (ptList.Count > 0)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         private static Line LineExtend(Line line)
         {
             return new Line(line.StartPoint, line.StartPoint + line.LineDirection() * (line.Length + 0.9));
