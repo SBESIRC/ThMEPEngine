@@ -398,6 +398,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     //Draw.DrawSeg(solution);
                     solutions.Add(solution);
                 }
+                var orgSolution = new Chromosome();
+                orgSolution.Logger = this.Logger;
+                var orgGenome = ConvertLineToGene();//创建初始基因序列
+                orgSolution.Genome = orgGenome;
+                //Draw.DrawSeg(solution);
+                solutions.Add(orgSolution);
             }
             return solutions;
         }

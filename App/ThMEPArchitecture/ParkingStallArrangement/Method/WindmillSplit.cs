@@ -116,6 +116,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return line;
         }
+
+        public static double GetMaxWidth(Polyline area)
+        {
+            var maxPt = area.GeometricExtents.MaxPoint;
+            var minPt = area.GeometricExtents.MinPoint;
+            return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
+        }
+
         public static List<Polyline> Split(Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
             ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
         {
@@ -125,10 +133,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
             segSreasCnt = rstAreas.Count;
             var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
-            for(int i = 0; i < cutlines.Count; i++)
+
+            var width = GetMaxWidth(area);
+
+            for (int i = 0; i < cutlines.Count; i++)
             {
                 var l = cutlines[i];
-                l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+                l.GetMaxMinVal(buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
 
                 maxVals.Add(maxVal2);
                 minVals.Add(minVal2);
@@ -164,10 +175,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rstAreas;
         }
 
-        public static void GetMaxMinVal(this Line line, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
+        public static void GetMaxMinVal(this Line line, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
         {
-            var rect1 = line.GetHalfBuffer(true);//上、右半区域
-            var rect2 = line.GetHalfBuffer(false);//下、左半区域
+            var rect1 = line.GetHalfBuffer(true, width);//上、右半区域
+            var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
             var boundPt1 = line.GetBoundPt(buildLines1, rect1);

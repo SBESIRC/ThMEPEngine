@@ -16,11 +16,17 @@ using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
+using Serilog;
+using System.IO;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
     {
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "AutoSeglineLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
 
@@ -55,6 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
+                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }

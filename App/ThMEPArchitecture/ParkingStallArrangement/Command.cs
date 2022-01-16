@@ -28,7 +28,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit:10).CreateLogger();
 
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
@@ -63,6 +63,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
+                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
