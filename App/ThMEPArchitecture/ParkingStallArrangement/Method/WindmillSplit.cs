@@ -117,43 +117,49 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return line;
         }
         public static List<Polyline> Split(Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic)
+            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
         {
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
+            segSreasCnt = rstAreas.Count;
             var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
             for(int i = 0; i < cutlines.Count; i++)
             {
                 var l = cutlines[i];
-                var rst = cutRst[i];//是否被墙线切割
-                if(rst)//被墙线切割的直接用墙线的起始终止点
-                {
-                    var rst2 = l.GetMaxMinVal(area, out double maxVal, out double minVal);
-                    if (rst2)//直接用墙线和障碍物最近作为依据
-                    {
-                        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
-                        
-                        maxVals.Add(Math.Min(maxVal, maxVal2));
-                        minVals.Add(Math.Max(minVal, minVal2));
-                    }
-                    else
-                    {
-                        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+                l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
 
-                        maxVals.Add(maxVal2);
-                        minVals.Add(minVal2);
-                    }
-                }
-                else
-                {
-                    l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+                maxVals.Add(maxVal2);
+                minVals.Add(minVal2);
+                //var l = cutlines[i];
+                //var rst = cutRst[i];//是否被墙线切割
+                //if(rst)//被墙线切割的直接用墙线的起始终止点
+                //{
+                //    var rst2 = l.GetMaxMinVal(area, out double maxVal, out double minVal);
+                //    if (rst2)//直接用墙线和障碍物最近作为依据
+                //    {
+                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
 
-                    maxVals.Add(maxVal2);
-                    minVals.Add(minVal2);
-                }
-                
+                //        maxVals.Add(Math.Min(maxVal, maxVal2));
+                //        minVals.Add(Math.Max(minVal, minVal2));
+                //    }
+                //    else
+                //    {
+                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+
+                //        maxVals.Add(maxVal2);
+                //        minVals.Add(minVal2);
+                //    }
+                //}
+                //else
+                //{
+                //    l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+
+                //    maxVals.Add(maxVal2);
+                //    minVals.Add(minVal2);
+                //}
+
             }
             return rstAreas;
         }
@@ -172,6 +178,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static bool GetMaxMinVal(this Line line, Polyline area, out double maxVal, out double minVal)
         {
+            double tor = 2.0;
             maxVal = 0;
             minVal = 0;
             var lines = area.ToLines();
@@ -192,16 +199,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     var val = line.StartPoint.X;
                     var sy = intersect.StartPoint.X - val;
                     var ey = intersect.EndPoint.X - val;
-                    maxVal = Math.Max(sy, ey);
-                    minVal = Math.Min(sy, ey);
+                    maxVal = Math.Max(sy, ey) - tor;
+                    minVal = Math.Min(sy, ey) + tor;
                 }
                 else
                 {
                     var val = line.StartPoint.Y;
                     var sy = intersect.StartPoint.Y - val;
                     var ey = intersect.EndPoint.Y - val;
-                    maxVal = Math.Max(sy, ey);
-                    minVal = Math.Min(sy, ey);
+                    maxVal = Math.Max(sy, ey) - tor;
+                    minVal = Math.Min(sy, ey) + tor;
                 }
                 return true;
             }

@@ -53,8 +53,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 seglineDic.Add(index++, line);
             }
-            WindmillSplit.Split(area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, out Dictionary<int, List<int>> seglineIndexDic);
-
+            WindmillSplit.Split(area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
+                out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt);
             gaPara.Set(outerBrder.SegLines, maxVals, minVals);
 
             var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
@@ -68,7 +68,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 var flag = random.NextDouble() < 0.5;
                 directionList.Add(num, flag);//默认给全横向
             }
-            layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, seglineIndexDic);
+            layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, 
+                seglineIndexDic, segAreasCnt);
 
             return true;
         }

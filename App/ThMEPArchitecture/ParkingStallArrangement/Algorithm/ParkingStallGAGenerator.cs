@@ -112,7 +112,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public int GetMaximumNumber_(LayoutParameter layoutPara, GaParameter gaPara)
         {
-            layoutPara.Set(Genome);
+            var rst2 = layoutPara.Set(Genome);
+            if (!rst2) return 0;
 
             Random rand = new Random();
             int rst = rand.Next(200);
@@ -123,7 +124,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Fitness method
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara, ParkingStallArrangementViewModel parameterViewModel)
         {
-            layoutPara.Set(Genome);
+            var rst = layoutPara.Set(Genome);
+            if (!rst) return 0;
             GeoUtilities.LogMomery("SolutionStart: ");
             int result = GetParkingNums(layoutPara, parameterViewModel);
             GeoUtilities.LogMomery("SolutionEnd: ");
@@ -142,7 +144,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public int GetMaximumNumberFast(LayoutParameter layoutPara, GaParameter gaPara)
         {
-            layoutPara.Set(Genome);
+            var rst = layoutPara.Set(Genome);
+            if (!rst) return 0;
             int result = GetParkingNumsFast(layoutPara);
             ParkingStallCount = result;
             return result;
