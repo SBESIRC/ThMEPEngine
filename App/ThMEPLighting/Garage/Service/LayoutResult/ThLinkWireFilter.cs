@@ -1,10 +1,11 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
+using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 
@@ -12,21 +13,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     internal class ThLinkWireFilter
     {
-        private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
-        private List<Line> Edges { get; set; }
         private DBObjectCollection LinkWires { get; set; }
         private ThQueryPointService PointQuery { get; set; }
-        public ThLinkWireFilter(DBObjectCollection linkWires, List<Line> edges, Point3dCollection lightPositions)
+        private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
+        public ThLinkWireFilter(DBObjectCollection linkWires, Point3dCollection lightPositions)
         {
-            Edges = edges;
-            LinkWires= linkWires;
+            LinkWires = linkWires;
             PointQuery = new ThQueryPointService(lightPositions.OfType<Point3d>().ToList());
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(linkWires);
         }
-        public DBObjectCollection Filter()
+        public DBObjectCollection Filter(List<Line> edges)
         {
             var garbages = new DBObjectCollection();
-            Edges.GetThreeWays().Where(o=>o.Count==3).ForEach(o =>
+            edges.GetThreeWays().Where(o=>o.Count==3).ForEach(o =>
             {
                 var pairs = o.GetLinePairs();
                 var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
@@ -39,6 +38,20 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     {
                         garbages.Add(line);
                     }
+                }
+            });
+            return Remove(LinkWires, garbages);
+        }
+
+        public DBObjectCollection Filter(List<Tuple<Line, Point3d>> branchPtPairs)
+        {
+            var garbages = new DBObjectCollection();
+            branchPtPairs.ForEach(o =>
+            {
+                var line = FindBranchCloseWire(o.Item1, o.Item2);
+                if (line != null)
+                {
+                    garbages.Add(line);
                 }
             });
             return Remove(LinkWires, garbages);
@@ -120,7 +133,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(o => o.Count == 3)
                 .ForEach(o =>
                 {
-                    var branch = Filter(o);
+                    var branch = FilterLines(o);
                     if (branch != null)
                     {
                         garbages.Add(branch);
@@ -129,7 +142,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return garbages;
         }
 
-        private Line Filter(List<Line> lines)
+        private Line FilterLines(List<Line> lines)
         {
             var pairs = lines.GetLinePairs();
             var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();

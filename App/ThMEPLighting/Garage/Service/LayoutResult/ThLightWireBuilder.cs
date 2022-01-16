@@ -267,14 +267,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return linkService.FindLightNodeLinkOnSamePath();
         }
 
-        protected List<ThLightNodeLink> FindLightNodeLinkOnMainBranch(ThLightGraphService graph)
+        protected Tuple<List<ThLightNodeLink>, List<Tuple<Line, Point3d>>> FindLightNodeLinkOnMainBranch(ThLightGraphService graph)
         {
             var linkService = new ThLightNodeBranchLinkService(graph)
             {
                 NumberLoop = ArrangeParameter.GetLoopNumber(graph.CalculateLightNumber()),
                 DefaultStartNumber = DefaultNumbers.Count > 0 ? DefaultNumbers.First() : "",
             };
-            return linkService.LinkMainBranch();
+            var nodeLinks = linkService.LinkMainBranch();
+            var branchPtPairs = linkService.BranchPtPairs;
+            return Tuple.Create(nodeLinks, branchPtPairs);
         }
 
         protected List<ThLightNodeLink> FindLightNodeLinkOnBetweenBranch(ThLightGraphService graph)
@@ -329,10 +331,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var lightWireFactory = new ThLightBlockFactory(edges);
             lightWireFactory.Build();
-            var filter = new ThLinkWireFilter(linkWires, 
-                edges.Select(o => o.Edge).ToList(), lightWireFactory.Results.Keys.ToCollection());
-            return filter.Filter();
+            var filter = new ThLinkWireFilter(linkWires, lightWireFactory.Results.Keys.ToCollection());
+            return filter.Filter(edges.Select(o => o.Edge).ToList());
         }
+
+        protected DBObjectCollection FilterSingleRowLinkWire(DBObjectCollection linkWires, List<ThLightEdge> edges,
+            List<Tuple<Line,Point3d>> branchPtPairs)
+        {
+            var lightWireFactory = new ThLightBlockFactory(edges);
+            lightWireFactory.Build();
+            var filter = new ThLinkWireFilter(linkWires,lightWireFactory.Results.Keys.ToCollection());
+            return filter.Filter(branchPtPairs);
+        }
+
         protected List<ThLightGraphService> BuildGraphs(List<ThLightEdge> edges)
         {
             // 为了1、2号线使用

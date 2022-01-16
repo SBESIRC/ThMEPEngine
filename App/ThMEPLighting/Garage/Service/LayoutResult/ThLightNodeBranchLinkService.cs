@@ -19,10 +19,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public int NumberLoop { get; set; } = 3;
         private List<ThLightEdge> Edges => Graph.GraphEdges;
         private List<ThLinkPath> Links => Graph.Links;
+        public List<Tuple<Line, Point3d>> BranchPtPairs { get; private set; } //获取分支点,用于过滤
         public ThLightNodeBranchLinkService(ThLightGraphService graph)
         {
             Graph = graph;
             DefaultStartNumber = "";
+            BranchPtPairs = new List<Tuple<Line, Point3d>>();
         }
 
         public List<ThLightNodeLink> LinkMainBranch()
@@ -145,6 +147,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var firstLinkNodes = TakeLightNodes(GetSamePathEdges(firstLinkPath.Edges), firstLinkPath.Start, NumberLoop);
             results.AddRange(FindNodeLinks(linkNodePairs.Item1, firstLinkNodes, new List<ThLightNode>()));
             results.AddRange(FindNodeLinks(linkNodePairs.Item2, firstLinkNodes, new List<ThLightNode>()));
+
+            //
+            if (firstLinkNodes.Count>0)
+            {
+                var firstEdge = FindEdge(firstEdgeId);
+                AddToBranchDirectionRecord(firstEdge.Edge,firstLinkPath.Start);
+            }
             return results;
         }
 
@@ -159,7 +168,24 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var secondLinkNodes = TakeLightNodes(GetSamePathEdges(secondLinkPath.Edges), secondLinkPath.Start, NumberLoop);
             results.AddRange(FindNodeLinks(linkNodePairs.Item1, firstLinkNodes, secondLinkNodes));
             results.AddRange(FindNodeLinks(linkNodePairs.Item2, firstLinkNodes, secondLinkNodes));
+
+            // 
+            results.ForEach(o =>
+            {
+                var secondLightEdge = FindEdgeByNode(firstLinkPath.Edges.Union(secondLinkPath.Edges).ToList(), o.Second.Id);
+                var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
+                var secondEdge = secondLightLinkPath.Edges.First();
+                AddToBranchDirectionRecord(secondEdge.Edge, secondLightLinkPath.Start);
+            });
             return results;
+        }
+
+        private void AddToBranchDirectionRecord(Line branch,Point3d crossPt)
+        {
+            if(BranchPtPairs.Select(o=>o.Item1).Contains(branch))
+            {
+                BranchPtPairs.Add(Tuple.Create(branch, crossPt));
+            }
         }
 
         private Tuple<List<ThLightNode>, List<ThLightNode>> FindPreNextNodes(

@@ -9,6 +9,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using System;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -46,10 +48,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkWireObjs = CreateSingleRowLinkWire();
 
             // 建议允许最大的回路编号是4
-            var jumpWireRes = CreateSingleRowJumpWire(Graphs);
+            var sameLinkJumpWireRes = CreateSingleRowJumpWire(Graphs);
+            var branchCornerJumpWireRes = CreateSingleRowBranchCornerJumpWire(Graphs);
+
+            // 过滤分支上的线
+            var totalEdges = GetEdges();
+            linkWireObjs = FilterSingleRowLinkWire(linkWireObjs, totalEdges, branchCornerJumpWireRes.Item2);
 
             // 收集创建的线            
-            Wires = Wires.Union(jumpWireRes);
+            Wires = Wires.Union(sameLinkJumpWireRes);
+            Wires = Wires.Union(branchCornerJumpWireRes.Item1);
             Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
             Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength);
             Wires = MergeWire(Wires);
@@ -96,17 +104,30 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             graphs.ForEach(g =>
             {
                 var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
-                var branchCornerLinks = FindLightNodeLinkOnMainBranch(g);
                 var branchBwtweenLinks = FindLightNodeLinkOnBetweenBranch(g);
                 branchBwtweenLinks = branchBwtweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
-                BuildSameLink(sameLinks);
-                BuildBranchCornerLink(branchCornerLinks);
+                BuildSameLink(sameLinks);               
                 BuildSameLink(branchBwtweenLinks);
                 sameLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-                branchCornerLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
                 branchBwtweenLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
             });
             return results;
+        }
+
+        private Tuple<DBObjectCollection, List<Tuple<Line, Point3d>>>
+            CreateSingleRowBranchCornerJumpWire(List<ThLightGraphService> graphs)
+        {
+            // 连接主分支到分支的跳线
+            var wires = new DBObjectCollection();
+            var branchPtPairs = new List<Tuple<Line, Point3d>>();
+            graphs.ForEach(g =>
+            {
+                var res = FindLightNodeLinkOnMainBranch(g);
+                BuildBranchCornerLink(res.Item1);
+                res.Item1.SelectMany(l => l.JumpWires).ForEach(e => wires.Add(e));
+                branchPtPairs.AddRange(res.Item2);
+            });
+            return Tuple.Create(wires, branchPtPairs);
         }
 
         private DBObjectCollection CreateDoubleRowJumpWire(List<ThLightEdge> edges)
