@@ -149,10 +149,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             results.AddRange(FindNodeLinks(linkNodePairs.Item2, firstLinkNodes, new List<ThLightNode>()));
 
             //
-            if (firstLinkNodes.Count>0)
+            if (results.Count>0)
             {
                 var firstEdge = FindEdge(firstEdgeId);
-                AddToBranchDirectionRecord(firstEdge.Edge,firstLinkPath.Start);
+                AddToBranchPtPairs(firstEdge.Edge,firstLinkPath.Start);
             }
             return results;
         }
@@ -175,14 +175,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var secondLightEdge = FindEdgeByNode(firstLinkPath.Edges.Union(secondLinkPath.Edges).ToList(), o.Second.Id);
                 var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
                 var secondEdge = secondLightLinkPath.Edges.First();
-                AddToBranchDirectionRecord(secondEdge.Edge, secondLightLinkPath.Start);
+                AddToBranchPtPairs(secondEdge.Edge, secondLightLinkPath.Start);
             });
             return results;
         }
 
-        private void AddToBranchDirectionRecord(Line branch,Point3d crossPt)
+        private void AddToBranchPtPairs(Line branch,Point3d crossPt)
         {
-            if(BranchPtPairs.Select(o=>o.Item1).Contains(branch))
+            bool isExist = BranchPtPairs
+                .Where(o => new List<Line> { o.Item1 }.Contains(branch))
+                .Where(o => crossPt.IsEqualTo(o.Item2, new Tolerance(1.0, 1.0)))
+                .Any();
+            if (!isExist)
             {
                 BranchPtPairs.Add(Tuple.Create(branch, crossPt));
             }
