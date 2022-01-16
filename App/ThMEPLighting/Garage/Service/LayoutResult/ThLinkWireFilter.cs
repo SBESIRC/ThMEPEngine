@@ -22,7 +22,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             PointQuery = new ThQueryPointService(lightPositions.OfType<Point3d>().ToList());
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(linkWires);
         }
-        public DBObjectCollection Filter(List<Line> edges)
+        public DBObjectCollection FilterBranch(List<Line> edges)
         {
             var garbages = new DBObjectCollection();
             edges.GetThreeWays().Where(o=>o.Count==3).ForEach(o =>
@@ -42,8 +42,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return Remove(LinkWires, garbages);
         }
-
-        public DBObjectCollection Filter(List<Tuple<Line, Point3d>> branchPtPairs)
+        public DBObjectCollection FilterBranch(List<Tuple<Line, Point3d>> branchPtPairs)
         {
             var garbages = new DBObjectCollection();
             branchPtPairs.ForEach(o =>
@@ -56,7 +55,29 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return Remove(LinkWires, garbages);
         }
-
+        public DBObjectCollection FilterElbow(List<Line> edges)
+        {
+            var garbages = new DBObjectCollection();
+            edges.GetElbows().Where(o => o.Count == 2).ForEach(o =>
+            {
+                
+                if (!o[0].IsLessThan45Degree(o[1]))
+                {
+                    var linkPt = o[0].FindLinkPt(o[1]);
+                    var line1 = FindBranchCloseWire(o[0], linkPt.Value);
+                    if (line1 != null)
+                    {
+                        garbages.Add(line1);
+                    }
+                    var line2 = FindBranchCloseWire(o[1], linkPt.Value);
+                    if (line2 != null)
+                    {
+                        garbages.Add(line2);
+                    }
+                }
+            });
+            return Remove(LinkWires, garbages);
+        }
         private Line FindBranchCloseWire(Line branch,Point3d crossPt)
         {
             var outline = CreateOutline(branch.StartPoint, branch.EndPoint,1.0);

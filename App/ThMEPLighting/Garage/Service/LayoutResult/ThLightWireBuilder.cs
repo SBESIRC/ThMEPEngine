@@ -332,16 +332,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lightWireFactory = new ThLightBlockFactory(edges);
             lightWireFactory.Build();
             var filter = new ThLinkWireFilter(linkWires, lightWireFactory.Results.Keys.ToCollection());
-            return filter.Filter(edges.Select(o => o.Edge).ToList());
+            return filter.FilterBranch(edges.Select(o => o.Edge).ToList());
         }
 
         protected DBObjectCollection FilterSingleRowLinkWire(DBObjectCollection linkWires, List<ThLightEdge> edges,
             List<Tuple<Line,Point3d>> branchPtPairs)
         {
+            var results = new DBObjectCollection();
             var lightWireFactory = new ThLightBlockFactory(edges);
             lightWireFactory.Build();
-            var filter = new ThLinkWireFilter(linkWires,lightWireFactory.Results.Keys.ToCollection());
-            return filter.Filter(branchPtPairs);
+            var filter1 = new ThLinkWireFilter(linkWires,lightWireFactory.Results.Keys.ToCollection());
+            results = filter1.FilterBranch(branchPtPairs);
+
+            var filter2 = new ThLinkWireFilter(results, lightWireFactory.Results.Keys.ToCollection());
+            results = filter2.FilterElbow(edges.Select(o => o.Edge).ToList());
+            return results;
         }
 
         protected List<ThLightGraphService> BuildGraphs(List<ThLightEdge> edges)
