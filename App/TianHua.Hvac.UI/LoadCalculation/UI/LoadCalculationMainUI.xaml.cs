@@ -3,6 +3,7 @@ using AcHelper.Commands;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Timers;
@@ -330,6 +331,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             {
                 ReadConfig(installUrl);
                 SaveBtn.IsEnabled = false;
+                ManualIntervention = false;
+                IsReverse = false;
             }
             else
             {
@@ -337,6 +340,8 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
                 //读取配置信息
                 ReadConfig(file);
                 SaveBtn.IsEnabled = true;
+                ManualIntervention = false;
+                IsReverse = false;
             }
             UpdateUIData(FileName);
         }
@@ -448,7 +453,7 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
                     newRowData = (DynamicLoadCalculationModelData)formatter.Deserialize(objectStream);
                 }
                 newRowData.RoomFunction = room.RoomName;
-                viewModel.DynamicModelData.Add(newRowData);
+                viewModel.DynamicModelData.Insert(0, newRowData);
             }
         }
 
@@ -682,22 +687,34 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
 
         private void chk_ColdWP_Checked(object sender, RoutedEventArgs e)
         {
-            chk_ColdWP_Com.IsEnabled = true;
+            if (!chk_ColdWP_Com.IsNull())
+            {
+                chk_ColdWP_Com.IsEnabled = true;
+            }
         }
 
         private void chk_ColdWP_Unchecked(object sender, RoutedEventArgs e)
         {
-            chk_ColdWP_Com.IsEnabled = false;
+            if (!chk_ColdWP_Com.IsNull())
+            {
+                chk_ColdWP_Com.IsEnabled = false;
+            }
         }
 
         private void chk_HotWP_Checked(object sender, RoutedEventArgs e)
         {
-            chk_HotWP_Com.IsEnabled = true;
+            if (!chk_HotWP_Com.IsNull())
+            {
+                chk_HotWP_Com.IsEnabled = true;
+            }
         }
 
         private void chk_HotWP_Unchecked(object sender, RoutedEventArgs e)
         {
-            chk_HotWP_Com.IsEnabled = false;
+            if (!chk_HotWP_Com.IsNull())
+            {
+                chk_HotWP_Com.IsEnabled = false;
+            }
         }
 
         private void ThCustomWindow_Closed(object sender, EventArgs e)
@@ -765,6 +782,47 @@ namespace TianHua.Hvac.UI.LoadCalculation.UI
             textBlock.LostFocus -= TextBox_LostFocus;
             textBlock.EnterEvent -= InputTextBox_EnterEvent;
             textBlock.IsReadOnly = true;
+        }
+
+        private bool ManualIntervention = false;//人为排序
+        private bool IsReverse = false;//是否倒叙
+        private void UpBtn_Click(object sender, RoutedEventArgs e)
+        {
+            int index = IndoorParameterTable.SelectedIndex;
+            if (index > 0)
+            {
+                var choiseData = viewModel.DynamicModelData[index];
+                viewModel.DynamicModelData.Move(index, index - 1);
+                ManualIntervention = true;
+            }
+        }
+
+        private void DownBtn_Click(object sender, RoutedEventArgs e)
+        {
+            int index = IndoorParameterTable.SelectedIndex;
+            if (index > -1 && index < viewModel.DynamicModelData.Count -1)
+            {
+                var choiseData = viewModel.DynamicModelData[index];
+                viewModel.DynamicModelData.Move(index, index + 1);
+                ManualIntervention = true;
+            }
+        }
+
+        private void IndoorParameterTable_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            var ModelDataList = viewModel.DynamicModelData.OrderBy(o => o.RoomFunction).ToList();
+            if(!ManualIntervention && IsReverse)
+            {
+                ModelDataList.Reverse();
+                IsReverse = false;
+            }
+            else
+            {
+                IsReverse = true;
+            }
+            ManualIntervention = false;
+            viewModel.DynamicModelData = new System.Collections.ObjectModel.ObservableCollection<DynamicLoadCalculationModelData>(ModelDataList);
+            e.Handled = true;
         }
     }
 }

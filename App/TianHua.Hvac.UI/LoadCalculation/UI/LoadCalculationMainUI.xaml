@@ -51,9 +51,9 @@
                            DropDownOpened="configFileList_DropDownOpened" />
                 </StackPanel>
                 <StackPanel Grid.Row="1" Orientation="Horizontal" MaxHeight="337" Focusable="False" Margin="0,5,0,0">
-                    <DataGrid x:Name="IndoorParameterTable"  AutoGenerateColumns="False" ItemsSource="{Binding DynamicModelData}" RowBackground="White" >
+                    <DataGrid x:Name="IndoorParameterTable" CanUserSortColumns="True" AutoGenerateColumns="False" ItemsSource="{Binding DynamicModelData}" RowBackground="White" Sorting="IndoorParameterTable_Sorting">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Width="100" Header="房间功能" CanUserSort="False" CanUserResize="False">
+                            <DataGridTemplateColumn CanUserSort="True"  SortMemberPath="RoomFunction" Width="100" Header="房间功能" CanUserResize="False">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <cus:InputTextBox Foreground="Blue" FontWeight="Bold" ForceCursor="True" Cursor="Hand" TextDecorations="Underline" BorderThickness="0" TextAlignment="Center" VerticalAlignment="Center" 
@@ -205,6 +205,10 @@
                     </DataGrid>
                     <Border BorderThickness="0,0,0,10" Height="1"   Focusable="False" ></Border>
                 </StackPanel>
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Focusable="False" Margin="10,5,0,0">
+                    <cus:ImageButton Name="UpBtn" IsEnabled="True" Content="↑" Width="30" Height="25" HorizontalAlignment="Left" Click="UpBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
+                    <cus:ImageButton Name="DownBtn" IsEnabled="True" Content="↓" Width="30" Height="25" HorizontalAlignment="Left" Click="DownBtn_Click" Margin="5,0,1,0"></cus:ImageButton>
+                </StackPanel>
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Focusable="False" Margin="0,5,0,0">
                     <cus:ImageButton Name="SaveAsFileBtn" IsEnabled="True" Content="另存模板" Width="70" Height="25" Click="SaveAsFileBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
                     <cus:ImageButton Name="SaveBtn" IsEnabled="False" Content="保存" Width="70" Height="25" Click="SaveBtn_Click" Margin="0,0,1,0"></cus:ImageButton>
@@ -226,27 +230,27 @@
                     <StackPanel Orientation="Horizontal" Margin="20,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
                         <CheckBox Name="chk_Area" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,5" Padding="0" Content="面积" IsChecked="True"></CheckBox>
                         <CheckBox Name="chk_ColdL" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷负荷" IsChecked="True"></CheckBox>
-                        <CheckBox Name="chk_ColdW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷水量" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_ColdWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False" Checked="chk_ColdWP_Checked" Unchecked="chk_ColdWP_Unchecked">
+                        <CheckBox Name="chk_ColdW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷水量" IsChecked="True"></CheckBox>
+                        <CheckBox Name="chk_ColdWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="True" Checked="chk_ColdWP_Checked" Unchecked="chk_ColdWP_Unchecked">
                             <StackPanel Orientation="Horizontal" Focusable="False" HorizontalAlignment="Left">
                                 <Label Content="冷水管径，比摩阻≤"  Focusable="False" Margin="0,0,0,0" Padding="0"/>
-                                <ComboBox Name="chk_ColdWP_Com" IsEnabled="False" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <ComboBox Name="chk_ColdWP_Com" IsEnabled="True" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <ComboBoxItem Content="200" Tag="1" IsSelected="True"></ComboBoxItem>
                                     <ComboBoxItem Content="150" Tag="2"></ComboBoxItem>
                                 </ComboBox>
                                 <Label Content="pa/m"  Focusable="False" Margin="0,0,0,0" Padding="0"/>
                             </StackPanel>
                         </CheckBox>
-                        <CheckBox Name="chk_CondensateWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷凝水管径" IsChecked="False"></CheckBox>
+                        <CheckBox Name="chk_CondensateWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="冷凝水管径" IsChecked="True"></CheckBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="20,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
                         <CheckBox VerticalContentAlignment="Center" Visibility="Hidden" VerticalAlignment="Center" Margin="0,0,0,5" Padding="0" Content="面积" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_HotL" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热负荷" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_HotW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热水量" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_HotWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="False" Checked="chk_HotWP_Checked" Unchecked="chk_HotWP_Unchecked">
+                        <CheckBox Name="chk_HotL" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热负荷" IsChecked="True"></CheckBox>
+                        <CheckBox Name="chk_HotW" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" Content="热水量" IsChecked="True"></CheckBox>
+                        <CheckBox Name="chk_HotWP" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,0,0,5" Padding="0" IsChecked="True" Checked="chk_HotWP_Checked" Unchecked="chk_HotWP_Unchecked">
                             <StackPanel Orientation="Horizontal" Focusable="False" HorizontalAlignment="Left">
                                 <Label Content="热水管径，比摩阻≤"  Focusable="False" Margin="0,0,0,0" Padding="0"/>
-                                <ComboBox Name="chk_HotWP_Com" IsEnabled="False" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+                                <ComboBox Name="chk_HotWP_Com" IsEnabled="True" Width="50" Margin="5,0,5,0" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
                                     <ComboBoxItem Content="200" Tag="1" IsSelected="True"></ComboBoxItem>
                                     <ComboBoxItem Content="150" Tag="2"></ComboBoxItem>
                                 </ComboBox>
@@ -259,8 +263,8 @@
                         <CheckBox Name="chk_FumeExhaust" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="排油烟量" IsChecked="True"></CheckBox>
                         <CheckBox Name="chk_FumeSupplementary" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="油烟补风量" IsChecked="True"></CheckBox>
                         <CheckBox Name="chk_AccidentExhaust" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="事故排风量" IsChecked="True"></CheckBox>
-                        <CheckBox Name="chk_NormalAirVolume" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时排风量" IsChecked="False"></CheckBox>
-                        <CheckBox Name="chk_NormalFumeSupplementary" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时补风量" IsChecked="False"></CheckBox>
+                        <CheckBox Name="chk_NormalAirVolume" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时排风量" IsChecked="True"></CheckBox>
+                        <CheckBox Name="chk_NormalFumeSupplementary" VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,0,25,5" Padding="0" Content="平时补风量" IsChecked="True"></CheckBox>
                     </StackPanel>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Orientation="Vertical" HorizontalAlignment="Center" Margin="70,0,0,0" Focusable="False">
