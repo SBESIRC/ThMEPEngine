@@ -116,9 +116,17 @@ namespace ThMEPElectrical.BlockConvert
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetCentriodPoint = targetBlockData.GetBottomCenter().TransformBy(targetBlockData.OwnerSpace2WCS);
                 var bottomCenter = srcBlockData.GetBottomCenter() - srcBlockData.Position;
+                var bottomCenterTiadl = bottomCenter.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
+                    + bottomCenter.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
+                    + bottomCenter.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis;
+                var tranMatrix = Matrix3d.Displacement(
+                    srcBlockData.BlockTransform.Translation.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
+                    + srcBlockData.BlockTransform.Translation.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
+                    + srcBlockData.BlockTransform.Translation.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis);
+                //var tranMatrix = Matrix3d.Displacement(srcBlockData.OwnerSpace2WCS.Translation);
                 var scrCentriodPoint = Point3d.Origin
-                    .TransformBy(srcBlockData.OwnerSpace2WCS.Inverse().PostMultiplyBy(srcBlockData.BlockTransform));
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) - bottomCenter;
+                        .TransformBy(tranMatrix.PostMultiplyBy(srcBlockData.OwnerSpace2WCS));
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) + bottomCenterTiadl;
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
@@ -130,23 +138,29 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var position = srcBlockData.Position;
                 double rotation = srcBlockData.Rotation;
-                if (srcBlockData.Normal == new Vector3d(0, 0, -1))
-                {
-                    rotation = -rotation;
-                }
+                var data = srcBlockData.OwnerSpace2WCS.ToArray();
+                data[3] = 0;
+                data[7] = 0;
+                data[11] = 0;
+                var tranMatrix = new Matrix3d(data);
+
+                //if (srcBlockData.Normal == new Vector3d(0, 0, -1))
+                //{
+                //    rotation = -rotation;
+                //}
                 if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, srcBlockData.Normal, position).PreMultiplyBy(tranMatrix));
                 }
                 else
                 {
                     if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, srcBlockData.Normal, position).PostMultiplyBy(tranMatrix));
                     }
                     else
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, srcBlockData.Normal, position).PostMultiplyBy(tranMatrix));
                     }
                 }
             }
