@@ -104,6 +104,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
             GaParameter gaParameter, out double maxVal, out double minVal)
         {
+
             maxVal = 0;
             minVal = 0;
             double simplifyFactor = 1.0;
@@ -121,7 +122,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     foreach(var segArea in segAreas)
                     {
                         var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                        var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null,out bool flag);
                         if(segLine.GetValueType(boundPt))
                         {
                             maxVal = segLine.GetMinDist(boundPt)-2760;
@@ -142,7 +143,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     foreach (var segArea in res)
                     {
                         var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                        var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
                         if (segLine.GetValueType(boundPt))
                         {
                             maxVal = segLine.GetMinDist(boundPt) - 2760;
@@ -258,13 +259,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
-        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea)
+        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
         {
-            
+            hasBuilding = true;
             if (buildLines.Count == 0)//区域内没有建筑物
             {
-                var pts = segArea.GetPoints().ToList();
-                return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
+                hasBuilding = false;
+                if (areaPtsIndex is null)
+                {
+                    var pts = segArea.GetPoints().ToList();
+                    return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
+                }
+                else
+                {
+                    var objs = areaPtsIndex.SelectCrossingPolygon(segArea);//找到切割区域内的全部点
+                    var pts = new List<Point3d>();
+                    foreach (var obj in objs)
+                    {
+                        var dbPt = obj as DBPoint;
+                        var pt = dbPt.Position;
+                        pts.Add(pt);
+                    }
+
+                    return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
+                }
+                
             }
             var closedPts = new List<Point3d>();
             foreach(var build in buildLines)
@@ -444,7 +463,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     return false;//没有建筑物要他作甚
                 }
-                var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
                     maxVal = segLine.GetMinDist(boundPt) - 2760;
@@ -483,7 +502,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     return false;//没有建筑物要他作甚
                 }
                 buildingNums.Add(buildCnt);
-                var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea,null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
                     maxVal = segLine.GetMinDist(boundPt) - 2760;
@@ -518,7 +537,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     return false;//没有建筑物要他作甚
                 }
-                var boundPt = segLine.GetBoundPt(buildLines, segArea);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea,null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
                     maxVal = segLine.GetMinDist(boundPt) - 2760;

@@ -139,7 +139,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             for (int i = 0; i < cutlines.Count; i++)
             {
                 var l = cutlines[i];
-                l.GetMaxMinVal(buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+                l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
 
                 maxVals.Add(maxVal2);
                 minVals.Add(minVal2);
@@ -175,16 +175,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return rstAreas;
         }
 
-        public static void GetMaxMinVal(this Line line, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
+        public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
         {
+            var areaPts = area.GetPoints().ToList();//获取墙线的全部交点
+            var dbPts = new List<DBPoint>();
+            areaPts.ForEach(p => dbPts.Add(new DBPoint(p)));
+            var ptsIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
             var rect1 = line.GetHalfBuffer(true, width);//上、右半区域
             var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
-            var boundPt1 = line.GetBoundPt(buildLines1, rect1);
-            var boundPt2 = line.GetBoundPt(buildLines2, rect2);
+            var boundPt1 = line.GetBoundPt(buildLines1, rect1, ptsIndex, out bool hasBuilding);
+            var boundPt2 = line.GetBoundPt(buildLines2, rect2, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
+            if(!hasBuilding)
+            {
+                maxVal += 2765;
+            }
             minVal = -line.GetMinDist(boundPt2) + 2760;
+            if (!hasBuilding2)
+            {
+                minVal -= 2765;
+            }
         }
 
         public static bool GetMaxMinVal(this Line line, Polyline area, out double maxVal, out double minVal)
