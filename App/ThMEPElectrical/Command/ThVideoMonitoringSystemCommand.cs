@@ -71,10 +71,9 @@ namespace ThMEPElectrical.Command
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var outFrame = frameBlockDic.Key;
+                    var outFrame = ThMEPFrameService.Normalize(frameBlockDic.Key);
                     var frameBlockId = frameBlockDic.Value;
                     originTransformer.Transform(outFrame);
-                    outFrame = ThMEPFrameService.Normalize(outFrame);
 
                     //获取楼层信息
                     var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
@@ -107,19 +106,6 @@ namespace ThMEPElectrical.Command
 
                     //插入图块
                     InsertBlock(layoutInfo, originTransformer);
-
-                    //using (AcadDatabase db = AcadDatabase.Active())
-                    //{
-                    //    foreach (var item in layoutInfo)
-                    //    {
-                    //        var endPt = item.layoutPt + 500 * item.layoutDir;
-                    //        Line line = new Line(item.layoutPt, endPt);
-                    //        Circle circle = new Circle(endPt, Vector3d.ZAxis, 100);
-                    //        //originTransformer.Reset(line);
-                    //        db.ModelSpace.Add(line);
-                    //        db.ModelSpace.Add(circle);
-                    //    }
-                    //}
                 }
             }
         }
