@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
-using ThCADExtension;
 using System.Collections.Generic;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
@@ -19,6 +20,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public int NumberLoop { get; set; } = 3;
         private List<ThLightEdge> Edges => Graph.GraphEdges;
         private List<ThLinkPath> Links => Graph.Links;
+        private List<Line> EdgeLines => Edges.Select(o => o.Edge).ToList();
         public List<Tuple<Line, Point3d>> BranchPtPairs { get; private set; } //获取分支点,用于过滤
         public ThLightNodeBranchLinkService(ThLightGraphService graph)
         {
@@ -26,7 +28,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             DefaultStartNumber = "";
             BranchPtPairs = new List<Tuple<Line, Point3d>>();
         }
-
         public List<ThLightNodeLink> LinkMainBranch()
         {
             /*  
@@ -37,15 +38,33 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
              */
             // eg.方向是从first -> second,连first->branch
             var results = new List<ThLightNodeLink>();
-            var preIds = FindPreEdgeIds();
-            preIds.ForEach(p =>
+            results.AddRange(LinkThreewayBranch());
+            results.AddRange(LinkCrossBranch());
+            return results;
+        }
+        private List<ThLightNodeLink> LinkThreewayBranch()
+        {
+            var results = new List<ThLightNodeLink>();
+            EdgeLines.GetThreeWays().ForEach(o =>
             {
-                var branches = FindBranches(p);
-                results.AddRange(LinkMainBranch(p, branches));
+                var pairs = o.GetLinePairs();
+                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
+                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
+                {
+                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
+                    results.AddRange(LinkThreewayCorner(mainPair.Item1, mainPair.Item2, branch));
+                }
             });
             return results;
         }
-
+        private List<ThLightNodeLink> LinkCrossBranch()
+        {
+            var results = new List<ThLightNodeLink>();
+            EdgeLines.GetCrosses()
+                .Where(o => o.Count == 4)
+                .ForEach(o =>results.AddRange(LinkCrossBranch(o)));          
+            return results;
+        }
         public List<ThLightNodeLink> LinkBetweenBranch()
         {
             /*      (branch1)
@@ -90,7 +109,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var secondSamePathEdges = GetSamePathEdges(secondLinkPath.Edges);
             return LinkBranchEdges(firstSamePathEdges, secondSamePathEdges);
         }
-
         private List<ThLightNodeLink> LinkBranchEdges(
             List<ThLightEdge> firstBranchEdges, 
             List<ThLightEdge> secondBranchEdges)
@@ -120,66 +138,205 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return new List<ThLightNodeLink>();
         }
-
-        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId,List<string> linkPathFirstEdgeIds)
+        private List<ThLightNodeLink> LinkThreewayCorner(Line main1,Line main2,Line branch)
         {
-            if(linkPathFirstEdgeIds.Count==1)
+            var main1Edge = FindEdge(Edges, main1);
+            var main2Edge = FindEdge(Edges, main2);
+            var branchEdge = FindEdge(Edges, branch);
+            if(main1Edge.Direction.IsSameDirection(main2Edge.Direction))
             {
-                // 有一个分支
-                return LinkMainBranch(preEdgeId, linkPathFirstEdgeIds[0]);
-            }
-            else if (linkPathFirstEdgeIds.Count == 2)
-            {
-                // 有两个分支
-                return LinkMainBranch(preEdgeId, linkPathFirstEdgeIds[0], linkPathFirstEdgeIds[1]);
+                var linkPath = FindLinkPath(main1Edge.Id);
+                if(IsFront(GetEdgeIds(linkPath.Edges), main1Edge.Id, main2Edge.Id))
+                {
+                    return LinkMainBranch(main1Edge, branchEdge);
+                }
+                else
+                {
+                    return LinkMainBranch(main2Edge, branchEdge);
+                }
             }
             else
             {
+                return LinkMainBranch(branchEdge, main1Edge, main2Edge);
+            }
+        }
+        private bool IsFront(List<string> edgeIds, string edge1Id,string edge2Id)
+        {
+            int index1 = edgeIds.IndexOf(edge1Id);
+            int index2 = edgeIds.IndexOf(edge2Id);
+            return index1 < index2;
+        }
+        private List<string> GetEdgeIds(List<ThLightEdge> edges)
+        {
+            return edges.Select(o => o.Id).ToList();
+        }
+        private List<ThLightNodeLink> LinkCrossBranch(List<Line> lines)
+        {
+            var pairs = lines.GetLinePairs();
+            var mainPairs = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2))
+                .Where(p => p.Item1.IsLessThan45Degree(p.Item2))
+                .Where(p=>FindEdge(Edges,p.Item1).Direction.IsSameDirection(FindEdge(Edges, p.Item2).Direction))
+                .ToList();
+            if (mainPairs.Count == 1)
+            {
+                var first = mainPairs.First();
+                var branches = lines.FindBranches(first.Item1, first.Item2);
+                return LinkCrossBranch(FindEdge(Edges, first.Item1),  
+                    FindEdge(Edges, branches[0]), FindEdge(Edges, branches[1]));
+            }
+            else if (mainPairs.Count == 2)
+            {
+                var firstPair = mainPairs[0];
+                var secondPair = mainPairs[1];
+                var firstEdge = FindEdge(Edges, firstPair.Item1);
+                var secondEdge = FindEdge(Edges, firstPair.Item2);
+                var thirdEdge = FindEdge(Edges, secondPair.Item1);
+                var fourthEdge = FindEdge(Edges, secondPair.Item2);
+                if (IsInSameLinkPath(new List<string> { firstEdge.Id, secondEdge.Id, thirdEdge.Id, fourthEdge.Id }))
+                {
+                    return LinkSamePathCrossBranch(firstEdge, secondEdge, thirdEdge, fourthEdge);
+                }
+                else
+                {
+                    var branchEdgesIds = GetEdgeIds(firstEdge.MultiBranch.Select(o => o.Item2)
+                        .Union(secondEdge.MultiBranch.Select(o => o.Item2)).ToList());
+                    if (branchEdgesIds.Contains(thirdEdge.Id) || branchEdgesIds.Contains(fourthEdge.Id))
+                    {
+                        return LinkUnSamePathCrossBranch(firstEdge, secondEdge, thirdEdge, fourthEdge);
+                    }
+                    else
+                    {
+                        return LinkUnSamePathCrossBranch(thirdEdge, fourthEdge, firstEdge, secondEdge);
+                    }
+                }
+            }
+            else 
+            {
+                // 暂时不支持
                 return new List<ThLightNodeLink>();
             }
         }
-        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId, string firstEdgeId)
+        private List<ThLightNodeLink> LinkSamePathCrossBranch(
+            ThLightEdge firstEdge, ThLightEdge secondEdge, 
+            ThLightEdge thirdEdge, ThLightEdge fourthEdge)
         {
-            var results = new List<ThLightNodeLink>();
-            var currentLinkPath = FindLinkPath(preEdgeId);
-            var firstLinkPath = FindLinkPath(firstEdgeId);
-            var linkNodePairs = FindPreNextNodes(currentLinkPath, preEdgeId, firstLinkPath.Start);
-            var firstLinkNodes = TakeLightNodes(GetSamePathEdges(firstLinkPath.Edges), firstLinkPath.Start, NumberLoop);
-            results.AddRange(FindNodeLinks(linkNodePairs.Item1, firstLinkNodes, new List<ThLightNode>()));
-            results.AddRange(FindNodeLinks(linkNodePairs.Item2, firstLinkNodes, new List<ThLightNode>()));
-
-            //
-            if (results.Count>0)
+            var linkPath = FindLinkPath(firstEdge.Id);
+            if (IsFront(GetEdgeIds(linkPath.Edges), firstEdge.Id, thirdEdge.Id))
             {
-                var firstEdge = FindEdge(firstEdgeId);
-                AddToBranchPtPairs(firstEdge.Edge,firstLinkPath.Start);
+                return LinkUnSamePathCrossBranch(firstEdge, secondEdge, thirdEdge, fourthEdge);
             }
-            return results;
+            else
+            {
+                return LinkUnSamePathCrossBranch(thirdEdge, fourthEdge, firstEdge, secondEdge);
+            }
         }
-
-        private List<ThLightNodeLink> LinkMainBranch(string preEdgeId,string firstEdgeId,string secondEdgeId)
+        private List<ThLightNodeLink> LinkUnSamePathCrossBranch(
+            ThLightEdge firstEdge, ThLightEdge secondEdge,
+            ThLightEdge thirdEdge, ThLightEdge fourthEdge)
         {
-            var results=new List<ThLightNodeLink>();
-            var currentLinkPath = FindLinkPath(preEdgeId);
-            var firstLinkPath = FindLinkPath(firstEdgeId);
-            var secondLinkPath = FindLinkPath(secondEdgeId);
-            var linkNodePairs= FindPreNextNodes(currentLinkPath, preEdgeId, firstLinkPath.Start);
-            var firstLinkNodes = TakeLightNodes(GetSamePathEdges(firstLinkPath.Edges), firstLinkPath.Start, NumberLoop);
-            var secondLinkNodes = TakeLightNodes(GetSamePathEdges(secondLinkPath.Edges), secondLinkPath.Start, NumberLoop);
-            results.AddRange(FindNodeLinks(linkNodePairs.Item1, firstLinkNodes, secondLinkNodes));
-            results.AddRange(FindNodeLinks(linkNodePairs.Item2, firstLinkNodes, secondLinkNodes));
+            var linkPath = FindLinkPath(firstEdge.Id);
+            if (IsFront(GetEdgeIds(linkPath.Edges), firstEdge.Id, secondEdge.Id))
+            {
+                return LinkCrossBranch(firstEdge, thirdEdge, fourthEdge);
+            }
+            else
+            {
+                return LinkCrossBranch(secondEdge, thirdEdge, fourthEdge);
+            }
+        }
+        private List<ThLightNodeLink> LinkCrossBranch(ThLightEdge mainEdge,ThLightEdge branch1Edge,ThLightEdge branch2Edge)
+        {
+            /*
+             *          |  
+             *          |  
+             *   -----------------
+             *          ->
+             */
+            var results = new List<ThLightNodeLink>();
+            var linkPt = mainEdge.Edge.FindLinkPt(branch1Edge.Edge);
+            if (!linkPt.HasValue)
+            {
+                return results;
+            }
+            var currentLinkPath = FindLinkPath(mainEdge.Id);
+            var mainLinkNodePairs = FindPreNextNodes(currentLinkPath.Edges, mainEdge, linkPt.Value);
+            var branch1LinkPath = FindLinkPath(branch1Edge.Id);
+            var branch2LinkPath = FindLinkPath(branch2Edge.Id);
 
-            // 
+            var branch1LinkNodes = FindBranchLinkNodes(branch1LinkPath.Edges, branch1Edge);
+            var branch2LinkNodes = FindBranchLinkNodes(branch2LinkPath.Edges, branch2Edge);
+
+            results.AddRange(FindNodeLinks(mainLinkNodePairs.Item1, branch1LinkNodes, branch2LinkNodes));
+            results.AddRange(FindNodeLinks(mainLinkNodePairs.Item2, branch1LinkNodes, branch2LinkNodes));
+            //
             results.ForEach(o =>
             {
-                var secondLightEdge = FindEdgeByNode(firstLinkPath.Edges.Union(secondLinkPath.Edges).ToList(), o.Second.Id);
+                var secondLightEdge = FindEdgeByNode(branch1LinkPath.Edges.Union(branch2LinkPath.Edges).ToList(), o.Second.Id);
                 var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
                 var secondEdge = secondLightLinkPath.Edges.First();
                 AddToBranchPtPairs(secondEdge.Edge, secondLightLinkPath.Start);
             });
             return results;
         }
-
+        private List<ThLightNodeLink> LinkMainBranch(ThLightEdge mainEdge, ThLightEdge branchEdge)
+        {
+            /*
+             *          |  
+             *          |  
+             *   -----------------
+             *          ->
+             */
+            var results = new List<ThLightNodeLink>();
+            var linkPt = mainEdge.Edge.FindLinkPt(branchEdge.Edge);
+            if(!linkPt.HasValue)
+            {
+                return results;
+            }
+            var currentLinkPath = FindLinkPath(mainEdge.Id);
+            var mainLinkNodePairs = FindPreNextNodes(currentLinkPath.Edges, mainEdge, linkPt.Value);
+            var branchLinkPath = FindLinkPath(branchEdge.Id);
+            var branchLinkNodes = FindBranchLinkNodes(branchLinkPath.Edges, branchEdge);
+            results.AddRange(FindNodeLinks(mainLinkNodePairs.Item1, branchLinkNodes, new List<ThLightNode>()));
+            results.AddRange(FindNodeLinks(mainLinkNodePairs.Item2, branchLinkNodes, new List<ThLightNode>()));
+            //
+            if (results.Count>0)
+            {
+                AddToBranchPtPairs(branchEdge.Edge, linkPt.Value);
+            }
+            return results;
+        }
+        private List<ThLightNodeLink> LinkMainBranch(ThLightEdge mainEdge, ThLightEdge branch1Edge, ThLightEdge branch2Edge)
+        {
+            /*
+             *          |  
+             *          |  <- mainEdge
+             *          |  
+             *   -----------------
+             * (从分支下来，往左、往右分)
+             */
+            var linkPt = mainEdge.Edge.FindLinkPt(branch1Edge.Edge);
+            if(!linkPt.HasValue)
+            {
+                return new List<ThLightNodeLink>();
+            }
+            var results =new List<ThLightNodeLink>();
+            var mainLinkPath = FindLinkPath(mainEdge.Id);
+            var branch1LinkPath = FindLinkPath(branch1Edge.Id);
+            var branch2LinkPath = FindLinkPath(branch2Edge.Id);
+            var mainLinkNodes = FindBranchLinkNodes(mainLinkPath.Edges, mainEdge);
+            var branch1LinkNodes = FindBranchLinkNodes(branch1LinkPath.Edges, branch1Edge);
+            var branch2LinkNodes = FindBranchLinkNodes(branch2LinkPath.Edges, branch2Edge);
+            results.AddRange(FindNodeLinks(mainLinkNodes, branch1LinkNodes, branch2LinkNodes));
+            // 
+            results.ForEach(o =>
+            {
+                var secondLightEdge = FindEdgeByNode(branch1LinkPath.Edges.Union(branch2LinkPath.Edges).ToList(), o.Second.Id);
+                var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
+                var secondEdge = secondLightLinkPath.Edges.First();
+                AddToBranchPtPairs(secondEdge.Edge, secondLightLinkPath.Start);
+            });
+            return results;
+        }
         private void AddToBranchPtPairs(Line branch,Point3d crossPt)
         {
             bool isExist = BranchPtPairs
@@ -191,12 +348,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 BranchPtPairs.Add(Tuple.Create(branch, crossPt));
             }
         }
-
         private Tuple<List<ThLightNode>, List<ThLightNode>> FindPreNextNodes(
-            ThLinkPath linkPath,string preEdgeId,Point3d branchPt)
+            List<ThLightEdge> linkPathEdges,ThLightEdge preEdge,Point3d branchPt)
         {
-            var preEdge = FindEdge(preEdgeId);
-            var currentEdges = GetEdgeSamePathSegment(linkPath.Edges, preEdge.Id);
+            var currentEdges = GetEdgeSamePathSegment(linkPathEdges, preEdge.Id);
             var twoHalfs = Split(currentEdges.Select(o => o.Edge).ToList(), preEdge.Edge);
             var prevHalfEdges = FindEdges(currentEdges, twoHalfs.Item1);
             var nextHalfEdges = FindEdges(currentEdges, twoHalfs.Item2);
@@ -204,8 +359,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var prevLinkNodes = TakeLightNodes(prevHalfEdges, branchPt, NumberLoop);
             var nextLinkNodes = TakeLightNodes(nextHalfEdges, branchPt, NumberLoop);
             prevLinkNodes = FilterPrevLinkNodes(prevLinkNodes);
-            prevLinkNodes = Different(prevLinkNodes);
-            nextLinkNodes = Different(nextLinkNodes);
+            prevLinkNodes = DifferentByNumber(prevLinkNodes);
+            nextLinkNodes = DifferentByNumber(nextLinkNodes);
             nextLinkNodes = nextLinkNodes
                 .Where(o => !prevLinkNodes.Select(n => n.Number)
                 .Contains(o.Number))
@@ -213,6 +368,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return Tuple.Create(prevLinkNodes, nextLinkNodes);
         }
 
+        //private List<ThLightNode> FindBranchLinkNodes(
+        //    List<ThLightEdge> linkPathEdges, ThLightEdge branchEdge, Point3d branchPt)
+        //{
+        //    var currentEdges = GetEdgeSamePathSegment(linkPathEdges, branchEdge.Id);
+        //    var linkNodes = TakeLightNodes(currentEdges, branchPt, NumberLoop);
+        //    linkNodes = DifferentByNumber(linkNodes);
+        //    return linkNodes;
+        //}
+        private List<ThLightNode> FindBranchLinkNodes(
+            List<ThLightEdge> linkPathEdges, ThLightEdge branchEdge)
+        {
+            var currentEdges = GetEdgeSamePathSegment(linkPathEdges, branchEdge.Id);
+            var linkNodes = currentEdges.SelectMany(e => e.LightNodes).ToList(); 
+            linkNodes = DifferentByPosition(linkNodes);
+            return linkNodes;
+        }
         private List<ThLightNodeLink> FindNodeLinks(List<ThLightNode> nodes,
             List<ThLightNode> firstBranchNodes, 
             List<ThLightNode> secondBranchNodes)
@@ -220,48 +391,29 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<ThLightNodeLink>(); 
             for(int i=0;i< nodes.Count;i++)
             {
-                int firstIndex = -1;
+                var linkNodes = new List<ThLightNode>();
                 for (int j = 0; j < firstBranchNodes.Count; j++)
                 {
                     if(nodes[i].Number == firstBranchNodes[j].Number)
                     {
-                        firstIndex = j;
-                        break;
+                        linkNodes.Add(firstBranchNodes[j]);
                     }
                 }
-                int secondIndex = -1; 
                 for (int j = 0; j < secondBranchNodes.Count; j++)
                 {
                     if (nodes[i].Number == secondBranchNodes[j].Number)
                     {
-                        secondIndex = j;
-                        break;
+                        linkNodes.Add(secondBranchNodes[j]);
                     }
                 }
-                if(firstIndex>=0 && secondIndex>=0)
+                if(linkNodes.Count>0)
                 {
-                    if(nodes[i].Position.DistanceTo(firstBranchNodes[firstIndex].Position)<=
-                        nodes[i].Position.DistanceTo(secondBranchNodes[secondIndex].Position))
-                    {
-                        results.Add(BuildLightNodeLink(nodes[i], firstBranchNodes[firstIndex]));
-                    }
-                    else
-                    {
-                        results.Add(BuildLightNodeLink(nodes[i], secondBranchNodes[secondIndex]));
-                    }
-                }
-                else if (firstIndex >= 0)
-                {
-                    results.Add(BuildLightNodeLink(nodes[i], firstBranchNodes[firstIndex]));
-                }
-                else if(secondIndex >= 0)
-                {
-                    results.Add(BuildLightNodeLink(nodes[i], secondBranchNodes[secondIndex]));
+                    results.Add(BuildLightNodeLink(nodes[i],
+                        linkNodes.OrderBy(o=> nodes[i].Position.DistanceTo(o.Position)).First()));
                 }
             }
             return results;
         }
-
         private ThLightNodeLink BuildLightNodeLink(ThLightNode first, ThLightNode second)
         {
             var edges = new List<Line>();
@@ -274,7 +426,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 Edges= edges,
             };
         }
-
         private List<ThLightNode> FilterPrevLinkNodes(List<ThLightNode> nodes)
         {
             var results = new List<ThLightNode>();
@@ -295,7 +446,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }            
             return results;
         }
-
         private List<ThLightNode> TakeLightNodes(List<ThLightEdge> edges, Point3d startPt,int number)
         {
             var results = new List<ThLightNode>();
@@ -306,7 +456,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-
         private List<ThLightNode> SortNodes(List<ThLightEdge> edges,Point3d startPt)
         {
             // 1、根据edges所在的路径（从startPt开始）
@@ -321,7 +470,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             nodes = nodes.OrderBy(n => n.Position.DistanceTo(poly)).ToList();
             return nodes;
         }
-
         private List<ThLightEdge> FindEdges(List<ThLightEdge> edges,List<Line> lines)
         {
             var results = new List<ThLightEdge>();
@@ -331,7 +479,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-
         private List<ThLightEdge> GetEdgeSamePathSegment(List<ThLightEdge> edges,string edgeId)
         {
             // 从一个链路上再细分成几段，定义为同一段上的分段
@@ -347,7 +494,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightEdge>();
             }
         }
-
         private Tuple<List<Line>, List<Line>> Split(List<Line> lines, Line middle)
         {
             int index = lines.IndexOf(middle);
@@ -367,7 +513,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return Tuple.Create(prevHalfs, nextHalfs);
         }
-
         private List<string> FindPreEdgeIds()
         {
             return Links
@@ -376,7 +521,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Distinct()
                 .ToList();
         }
-
         private ThLinkPath FindLinkPath(string id)
         {
             var res = Links.Where(o => o.Edges.Select(e => e.Id).Contains(id));
@@ -389,7 +533,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return null;
             }
         }
-
         private List<List<ThLightEdge>> SplitSameLinks(List<ThLightEdge> sameLinkEdges)
         {
             var links = new List<List<ThLightEdge>>();
@@ -414,7 +557,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return links;
         }
-
         private List<Line> GetSamePathEdges(List<Line> edges)
         {
             // 获取与第一段在同一段上的路线
@@ -438,13 +580,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-
         private List<ThLightEdge> GetSamePathEdges(List<ThLightEdge> edges)
         {
             var sameLines = GetSamePathEdges(edges.Select(o => o.Edge).ToList());
             return edges.Where(o => sameLines.Contains(o.Edge)).ToList();
         }
-
         private List<string> FindBranches(string preId)
         {
             return Links
@@ -454,12 +594,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Select(l=>l.Edges[0].Id)
                 .ToList();
         }
-
         private ThLightEdge FindEdge(string id)
         {
             return Edges.Where(o => o.Id == id).FirstOrDefault();
         }
-
         private ThLightEdge FindEdgeByNode(List<ThLightEdge> edges , string nodeId)
         {
             return edges
@@ -467,7 +605,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Contains(nodeId))
                 .FirstOrDefault();
         }
-
         private ThLightEdge FindEdge(List<ThLightEdge> edges, Line edge)
         {
             int index = edges.Select(o => o.Edge).ToList().IndexOf(edge);
@@ -480,18 +617,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new ThLightEdge();
             }
         }
-
         private bool IsValid(ThLightEdge edge)
         {
             return edge != null && !string.IsNullOrEmpty(edge.Id);
         }
-
         private List<ThLightNode> SelectNumberNodes(List<ThLightEdge> edges)
         {
             return edges.SelectMany(e => e.LightNodes).ToList();
         }
-
-        private List<ThLightNode> Different(List<ThLightNode> lightNodes)
+        private List<ThLightNode> DifferentByNumber(List<ThLightNode> lightNodes)
         {
             var results = new List<ThLightNode>();
             lightNodes.ForEach(o =>
@@ -502,6 +636,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             });
             return results;
+        }
+        private List<ThLightNode> DifferentByPosition(List<ThLightNode> lightNodes)
+        {
+            var results = new List<ThLightNode>();
+            lightNodes.ForEach(o =>
+            {
+                if (!results.Select(r => r.Position).ToList().IsContains(o.Position)) 
+                {
+                    results.Add(o);
+                }
+            });
+            return results;
+        }
+        private bool IsInSameLinkPath(List<string> edgeIds)
+        {
+            return Links.Where(l=> GetEdgeIds(l.Edges).IsContains(edgeIds)).Any();
         }
     }
 }

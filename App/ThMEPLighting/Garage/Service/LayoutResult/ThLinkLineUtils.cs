@@ -139,6 +139,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return null;
         }
+
+        public static List<Line> FindBranches(this List<Line> crosses, Line first, Line second)
+        {
+            var results = new List<Line>();
+            int firstIndex = crosses.IndexOf(first);
+            int secondIndex = crosses.IndexOf(second);
+            for (int i = 0; i < crosses.Count; i++)
+            {
+                if (i != firstIndex && i != secondIndex)
+                {
+                    results.Add(crosses[i]);
+                }
+            }
+            return results;
+        }
         public static Line Merge(this Line first,Line second)
         {
             // 对于分支线可能对很短，需要与其相邻的线合并
@@ -209,6 +224,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
             }            
             return pts.CreatePolyline();
+        }
+        public static bool IsContains(this List<string> container, List<string> subIds)
+        {
+            return subIds.Where(o => !container.Contains(o)).Any();
+        }
+        public static bool IsContains(this List<Point3d> pts, Point3d pt, double tolerance = 1.0)
+        {
+            return pts.Contains(pt) || pts.Where(o => o.DistanceTo(pt) <= tolerance).Any();
         }
     }
 }
