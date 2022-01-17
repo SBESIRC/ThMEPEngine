@@ -14,7 +14,6 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem;
 using ThMEPElectrical.SecurityPlaneSystem.GuardTourSystem.LayoutService;
-using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
@@ -62,11 +61,8 @@ namespace ThMEPElectrical.Command
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    var blk = frame.Clone() as BlockReference;
-                    var boundary = CommonService.GetBlockInfo(blk).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    ObjectIdCollection dBObject = new ObjectIdCollection();
-                    dBObject.Add(obj);
-                    frameLst.Add(boundary, dBObject);
+                    var boundary = ThElectricalCommonService.GetFrameBlkPolyline(frame);
+                    frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
                 var pt = frameLst.First().Key.StartPoint;

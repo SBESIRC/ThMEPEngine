@@ -28,7 +28,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
-            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit:10).CreateLogger();
 
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
 
@@ -63,6 +63,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
+                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
@@ -173,19 +174,35 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     try
                     {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
+                        if(!adb.Layers.Contains(layerNames))
+                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
                     }
                     catch { }
                 }
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
+                    {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        try
+                        {
+                            partitionpro.ProcessAndDisplay();
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                        continue;
+                    }
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
                     {
                         try
                         {
-                            partition.ProcessAndDisplay(layerNames, 30);
+                            partition.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
@@ -196,7 +213,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            //layoutPara.Dispose();
         }
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
@@ -237,7 +253,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 //rst = geneAlgorithm.Run(histories, recordprevious);
                 rst = geneAlgorithm.Run2(histories, recordprevious);
             }
-            catch
+            catch(Exception ex)
             {
                 ;
             }
@@ -249,28 +265,37 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
-                var layerNames = "solutions" + k.ToString();
-                using (AcadDatabase adb = AcadDatabase.Active())
-                {
-                    try
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                    }
-                    catch { }
-                }
-
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
                     {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                         try
                         {
-                            partition.ProcessAndDisplay(layerNames, 30);
+                            partitionpro.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
-                            partition.Dispose();
+                            ;
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        ParkingPartition partition = new ParkingPartition();
+                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                        {
+                            try
+                            {
+                                partition.ProcessAndDisplay();
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex.Message);
+                                partition.Dispose();
+                            }
                         }
                     }
                 }

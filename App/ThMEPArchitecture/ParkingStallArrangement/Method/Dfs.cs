@@ -283,9 +283,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var orderRst = lineEx.OrderBy(lex => lex.Segline.GetCenterPt().X).ThenByDescending(lex => lex.Segline.GetCenterPt().Y).ToList();//从左向右，从上到下
             return orderRst;
         }
-        public static List<List<Line>> GetDichotomySegline(OuterBrder outerBrder)
+        public static List<List<SegLineEx>> GetDichotomySegline(OuterBrder outerBrder)
         {
-            var seglinesList = new List<List<Line>>();
+            var seglinesList = new List<List<SegLineEx>>();
             var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
             var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
 
@@ -318,6 +318,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return seglinesList;
         }
 
+        /// <summary>
+        /// 生成一种随机的分割线方案
+        /// </summary>
+        /// <param name="outerBrder"></param>
+        /// <returns></returns>
         public static List<SegLineEx> GetRandomSeglines(OuterBrder outerBrder)
         {
             var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一

@@ -80,6 +80,11 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
         }
 
+        public static bool Contains(this AcPolygon polygon, MPolygon mPolygon)
+        {
+            return polygon.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
+        }
+
         public static bool Intersects(this AcPolygon polygon, Entity entity)
         {
             return polygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());

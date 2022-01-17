@@ -82,7 +82,14 @@ namespace ThMEPLighting.DSFEL.Service
                 });
 
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                getDoors = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+                var originDoors = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+                foreach (var door in originDoors)
+                {
+                    if (!getDoors.Any(x => x.Intersects(door)))
+                    {
+                        getDoors.Add(door);
+                    }
+                }
 
                 var oringinPolys = polyline.Clone() as Polyline;
                 originTransformer.Reset(oringinPolys);

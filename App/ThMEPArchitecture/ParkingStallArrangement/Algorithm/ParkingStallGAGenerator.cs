@@ -112,7 +112,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public int GetMaximumNumber_(LayoutParameter layoutPara, GaParameter gaPara)
         {
-            layoutPara.Set(Genome);
+            var rst2 = layoutPara.Set(Genome);
+            if (!rst2) return 0;
 
             Random rand = new Random();
             int rst = rand.Next(200);
@@ -123,8 +124,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //Fitness method
         public int GetMaximumNumber(LayoutParameter layoutPara, GaParameter gaPara, ParkingStallArrangementViewModel parameterViewModel)
         {
-            layoutPara.Set(Genome);
+            var rst = layoutPara.Set(Genome);
+            if (!rst) return 0;
+            GeoUtilities.LogMomery("SolutionStart: ");
             int result = GetParkingNums(layoutPara, parameterViewModel);
+            GeoUtilities.LogMomery("SolutionEnd: ");
             //Thread.Sleep(3);
             //int result = Convert.ToInt32(Regex.Match(Guid.NewGuid().ToString(), @"\d+").Value);
             ParkingStallCount = result;
@@ -140,7 +144,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
         public int GetMaximumNumberFast(LayoutParameter layoutPara, GaParameter gaPara)
         {
-            layoutPara.Set(Genome);
+            var rst = layoutPara.Set(Genome);
+            if (!rst) return 0;
             int result = GetParkingNumsFast(layoutPara);
             ParkingStallCount = result;
             return result;
@@ -180,8 +185,36 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
+                GeoUtilities.LogMomery("UnitStart: ");
+                var use_partition_pro = true;
+                if (use_partition_pro)
+                {
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    try
+                    {
+                        var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());
+                        if (CachedPartitionCnt.ContainsKey(partitionBoundary))
+                        {
+                            count += CachedPartitionCnt[partitionBoundary];
+                        }
+                        else
+                        {
+                            var subCnt = partitionpro.CalNumOfParkingSpaces();
+                            CachedPartitionCnt.Add(partitionBoundary, subCnt);
+                            System.Diagnostics.Debug.WriteLine($"Sub area count: {CachedPartitionCnt.Count}");
+                            count += subCnt;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
+                    continue;
+                }
+
                 ParkingPartition partition = new ParkingPartition();
-                if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
                 {
                     try
                     {
@@ -294,6 +327,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             LowerBound = GaPara.MinValues[i] + value;
             UpperBound = GaPara.MaxValues[i] + value;
         }
+
+        private void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+        }
+
         #region
         //第一代初始化
         private List<Gene> ConvertLineToGene(int index)
@@ -357,6 +398,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     //Draw.DrawSeg(solution);
                     solutions.Add(solution);
                 }
+                var orgSolution = new Chromosome();
+                orgSolution.Logger = this.Logger;
+                var orgGenome = ConvertLineToGene();//创建初始基因序列
+                orgSolution.Genome = orgGenome;
+                //Draw.DrawSeg(solution);
+                solutions.Add(orgSolution);
             }
             return solutions;
         }
@@ -445,6 +492,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             {
                 s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
                 System.Diagnostics.Debug.WriteLine($"{iterationIndex}.{index++}: { s.ParkingStallCount}");
+                ReclaimMemory();
             }
             );
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
@@ -635,7 +683,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
         {
             Logger?.Information("进行选择");
-            inputSolution.ForEach(s => s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel));
+            inputSolution.ForEach(s =>
+            {
+                s.GetMaximumNumber(LayoutPara, GaPara, ParameterViewModel);
+                ReclaimMemory();
+            });
             //inputSolution.ForEach(s => s.GetMaximumNumberFast(LayoutPara, GaPara));
             var sorted = inputSolution.OrderByDescending(s => s.ParkingStallCount).ToList();
             maxNums = sorted.First().ParkingStallCount;

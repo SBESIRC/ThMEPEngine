@@ -217,22 +217,6 @@ namespace ThMEPArchitecture.PartitionLayout
             bool judge_carmodulebox = true, bool reverse_dividesequence = false, bool adjust_pillar_edge = false, bool judge_modulebox = false,
             bool gfirstpillar = false, bool allow_pillar_in_wall = false, bool judge_in_obstacles = false, bool glastpillar = true, List<Polyline> crs = null)
         {
-            //var pointloc = line.StartPoint.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisCarLength * 1.5));
-            //var lsbuffer = (new Line(line.StartPoint, pointloc)).Buffer(1);
-            //var crossedcar = CarSpatialIndex.SelectCrossingPolygon(lsbuffer).Cast<Polyline>();
-            //if (crossedcar.Count() > 0)
-            //{
-            //    var carpt = crossedcar.First().Vertices().Cast<Point3d>().OrderBy(t => t.DistanceTo(line.StartPoint)).First();
-            //    var pt_online = line.GetClosestPointTo(carpt, true);
-            //    if (line.GetClosestPointTo(pt_online, false).DistanceTo(pt_online) < 1)
-            //        line = new Line(pt_online, line.EndPoint);
-            //    else
-            //    {
-            //        var dis = DisCarWidth - pt_online.DistanceTo(line.StartPoint);
-            //        line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * dis)), line.EndPoint);
-            //    }
-            //}
-            //lsbuffer.Dispose();
             if (allow_pillar_in_wall && GeneratePillars)
             {
                 var dis = ClosestPointInVertCurves(line.StartPoint, line, IniLanes.Select(e => e.Line).ToList());
@@ -961,7 +945,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// Unify lane direction.
         /// </summary>
         /// <param name="lane"></param>
-        public static void UnifyLaneDirection(ref Line lane, List<ParkingPartition.Lane> iniLanes)
+        private static void UnifyLaneDirection(ref Line lane, List<ParkingPartition.Lane> iniLanes)
         {
             var line = CreateLine(lane);
             var lanes = iniLanes.Select(e => e.Line).Where(e => IsPerpLine(line, e)).ToList();

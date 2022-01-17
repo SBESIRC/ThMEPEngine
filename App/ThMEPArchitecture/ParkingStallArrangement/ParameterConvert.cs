@@ -18,7 +18,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public static class ParameterConvert
     {
-        public static bool ConvertParametersToCalculateCarSpots(LayoutParameter layoutPara, int j, ref ParkingPartition partition, ParkingStallArrangementViewModel vm = null, Logger logger = null)
+        public static bool ConvertParametersToPartition(LayoutParameter layoutPara, int j, ref ParkingPartition partition, ParkingStallArrangementViewModel vm = null, Logger logger = null)
         {
             int index = layoutPara.AreaNumber[j];
             layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
@@ -71,7 +71,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             sw.WriteLine(w);
             sw.WriteLine(l);
             sw.Close();
+            sw.Dispose();
             fs1.Close();
+            fs1.Dispose();
 #endif
             inilanes = inilanes.Distinct().ToList();
             partition = new ParkingPartition(outerWallLines, inilanes, null, bound, buildingBoxes, vm);
@@ -91,7 +93,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
         }
 
-        public static void DebugParkingPartitionO(LayoutParameter layoutPara, int j, ref ParkingPartitionBackup partition)
+        public static void ConvertParametersToPartitionPro(LayoutParameter layoutPara, int j, ref ParkingPartitionPro partition, ParkingStallArrangementViewModel vm = null)
         {
             int index = layoutPara.AreaNumber[j];
             layoutPara.Id2AllSegLineDic.TryGetValue(index, out List<Line> lanes);
@@ -124,9 +126,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 #endif
             inilanes = inilanes.Distinct().ToList();
             var obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(bound).Cast<Polyline>().ToList();
-            partition = new ParkingPartitionBackup(outerWallLines, inilanes, obstacles, bound);
+            var buildingBoxes = new List<Polyline>();
+            foreach (var obs in buildingObstacleList)
+            {
+                Extents3d ext = new Extents3d();
+                foreach (var o in obs)
+                {
+                    if (boundary.Contains(o) || boundary.Intersect(o, Intersect.OnBothOperands).Count > 0)
+                    {
+                        ext.AddExtents(o.GeometricExtents);
+                    }
+                }
+                if (ext.ToExtents2d().GetArea() >= 2 * 10e7 && ext.ToExtents2d().GetArea() < 10e15)
+                    buildingBoxes.Add(ext.ToRectangle());
+            }
+            partition = new ParkingPartitionPro(outerWallLines, inilanes, obstacles, bound,vm);
+            partition.BuildingBoxes = buildingBoxes;
             partition.ObstaclesSpatialIndex = ObstaclesSpatialIndex;
         }
-
     }
 }

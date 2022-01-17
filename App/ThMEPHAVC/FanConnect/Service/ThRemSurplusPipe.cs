@@ -50,7 +50,7 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             foreach (var fcu in AllFan)
             {
-                ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu.FanPoint);
+                ThFanConnectUtils.FindFcuNode(treeModel.RootNode, fcu);
             }
             FindBadNode(treeModel.RootNode);
             //找到图纸上对应的线，进行删除

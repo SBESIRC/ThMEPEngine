@@ -64,8 +64,8 @@
     <Compile Include="ParkingStallArrangement\Method\PtTools.cs" />
     <Compile Include="ParkingStallArrangement\Model\GaParameter.cs" />
     <Compile Include="ParkingStallArrangement\Model\LayoutParameter.cs" />
-    <Compile Include="PartitionLayout\ParkingPartitionBackMain.cs" />
-    <Compile Include="PartitionLayout\ParkingPartitionBackSucceed.cs" />
+    <Compile Include="PartitionLayout\ParkingPartitionProMain.cs" />
+    <Compile Include="PartitionLayout\ParkingPartitionProSucceed.cs" />
     <Compile Include="PartitionLayout\ParkingPartitionSucceed.cs" />
     <Compile Include="PartitionLayout\PartitionFast.cs" />
     <Compile Include="ParkingStallArrangement\GenerateParkingStallDirectlyCmd.cs" />

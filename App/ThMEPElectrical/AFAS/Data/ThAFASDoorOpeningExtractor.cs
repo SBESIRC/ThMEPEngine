@@ -259,31 +259,12 @@ namespace ThMEPElectrical.AFAS.Data
 
         public ThStoreyInfo Query(Entity entity)
         {
-            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity)); ;
+            var results = StoreyInfos.Where(o => o.Boundary.EntityContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
-        }
-
-        public void Print(Database database)
-        {
-            using (var db = AcadDatabase.Use(database))
-            {
-                var doorIds = new ObjectIdList();
-                Doors.ForEach(o =>
-                {
-                    o.Outline.ColorIndex = ColorIndex;
-                    o.Outline.SetDatabaseDefaults();
-                    doorIds.Add(db.ModelSpace.Add(o.Outline));
-                });
-                if (doorIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), doorIds);
-                }
-            }
         }
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            //Doors.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
             foreach (var o in Doors)
             {
                 if (GroupOwner.ContainsKey(o.Outline ) == false)

@@ -288,52 +288,6 @@ namespace ThMEPEngineCore.CAD
             return pt.DistanceTo(line.GetClosestPointTo(pt, false)) <= tolerance;
         }
         /// <summary>
-        /// 点在实体内部,不在边界
-        /// </summary>
-        /// <param name="ent"></param>
-        /// <param name="pt"></param>
-        /// <returns></returns>
-        public static bool IsContains(this Entity ent, Point3d pt)
-        {
-            if (ent is Polyline polyline)
-            {
-                return polyline.Contains(pt);
-            }
-            else if (ent is MPolygon mPolygon)
-            {
-                return mPolygon.Contains(pt);
-            }
-            else if (ent is Circle circle)
-            {
-                return pt.DistanceTo(circle.Center) < circle.Radius;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        /// <summary>
-        /// A包括B，A的边界和B的边界可能有重复
-        /// </summary>
-        /// <param name="A">Polygon A</param>
-        /// <param name="B">Polygon B</param>
-        /// <returns></returns>
-        public static bool IsContains(this Entity A, Entity B)
-        {
-            if (A is Polyline firstPoly)
-            {
-                return Contains(firstPoly, B);
-            }
-            else if (A is MPolygon mPolygon)
-            {
-                return Contains(mPolygon, B);
-            }
-            else
-            {
-                return false;
-            }
-        }
-        /// <summary>
         /// A完全包含B（B没有任何一个点在A的边界上，都在A的里面）
         /// </summary>
         /// <param name="first">A</param>
@@ -361,65 +315,7 @@ namespace ThMEPEngineCore.CAD
                 return false;
             }
         }
-        private static bool Contains(Polyline firstPoly, Entity entity)
-        {
-            if (entity is Polyline secondPoly)
-            {
-                return firstPoly.Contains(secondPoly);
-            }
-            else if (entity is MPolygon mPolygon)
-            {
-                return firstPoly.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
-            }
-            else if(entity is Line line)
-            {
-                return firstPoly.Contains(line);
-            }
-            else
-            {
-                return false;
-            }
-        }
-        private static bool Contains(MPolygon firstPolygon, Entity entity)
-        {
-            if (entity is Polyline secondPoly)
-            {
-                return firstPolygon.ToNTSPolygon().Contains(secondPoly.ToNTSPolygon());
-            }
-            else if (entity is MPolygon mPolygon)
-            {
-                return firstPolygon.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
-            }
-            else
-            {
-                return false;
-            }
-        }
 
-        public static double CalculatePublicSector(this Line first, Line second)
-        {
-            //计算两条平行线公共部分
-            if (first.LineDirection().IsParallelToEx(second.LineDirection()))
-            {
-                var plane = new Plane(first.StartPoint, first.LineDirection());
-                var mt = Matrix3d.WorldToPlane(plane);
-                var pt1 = second.StartPoint.TransformBy(mt);
-                var pt2 = second.EndPoint.TransformBy(mt);
-                var secondMinZ = Math.Min(pt1.Z, pt2.Z);
-                var secondMaxZ = Math.Max(pt1.Z, pt2.Z);
-                if (secondMaxZ <= 0 || secondMinZ >= first.Length)
-                {
-                    return 0.0;
-                }
-                var bottom = Math.Max(0, secondMinZ);
-                var top = Math.Min(first.Length, secondMaxZ);
-                return top - bottom;
-            }
-            else
-            {
-                return 0.0;
-            }
-        }
         public static List<Point3d> GetPoints(this Line line)
         {
             var result = new List<Point3d>();

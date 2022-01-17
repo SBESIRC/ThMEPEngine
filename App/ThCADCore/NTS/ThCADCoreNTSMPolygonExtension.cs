@@ -192,6 +192,16 @@ namespace ThCADCore.NTS
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
 
+        public static bool Contains(this MPolygon mPolygon, Curve curve)
+        {
+            return mPolygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
+        }
+
+        public static bool Contains(this MPolygon mPolygon, MPolygon mPolygon2)
+        {
+            return mPolygon.ToNTSPolygon().Contains(mPolygon2.ToNTSPolygon());
+        }
+
         public static bool Intersects(this MPolygon mPolygon, Entity entity)
         {
             return mPolygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());

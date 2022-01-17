@@ -40,7 +40,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             var points = sprinklers
                     .OfType<ThSprinkler>()
                     .Where(o => o.Category == Category)
-                    .Where(o => entity.IsContains(o.Position))
+                    .Where(o => entity.EntityContains(o.Position))
                     .Select(o => o.Position)
                     .ToList();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(PipeLine);

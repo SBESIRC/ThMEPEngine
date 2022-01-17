@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
 using ThMEPHVAC.FanConnect.Service;
 using ThMEPHVAC.FanLayout.Service;
@@ -62,27 +63,41 @@ namespace ThMEPHVAC.FanConnect.Command
                     {
                         return;
                     }
+                    var transformer = new ThMEPOriginTransformer(startPt);
+                    var mt = Matrix3d.Displacement(startPt.GetVectorTo(Point3d.Origin));
                     //获取剪力墙
                     var shearWalls = ThBuildElementExtractService.GetShearWalls();
                     //获取结构柱
                     var columns = ThBuildElementExtractService.GetColumns();
                     //获取房间框线
                     var rooms = ThBuildElementExtractService.GetBuildRooms();
+                    
+                    foreach (var f in fucs)
+                    {
+                        transformer.Transform(f.FanPoint);
+                        transformer.Transform(f.FanObb);
+                    }
+                    transformer.Transform(startPt);
                     //生成管路路由
                     var pipeService = new ThCreatePipeService();
-                    pipeService.PipeStartPt = startPt;
+                    pipeService.PipeStartPt = startPt; 
                     pipeService.PipeWidth = 300.0;
                     pipeService.EquipModel = fucs;
                     foreach (var wall in shearWalls)
                     {
+                        transformer.Transform(wall.Outline);
                         pipeService.AddObstacleHole(wall.Outline);
                     }
                     foreach (var column in columns)
                     {
+                        transformer.Transform(column.Outline);
                         pipeService.AddObstacleHole(column.Outline);
                     }
                     foreach (var room in rooms)
                     {
+                        room.UpgradeOpen();
+                        transformer.Transform(room);
+                        room.DowngradeOpen();
                         pipeService.AddObstacleRoom(room);
                     }
                     var plines = pipeService.CreatePipeLine(1);
@@ -90,6 +105,21 @@ namespace ThMEPHVAC.FanConnect.Command
                     foreach (var pl in plines)
                     {
                         toDbServiece.InsertEntity(pl, "AI-水管路由");
+                        transformer.Reset(pl);
+                    }
+                    foreach (var wall in shearWalls)
+                    {
+                        transformer.Reset(wall.Outline);
+                    }
+                    foreach (var column in columns)
+                    {
+                        transformer.Reset(column.Outline);
+                    }
+                    foreach (var room in rooms)
+                    {
+                        room.UpgradeOpen();
+                        transformer.Reset(room);
+                        room.DowngradeOpen();
                     }
                     return;
                 }

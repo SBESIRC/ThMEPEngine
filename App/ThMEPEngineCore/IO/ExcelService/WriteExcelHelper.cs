@@ -14,7 +14,6 @@ namespace ThMEPEngineCore.IO.ExcelService
         public WriteExcelHelper(string excelPath)
         {
             saveExcelPath = excelPath;
-            
         }
         public void DeleteExcelSheet(List<string> sheetNames,bool isDelete) 
         {
@@ -37,6 +36,54 @@ namespace ThMEPEngineCore.IO.ExcelService
                 {
                     workbook.RemoveSheetAt(delSheetIndex[i]);
                 }
+                using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
+                {
+                    workbook.Write(filess);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //防止解析报错内存资源没有释放
+                if (null != workbook)
+                    workbook.Close();
+            }
+        }
+        public void DeleteExcelRow(string sheetName, int startDelRowIndex, int endDexRowIndex) 
+        {
+            IWorkbook workbook = null;
+            try
+            {
+                workbook = ReadExcelToMemory(saveExcelPath, true);
+                ISheet writeSheet = workbook.GetSheet(sheetName);
+                DeleteExcelSheetRows(writeSheet,startDelRowIndex,endDexRowIndex);
+                using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
+                {
+                    workbook.Write(filess);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            finally
+            {
+                //防止解析报错内存资源没有释放
+                if (null != workbook)
+                    workbook.Close();
+            }
+        }
+        public void DeleteExcelRow(int sheetIndex, int startDelRowIndex, int endDexRowIndex)
+        {
+            IWorkbook workbook = null;
+            try
+            {
+                workbook = ReadExcelToMemory(saveExcelPath, true);
+                ISheet writeSheet = workbook.GetSheetAt(sheetIndex);
+                DeleteExcelSheetRows(writeSheet, startDelRowIndex, endDexRowIndex);
                 using (FileStream filess = new FileStream(saveExcelPath, FileMode.Create, FileAccess.Write))
                 {
                     workbook.Write(filess);
@@ -141,6 +188,23 @@ namespace ThMEPEngineCore.IO.ExcelService
             {
                 if (null != workbook)
                     workbook.Close();
+            }
+        }
+        private void DeleteExcelSheetRows(ISheet writeSheet,int startDelRowIndex,int endDexRowIndex) 
+        {
+            if (null == writeSheet)
+                return;
+            int rowCount = writeSheet.LastRowNum;//获取总行数
+            var endRow = endDexRowIndex < 0 ? rowCount : endDexRowIndex;
+            //删除行后面的行号会改变,从最大的行开始删除
+            for (int i = endRow; i>startDelRowIndex; i--) 
+            {
+                if (i < 0)
+                    break;
+                var row = writeSheet.GetRow(i);
+                if (row == null)
+                    continue;
+                writeSheet.RemoveRow(row);
             }
         }
     }

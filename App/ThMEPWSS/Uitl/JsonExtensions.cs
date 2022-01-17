@@ -185,6 +185,18 @@ namespace ThMEPWSS.JsonExtensionsNs
                 yield return seg.EndPoint;
             }
         }
+        public static int MaxOrZero(this IEnumerable<int> source)
+        {
+            var max = 0;
+            foreach (var i in source)
+            {
+                if (i > max)
+                {
+                    max = i;
+                }
+            }
+            return max;
+        }
     }
     public static class JsonExtensions
     {

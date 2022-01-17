@@ -95,7 +95,7 @@ namespace ThMEPElectrical.DCL.Data
         {
             foreach (var item in OuterArchOutlineIdDic)
             {
-                if (item.Key.IsContains(hole))
+                if (item.Key.EntityContains(hole))
                 {
                     return item.Value;
                 }

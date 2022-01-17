@@ -207,12 +207,12 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public static HydrantData CollectData(AcadDatabase adb, GRect range)
         {
             FocusMainWindow();
-            var hehe = new HydrantData();
-            hehe.Range = range;
+            var data = new HydrantData();
+            data.Range = range;
             var segs = new List<GLineSegment>(THESAURUSREPERCUSSION * THESAURUSTOLERATION);
             var dtexts = new List<DBTextInfo>(THESAURUSREPERCUSSION * THESAURUSTOLERATION);
-            hehe.redlines = new HashSet<GLineSegment>(THESAURUSREPERCUSSION);
-            hehe.hatches = new HashSet<Geometry>(THESAURUSREPERCUSSION);
+            data.redlines = new HashSet<GLineSegment>(THESAURUSREPERCUSSION);
+            data.hatches = new HashSet<Geometry>(THESAURUSREPERCUSSION);
             var mi = typeof(ThCADCore.NTS.ThCADCoreNTSHatchExtension).GetMethod(THESAURUSCONDOM, BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public);
             var pr = Expression.Parameter(typeof(Hatch), ADMINISTRATIONS);
             var ToNTSGeometry = Expression.Lambda<Func<Hatch, Geometry>>(Expression.Call(null, mi, pr), pr).Compile();
@@ -268,9 +268,9 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                     }
                 }
             }
-            hehe.segs = segs.ToHashSet();
-            hehe.dtexts = dtexts;
-            return hehe;
+            data.segs = segs.ToHashSet();
+            data.dtexts = dtexts;
+            return data;
             void handle_entity(Entity entity, Matrix3d matrix, List<KeyValuePair<Geometry, Action>> fs)
             {
                 if (entity is Hatch hatch)
@@ -282,7 +282,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         var r = hatch.Bounds.ToGRect().TransformBy(matrix);
                         reg(fs, r, () =>
                         {
-                            hehe.hatches.Add(geo);
+                            data.hatches.Add(geo);
                         });
                     }
                     catch { }
@@ -311,7 +311,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                         {
                             if (UndergroundFireHydrantSystem.Extract.ThExtractHYDTPipeService.IsHYDTPipeLayer(entity.Layer))
                             {
-                                hehe.redlines.AddRange(GetGLineSegments(ln).Where(x => x.Length > THESAURUSACRIMONIOUS));
+                                data.redlines.AddRange(GetGLineSegments(ln).Where(x => x.Length > THESAURUSACRIMONIOUS));
                             }
                         });
                     }
@@ -590,7 +590,6 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const bool INTRAVASCULARLY = false;
         public const int THESAURUSDISINGENUOUS = 36;
         public const bool THESAURUSOBSTINACY = true;
-        public const int DISPENSABLENESS = 40;
         public const int SUPERLATIVENESS = 6;
         public const int THESAURUSREPERCUSSION = 4096;
         public const string DISORGANIZATION = "TCH_PIPE";
@@ -604,6 +603,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const string MULTIPROCESSING = "|";
         public const char SUPERREGENERATIVE = '$';
         public const string THESAURUSCOURIER = "$";
+        public const int QUOTATIONWITTIG = 500;
         public const int THESAURUSHYPNOTIC = 300;
         public const int QUOTATIONEDIBLE = 4;
         public const int INTROPUNITIVENESS = 3;
@@ -657,7 +657,6 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
             }
             Point3d selPt = default;
             Polygon selectArea = default;
-            List<Polygon> extraAreas = default;
             FireHydrantSystem GetCtx()
             {
                 FocusMainWindow();
@@ -718,388 +717,68 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                 ctx.SubPathList = subPathList;
                 return ctx;
             }
-            var TEXTHEIGHT = vm.CurrentDwgRatio is SEMITRANSPARENT ? THESAURUSSOMBRE : THESAURUSCOMPULSIVE;
-            MLeader DrawMLeader(string content, Point3d p1, Point3d p2)
-            {
-                var e = new MLeader();
-                var mt = new MText() { Contents = content, TextHeight = TEXTHEIGHT, ColorIndex = DISPENSABLENESS, };
-                ByLayer(mt);
-                e.MText = mt;
-                e.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
-                e.ArrowSize = THESAURUSSTAMPEDE;
-                e.DoglegLength = THESAURUSENTREPRENEUR;
-                e.LandingGap = THESAURUSSTAMPEDE;
-                e.ExtendLeaderToText = INTRAVASCULARLY;
-                e.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.LeftLeader);
-                e.SetTextAttachmentType(TextAttachmentType.AttachmentBottomOfTopLine, LeaderDirectionType.RightLeader);
-                e.AddLeaderLine(p1);
-                var bd = e.MText.Bounds.ToGRect();
-                var p3 = p2.OffsetY(bd.Height + HYPERDISYLLABLE);
-                if (p2.X < p1.X)
-                {
-                    p3 = p3.OffsetX(-bd.Width);
-                }
-                e.TextLocation = p3;
-                e.Layer = LeaderLayer;
-                DrawingQueue.Enqueue(adb => { adb.ModelSpace.Add(e); });
-                return e;
-            }
             var ctx = GetCtx();
             if (ctx == null) return;
-{ ThRainSystemService.ImportElementsFromStdDwg(); }
-            using (DocLock)
-            using (var adb = AcadDatabase.Active())
-            using (var tr = new _DrawingTransaction(adb))
             {
-                string GetEffectiveName(BlockReference br) => br.BlockTableRecord.IsNull ? string.Empty : (br.IsDynamicBlock || br.DynamicBlockTableRecord.IsValid ? adb.Element<BlockTableRecord>(br.DynamicBlockTableRecord).Name : br.Name);
-                if (adb.ModelSpace.OfType<BlockReference>().Where(br => GetEffectiveName(br) is DISINTEGRATIVELY).Any())
+                var TEXTHEIGHT = vm.CurrentDwgRatio is SEMITRANSPARENT ? THESAURUSSOMBRE : THESAURUSCOMPULSIVE;
+{ ThRainSystemService.ImportElementsFromStdDwg(); }
+                using (DocLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new _DrawingTransaction(adb))
                 {
-                    Active.Editor.WriteMessage(PHENYLHYDRAZONE);
-                }
-                LayerThreeAxes(new string[] { THESAURUSBLEMISH });
-                var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
-                mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
-                var pts = mlInfos.Select(x => x.BasePoint.ToNTSPoint(x)).Distinct().ToList();
-                var ptsf = GeoFac.CreateIntersectsSelector(pts);
-                switch (@case)
-                {
-                    case THESAURUSHOUSING:
+                    string GetEffectiveName(BlockReference br) => br.BlockTableRecord.IsNull ? string.Empty : (br.IsDynamicBlock || br.DynamicBlockTableRecord.IsValid ? adb.Element<BlockTableRecord>(br.DynamicBlockTableRecord).Name : br.Name);
+                    if (adb.ModelSpace.OfType<BlockReference>().Where(br => GetEffectiveName(br) is DISINTEGRATIVELY).Any())
+                    {
+                        Active.Editor.WriteMessage(PHENYLHYDRAZONE);
+                    }
+                    LayerThreeAxes(new string[] { THESAURUSBLEMISH });
+                    var mlInfos = new List<MLeaderInfo>(THESAURUSREPERCUSSION);
+                    var shootHints = new List<Point3dEx>();
+                    {
+                        mlInfos.AddRange(ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx).Distinct().Select(x => x._pt).Select(pt => MLeaderInfo.Create(pt, THESAURUSDEPLORE)));
+                        const double tol = QUOTATIONWITTIG;
+                        var pts = mlInfos.Select(x => x.BasePoint.ToNTSPoint(x)).Distinct().ToList();
+                        var getNearest = GeoFac.NearestNeighbourGeometryF(pts);
+                        IEnumerable<Point> getTargetPt(Point3d pt)
                         {
-                            var mainVisited = new List<Point3dEx>();
-                            var k = vm.StartNum - THESAURUSHOUSING;
-                            foreach (var mpt in ctx.MainPathList)
+                            var src = pt.ToNTSPoint();
+                            var npt = getNearest(src);
+                            if (npt is not null && src.Distance(npt) < tol)
                             {
-                                foreach (var ppt in mpt)
-                                {
-                                    mainVisited.Add(ppt);
-                                    foreach (var kv in ctx.BranchDic)
-                                    {
-                                        if (kv.Key.Equals(ppt))
-                                        {
-                                            foreach (var v in kv.Value)
-                                            {
-                                                foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                {
-                                                    var info = (MLeaderInfo)pt.UserData;
-                                                    if (info.Text == THESAURUSDEPLORE)
-                                                    {
-                                                        info.Text = vm.Prefix + ++k;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            foreach (var _mpt in ctx.SubPathList)
-                            {
-                                var mpt = _mpt.ToList();
-                                {
-                                    if (mpt.Count > THESAURUSHOUSING)
-                                    {
-                                        var first = mpt.First();
-                                        var last = mpt.Last();
-                                        var i = mainVisited.IndexOf(first);
-                                        var j = mainVisited.IndexOf(last);
-                                        var shouldReverse = INTRAVASCULARLY;
-                                        if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                        {
-                                            if (i > j) shouldReverse = THESAURUSOBSTINACY;
-                                        }
-                                        else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                        {
-                                            shouldReverse = THESAURUSOBSTINACY;
-                                        }
-                                        if (shouldReverse)
-                                        {
-                                            mpt.Reverse();
-                                        }
-                                    }
-                                }
-                                foreach (var ppt in mpt)
-                                {
-                                    foreach (var kv in ctx.BranchDic)
-                                    {
-                                        if (kv.Key.Equals(ppt))
-                                        {
-                                            foreach (var v in kv.Value)
-                                            {
-                                                foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                {
-                                                    var info = (MLeaderInfo)pt.UserData;
-                                                    if (info.Text == THESAURUSDEPLORE)
-                                                    {
-                                                        info.Text = vm.Prefix + ++k;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
+                                shootHints.Add(new Point3dEx(npt.ToPoint3d()));
+                                yield return npt;
                             }
                         }
-                        break;
-                    case THESAURUSPERMUTATION:
+                        switch (@case)
                         {
-                            void main()
-                            {
-                                var mainVisited = new List<Point3dEx>();
-                                var k = vm.StartNum - THESAURUSHOUSING;
-                                foreach (var _mpt in ctx.MainPathList)
+                            case THESAURUSHOUSING:
                                 {
-                                    var mpt = _mpt.ToList();
-                                    if (mpt.Count > THESAURUSSTAMPEDE)
-                                    {
-                                        var last = mpt.Last();
-                                        if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                        {
-                                            mpt.Reverse();
-                                        }
-                                    }
-                                    mainVisited.AddRange(mpt);
-                                    if (mpt.Count > THESAURUSSTAMPEDE)
-                                    {
-                                        if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                        {
-                                            foreach (var ppt in mpt)
-                                            {
-                                                foreach (var kv in ctx.BranchDic)
-                                                {
-                                                    if (kv.Key.Equals(ppt))
-                                                    {
-                                                        foreach (var v in kv.Value)
-                                                        {
-                                                            foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                            {
-                                                                var info = (MLeaderInfo)pt.UserData;
-                                                                if (info.Text == THESAURUSDEPLORE)
-                                                                {
-                                                                    info.Text = vm.Prefix + ++k;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            return;
-                                        }
-                                    }
-                                }
-                                foreach (var _mpt in ctx.SubPathList)
-                                {
-                                    var mpt = _mpt.ToList();
-                                    {
-                                        if (mpt.Count > THESAURUSHOUSING)
-                                        {
-                                            var first = mpt.First();
-                                            var last = mpt.Last();
-                                            var i = mainVisited.IndexOf(first);
-                                            var j = mainVisited.IndexOf(last);
-                                            var shouldReverse = INTRAVASCULARLY;
-                                            if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                            {
-                                                if (i > j) shouldReverse = THESAURUSOBSTINACY;
-                                            }
-                                            else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                            {
-                                                shouldReverse = THESAURUSOBSTINACY;
-                                            }
-                                            if (first._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                            {
-                                                shouldReverse = INTRAVASCULARLY;
-                                            }
-                                            else if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                            {
-                                                shouldReverse = THESAURUSOBSTINACY;
-                                            }
-                                            if (shouldReverse)
-                                            {
-                                                mpt.Reverse();
-                                            }
-                                        }
-                                    }
-                                    if (mpt.Count > THESAURUSSTAMPEDE)
-                                    {
-                                        if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                        {
-                                            foreach (var ppt in mpt)
-                                            {
-                                                foreach (var kv in ctx.BranchDic)
-                                                {
-                                                    if (kv.Key.Equals(ppt))
-                                                    {
-                                                        foreach (var v in kv.Value)
-                                                        {
-                                                            foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                            {
-                                                                var info = (MLeaderInfo)pt.UserData;
-                                                                if (info.Text == THESAURUSDEPLORE)
-                                                                {
-                                                                    info.Text = vm.Prefix + ++k;
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                            return;
-                                        }
-                                    }
-                                }
-                            }
-                            main();
-                        }
-                        break;
-                    case INTROPUNITIVENESS:
-                        {
-                            var mainVisited = new List<Point3dEx>();
-                            {
-                                var k = vm.StartNum - THESAURUSHOUSING;
-                                foreach (var mpt in ctx.MainPathList)
-                                {
-                                    foreach (var ppt in mpt)
-                                    {
-                                        mainVisited.Add(ppt);
-                                        foreach (var kv in ctx.BranchDic)
-                                        {
-                                            if (kv.Key.Equals(ppt))
-                                            {
-                                                foreach (var v in kv.Value)
-                                                {
-                                                    foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                    {
-                                                        var info = (MLeaderInfo)pt.UserData;
-                                                        if (info.Text == THESAURUSDEPLORE)
-                                                        {
-                                                            info.Text = vm.Prefix + ++k;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            {
-                                var prefix = THESAURUSDEPLORE;
-                                foreach (var _mpt in ctx.SubPathList)
-                                {
-                                    var mpt = _mpt.ToList();
-                                    {
-                                        if (mpt.Count > THESAURUSHOUSING)
-                                        {
-                                            var first = mpt.First();
-                                            var last = mpt.Last();
-                                            var i = mainVisited.IndexOf(first);
-                                            var j = mainVisited.IndexOf(last);
-                                            var shouldReverse = INTRAVASCULARLY;
-                                            if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                            {
-                                                if (i > j) shouldReverse = THESAURUSOBSTINACY;
-                                            }
-                                            else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
-                                            {
-                                                shouldReverse = THESAURUSOBSTINACY;
-                                            }
-                                            if (shouldReverse)
-                                            {
-                                                mpt.Reverse();
-                                            }
-                                        }
-                                    }
-                                    var k = THESAURUSSTAMPEDE;
-                                    if (mpt.Count > THESAURUSHOUSING)
-                                    {
-                                        var first = mpt.First();
-                                        var last = mpt.Last();
-                                        foreach (var ppt in new Point3dEx[] { first, last })
-                                        {
-                                            ctx.FireHydrantSystemIn.MarkList.TryGetValue(ppt, out string v);
-                                            if (v != null)
-                                            {
-                                                var m = Regex.Match(v, QUOTATIONPERISTALTIC);
-                                                if (m.Success)
-                                                {
-                                                    prefix = m.Groups[THESAURUSHOUSING].Value.ToLower();
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    foreach (var ppt in mpt)
-                                    {
-                                        foreach (var kv in ctx.BranchDic)
-                                        {
-                                            if (kv.Key.Equals(ppt))
-                                            {
-                                                foreach (var v in kv.Value)
-                                                {
-                                                    foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                    {
-                                                        var info = (MLeaderInfo)pt.UserData;
-                                                        if (info.Text == THESAURUSDEPLORE)
-                                                        {
-                                                            info.Text = vm.Prefix + prefix + ++k;
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        break;
-                    case QUOTATIONEDIBLE:
-                        {
-                            void main()
-                            {
-                                var mainVisited = new List<Point3dEx>();
-                                {
+                                    var mainVisited = new List<Point3dEx>();
                                     var k = vm.StartNum - THESAURUSHOUSING;
-                                    foreach (var _mpt in ctx.MainPathList)
+                                    foreach (var mpt in ctx.MainPathList)
                                     {
-                                        var mpt = _mpt.ToList();
-                                        if (mpt.Count > THESAURUSSTAMPEDE)
+                                        foreach (var ppt in mpt)
                                         {
-                                            var last = mpt.Last();
-                                            if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                            mainVisited.Add(ppt);
+                                            foreach (var kv in ctx.BranchDic)
                                             {
-                                                mpt.Reverse();
-                                            }
-                                        }
-                                        mainVisited.AddRange(mpt);
-                                        if (mpt.Count > THESAURUSSTAMPEDE)
-                                        {
-                                            if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                            {
-                                                foreach (var ppt in mpt)
+                                                if (kv.Key.Equals(ppt))
                                                 {
-                                                    foreach (var kv in ctx.BranchDic)
+                                                    foreach (var v in kv.Value)
                                                     {
-                                                        if (kv.Key.Equals(ppt))
+                                                        foreach (var pt in getTargetPt(v._pt))
                                                         {
-                                                            foreach (var v in kv.Value)
+                                                            var info = (MLeaderInfo)pt.UserData;
+                                                            if (info.Text == THESAURUSDEPLORE)
                                                             {
-                                                                foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
-                                                                {
-                                                                    var info = (MLeaderInfo)pt.UserData;
-                                                                    if (info.Text == THESAURUSDEPLORE)
-                                                                    {
-                                                                        info.Text = vm.Prefix + ++k;
-                                                                    }
-                                                                }
+                                                                info.Text = vm.Prefix + ++k;
                                                             }
                                                         }
                                                     }
                                                 }
-                                                return;
                                             }
                                         }
                                     }
-                                }
-                                {
-                                    var prefix = THESAURUSDEPLORE;
                                     foreach (var _mpt in ctx.SubPathList)
                                     {
                                         var mpt = _mpt.ToList();
@@ -1119,253 +798,548 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                                 {
                                                     shouldReverse = THESAURUSOBSTINACY;
                                                 }
-                                                if (first._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                                {
-                                                    shouldReverse = INTRAVASCULARLY;
-                                                }
-                                                else if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
-                                                {
-                                                    shouldReverse = THESAURUSOBSTINACY;
-                                                }
                                                 if (shouldReverse)
                                                 {
                                                     mpt.Reverse();
                                                 }
                                             }
                                         }
-                                        if (mpt.Count > THESAURUSHOUSING)
+                                        foreach (var ppt in mpt)
                                         {
-                                            var first = mpt.First();
-                                            var last = mpt.Last();
-                                            foreach (var ppt in new Point3dEx[] { first, last })
+                                            foreach (var kv in ctx.BranchDic)
                                             {
-                                                ctx.FireHydrantSystemIn.MarkList.TryGetValue(ppt, out string v);
-                                                if (v != null)
+                                                if (kv.Key.Equals(ppt))
                                                 {
-                                                    var m = Regex.Match(v, QUOTATIONPERISTALTIC);
-                                                    if (m.Success)
+                                                    foreach (var v in kv.Value)
                                                     {
-                                                        prefix = m.Groups[THESAURUSHOUSING].Value.ToLower();
-                                                        break;
+                                                        foreach (var pt in getTargetPt(v._pt))
+                                                        {
+                                                            var info = (MLeaderInfo)pt.UserData;
+                                                            if (info.Text == THESAURUSDEPLORE)
+                                                            {
+                                                                info.Text = vm.Prefix + ++k;
+                                                            }
+                                                        }
                                                     }
                                                 }
                                             }
                                         }
-                                        if (mpt.Count > THESAURUSSTAMPEDE)
+                                    }
+                                }
+                                break;
+                            case THESAURUSPERMUTATION:
+                                {
+                                    void main()
+                                    {
+                                        var mainVisited = new List<Point3dEx>();
+                                        var k = vm.StartNum - THESAURUSHOUSING;
+                                        foreach (var _mpt in ctx.MainPathList)
                                         {
-                                            if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                            var mpt = _mpt.ToList();
+                                            if (mpt.Count > THESAURUSSTAMPEDE)
                                             {
-                                                var k = vm.StartNum - THESAURUSHOUSING;
-                                                foreach (var ppt in mpt)
+                                                var last = mpt.Last();
+                                                if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
                                                 {
-                                                    foreach (var kv in ctx.BranchDic)
+                                                    mpt.Reverse();
+                                                }
+                                            }
+                                            mainVisited.AddRange(mpt);
+                                            if (mpt.Count > THESAURUSSTAMPEDE)
+                                            {
+                                                if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                {
+                                                    foreach (var ppt in mpt)
                                                     {
-                                                        if (kv.Key.Equals(ppt))
+                                                        foreach (var kv in ctx.BranchDic)
                                                         {
-                                                            foreach (var v in kv.Value)
+                                                            if (kv.Key.Equals(ppt))
                                                             {
-                                                                foreach (var pt in ptsf(v._pt.ToGRect(THESAURUSHOUSING).ToPolygon()))
+                                                                foreach (var v in kv.Value)
                                                                 {
-                                                                    var info = (MLeaderInfo)pt.UserData;
-                                                                    if (info.Text == THESAURUSDEPLORE)
+                                                                    foreach (var pt in getTargetPt(v._pt))
                                                                     {
-                                                                        info.Text = vm.Prefix + prefix + ++k;
+                                                                        var info = (MLeaderInfo)pt.UserData;
+                                                                        if (info.Text == THESAURUSDEPLORE)
+                                                                        {
+                                                                            info.Text = vm.Prefix + ++k;
+                                                                        }
                                                                     }
                                                                 }
                                                             }
                                                         }
                                                     }
+                                                    return;
                                                 }
-                                                return;
+                                            }
+                                        }
+                                        foreach (var _mpt in ctx.SubPathList)
+                                        {
+                                            var mpt = _mpt.ToList();
+                                            {
+                                                if (mpt.Count > THESAURUSHOUSING)
+                                                {
+                                                    var first = mpt.First();
+                                                    var last = mpt.Last();
+                                                    var i = mainVisited.IndexOf(first);
+                                                    var j = mainVisited.IndexOf(last);
+                                                    var shouldReverse = INTRAVASCULARLY;
+                                                    if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                    {
+                                                        if (i > j) shouldReverse = THESAURUSOBSTINACY;
+                                                    }
+                                                    else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                    {
+                                                        shouldReverse = THESAURUSOBSTINACY;
+                                                    }
+                                                    if (first._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                    {
+                                                        shouldReverse = INTRAVASCULARLY;
+                                                    }
+                                                    else if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                    {
+                                                        shouldReverse = THESAURUSOBSTINACY;
+                                                    }
+                                                    if (shouldReverse)
+                                                    {
+                                                        mpt.Reverse();
+                                                    }
+                                                }
+                                            }
+                                            if (mpt.Count > THESAURUSSTAMPEDE)
+                                            {
+                                                if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                {
+                                                    foreach (var ppt in mpt)
+                                                    {
+                                                        foreach (var kv in ctx.BranchDic)
+                                                        {
+                                                            if (kv.Key.Equals(ppt))
+                                                            {
+                                                                foreach (var v in kv.Value)
+                                                                {
+                                                                    foreach (var pt in getTargetPt(v._pt))
+                                                                    {
+                                                                        var info = (MLeaderInfo)pt.UserData;
+                                                                        if (info.Text == THESAURUSDEPLORE)
+                                                                        {
+                                                                            info.Text = vm.Prefix + ++k;
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                    main();
+                                }
+                                break;
+                            case INTROPUNITIVENESS:
+                                {
+                                    var mainVisited = new List<Point3dEx>();
+                                    {
+                                        var k = vm.StartNum - THESAURUSHOUSING;
+                                        foreach (var mpt in ctx.MainPathList)
+                                        {
+                                            foreach (var ppt in mpt)
+                                            {
+                                                mainVisited.Add(ppt);
+                                                foreach (var kv in ctx.BranchDic)
+                                                {
+                                                    if (kv.Key.Equals(ppt))
+                                                    {
+                                                        foreach (var v in kv.Value)
+                                                        {
+                                                            foreach (var pt in getTargetPt(v._pt))
+                                                            {
+                                                                var info = (MLeaderInfo)pt.UserData;
+                                                                if (info.Text == THESAURUSDEPLORE)
+                                                                {
+                                                                    info.Text = vm.Prefix + ++k;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    {
+                                        var prefix = THESAURUSDEPLORE;
+                                        foreach (var _mpt in ctx.SubPathList)
+                                        {
+                                            var mpt = _mpt.ToList();
+                                            {
+                                                if (mpt.Count > THESAURUSHOUSING)
+                                                {
+                                                    var first = mpt.First();
+                                                    var last = mpt.Last();
+                                                    var i = mainVisited.IndexOf(first);
+                                                    var j = mainVisited.IndexOf(last);
+                                                    var shouldReverse = INTRAVASCULARLY;
+                                                    if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                    {
+                                                        if (i > j) shouldReverse = THESAURUSOBSTINACY;
+                                                    }
+                                                    else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                    {
+                                                        shouldReverse = THESAURUSOBSTINACY;
+                                                    }
+                                                    if (shouldReverse)
+                                                    {
+                                                        mpt.Reverse();
+                                                    }
+                                                }
+                                            }
+                                            var k = THESAURUSSTAMPEDE;
+                                            if (mpt.Count > THESAURUSHOUSING)
+                                            {
+                                                var first = mpt.First();
+                                                var last = mpt.Last();
+                                                foreach (var ppt in new Point3dEx[] { first, last })
+                                                {
+                                                    ctx.FireHydrantSystemIn.MarkList.TryGetValue(ppt, out string v);
+                                                    if (v != null)
+                                                    {
+                                                        var m = Regex.Match(v, QUOTATIONPERISTALTIC);
+                                                        if (m.Success)
+                                                        {
+                                                            prefix = m.Groups[THESAURUSHOUSING].Value.ToLower();
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            foreach (var ppt in mpt)
+                                            {
+                                                foreach (var kv in ctx.BranchDic)
+                                                {
+                                                    if (kv.Key.Equals(ppt))
+                                                    {
+                                                        foreach (var v in kv.Value)
+                                                        {
+                                                            foreach (var pt in getTargetPt(v._pt))
+                                                            {
+                                                                var info = (MLeaderInfo)pt.UserData;
+                                                                if (info.Text == THESAURUSDEPLORE)
+                                                                {
+                                                                    info.Text = vm.Prefix + prefix + ++k;
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                            main();
-                        }
-                        break;
-                    default:
-                        throw new NotSupportedException();
-                }
-                var stepAngle = THESAURUSACRIMONIOUS;
-                var stepRadius = HYPERDISYLLABLE;
-                var minRadius = DOCTRINARIANISM;
-                var maxRadius = THESAURUSPARAGRAPH;
-                var toDraw = new List<Point>();
-                foreach (var info in mlInfos)
-                {
-                    if (!string.IsNullOrWhiteSpace(info.Text))
-                    {
-                        toDraw.Add(info.BasePoint.ToNTSPoint().Tag(info.Text));
-                    }
-                }
-                var toDrawf = GeoFac.CreateIntersectsSelector(toDraw);
-                {
-                    var lst = new List<Geometry>(THESAURUSREPERCUSSION);
-                    var lst2 = new List<Geometry>(THESAURUSREPERCUSSION);
-                    foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer is LeaderLayer).ToList())
-                    {
-                        Geometry geo = null;
-                        if (ent is Line ln && ln.Length > THESAURUSSTAMPEDE)
-                        {
-                            geo = ln.ToLineString();
-                        }
-                        else if (ent is Polyline pl)
-                        {
-                            geo = pl.ToLineString();
-                        }
-                        else if (ent is DBText dbt)
-                        {
-                            geo = dbt.Bounds.ToGRect().ToPolygon();
-                        }
-                        if (geo != null)
-                        {
-                            if (toDraw.Select(x => x.ToPoint2d().ToGRect(maxRadius).ToPolygon()).Any(x => x.Contains(geo)))
-                            {
-                                ent.Erase(adb);
-                            }
-                        }
-                    }
-                    foreach (var ent in adb.ModelSpace.OfType<Entity>())
-                    {
-                        var dxfName = ent.GetRXClass().DxfName.ToUpper();
-                        if (!IsLayerVisible(ent)) continue;
-                        if (ent is Line ln && ln.Length > THESAURUSSTAMPEDE)
-                        {
-                            lst.Add(ln.ToLineString().Buffer(THESAURUSACRIMONIOUS).Tag(() => { ent.Erase(adb); }));
-                        }
-                        else if (ent is Polyline pl)
-                        {
-                            lst.Add(pl.ToLineString().Buffer(THESAURUSACRIMONIOUS).Tag(() => { ent.Erase(adb); }));
-                        }
-                        else if (ent is DBText dbt)
-                        {
-                            lst.Add(dbt.Bounds.ToGRect().ToPolygon().Buffer(THESAURUSACRIMONIOUS).Tag(() => { ent.Erase(adb); }));
-                        }
-                        else if (dxfName is THESAURUSDURESS or THESAURUSFACILITATE or THESAURUSINHARMONIOUS)
-                        {
-                            lst.Add(ent.Bounds.ToGRect().ToPolygon().Buffer(THESAURUSACRIMONIOUS).Tag(() => { ent.Erase(adb); }));
-                        }
-                    }
-                    lst = GeoFac.CreateIntersectsSelector(lst)(GeoFac.CreateGeometryEx(toDraw.Select(x => x.ToPoint2d().ToGRect(maxRadius).ToPolygon()).ToList()));
-                    if (selectArea != null)
-                    {
-                        lst = GeoFac.CreateIntersectsSelector(lst)(selectArea);
-                    }
-                    var lstf = GeoFac.CreateCoveredBySelector(lst);
-                    foreach (var pt in ctx.FireHydrantSystemIn.TermPointDic.Values)
-                    {
-                        if (pt.StartLine is null) continue;
-                        var seg = pt.StartLine.ToGLineSegment();
-                        foreach (var geo in lstf(seg.ToLineString()))
-                        {
-                            (geo.UserData as Action)?.Invoke();
-                            geo.UserData = null;
-                        }
-                    }
-                    foreach (var pt in ctx.FireHydrantSystemIn.TermPointDic.Values)
-                    {
-                        if (pt.TextLine is null) continue;
-                        var seg = pt.TextLine.ToGLineSegment();
-                        foreach (var geo in lstf(seg.ToLineString()))
-                        {
-                            (geo.UserData as Action)?.Invoke();
-                            geo.UserData = null;
-                        }
-                        foreach (var geo in lstf(seg.Center.OffsetY(THESAURUSHYPNOTIC).ToNTSPoint()))
-                        {
-                            (geo.UserData as Action)?.Invoke();
-                            geo.UserData = null;
-                        }
-                    }
-                }
-                var data = CollectData(adb, selectArea.ToGRect());
-                {
-                    var t0 = DateTime.Now;
-                    var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx._pt).ToHashSet();
-                    var range = data.Range.ToPolygon().ToIPreparedGeometry();
-                    range = new MultiPoint(targets.Select(x => x.ToNTSPoint()).Where(x => range.Contains(x)).ToArray()).ToGRect().Expand(maxRadius + THESAURUSNOTORIETY).ToPolygon().ToIPreparedGeometry();
-                    var rdls = GeoFac.GetManyLineStrings(data.redlines.Select(x => x.ToLineString()).Where(x => range.Intersects(x))).ToList();
-                    var textpls = data.dtexts.SelectNotNull(GetObbPolygon).ToHashSet();
-                    var obstcs = data.segs.Except(data.redlines).Select(x => x.ToLineString()).OfType<Geometry>().Concat(textpls).Where(x => range.Intersects(x)).ToHashSet();
-                    {
-                        var tmp = GeoFac.GetNodedLineStrings(rdls).ToList();
-                        var kills = targets.Select(x => x.ToPoint2d().ToGCircle(HYPERDISYLLABLE - THESAURUSACRIMONIOUS).ToCirclePolygon(SUPERLATIVENESS, INTRAVASCULARLY)).ToList();
-                        var breaks = GeoFac.GetNodedLineStrings(targets.Select(x => x.ToPoint2d().ToGCircle(HYPERDISYLLABLE).ToCirclePolygon(THESAURUSDISINGENUOUS, INTRAVASCULARLY))).ToList();
-                        tmp = GeoFac.GetNodedLineStrings(tmp.Concat(breaks)).ToList();
-                        rdls = tmp.Except(breaks).Except(GeoFac.CreateIntersectsSelector(tmp)(GeoFac.CreateGeometryEx(kills))).ToList();
-                    }
-                    {
-                        rdls.AddRange(GeoFac.GetManyLines(rdls.ToList(), INTRAVASCULARLY).SelectMany(x => GeoFac.GetLines(x.Buffer(THESAURUSENTREPRENEUR), INTRAVASCULARLY)).Select(x => x.ToLineString()));
-                    }
-                    var hatches = data.hatches.Where(x => range.Intersects(x)).ToHashSet();
-                    var t1 = GeoFac.CreateIntersectsTester(rdls.Concat(obstcs).ToList());
-                    var t2 = GeoFac.CreateIntersectsTester(rdls);
-                    var t3 = GeoFac.CreateIntersectsTester(rdls.OfType<Geometry>().Concat(textpls).ToList());
-                    var (t4, addsankaku) = GeoFac.CreateIntersectsTesterEngine<Geometry>();
-                    foreach (var tg in targets)
-                    {
-                        var text = toDrawf(tg.ToGRect(HYPERDISYLLABLE).ToPolygon()).FirstOrDefault()?.UserData as string;
-                        if (string.IsNullOrWhiteSpace(text)) continue;
-                        var (w, h) = GetDBTextSize(text, TEXTHEIGHT, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
-                        void test()
-                        {
-                            for (int state = THESAURUSSTAMPEDE; state < INTROPUNITIVENESS; state++)
-                            {
-                                for (double radius = minRadius; radius < maxRadius; radius += stepRadius)
+                                break;
+                            case QUOTATIONEDIBLE:
                                 {
-                                    var n = THESAURUSDIFFICULTY / stepAngle;
-                                    var step = Math.PI * THESAURUSPERMUTATION / n;
-                                    for (int k = THESAURUSSTAMPEDE; k < n; k++)
+                                    void main()
                                     {
-                                        const double text_gap = THESAURUSENTREPRENEUR;
-                                        const double bd_gap = THESAURUSENTREPRENEUR;
-                                        var angle = step * k + PROCRASTINATION.AngleFromDegree();
-                                        var pt1 = tg.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle));
-                                        var pt2 = pt1.OffsetXY(w + THESAURUSPERMUTATION * text_gap, h + THESAURUSPERMUTATION * text_gap);
-                                        var labelline1 = new GLineSegment(pt1, tg);
-                                        if (state < THESAURUSPERMUTATION)
+                                        var mainVisited = new List<Point3dEx>();
                                         {
-                                            if (t2(labelline1.ToLineString())) continue;
+                                            var k = vm.StartNum - THESAURUSHOUSING;
+                                            foreach (var _mpt in ctx.MainPathList)
+                                            {
+                                                var mpt = _mpt.ToList();
+                                                if (mpt.Count > THESAURUSSTAMPEDE)
+                                                {
+                                                    var last = mpt.Last();
+                                                    if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                    {
+                                                        mpt.Reverse();
+                                                    }
+                                                }
+                                                mainVisited.AddRange(mpt);
+                                                if (mpt.Count > THESAURUSSTAMPEDE)
+                                                {
+                                                    if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                    {
+                                                        foreach (var ppt in mpt)
+                                                        {
+                                                            foreach (var kv in ctx.BranchDic)
+                                                            {
+                                                                if (kv.Key.Equals(ppt))
+                                                                {
+                                                                    foreach (var v in kv.Value)
+                                                                    {
+                                                                        foreach (var pt in getTargetPt(v._pt))
+                                                                        {
+                                                                            var info = (MLeaderInfo)pt.UserData;
+                                                                            if (info.Text == THESAURUSDEPLORE)
+                                                                            {
+                                                                                info.Text = vm.Prefix + ++k;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        return;
+                                                    }
+                                                }
+                                            }
                                         }
-                                        var r = new GRect(pt1, pt2);
-                                        if ((pt1 - tg).X < THESAURUSSTAMPEDE)
                                         {
-                                            r = r.OffsetXY(-(w + THESAURUSPERMUTATION * text_gap), THESAURUSSTAMPEDE);
+                                            var prefix = THESAURUSDEPLORE;
+                                            foreach (var _mpt in ctx.SubPathList)
+                                            {
+                                                var mpt = _mpt.ToList();
+                                                {
+                                                    if (mpt.Count > THESAURUSHOUSING)
+                                                    {
+                                                        var first = mpt.First();
+                                                        var last = mpt.Last();
+                                                        var i = mainVisited.IndexOf(first);
+                                                        var j = mainVisited.IndexOf(last);
+                                                        var shouldReverse = INTRAVASCULARLY;
+                                                        if (i >= THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                        {
+                                                            if (i > j) shouldReverse = THESAURUSOBSTINACY;
+                                                        }
+                                                        else if (i < THESAURUSSTAMPEDE && j >= THESAURUSSTAMPEDE)
+                                                        {
+                                                            shouldReverse = THESAURUSOBSTINACY;
+                                                        }
+                                                        if (first._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                        {
+                                                            shouldReverse = INTRAVASCULARLY;
+                                                        }
+                                                        else if (last._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                        {
+                                                            shouldReverse = THESAURUSOBSTINACY;
+                                                        }
+                                                        if (shouldReverse)
+                                                        {
+                                                            mpt.Reverse();
+                                                        }
+                                                    }
+                                                }
+                                                if (mpt.Count > THESAURUSHOUSING)
+                                                {
+                                                    var first = mpt.First();
+                                                    var last = mpt.Last();
+                                                    foreach (var ppt in new Point3dEx[] { first, last })
+                                                    {
+                                                        ctx.FireHydrantSystemIn.MarkList.TryGetValue(ppt, out string v);
+                                                        if (v != null)
+                                                        {
+                                                            var m = Regex.Match(v, QUOTATIONPERISTALTIC);
+                                                            if (m.Success)
+                                                            {
+                                                                prefix = m.Groups[THESAURUSHOUSING].Value.ToLower();
+                                                                break;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if (mpt.Count > THESAURUSSTAMPEDE)
+                                                {
+                                                    if (mpt.First()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()) || mpt.Last()._pt.ToGRect(HYPERDISYLLABLE).ToPolygon().Intersects(selPt.ToNTSPoint()))
+                                                    {
+                                                        var k = vm.StartNum - THESAURUSHOUSING;
+                                                        foreach (var ppt in mpt)
+                                                        {
+                                                            foreach (var kv in ctx.BranchDic)
+                                                            {
+                                                                if (kv.Key.Equals(ppt))
+                                                                {
+                                                                    foreach (var v in kv.Value)
+                                                                    {
+                                                                        foreach (var pt in getTargetPt(v._pt))
+                                                                        {
+                                                                            var info = (MLeaderInfo)pt.UserData;
+                                                                            if (info.Text == THESAURUSDEPLORE)
+                                                                            {
+                                                                                info.Text = vm.Prefix + prefix + ++k;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                        return;
+                                                    }
+                                                }
+                                            }
                                         }
-                                        var rpl = r.Expand(bd_gap).ToPolygon();
-                                        if (state < THESAURUSPERMUTATION)
-                                        {
-                                            if (t4(rpl)) continue;
-                                        }
-                                        if (state == THESAURUSSTAMPEDE)
-                                        {
-                                            if (t1(rpl)) continue;
-                                        }
-                                        else if (state == THESAURUSHOUSING)
-                                        {
-                                            if (t3(rpl)) continue;
-                                        }
-                                        var _r = r.Expand(-text_gap);
-                                        var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
-                                        t.Layer = LeaderLayer;
-                                        t.WidthFactor = THESAURUSDISPASSIONATE;
-                                        DrawingQueue.Enqueue(adb =>
-                                        {
-                                            t.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
-                                        });
-                                        DrawLineSegmentLazy(labelline1).Layer = LeaderLayer;
-                                        DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom)).Layer = LeaderLayer;
-                                        addsankaku(rpl);
-                                        return;
                                     }
+                                    main();
+                                }
+                                break;
+                            default:
+                                throw new NotSupportedException();
+                        }
+                    }
+                    var stepAngle = THESAURUSACRIMONIOUS;
+                    var stepRadius = HYPERDISYLLABLE;
+                    var minRadius = DOCTRINARIANISM;
+                    var maxRadius = THESAURUSPARAGRAPH;
+                    var toDraw = new List<Point>();
+                    foreach (var info in mlInfos)
+                    {
+                        if (!string.IsNullOrWhiteSpace(info.Text))
+                        {
+                            toDraw.Add(info.BasePoint.ToNTSPoint().Tag(info.Text));
+                        }
+                    }
+                    var toDrawf = GeoFac.CreateIntersectsSelector(toDraw);
+                    {
+                        IEnumerable<Geometry> getTargets(Entity ent)
+                        {
+                            if (ent is Line ln)
+                            {
+                                var seg = ln.ToGLineSegment();
+                                if (seg.IsValid) yield return seg.Center.ToGRect(THESAURUSPERMUTATION).ToPolygon().Tag(ln);
+                            }
+                            else if (ent is Polyline pl)
+                            {
+                                yield return pl.ExplodeToDBObjectCollection().OfType<Line>().Select(x => x.ToGLineSegment().Center.ToGRect(THESAURUSPERMUTATION).ToPolygon()).ToGeometry().Tag(pl);
+                            }
+                            else if (ent is DBText dbt)
+                            {
+                                yield return dbt.Bounds.ToGRect().ToPolygon().Tag(dbt);
+                            }
+                            else
+                            {
+                                var dxfName = ent.GetRXClass().DxfName.ToUpper();
+                                if (dxfName is THESAURUSDURESS or THESAURUSFACILITATE or THESAURUSINHARMONIOUS)
+                                {
+                                    yield return ent.ExplodeToDBObjectCollection().OfType<Entity>().SelectMany(e => getTargets(e)).ToGeometry().Tag(ent);
                                 }
                             }
                         }
-                        test();
+                        var targetsf = GeoFac.CreateIntersectsSelector(adb.ModelSpace.OfType<Entity>().SelectMany(getTargets).ToList());
+                        IEnumerable<Point2d> getShooters()
+                            {
+                                foreach (var kv in ctx.FireHydrantSystemIn.TermPointDic.Where(kv => kv.Value.Type is THESAURUSHOUSING))
+                                {
+                                    var pt = kv.Value;
+                                    if (@case is THESAURUSPERMUTATION or QUOTATIONEDIBLE)
+                                    {
+                                        if (!shootHints.Contains(kv.Key))
+                                        {
+                                            continue;
+                                        }
+                                    }
+                                    if (pt.StartLine is not null)
+                                    {
+                                        var seg = pt.StartLine.ToGLineSegment();
+                                        if (seg.IsValid)
+                                        {
+                                            yield return seg.Center;
+                                        }
+                                    }
+                                    if (pt.TextLine is not null)
+                                    {
+                                        var seg = pt.TextLine.ToGLineSegment();
+                                        if (seg.IsValid)
+                                        {
+                                            yield return seg.Center;
+                                            yield return seg.Center.OffsetY(THESAURUSHYPNOTIC);
+                                        }
+                                    }
+                                }
+                            }
+                        var tokills = targetsf(getShooters().Select(x => x.ToNTSPoint()).ToGeometry()).Select(x => x.UserData).Cast<Entity>().Distinct().ToList();
+                        foreach (var ent in tokills)
+                        {
+                            ent.Erase(adb);
+                        }
                     }
-                    Active.Editor.Write(INTELLECTUALNESS + (DateTime.Now - t0).ToString() + INTELLECTUALNESS);
+                    var data = CollectData(adb, selectArea.ToGRect());
+                    {
+                        var t0 = DateTime.Now;
+                        var targets = ctx.FireHydrantSystemIn.TermPointDic.Values.Where(x => x.Type is THESAURUSHOUSING).Select(x => x.PtEx._pt).ToHashSet();
+                        var range = data.Range.ToPolygon().ToIPreparedGeometry();
+                        range = new MultiPoint(targets.Select(x => x.ToNTSPoint()).Where(x => range.Contains(x)).ToArray()).ToGRect().Expand(maxRadius + THESAURUSNOTORIETY).ToPolygon().ToIPreparedGeometry();
+                        var rdls = GeoFac.GetManyLineStrings(data.redlines.Select(x => x.ToLineString()).Where(x => range.Intersects(x))).ToList();
+                        var textpls = data.dtexts.SelectNotNull(GetObbPolygon).ToHashSet();
+                        var obstcs = data.segs.Except(data.redlines).Select(x => x.ToLineString()).OfType<Geometry>().Concat(textpls).Where(x => range.Intersects(x)).ToHashSet();
+                        {
+                            var tmp = GeoFac.GetNodedLineStrings(rdls).ToList();
+                            var kills = targets.Select(x => x.ToPoint2d().ToGCircle(HYPERDISYLLABLE - THESAURUSACRIMONIOUS).ToCirclePolygon(SUPERLATIVENESS, INTRAVASCULARLY)).ToList();
+                            var breaks = GeoFac.GetNodedLineStrings(targets.Select(x => x.ToPoint2d().ToGCircle(HYPERDISYLLABLE).ToCirclePolygon(THESAURUSDISINGENUOUS, INTRAVASCULARLY))).ToList();
+                            tmp = GeoFac.GetNodedLineStrings(tmp.Concat(breaks)).ToList();
+                            rdls = tmp.Except(breaks).Except(GeoFac.CreateIntersectsSelector(tmp)(GeoFac.CreateGeometryEx(kills))).ToList();
+                        }
+                        {
+                            rdls.AddRange(GeoFac.GetManyLines(rdls.ToList(), INTRAVASCULARLY).SelectMany(x => GeoFac.GetLines(x.Buffer(THESAURUSENTREPRENEUR), INTRAVASCULARLY)).Select(x => x.ToLineString()));
+                        }
+                        var hatches = data.hatches.Where(x => range.Intersects(x)).ToHashSet();
+                        var t1 = GeoFac.CreateIntersectsTester(rdls.Concat(obstcs).ToList());
+                        var t2 = GeoFac.CreateIntersectsTester(rdls);
+                        var t3 = GeoFac.CreateIntersectsTester(rdls.OfType<Geometry>().Concat(textpls).ToList());
+                        var (t4, addsankaku) = GeoFac.CreateIntersectsTesterEngine<Geometry>();
+                        foreach (var tg in targets)
+                        {
+                            var text = toDrawf(tg.ToGRect(HYPERDISYLLABLE).ToPolygon()).FirstOrDefault()?.UserData as string;
+                            if (string.IsNullOrWhiteSpace(text)) continue;
+                            var (w, h) = GetDBTextSize(text, TEXTHEIGHT, THESAURUSDISPASSIONATE, CONTROVERSIALLY);
+                            void test()
+                            {
+                                for (int state = THESAURUSSTAMPEDE; state < INTROPUNITIVENESS; state++)
+                                {
+                                    for (double radius = minRadius; radius < maxRadius; radius += stepRadius)
+                                    {
+                                        var n = THESAURUSDIFFICULTY / stepAngle;
+                                        var step = Math.PI * THESAURUSPERMUTATION / n;
+                                        for (int k = THESAURUSSTAMPEDE; k < n; k++)
+                                        {
+                                            const double text_gap = THESAURUSENTREPRENEUR;
+                                            const double bd_gap = THESAURUSENTREPRENEUR;
+                                            var angle = step * k + PROCRASTINATION.AngleFromDegree();
+                                            var pt1 = tg.OffsetXY(radius * Math.Cos(angle), radius * Math.Sin(angle));
+                                            var pt2 = pt1.OffsetXY(w + THESAURUSPERMUTATION * text_gap, h + THESAURUSPERMUTATION * text_gap);
+                                            var labelline1 = new GLineSegment(pt1, tg);
+                                            if (state < THESAURUSPERMUTATION)
+                                            {
+                                                if (t2(labelline1.ToLineString())) continue;
+                                            }
+                                            var r = new GRect(pt1, pt2);
+                                            if ((pt1 - tg).X < THESAURUSSTAMPEDE)
+                                            {
+                                                r = r.OffsetXY(-(w + THESAURUSPERMUTATION * text_gap), THESAURUSSTAMPEDE);
+                                            }
+                                            var rpl = r.Expand(bd_gap).ToPolygon();
+                                            if (state < THESAURUSPERMUTATION)
+                                            {
+                                                if (t4(rpl)) continue;
+                                            }
+                                            if (state == THESAURUSSTAMPEDE)
+                                            {
+                                                if (t1(rpl)) continue;
+                                            }
+                                            else if (state == THESAURUSHOUSING)
+                                            {
+                                                if (t3(rpl)) continue;
+                                            }
+                                            var _r = r.Expand(-text_gap);
+                                            var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
+                                            t.Layer = LeaderLayer;
+                                            t.WidthFactor = THESAURUSDISPASSIONATE;
+                                            DrawingQueue.Enqueue(adb =>
+                                            {
+                                                t.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
+                                            });
+                                            DrawLineSegmentLazy(labelline1).Layer = LeaderLayer;
+                                            DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom)).Layer = LeaderLayer;
+                                            addsankaku(rpl);
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                            test();
+                        }
+                        Active.Editor.Write(INTELLECTUALNESS + (DateTime.Now - t0).ToString() + INTELLECTUALNESS);
+                    }
                 }
             }
         }
@@ -1390,6 +1364,15 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public HashSet<Geometry> hatches;
         public HashSet<Point3d> targets;
         public GRect Range;
+        public void Init()
+        {
+            segs ??= new HashSet<GLineSegment>();
+            circles ??= new HashSet<GCircle>();
+            dtexts ??= new List<DBTextInfo>();
+            redlines ??= new HashSet<GLineSegment>();
+            hatches ??= new HashSet<Geometry>();
+            targets ??= new HashSet<Point3d>();
+        }
     }
     public class DBTextInfo
     {

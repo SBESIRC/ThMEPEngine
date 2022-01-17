@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPElectrical.SecurityPlaneSystem.ConnectPipe;
-using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
+using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Command;
@@ -76,26 +76,19 @@ namespace ThMEPElectrical.Command
                     return;
                 }
 
-                //List<BlockReference> frameLst = new List<BlockReference>();
-                Dictionary<BlockReference, ObjectIdCollection> frameLst = new Dictionary<BlockReference, ObjectIdCollection>();
+                Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<BlockReference>(obj);
-                    ObjectIdCollection dBObject = new ObjectIdCollection();
-                    dBObject.Add(obj);
-                    frameLst.Add(frame.Clone() as BlockReference, dBObject);
-                    
+                    var boundary = ThElectricalCommonService.GetFrameBlkPolyline(frame);
+                    frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
+
                 string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frameBlock = frameBlockDic.Key;
+                    var frame = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
-                    var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame == null)
-                    {
-                        continue;
-                    }
 
                     var pt = frame.StartPoint;
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);

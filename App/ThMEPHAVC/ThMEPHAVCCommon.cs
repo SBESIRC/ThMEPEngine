@@ -46,7 +46,7 @@ namespace ThMEPHVAC
             // 查找包括此点的房间
             return rooms
                 .Where(o => o.Boundary != null)
-                .Where(o => o.Boundary.IsContains(wcsPt))
+                .Where(o => o.Boundary.EntityContains(wcsPt))
                 .ToList();
         }
     }

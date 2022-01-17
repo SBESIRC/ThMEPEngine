@@ -13,7 +13,6 @@ using System.IO;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPElectrical.SecurityPlaneSystem.StructureHandleService;
 using ThMEPElectrical.Service;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPEngineCore.Algorithm;
@@ -67,7 +66,7 @@ namespace ThMEPElectrical.Command
                 List<Polyline> frames = new List<Polyline>();
                 foreach (var frameBlock in frameLst)
                 {
-                    var frame = CommonService.GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                    var frame = ThElectricalCommonService.GetFrameBlkPolyline(frameBlock);
                     if (frame != null)
                     {
                         frames.Add(frame);

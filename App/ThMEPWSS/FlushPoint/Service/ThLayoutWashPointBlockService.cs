@@ -195,7 +195,7 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             if (obj is Entity entity)
             {
-                return entity.IsContains(pt);
+                return entity.EntityContains(pt);
             }
             return false;
         }

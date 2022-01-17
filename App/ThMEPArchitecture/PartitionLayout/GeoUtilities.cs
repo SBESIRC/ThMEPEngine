@@ -4,6 +4,8 @@ using Dreambuild.AutoCAD;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,12 +17,69 @@ namespace ThMEPArchitecture.PartitionLayout
 {
     public static class GeoUtilities
     {
+        public static void LogMomery(string text, bool relog = false, string path = null)
+        {
+            return;
+            //if (path == null) path = Path.GetTempPath();
+            //string filepath = path + "\\MemoryLog.txt";
+            //Process proc = Process.GetCurrentProcess();
+            //long b = proc.PrivateMemorySize64;
+            //for (int i = 0; i < 2; i++)
+            //{
+            //    b /= 1024;
+            //}
+            //b /= 2;
+            //if (!File.Exists(filepath))
+            //{
+            //    FileStream fs = new FileStream(filepath, FileMode.Create, FileAccess.Write);
+            //    fs.Close();
+            //    fs.Dispose();
+            //}
+            //if (relog)
+            //{
+            //    FileStream fsr = new FileStream(filepath, FileMode.Open, FileAccess.Write);
+            //    StreamWriter swr = new StreamWriter(fsr);
+            //    swr.WriteLine(text + b.ToString());
+            //    swr.Close();
+            //    fsr.Close();
+            //    swr.Dispose();
+            //    fsr.Dispose();
+            //}
+            //else
+            //{
+            //    FileStream fsc = new FileStream(filepath, FileMode.Append);
+            //    StreamWriter swc = new StreamWriter(fsc);
+            //    swc.WriteLine(text + b.ToString());
+            //    swc.Close();
+            //    fsc.Close();
+            //    swc.Dispose();
+            //    fsc.Dispose();
+            //}
+        }
+
+        public static Point3d AveragePoint(Point3d a, Point3d b)
+        {
+            return new Point3d((a.X + b.X) / 2, (a.Y + b.Y / 2), (a.Z + b.Z) / 2);
+        }
+
         public static Point3d GetRecCentroid(this Polyline rec)
         {
             var ext = rec.GeometricExtents;
             var min = ext.MinPoint;
             var max = ext.MaxPoint;
             return new Point3d((min.X + max.X) / 2, (min.Y + max.Y) / 2, 0);
+        }
+
+        public static Line ChangeLineToBeOrthogonal(Line line)
+        {
+            double distx = Math.Abs(line.StartPoint.X - line.EndPoint.X);
+            double disty = Math.Abs(line.StartPoint.Y - line.EndPoint.Y);
+            double averx = (line.StartPoint.X + line.EndPoint.X) / 2;
+            double avery = (line.StartPoint.Y + line.EndPoint.Y) / 2;
+            if (distx >= disty)
+                return new Line(new Point3d(line.StartPoint.X, avery, 0), new Point3d(line.EndPoint.X, avery, 0));
+            else
+                return new Line(new Point3d(averx, line.StartPoint.Y, 0), new Point3d(averx, line.EndPoint.Y, 0));
         }
 
         public static List<Point3d> RemoveDuplicatePts(List<Point3d> points, double tol = 0, bool preserve_order = true)
@@ -153,6 +212,17 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 p.AddVertexAt(i, points[i].ToPoint2d(), 0, 0, 0);
             }
+            p.Closed = closed;
+            return p;
+        }
+
+        public static Polyline CreatPolyFromLines(Line a, Line b, bool closed = true)
+        {
+            Polyline p = new Polyline();
+            p.AddVertexAt(0, a.StartPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(1, a.EndPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(2, b.EndPoint.ToPoint2d(), 0, 0, 0);
+            p.AddVertexAt(3, b.StartPoint.ToPoint2d(), 0, 0, 0);
             p.Closed = closed;
             return p;
         }
@@ -413,6 +483,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static bool IsInAnyPolys(Point3d pt, List<Polyline> pls, bool allowOnEdge = false)
         {
+            if (pls.Count == 0) return false;
             var ps = pls.Where(e => e.Area > 1).OrderBy(e => e.GetClosestPointTo(pt, false).DistanceTo(pt));
             if (!allowOnEdge)
             {
@@ -435,18 +506,23 @@ namespace ThMEPArchitecture.PartitionLayout
             return false;
         }
 
-        public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes)
+        public static bool IsInAnyBoxes(Point3d pt, List<Polyline> boxes, bool true_on_edge = false)
         {
+            if (boxes.Count == 0) return false;
+            if (true_on_edge)
+            {
+                if (ClosestPointInCurves(pt, boxes) < 10) return true;
+            }
             foreach (var p in boxes)
             {
                 if (p.Area < 1) continue;
-                p.TransformBy(Matrix3d.Scaling(0.99, p.GetRecCentroid()));
+                p.TransformBy(Matrix3d.Scaling(0.99999, p.GetRecCentroid()));
                 if (p.Contains(pt))
                 {
-                    p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
+                    p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
                     return true;
                 }
-                p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
+                p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
             }
             return false;
         }

@@ -167,7 +167,8 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     var transformer = new ThMEPOriginTransformer(centerPt);
                     transformer.Transform(objs);
                     transformer.Transform(nFrame);
-                    transformer.Reset(Clip(nFrame, objs));
+                    objs = Clip(nFrame, objs);
+                    transformer.Reset(objs);
 
                     //处理车道线
                     resLines = ThMEPLineExtension.TransCurveToLine(objs, 500);

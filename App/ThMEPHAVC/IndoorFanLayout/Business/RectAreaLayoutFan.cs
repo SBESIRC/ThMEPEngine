@@ -26,7 +26,36 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return _roomIntersectAreas;
             LayoutFanRectFirstStep(true);
             //排布完成后，进行检查删除逻辑
-            CheckAndRemoveLayoutFan();
+            var delFans = CheckAndRemoveLayoutFan();
+            if (delFans.Count > 0)
+            {
+                //有删除重新进行排布计算
+                foreach (var area in _roomIntersectAreas)
+                {
+                    if (!delFans.Any(c => c.CellId == area.divisionArea.Uid))
+                        continue;
+                    area.FanLayoutAreaResult.Clear();
+                    CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                    OneDivisionAreaCalcFanRectangle(area, _fanRectangle, _groupYVector.Negate());
+                }
+            }
+            else 
+            {
+                var addFanCellIds = CheckAndAddLayoutFan();
+                if (addFanCellIds.Count>0) 
+                {
+                    //需要添加 重新进行排布计算
+                    foreach (var area in _roomIntersectAreas)
+                    {
+                        if (!addFanCellIds.Any(c => c == area.divisionArea.Uid))
+                            continue;
+                        area.FanLayoutAreaResult.Clear();
+                        CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                        OneDivisionAreaCalcFanRectangle(area, _fanRectangle, _groupYVector.Negate());
+                    }
+                }
+            }
+            //LayoutFanRectFirstStep(false);
             //判断是否需要更改方向
             if (_changeLayoutDir) 
             {
@@ -227,54 +256,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return haveChange;
         }
-        void CheckAndRemoveLayoutFan() 
-        {
-            //计算需要多少台时要根据当前UCS面积计算需要，如果有多个UCS时不能以整个房间的负荷作为计算
-            var areaLoad = 0.0;
-            var ucsArea = 0.0;
-            foreach (var item in _roomIntersectAreas) 
-            {
-                ucsArea += item.RealIntersectAreas.Sum(c => c.Area);
-            }
-            areaLoad = ucsArea * _roomUnitLoad;
-            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, areaLoad, _fanRectangle.Load);
-            var calcDelFans = layoutResultCheck.GetDeleteFanByRow();
-            if (calcDelFans.Count < 1)
-                return;
-            foreach (var areaCell in _roomIntersectAreas) 
-            {
-                if (!calcDelFans.Any(c => c.CellId == areaCell.divisionArea.Uid))
-                    continue;
-                int delCount = 0;
-                foreach (var item in areaCell.FanLayoutAreaResult) 
-                {
-                    var delFans = new List<FanLayoutRect>();
-                    foreach (var fan in item.FanLayoutResult) 
-                    {
-                        if (calcDelFans.Any(c => c.FanId == fan.FanId))
-                            delFans.Add(fan);
-                    }
-                    if (delFans.Count < 1)
-                        continue;
-                    delCount += delFans.Count;
-                    foreach (var del in delFans)
-                        item.FanLayoutResult.Remove(del);
-                }
-                if (delCount < 1)
-                    continue;
-                areaCell.NeedFanCount -= delCount;
-            }
-            //有删除重新进行排布计算
-            foreach (var area in _roomIntersectAreas)
-            {
-                if (!calcDelFans.Any(c => c.CellId == area.divisionArea.Uid))
-                    continue;
-                area.FanLayoutAreaResult.Clear();
-                CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
-                OneDivisionAreaCalcFanRectangle(area, _fanRectangle, _groupYVector.Negate());
-            }
-            //LayoutFanRectFirstStep(false);
-        }
+       
         List<FanLayoutRect> GetDirNearFans(DivisionRoomArea divisionAreaFan, Vector3d checkDir) 
         {
             var nearAreas = GetNearDivisionAreas(divisionAreaFan.divisionArea, checkDir);

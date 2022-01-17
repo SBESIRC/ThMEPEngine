@@ -113,7 +113,7 @@ namespace ThMEPElectrical.AFAS.Data
 
         public ThStoreyInfo Query(Entity entity)
         {
-            var results = StoreyInfos.Where(o => o.Boundary.IsContains(entity));
+            var results = StoreyInfos.Where(o => o.Boundary.EntityContains(entity));
             return results.Count() > 0 ? results.First() : new ThStoreyInfo();
         }
 

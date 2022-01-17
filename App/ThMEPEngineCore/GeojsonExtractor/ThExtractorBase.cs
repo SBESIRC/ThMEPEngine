@@ -96,7 +96,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
         protected List<string> FindCurveGroupIds(Dictionary<Entity, string> groupId, Entity curve)
         {
             var ids = new List<string>();
-            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
+            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.EntityContains(curve)).ToList();
             groups.ForEach(g => ids.Add(groupId[g]));
             return ids;
         }

@@ -117,7 +117,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                         continue;
                     }
 
-                    var room = roomIndex.SelectCrossingPolygon(frame).OfType<Polyline>().ToList();
+                    var room = roomIndex.SelectCrossingPolygon(frame).OfType<Polyline>().Where(p => p.Area > 1.0).ToList();
                     var exactFrames = new DBObjectCollection
                     {
                         frame,
@@ -177,9 +177,9 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                     transformer.Transform(exactFrame);
                     geometryWithoutColumn = new List<Polyline>();
                     obstacle = new List<Polyline>();
-                    var architectureWall = archIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
-                    var shearWall = shearIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
-                    var column = columnIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().ToList();
+                    var architectureWall = archIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().Where(p => p.Area > 1.0).ToList();
+                    var shearWall = shearIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().Where(p => p.Area > 1.0).ToList();
+                    var column = columnIndex.SelectCrossingPolygon(exactFrame).OfType<Polyline>().Where(p => p.Area > 1.0).ToList();
 
                     geometryWithoutColumn.AddRange(architectureWall);
                     geometryWithoutColumn.AddRange(shearWall);

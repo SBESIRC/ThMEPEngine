@@ -16,11 +16,17 @@ using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
+using Serilog;
+using System.IO;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class WithoutSegLineCmd : ThMEPBaseCommand, IDisposable
     {
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "AutoSeglineLog.txt");
+
+        public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
+            .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day, retainedFileCountLimit: 10).CreateLogger();
         public static ParkingStallArrangementViewModel ParameterViewModel { get; set; }
         private CommandMode _CommandMode { get; set; } = CommandMode.WithoutUI;
 
@@ -55,6 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
+                Logger?.Information(ex.Message);
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
@@ -155,24 +162,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
-                var layerNames = "solutions" + k.ToString();
-                using (AcadDatabase adb = AcadDatabase.Active())
-                {
-                    try
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                    }
-                    catch { }
-                }
-
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
+                    {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        try
+                        {
+                            partitionpro.ProcessAndDisplay();
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                        continue;
+                    }
+
                     ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToCalculateCarSpots(layoutPara, j, ref partition, ParameterViewModel))
+                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
                     {
                         try
                         {
-                            partition.ProcessAndDisplay(layerNames, 30);
+                            partition.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {

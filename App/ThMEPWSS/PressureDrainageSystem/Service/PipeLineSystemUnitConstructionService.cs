@@ -1327,7 +1327,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
         {
             foreach (var p in pts)
             {
-                if (pt.CreateSquare(tol).IsContains(p))
+                if (pt.CreateSquare(tol).EntityContains(p))
                 {
                     return true;
                 }

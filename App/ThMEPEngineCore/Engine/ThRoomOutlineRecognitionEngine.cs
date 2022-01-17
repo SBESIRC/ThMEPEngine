@@ -27,7 +27,14 @@ namespace ThMEPEngineCore.Engine
 
         public override void Extract(Database database)
         {
-            throw new NotSupportedException();
+            var visitor = new ThRoomOutlineExtractionVisitor()
+            {
+                LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database),
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
 
         public override void ExtractFromMS(Database database, ObjectIdCollection dbObjs)
@@ -47,7 +54,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotSupportedException();
+            var engine = new ThRoomOutlineExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)

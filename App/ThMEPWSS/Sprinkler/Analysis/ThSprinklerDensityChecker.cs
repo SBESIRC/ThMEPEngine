@@ -41,7 +41,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
         {
             var sprinklersClone = sprinklers.OfType<ThSprinkler>()
                                             .Where(o => o.Category == Category)
-                                            .Where(o => entity.IsContains(o.Position))
+                                            .Where(o => entity.EntityContains(o.Position))
                                             .ToList();
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0)

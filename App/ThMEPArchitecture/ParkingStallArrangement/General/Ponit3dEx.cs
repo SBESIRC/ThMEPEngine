@@ -40,6 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         public override int GetHashCode()
         {
             return ((int)_pt.X / 1000).GetHashCode() ^ ((int)_pt.Y / 1000).GetHashCode();
+            //return 1;
         }
         public bool Equals(Point3dEx other)
         {

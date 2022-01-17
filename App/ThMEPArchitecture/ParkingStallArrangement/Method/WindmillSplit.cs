@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
 using DotNetARX;
+using System;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -31,16 +32,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return seglineTndexDic;
         }
 
-        public static List<Line> SegLineCut(List<Line> lines, Polyline area)
+        public static List<bool> SegLineCut(List<Line> lines, Polyline area, out List<Line> cutLines)
         {
-            var cutLines = new List<Line>();
+            var cutRsts = new List<bool>();
+            cutLines = new List<Line>();
             for(int i =0; i < lines.Count; i++)
             {
                 var pts = new List<Point3d>();
                 var line = lines[i];
                 var spt = line.StartPoint;
                 pts.AddRange(line.Intersect(area, 0));//求与边界的交点
-                for(int j = 0; j < lines.Count;j++)
+                cutRsts.Add(pts.Count > 0);//有交点为true
+                for (int j = 0; j < lines.Count;j++)
                 {
                     if (i == j) continue;
                     pts.AddRange(line.Intersect(lines[j], 0));//求与其他分割线的交点
@@ -49,7 +52,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 cutLines.Add(new Line(orderPts.First(), orderPts.Last()));
             }
 
-            return cutLines;
+            return cutRsts;
         }
 
         private static void DicAdd(this Dictionary<int, List<int>> seglineTndexDic, int index,int target)
@@ -113,26 +116,114 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return line;
         }
+
+        public static double GetMaxWidth(Polyline area)
+        {
+            var maxPt = area.GeometricExtents.MaxPoint;
+            var minPt = area.GeometricExtents.MinPoint;
+            return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
+        }
+
         public static List<Polyline> Split(Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic)
+            ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
         {
             var areas = new List<Polyline>() { area };
             seglineIndexDic = GetSegLineIndexDic(seglineDic);//获取线的邻接表
             var segLines = GetExtendSegline(seglineDic, seglineIndexDic);//进行线的延展
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
-            var cutlines = SegLineCut(segLines, area);
-            foreach (var l in cutlines)
+            segSreasCnt = rstAreas.Count;
+            var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
+
+            var width = GetMaxWidth(area);
+
+            for (int i = 0; i < cutlines.Count; i++)
             {
-                var rect1 = l.GetHalfBuffer(true);//上、右半区域
-                var rect2 = l.GetHalfBuffer(false);//下、左半区域
-                var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
-                var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
-                var boundPt1 = l.GetBoundPt(buildLines1, rect1);
-                var boundPt2 = l.GetBoundPt(buildLines2, rect2);
-                maxVals.Add(l.GetMinDist(boundPt1) - 2760);
-                minVals.Add(l.GetMinDist(boundPt2) + 2760);
+                var l = cutlines[i];
+                l.GetMaxMinVal(buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+
+                maxVals.Add(maxVal2);
+                minVals.Add(minVal2);
+                //var l = cutlines[i];
+                //var rst = cutRst[i];//是否被墙线切割
+                //if(rst)//被墙线切割的直接用墙线的起始终止点
+                //{
+                //    var rst2 = l.GetMaxMinVal(area, out double maxVal, out double minVal);
+                //    if (rst2)//直接用墙线和障碍物最近作为依据
+                //    {
+                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+
+                //        maxVals.Add(Math.Min(maxVal, maxVal2));
+                //        minVals.Add(Math.Max(minVal, minVal2));
+                //    }
+                //    else
+                //    {
+                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+
+                //        maxVals.Add(maxVal2);
+                //        minVals.Add(minVal2);
+                //    }
+                //}
+                //else
+                //{
+                //    l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
+
+                //    maxVals.Add(maxVal2);
+                //    minVals.Add(minVal2);
+                //}
+
             }
             return rstAreas;
+        }
+
+        public static void GetMaxMinVal(this Line line, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)
+        {
+            var rect1 = line.GetHalfBuffer(true, width);//上、右半区域
+            var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
+            var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
+            var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
+            var boundPt1 = line.GetBoundPt(buildLines1, rect1);
+            var boundPt2 = line.GetBoundPt(buildLines2, rect2);
+            maxVal = line.GetMinDist(boundPt1) - 2760;
+            minVal = -line.GetMinDist(boundPt2) + 2760;
+        }
+
+        public static bool GetMaxMinVal(this Line line, Polyline area, out double maxVal, out double minVal)
+        {
+            double tor = 2.0;
+            maxVal = 0;
+            minVal = 0;
+            var lines = area.ToLines();
+            var dir = line.GetDirection();
+            var intersectLines = new List<Line>();
+            foreach(var l in lines)
+            {
+                if(line.Intersect(l,0).Count > 0)
+                {
+                    intersectLines.Add(l);
+                }
+            }
+            if(intersectLines.Count == 1)
+            {
+                var intersect = intersectLines[0];
+                if (dir == 1)//竖直线
+                {
+                    var val = line.StartPoint.X;
+                    var sy = intersect.StartPoint.X - val;
+                    var ey = intersect.EndPoint.X - val;
+                    maxVal = Math.Max(sy, ey) - tor;
+                    minVal = Math.Min(sy, ey) + tor;
+                }
+                else
+                {
+                    var val = line.StartPoint.Y;
+                    var sy = intersect.StartPoint.Y - val;
+                    var ey = intersect.EndPoint.Y - val;
+                    maxVal = Math.Max(sy, ey) - tor;
+                    minVal = Math.Min(sy, ey) + tor;
+                }
+                return true;
+            }
+            return false;
         }
 
         public static Polyline GetHalfBuffer(this Line line, bool flag, double tor = 99999)
@@ -199,6 +290,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             }
 #endif
+
             var rstAreas = segLines.SplitArea(areas);//基于延展线进行区域分割
             return rstAreas;
         }

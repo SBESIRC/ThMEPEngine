@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,36 +15,28 @@ using ThMEPLighting.DSFEL.Service;
 
 namespace ThMEPLighting.DSFEL
 {
-    public class LayoutService
+    public class LayoutExitService
     {
-        public List<RoomInfoModel> LayoutFELService(List<ThIfcRoom> roomInfo, List<Polyline> door, List<Line> centerLines, List<Polyline> holes,
+        public List<ExitModel> LayoutFELService(List<ThIfcRoom> roomInfo, List<Polyline> door, List<Line> centerLines, List<Polyline> holes,
             ThEStoreys floor, ThMEPOriginTransformer originTransformer)
         {
             //计算块出口
             CalExitService calExitService = new CalExitService();
             var exitInfo = calExitService.CalExit(roomInfo, door, floor);
-            
-            //创建疏散路径
-            CreateEvacuationPathService evacuationPath = new CreateEvacuationPathService();
-            var evaPaths = evacuationPath.CreatePath(exitInfo, centerLines, holes);
 
-            //打印出入口图块
-            exitInfo.ForEach(x => x.positin = originTransformer.Reset(x.positin));
-            PrintBlock(exitInfo);
-
-            //打印路径
-            //PrintPathService printService = new PrintPathService();
-            //printService.PrintPath(evaPaths.SelectMany(x => x.evacuationPaths).ToList(), centerLines, originTransformer);
-
-            return evaPaths;
+            return exitInfo;
         }
 
         /// <summary>
         /// 打印出入口图块
         /// </summary>
         /// <param name="exitModels"></param>
-        private void PrintBlock(List<ExitModel> exitModels)
+        public void PrintBlock(List<ExitModel> exitModels)
         {
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                db.Database.ImportModel(ThMEPLightingCommon.ExitEBlockName, ThMEPLightingCommon.EmgLightLayerName);
+            }
             foreach (var model in exitModels)
             {
                 double rotateAngle = (-Vector3d.XAxis).GetAngleTo(model.direction, Vector3d.ZAxis);

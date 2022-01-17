@@ -19,7 +19,6 @@ namespace ThMEPLighting.DSFEL.Service
         {
             using (var db = AcadDatabase.Active())
             {
-                db.Database.ImportModel(blockName, layerName);
                 var id = db.Database.InsertModel(point, angle, layerName, blockName, scale, dic);
                 return id;
             }
@@ -29,7 +28,6 @@ namespace ThMEPLighting.DSFEL.Service
         {
             using (var db = AcadDatabase.Active())
             {
-                db.Database.ImportModel(blockName, layerName);
                 var id = db.Database.InsertModel(point, angle, layerName, blockName, scale, null);
                 return id;
             }
@@ -61,13 +59,13 @@ namespace ThMEPLighting.DSFEL.Service
             }
         }
 
-        private static void ImportModel(this Database database, string blockName, string layerName)
+        public static void ImportModel(this Database database, string blockName, string layerName)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), false);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blockName), true);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layerName), true);
             }
         }
     }
