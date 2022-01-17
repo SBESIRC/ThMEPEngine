@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
 {
     public class AFASBeamExtendFactory
     {
-        private List<Polyline> ObstacleBoundarys { get; set; }
+        private List<Entity> ObstacleBoundarys { get; set; }
         private List<AFASBeamContour> Beams { get; set; }
         public AFASDetector detectorType { get; set; }
         private ThCADCoreNTSSpatialIndex thobstacleSpatialIndex { get; set; }
@@ -35,12 +35,13 @@ namespace ThMEPEngineCore.AFASRegion.Service
             var thBeams = beams.Cast<ThIfcLineBeam>().ToList();
 
             //获取墙
-            var thwalls = walls.Select(o => o.Outline).Cast<Polyline>();
+            var thwalls = walls.Select(o => o.Outline).OfType<Polyline>();
+            var thMpolyWalls = walls.Select(o => o.Outline).OfType<MPolygon>();
 
-
-            List<Polyline> obstacle = new List<Polyline>();
+            var obstacle = new List<Entity>();
             obstacle.AddRange(thcolumns);
             obstacle.AddRange(thwalls);
+            obstacle.AddRange(thMpolyWalls);
             obstacle.AddRange(holes);
             this.ObstacleBoundarys = obstacle;
             Beams = new List<AFASBeamContour>();
@@ -138,7 +139,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             thbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(Beams.Select(o => o.BeamBoundary).ToCollection());
         }
 
-        public List<AFASBeamContour> ExtendBeamCenterLineFromRoom(Entity room, List<Polyline> obstacles, List<AFASBeamContour> beamcenterLines)
+        public List<AFASBeamContour> ExtendBeamCenterLineFromRoom(Entity room, List<Entity> obstacles, List<AFASBeamContour> beamcenterLines)
         {
             List<AFASBeamContour> newBeamLines = new List<AFASBeamContour>();
             beamcenterLines.ForEach(o => newBeamLines.Add(o.Clone()));
@@ -237,7 +238,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
         public DBObjectCollection DetectionRegions(Entity frame)
         {
             //获取障碍物
-            var obstacles = thobstacleSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
+            var obstacles = thobstacleSpatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ToList();
 
             //获取梁
             var allbeams = thbeamsSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>();
@@ -268,11 +269,19 @@ namespace ThMEPEngineCore.AFASRegion.Service
             //探测区域Lines
             DBObjectCollection DetectionAreaLines = new DBObjectCollection();
             frame.ToNTSPolygonalGeometry().ToDbPolylines().ForEach(o => DetectionAreaLines.Add(o));//添加房间框线
-            obstacles.ForEach(o => DetectionAreaLines.Add(o));//添加障碍物
+            obstacles.OfType<Polyline>().ForEach(o => DetectionAreaLines.Add(o));//添加障碍物
+            obstacles.OfType<MPolygon>().ForEach(o =>
+               {
+                   DetectionAreaLines.Add(o.Shell());
+                   var holes = o.Holes();
+                   holes.ForEach(h => DetectionAreaLines.Add(h));
+               });//添加障碍物
+
             extendBeam.Where(o => o.BeamType == BeamType.HighBeam).ForEach(o => DetectionAreaLines.Add(o.BeamCenterline));//添加梁中心线
             var polygons = DetectionAreaLines.PolygonsEx();
 
-            var obstacleBufferArea = obstacles.Cast<Polyline>().Select(o => o.Buffer(10)[0] as Polyline);//障碍物空间（柱，剪力墙,结构墙)
+            var obstacleBufferArea = obstacles.OfType<Polyline>().Select(o => o.Buffer(10)[0] as Polyline);//障碍物空间（柱，剪力墙,结构墙)
+            var obstacleBufferAreaMpoly = obstacles.OfType<MPolygon>().Select(o => o.Buffer(10)[0] as MPolygon);//带洞墙
             var beamBufferArea = extendBeam.Select(o => o.BeamBoundary).Cast<Polyline>().Select(o => o.Buffer(10)[0] as Polyline);//梁
             var IsMPolygonRoom = false;
             var Holes = new List<Polyline>();
@@ -298,7 +307,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
                     {
                         continue;
                     }
-                    if (obstacleBufferArea.Any(o => o.Contains(polyline)))
+                    if (obstacleBufferArea.Any(o => o.Contains(polyline)) || obstacleBufferAreaMpoly.Any(o => o.Contains(polyline)))
                     {
                         //过滤掉墙，柱
                         continue;

@@ -132,6 +132,19 @@ namespace ThMEPWSS.Pipe.Model
                 this.RaisePropertyChanged();
             }
         }
+        private string _CondenseFloorDrainDN = "DN50";
+        public string CondenseFloorDrainDN
+        {
+            get
+            {
+                return _CondenseFloorDrainDN;
+            }
+            set
+            {
+                _CondenseFloorDrainDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
         private string _CondensePipeHorizontalDN = "DN25";
         public string CondensePipeHorizontalDN
         {

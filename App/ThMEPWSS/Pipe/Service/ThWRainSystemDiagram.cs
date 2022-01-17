@@ -709,6 +709,10 @@ namespace ThMEPWSS.FlatDiagramNs
                                                         {
                                                             dn = vm.Params.WaterWellFloorDrainDN;
                                                         }
+                                                        else if (nlst(wlinesGeo))
+                                                        {
+                                                            dn = vm.Params.CondenseFloorDrainDN;
+                                                        }
                                                         else
                                                         {
                                                             dn = vm.Params.BalconyFloorDrainDN;
@@ -731,6 +735,10 @@ namespace ThMEPWSS.FlatDiagramNs
                                                             if (fl0st(wlinesGeo))
                                                             {
                                                                 dn = vm.Params.WaterWellFloorDrainDN;
+                                                            }
+                                                            else if (nlst(wlinesGeo))
+                                                            {
+                                                                dn = vm.Params.CondenseFloorDrainDN;
                                                             }
                                                             else
                                                             {
@@ -968,6 +976,10 @@ namespace ThMEPWSS.FlatDiagramNs
                                                                   {
                                                                       dn = vm.Params.WaterWellFloorDrainDN;
                                                                   }
+                                                                  else if (nlst(ln))
+                                                                  {
+                                                                      dn = vm.Params.CondenseFloorDrainDN;
+                                                                  }
                                                                   else
                                                                   {
                                                                       dn = vm.Params.BalconyFloorDrainDN;
@@ -1073,9 +1085,14 @@ namespace ThMEPWSS.FlatDiagramNs
                                                               foreach (var ln in lns)
                                                               {
                                                                   string dn;
-                                                                  if (fl0st(fd.Buffer(MISAPPREHENSIVE)))
+                                                                  var buf = fd.Buffer(MISAPPREHENSIVE);
+                                                                  if (fl0st(buf))
                                                                   {
                                                                       dn = vm.Params.WaterWellFloorDrainDN;
+                                                                  }
+                                                                  else if (nlst(buf))
+                                                                  {
+                                                                      dn = vm.Params.CondenseFloorDrainDN;
                                                                   }
                                                                   else
                                                                   {

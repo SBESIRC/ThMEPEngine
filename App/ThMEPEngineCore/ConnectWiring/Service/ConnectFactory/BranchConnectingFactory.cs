@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
             }
             if (eBlocks.Count > 0)
             {
-                if (resPoly.Length > 10)
+                if (resPoly.NumberOfVertices > 1)
                 {
                     resPoly.ReverseCurve();
                     resPoly = CreateBranch(resPoly, eBlocks.First(), loopBlockInfos);

@@ -331,7 +331,6 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
                     //acac.ModelSpace.Add(blockObb);
                     //acac.ModelSpace.Add(wiring.Clone() as Polyline);
                     return new Polyline();
-                    throw new NotImplementedException();
                 }
                 int pathedgs = wiring.NumberOfVertices;
 
@@ -363,6 +362,10 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
                 {
                     //倾斜插入块本身,不做处理
                     return CennectToPolyline();
+                }
+                if(line.Length < 10)
+                {
+                    return new Polyline();
                 }
                 Point3d intersectPt = line.ExtendLine(6).Buffer(6).Intersect(blockObb, Intersect.OnBothOperands).Cast<Point3d>().OrderBy(o => o.DistanceTo(line.EndPoint)).First();
                 Point3d connectPt = preferred.Item2.OrderBy(o => o.DistanceTo(intersectPt)).First();

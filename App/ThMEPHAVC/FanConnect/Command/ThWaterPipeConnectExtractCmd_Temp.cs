@@ -74,13 +74,13 @@ namespace ThMEPHVAC.FanConnect.Command
                     
                     foreach (var f in fucs)
                     {
-                        transformer.Transform(f.FanPoint);
+                        f.FanPoint = transformer.Transform(f.FanPoint);
                         transformer.Transform(f.FanObb);
                     }
-                    transformer.Transform(startPt);
+                    
                     //生成管路路由
                     var pipeService = new ThCreatePipeService();
-                    pipeService.PipeStartPt = startPt; 
+                    pipeService.PipeStartPt = transformer.Transform(startPt);
                     pipeService.PipeWidth = 300.0;
                     pipeService.EquipModel = fucs;
                     foreach (var wall in shearWalls)

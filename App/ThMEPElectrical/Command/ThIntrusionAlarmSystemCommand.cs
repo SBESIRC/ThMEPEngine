@@ -65,17 +65,17 @@ namespace ThMEPElectrical.Command
                     frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
+                var pt = frameLst.First().Key.StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frame = frameBlockDic.Key;
+                    var outFrame = ThMEPFrameService.Normalize(frameBlockDic.Key);
                     var frameBlockId = frameBlockDic.Value;
+                    originTransformer.Transform(outFrame);
 
-                    var pt = frame.StartPoint;
-                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                    originTransformer.Transform(frame);
-                    var outFrame = ThMEPFrameService.Normalize(frame);
-
-                    GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+                    //获取楼层信息
                     var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
                     if (floor.IsNull())
                     {
@@ -101,19 +101,6 @@ namespace ThMEPElectrical.Command
 
                     //插入图块
                     InsertBlock(layoutInfo, originTransformer);
-
-                    //using (AcadDatabase db = AcadDatabase.Active())
-                    //{
-                    //    foreach (var item in layoutInfo)
-                    //    {
-                    //        var endPt = item.LayoutPoint + 500 * item.LayoutDir;
-                    //        Line line = new Line(item.LayoutPoint, endPt);
-                    //        Circle circle = new Circle(endPt, Vector3d.ZAxis, 100);
-                    //        //originTransformer.Reset(line);
-                    //        db.ModelSpace.Add(line);
-                    //        db.ModelSpace.Add(circle);
-                    //    }
-                    //}
                 }
             }
         }

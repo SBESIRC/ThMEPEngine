@@ -568,6 +568,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (seg.IsValid) lst.Add(seg.ToLineString());
                         continue;
                     }
+                    if (!entity.Visible || !isRainLayer(entity.Layer)) continue;
                     var bd = entity.Bounds.ToGRect();
                     if (bd.IsValid)
                     {
@@ -579,7 +580,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         var ext = new Extents3d();
                         try
                         {
-                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>())
+                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>().Where(x => x.Visible))
                             {
                                 if (e.Bounds.HasValue)
                                 {
@@ -3994,7 +3995,14 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     string getFDDN()
                     {
                         const string dft = QUOTATIONBREWSTER;
-                        return viewModel?.Params.BalconyFloorDrainDN ?? dft;
+                        if (gpItem.PipeType is PipeType.NL)
+                        {
+                            return viewModel?.Params.CondenseFloorDrainDN ?? dft;
+                        }
+                        else
+                        {
+                            return viewModel?.Params.BalconyFloorDrainDN ?? dft;
+                        }
                     }
                     string getHDN()
                     {
@@ -4642,8 +4650,8 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                 }
                                                 var pt = segs.Last().EndPoint.ToPoint3d();
                                                 {
-                                                    Dr.DrawRainPort(pt.OffsetX(THESAURUSDOMESTIC+THESAURUSENTREPRENEUR));
-                                                    Dr.DrawRainPortLabel(pt.OffsetX(-THESAURUSENTREPRENEUR+THESAURUSENTREPRENEUR));
+                                                    Dr.DrawRainPort(pt.OffsetX(THESAURUSDOMESTIC + THESAURUSENTREPRENEUR));
+                                                    Dr.DrawRainPortLabel(pt.OffsetX(-THESAURUSENTREPRENEUR + THESAURUSENTREPRENEUR));
                                                     if (gpItem.HasOutletWrappingPipe)
                                                     {
                                                         var p = segs.Last().EndPoint.OffsetX(THESAURUSLOITER);
@@ -4678,10 +4686,11 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                 }
                                                 else
                                                 {
-                                                    var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -COMMONPLACENESS), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSLEGATE+THESAURUSENTREPRENEUR-THESAURUSDISINGENUOUS, THESAURUSSTAMPEDE) };
+                                                    var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -COMMONPLACENESS), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSLEGATE + THESAURUSENTREPRENEUR - THESAURUSDISINGENUOUS, THESAURUSSTAMPEDE) };
                                                     var segs = vecs.ToGLineSegments(pt);
                                                     drawDomePipes(segs);
                                                     Dr.DrawRainPort(segs.Last().EndPoint.ToPoint3d());
+                                                    DrawBlockReference(THESAURUSEMPHASIS, segs.Last().EndPoint.ToPoint3d(), br => { br.Layer = DENDROCHRONOLOGIST; });
                                                 }
                                             }
                                         }
@@ -5435,7 +5444,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var run = runs.TryGet(i);
                                     if (run != null)
                                     {
-                                        Dr.DrawDN_2(info.EndPoint.OffsetXY(THESAURUSFORMULATE,-HEIGHT), CIRCUMCONVOLUTION, dn);
+                                        Dr.DrawDN_2(info.EndPoint.OffsetXY(THESAURUSFORMULATE, -HEIGHT), CIRCUMCONVOLUTION, dn);
                                     }
                                 }
                             }

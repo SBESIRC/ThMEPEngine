@@ -70,10 +70,9 @@ namespace ThMEPElectrical.Command
 
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var outFrame = frameBlockDic.Key;
+                    var outFrame = ThMEPFrameService.Normalize(frameBlockDic.Key);
                     var frameBlockId = frameBlockDic.Value;
                     originTransformer.Transform(outFrame);
-                    outFrame = ThMEPFrameService.Normalize(outFrame);
 
                     var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
                     if (floor.IsNull())

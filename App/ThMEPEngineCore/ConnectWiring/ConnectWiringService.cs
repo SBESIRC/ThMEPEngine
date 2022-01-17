@@ -154,7 +154,7 @@ namespace ThMEPEngineCore.ConnectWiring
                             {
                                 //var wiring = branchConnecting.CreateBranch(line, resBlocks);
                                 var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
-                                if (wiring.Length > 10)
+                                if (wiring.NumberOfVertices > 1)
                                 {
                                     resLines.Add(wiring);
                                 }

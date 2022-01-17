@@ -95,8 +95,8 @@
                         <Label>方向：</Label>
                         <StackPanel Orientation="Horizontal">
                             <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=0}">自动</RadioButton>
-                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">强制横向</RadioButton>
-                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">强制纵向</RadioButton>
+                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=1}">优先横向</RadioButton>
+                            <RadioButton GroupName="DirectionGroup"  IsChecked="{Binding RunMode, Converter={StaticResource RadioValueConverter}, ConverterParameter=2}">优先纵向</RadioButton>
                         </StackPanel>
                     </StackPanel>
                     <Label></Label>

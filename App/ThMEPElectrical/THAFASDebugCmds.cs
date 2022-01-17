@@ -305,8 +305,8 @@ namespace ThMEPElectrical
             var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
             //画框，提数据，转数据
-            var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
-            //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+            //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+            var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
 
             if (selectPts.Count == 0)
             {

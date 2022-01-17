@@ -33,7 +33,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this._vm = vm.Clone();
             this.vm = vm;
             this.DataContext = _vm;
-            cbxWellFD.ItemsSource = cbxBalFD.ItemsSource = new string[] { "DN50", "DN75", };
+            cbxWellFD.ItemsSource = cbxBalFD.ItemsSource = cbxCndFD.ItemsSource = new string[] { "DN50", "DN75", };
             cbxLNLG.ItemsSource = cbxYTYS.ItemsSource = new string[] { "DN50", "DN75", "DN100" };
             cbxLNHG.ItemsSource = new string[] { "DN25", "DN32", "DN50" };
         }

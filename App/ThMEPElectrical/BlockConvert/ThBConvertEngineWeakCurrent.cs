@@ -116,9 +116,17 @@ namespace ThMEPElectrical.BlockConvert
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetCentriodPoint = targetBlockData.GetBottomCenter().TransformBy(targetBlockData.OwnerSpace2WCS);
                 var bottomCenter = srcBlockData.GetBottomCenter() - srcBlockData.Position;
+                var bottomCenterTiadl = bottomCenter.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
+                    + bottomCenter.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
+                    + bottomCenter.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis;
+                var tranMatrix = Matrix3d.Displacement(
+                    srcBlockData.BlockTransform.Translation.X * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Xaxis
+                    + srcBlockData.BlockTransform.Translation.Y * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Yaxis
+                    + srcBlockData.BlockTransform.Translation.Z * srcBlockData.OwnerSpace2WCS.CoordinateSystem3d.Zaxis);
+                //var tranMatrix = Matrix3d.Displacement(srcBlockData.OwnerSpace2WCS.Translation);
                 var scrCentriodPoint = Point3d.Origin
-                    .TransformBy(srcBlockData.OwnerSpace2WCS.Inverse().PostMultiplyBy(srcBlockData.BlockTransform));
-                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) - bottomCenter;
+                        .TransformBy(tranMatrix.PostMultiplyBy(srcBlockData.OwnerSpace2WCS));
+                var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint) + bottomCenterTiadl;
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }
         }
