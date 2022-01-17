@@ -335,6 +335,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var secondLinkWireObjs = CreateLinkWire(secondEdges);
             firstLinkWireObjs = FilterDoubleRowLinkWire(firstLinkWireObjs, edges);
             secondLinkWireObjs = FilterDoubleRowLinkWire(secondLinkWireObjs, edges);
+            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs, firstEdges);
+            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs, secondEdges);
             results = results.Union(firstLinkWireObjs);
             results = results.Union(secondLinkWireObjs);
             return results;
