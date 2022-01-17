@@ -129,23 +129,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Data
             Avoidence.AddRange(AvoidEquipments);
         }
 
-        private void CleanPreviousEquipment()
-        {
-            CleanEquipments.ForEach(x =>
-            {
-                var handle = x.Properties[ThExtractorPropertyNameManager.HandlerPropertyName].ToString();
-
-                var dbTrans = new DBTransaction();
-                var objId = dbTrans.GetObjectId(handle);
-                var obj = dbTrans.GetObject(objId, OpenMode.ForWrite, false);
-                obj.UpgradeOpen();
-                obj.Erase();
-                obj.DowngradeOpen();
-                dbTrans.Commit();
-                Data.Remove(x);
-            });
-        }
-
         public void ExtendEquipment(List<string> cleanBlkName, double scale)
         {
             var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, scale);
