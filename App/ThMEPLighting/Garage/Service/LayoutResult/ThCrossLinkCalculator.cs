@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
+using ThCADCore.NTS;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -623,11 +624,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<ThLightEdge>();
             edges.ForEach(e =>
             {
-                if (e.LightNodes.Select(n => n.Position).Where(n => partition.IsContains(n)).Any())
+                if (e.LightNodes.Select(n => n.Position).Where(n => partition.Contains(n)).Any())
                 {
                     results.Add(e);
                 }
-                else if (partition.IsContains(e.Edge.StartPoint) || partition.IsContains(e.Edge.EndPoint))
+                else if (partition.Contains(e.Edge.StartPoint) || partition.Contains(e.Edge.EndPoint))
                 {
                     results.Add(e);
                 }

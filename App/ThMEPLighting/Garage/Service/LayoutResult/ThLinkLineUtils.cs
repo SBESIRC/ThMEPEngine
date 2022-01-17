@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 
@@ -71,7 +72,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public static List<Line> GroupSides(this Polyline partition, List<Line> sides)
         {
             return sides
-                .Where(e => partition.IsContains(e.StartPoint) || partition.IsContains(e.EndPoint))
+                .Where(e => partition.Contains(e.StartPoint) || partition.Contains(e.EndPoint))
                 .ToList();
         }
 
