@@ -89,7 +89,8 @@ namespace ThMEPHVAC.LoadCalculation.Service
                                             {
                                                 table.Position = table.Position + new Vector3d(0, addRowCount * 440, 0);
                                             }
-                                            if (!table.GeometricExtents.ToRectangle().Contains(connectpoint))
+                                            var tableRec = table.GeometricExtents.ToRectangle();
+                                            if (!tableRec.Contains(connectpoint) && tableRec.Intersect(curve, Intersect.OnBothOperands).Count < 1)
                                             {
                                                 table.Position = table.Position + new Vector3d(existedTable.Width - table.Width, 0, 0);
                                             }
