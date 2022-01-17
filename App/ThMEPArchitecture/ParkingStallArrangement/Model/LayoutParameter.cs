@@ -236,6 +236,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 return false;//必定是个不合理的解
             }
+            double areasTotalArea = 0;//分割后区域总面积
+            areas.ForEach(a => areasTotalArea += a.Area);
+            if (areasTotalArea > OuterBoundary.Area)
+            {
+                return false;//分割后的总面积不能大于原始面积
+            }
             System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
             System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
 
