@@ -357,9 +357,10 @@ namespace ThMEPArchitecture.PartitionLayout
                             splitori.TransformBy(Matrix3d.Displacement(-vec * (DisVertCarLength + DisLaneWidth)));
                             var ploritolane = CreatPolyFromLines(splitback, splitori);
                             splitori.TransformBy(Matrix3d.Displacement(vec * DisLaneWidth / 2));
-                            if ((lane.GetClosestPointTo(splitori.StartPoint, false).DistanceTo(splitori.StartPoint) > 5000
+                            if (((lane.GetClosestPointTo(splitori.StartPoint, false).DistanceTo(splitori.StartPoint) > 5000
                                 || lane.GetClosestPointTo(splitori.EndPoint, false).DistanceTo(splitori.EndPoint) > 5000)
                                 && ObstaclesSpatialIndex.SelectCrossingPolygon(ploritolane).Count > 0)
+                                || IsInAnyBoxes(splitori.GetCenter(), CarBoxes))
                             {
                                 //生成模块与车道线错开且原车道线碰障碍物
                                 continue;
