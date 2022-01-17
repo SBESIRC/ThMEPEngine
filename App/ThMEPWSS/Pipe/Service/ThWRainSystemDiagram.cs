@@ -467,7 +467,7 @@ namespace ThMEPWSS.FlatDiagramNs
                             var _linesGroup = new HashSet<HashSet<GLineSegment>>();
                             var storey = geoData.Storeys[si].ToPolygon();
                             var gpGeos = GeoFac.CreateEnvelopeSelector(geoData.Groups.Select(GeoFac.CreateGeometry).ToList())(storey);
-                            var wlsegs = geoData.WLines;
+                            var wlsegs = geoData.OWLines.ToList();
                             var vertices = GeoFac.CreateEnvelopeSelector(wlsegs.Select(x => x.StartPoint.ToNTSPoint().Tag(x)).Concat(wlsegs.Select(x => x.EndPoint.ToNTSPoint().Tag(x))).ToList())(storey);
                             var verticesf = GeoFac.CreateIntersectsSelector(vertices);
                             wlsegs = vertices.Select(x => x.UserData).Cast<GLineSegment>().Distinct().ToList();
@@ -618,6 +618,15 @@ namespace ThMEPWSS.FlatDiagramNs
                             var y2lst = T(y2ls);
                             var fl0st = T(fl0s);
                             var fl0sf = F(fl0s);
+                            string getDN(Geometry shooter)
+                            {
+                                if (nlst(shooter)) return vm.Params.CondensePipeVerticalDN;
+                                if (y2lst(shooter)) return vm.Params.BalconyRainPipeDN;
+                                if (fl0st(shooter)) return vm.Params.WaterWellFloorDrainDN;
+                                if (y1lst(shooter)) return IRRESPONSIBLENESS;
+                                if (fldrst(shooter)) return vm.Params.BalconyFloorDrainDN;
+                                return null;
+                            }
                             var nlfdpts = nls.SelectMany(nl => wlinesGeosf(nl)).Distinct().SelectMany(x => fdsf(x))
                                     .Concat(nls.SelectMany(x => fdsf(x.Buffer(THESAURUSHYPNOTIC))))
                                     .Select(x => x.GetCenter()).Distinct().ToList();
@@ -884,11 +893,19 @@ namespace ThMEPWSS.FlatDiagramNs
                                                     {
                                                         foreach (var gpgeo in gpGeos)
                                                         {
-                                                            if (vps.Any(vp => vp.Intersects(gpgeo)))
+                                                            foreach (var vp in vps)
                                                             {
-                                                                foreach (var geo in lnsGeosf(new MultiLineString(GeoFac.GetLines(gpgeo, skipPolygon: THESAURUSOBSTINACY).Select(x => x.ToLineString()).ToArray()).Buffer(THESAURUSPERMUTATION)))
+                                                                if (vp.Intersects(gpgeo))
                                                                 {
-                                                                    draw(IRRESPONSIBLENESS, geo.Buffer(THESAURUSPERMUTATION), overWrite: INTRAVASCULARLY);
+                                                                    {
+                                                                        var dn = getDN(vp.GetCenter().ToNTSPoint());
+                                                                        if (dn is null) continue;
+                                                                        foreach (var geo in lnsGeosf(new MultiLineString(GeoFac.GetLines(gpgeo, skipPolygon: THESAURUSOBSTINACY).Select(x => x.ToLineString()).ToArray()).Buffer(THESAURUSPERMUTATION)))
+                                                                        {
+                                                                            draw(dn, geo.Buffer(THESAURUSPERMUTATION), overWrite: INTRAVASCULARLY);
+                                                                        }
+                                                                    }
+                                                                    break;
                                                                 }
                                                             }
                                                         }

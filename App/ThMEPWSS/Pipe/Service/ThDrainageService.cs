@@ -116,22 +116,22 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
     }
 #pragma warning disable
+    public enum FlFixType
+    {
+        NoFix,
+        MiddleHigher,
+        Lower,
+        Higher,
+    }
+    public enum FlCaseEnum
+    {
+        Unknown,
+        Case1,
+        Case2,
+        Case3,
+    }
     public class FixingLogic1
     {
-        public enum FlFixType
-        {
-            NoFix,
-            MiddleHigher,
-            Lower,
-            Higher,
-        }
-        public enum FlCaseEnum
-        {
-            Unknown,
-            Case1,
-            Case2,
-            Case3,
-        }
         public static FlCaseEnum GetFlCase(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
         {
             FlCaseEnum f()
@@ -191,18 +191,18 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             return ret;
         }
     }
+    public enum PlFixType
+    {
+        NoFix,
+    }
+    public enum PlCaseEnum
+    {
+        Unknown,
+        Case1,
+        Case3,
+    }
     public class FixingLogic2
     {
-        public enum PlFixType
-        {
-            NoFix,
-        }
-        public enum PlCaseEnum
-        {
-            Unknown,
-            Case1,
-            Case3,
-        }
         public static PlCaseEnum GetPlCase(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
         {
             PlCaseEnum f()
@@ -235,43 +235,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public static PlFixType GetPlFixType(string label, string storey, bool existsXXRoomAtUpperStorey, int circlesCount)
         {
             return PlFixType.NoFix;
-        }
-    }
-    public class LabelItem
-    {
-        public string Label;
-        public string Prefix;
-        public string D1S;
-        public string D2S;
-        public string Suffix;
-        public int D1
-        {
-            get
-            {
-                int.TryParse(D1S, out int r); return r;
-            }
-        }
-        public int D2
-        {
-            get
-            {
-                int.TryParse(D2S, out int r); return r;
-            }
-        }
-        static readonly Regex re = new Regex(TRANSLITERATIONS);
-        public static LabelItem Parse(string label)
-        {
-            if (label == null) return null;
-            var m = re.Match(label);
-            if (!m.Success) return null;
-            return new LabelItem()
-            {
-                Label = label,
-                Prefix = m.Groups[THESAURUSHOUSING].Value,
-                D1S = m.Groups[THESAURUSPERMUTATION].Value,
-                D2S = m.Groups[INTROPUNITIVENESS].Value,
-                Suffix = m.Groups[QUOTATIONEDIBLE].Value,
-            };
         }
     }
 #pragma warning disable
@@ -331,10 +294,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             public bool HasDownBoardLine;
             public bool Is4Tune;
             public string RoomName;
-            public FixingLogic1.FlFixType FlFixType;
-            public FixingLogic1.FlCaseEnum FlCaseEnum;
-            public FixingLogic2.PlFixType PlFixType;
-            public FixingLogic2.PlCaseEnum PlCaseEnum;
+            public FlFixType FlFixType;
+            public FlCaseEnum FlCaseEnum;
+            public PlFixType PlFixType;
+            public PlCaseEnum PlCaseEnum;
             public override int GetHashCode()
             {
                 return THESAURUSSTAMPEDE;
@@ -443,10 +406,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public bool HasSCurve;
         public bool HasDoubleSCurve;
         public bool HasUnderBoardLabel;
-    }
-    public enum GDirection
-    {
-        E, W, S, N, ES, EN, WS, WN,
     }
     public class ThwOutput
     {
@@ -649,7 +608,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             public int __dy;
             public DrainageSystemDiagramViewModel viewModel;
             public ExtraInfo exInfo;
-            public static bool SHOWLINE;
+            public static bool @switch;
             public void Draw()
             {
                 {
@@ -707,11 +666,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         DrawStoreyLine(storey, bsPt1.ToPoint3d(), lineLen, getStoreyHeightText());
                     }
                 }
-                void _DrawWrappingPipe(Point2d basePt, string shadow)
+                void _DrawWrappingPipe(Point2d basePt, string pillow = null)
                 {
-                    if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                     {
-                        Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                        Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                     }
                     DrawBlockReference(THESAURUSSTRINGENT, basePt.ToPoint3d(), br =>
                     {
@@ -726,8 +685,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     var segs = vecs.ToGLineSegments(basePoint);
                     segs.RemoveAt(INTROPUNITIVENESS);
                     DrawDiryWaterWells1(segs[THESAURUSPERMUTATION].EndPoint + new Vector2d(-THESAURUSDOMESTIC, THESAURUSHYPNOTIC), values);
-                    if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
-                    if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
+                    if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC));
+                    if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC));
                     DrawNoteText(output.DN1, segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSATTACHMENT));
                     DrawNoteText(output.DN2, segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSATTACHMENT));
                     if (output.HasCleaningPort1) DrawCleaningPort(segs[QUOTATIONEDIBLE].StartPoint.ToPoint3d(), INTRAVASCULARLY, THESAURUSHOUSING);
@@ -753,16 +712,16 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         if (seg.IsValid) dome_lines.Add(seg);
                     }
-                    void drawDomePipes(IEnumerable<GLineSegment> segs, string shadow)
+                    void drawDomePipes(IEnumerable<GLineSegment> segs, string pillow = null)
                     {
                         var ok = INTRAVASCULARLY;
                         foreach (var seg in segs.Where(s => s.IsValid))
                         {
                             if (!ok)
                             {
-                                if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                 {
-                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING), dome_layer);
+                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING), dome_layer);
                                 }
                                 ok = THESAURUSOBSTINACY;
                             }
@@ -773,16 +732,16 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         if (seg.IsValid) vent_lines.Add(seg);
                     }
-                    void drawVentPipes(IEnumerable<GLineSegment> segs, string shadow)
+                    void drawVentPipes(IEnumerable<GLineSegment> segs, string pillow = null)
                     {
                         var ok = INTRAVASCULARLY;
                         foreach (var seg in segs.Where(s => s.IsValid))
                         {
                             if (!ok)
                             {
-                                if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                 {
-                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING), vent_layer);
+                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING), vent_layer);
                                 }
                                 ok = THESAURUSOBSTINACY;
                             }
@@ -914,7 +873,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     {
                                         dome_lines.Add(new GLineSegment(p, pt));
                                     }
-                                    DrawDSCurve(p, INTRAVASCULARLY, getDSCurveValue(), THESAURUSDEPLORE);
+                                    DrawDSCurve(p, INTRAVASCULARLY, getDSCurveValue());
                                 }
                             }
                             if (hanging.FloorDrainsCount >= THESAURUSHOUSING)
@@ -929,11 +888,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         start = segs.Last().EndPoint;
                         return start;
                     }
-                    void DrawOutlets1(string shadow, Point2d basePoint1, double width, ThwOutput output, bool isRainWaterWell = INTRAVASCULARLY, Vector2d? fixv = null)
+                    void DrawOutlets1(string pillow, Point2d basePoint1, double width, ThwOutput output, bool isRainWaterWell = INTRAVASCULARLY, Vector2d? fixv = null)
                     {
-                        if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                         {
-                            Dr.DrawSimpleLabel(basePoint1.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                            Dr.DrawSimpleLabel(basePoint1.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                         }
                         Point2d pt2, pt3;
                         if (output.DirtyWaterWellValues != null)
@@ -959,20 +918,20 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 var segs = vecs.ToGLineSegments(basePoint1);
                                 if (output.LinesCount == THESAURUSHOUSING)
                                 {
-                                    drawDomePipes(segs.Take(INTROPUNITIVENESS), THESAURUSDEPLORE);
+                                    drawDomePipes(segs.Take(INTROPUNITIVENESS));
                                 }
                                 else if (output.LinesCount > THESAURUSHOUSING)
                                 {
                                     segs.RemoveAt(THESAURUSDESTITUTE);
                                     if (!output.HasVerticalLine2) segs.RemoveAt(SUPERLATIVENESS);
                                     segs.RemoveAt(INTROPUNITIVENESS);
-                                    drawDomePipes(segs, THESAURUSDEPLORE);
+                                    drawDomePipes(segs);
                                 }
                             }
                             var pts = vecs.ToPoint2ds(basePoint1);
-                            if (output.HasWrappingPipe1) _DrawWrappingPipe(pts[INTROPUNITIVENESS].OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
-                            if (output.HasWrappingPipe2) _DrawWrappingPipe(pts[QUOTATIONEDIBLE].OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
-                            if (output.HasWrappingPipe3) _DrawWrappingPipe(pts[THESAURUSSCARCE].OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
+                            if (output.HasWrappingPipe1) _DrawWrappingPipe(pts[INTROPUNITIVENESS].OffsetX(THESAURUSHYPNOTIC));
+                            if (output.HasWrappingPipe2) _DrawWrappingPipe(pts[QUOTATIONEDIBLE].OffsetX(THESAURUSHYPNOTIC));
+                            if (output.HasWrappingPipe3) _DrawWrappingPipe(pts[THESAURUSSCARCE].OffsetX(THESAURUSHYPNOTIC));
                             if (output.HasWrappingPipe1 && !output.HasWrappingPipe2 && !output.HasWrappingPipe3)
                             {
                                 if (gpItem.OutletWrappingPipeRadius != null)
@@ -998,10 +957,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     DrawLine(layer, new GLineSegment(p3, p2));
                                     DrawStoreyHeightSymbol(p3, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
                                     {
-                                        var _shadow = THESAURUSDEPLORE;
-                                        if (SHOWLINE && !string.IsNullOrEmpty(_shadow) && _shadow.Length > THESAURUSHOUSING)
+                                        var _pillow = THESAURUSDEPLORE;
+                                        if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
                                         {
-                                            Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _shadow.Substring(THESAURUSHOUSING));
+                                            Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
                                         }
                                     }
                                 }
@@ -1020,7 +979,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         {
                             var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, QUOTATIONAFGHAN) };
                             var segs = vecs.ToGLineSegments(pt3);
-                            drawDomePipes(segs, THESAURUSDEPLORE);
+                            drawDomePipes(segs);
                             DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), INTRAVASCULARLY, THESAURUSPERMUTATION);
                         }
                         if (output.HangingCount == THESAURUSHOUSING)
@@ -1029,7 +988,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             Point2d lastPt = pt2;
                             {
                                 var segs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, INDIGESTIBLENESS), new Vector2d(THESAURUSPERVADE, THESAURUSPERVADE) }.ToGLineSegments(lastPt);
-                                drawDomePipes(segs, THESAURUSDEPLORE);
+                                drawDomePipes(segs);
                                 lastPt = segs.Last().EndPoint;
                             }
                             {
@@ -1040,11 +999,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         {
                             var vs1 = new List<Vector2d> { new Vector2d(THESAURUSNECESSITY, THESAURUSNECESSITY), new Vector2d(QUOTATIONDEFLUVIUM, QUOTATIONDEFLUVIUM) };
                             var pts = vs1.ToPoint2ds(pt3);
-                            drawDomePipes(vs1.ToGLineSegments(pt3), THESAURUSDEPLORE);
+                            drawDomePipes(vs1.ToGLineSegments(pt3));
                             drawHanging(pts.Last(), output.Hanging1);
                             var dx = output.Hanging1.FloorDrainsCount == THESAURUSPERMUTATION ? POLYOXYMETHYLENE : THESAURUSSTAMPEDE;
                             var vs2 = new List<Vector2d> { new Vector2d(HYDROCOTYLACEAE + dx, THESAURUSSTAMPEDE), new Vector2d(QUOTATIONDEFLUVIUM, QUOTATIONDEFLUVIUM) };
-                            drawDomePipes(vs2.ToGLineSegments(pts[THESAURUSHOUSING]), THESAURUSDEPLORE);
+                            drawDomePipes(vs2.ToGLineSegments(pts[THESAURUSHOUSING]));
                             drawHanging(vs2.ToPoint2ds(pts[THESAURUSHOUSING]).Last(), output.Hanging2);
                         }
                     }
@@ -1137,11 +1096,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             }
                             DrawCleaningPort(basePt, leftOrRight, scale);
                         }
-                        void _DrawCheckPoint(Point2d basePt, bool leftOrRight, string shadow)
+                        void _DrawCheckPoint(Point2d basePt, bool leftOrRight, string pillow = null)
                         {
-                            if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                            if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                             {
-                                Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                             }
                             DrawCheckPoint(basePt.ToPoint3d(), leftOrRight);
                         }
@@ -1184,11 +1143,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             void handleHanging(Hanging hanging, bool isLeftOrRight)
                             {
                                 var linesDfferencers = new List<Polygon>();
-                                void _DrawFloorDrain(Point3d basePt, bool leftOrRight, int i, int j, string shadow)
+                                void _DrawFloorDrain(Point3d basePt, bool leftOrRight, int i, int j, string pillow = null)
                                 {
-                                    if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                     {
-                                        Dr.DrawSimpleLabel(basePt.ToPoint2D(), THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                        Dr.DrawSimpleLabel(basePt.ToPoint2D(), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                                     }
                                     var p1 = basePt.ToPoint2d();
                                     {
@@ -1199,7 +1158,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             fdBsPts.Add(p);
                                             var vecs = new List<Vector2d> { new Vector2d(-THESAURUSSOMETIMES, THESAURUSSTAMPEDE), fixVec, new Vector2d(-THESAURUSQUAGMIRE, THESAURUSQUAGMIRE), new Vector2d(THESAURUSSTAMPEDE, THESAURUSFORMULATE), new Vector2d(-ELECTROMYOGRAPH, THESAURUSSTAMPEDE) };
                                             var segs = vecs.ToGLineSegments(basePt.ToPoint2d() + new Vector2d(THROMBOEMBOLISM, THESAURUSSTAMPEDE));
-                                            drawDomePipes(segs, THESAURUSDEPLORE);
+                                            drawDomePipes(segs);
                                             DrainageSystemDiagram.DrawWashingMachineRaisingSymbol(segs.Last().EndPoint, THESAURUSOBSTINACY);
                                             return;
                                         }
@@ -1216,11 +1175,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         return;
                                     }
                                 }
-                                void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight, int i, int j, string shadow)
+                                void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight, int i, int j, string pillow = null)
                                 {
-                                    if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                     {
-                                        Dr.DrawSimpleLabel(p1, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                        Dr.DrawSimpleLabel(p1, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                                     }
                                     if (!hasDrawedDSCurveLabel && !thwPipeLine.Labels.Any(x => IsFL0(x)))
                                     {
@@ -1244,7 +1203,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         {
                                             dome_lines.Add(new GLineSegment(p1, p2));
                                         }
-                                        DrawDSCurve(p2, leftOrRight, getDSCurveValue(), THESAURUSDEPLORE);
+                                        DrawDSCurve(p2, leftOrRight, getDSCurveValue());
                                     }
                                 }
                                 ++counterPipeButtomHeightSymbol;
@@ -1292,15 +1251,15 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     var segs2 = _vecs2.ToGLineSegments(startPt.OffsetY(-delta));
                                     DrawDomePipes(segs1);
                                     DrawDomePipes(segs2);
-                                    _DrawFloorDrain(segs1.Last().EndPoint.ToPoint3d(), THESAURUSOBSTINACY, i, j, THESAURUSDEPLORE);
-                                    _DrawFloorDrain(segs2.Last().EndPoint.ToPoint3d(), INTRAVASCULARLY, i, j, THESAURUSDEPLORE);
+                                    _DrawFloorDrain(segs1.Last().EndPoint.ToPoint3d(), THESAURUSOBSTINACY, i, j);
+                                    _DrawFloorDrain(segs2.Last().EndPoint.ToPoint3d(), INTRAVASCULARLY, i, j);
                                     if (run.Is4Tune)
                                     {
                                         var st = info.StartPoint;
                                         var p1 = new List<Vector2d> { new Vector2d(-QUOTATIONWITTIG, THESAURUSSTAMPEDE), new Vector2d(THESAURUSSTAMPEDE, -THESAURUSMISSIONARY) }.GetLastPoint(st);
                                         var p2 = new List<Vector2d> { new Vector2d(THESAURUSHYPNOTIC, THESAURUSSTAMPEDE), new Vector2d(THESAURUSSTAMPEDE, -THESAURUSMISSIONARY) }.GetLastPoint(st);
-                                        _DrawWrappingPipe(p1, THESAURUSDEPLORE);
-                                        _DrawWrappingPipe(p2, THESAURUSDEPLORE);
+                                        _DrawWrappingPipe(p1);
+                                        _DrawWrappingPipe(p2);
                                     }
                                 }
                                 else if (run.HasLongTranslator)
@@ -1312,8 +1271,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var startPt = info.EndPoint.OffsetXY(-dx, HEIGHT / THESAURUSCOMMUNICATION + ANTICONVULSANTS);
                                         var segs = vecs.ToGLineSegments(startPt);
                                         var p1 = segs.Last(INTROPUNITIVENESS).StartPoint;
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
-                                        _DrawDSCurve(vec7, p1, isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
+                                        _DrawDSCurve(vec7, p1, isLeftOrRight, i, j);
                                         var dn = getBasinDN();
                                         DrawNoteText(dn, p1 - new Vector2d(-ANTICONVULSANTS, -THESAURUSASSURANCE));
                                     }
@@ -1340,7 +1299,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             drawDomePipe(new GLineSegment(p1, p2));
                                             pt = p2;
                                         }
-                                        var isFDHigher = gpItem.Hangings[i].FlFixType == FixingLogic1.FlFixType.Higher && hanging.FloorDrainsCount > THESAURUSSTAMPEDE && run.HasLongTranslator && run.IsLongTranslatorToLeftOrRight;
+                                        var isFDHigher = gpItem.Hangings[i].FlFixType == FlFixType.Higher && hanging.FloorDrainsCount > THESAURUSSTAMPEDE && run.HasLongTranslator && run.IsLongTranslatorToLeftOrRight;
                                         if (isFDHigher)
                                         {
                                             pt = pt.OffsetY(-PREREGISTRATION);
@@ -1365,12 +1324,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 _segs = segs.Take(QUOTATIONEDIBLE).ToList();
                                             }
                                             if (shouldDrawRaiseWashingMachineSymbol(hanging)) { _segs.RemoveAt(THESAURUSPERMUTATION); }
-                                            f = () => { drawDomePipes(_segs, THESAURUSDEPLORE); };
+                                            f = () => { drawDomePipes(_segs); };
                                         }
                                         if (hanging.FloorDrainsCount == THESAURUSHOUSING)
                                         {
                                             var p = segs.Last(INTROPUNITIVENESS).EndPoint;
-                                            _DrawFloorDrain(p.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                            _DrawFloorDrain(p.ToPoint3d(), isLeftOrRight, i, j);
                                             Get2FloorDrainDN(out string v1, out string v2);
                                             DrawNoteText(v1, p + new Vector2d(THESAURUSHYPNOTIC, -THESAURUSGETAWAY));
                                         }
@@ -1378,14 +1337,14 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         {
                                             var p2 = segs.Last(INTROPUNITIVENESS).EndPoint;
                                             var p1 = segs.Last(THESAURUSHOUSING).EndPoint;
-                                            _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
-                                            _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                            _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j);
+                                            _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j);
                                             Get2FloorDrainDN(out string v1, out string v2);
                                             DrawNoteText(v1, p1 + new Vector2d(THESAURUSCAVERN, -THESAURUSDOMESTIC));
                                             DrawNoteText(v2, p2 + new Vector2d(PHYSIOLOGICALLY - THESAURUSCAVERN, -THESAURUSDOMESTIC));
                                             if (!hanging.IsSeries)
                                             {
-                                                drawDomePipes(new GLineSegment[] { segs.Last(THESAURUSPERMUTATION) }, THESAURUSDEPLORE);
+                                                drawDomePipes(new GLineSegment[] { segs.Last(THESAURUSPERMUTATION) });
                                             }
                                             {
                                                 var fixY = QUOTATIONTRANSFERABLE;
@@ -1398,8 +1357,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 var seg = new List<Vector2d> { new Vector2d(THROMBOEMBOLISM, THESAURUSSTAMPEDE), new Vector2d(THESAURUSPERVADE, THESAURUSPERVADE) }.ToGLineSegments(p1)[THESAURUSHOUSING];
                                                 f = () =>
                                                 {
-                                                    drawDomePipes(_segs, THESAURUSDEPLORE);
-                                                    drawDomePipes(new GLineSegment[] { seg }, THESAURUSDEPLORE);
+                                                    drawDomePipes(_segs);
+                                                    drawDomePipes(new GLineSegment[] { seg });
                                                 };
                                             }
                                         }
@@ -1425,7 +1384,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         if (hanging.HasDoubleSCurve)
                                         {
                                             var p1 = segs.Last(INTROPUNITIVENESS).StartPoint;
-                                            _DrawDSCurve(vec7, p1, isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                            _DrawDSCurve(vec7, p1, isLeftOrRight, i, j);
                                         }
                                         f?.Invoke();
                                     }
@@ -1437,7 +1396,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         DrawFloorDrain((info.StartPoint + new Vector2d(-THESAURUSSATIATE, -THESAURUSINTRENCH)).ToPoint3d(), THESAURUSOBSTINACY, ADENOHYPOPHYSIS);
                                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSINFLEXIBLE), new Vector2d(-THESAURUSPERVADE, THESAURUSPERVADE), new Vector2d(-THESAURUSCAPITALISM, THESAURUSSTAMPEDE) };
                                         var segs = vecs.ToGLineSegments(info.StartPoint).Skip(THESAURUSHOUSING).ToList();
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
                                     }
                                     else
                                     {
@@ -1462,8 +1421,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 linesDfferencers.Add(GRect.Create(_segs[INTROPUNITIVENESS].EndPoint, THESAURUSENTREPRENEUR).ToPolygon());
                                                 var p2 = segs.Last(INTROPUNITIVENESS).EndPoint;
                                                 var p1 = segs.Last(THESAURUSHOUSING).EndPoint;
-                                                _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
-                                                _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                                _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j);
+                                                _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j);
                                                 Get2FloorDrainDN(out string v1, out string v2);
                                                 DrawNoteText(v1, p1 + new Vector2d(THESAURUSCAVERN, -THESAURUSDOMESTIC));
                                                 DrawNoteText(v2, p2 + new Vector2d(PHYSIOLOGICALLY - THESAURUSCAVERN, -THESAURUSDOMESTIC));
@@ -1482,15 +1441,15 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 var segs2 = _vecs2.ToGLineSegments(startPt.OffsetY(-delta));
                                                 dome_lines.AddRange(segs1);
                                                 dome_lines.AddRange(segs2);
-                                                _DrawFloorDrain(segs1.Last().EndPoint.ToPoint3d(), THESAURUSOBSTINACY, i, j, THESAURUSDEPLORE);
-                                                _DrawFloorDrain(segs2.Last().EndPoint.ToPoint3d(), INTRAVASCULARLY, i, j, THESAURUSDEPLORE);
+                                                _DrawFloorDrain(segs1.Last().EndPoint.ToPoint3d(), THESAURUSOBSTINACY, i, j);
+                                                _DrawFloorDrain(segs2.Last().EndPoint.ToPoint3d(), INTRAVASCULARLY, i, j);
                                             }
                                             ok = THESAURUSOBSTINACY;
                                         }
                                         Action f = null;
                                         if (!ok)
                                         {
-                                            if (gpItem.Hangings[i].FlCaseEnum != FixingLogic1.FlCaseEnum.Case1)
+                                            if (gpItem.Hangings[i].FlCaseEnum != FlCaseEnum.Case1)
                                             {
                                                 var segs = vecs.ToGLineSegments(startPt);
                                                 var _segs = segs.ToList();
@@ -1516,7 +1475,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 if (hanging.FloorDrainsCount == THESAURUSHOUSING)
                                                 {
                                                     var p = segs.Last(INTROPUNITIVENESS).EndPoint;
-                                                    _DrawFloorDrain(p.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                                    _DrawFloorDrain(p.ToPoint3d(), isLeftOrRight, i, j);
                                                     Get2FloorDrainDN(out string v1, out string v2);
                                                     DrawNoteText(v1, p + new Vector2d(THESAURUSHYPNOTIC, -THESAURUSGETAWAY));
                                                 }
@@ -1524,13 +1483,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 {
                                                     var p2 = segs.Last(INTROPUNITIVENESS).EndPoint;
                                                     var p1 = segs.Last(THESAURUSHOUSING).EndPoint;
-                                                    _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
-                                                    _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                                    _DrawFloorDrain(p1.ToPoint3d(), isLeftOrRight, i, j);
+                                                    _DrawFloorDrain(p2.ToPoint3d(), isLeftOrRight, i, j);
                                                     Get2FloorDrainDN(out string v1, out string v2);
                                                     DrawNoteText(v1, p1 + new Vector2d(THESAURUSCAVERN, -THESAURUSDOMESTIC));
                                                     DrawNoteText(v2, p2 + new Vector2d(PHYSIOLOGICALLY - THESAURUSCAVERN, -THESAURUSDOMESTIC));
                                                 }
-                                                f = () => drawDomePipes(_segs, THESAURUSDEPLORE);
+                                                f = () => drawDomePipes(_segs);
                                             }
                                         }
                                         {
@@ -1543,11 +1502,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             if (hanging.HasDoubleSCurve)
                                             {
                                                 var p1 = segs.Last(INTROPUNITIVENESS).StartPoint;
-                                                if (gpItem.Hangings[i].FlCaseEnum == FixingLogic1.FlCaseEnum.Case1)
+                                                if (gpItem.Hangings[i].FlCaseEnum == FlCaseEnum.Case1)
                                                 {
                                                     var p2 = p1 + vec7;
                                                     var segs1 = new List<Vector2d> { new Vector2d(-INCONSIDERABILIS + THESAURUSBISEXUAL + THESAURUSQUAGMIRE, THESAURUSSTAMPEDE), new Vector2d(THESAURUSSTAMPEDE, -POLYOXYMETHYLENE - THESAURUSSPIRIT - THESAURUSQUAGMIRE), new Vector2d(MISAPPREHENSIVE, -MISAPPREHENSIVE) }.ToGLineSegments(p2);
-                                                    drawDomePipes(segs1, THESAURUSDEPLORE);
+                                                    drawDomePipes(segs1);
                                                     {
                                                         Vector2d v = default;
                                                         var b = isLeftOrRight;
@@ -1556,7 +1515,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                             b = INTRAVASCULARLY;
                                                             v = new Vector2d(-THESAURUSCAVERN, -QUOTATIONWITTIG);
                                                         }
-                                                        _DrawDSCurve(default(Vector2d), p2 + v, b, i, j, THESAURUSDEPLORE);
+                                                        _DrawDSCurve(default(Vector2d), p2 + v, b, i, j);
                                                     }
                                                     var p3 = segs1.Last().EndPoint;
                                                     var p4 = p3.OffsetY(THESAURUSCANDIDATE);
@@ -1567,11 +1526,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 else
                                                 {
                                                     var fixY = THESAURUSADJUST + THESAURUSHYPNOTIC;
-                                                    _DrawDSCurve(vec7, p1, isLeftOrRight, i, j, THESAURUSDEPLORE);
+                                                    _DrawDSCurve(vec7, p1, isLeftOrRight, i, j);
                                                     if (getDSCurveValue() == THESAURUSDISCIPLINARIAN)
                                                     {
                                                         var segs1 = new List<Vector2d> { new Vector2d(THESAURUSFLUTTER, THESAURUSSTAMPEDE), new Vector2d(THESAURUSPERVADE, -THESAURUSPERVADE) }.ToGLineSegments(p1.OffsetY(HYPERDISYLLABLE));
-                                                        f = () => { drawDomePipes(segs1, THESAURUSDEPLORE); };
+                                                        f = () => { drawDomePipes(segs1); };
                                                     }
                                                     var dn = getBasinDN();
                                                     DrawNoteText(dn, p1.OffsetY(fixY));
@@ -1771,7 +1730,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         pt1 = info.EndPoint.OffsetY(DETERMINATENESS + QUINQUARTICULAR);
                                     }
                                 }
-                                _DrawCheckPoint(pt1, THESAURUSOBSTINACY, THESAURUSDEPLORE);
+                                _DrawCheckPoint(pt1, THESAURUSOBSTINACY);
                                 if (storey == THESAURUSREGION)
                                 {
                                     var dx = -POLYOXYMETHYLENE;
@@ -1815,13 +1774,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     if (run.HasShortTranslator)
                                     {
                                         var segs = vecs.ToGLineSegments(info.Segs.Last(THESAURUSPERMUTATION).StartPoint.OffsetY(-THESAURUSHYPNOTIC));
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
                                         _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, THESAURUSPERMUTATION);
                                     }
                                     else
                                     {
                                         var segs = vecs.ToGLineSegments(info.Segs.Last().StartPoint.OffsetY(-THESAURUSHYPNOTIC));
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
                                         _DrawCleaningPort(segs.Last().EndPoint.ToPoint3d(), run.IsLongTranslatorToLeftOrRight, THESAURUSPERMUTATION);
                                         if (run.IsLongTranslatorToLeftOrRight)
                                         {
@@ -2080,15 +2039,15 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 {
                                     switch (gpItem.Hangings[i].FlFixType)
                                     {
-                                        case FixingLogic1.FlFixType.NoFix:
+                                        case FlFixType.NoFix:
                                             break;
-                                        case FixingLogic1.FlFixType.MiddleHigher:
+                                        case FlFixType.MiddleHigher:
                                             fixY = THESAURUSFEELER / QUOTATIONBASTARD * HEIGHT;
                                             break;
-                                        case FixingLogic1.FlFixType.Lower:
+                                        case FlFixType.Lower:
                                             fixY = -THESAURUSATTENDANCE / THESAURUSPERMUTATION / QUOTATIONBASTARD * HEIGHT;
                                             break;
-                                        case FixingLogic1.FlFixType.Higher:
+                                        case FlFixType.Higher:
                                             fixY = THESAURUSATTENDANCE / THESAURUSPERMUTATION / QUOTATIONBASTARD * HEIGHT + THESAURUSINACCURACY / QUOTATIONBASTARD * HEIGHT;
                                             break;
                                         default:
@@ -2288,7 +2247,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             var segs = info.DisplaySegs ?? info.Segs;
                             if (segs != null)
                             {
-                                drawDomePipes(segs, THESAURUSDEPLORE);
+                                drawDomePipes(segs);
                             }
                         }
                     }
@@ -2433,7 +2392,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 var segs = info.RightSegsMiddle;
                                 if (segs != null)
                                 {
-                                    drawVentPipes(segs, THESAURUSDEPLORE);
+                                    drawVentPipes(segs);
                                 }
                             }
                             void TestRightSegsLast()
@@ -2441,7 +2400,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 var segs = info.RightSegsLast;
                                 if (segs != null)
                                 {
-                                    drawVentPipes(segs, THESAURUSDEPLORE);
+                                    drawVentPipes(segs);
                                 }
                             }
                             void TestRightSegsFirst()
@@ -2449,7 +2408,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 var segs = info.RightSegsFirst;
                                 if (segs != null)
                                 {
-                                    drawVentPipes(segs, THESAURUSDEPLORE);
+                                    drawVentPipes(segs);
                                 }
                             }
                             void Run()
@@ -2467,7 +2426,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var segs = info.RightSegsFirst;
                                         if (segs != null)
                                         {
-                                            drawVentPipes(segs, THESAURUSDEPLORE);
+                                            drawVentPipes(segs);
                                         }
                                     }
                                     else if (gpItem.MinTl + THESAURUSASPIRATION == storey)
@@ -2475,7 +2434,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var segs = info.RightSegsLast;
                                         if (segs != null)
                                         {
-                                            drawVentPipes(segs, THESAURUSDEPLORE);
+                                            drawVentPipes(segs);
                                         }
                                     }
                                     else if (GetStoreyScore(storey).InRange(gpItem.MinTl, gpItem.MaxTl))
@@ -2488,7 +2447,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 b = !b;
                                                 if (b) segs = segs.Take(THESAURUSHOUSING).ToList();
                                             }
-                                            drawVentPipes(segs, THESAURUSDEPLORE);
+                                            drawVentPipes(segs);
                                         }
                                     }
                                 }
@@ -2522,7 +2481,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         {
                                             var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -QUOTATIONWITTIG), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSMAIDENLY, THESAURUSSTAMPEDE) };
                                             var segs = vecs.ToGLineSegments(basePt);
-                                            drawDomePipes(segs, THESAURUSDEPLORE);
+                                            drawDomePipes(segs);
                                             var pt = segs.Last().EndPoint.ToPoint3d();
                                             {
                                                 Dr.DrawRainPort(pt.OffsetX(THESAURUSDOMESTIC));
@@ -2536,7 +2495,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             DrawFloorDrain(p.ToPoint3d(), THESAURUSOBSTINACY, ADENOHYPOPHYSIS);
                                             var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSFICTION), new Vector2d(-THESAURUSHYPNOTIC, -THESAURUSHYPNOTIC), new Vector2d(-INCONSIDERABILIS, THESAURUSSTAMPEDE), new Vector2d(-THESAURUSNEGLIGENCE, THESAURUSNEGLIGENCE) };
                                             var segs = vecs.ToGLineSegments(p + new Vector2d(-THESAURUSCAVERN, -THESAURUSINTRACTABLE));
-                                            drawDomePipes(segs, THESAURUSDEPLORE);
+                                            drawDomePipes(segs);
                                         }
                                     }
                                     else
@@ -2552,7 +2511,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                     {
                                                         var vecs = new List<Vector2d>() { new Vector2d(THESAURUSSTAMPEDE, -HYPERDISYLLABLE + THESAURUSCREDITABLE), new Vector2d(-THESAURUSHYPNOTIC, -THESAURUSHYPNOTIC), new Vector2d(-HYPERDISYLLABLE - THESAURUSJINGLE + ALSOMEGACEPHALOUS * THESAURUSPERMUTATION, THESAURUSSTAMPEDE), new Vector2d(-THESAURUSHYPNOTIC, THESAURUSHYPNOTIC) };
                                                         var segs = vecs.ToGLineSegments(p + new Vector2d(-THESAURUSCAVERN, -THESAURUSINTRACTABLE));
-                                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                                        drawDomePipes(segs);
                                                         var seg = new List<Vector2d> { new Vector2d(-THESAURUSDICTATORIAL, -THESAURUSFICTION), new Vector2d(THESAURUSINCARCERATE, THESAURUSSTAMPEDE) }.ToGLineSegments(segs.First().StartPoint)[THESAURUSHOUSING];
                                                         DrawDimLabel(seg.StartPoint, seg.EndPoint, new Vector2d(THESAURUSSTAMPEDE, -POLYOXYMETHYLENE), METACOMMUNICATION, QUOTATIONBENJAMIN);
                                                     }
@@ -2561,7 +2520,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 {
                                                     var vecs = new List<Vector2d> { new Vector2d(-THESAURUSINHERIT, -DEMONSTRATIONIST), new Vector2d(THESAURUSMIRTHFUL, THESAURUSSTAMPEDE), new Vector2d(THESAURUSHYPNOTIC, THESAURUSHYPNOTIC), new Vector2d(THESAURUSSTAMPEDE, THESAURUSFICTION) };
                                                     var segs = vecs.ToGLineSegments(info.EndPoint).Skip(THESAURUSHOUSING).ToList();
-                                                    drawDomePipes(segs, THESAURUSDEPLORE);
+                                                    drawDomePipes(segs);
                                                     DrawFloorDrain((segs.Last().EndPoint + new Vector2d(THESAURUSCAVERN, THESAURUSINTRACTABLE)).ToPoint3d(), THESAURUSOBSTINACY, ADENOHYPOPHYSIS);
                                                 }
                                             }
@@ -2571,20 +2530,20 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                 }
                                 else if (gpItem.IsSingleOutlet)
                                 {
-                                    void DrawOutlets3(string shadow, Point2d basePoint)
+                                    void DrawOutlets3(string pillow, Point2d basePoint)
                                     {
-                                        if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                         {
-                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                                         }
                                         var values = output.DirtyWaterWellValues;
                                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSFORESTALL, THESAURUSSTAMPEDE), new Vector2d(THESAURUSSTAMPEDE, THESAURUSDERELICTION), new Vector2d(THESAURUSLEARNER, THESAURUSSTAMPEDE), new Vector2d(THESAURUSPERVADE, THESAURUSPERVADE), new Vector2d(THESAURUSSTAMPEDE, INVULNERABLENESS) };
                                         var segs = vecs.ToGLineSegments(basePoint);
                                         segs.RemoveAt(INTROPUNITIVENESS);
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
                                         DrawDiryWaterWells1(segs[THESAURUSPERMUTATION].EndPoint + new Vector2d(-THESAURUSDOMESTIC, THESAURUSHYPNOTIC), values);
-                                        if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
-                                        if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
+                                        if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC));
+                                        if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC));
                                         if (output.HasWrappingPipe2)
                                         {
                                             if (gpItem.OutletWrappingPipeRadius != null)
@@ -2610,10 +2569,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 DrawLine(layer, new GLineSegment(p3, p2));
                                                 DrawStoreyHeightSymbol(p3, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
                                                 {
-                                                    var _shadow = THESAURUSDEPLORE;
-                                                    if (SHOWLINE && !string.IsNullOrEmpty(_shadow) && _shadow.Length > THESAURUSHOUSING)
+                                                    var _pillow = THESAURUSDEPLORE;
+                                                    if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
                                                     {
-                                                        Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _shadow.Substring(THESAURUSHOUSING));
+                                                        Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
                                                     }
                                                 }
                                             }
@@ -2644,7 +2603,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             var p1 = segs[THESAURUSSTAMPEDE].EndPoint;
                                             DrawNoteText(v3, p1.OffsetXY(-POLYOXYMETHYLENE - THESAURUSREPRODUCTION, -THESAURUSDOMESTIC).OffsetY(-THESAURUSEQUATION));
                                             segs = new List<Vector2d> { new Vector2d(-THESAURUSCAVERN, -THESAURUSECLECTIC), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSINGLORIOUS, THESAURUSSTAMPEDE) }.ToGLineSegments(p.OffsetY(-THESAURUSEQUATION)).Skip(THESAURUSHOUSING).ToList();
-                                            drawDomePipes(segs, THESAURUSDEPLORE);
+                                            drawDomePipes(segs);
                                             var p3 = segs.First().StartPoint;
                                             drawDomePipe(new GLineSegment(p3, p3.OffsetY(THESAURUSEQUATION)));
                                         }
@@ -2656,7 +2615,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             var p1 = segs[THESAURUSSTAMPEDE].StartPoint;
                                             DrawNoteText(v1, p1.OffsetXY(HYPERDISYLLABLE, -THESAURUSDOMESTIC).OffsetY(-THESAURUSEQUATION));
                                             segs = new List<Vector2d> { new Vector2d(-THESAURUSCAVERN, -THESAURUSECLECTIC), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSISOLATION, THESAURUSSTAMPEDE) }.ToGLineSegments(p.OffsetY(-THESAURUSEQUATION)).Skip(THESAURUSHOUSING).ToList();
-                                            drawDomePipes(segs, THESAURUSDEPLORE);
+                                            drawDomePipes(segs);
                                             var p3 = segs.First().StartPoint;
                                             drawDomePipe(new GLineSegment(p3, p3.OffsetY(THESAURUSEQUATION)));
                                         }
@@ -2668,12 +2627,12 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     output.HasWrappingPipe2 = output.HasWrappingPipe1;
                                     output.DN1 = getBasinDN();
                                     output.DN2 = IRRESPONSIBLENESS;
-                                    void DrawOutlets4(string shadow, Point2d basePoint, double HEIGHT)
+                                    void DrawOutlets4(string pillow, Point2d basePoint, double HEIGHT)
                                     {
                                         var v = PERIODONTOCLASIA;
-                                        if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                         {
-                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                                         }
                                         var dx = QUOTATIONTRANSFERABLE;
                                         if (getDSCurveValue() == THESAURUSDISCIPLINARIAN && v == PERIODONTOCLASIA)
@@ -2685,8 +2644,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var segs = vecs.ToGLineSegments(basePoint);
                                         segs.RemoveAt(INTROPUNITIVENESS);
                                         DrawDiryWaterWells1(segs[THESAURUSPERMUTATION].EndPoint + new Vector2d(-THESAURUSDOMESTIC, THESAURUSHYPNOTIC), values);
-                                        if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
-                                        if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC), THESAURUSDEPLORE);
+                                        if (output.HasWrappingPipe1) _DrawWrappingPipe(segs[INTROPUNITIVENESS].StartPoint.OffsetX(THESAURUSHYPNOTIC));
+                                        if (output.HasWrappingPipe2) _DrawWrappingPipe(segs[THESAURUSPERMUTATION].EndPoint.OffsetX(THESAURUSHYPNOTIC));
                                         if (output.HasWrappingPipe2)
                                         {
                                             if (gpItem.OutletWrappingPipeRadius != null)
@@ -2712,10 +2671,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 DrawLine(layer, new GLineSegment(p30, p20));
                                                 DrawStoreyHeightSymbol(p30, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
                                                 {
-                                                    var _shadow = THESAURUSDEPLORE;
-                                                    if (SHOWLINE && !string.IsNullOrEmpty(_shadow) && _shadow.Length > THESAURUSHOUSING)
+                                                    var _pillow = THESAURUSDEPLORE;
+                                                    if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
                                                     {
-                                                        Dr.DrawSimpleLabel(p30, THESAURUSFEATURE + _shadow.Substring(THESAURUSHOUSING));
+                                                        Dr.DrawSimpleLabel(p30, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
                                                     }
                                                 }
                                             }
@@ -2727,7 +2686,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var p = segs[THESAURUSCOMMUNICATION].EndPoint;
                                         var fixY = THESAURUSHYPNOTIC + HEIGHT / THESAURUSCOMMUNICATION;
                                         var p1 = p.OffsetX(-THESAURUSPERVADE) + new Vector2d(-THESAURUSOFFEND + THESAURUSDOMESTIC, fixY);
-                                        DrawDSCurve(p1, THESAURUSOBSTINACY, v, THESAURUSDEPLORE);
+                                        DrawDSCurve(p1, THESAURUSOBSTINACY, v);
                                         var p2 = p1.OffsetY(-fixY);
                                         segs.Add(new GLineSegment(p1, p2));
                                         if (v == THESAURUSDISCIPLINARIAN)
@@ -2737,7 +2696,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             segs = segs.Take(INTROPUNITIVENESS).ToList();
                                             segs.AddRange(_segs);
                                         }
-                                        drawDomePipes(segs, THESAURUSDEPLORE);
+                                        drawDomePipes(segs);
                                     }
                                     DrawOutlets4(THESAURUSDEPLORE, info.EndPoint, HEIGHT);
                                 }
@@ -2786,10 +2745,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, (INCONSIDERABILIS + THESAURUSDOMESTIC) * k), new Vector2d(THESAURUSHYPNOTIC, (-THESAURUSHALTER) * k), new Vector2d(THESAURUSSTAMPEDE, (-THESAURUSPRIVILEGE - THESAURUSDOMESTIC) * k) };
                                         var segs = vecs.ToGLineSegments(info.EndPoint).Skip(THESAURUSHOUSING).ToList();
                                         lines.AddRange(segs);
-                                        var shadow = THESAURUSDEPLORE;
-                                        if (SHOWLINE && !string.IsNullOrEmpty(shadow) && shadow.Length > THESAURUSHOUSING)
+                                        var pillow = THESAURUSDEPLORE;
+                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
                                         {
-                                            Dr.DrawSimpleLabel(segs.First().StartPoint, THESAURUSFEATURE + shadow.Substring(THESAURUSHOUSING));
+                                            Dr.DrawSimpleLabel(segs.First().StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
                                         }
                                     }
                                     break;
@@ -3080,6 +3039,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
         public static (List<DrainageDrawingData>, ExtraInfo, bool) CreateDrainageDrawingData(out List<DrainageDrawingData> drDatas, bool noWL, DrainageGeoData geoData)
         {
+            geoData.ODLines.AddRange(geoData.DLines);
             ThDrainageService.PreFixGeoData(geoData);
             if (noWL && geoData.Labels.Any(x => IsWL(x.Text)))
             {
@@ -3093,6 +3053,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         }
         public static (List<DrainageDrawingData>, ExtraInfo) CreateDrainageDrawingData(DrainageGeoData geoData, bool noDraw)
         {
+            geoData.ODLines.AddRange(geoData.DLines);
             ThDrainageService.PreFixGeoData(geoData);
             return _CreateDrainageDrawingData(geoData, noDraw);
         }
@@ -3165,8 +3126,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             storeysItems = GetStoreysItem(storeys);
             geoData = new DrainageGeoData();
             geoData.Init();
-            geoData.StoreyItems.AddRange(storeysItems);
             geoData.StoreyInfos.AddRange(storeys);
+            geoData.StoreyItems.AddRange(storeysItems);
             DrainageService.CollectGeoData(adb, geoData, ctx);
             geoData.Flush();
         }
@@ -3468,6 +3429,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         {
                             var drData = drDatas[i];
                             drData.FloorDrains.TryGetValue(label, out int v);
+                            if (storey == HYDROCHLOROFLUOROCARBON)
+                            {
+                                var v2 = drDatas.Select(x => { x.FdsCountAt2F.TryGetValue(label, out int vv); return vv; }).MaxOrZero();
+                                return Math.Max(v, v2);
+                            }
                             return v;
                         }
                     }
@@ -4274,7 +4240,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             DrawDomePipes(new GLineSegment(p1, p2));
             if (!Testing) DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
         }
-        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value, string shadow)
+        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value, string pillow = null)
         {
             if (!Testing) DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight, value);
         }
@@ -5494,6 +5460,24 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             foreach (var entity in adb.ModelSpace.OfType<Entity>())
             {
                 {
+                    {
+                        if (entity is Circle c && isDrainageLayer(c.Layer) && c.Radius > THESAURUSSTAMPEDE)
+                        {
+                            geoData.circles.Add(c.ToGCircle());
+                        }
+                    }
+                    {
+                        if (entity is BlockReference br && br.BlockTableRecord.IsValid && br.GetEffectiveName() is THESAURUSCONFRONTATION)
+                        {
+                            var c = EntityTool.GetCircles(br).Where(x => x.Visible).Select(x => x.ToGCircle()).Where(x => x.Radius > THESAURUSINCOMPLETE).FirstOrDefault();
+                            if (c.IsValid)
+                            {
+                                geoData.FloorDrainRings.Add(c);
+                            }
+                        }
+                    }
+                }
+                {
                     if (entity.Layer is THESAURUSARCHER)
                     {
                         var bd = entity.Bounds.ToGRect();
@@ -5504,52 +5488,54 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         return;
                     }
                 }
-                if (entity is BlockReference br)
                 {
-                    if (!br.BlockTableRecord.IsValid) continue;
-                    var btr = adb.Blocks.Element(br.BlockTableRecord);
-                    var _fs = new List<KeyValuePair<Geometry, Action>>();
-                    Action f = null;
-                    try
+                    if (entity is BlockReference br)
                     {
-                        isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
-                        handleBlockReference(br, Matrix3d.Identity, _fs);
-                    }
-                    finally
-                    {
-                        isInXref = INTRAVASCULARLY;
-                    }
-                    {
-                        var info = br.XClipInfo();
-                        if (info.IsValid)
+                        if (!br.BlockTableRecord.IsValid) continue;
+                        var btr = adb.Blocks.Element(br.BlockTableRecord);
+                        var _fs = new List<KeyValuePair<Geometry, Action>>();
+                        Action f = null;
+                        try
                         {
-                            info.TransformBy(br.BlockTransform);
-                            var gf = info.PreparedPolygon;
-                            foreach (var kv in _fs)
+                            isInXref = btr.XrefStatus != XrefStatus.NotAnXref;
+                            handleBlockReference(br, Matrix3d.Identity, _fs);
+                        }
+                        finally
+                        {
+                            isInXref = INTRAVASCULARLY;
+                        }
+                        {
+                            var info = br.XClipInfo();
+                            if (info.IsValid)
                             {
-                                if (gf.Intersects(kv.Key))
+                                info.TransformBy(br.BlockTransform);
+                                var gf = info.PreparedPolygon;
+                                foreach (var kv in _fs)
+                                {
+                                    if (gf.Intersects(kv.Key))
+                                    {
+                                        f += kv.Value;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                foreach (var kv in _fs)
                                 {
                                     f += kv.Value;
                                 }
                             }
+                            f?.Invoke();
                         }
-                        else
-                        {
-                            foreach (var kv in _fs)
-                            {
-                                f += kv.Value;
-                            }
-                        }
-                        f?.Invoke();
                     }
-                }
-                else
-                {
-                    var _fs = new List<KeyValuePair<Geometry, Action>>();
-                    handleEntity(entity, Matrix3d.Identity, _fs);
-                    foreach (var kv in _fs)
+                    else
                     {
-                        kv.Value();
+                        var _fs = new List<KeyValuePair<Geometry, Action>>();
+                        handleEntity(entity, Matrix3d.Identity, _fs);
+                        foreach (var kv in _fs)
+                        {
+                            kv.Value();
+                        }
                     }
                 }
             }
@@ -5741,6 +5727,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             var _toiletsf = F(_toilets);
             var _nonamesf = F(_nonames);
             var _balconiesf = F(_balconies);
+            var circlePts = geoData.circles.Select(x => x.ToCirclePolygon(SUPERLATIVENESS).Tag(x)).ToList();
+            var circlePtsf = GeoFac.CreateIntersectsSelector(circlePts);
             for (int si = THESAURUSSTAMPEDE; si < cadDatas.Count; si++)
             {
                 var drData = new DrainageDrawingData();
@@ -6349,13 +6337,25 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         if ((geoData.StoreyItems[i].Labels?.Contains(HYDROCHLOROFLUOROCARBON) ?? INTRAVASCULARLY) && i != si)
                         {
                             var v = geoData.StoreyInfos[i].ContraPoint - geoData.StoreyInfos[si].ContraPoint;
-                            foreach (var kv in lbDict)
+                            var r1 = geoData.StoreyInfos[si].Boundary.ToPolygon();
+                            var r2 = geoData.StoreyInfos[i].Boundary.ToPolygon();
+                            var cPts = circlePtsf(r1);
+                            var ccs = cPts.Select(x => x.UserData).Cast<GCircle>().Select(x => x.ToCirclePolygon(SUPERLATIVENESS).Tag(x)).ToList();
+                            var fds = GeoFac.CreateContainsSelector(geoData.FloorDrainRings.Select(x => x.ToCirclePolygon(SUPERLATIVENESS).Tag(x)).ToList())(r2).Select(x => x.Offset(-v));
+                            var fdPtsf = GeoFac.CreateIntersectsSelector(fds.Select(x => x.GetCenter().ToNTSPoint().Tag(x)).ToList());
+                            var lbPtsf = GeoFac.CreateIntersectsSelector(lbDict.Where(x => IsFL(x.Value) && !IsFL0(x.Value)).Select(x => x.Key.GetCenter().ToNTSPoint().Tag(x.Value)).ToList());
+                            var bufs = GeoFac.GroupGeometries(item.DLines.Concat(ccs).Concat(fds).ToList()).Select(x => x.ToGeometry().Buffer(THESAURUSHOUSING)).ToList();
+                            foreach (var buf in bufs)
                             {
-                                if (IsFL(kv.Value) && !IsFL0(kv.Value))
+                                var lbPt = lbPtsf(buf).FirstOrDefault();
+                                if (lbPt is not null)
                                 {
-                                    var p1 = kv.Key.GetCenter();
-                                    var p2 = p1 + v;
-                                    DrawLineSegmentLazy(new GLineSegment(p1, p2));
+                                    var lb = lbPt.UserData as string;
+                                    var fdPts = fdPtsf(buf).Where(x => ccs.Any(c => c.Intersects(x))).ToList();
+                                    if (fdPts.Count > THESAURUSSTAMPEDE)
+                                    {
+                                        drData.FdsCountAt2F[lb] = fdPts.Count;
+                                    }
                                 }
                             }
                         }
@@ -6527,7 +6527,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     var _dlines = dlinesGeosf(fl);
                                     if (_dlines.Count == THESAURUSSTAMPEDE) return INTRAVASCULARLY;
                                     if (fds.Count == THESAURUSPERMUTATION)
-                                    {
                                         {
                                             try
                                             {
@@ -6573,7 +6572,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 return INTRAVASCULARLY;
                                             }
                                         }
-                                    }
                                     return INTRAVASCULARLY;
                                 }
                                 if (isShunt())
@@ -6881,8 +6879,10 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public HashSet<string> _4tunes;
         public HashSet<string> HasRainPortSymbolsForFL0;
         public HashSet<string> IsConnectedToFloorDrainForFL0;
+        public Dictionary<string, int> FdsCountAt2F;
         public void Init()
         {
+            FdsCountAt2F ??= new Dictionary<string, int>();
             VerticalPipeLabels ??= new HashSet<string>();
             LongTranslatorLabels ??= new HashSet<string>();
             ShortTranslatorLabels ??= new HashSet<string>();
@@ -6911,6 +6911,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<KeyValuePair<string, Geometry>> RoomData;
         public List<CText> Labels;
         public List<GLineSegment> LabelLines;
+        public HashSet<GLineSegment> ODLines;
         public List<GLineSegment> DLines;
         public List<GLineSegment> VLines;
         public List<GLineSegment> WLines;
@@ -6937,6 +6938,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<GRect> zbqs;
         public List<GRect> xsts;
         public List<List<Geometry>> Groups;
+        public HashSet<GCircle> circles;
+        public List<GCircle> FloorDrainRings;
         public void Init()
         {
             Storeys ??= new List<GRect>();
@@ -6970,6 +6973,9 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             StoreyInfos ??= new List<StoreyInfo>();
             Groups ??= new List<List<Geometry>>();
             StoreyItems ??= new List<StoreyItem>();
+            ODLines ??= new HashSet<GLineSegment>();
+            circles ??= new HashSet<GCircle>();
+            FloorDrainRings ??= new List<GCircle>();
         }
         Dictionary<Point2d, string> floorDrainTypeDict;
         public void UpdateFloorDrainTypeDict(Point2d bd, string v)
@@ -7426,6 +7432,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSINVOICE = "W-RAIN-DIMS";
         public const int HYPERDISYLLABLE = 100;
         public const string DENDROCHRONOLOGIST = "W-RAIN-EQPM";
+        public const int THESAURUSINCOMPLETE = 20;
         public const string THESAURUSWINDFALL = "TCH_VPIPEDIM";
         public const string THESAURUSSPECIFICATION = "-";
         public const string THESAURUSDURESS = "TCH_TEXT";
@@ -7545,10 +7552,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSJOBBER = "FromImagination";
         public const int THESAURUSLUMBERING = 55;
         public const string THESAURUSCROUCH = "X.XX";
-        public const string THESAURUSHAUGHTY = "排出：";
         public const int THESAURUSITEMIZE = 666;
-        public const string THESAURUSDECIPHER = "排出套管：";
-        public const string THESAURUSREFRESH = "WaterWellWrappingPipeRadiusStringDict:";
         public const int THESAURUSEXCESS = 255;
         public const int THESAURUSDELIGHT = 0x91;
         public const int THESAURUSCRADLE = 0xc7;
@@ -7597,7 +7601,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSABUNDANT = @"^P\d?L";
         public const string THESAURUSOPTIONAL = @"^T\d?L";
         public const string DIASTEREOISOMER = @"^D\d?L";
-        public const string TRANSLITERATIONS = @"^(F\d?L|T\d?L|P\d?L|D\d?L)(\w*)\-(\w*)([a-zA-Z]*)$";
         public const double HYDROELECTRICITY = 383875.8169;
         public const double THESAURUSMARRIAGE = 250561.9571;
         public const string SUCCESSLESSNESS = "P型存水弯";
@@ -7726,7 +7729,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int THESAURUSCHORUS = 2279;
         public const int THESAURUSCELESTIAL = 1239;
         public const int THESAURUSPRIVILEGE = 675;
-        public const string MULTILATERALIZE = "drainage_drawing_ctx";
         public const string MÖNCHENGLADBACH = "通气帽系统-AI";
         public const string THESAURUSREBATE = "暂不支持污废分流";
         public const string THESAURUSDECLAIM = "PL";
@@ -7774,19 +7776,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const string THESAURUSCLINICAL = "A-Toilet-9";
         public const string THESAURUSBALEFUL = "$xiyiji";
         public const string THESAURUSARCHER = "feng_dbg_test_washing_machine";
-        public const string INTERLINGUISTIC = "ShortTranslatorLabels：";
-        public const string MICROCHIROPTERAN = "LongTranslatorLabels：";
-        public const string THESAURUSLITERATE = "VerticalPipeLabels:";
-        public const string THESAURUSCATARACT = "ToiletPls:";
-        public const string THESAURUSDISCREDIT = "KitchenFls:";
-        public const string THESAURUSSINCERITY = "BalconyFls:";
         public const string THESAURUSRESIGNED = "多通道";
         public const string PHOTOAUTOTROPHIC = "洗衣机";
-        public const string THESAURUSTROPICAL = "FloorDrains：";
-        public const string THESAURUSSUNDRY = "SingleOutletFloorDrains：";
-        public const string THESAURUSVACUUM = "Shunts：";
-        public const string THESAURUSSELECTIVE = "circlesCount ";
-        public const string MICROELECTRONICS = "drainage_drDatas";
         public const string THESAURUSACQUISITIVE = "单排";
         public const string QUOTATIONCHILLI = "设置乙字弯";
         public const string QUOTATIONROBERT = "单盆洗手台";
@@ -7882,47 +7873,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             if (label == null) return INTRAVASCULARLY;
             return (IsFL(label) && !IsFL0(label)) || IsPL(label) || IsTL(label) || IsDL(label);
         }
-        public class ThModelExtractionVisitor : ThDistributionElementExtractionVisitor
-        {
-            public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Autodesk.AutoCAD.DatabaseServices.Entity dbObj, Matrix3d matrix)
-            {
-                if (dbObj is BlockReference blkref)
-                {
-                    HandleBlockReference(elements, blkref, matrix);
-                }
-            }
-            public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
-            {
-            }
-            private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-            {
-                return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-            }
-            public override bool IsDistributionElement(Entity entity)
-            {
-                if (entity is BlockReference reference)
-                {
-                    if (reference.GetEffectiveName().Contains(THESAURUSCLINICAL))
-                    {
-                        using var adb = AcadDatabase.Use(reference.Database);
-                        if (IsVisibleLayer(adb.Layers.Element(reference.Layer)))
-                            return THESAURUSOBSTINACY;
-                    }
-                }
-                return INTRAVASCULARLY;
-            }
-            public override bool CheckLayerValid(Entity curve)
-            {
-                return THESAURUSOBSTINACY;
-            }
-            private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
-            {
-                elements.Add(new ThRawIfcDistributionElementData()
-                {
-                    Geometry = blkref.GetTransformedCopy(matrix),
-                });
-            }
-        }
     }
     public class ExtraInfo
     {
@@ -7935,8 +7885,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public List<DrainageCadData> CadDatas;
         public List<Item> Items;
         public List<DrainageDrawingData> drDatas;
-        public List<DrainageSystemNs.StoreyItem> storeysItems;
-        public DrainageSystemNs.DrainageGeoData geoData;
+        public List<ThMEPWSS.ReleaseNs.DrainageSystemNs.StoreyItem> storeysItems;
+        public ThMEPWSS.ReleaseNs.DrainageSystemNs.DrainageGeoData geoData;
         public DrainageSystemDiagramViewModel vm;
     }
 }
