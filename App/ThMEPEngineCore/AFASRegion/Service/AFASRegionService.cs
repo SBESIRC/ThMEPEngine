@@ -53,7 +53,11 @@ namespace ThMEPEngineCore.AFASRegion.Service
             thnohighbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(nohighbeams);
 
             //获取墙
-            var thWalls= walls.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
+            //var thWalls = walls.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
+            var wallOutlines = walls.Select(o => o.Outline);
+            var thWalls = wallOutlines.OfType<AcPolygon>().ToCollection();
+            var thWallsMpoly = wallOutlines.OfType<MPolygon>();
+            thWallsMpoly.ForEach(x => thWalls.Add(x));
             thWallsSpatialIndex = new ThCADCoreNTSSpatialIndex(thWalls);
 
             //获取洞
@@ -79,7 +83,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             var nohighbeams = thnohighbeamsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
 
             //获取墙
-            var Walls = thWallsSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
+            var Walls = thWallsSpatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ToCollection();
 
             //获取洞
             var Holes = thHolesSpatialIndex.SelectCrossingPolygon(frame).Cast<AcPolygon>().ToCollection();
@@ -95,7 +99,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
                 dBObjects.Add(cPoly);
             }
 
-            foreach (AcPolygon wPoly in Walls)
+            foreach (Entity wPoly in Walls)
             {
                 dBObjects.Add(wPoly);
             }
@@ -141,7 +145,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
                         var Diffobjsm = DifferenceMP(space, dBNoHighObjects).Cast<Entity>();
                         foreach (Entity mpolyline in Diffobjsm)
                         {
-                            if(mpolyline is Polyline polyline)
+                            if (mpolyline is Polyline polyline)
                             {
                                 var buffers = polyline.Buffer(-BufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0);
                                 DBObjectCollection objs = Holes;
@@ -185,12 +189,12 @@ namespace ThMEPEngineCore.AFASRegion.Service
                         //{
                         //    Objs.AddRange(Diffobjs.SelectMany(x => x.Buffer(-BufferDistance).Cast<AcPolygon>()).Where(x => x.Area > 0));
                         //}
-                    }  
+                    }
                     else
                     {
                         Objs.AddRange(mPolygon.Buffer(-SmallestBufferDistance).Cast<AcPolygon>().Where(x => x.Area > 0));
                     }
-                }   
+                }
             }
             //新的需求，如果可布置区域内缩500一个区域都缩不出来，则选择最大的那个区域，进行内缩200
             //这样做的意义是，保证至少有一个可布置区域
@@ -205,7 +209,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             return Objs.ToCollection();
         }
 
-        
+
 
         private DBObjectCollection Difference(Entity e, DBObjectCollection objs)
         {
@@ -229,7 +233,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
 
         private DBObjectCollection DifferenceMP(Entity e, DBObjectCollection objs)
         {
-            if(objs.Count ==0)
+            if (objs.Count == 0)
             {
                 return new DBObjectCollection() { e };
             }
@@ -254,7 +258,7 @@ namespace ThMEPEngineCore.AFASRegion.Service
             {
                 if (o is Polyline)
                     reobjs.Add(o);
-                else if(o is MPolygon mPolygon)
+                else if (o is MPolygon mPolygon)
                 {
                     if (mPolygon.Holes().Count > 0)
                         reobjs.Add(mPolygon);
