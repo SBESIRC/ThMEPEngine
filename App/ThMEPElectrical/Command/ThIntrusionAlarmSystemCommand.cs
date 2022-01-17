@@ -65,17 +65,18 @@ namespace ThMEPElectrical.Command
                     frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
+                var pt = frameLst.First().Key.StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frame = frameBlockDic.Key;
+                    var outFrame = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
+                    originTransformer.Transform(outFrame);
+                    outFrame = ThMEPFrameService.Normalize(outFrame);
 
-                    var pt = frame.StartPoint;
-                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                    originTransformer.Transform(frame);
-                    var outFrame = ThMEPFrameService.Normalize(frame);
-
-                    GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+                    //获取楼层信息
                     var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
                     if (floor.IsNull())
                     {

@@ -75,6 +75,7 @@ namespace ThMEPElectrical.Command
                 {
                     return;
                 }
+                string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
 
                 Dictionary<Polyline, ObjectIdCollection> frameLst = new Dictionary<Polyline, ObjectIdCollection>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
@@ -84,21 +85,20 @@ namespace ThMEPElectrical.Command
                     frameLst.Add(boundary, new ObjectIdCollection() { obj });
                 }
 
-                string trunkingLayer = acadDatabase.Element<Curve>(trunkingResult.Value.GetObjectIds().First()).Layer;
+                var pt = frameLst.First().Key.StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
+
                 foreach (var frameBlockDic in frameLst)
                 {
-                    var frame = frameBlockDic.Key;
+                    var outFrame = frameBlockDic.Key;
                     var frameBlockId = frameBlockDic.Value;
+                    originTransformer.Transform(outFrame);
+                    outFrame = ThMEPFrameService.Normalize(outFrame);
 
-                    var pt = frame.StartPoint;
-                    ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
-                    originTransformer.Transform(frame);
-                    var outFrame = ThMEPFrameService.Normalize(frame);
-
-                    GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
-
+                    //获取楼层信息
                     var floor = getPrimitivesService.GetFloorInfo(frameBlockId);
-                    if(floor.IsNull())
+                    if (floor.IsNull())
                     {
                         continue;
                     }
@@ -114,10 +114,10 @@ namespace ThMEPElectrical.Command
                     
 
                     //获取连线图块
-                    var blocks = GetBlocks(frame, originTransformer);
+                    var blocks = GetBlocks(outFrame, originTransformer);
 
                     //获取线槽
-                    var trunkings = getPrimitivesService.GetTrunkings(frame, trunkingLayer);
+                    var trunkings = getPrimitivesService.GetTrunkings(outFrame, trunkingLayer);
 
                     var ACEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.AC_BLOCK_NAMES, ThMEPCommon.AC_PIPE_LAYER_NAME, true);
                     var GTEntitys = getPrimitivesService.GetOldLayout(outFrame, ThMEPCommon.GT_BLOCK_NAMES, ThMEPCommon.GT_PIPE_LAYER_NAME, true);
@@ -132,7 +132,7 @@ namespace ThMEPElectrical.Command
 
                     //连线
                     ConnectPipeService connectPipeService = new ConnectPipeService();
-                    var Lines=connectPipeService.ConnectPipe(frame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
+                    var Lines=connectPipeService.ConnectPipe(outFrame, blocks, rooms, doors, columns, trunkings, new List<Polyline>(), floor);
 
                     using (AcadDatabase db = AcadDatabase.Active())
                     {
