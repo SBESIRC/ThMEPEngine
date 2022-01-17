@@ -31,7 +31,7 @@
     <Compile Include="Common\ThEnumBlockScale.cs" />
     <Compile Include="DSFEL\DSFELConfigCommon.cs" />
     <Compile Include="DSFEL\ExitService\CalExitService.cs" />
-    <Compile Include="DSFEL\LayoutService.cs" />
+    <Compile Include="DSFEL\LayoutExitService.cs" />
     <Compile Include="DSFEL\Model\ExitModel.cs" />
     <Compile Include="DSFEL\Model\ExitRoomModel.cs" />
     <Compile Include="DSFEL\Model\FELModel.cs" />
