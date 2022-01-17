@@ -60,15 +60,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     foreach (BlockReference buildingBlock in BuildingBlocks)
                     {
                         var cuttersInBuilding = buildingBlock.GetCutters();
-#if DEBUG
-                        using (AcadDatabase currentDb = AcadDatabase.Active())
-                        {
-                            foreach (var pline in cuttersInBuilding)
-                            {
-                                currentDb.CurrentSpace.Add(pline);
-                            }
-                        }
-#endif
+//#if DEBUG
+//                        using (AcadDatabase currentDb = AcadDatabase.Active())
+//                        {
+//                            foreach (var pline in cuttersInBuilding)
+//                            {
+//                                currentDb.CurrentSpace.Add(pline);
+//                            }
+//                        }
+//#endif
                             allCuttersList.Add(cuttersInBuilding);
                     }
                     var allCutters = allCuttersList.SelectMany(c => c).ToCollection();
@@ -236,9 +236,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 return false;//必定是个不合理的解
             }
+
+            double areaTolerance = 1.0;//面积容差
             double areasTotalArea = 0;//分割后区域总面积
             areas.ForEach(a => areasTotalArea += a.Area);
-            if (areasTotalArea > OuterBoundary.Area)
+            if (areasTotalArea - areaTolerance > OuterBoundary.Area)
             {
                 return false;//分割后的总面积不能大于原始面积
             }
