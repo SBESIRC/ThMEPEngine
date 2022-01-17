@@ -51,6 +51,10 @@
                 <ComboBox x:Name="cbxBalFD" Width="100" SelectedIndex="0" Text="{Binding BalconyFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label Content="冷凝地漏："></Label>
+                <ComboBox x:Name="cbxCndFD" Width="100" SelectedIndex="0" Text="{Binding CondenseFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="水井地漏："></Label>
                 <ComboBox x:Name="cbxWellFD" Width="100" SelectedIndex="0" Text="{Binding WaterWellFloorDrainDN,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></ComboBox>
             </StackPanel>

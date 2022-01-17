@@ -568,6 +568,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (seg.IsValid) lst.Add(seg.ToLineString());
                         continue;
                     }
+                    if (!entity.Visible || !isRainLayer(entity.Layer)) continue;
                     var bd = entity.Bounds.ToGRect();
                     if (bd.IsValid)
                     {
@@ -579,7 +580,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         var ext = new Extents3d();
                         try
                         {
-                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>())
+                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>().Where(x => x.Visible))
                             {
                                 if (e.Bounds.HasValue)
                                 {
@@ -3994,7 +3995,14 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                     string getFDDN()
                     {
                         const string dft = QUOTATIONBREWSTER;
-                        return viewModel?.Params.BalconyFloorDrainDN ?? dft;
+                        if (gpItem.PipeType is PipeType.NL)
+                        {
+                            return viewModel?.Params.CondenseFloorDrainDN ?? dft;
+                        }
+                        else
+                        {
+                            return viewModel?.Params.BalconyFloorDrainDN ?? dft;
+                        }
                     }
                     string getHDN()
                     {
