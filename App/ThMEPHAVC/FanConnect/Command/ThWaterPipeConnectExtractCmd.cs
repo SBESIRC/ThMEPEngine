@@ -170,11 +170,29 @@ namespace ThMEPHVAC.FanConnect.Command
                         AllLine = allLines,
                         AllFan = tmpFcus
                     };
-                    remSurplusPipe.RemSurplusPipe();
-                    var toDbServiece = new ThFanToDBServiece();
+                    string layer;
+                    int colorIndex;
+                    remSurplusPipe.RemSurplusPipe(out layer,out colorIndex);
+
                     foreach (var pl in plines)
                     {
-                        toDbServiece.InsertEntity(pl, "AI-水管路由");
+                        pl.TransformBy(mt);
+                    }
+                    var tempLineColl = cleanServiec.CleanNoding(plines.ToCollection());
+                    var tempPathes = new List<Line>();
+                    foreach(var l in tempLineColl)
+                    {
+                        if(l is Line)
+                        {
+                            tempPathes.Add(l as Line);
+                        }
+                    }
+                    tempPathes = ThFanConnectUtils.CleanLaneLines(tempPathes);
+                    var toDbServiece = new ThFanToDBServiece();
+                    foreach (var path in tempPathes)
+                    {
+                        path.TransformBy(mt.Inverse());
+                        toDbServiece.InsertEntity(path, layer, colorIndex);
                     }
                     
                     return;
