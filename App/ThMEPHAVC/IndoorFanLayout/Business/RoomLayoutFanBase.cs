@@ -48,10 +48,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             _roomPLine = roomOutPLine;
             _roomInnerPLine = new List<Polyline>();
             _roomLoad = roomLoad;
-            _roomUnitLoad = roomLoad / roomOutPLine.Area;
             if (null != innerPLines && innerPLines.Count > 0)
                 foreach (var item in innerPLines)
                     _roomInnerPLine.Add(item);
+            var area = roomOutPLine.Area - _roomInnerPLine.Sum(c => c.Area);
+            _roomUnitLoad = roomLoad / area;
         }
         protected void CalcRoomLoad(AreaLayoutGroup layoutGroup, bool isLayoutByVertical = false) 
         {
@@ -78,7 +79,6 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     CalcLayoutAreaByVertical(area, _fanRectangle, _groupYVector);
             }
         }
-
         protected void LayoutFanVent()
         {
             if (_fanRectangle.MinVentCount < 1 || _fanRectangle.VentRect == null)
@@ -136,7 +136,85 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 }
             }
         }
-
+        protected List<DeleteFan> CheckAndRemoveLayoutFan()
+        {
+            //计算需要多少台时要根据当前UCS面积计算需要，如果有多个UCS时不能以整个房间的负荷作为计算
+            var areaLoad = 0.0;
+            var ucsArea = 0.0;
+            foreach (var item in _roomIntersectAreas)
+            {
+                ucsArea += item.RealIntersectAreas.Sum(c => c.Area);
+            }
+            areaLoad = ucsArea * _roomUnitLoad;
+            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, areaLoad, _fanRectangle.Load);
+            var calcDelFans = layoutResultCheck.GetDeleteFanByRow();
+            if (calcDelFans.Count < 1)
+                return calcDelFans;
+            foreach (var areaCell in _roomIntersectAreas)
+            {
+                if (!calcDelFans.Any(c => c.CellId == areaCell.divisionArea.Uid))
+                    continue;
+                int delCount = 0;
+                foreach (var item in areaCell.FanLayoutAreaResult)
+                {
+                    var delFans = new List<FanLayoutRect>();
+                    foreach (var fan in item.FanLayoutResult)
+                    {
+                        if (calcDelFans.Any(c => c.FanId == fan.FanId))
+                            delFans.Add(fan);
+                    }
+                    if (delFans.Count < 1)
+                        continue;
+                    delCount += delFans.Count;
+                    foreach (var del in delFans)
+                        item.FanLayoutResult.Remove(del);
+                }
+                if (delCount < 1)
+                    continue;
+                areaCell.NeedFanCount -= delCount;
+            }
+            return calcDelFans;
+        }
+        protected List<string> CheckAndAddLayoutFan() 
+        {
+            var addFanCellIds = new List<string>();
+            var areaLoad = 0.0;
+            var ucsArea = 0.0;
+            foreach (var item in _roomIntersectAreas)
+            {
+                ucsArea += item.RealIntersectAreas.Sum(c => c.Area);
+            }
+            areaLoad = ucsArea * _roomUnitLoad;
+            var layoutResultCheck = new LayoutResultCheck(_roomIntersectAreas, areaLoad, _fanRectangle.Load);
+            var orderRowIds = _allGroupPoints.Select(c => c.Key).ToList();
+            var addFans = layoutResultCheck.RowAddFan(orderRowIds, out List<LayoutRow> ucsRowFans);
+            if (addFans.Count != orderRowIds.Count)
+                return addFanCellIds;
+            for (int i = 0; i < orderRowIds.Count; i++) 
+            {
+                var addCount = addFans[i];
+                if (addCount < 1)
+                    continue;
+                var rowId = orderRowIds[i];
+                var thisRowCells = ucsRowFans.Where(c => c.RowGroupId == rowId).First().RowCells;
+                var cellDiff = thisRowCells.ToDictionary(c=>c.CellId,x=>x.CellLayoutDiffNeed);
+                while (addCount > 0) 
+                {
+                    var cellId = cellDiff.OrderByDescending(c=>c.Value).First().Key;
+                    addFanCellIds.Add(cellId);
+                    foreach (var areaCell in _roomIntersectAreas)
+                    {
+                        if (areaCell.divisionArea.Uid != cellId)
+                            continue;
+                        cellDiff[cellId] -= _fanRectangle.Load;
+                        areaCell.NeedFanCount += 1;
+                        break;
+                    }
+                    addCount -= 1;
+                }
+            }
+            return addFanCellIds;
+        }
         protected Polyline GetFanVentPolyline(Point3d centerPoint, Vector3d fanDir)
         {
             var otherDir = fanDir.CrossProduct(Vector3d.ZAxis);

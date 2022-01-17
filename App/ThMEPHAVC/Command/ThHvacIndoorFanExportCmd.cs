@@ -156,6 +156,7 @@ namespace ThMEPHVAC.Command
                 var writeExcel = new WriteExcelHelper(exportPath);
                 writeExcel.DeleteExcelSheet(new List<string> { sheetName }, false);
                 writeExcel.WriteDataTableToTemplateExcel(data.Tables[0], sheetName, 4);
+                writeExcel.DeleteExcelRow(0,4+ data.Tables[0].Rows.Count-1,-1);
                 ShowMsg = "导出成功";
             }
             catch(Exception ex) 

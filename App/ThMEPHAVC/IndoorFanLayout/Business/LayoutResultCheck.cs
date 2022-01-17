@@ -15,6 +15,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         int _needFanCount;
         public LayoutResultCheck(List<DivisionRoomArea> layoutResult,double roomNeedLoad,double fanLoad) 
         {
+            //这里数据一般是一个UCS
             _layoutResult = new List<DivisionRoomArea>();
             foreach (var item in layoutResult) 
             {
@@ -78,6 +79,105 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 delCell.CellLayoutDiffNeed -= _fanLoad;
             }
             return delFans;
+        }
+
+        public List<int> RowAddFan(List<string> rowOrderIds, out List<LayoutRow> ucsRowFans) 
+        {
+            ucsRowFans = new List<LayoutRow>();
+            //这里数据是一个UCS,
+            var rowAddCounts = new List<int>();
+            if (_layoutFanCount >= _needFanCount)
+                return rowAddCounts;
+            int needAddCount = _needFanCount - _layoutFanCount;
+            var allLayoutFans = new List<FanLayoutArea>();
+            ucsRowFans = GetLayoutRowInfo(out allLayoutFans);
+            var rowOverLoads = new List<double>();
+            var rowAddLoads = new List<double>();
+            for (int i = 0; i < rowOrderIds.Count; i++)
+            {
+                var rowId = rowOrderIds[i];
+                var rowFans = ucsRowFans.Where(c => c.RowGroupId == rowId).FirstOrDefault();
+                if (rowFans == null)
+                {
+                    rowOverLoads.Add(0);
+                    rowAddLoads.Add(0);
+                    continue;
+                }
+                double overLoad = rowFans.RowLayoutLoad - rowFans.RowNeedLoad;
+                rowOverLoads.Add(overLoad);
+                rowAddLoads.Add(0);
+            }
+            double needAddLoad = 0.0;
+            for (int i = 0; i < rowAddLoads.Count; i++) 
+            {
+                double overLoad = rowOverLoads[i];
+                if (overLoad > 0)
+                    continue;
+                needAddLoad += overLoad;
+                //排负荷不够，计算是否往相邻排补,如果相邻排无法补，继续往相邻排补
+                int j = 1;
+                while (true)
+                {
+                    if (i - j < 0 && i + j > rowAddLoads.Count)
+                        break;
+                    int upRow = i - j;
+                    int downRow = i + j;
+                    bool isBreak = false;
+                    if (upRow > 0)
+                    {
+                        //有上一排,如果上一排负荷不够，不进行添加
+                        var upRowOverLoad = rowOverLoads[upRow];
+                        if (upRowOverLoad > 0)
+                        {
+                            rowOverLoads[upRow] = 0;
+                            rowAddLoads[upRow] += needAddLoad;
+                            needAddLoad -= overLoad;
+                            isBreak = true;
+                        }
+                    }
+                    if (isBreak)
+                        break;
+                    if (downRow < rowOrderIds.Count)
+                    {
+                        //没有上一排，有下一排
+                        var downRowOverLoad = rowOverLoads[downRow];
+                        if (downRowOverLoad > 0)
+                        {
+                            rowOverLoads[downRow] = 0;
+                            rowAddLoads[downRow] += needAddLoad;
+                            needAddLoad -= overLoad;
+                            isBreak = true;
+                        }
+                    }
+                    if (isBreak)
+                        break;
+                    j += 1;
+                }
+            }
+            int hisAddCount = 0;
+            for (int i = 0; i < rowAddLoads.Count; i++) 
+            {
+                if (hisAddCount > needAddCount)
+                    break;
+                double overLoad = rowOverLoads[i];
+                if (overLoad < 0)
+                {
+                    rowAddCounts.Add(0);
+                    continue; 
+                }
+                var addLoad = rowAddLoads[i];
+                double add = overLoad + addLoad;
+                if (add > 0)
+                {
+                    rowAddCounts.Add(0);
+                    continue;
+                }
+                add = Math.Abs(add);
+                int addCount = (int)Math.Ceiling(add / _fanLoad);
+                hisAddCount += addCount;
+                rowAddCounts.Add(addCount);
+            }
+            return rowAddCounts;
         }
         private int LayoutFanCount(List<DivisionRoomArea> layoutResult) 
         {
