@@ -1,6 +1,7 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
