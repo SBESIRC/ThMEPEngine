@@ -621,5 +621,9 @@ namespace ThMEPLighting.Garage
         {
             return first.DotProduct(second) < 0.0;
         }
+        public static void ThDispose(this DBObjectCollection dbObjs)
+        {
+            dbObjs.OfType<DBObject>().ToList().ForEach(o => o.Dispose());
+        }
     }
 }

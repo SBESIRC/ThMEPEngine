@@ -45,7 +45,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void BuildSingleRow()
         {
             // 创建连接线，按照灯长度把灯所在的边打断
-            var linkWireObjs = CreateSingleRowLinkWire();
+            var edges = GetEdges();
+            var linkWireObjs = CreateSingleRowLinkWire(edges);
 
             // 建议允许最大的回路编号是4
             var samePathJumpWireRes = CreateSingleRowJumpWire(Graphs);
@@ -70,7 +71,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             // 将1、2线边上的灯线用灯块打断，并过滤末端
             var linkWireObjs = CreateDoubleRowLinkWire(totalEdges);
-            linkWireObjs = FilterDoubleRowLinkWire(linkWireObjs, totalEdges);
 
             // 创建直段上的跳线(类似于拱形)
             var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);

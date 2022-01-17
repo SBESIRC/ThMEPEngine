@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -80,7 +81,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         private Line FindBranchCloseWire(Line branch,Point3d crossPt)
         {
-            var outline = CreateOutline(branch.StartPoint, branch.EndPoint,1.0);
+            var newBranch = branch.ExtendLine(-1.0);
+            var outline = CreateOutline(newBranch.StartPoint, newBranch.EndPoint,
+                ThGarageLightCommon.RepeatedPointDistance);
             var lines = Query(outline).OfType<Line>()
                 .Where(o => branch.IsCollinear(o, 1.0)).ToList();
             var firstLightPos = Point3d.Origin;

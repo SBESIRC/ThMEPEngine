@@ -168,7 +168,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new List<ThLightNode>();
             var line1FarwayPt = linkPt.GetNextLinkPt(line1.StartPoint, line1.EndPoint);
             var edges = Sort(line1Edges, linkPt, line1FarwayPt);
-            edges = Filter(edges);
+            //edges = Filter(edges);
             var nodes = GetClosestNodes(linkPt, line1FarwayPt,
                 edges.SelectMany(o => o.LightNodes).ToList());
             return GetDifferntNumberNodes(nodes);
@@ -514,7 +514,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private List<ThLightNodeLink> Link(List<ThLightNode> firstNodes, List<ThLightNode> secondNodes)
         {
-            var results = new List<ThLightNodeLink>();
+            var results = new List<ThLightNodeLink>();     
             firstNodes.ForEach(f =>
             {
                 secondNodes.ForEach(s =>

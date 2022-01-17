@@ -45,7 +45,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void BuildSingleRow()
         {
             // 创建连接线，按照灯长度把灯所在的边打断
-            var linkWireObjs = CreateSingleRowLinkWire();
+            var edges = GetEdges();
+            var linkWireObjs = CreateSingleRowLinkWire(edges); 
 
             // 建议允许最大的回路编号是4
             var sameLinkJumpWireRes = CreateSingleRowJumpWire(Graphs);

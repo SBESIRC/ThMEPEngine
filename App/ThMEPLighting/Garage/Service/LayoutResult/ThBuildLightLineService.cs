@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -12,6 +13,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new DBObjectCollection();
             lightPos.ForEach(o => results.Add(CreateLine(o.Key, o.Value, lampLength)));
             return results; 
+        }
+        public static DBObjectCollection Build(List<Tuple<Point3d, double,string>> lightPos, double lampLength)
+        {
+            var results = new DBObjectCollection();
+            lightPos.ForEach(o => results.Add(CreateLine(o.Item1, o.Item2, lampLength)));
+            return results;
         }
         private static Line CreateLine(Point3d pos, double rad,double lampLength)
         {

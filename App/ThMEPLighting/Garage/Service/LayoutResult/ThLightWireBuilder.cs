@@ -217,12 +217,25 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return new List<ThLightNodeLink>();
             }
         }
-        protected DBObjectCollection FilerLinkWire(DBObjectCollection linkWires)
+        protected DBObjectCollection FilerLinkWire(DBObjectCollection linkWires,List<ThLightEdge> edges)
         {
-            var lightLines = ThBuildLightLineService.Build(LightPositionDict, ArrangeParameter.LampLength);
-            var filerService = new ThFilterLinkWireService(linkWires, lightLines, ArrangeParameter.LightWireBreakLength);
+            var lightBlkService = new ThLightBlockFactory(edges);
+            var lightPosRes = lightBlkService.BuildLightPosInf();
+
+            // 过滤默认灯编号的线
+            var defaultLights = lightPosRes.Where(o => DefaultNumbers.Contains(o.Item3)).ToList();
+            var otherLights = lightPosRes.Where(o => !DefaultNumbers.Contains(o.Item3)).ToList();
+            var defaultLightLines = ThBuildLightLineService.Build(defaultLights, ArrangeParameter.LampLength);
+            var otherLightLines = ThBuildLightLineService.Build(otherLights,
+                ArrangeParameter.LampLength+ ArrangeParameter.LightWireBreakLength);
+            linkWires = linkWires.Union(otherLightLines); // 把非默认编号的灯线传入，作为连接线使用
+            var filerService = new ThFilterLinkWireService(linkWires, defaultLightLines, ArrangeParameter.LightWireBreakLength);
             var results = filerService.Filter();
-            lightLines.Dispose();
+            results = results.Difference(otherLightLines);
+
+            // 释放资源
+            defaultLightLines.ThDispose();
+            otherLightLines.ThDispose();
             return results;
         }
 
@@ -307,11 +320,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
             return results;
         }
-        protected DBObjectCollection CreateSingleRowLinkWire()
+        protected DBObjectCollection CreateSingleRowLinkWire(List<ThLightEdge> edges)
         {
-            var edges = GetEdges();
             var linkWireObjs = CreateLinkWire(edges);
-            linkWireObjs = FilerLinkWire(linkWireObjs);
+            linkWireObjs = FilerLinkWire(linkWireObjs, edges);
             return linkWireObjs;
         }
         protected DBObjectCollection CreateDoubleRowLinkWire(List<ThLightEdge> edges)
@@ -319,10 +331,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var results = new DBObjectCollection();
             var firstEdges = GetEdges(edges, EdgePattern.First);
             var secondEdges = GetEdges(edges, EdgePattern.Second);
-            var firstLinkWireObjs = CreateLinkWire(firstEdges);            
-            firstLinkWireObjs = FilerLinkWire(firstLinkWireObjs);
+            var firstLinkWireObjs = CreateLinkWire(firstEdges);
             var secondLinkWireObjs = CreateLinkWire(secondEdges);
-            secondLinkWireObjs = FilerLinkWire(secondLinkWireObjs);
+            firstLinkWireObjs = FilterDoubleRowLinkWire(firstLinkWireObjs, edges);
+            secondLinkWireObjs = FilterDoubleRowLinkWire(secondLinkWireObjs, edges);
             results = results.Union(firstLinkWireObjs);
             results = results.Union(secondLinkWireObjs);
             return results;
@@ -344,8 +356,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var filter1 = new ThLinkWireFilter(linkWires,lightWireFactory.Results.Keys.ToCollection());
             results = filter1.FilterBranch(branchPtPairs);
 
-            var filter2 = new ThLinkWireFilter(results, lightWireFactory.Results.Keys.ToCollection());
-            results = filter2.FilterElbow(edges.Select(o => o.Edge).ToList());
+            //var filter2 = new ThLinkWireFilter(results, lightWireFactory.Results.Keys.ToCollection());
+            //results = filter2.FilterElbow(edges.Select(o => o.Edge).ToList());
             return results;
         }
 
