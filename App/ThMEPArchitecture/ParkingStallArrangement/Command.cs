@@ -189,7 +189,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                         try
                         {
-                            partitionpro.ProcessAndDisplay(layerNames, 30);
+                            partitionpro.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
@@ -202,7 +202,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     {
                         try
                         {
-                            partition.ProcessAndDisplay(layerNames, 30);
+                            partition.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
@@ -265,16 +265,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
-                var layerNames = "solutions" + k.ToString();
-                using (AcadDatabase adb = AcadDatabase.Active())
-                {
-                    try
-                    {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                    }
-                    catch { }
-                }
-
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     var use_partition_pro = true;
@@ -284,7 +274,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                         try
                         {
-                            partitionpro.ProcessAndDisplay(layerNames, 30);
+                            partitionpro.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
@@ -299,7 +289,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         {
                             try
                             {
-                                partition.ProcessAndDisplay(layerNames, 30);
+                                partition.ProcessAndDisplay();
                             }
                             catch (Exception ex)
                             {

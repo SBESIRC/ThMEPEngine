@@ -88,16 +88,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var rst = geneAlgorithm.Run();
 
-            layoutPara.Set(rst);
-            var layerNames = "solutions0";
-            using (AcadDatabase adb = AcadDatabase.Active())
-            {
-                try
-                {
-                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                }
-                catch { }
-            }
+            layoutPara.Set(rst);      
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
@@ -108,7 +99,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                     try
                     {
-                        count += partitionpro.ProcessAndDisplay(layerNames, 30);
+                        count += partitionpro.ProcessAndDisplay();
                     }
                     catch (Exception ex)
                     {
@@ -123,7 +114,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     {
                         try
                         {
-                            count += partition.ProcessAndDisplay(layerNames, 30);
+                            count += partition.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {

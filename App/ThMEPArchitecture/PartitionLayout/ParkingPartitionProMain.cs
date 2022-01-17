@@ -9,6 +9,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPArchitecture.ViewModel;
+using ThMEPEngineCore;
 using ThMEPEngineCore.CAD;
 using static ThMEPArchitecture.PartitionLayout.GeoUtilities;
 
@@ -62,6 +63,8 @@ namespace ThMEPArchitecture.PartitionLayout
         private double MaxLength;
         public ThCADCoreNTSSpatialIndex ObstaclesSpatialIndex;
         public ThCADCoreNTSSpatialIndex CarBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+        public ThCADCoreNTSSpatialIndex LaneSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+        public ThCADCoreNTSSpatialIndex CarSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public List<Lane> IniLanes = new List<Lane>();
         private List<Polyline> CarSpots = new List<Polyline>();
         private List<Polyline> Pillars = new List<Polyline>();
@@ -137,25 +140,39 @@ namespace ThMEPArchitecture.PartitionLayout
             return count;
         }
 
-        public int ProcessAndDisplay(string layer = "0", int colorIndex = 0)
+        public int ProcessAndDisplay(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
             GenerateParkingSpaces();
             Dispose();
-            Display(layer, colorIndex);
+            Display();
             return CarSpots.Count;
         }
 
-        public void Display(string layer = "0", int colorindex = 0)
+        public void Display(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
+            using (AcadDatabase adb = AcadDatabase.Active())
+            {
+                if (!adb.Layers.Contains(carLayerName))
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, carLayerName, 0);
+                }
+                if (!adb.Layers.Contains(columnLayerName))
+                {
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, columnLayerName, 0);
+                }
+            }
             CarSpots.Select(e =>
             {
-                e.Layer = layer;
-                e.ColorIndex = 30;
+                e.Layer = carLayerName;
+                e.ColorIndex = carindex;
                 return e;
             }).AddToCurrentSpace();
             Pillars.Select(e =>
             {
-                e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
+                e.Layer = columnLayerName;
+                if (columncolor < 0)
+                    e.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(15, 240, 206);
+                else e.ColorIndex = columncolor;
                 return e;
             }).AddToCurrentSpace();
         }
@@ -244,10 +261,67 @@ namespace ThMEPArchitecture.PartitionLayout
                     var plcarbox = CreatPolyFromLines(linesplitbound, linesplitboundback);
                     plcarbox.Scale(plcarbox.GetRecCentroid(), ScareFactorForCollisionCheck);
                     var linesplitcarboxes = SplitLineBySpacialIndexInPoly(linesplitbound, plcarbox, CarBoxesSpatialIndex, false)
-                        .Where(e => !IsInAnyBoxes(e.GetCenter(), CarBoxes))
+                        .Where(e => !IsInAnyBoxes(e.GetCenter()/*.TransformBy(Matrix3d.Displacement(-vec.GetNormal())) * 200*/, CarBoxes,true))
+                        //.Where(e =>
+                        //{
+                        //    return !IsInAnyBoxes(AveragePoint(e.GetCenter(), linesplitboundback.GetClosestPointTo(e.GetCenter(), true)), CarBoxes);
+                        //})
                         .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
                         .Where(e => IsConnectedToLane(e));
-                    foreach (var linesplit in linesplitcarboxes)
+                    //解决车道线与车道模块短边平行长度不够的情况
+                    var fixlinesplitcarboxes = new List<Line>();
+                    foreach (var tmplinesplitcarboxes in linesplitcarboxes)
+                    {
+                        var k = CreateLine(tmplinesplitcarboxes);
+                        k.TransformBy(Matrix3d.Displacement(vec * DisLaneWidth / 2));
+                        var boxs = CarBoxes.Where(f =>
+                          {
+                              var segs = new DBObjectCollection();
+                              f.Explode(segs);
+                              var seg = segs.Cast<Line>().Where(s => Math.Abs(s.Length - DisCarAndHalfLane) > 1).First();
+                              if (IsPerpLine(seg, k))
+                              {
+                                  segs.Dispose();
+                                  return true;
+                              }
+                              else
+                              {
+                                  segs.Dispose();
+                                  return false;
+                              }
+                          }).Select(box => box.Clone() as Polyline).ToList();
+                        var spindex = new ThCADCoreNTSSpatialIndex(boxs.ToCollection());
+                        var plcarboxfix = CreatPolyFromLines(k, linesplitboundback);
+                        plcarboxfix.Scale(plcarbox.GetRecCentroid(), ScareFactorForCollisionCheck);
+                        fixlinesplitcarboxes.AddRange(SplitLineBySpacialIndexInPoly(k, plcarboxfix, spindex, false)
+                            .Where(e => !IsInAnyBoxes(e.GetCenter(), boxs, true))
+                            .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
+                            .Where(e =>
+                            {
+                                var ep = CreateLine(e);
+                                ep.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
+                                if (IsConnectedToLane(ep))
+                                {
+                                    ep.Dispose();
+                                    return true;
+                                }
+                                else
+                                {
+                                    ep.Dispose();
+                                    return false;
+                                }
+                            }).Select(e =>
+                            {
+                                e.StartPoint = e.StartPoint.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
+                                e.EndPoint = e.EndPoint.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
+                                return e;
+                            })
+                            );
+                        spindex.Dispose();
+                        boxs.ForEach(e => e.Dispose());
+                        plcarboxfix.Dispose();
+                    }
+                    foreach (var linesplit in fixlinesplitcarboxes)
                     {
                         var offsetback = CreateLine(linesplit);
                         offsetback.TransformBy(Matrix3d.Displacement(-vec * (DisVertCarLength + DisLaneWidth / 2)));
@@ -453,39 +527,47 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             var lanes = new List<Lane>();
             CarModules.ForEach(e => lanes.Add(new Lane(e.Line, e.Vec)));
-            foreach (var vl in lanes)
+            foreach (var k in lanes)
             {
-                var line = CreateLine(vl.Line);
+                var vl = k.Line;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = CreateLine(vl);
                 if (ClosestPointInVertLines(line.StartPoint, line, IniLanes.Select(e => e.Line)) < 10)
                     line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * DisLaneWidth / 2));
                 if (ClosestPointInVertLines(line.EndPoint, line, IniLanes.Select(e => e.Line)) < 10)
                     line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisLaneWidth / 2));
-                line.TransformBy(Matrix3d.Displacement(vl.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, vl.Vec, DisVertCarWidth, DisVertCarLength, false, false);
+                line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength, false, false);
             }
         }
 
         private void GenerateCarsOnRestLanes()
         {
+            LaneSpatialIndex.Update(IniLanes.Select(e => CreatePolyFromLine(e.Line)).ToCollection(), new DBObjectCollection());
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth);
-            foreach (var vl in vertlanes)
+            foreach (var k in vertlanes)
             {
-                var line = CreateLine(vl.Line);
-                line.TransformBy(Matrix3d.Displacement(vl.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, vl.Vec, DisVertCarWidth, DisVertCarLength);
+                var vl = k.Line;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = CreateLine(vl);
+                line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength);
             }
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength);
-            foreach (var vl in vertlanes)
+            foreach (var k in vertlanes)
             {
-                var line = CreateLine(vl.Line);
-                line.TransformBy(Matrix3d.Displacement(vl.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, vl.Vec, DisParallelCarLength, DisParallelCarWidth);
+                var vl = k.Line;
+                UnifyLaneDirection(ref vl, IniLanes);
+                var line = CreateLine(vl);
+                line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth);
             }
         }
 
         private void PostProcess()
         {
             RemoveDuplicateCars();
+            RemoveCarsIntersectedWithBoundary();
             RemoveInvalidPillars();
         }
 

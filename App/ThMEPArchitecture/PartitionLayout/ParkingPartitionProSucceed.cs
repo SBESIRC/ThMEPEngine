@@ -89,6 +89,29 @@ namespace ThMEPArchitecture.PartitionLayout
             else return false;
         }
 
+        private static void UnifyLaneDirection(ref Line lane, List<Lane> iniLanes)
+        {
+            var line = CreateLine(lane);
+            var lanes = iniLanes.Select(e => e.Line).Where(e => IsPerpLine(line, e)).ToList();
+            if (lanes.Count > 0)
+            {
+                if (ClosestPointInCurves(line.EndPoint, lanes) < 1 && ClosestPointInCurves(line.StartPoint, lanes) < 1)
+                {
+                    if (line.StartPoint.X - line.EndPoint.X > 1000) line.ReverseCurve();
+                    else if (lanes.Count == 0 && line.StartPoint.Y - line.EndPoint.Y > 1000) line.ReverseCurve();
+                }
+                else if (ClosestPointInCurves(line.EndPoint, lanes) < DisCarAndHalfLane + 1 && ClosestPointInCurves(line.StartPoint, lanes) > DisCarAndHalfLane + 1) line.ReverseCurve();
+                else if (ClosestPointInCurves(line.EndPoint, lanes) < DisCarAndHalfLane + 1 && ClosestPointInCurves(line.StartPoint, lanes) < DisCarAndHalfLane + 1
+                    && ClosestPointInCurves(line.EndPoint, lanes) < ClosestPointInCurves(line.StartPoint, lanes)) line.ReverseCurve();
+            }
+            else
+            {
+                if (line.StartPoint.X - line.EndPoint.X > 1000) line.ReverseCurve();
+                else if (lanes.Count == 0 && line.StartPoint.Y - line.EndPoint.Y > 1000) line.ReverseCurve();
+            }
+            lane = line;
+        }
+
         private List<Line> SplitLineBySpacialIndexInPoly(Line line, Polyline polyline, ThCADCoreNTSSpatialIndex spatialIndex, bool allow_on_edge = true)
         {
             var crossed = spatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>();
@@ -282,10 +305,14 @@ namespace ThMEPArchitecture.PartitionLayout
                     {
                         boxsplit.TransformBy(Matrix3d.Displacement(-lane.Vec.GetNormal() * mindistance));
                         var boxsplittest = CreateLine(boxsplit);
-                        boxsplittest.TransformBy(Matrix3d.Displacement(lane.Vec.GetNormal() * (mindistance + DisLaneWidth / 2)));
+                        boxsplittest.TransformBy(Matrix3d.Displacement(lane.Vec.GetNormal() * mindistance));
                         var boxpl = CreatPolyFromLines(boxsplit, boxsplittest);
                         boxpl.Scale(boxpl.GetRecCentroid(), ScareFactorForCollisionCheck);
                         var boxcrossed = CarBoxesSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>().ToList();
+                        boxsplittest.TransformBy(Matrix3d.Displacement(lane.Vec.GetNormal() * DisLaneWidth / 2));
+                        boxpl = CreatPolyFromLines(boxsplit, boxsplittest);
+                        boxpl.Scale(boxpl.GetRecCentroid(), ScareFactorForCollisionCheck);
+                        boxcrossed.AddRange(LaneSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
                         var boxpoints = new List<Point3d>();
                         foreach (var cross in boxcrossed)
                         {
@@ -295,9 +322,20 @@ namespace ThMEPArchitecture.PartitionLayout
                         boxpl.Scale(boxpl.GetRecCentroid(), 1 / (ScareFactorForCollisionCheck - 0.01));
                         boxpoints = boxpoints.Where(p => boxpl.IsPointInFast(p)).Select(p => boxsplittest.GetClosestPointTo(p, false)).ToList();
                         var splits = SplitLine(boxsplittest, boxpoints).Where(e => !IsInAnyBoxes(e.GetCenter(), CarBoxes, true)).Where(e => e.Length >= minlength);
+                        splits = splits.Where(e =>
+                         {
+                             var tlt = new Line(boxsplit.GetClosestPointTo(e.StartPoint, true), boxsplit.GetClosestPointTo(e.EndPoint, true));
+                             var plt = CreatPolyFromLines(tlt, e);
+                             foreach (var il in boxcrossed)
+                             {
+                                 if (plt.Contains(il.GetCenter())) return false;
+                             }
+                             return true;
+                         });
                         foreach (var split in splits)
                         {
-                            split.TransformBy(Matrix3d.Displacement(-lane.Vec.GetNormal() * (mindistance + DisLaneWidth / 2)));
+                            split.TransformBy(Matrix3d.Displacement(-lane.Vec.GetNormal() * DisLaneWidth / 2));
+                            split.TransformBy(Matrix3d.Displacement(-lane.Vec.GetNormal() * mindistance));
                             if (ClosestPointInVertLines(split.StartPoint, split, IniLanes.Select(e => e.Line)) < 10)
                                 split.StartPoint = split.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(split).GetNormal() * DisLaneWidth / 2));
                             if (ClosestPointInVertLines(split.EndPoint, split, IniLanes.Select(e => e.Line)) < 10)
@@ -368,6 +406,21 @@ namespace ThMEPArchitecture.PartitionLayout
                     }
                 }
             }
+        }
+
+        private void RemoveCarsIntersectedWithBoundary()
+        {
+            var obspls = Obstacles.Where(e => e.Closed).Where(e => e.Area > DisVertCarLength * DisLaneWidth * 5).ToList();
+            CarSpots = CarSpots.Where(e =>
+            {
+                var k = e.Clone() as Polyline;
+                k.Scale(k.GetRecCentroid(), ScareFactorForCollisionCheck);
+                var conda = Boundary.Contains(k.GetRecCentroid());
+                var condb = !IsInAnyPolys(k.GetRecCentroid(), obspls);
+                var condc = Boundary.Intersect(k, Intersect.OnBothOperands).Count == 0;
+                if (conda && condb && condc) return true;
+                else return false;
+            }).ToList();
         }
 
         private void RemoveInvalidPillars()
@@ -471,7 +524,13 @@ namespace ThMEPArchitecture.PartitionLayout
             {
                 points.AddRange(o.Vertices().Cast<Point3d>().ToArray());
                 points.AddRange(o.Intersect(pltest, Intersect.OnBothOperands));
-                points.AddRange(SplitCurve(o, pltestsc).Select(e => e.GetCenter()));
+                try
+                {
+                    points.AddRange(SplitCurve(o, pltestsc).Select(e => e.GetPointAtParameter(e.EndParam / 2)));
+                }
+                catch
+                {
+                }
             }
             points = points.Where(e => pltest.IsPointInFast(e) || pltest.GetClosePoint(e).DistanceTo(e) < 1).Distinct().ToList();
             Line edgea = new Line(lane.StartPoint, unittest.StartPoint);
@@ -583,7 +642,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var pte = pts.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * 50000));
                 var tl = new Line(pts, pte);
                 var tlbf = tl.Buffer(1);
-                var crosscars = CarBoxesSpatialIndex.SelectCrossingPolygon(tlbf).Cast<Polyline>().OrderBy(t => t.GetRecCentroid().DistanceTo(pts)).ToList();
+                var crosscars = CarSpatialIndex.SelectCrossingPolygon(tlbf).Cast<Polyline>().OrderBy(t => t.GetRecCentroid().DistanceTo(pts)).ToList();
                 if (crosscars.Count > 1)
                 {
                     for (int i = 1; i < crosscars.Count; i++)
@@ -633,6 +692,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 {
                     if (add_to_car_spacialindex)
                         AddToSpatialIndex(car, ref CarBoxesSpatialIndex);
+                    AddToSpatialIndex(car, ref CarSpatialIndex);
                     CarSpots.Add(car);
                     if (Pillars.Count > 0)
                     {
@@ -697,6 +757,7 @@ namespace ThMEPArchitecture.PartitionLayout
                                 if (add_to_car_spacialindex)
                                     AddToSpatialIndex(pillar, ref CarBoxesSpatialIndex);
                                 Pillars.Add(pillar);
+                                AddToSpatialIndex(pillar, ref CarSpatialIndex);
                             }
                             if (adjust_pillar_edge)
                             {

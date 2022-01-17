@@ -57,6 +57,11 @@ namespace ThMEPArchitecture.PartitionLayout
             //}
         }
 
+        public static Point3d AveragePoint(Point3d a, Point3d b)
+        {
+            return new Point3d((a.X + b.X) / 2, (a.Y + b.Y / 2), (a.Z + b.Z) / 2);
+        }
+
         public static Point3d GetRecCentroid(this Polyline rec)
         {
             var ext = rec.GeometricExtents;
@@ -506,18 +511,18 @@ namespace ThMEPArchitecture.PartitionLayout
             if (boxes.Count == 0) return false;
             if (true_on_edge)
             {
-                if (ClosestPointInCurves(pt, boxes) < 1) return true;
+                if (ClosestPointInCurves(pt, boxes) < 10) return true;
             }
             foreach (var p in boxes)
             {
                 if (p.Area < 1) continue;
-                p.TransformBy(Matrix3d.Scaling(0.99, p.GetRecCentroid()));
+                p.TransformBy(Matrix3d.Scaling(0.99999, p.GetRecCentroid()));
                 if (p.Contains(pt))
                 {
-                    p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
+                    p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
                     return true;
                 }
-                p.TransformBy(Matrix3d.Scaling(1 / 0.99, p.GetRecCentroid()));
+                p.TransformBy(Matrix3d.Scaling(1 / 0.99999, p.GetRecCentroid()));
             }
             return false;
         }

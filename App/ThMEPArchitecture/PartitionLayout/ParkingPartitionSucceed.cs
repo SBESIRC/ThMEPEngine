@@ -945,7 +945,7 @@ namespace ThMEPArchitecture.PartitionLayout
         /// Unify lane direction.
         /// </summary>
         /// <param name="lane"></param>
-        public static void UnifyLaneDirection(ref Line lane, List<ParkingPartition.Lane> iniLanes)
+        private static void UnifyLaneDirection(ref Line lane, List<ParkingPartition.Lane> iniLanes)
         {
             var line = CreateLine(lane);
             var lanes = iniLanes.Select(e => e.Line).Where(e => IsPerpLine(line, e)).ToList();
