@@ -608,7 +608,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             public int __dy;
             public DrainageSystemDiagramViewModel viewModel;
             public ExtraInfo exInfo;
-            public static bool @switch;
             public void Draw()
             {
                 {
@@ -666,12 +665,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         DrawStoreyLine(storey, bsPt1.ToPoint3d(), lineLen, getStoreyHeightText());
                     }
                 }
-                void _DrawWrappingPipe(Point2d basePt, string pillow = null)
+                void _DrawWrappingPipe(Point2d basePt)
                 {
-                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                    {
-                        Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                    }
                     DrawBlockReference(THESAURUSSTRINGENT, basePt.ToPoint3d(), br =>
                     {
                         br.Layer = THESAURUSDEFAULTER;
@@ -712,17 +707,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         if (seg.IsValid) dome_lines.Add(seg);
                     }
-                    void drawDomePipes(IEnumerable<GLineSegment> segs, string pillow = null)
+                    void drawDomePipes(IEnumerable<GLineSegment> segs)
                     {
                         var ok = INTRAVASCULARLY;
                         foreach (var seg in segs.Where(s => s.IsValid))
                         {
                             if (!ok)
                             {
-                                if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                {
-                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING), dome_layer);
-                                }
                                 ok = THESAURUSOBSTINACY;
                             }
                             dome_lines.Add(seg);
@@ -732,17 +723,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                     {
                         if (seg.IsValid) vent_lines.Add(seg);
                     }
-                    void drawVentPipes(IEnumerable<GLineSegment> segs, string pillow = null)
+                    void drawVentPipes(IEnumerable<GLineSegment> segs)
                     {
                         var ok = INTRAVASCULARLY;
                         foreach (var seg in segs.Where(s => s.IsValid))
                         {
                             if (!ok)
                             {
-                                if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                {
-                                    Dr.DrawSimpleLabel(seg.StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING), vent_layer);
-                                }
                                 ok = THESAURUSOBSTINACY;
                             }
                             vent_lines.Add(seg);
@@ -888,12 +875,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         start = segs.Last().EndPoint;
                         return start;
                     }
-                    void DrawOutlets1(string pillow, Point2d basePoint1, double width, ThwOutput output, bool isRainWaterWell = INTRAVASCULARLY, Vector2d? fixv = null)
+                    void DrawOutlets1(Point2d basePoint1, double width, ThwOutput output, bool isRainWaterWell = INTRAVASCULARLY, Vector2d? fixv = null)
                     {
-                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                        {
-                            Dr.DrawSimpleLabel(basePoint1.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                        }
                         Point2d pt2, pt3;
                         if (output.DirtyWaterWellValues != null)
                         {
@@ -956,13 +939,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     DrawLine(layer, new GLineSegment(p1, p2));
                                     DrawLine(layer, new GLineSegment(p3, p2));
                                     DrawStoreyHeightSymbol(p3, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
-                                    {
-                                        var _pillow = THESAURUSDEPLORE;
-                                        if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
-                                        {
-                                            Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
-                                        }
-                                    }
                                 }
                             }
                             var v = new Vector2d(THESAURUSATTACHMENT, THESAURUSENTREPRENEUR);
@@ -1096,12 +1072,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             }
                             DrawCleaningPort(basePt, leftOrRight, scale);
                         }
-                        void _DrawCheckPoint(Point2d basePt, bool leftOrRight, string pillow = null)
+                        void _DrawCheckPoint(Point2d basePt, bool leftOrRight)
                         {
-                            if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                            {
-                                Dr.DrawSimpleLabel(basePt, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                            }
                             DrawCheckPoint(basePt.ToPoint3d(), leftOrRight);
                         }
                         var fdBasePoints = new Dictionary<int, List<Point2d>>();
@@ -1124,7 +1096,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     var basePt = info.EndPoint;
                                     if (output != null)
                                     {
-                                        DrawOutlets1(THESAURUSDEPLORE, basePt, THESAURUSEXECRABLE, output);
+                                        DrawOutlets1(basePt, THESAURUSEXECRABLE, output);
                                     }
                                 }
                             }
@@ -1143,12 +1115,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                             void handleHanging(Hanging hanging, bool isLeftOrRight)
                             {
                                 var linesDfferencers = new List<Polygon>();
-                                void _DrawFloorDrain(Point3d basePt, bool leftOrRight, int i, int j, string pillow = null)
+                                void _DrawFloorDrain(Point3d basePt, bool leftOrRight, int i, int j)
                                 {
-                                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                    {
-                                        Dr.DrawSimpleLabel(basePt.ToPoint2D(), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                                    }
                                     var p1 = basePt.ToPoint2d();
                                     {
                                         if (_shouldDrawRaiseWashingMachineSymbol())
@@ -1175,12 +1143,8 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         return;
                                     }
                                 }
-                                void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight, int i, int j, string pillow = null)
+                                void _DrawDSCurve(Vector2d vec7, Point2d p1, bool leftOrRight, int i, int j)
                                 {
-                                    if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                    {
-                                        Dr.DrawSimpleLabel(p1, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                                    }
                                     if (!hasDrawedDSCurveLabel && !thwPipeLine.Labels.Any(x => IsFL0(x)))
                                     {
                                         hasDrawedDSCurveLabel = THESAURUSOBSTINACY;
@@ -2525,17 +2489,13 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 }
                                             }
                                         }
-                                        DrawOutlets1(THESAURUSDEPLORE, basePt, THESAURUSEXECRABLE, output, isRainWaterWell: THESAURUSOBSTINACY);
+                                        DrawOutlets1(basePt, THESAURUSEXECRABLE, output, isRainWaterWell: THESAURUSOBSTINACY);
                                     }
                                 }
                                 else if (gpItem.IsSingleOutlet)
                                 {
-                                    void DrawOutlets3(string pillow, Point2d basePoint)
+                                    void DrawOutlets3(Point2d basePoint)
                                     {
-                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                        {
-                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                                        }
                                         var values = output.DirtyWaterWellValues;
                                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, -THESAURUSCOMATOSE), new Vector2d(-THESAURUSPERVADE, -THESAURUSPERVADE), new Vector2d(-THESAURUSFORESTALL, THESAURUSSTAMPEDE), new Vector2d(THESAURUSSTAMPEDE, THESAURUSDERELICTION), new Vector2d(THESAURUSLEARNER, THESAURUSSTAMPEDE), new Vector2d(THESAURUSPERVADE, THESAURUSPERVADE), new Vector2d(THESAURUSSTAMPEDE, INVULNERABLENESS) };
                                         var segs = vecs.ToGLineSegments(basePoint);
@@ -2568,13 +2528,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 DrawLine(layer, new GLineSegment(p1, p2));
                                                 DrawLine(layer, new GLineSegment(p3, p2));
                                                 DrawStoreyHeightSymbol(p3, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
-                                                {
-                                                    var _pillow = THESAURUSDEPLORE;
-                                                    if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
-                                                    {
-                                                        Dr.DrawSimpleLabel(p3, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
-                                                    }
-                                                }
                                             }
                                         }
                                         DrawNoteText(output.DN1, segs[INTROPUNITIVENESS].StartPoint.OffsetXY(THESAURUSATTACHMENT, THESAURUSENTREPRENEUR));
@@ -2585,7 +2538,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                     }
                                     output.HasWrappingPipe2 = output.HasWrappingPipe1 = gpItem.HasWrappingPipe;
                                     output.DN2 = IRRESPONSIBLENESS;
-                                    DrawOutlets3(THESAURUSDEPLORE, info.EndPoint);
+                                    DrawOutlets3(info.EndPoint);
                                 }
                                 else if (gpItem.FloorDrainsCountAt1F > THESAURUSSTAMPEDE)
                                 {
@@ -2620,20 +2573,16 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                             drawDomePipe(new GLineSegment(p3, p3.OffsetY(THESAURUSEQUATION)));
                                         }
                                     }
-                                    DrawOutlets1(THESAURUSDEPLORE, info.EndPoint, THESAURUSEXECRABLE, output, fixv: new Vector2d(THESAURUSSTAMPEDE, -THESAURUSSURPRISED));
+                                    DrawOutlets1(info.EndPoint, THESAURUSEXECRABLE, output, fixv: new Vector2d(THESAURUSSTAMPEDE, -THESAURUSSURPRISED));
                                 }
                                 else if (gpItem.HasBasinInKitchenAt1F)
                                 {
                                     output.HasWrappingPipe2 = output.HasWrappingPipe1;
                                     output.DN1 = getBasinDN();
                                     output.DN2 = IRRESPONSIBLENESS;
-                                    void DrawOutlets4(string pillow, Point2d basePoint, double HEIGHT)
+                                    void DrawOutlets4(Point2d basePoint, double HEIGHT)
                                     {
                                         var v = PERIODONTOCLASIA;
-                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                        {
-                                            Dr.DrawSimpleLabel(basePoint.OffsetY(-HYPERDISYLLABLE), THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                                        }
                                         var dx = QUOTATIONTRANSFERABLE;
                                         if (getDSCurveValue() == THESAURUSDISCIPLINARIAN && v == PERIODONTOCLASIA)
                                         {
@@ -2659,7 +2608,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                         ByLayer(line);
                                                     }
                                                 }
-                                                static void DrawStoreyHeightSymbol(Point2d basePt, string layer, string label = HELIOCENTRICISM)
+                                                static void DrawStoreyHeightSymbol(Point2d basePt, string layer, string label)
                                                 {
                                                     DrawBlockReference(blkName: THESAURUSSUPERFICIAL, basePt: basePt.ToPoint3d(), layer: layer, props: new Dictionary<string, string>() { { THESAURUSSUPERFICIAL, label } }, cb: br => { ByLayer(br); });
                                                 }
@@ -2670,13 +2619,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                                 DrawLine(layer, new GLineSegment(p10, p20));
                                                 DrawLine(layer, new GLineSegment(p30, p20));
                                                 DrawStoreyHeightSymbol(p30, THESAURUSSTRIPED, gpItem.OutletWrappingPipeRadius);
-                                                {
-                                                    var _pillow = THESAURUSDEPLORE;
-                                                    if (@switch && !string.IsNullOrEmpty(_pillow) && _pillow.Length > THESAURUSHOUSING)
-                                                    {
-                                                        Dr.DrawSimpleLabel(p30, THESAURUSFEATURE + _pillow.Substring(THESAURUSHOUSING));
-                                                    }
-                                                }
                                             }
                                         }
                                         DrawNoteText(output.DN1, segs[INTROPUNITIVENESS].StartPoint.OffsetXY(THESAURUSATTACHMENT, THESAURUSENTREPRENEUR));
@@ -2698,11 +2640,11 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         }
                                         drawDomePipes(segs);
                                     }
-                                    DrawOutlets4(THESAURUSDEPLORE, info.EndPoint, HEIGHT);
+                                    DrawOutlets4(info.EndPoint, HEIGHT);
                                 }
                                 else
                                 {
-                                    DrawOutlets1(THESAURUSDEPLORE, info.EndPoint, THESAURUSEXECRABLE, output);
+                                    DrawOutlets1(info.EndPoint, THESAURUSEXECRABLE, output);
                                 }
                             }
                         }
@@ -2745,11 +2687,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         var vecs = new List<Vector2d> { new Vector2d(THESAURUSSTAMPEDE, (INCONSIDERABILIS + THESAURUSDOMESTIC) * k), new Vector2d(THESAURUSHYPNOTIC, (-THESAURUSHALTER) * k), new Vector2d(THESAURUSSTAMPEDE, (-THESAURUSPRIVILEGE - THESAURUSDOMESTIC) * k) };
                                         var segs = vecs.ToGLineSegments(info.EndPoint).Skip(THESAURUSHOUSING).ToList();
                                         lines.AddRange(segs);
-                                        var pillow = THESAURUSDEPLORE;
-                                        if (@switch && !string.IsNullOrEmpty(pillow) && pillow.Length > THESAURUSHOUSING)
-                                        {
-                                            Dr.DrawSimpleLabel(segs.First().StartPoint, THESAURUSFEATURE + pillow.Substring(THESAURUSHOUSING));
-                                        }
                                     }
                                     break;
                                 }
@@ -4240,7 +4177,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
             DrawDomePipes(new GLineSegment(p1, p2));
             if (!Testing) DrawSWaterStoringCurve(p2.ToPoint3d(), leftOrRight);
         }
-        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value, string pillow = null)
+        public static void DrawDSCurve(Point2d p2, bool leftOrRight, string value)
         {
             if (!Testing) DrawDoubleWashBasins(p2.ToPoint3d(), leftOrRight, value);
         }
@@ -7498,7 +7435,6 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
         public const int THESAURUSINTRACTABLE = 160;
         public const string ADENOHYPOPHYSIS = "普通地漏无存水弯";
         public const int THESAURUSATTACHMENT = 750;
-        public const string THESAURUSFEATURE = "*";
         public const string IRRESPONSIBLENESS = "DN100";
         public const double UNDENOMINATIONAL = 0.0;
         public const int SUBCATEGORIZING = 780;
