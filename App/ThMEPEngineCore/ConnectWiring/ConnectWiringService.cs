@@ -31,13 +31,17 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false)
+        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false,List<string> allConfigBlocks = null)
         {
             //获取所有的块
-            var allConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
-            if(!allConfigBlocks.Any())
+            var ConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
+            if(!ConfigBlocks.Any())
             {
                 return;
+            }
+            if(allConfigBlocks.IsNull())
+            {
+                allConfigBlocks = ConfigBlocks;
             }
             GetPickData(out List<Polyline> holes, out Polyline outFrame, out BlockReference block);
             if (outFrame == null || block == null)
@@ -47,20 +51,32 @@ namespace ThMEPEngineCore.ConnectWiring
             ThBlockPointsExtractor thBlockPointsExtractor = new ThBlockPointsExtractor(allConfigBlocks);
             using (AcadDatabase db = AcadDatabase.Active())
             {
+                db.Database.CreateAILayer("0", 255);
                 thBlockPointsExtractor.Extract(db.Database, outFrame.Vertices());
             }
             var allBlocks = thBlockPointsExtractor.resBlocks.Where(x => !x.BlockTableRecord.IsNull && !(x.Database is null)).ToList();
-            BranchConnectingService branchConnecting = new BranchConnectingService();
+            //BranchConnectingService branchConnecting = new BranchConnectingService();
+            BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, !wall, !column);
-
+            
             var CenterLine = new List<ThGeometry>();
             if (Convert.ToInt16(Application.GetSystemVariable("USERR3")) == 1)
             {
                 CenterLine = GetCenterLinePolylines(out DBObjectCollection objs);
+                //CenterLine.AddRange(GetUCSPolylines(outFrame,objs));
             }
+
+            //新增 处理超远问题
+            ThMEPOriginTransformer Transformer = new ThMEPOriginTransformer(outFrame.StartPoint);
+            data.ForEach(o => Transformer.Transform(o.Boundary));
+            CenterLine.ForEach(o => Transformer.Transform(o.Boundary));
+
+            string Inputpath = "{0}_{1}_MAInput.geojson";
+            string Outputpath = "{0}_{1}_Output.geojson";
             foreach (var info in configInfo)
             {
+                var LoopName = info.loopInfoModels[0].LineContent;
                 var blockInfos = info.loopInfoModels.First().blocks;
                 var configBlocks = blockInfos.Select(x => x.blockName);
                 var resBlocks = allBlocks
@@ -85,31 +101,29 @@ namespace ThMEPEngineCore.ConnectWiring
                     };
                     var allDatas = new List<ThGeometry>(data);
                     allDatas.AddRange(CenterLine);
+                    blockGeos.ForEach(o => Transformer.Transform(o.Boundary));
                     allDatas.AddRange(blockGeos);
-                    allDatas.AddRange(GetBlockHoles(allBlocks, resBlocks));
+                    var blockHoles = GetBlockHoles(allBlocks, resBlocks);
+                    blockHoles.ForEach(o => Transformer.Transform(o.Boundary));
+                    allDatas.AddRange(blockHoles);
                     var dataGeoJson = ThGeoOutput.Output(allDatas);
 
                     if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
-
-                        string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
+                        string path = Path.Combine(Active.DocumentDirectory, string.Format(Inputpath, Active.DocumentName, LoopName));
                         File.WriteAllText(path, dataGeoJson);
                     }
-
-                    //--------------处理中
-                    var outJson = thCableRouter.RouteCable(dataGeoJson, context);
-
+                    var res = thCableRouter.RouteCable(dataGeoJson, context);
                     if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
-                        string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
-                        File.WriteAllText(path, outJson);
+                        string path = Path.Combine(Active.DocumentDirectory, string.Format(Outputpath, Active.DocumentName, LoopName));
+                        File.WriteAllText(path, dataGeoJson);
                     }
-
-                    if (!outJson.Contains("error"))
+                    if (!res.Contains("error"))
                     {
                         var lines = new List<Polyline>();
                         var serializer = GeoJsonSerializer.Create();
-                        using (var stringReader = new StringReader(outJson))
+                        using (var stringReader = new StringReader(res))
                         using (var jsonReader = new JsonTextReader(stringReader))
                         {
                             var features = serializer.Deserialize<FeatureCollection>(jsonReader);
@@ -127,15 +141,25 @@ namespace ThMEPEngineCore.ConnectWiring
                         {
                             loops = multiLoopService.CreateLoop(info, lines, resBlocks);
                         }
+                        resBlocks = resBlocks.Select(o =>
+                        {
+                            var entity = o.Clone() as BlockReference;
+                            Transformer.Transform(entity);
+                            return entity;
+                        }).ToList();
                         foreach (var loop in loops)
                         {
                             List<Polyline> resLines = new List<Polyline>();
                             foreach (var line in loop.Value)
                             {
-                                var wiring = branchConnecting.CreateBranch(line, resBlocks);
-                                //var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
-                                resLines.Add(wiring);
+                                //var wiring = branchConnecting.CreateBranch(line, resBlocks);
+                                var wiring = connectingFactory.BranchConnect(line, resBlocks, blockInfos);
+                                if (wiring.Length > 10)
+                                {
+                                    resLines.Add(wiring);
+                                }
                             }
+                            resLines.ForEach(o => Transformer.Reset(o));
                             //插入线
                             LineTypeService.InsertConnectPipe(resLines, loop.Key.LineType);
                         }

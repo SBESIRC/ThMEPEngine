@@ -17,14 +17,17 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
             var sBlocks = blocks.Where(x => x.Position.DistanceTo(wiring.StartPoint) < mergeDis).ToList();
             var eBlocks = blocks.Where(x => x.Position.DistanceTo(wiring.EndPoint) < mergeDis).ToList();
             Polyline resPoly = wiring;
-            if (eBlocks.Count > 0)
-            {
-                resPoly = CreateBranch(resPoly, eBlocks.First(), loopBlockInfos);
-            }
             if (sBlocks.Count > 0)
             {
-                resPoly.ReverseCurve();
                 resPoly = CreateBranch(resPoly, sBlocks.First(), loopBlockInfos);
+            }
+            if (eBlocks.Count > 0)
+            {
+                if (resPoly.Length > 10)
+                {
+                    resPoly.ReverseCurve();
+                    resPoly = CreateBranch(resPoly, eBlocks.First(), loopBlockInfos);
+                }
             }
             return resPoly;
         }

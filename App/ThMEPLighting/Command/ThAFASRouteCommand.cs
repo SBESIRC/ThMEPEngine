@@ -50,7 +50,8 @@ namespace ThMEPLighting.Command
                 }
             }
             ConnectWiringService connectWiringService = new ConnectWiringService();
-            connectWiringService.Routing(configFilter, false, ThMEPLightingService.Instance.AvoidColumnChecked);
+            var configs = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
+            connectWiringService.Routing(configFilter, false, ThMEPLightingService.Instance.AvoidColumnChecked, configs);
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
 #endif
