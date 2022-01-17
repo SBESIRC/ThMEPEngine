@@ -270,14 +270,14 @@ namespace ThMEPHVAC.FanConnect.Service
         }
         public List<Entity> FindTextFromLine(Line line,ref List<Entity> marks)
         {
-            var box = line.Buffer(800);
+            var box = line.Buffer(400);
             var retText = new List<Entity>();
             foreach (var mark in marks)
             {
                 if (mark is DBText)
                 {
                     var text = mark as DBText;
-                    if (box.Contains(text.Position))
+                    if (box.Contains(text.AlignmentPoint))
                     {
                         retText.Add(mark);
                     }
@@ -535,7 +535,6 @@ namespace ThMEPHVAC.FanConnect.Service
             {
                 return;
             }
-
             if (node.Children.Count == 0)
             {
                 UpdateNodeMark(node,ref marks);

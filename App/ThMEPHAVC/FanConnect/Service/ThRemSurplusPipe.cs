@@ -26,8 +26,10 @@ namespace ThMEPHVAC.FanConnect.Service
         public Point3d StartPoint { set; get; }
         public List<Line> AllLine { set; get; }
         public List<ThFanCUModel> AllFan { set; get; }
-        public List<Line> RemSurplusPipe()
+        public List<Line> RemSurplusPipe(out string layer,out int colorIndex)
         {
+            layer = "AI-水管路由";
+            colorIndex = 0;
             var mt = Matrix3d.Displacement(StartPoint.GetVectorTo(Point3d.Origin));
             foreach(var l in AllLine)
             {
@@ -54,8 +56,6 @@ namespace ThMEPHVAC.FanConnect.Service
             }
             FindBadNode(treeModel.RootNode);
             //找到图纸上对应的线，进行删除
-            string layer;
-            int colorIndex;
             var dbObjs = GetDbPipes(StartPoint,out layer,out colorIndex);
             var tmpLines = new List<Line>();
             foreach(var obj in dbObjs)
