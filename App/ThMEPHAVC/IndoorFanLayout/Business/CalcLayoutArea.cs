@@ -359,14 +359,20 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     else if (item is MPolygon mPolygon)
                         thisOutAreas.Add(mPolygon);
                 }
-
             }
+            roomOutInseterAreas.Clear();
             foreach (var item in thisOutAreas)
             {
                 if (item is Polyline polyline)
+                {
                     area += polyline.Area;
+                    roomOutInseterAreas.Add(polyline);
+                }
                 else if (item is MPolygon mPolygon)
+                {
                     area += mPolygon.Area;
+                    roomOutInseterAreas.Add(mPolygon.Outline());
+                }
             }
             return area * _roomUnitLoad;
         }
