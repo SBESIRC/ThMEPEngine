@@ -138,29 +138,23 @@ namespace ThMEPElectrical.BlockConvert
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var position = srcBlockData.Position;
                 double rotation = srcBlockData.Rotation;
-                var data = srcBlockData.OwnerSpace2WCS.ToArray();
-                data[3] = 0;
-                data[7] = 0;
-                data[11] = 0;
-                var tranMatrix = new Matrix3d(data);
-
-                //if (srcBlockData.Normal == new Vector3d(0, 0, -1))
-                //{
-                //    rotation = -rotation;
-                //}
+                if (srcBlockData.Normal == new Vector3d(0, 0, -1))
+                {
+                    rotation = -rotation;
+                }
                 if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, srcBlockData.Normal, position).PreMultiplyBy(tranMatrix));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
                 }
                 else
                 {
                     if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, srcBlockData.Normal, position).PostMultiplyBy(tranMatrix));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
                     }
                     else
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation, srcBlockData.Normal, position).PostMultiplyBy(tranMatrix));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
                     }
                 }
             }
