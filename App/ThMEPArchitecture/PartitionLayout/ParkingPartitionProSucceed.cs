@@ -638,8 +638,9 @@ namespace ThMEPArchitecture.PartitionLayout
             //背靠背对齐
             if (Math.Abs(length_divided - DisVertCarWidth) < 1)
             {
+                double dis_judge_in_backtoback = 20000;
                 var pts = line.StartPoint.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisVertCarLength * 1.5));
-                var pte = pts.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * 50000));
+                var pte = pts.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * dis_judge_in_backtoback));
                 var tl = new Line(pts, pte);
                 var tlbf = tl.Buffer(1);
                 var crosscars = CarSpatialIndex.SelectCrossingPolygon(tlbf).Cast<Polyline>().OrderBy(t => t.GetRecCentroid().DistanceTo(pts)).ToList();

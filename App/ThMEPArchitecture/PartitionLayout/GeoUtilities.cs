@@ -398,7 +398,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             points.Insert(0, line.StartPoint);
             points.Add(line.EndPoint);
-            RemoveDuplicatePts(points);
+            points=RemoveDuplicatePts(points);
             points = points.Where(e => line.GetClosestPointTo(e, false).DistanceTo(e) < 0.1).ToList();
             SortAlongCurve(points, line);
             List<Line> results = new List<Line>();

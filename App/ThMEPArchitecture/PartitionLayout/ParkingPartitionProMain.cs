@@ -244,12 +244,17 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (!IniLanes[i].CanBeMoved) continue;
                 if (lane.Length < LengthCanGIntegralModulesConnectSingle) continue;
                 var offsetlane = CreateLine(lane);
-                offsetlane.TransformBy(Matrix3d.Displacement(vec * DisModulus));
+                offsetlane.TransformBy(Matrix3d.Displacement(vec * (DisModulus + DisLaneWidth / 2)));
                 offsetlane.TransformBy(Matrix3d.Scaling(10, offsetlane.GetCenter()));
                 //与边界相交
                 var linesplitbounds = SplitLine(offsetlane, Boundary)
                     .Where(e => Boundary.Contains(e.GetCenter()))
                     .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
+                    .Select(e =>
+                    {
+                        e.TransformBy(Matrix3d.Displacement(-vec * (DisLaneWidth / 2)));
+                        return e;
+                    })
                     .Where(e => IsConnectedToLane(e));
                 bool generate = false;
                 var quitcycle = false;
@@ -333,6 +338,8 @@ namespace ThMEPArchitecture.PartitionLayout
                         }
                         //与障碍物相交
                         linesplit.TransformBy(Matrix3d.Displacement(vec * DisLaneWidth / 2));
+                        plbound = CreatPolyFromLines(linesplit, offsetback);
+                        plbound.Scale(plbound.GetRecCentroid(), ScareFactorForCollisionCheck);
                         var obsplits = SplitLineBySpacialIndexInPoly(linesplit, plbound, ObstaclesSpatialIndex, false)
                             .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
                             .Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles))
@@ -552,7 +559,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = CreateLine(vl);
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength);
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
+                    , true, true, false, false, true, true);
             }
             vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength);
             foreach (var k in vertlanes)
@@ -561,7 +569,8 @@ namespace ThMEPArchitecture.PartitionLayout
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = CreateLine(vl);
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth);
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
+                    , true, true, false, false, true, true);
             }
         }
 
