@@ -13,7 +13,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         private DBObjectCollection Objs { get; set; }
         private List<Entity> Outlines = new List<Entity>();
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public Dictionary<Entity, HashSet<Entity>> Groups { get; private set; } 
+        public Dictionary<Entity, HashSet<Entity>> Groups { get; private set; }
 
         public ThGroupService(List<Entity> outlines, DBObjectCollection objs)
         {
@@ -39,7 +39,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             });
         }
 
-        private Entity Buffer(Entity outline,double length)
+        private Entity Buffer(Entity outline, double length)
         {
             var bufferService = new ThNTSBufferService();
             return bufferService.Buffer(outline, length);

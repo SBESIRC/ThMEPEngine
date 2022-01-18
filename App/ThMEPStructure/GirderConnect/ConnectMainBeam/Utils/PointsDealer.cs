@@ -195,116 +195,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
-        /// Get the best connect point by conform point set
-        /// </summary>
-        /// <param name="nearPt"></param>
-        /// <param name="priotityConnectPt"></param>
-        /// <param name="outPts"></param>
-        /// <returns>The best connect point</returns>
-        public static Point3d BestConnect(Point3d nearPt, List<Point3d> priotityConnectPt, List<Point3d> outPts)
-        {
-            double minArea = double.MaxValue;
-            double minDis = double.MaxValue;
-            double curArea;
-            double curDis;
-            foreach (var priCntPt in priotityConnectPt)
-            {
-                foreach (var outPt in outPts)
-                {
-                    curDis = priCntPt.DistanceTo(outPt);
-                    minDis = curDis < minDis ? curDis : minDis;
-                }
-                minDis = minDis < 600 ? minDis : 600; //prevent mistake by big minDis
-                curArea = nearPt.DistanceTo(priCntPt) * minDis;
-                if (curArea < minArea)
-                {
-                    minArea = curArea;
-                }
-            }
-            return priotityConnectPt[0];
-        }
-
-        /// <summary>
-        /// Remove Points in this point set who is very close to the points in another point set 
-        /// </summary>
-        /// <param name="basePoints"></param>
-        /// <param name="removePoints"></param>
-        /// <param name="deviation"></param>
-        /// <returns></returns>
-        public static Point3dCollection RemoveSimmilerPoint(Point3dCollection basePoints, HashSet<Point3d> removePoints, double deviation = 0.001)
-        {
-            Point3dCollection ansPoints = new Point3dCollection();
-            foreach (Point3d basePt in basePoints)
-            {
-                ansPoints.Add(basePt);
-            }
-            foreach (Point3d basePoint in basePoints)
-            {
-                foreach (Point3d removePoint in removePoints)
-                {
-                    if (basePoint.DistanceTo(removePoint) < deviation)
-                    {
-                        if (basePoints.Contains(removePoint))
-                        {
-                            ansPoints.Remove(removePoint);
-                        }
-                    }
-                }
-            }
-            return ansPoints;
-        }
-        public static Point3dCollection RemoveSimmilerPoint(Point3dCollection basePoints, Point3dCollection removePoints, double deviation = 0.001)
-        {
-            Point3dCollection ansPoints = new Point3dCollection();
-            foreach (Point3d basePt in basePoints)
-            {
-                ansPoints.Add(basePt);
-            }
-            foreach (Point3d basePoint in basePoints)
-            {
-                foreach (Point3d removePoint in removePoints)
-                {
-                    if (basePoint.DistanceTo(removePoint) < deviation)
-                    {
-                        if (ansPoints.Contains(removePoint) && basePoints.Contains(removePoint))
-                        {
-                            ansPoints.Remove(removePoint);
-                        }
-                    }
-                }
-            }
-            return ansPoints;
-        }
-        public static List<Point3d> RemoveSimmilerPoint(List<Point3d> points, double deviation = 1)
-        {
-            var ansPts = new List<Point3d>();
-            Dictionary<Point3d, bool> visitPt = new Dictionary<Point3d, bool>();
-            foreach(var point in points)
-            {
-                if (!visitPt.ContainsKey(point))
-                {
-                    visitPt.Add(point, false);
-                }
-            }
-            foreach(var ptA in points)
-            {
-                if(visitPt[ptA] == false)
-                {
-                    visitPt[ptA] = true;
-                    ansPts.Add(ptA);
-                    foreach(var ptB in points)
-                    {
-                        if (visitPt[ptB] == false && ptA.DistanceTo(ptB) < deviation)
-                        {
-                            visitPt[ptB] = true;
-                        }
-                    }
-                }
-            }
-            return ansPts;
-        }
-
-        /// <summary>
         /// Remove Points in a Point set whose distance to a polyline out of a certain range
         /// </summary>
         /// <param name="points"></param>
@@ -328,9 +218,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             var lines = ThMEPPolygonService.CenterLine(pl.ToNTSPolygon().ToDbMPolygon());
             int n = pl.NumberOfVertices;
-            for(int j = 0; j < n; ++j)
+            for (int j = 0; j < n; ++j)
             {
-                if(lines.Count != 0)
+                if (lines.Count != 0)
                 {
                     break;
                 }
@@ -386,15 +276,15 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         if (polyline.ContainsOrOnBoundary(pt))
                         {
                             bool flag = false;
-                            foreach(var zeroPt in zeroPts)
+                            foreach (var zeroPt in zeroPts)
                             {
-                                if(pt.DistanceTo(zeroPt) < 300)
+                                if (pt.DistanceTo(zeroPt) < 300)
                                 {
                                     flag = true;
                                     break;
                                 }
                             }
-                            if(flag == true)
+                            if (flag == true)
                             {
                                 continue;
                             }
@@ -492,54 +382,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="clumnPts"></param>
         /// <param name="outlineWalls"></param>
         /// <returns></returns>
-        public static HashSet<Point3d> FindIntersectBorderPt(Point3dCollection clumnPts, List<Polyline> outlines,
-            ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts)
-        {
-            var ansPts = new HashSet<Point3d>();
-            foreach(Polyline polyline in outlines)
-            {
-                Polyline pl = polyline.Buffer(500)[0] as Polyline;
-                foreach (Point3d pt in clumnPts)
-                {
-                    if (pl.ContainsOrOnBoundary(pt) && !ansPts.Contains(pt))
-                    {
-                        if (outline2BorderNearPts.ContainsKey(polyline))
-                        {
-                            if (!outline2BorderNearPts[polyline].ContainsKey(pt))
-                            {
-                                outline2BorderNearPts[polyline].Add(pt, new HashSet<Point3d>());
-                            }
-                        }
-                        ansPts.Add(pt);
-                    }
-                }
-            }
-            return ansPts;
-        }
-        public static HashSet<Point3d> FindIntersectBorderPt(List<Point3d> clumnPts, List<Polyline> outlines)
-        {
-            var ansPts = new HashSet<Point3d>();
-            foreach (Polyline polyline in outlines)
-            {
-                Polyline pl = polyline.Buffer(500)[0] as Polyline;
-                foreach (Point3d pt in clumnPts)
-                {
-                    if (pl.ContainsOrOnBoundary(pt) && !ansPts.Contains(pt))
-                    {
-                        ansPts.Add(pt);
-                    }
-                }
-            }
-            return ansPts;
-        }
-        public static HashSet<Point3d> GetBorderPts(List<Polyline> outlines, HashSet<Point3d> points)
+        public static HashSet<Point3d> FindIntersectBorderPt(List<Polyline> outlines, HashSet<Point3d> points, double bufferLength = 500)
         {
             var borderPts = new HashSet<Point3d>();
             var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             foreach (var outline in outlines)
             {
-                var innerPoints = outline.Buffer(500).OfType<Polyline>()
+                var innerPoints = outline.Buffer(bufferLength).OfType<Polyline>()
                     .Where(o => o.Area > 1.0)
                     .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
                     .OfType<DBPoint>()
@@ -555,14 +405,14 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlines"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points)
+        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points, double bufferLength = 500)
         {
             var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
             var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             foreach (var outline in outlines)
             {
-                var innerPoints = outline.Buffer(500).OfType<Polyline>()
+                var innerPoints = outline.Buffer(bufferLength).OfType<Polyline>()
                     .Where(o => o.Area > 1.0)
                     .SelectMany(p => spatialIndex.SelectWindowPolygon(p)
                     .OfType<DBPoint>()
@@ -582,13 +432,13 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         {
             var outline2BorderPts = GetOutline2BorderPts(polylines.ToHashSet(), dicTuples.Keys.ToList());
             var outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
-            foreach(var outline in outline2BorderPts.Keys)
+            foreach (var outline in outline2BorderPts.Keys)
             {
                 if (!outline2BorderNearPts.ContainsKey(outline))
                 {
                     outline2BorderNearPts.Add(outline, new Dictionary<Point3d, HashSet<Point3d>>());
                 }
-                foreach(var borderPt in outline2BorderPts[outline])
+                foreach (var borderPt in outline2BorderPts[outline])
                 {
                     if (!outline2BorderNearPts[outline].ContainsKey(borderPt))
                     {
@@ -609,51 +459,10 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             return outline2BorderNearPts;
         }
 
-
-        /// <summary>
-        /// Update structure Outline2BorderNearPts
-        /// </summary>
-        /// <param name="outline2BorderNearPts"></param>
-        public static void UpdateOutline2BorderNearPts(ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, Dictionary<Point3d, HashSet<Point3d>> connects)
-        {
-            foreach (var outline2BorderNearPt in outline2BorderNearPts)
-            {
-                var outline = outline2BorderNearPt.Key;
-                foreach (var border2NearPts in outline2BorderNearPt.Value)
-                {
-                    var borderPt = border2NearPts.Key;
-                    if (connects.ContainsKey(borderPt))
-                    {
-                        foreach (var pt in connects[borderPt])
-                        {
-                            if (!outline2BorderNearPt.Value.ContainsKey(pt) && !border2NearPts.Value.Contains(pt))
-                            {
-                                border2NearPts.Value.Add(pt);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         public static Point3dCollection PointsDistinct(Point3dCollection pts, double deviation = 1.0)
         {
             Point3dCollection ansPts = new Point3dCollection();
             var kdTree = new ThCADCoreNTSKdTree(deviation);
-            foreach(Point3d pt in pts)
-            {
-                kdTree.InsertPoint(pt);
-            }
-            kdTree.Nodes.ForEach(o =>
-            {
-                ansPts.Add(o.Key.Coordinate.ToAcGePoint3d());
-            });
-            return ansPts;
-        }
-        public static HashSet<Point3d> PointsDistinct(HashSet<Point3d> pts, double deviation = 1.0)
-        {
-            HashSet<Point3d> ansPts = new HashSet<Point3d>();
-            var kdTree = new ThCADCoreNTSKdTree(1.0);
             foreach (Point3d pt in pts)
             {
                 kdTree.InsertPoint(pt);

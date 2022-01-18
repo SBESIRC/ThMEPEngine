@@ -70,11 +70,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 ThBeamGeometryPreprocessor.Z0Curves(ref buildings);
                 var mainBuildings = buildings.OfType<Entity>().ToList();
 
-                //columns.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
-                //shearwalls.OfType<Entity>().ToList().CreateGroup(acdb.Database, 5);
-                //buildings.OfType<Entity>().ToList().CreateGroup(acdb.Database, 1);
-
-                // 分组 
+                //分组 
                 var columnGroupService = new ThGroupService(mainBuildings, columns);
                 var columnGroupDict = columnGroupService.Groups;
                 var outsideColumns = columnGroupService.OutsideObjs;
@@ -95,6 +91,11 @@ namespace ThMEPStructure.GirderConnect.Command
 
                 //计算
                 var connectService = new Connect();
+                connectService.SimilarAngle = Math.PI / 8;
+                connectService.SimilarPointsDis = 500;
+                connectService.SamePointsDis = 1;
+                connectService.MaxBeamLength = 13000;
+                connectService.SplitArea = 52000000;
 
                 var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts, transformer);
 
@@ -107,13 +108,13 @@ namespace ThMEPStructure.GirderConnect.Command
                 //处理算法输出
                 var lines = MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
 
-                //  还原到原始位置
+                //还原到原始位置
                 lines.ForEach(o => transformer.Reset(o));
                 transformer.Reset(columns);
                 transformer.Reset(shearwalls);
                 transformer.Reset(buildings);
 
-                // 打印到Cad                
+                //打印到Cad                
                 ImportService.ImportMainBeamInfo(); //导入主梁信息
                 MainBeamPostProcess.Output(lines);
             }

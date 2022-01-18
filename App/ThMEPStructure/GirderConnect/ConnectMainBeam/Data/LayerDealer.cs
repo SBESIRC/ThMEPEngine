@@ -34,22 +34,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
                 });
             }
         }
-        public static void Output(Dictionary<Point3d, Point3d> tuples, string layerName, ThMEPOriginTransformer transformer)
-        {
-            using (var acdb = AcadDatabase.Active())
-            {
-                tuples.ForEach(o =>
-                {
-                    var line = new Line(o.Key, o.Value);
-                    transformer.Reset(line);
-                    line.Layer = layerName;
-                    {
-                        line.ColorIndex = (int)ColorIndex.BYLAYER;
-                    }
-                    HostApplicationServices.WorkingDatabase.AddToModelSpace(line);
-                });
-            }
-        }
 
         /// <summary>
         /// 创建一个新的图层
