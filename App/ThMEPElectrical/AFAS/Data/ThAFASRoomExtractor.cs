@@ -248,6 +248,10 @@ namespace ThMEPElectrical.AFAS.Data
             foreach (ThIfcRoom room in Rooms)
             {
                 var newBoundary = bufferService.Buffer(room.Boundary, -1.0);
+                if (newBoundary == null)
+                {
+                    continue;
+                }
                 var ids = FindCurveGroupIds(groupId, newBoundary); //包含房间的元素
                 if (ids.Count == 0)
                 {
