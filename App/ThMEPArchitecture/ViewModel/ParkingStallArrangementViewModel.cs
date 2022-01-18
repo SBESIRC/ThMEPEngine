@@ -27,6 +27,32 @@ namespace ThMEPArchitecture.ViewModel
             }
         }
 
+        //只生成分割线
+        private bool _JustCreateSplittersChecked = true;
+
+        public bool JustCreateSplittersChecked
+        {
+            get { return _JustCreateSplittersChecked; }
+            set 
+            { 
+                _JustCreateSplittersChecked = value; 
+                RaisePropertyChanged("JustCreateSplittersChecked"); 
+            }
+        }
+
+        //方案个数
+        private int _LayoutCount = 1;
+
+        public int LayoutCount
+        {
+            get { return _LayoutCount; }
+            set 
+            { 
+                _LayoutCount = value; 
+                RaisePropertyChanged("LayoutCount"); 
+            }
+        }
+
         public bool IsComputationParaSetupEnabled
         {
             get

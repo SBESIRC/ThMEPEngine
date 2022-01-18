@@ -52,7 +52,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// 用O显示一个点
         /// </summary>
         /// <param name="pt">点的位置</param>
-        public static void  ShowPointAsO(Point3d pt, int colorIndex = 80, double radius = 141.59265)
+        public static void ShowPointAsO(Point3d pt, int colorIndex = 80, double radius = 141.59265)
         {
             Circle circle = new Circle(pt, Vector3d.ZAxis, radius);
             circle.ColorIndex = colorIndex;
@@ -189,9 +189,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
         public static void ShowDicTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples, int color)
         {
-            foreach(var dicTuple in dicTuples)
+            foreach (var dicTuple in dicTuples)
             {
-                foreach(var pt in dicTuple.Value)
+                foreach (var pt in dicTuple.Value)
                 {
                     DrawLine(dicTuple.Key, pt, color);
                 }
@@ -200,11 +200,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 
         public static void ShowBorderConnectNearLines(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, int color = 1)
         {
-            foreach(var dicKVpair in outline2BorderNearPts.Values)
+            foreach (var dicKVpair in outline2BorderNearPts.Values)
             {
-                foreach(var KVpair in dicKVpair)
+                foreach (var KVpair in dicKVpair)
                 {
-                    foreach(var pt in KVpair.Value)
+                    foreach (var pt in KVpair.Value)
                     {
                         DrawLine(KVpair.Key, pt, color);
                     }

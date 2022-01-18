@@ -259,13 +259,98 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
+        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, Polyline area,ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
+        {
+            
+            hasBuilding = true;
+            if (buildLines.Count == 0)//区域内没有建筑物
+            {
+                hasBuilding = false;
+                if (areaPtsIndex is null)//之前二分逻辑的距离
+                {
+                    var pts = segArea.GetPoints().ToList();
+                    return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
+                }
+                else
+                {
+                    try
+                    {
+                        var objs = areaPtsIndex.SelectCrossingPolygon(segArea);//找到切割区域内的全部点
+                        var pts = new List<Point3d>();
+                        foreach (var obj in objs)
+                        {
+                            var dbPt = obj as DBPoint;
+                            var pt = dbPt.Position;
+                            pts.Add(pt);
+                        }
+                        if(pts.Count == 0)
+                        {
+                            ;
+                        }
+                        return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
+                    
+                }
+                
+            }
+            var closedPts = new List<Point3d>();
+            if(line.GetDirection() == -1)//水平线才需要考虑穿障碍物
+            {
+                var buildList = new List<BlockReference>();
+                foreach (var build in buildLines)
+                {
+                    buildList.Add(build as BlockReference);
+                }
+                var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
+                var rect = closeBuild.GetRect();
+                var plines = GetPlines(closeBuild);
+                plines.ForEach(pl => pl.GetPoints().ForEach(p => closedPts.Add(p)));
+                closedPts = closedPts.OrderBy(p => p.DistanceTo(new Point3d(p.X, line.StartPoint.Y, 0))).ToList();
+                foreach (var pt in closedPts)
+                {
+                    var tempLine = new Line(new Point3d(line.StartPoint.X, pt.Y, 0), new Point3d(line.EndPoint.X, pt.Y, 0));
+                    var intersectRsts = tempLine.IsIntersectPt(plines, area);
+                    if(!intersectRsts)
+                    {
+                        return pt;
+                    }
+                }
+                return closedPts.First();
+            }
+            else//竖直线
+            {
+                foreach (var build in buildLines)
+                {
+                    try
+                    {
+                        var br = build as BlockReference;
+                        var pline = br.GetRect();
+                        var pts = pline.GetPoints().ToList();
+                        closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
+                }
+            }
+            
+            
+            return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
+        }
+
         public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
         {
             hasBuilding = true;
             if (buildLines.Count == 0)//区域内没有建筑物
             {
                 hasBuilding = false;
-                if (areaPtsIndex is null)
+                if (areaPtsIndex is null)//之前二分逻辑的距离
                 {
                     var pts = segArea.GetPoints().ToList();
                     return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
@@ -283,26 +368,69 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
                     return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
                 }
-                
+
             }
             var closedPts = new List<Point3d>();
-            foreach(var build in buildLines)
-            {
-                try
+           
+            
+                foreach (var build in buildLines)
                 {
-                    var br = build as BlockReference;
-                    var pline = br.GetRect();
-                    var pts = pline.GetPoints().ToList();
-                    closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+                    try
+                    {
+                        var br = build as BlockReference;
+                        var pline = br.GetRect();
+                        var pts = pline.GetPoints().ToList();
+                        closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
                 }
-                catch (Exception ex)
-                {
-                    ;
-                }
-            }
+            
+
+
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
-        
+
+        private static bool IsIntersectPt(this Line line, List<Polyline> plines, Polyline area)
+        {
+            double tor = 5500;
+            var pts = new List<Point3d>();
+            foreach(var pline in plines)
+            {
+                pts.AddRange(line.Intersect(pline, 0));
+            }
+            if(pts.Count > 2)
+            {
+                return false;
+            }
+            var lineIntersectWithAreaPts = line.Intersect(area, Intersect.ExtendThis);
+            foreach (var pt in pts)
+            {
+                foreach(var pt2 in lineIntersectWithAreaPts)
+                {
+                    if (pt.DistanceTo(pt2) < tor)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        private static List<Polyline> GetPlines(BlockReference bkr)
+        {
+            var plines = new List<Polyline>();
+            var objs = new DBObjectCollection();
+            bkr.Explode(objs);
+
+            objs.Cast<Entity>().Where(e => e is Polyline && (e as Polyline).Closed).ForEach(e => plines.Add(e as Polyline));
+
+            return plines;
+        }
+
         private static bool GetValueType(this Line line, Point3d pt)
         {
             //判断点是直线的上限还是下限
@@ -485,10 +613,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             var segAreas = segLine.SplitByLine(area);
             rstAreas = new List<Polyline>();//分割线分割生成的区域
-            if (segAreas.Count < 2)
+            if (segAreas.Count != 2)//不是两个区域直接退出
             {
                 return false;
             }
+
             var buildingNums = new List<int>();//分割区域内的建筑物数目
             var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
             var res = sortedAreas.Take(2);

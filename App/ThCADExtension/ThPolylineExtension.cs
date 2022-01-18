@@ -52,25 +52,6 @@ namespace ThCADExtension
         }
 
         /// <summary>
-        /// 点在多边形内判断
-        /// </summary>
-        /// <param name="pline"></param>
-        /// <param name="pt"></param>
-        /// <returns></returns>
-        public static bool ContainsPoint(this Polyline pline, Point3d pt)
-        {
-            // https://forums.autodesk.com/t5/net/spatial-query-in-autocad-2010/m-p/5304221/highlight/true#M42039
-            foreach (var region in RegionTools.CreateRegion(new Curve[] { pline }))
-            {
-                if (region.ContainsPoint(pt))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        /// <summary>
         /// 根据弦长分割Polyline
         /// </summary>
         /// <param name="poly"></param>

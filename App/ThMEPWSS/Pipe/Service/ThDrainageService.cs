@@ -5359,6 +5359,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         if (seg.IsValid) lst.Add(seg.ToLineString());
                         continue;
                     }
+                    if (!entity.Visible || !isDrainageLayer(entity.Layer)) continue;
                     var bd = entity.Bounds.ToGRect();
                     if (bd.IsValid)
                     {
@@ -5370,7 +5371,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                         var ext = new Extents3d();
                         try
                         {
-                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>())
+                            foreach (var e in entity.ExplodeToDBObjectCollection().OfType<Entity>().Where(x => x.Visible))
                             {
                                 if (e.Bounds.HasValue)
                                 {

@@ -24,9 +24,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
     public static class Preprocessing
     {
-        public static bool DataPreprocessing(AcadDatabase acadDatabase,out GaParameter gaPara, out LayoutParameter layoutPara)
+        public static bool DataPreprocessing(AcadDatabase acadDatabase,out GaParameter gaPara, out LayoutParameter layoutPara, Serilog.Core.Logger Logger = null)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder,Logger);
             gaPara = new GaParameter();
             layoutPara = new LayoutParameter();
             if (outerBrder.SegLines.Count == 0)//分割线数目为0

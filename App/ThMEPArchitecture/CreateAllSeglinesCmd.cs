@@ -50,7 +50,7 @@ namespace ThMEPArchitecture
         }
         public void Run(AcadDatabase acadDatabase, bool randomFlag = true)//false 自动生成全部分割线, ture 生成随机分割线
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (!rstDataExtract)
             {
                 return;

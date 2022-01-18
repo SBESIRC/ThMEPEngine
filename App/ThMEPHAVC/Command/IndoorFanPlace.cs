@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThMEPEngineCore.Command;
@@ -23,9 +22,6 @@ namespace ThMEPHVAC.Command
         int ventCount = 1;
         double FirstVentDistanceToFan = 1000.0;
         double VentDistanceToPreVent = 2700.0;
-        double ReturnSideDistanceToStartAdd = 100.0;
-        double LastVentDistanceToEndAdd = 200;
-        double MultipleValue = 50.0;
         public IndoorFanPlace() 
         {
             CommandName = "THSNJFZ";
@@ -64,7 +60,7 @@ namespace ThMEPHVAC.Command
                     fanLoad = new VRFImpellerFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
                     break;
             }
-            bool canChange = true; ;
+            bool canChange = true;
             if (haveVent) 
             {
                 if (fanLoad.FanVentSizeCount > 1)
@@ -156,13 +152,8 @@ namespace ThMEPHVAC.Command
         }
         FanLayoutDetailed CoilFanLayoutData(FanLoadBase fanLoad,Point3d fanPoint, Vector3d fanDir,int ventCount)
         {
-            var returnVentCenterDisTonFan = fanLoad.FanLength+ MultipleValue + fanLoad.ReturnAirSizeLength / 2;
-            if (IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType == EnumAirReturnType.AirReturnPipe)
-                returnVentCenterDisTonFan += IndoorFanCommon.ReducingLength -100;
-            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
-            var remainder = returnVentCenterDisTonFan % MultipleValue;
-            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
-            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var returnVentCenterDisTonFan = IndoorFanDistance.CoilReturnVentCenterDisToFan(fanLoad, IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType);
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + IndoorFanDistance.ReturnSideDistanceToStartAdd);
             var ep = fanPoint;
             var ventPoints = new List<Point3d>();
             for (int i = 0; i < ventCount; i++)
@@ -173,7 +164,7 @@ namespace ThMEPHVAC.Command
             if (ventPoints.Count > 0) 
             {
                 var ventWidth = fanLoad.GetCoilFanVentSize(ventCount,out double ventLength);
-                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth/2+ LastVentDistanceToEndAdd);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth/2+ IndoorFanDistance.LastVentDistanceToEndAdd);
             }
                 
             var fanLayout = new FanLayoutDetailed(sp,ep, fanLoad.FanWidth,fanDir);
@@ -186,12 +177,8 @@ namespace ThMEPHVAC.Command
         }
         FanLayoutDetailed VRFFanLayoutData(FanLoadBase fanLoad, Point3d fanPoint, Vector3d fanDir, int ventCount) 
         {
-            var returnVentCenterDisTonFan = fanLoad.FanLength + MultipleValue + fanLoad.ReturnAirSizeLength / 2;
-            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
-            var remainder = returnVentCenterDisTonFan % MultipleValue;
-            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
-
-            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var returnVentCenterDisTonFan = IndoorFanDistance.VRFReturnVentCenterDisToFan(fanLoad);
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + IndoorFanDistance.ReturnSideDistanceToStartAdd);
             var ep = fanPoint;
             var ventPoints = new List<Point3d>();
             for (int i = 0; i < ventCount; i++)
@@ -202,7 +189,7 @@ namespace ThMEPHVAC.Command
             if (ventPoints.Count > 0) 
             {
                 var ventWidth = fanLoad.GetCoilFanVentSize(ventCount, out double ventLength);
-                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + IndoorFanDistance.LastVentDistanceToEndAdd);
             }
             var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);
             fanLayout.FanPoint = fanPoint;
@@ -223,14 +210,9 @@ namespace ThMEPHVAC.Command
         }
         FanLayoutDetailed AirFanLayoutData(FanLoadBase fanLoad, Point3d fanPoint, Vector3d fanDir)
         {
-            var returnVentCenterDisTonFan = fanLoad.FanLength + MultipleValue+50.0 + fanLoad.ReturnAirSizeLength / 2;
-            if (IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType == EnumAirReturnType.AirReturnPipe)
-                returnVentCenterDisTonFan += IndoorFanCommon.ReducingLength;
-            var col = (int)Math.Floor(returnVentCenterDisTonFan / MultipleValue);
-            var remainder = returnVentCenterDisTonFan % MultipleValue;
-            returnVentCenterDisTonFan = (remainder * 2) > MultipleValue ? (col + 1) * MultipleValue : col * MultipleValue;
+            var returnVentCenterDisTonFan = IndoorFanDistance.AirReturnVentCenterDisToFan(fanLoad, IndoorFanParameter.Instance.PlaceModel.LayoutModel.AirReturnType);
             var posion = fanPoint;
-            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + ReturnSideDistanceToStartAdd);
+            var sp = fanPoint - fanDir.MultiplyBy(returnVentCenterDisTonFan + fanLoad.ReturnAirSizeLength / 2 + IndoorFanDistance.ReturnSideDistanceToStartAdd);
             var ep = fanPoint;
             var ventPoints = new List<Point3d>();
             for (int i = 0; i < ventCount; i++)
@@ -241,7 +223,7 @@ namespace ThMEPHVAC.Command
             if (ventPoints.Count > 0)
             {
                 var ventWidth = fanLoad.GetCoilFanVentSize(ventCount, out double ventLength);
-                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + LastVentDistanceToEndAdd);
+                ep = ventPoints.Last() + fanDir.MultiplyBy(ventWidth / 2 + IndoorFanDistance.LastVentDistanceToEndAdd);
             }
             var fanLayout = new FanLayoutDetailed(sp, ep, fanLoad.FanWidth, fanDir);
             fanLayout.FanLayoutName = fanLoad.FanNumber;

@@ -23,7 +23,8 @@ namespace TianHua.AutoCAD.ThCui
         {
             CreateHVACCalculationPanel(tab);
             CreateHVACInstallationPanel(tab);
-            CreateHVACPlanPanel(tab);
+            CreateHVACVentilationPanel(tab);
+            CreateHVACHeatingPanel(tab);
         }
 
         private static void CreateHVACCalculationPanel(RibbonTabSource tab)
@@ -83,9 +84,9 @@ namespace TianHua.AutoCAD.ThCui
                 RibbonButtonStyle.LargeWithText);
         }
 
-        private static void CreateHVACPlanPanel(RibbonTabSource tab)
+        private static void  CreateHVACVentilationPanel(RibbonTabSource tab)
         {
-            var panel = tab.AddNewPanel("HVACPLAN", "平面图");
+            var panel = tab.AddNewPanel("HVACPLANV", "风平面");
             var row = panel.AddNewRibbonRow();
 
             {
@@ -173,6 +174,12 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THFGLD_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
+        }
+
+        private static void CreateHVACHeatingPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("HVACPLANH", "水平面");
+            var row = panel.AddNewRibbonRow();
 
             {
                 var subPanel = row.AddNewPanel();
@@ -216,7 +223,6 @@ namespace TianHua.AutoCAD.ThCui
                     RibbonButtonStyle.LargeWithText);
             }
         }
-
 
         private static void CreateElectricPanel(RibbonTabSource tab)
         {

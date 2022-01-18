@@ -50,6 +50,39 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 stopwatch, thresholdSecond);
         }
 
+        public static bool dfsSplitTiny(ref List<Polyline> areas, GaParameter gaParameter, ref List<int> usedLines, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
+            ref List<double>  maxVals, ref List<double> minVals, Stopwatch stopwatch)
+        {
+            if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
+            {
+                return true;
+            }
+            if(stopwatch.Elapsed.TotalSeconds > 10)
+            {
+                stopwatch.Stop();
+                return false;
+            }
+
+            for (int i = 0; i < gaParameter.LineCount; i++)
+            {
+                if (usedLines.Contains(i))
+                {
+                    continue;
+                }
+                var line = gaParameter.SegLine[i];
+                if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
+                {
+                    maxVals.Add(maxVal);
+                    minVals.Add(minVal);
+                    usedLines.Add(i);
+                }
+            }
+
+            //递归搜索
+            return dfsSplitTiny(ref areas, gaParameter, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals,stopwatch);
+        }
+
+
         public static bool dfsSplitWithoutSegline(Polyline wallLine, int throughBuildNums, ref List<Polyline> areas, ref List<Line> sortSegLines,
             ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch, double threshSecond)
         {
@@ -220,34 +253,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static void GetAreaRandSeglinesByDfs(Polyline area, int seglineCnt, List<SegLineEx> visited, 
             ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg)
         {
-            if (visited.Count == seglineCnt)
+            try
             {
-                var tmp = new List<SegLineEx>();
-                visited.ForEach(seg => tmp.Add(seg.Clone()));
-                rstSegLines.AddRange(tmp);
-#if DEBUG
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                if (visited.Count == seglineCnt)
                 {
-                    foreach (var line in visited)
-                    {
-                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
-                    }
+                    var tmp = new List<SegLineEx>();
+                    visited.ForEach(seg => tmp.Add(seg.Clone()));
+                    rstSegLines.AddRange(tmp);
+                    //#if DEBUG
+                    //                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                    //                {
+                    //                    foreach (var line in visited)
+                    //                    {
+                    //                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
+                    //                    }
+                    //                }
+                    //#endif
+                    successedSeg = true;
+                    return;
                 }
-#endif
-                successedSeg = true;
-                return;
+                var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
+                if (spliters is null) return;
+                if(spliters.Count == 0)
+                {
+                    ;
+                }
+                var selectSegNum = General.Utils.RandInt(spliters.Count - 1);
+                var spliter = spliters[selectSegNum];//选中的分割线
+                var segline = spliter.Seglines;
+                var subAreas = segline.SplitByLine(area); //split area
+                visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
+                foreach (var subArea in subAreas)
+                {
+                    GetAreaRandSeglinesByDfs(subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
+                    if (successedSeg) return;
+                }
             }
-            var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
-            if (spliters is null)  return;
-            var selectSegNum = General.Utils.RandInt(spliters.Count-1);
-            var spliter = spliters[selectSegNum];//选中的分割线
-            var segline = spliter.Seglines;
-            var subAreas = segline.SplitByLine(area); //split area
-            visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
-            foreach (var subArea in subAreas)
+            catch (Exception ex)
             {
-                GetAreaRandSeglinesByDfs(subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
-                if (successedSeg) return;
+                ;
             }
         }
 
@@ -371,8 +415,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             buildNums.Add(0);
             while (startX < right)//直线在框内
             {
-                var upPt = new Point3d(startX, upper, 0);
-                var buttomPt = new Point3d(startX, buttom, 0);
+                var upPt = new Point3d(startX, upper - dist, 0);
+                var buttomPt = new Point3d(startX, buttom + dist, 0);
                 var segLine = new Line(upPt, buttomPt);
                 var segRect = segLine.Buffer(1.0);
                 var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);

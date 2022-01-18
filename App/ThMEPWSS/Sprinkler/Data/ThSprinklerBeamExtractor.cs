@@ -53,8 +53,9 @@ namespace ThMEPWSS.Sprinkler.Data
                     var storeyInfo = Query(o.Outline);
                     parentId = storeyInfo.Id;
                 }
+
                 geometry.Properties.Add(ThExtractorPropertyNameManager.ParentIdPropertyName, parentId);
-                geometry.Properties.Add(DistanceToFloorPropertyName, GetDistancd(o.DistanceToFloor));
+                geometry.Properties.Add(ThExtractorPropertyNameManager.HeightPropertyName, o.Height);
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });

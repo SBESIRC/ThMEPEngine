@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
 using ThMEPHVAC.IndoorFanLayout.DataEngine;
+using ThMEPHVAC.IndoorFanLayout.Models;
+using ThMEPHVAC.IndoorFanModels;
 
 namespace ThMEPHVAC.IndoorFanLayout
 {
@@ -14,13 +16,31 @@ namespace ThMEPHVAC.IndoorFanLayout
     {
         public const double FanSpaceMinDistance = 800;
         public const double RoomBufferOffSet = -500.0;
-        public const double ReducingLength = 150.0;
         public static Color RoomLoadOverLineColor = Color.FromRgb(255, 0, 0);
         public static Color RoomLoadNotEnoughLineColor = Color.FromRgb(0, 0, 255);
         public static Point3d PolylinCenterPoint(Polyline polyline) 
         {
             var allPoints = GetPolylinePoints(polyline);
             return ThPointVectorUtil.PointsAverageValue(allPoints);
+        }
+        public static FanLoadBase GetFanLoadBase(IndoorFanBase fanData, EnumFanType fanType, double correctionFactor) 
+        {
+            FanLoadBase fanLoad = null;
+            switch (fanType)
+            {
+                case EnumFanType.FanCoilUnitFourControls:
+                case EnumFanType.FanCoilUnitTwoControls:
+                    fanLoad = new CoilFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
+                    break;
+                case EnumFanType.IntegratedAirConditionin:
+                    fanLoad = new AirConditionFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
+                    break;
+                case EnumFanType.VRFConditioninConduit:
+                case EnumFanType.VRFConditioninFourSides:
+                    fanLoad = new VRFImpellerFanLoad(fanData, fanType, EnumHotColdType.Cold, correctionFactor);
+                    break;
+            }
+            return fanLoad;
         }
         public static bool RoomLoadTableReadLoad(Table roomTable,bool isCold, out double roomArea, out double roomLoad)
         {

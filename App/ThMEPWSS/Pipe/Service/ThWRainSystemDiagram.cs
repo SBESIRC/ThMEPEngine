@@ -211,7 +211,7 @@ namespace ThMEPWSS.FlatDiagramNs
         public static bool IsY1L(string label)
         {
             if (string.IsNullOrEmpty(label)) return INTRAVASCULARLY;
-            return label.StartsWith(CHRISTIANIZATION) || label.StartsWith(CONSTRUCTIONIST);
+            return label.StartsWith(CHRISTIANIZATION) || label.StartsWith(CONSTRUCTIONIST) || label.StartsWith(CONSTRUCTIONIST);
         }
         public static bool IsY2L(string label)
         {

@@ -8,6 +8,8 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Reflection;
+using System.Linq;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -102,7 +104,12 @@ namespace TianHua.AutoCAD.ThCui
             CreatePartialCui();
         }
 #endif
-
+        [CommandMethod("TIANHUACAD", "THMEPVERSION", CommandFlags.Modal)]
+        public void ThMEPVersion()
+        {
+            var asm = Assembly.GetExecutingAssembly();
+            Active.Editor.Write("当前版本号:" + asm.GetCustomAttribute<AssemblyFileVersionAttribute>().Version + "\n");
+        }
         [CommandMethod("TIANHUACAD", "THMEPPROFILE", CommandFlags.Modal)]
         public void ThMEPProfile()
         {

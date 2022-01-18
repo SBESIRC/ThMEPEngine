@@ -3662,7 +3662,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 if (!ok) return;
                 var pipeGroupItems = GetRainGroupedPipeItems(drDatas, storeysItems, out List<int> allNumStoreys, out List<string> allRfStoreys, out OtherInfo otherInfo);
                 Dispose();
-                DrawRainDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, otherInfo, null, exInfo);
+                DrawRainDiagram(drDatas, storeysItems, basePoint, pipeGroupItems, allNumStoreys, allRfStoreys, otherInfo, RainSystemDiagramViewModel.Singleton, exInfo);
                 FlushDQ(adb);
             }
         }
@@ -3998,6 +3998,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (gpItem.PipeType is PipeType.NL)
                         {
                             return viewModel?.Params.CondenseFloorDrainDN ?? dft;
+                        }
+                        else if (gpItem.PipeType is PipeType.FL0)
+                        {
+                            return viewModel?.Params.WaterWellFloorDrainDN ?? dft;
                         }
                         else
                         {

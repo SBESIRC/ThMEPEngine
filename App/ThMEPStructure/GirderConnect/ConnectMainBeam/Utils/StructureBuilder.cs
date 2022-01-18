@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using DotNetARX;
+using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -8,8 +10,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
-using DotNetARX;
-using NFox.Cad;
 
 namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
 {
@@ -225,7 +225,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outline2BorderNearPts">Input and Output</param>
         public static void PriorityBorderPoints(Dictionary<Polyline, Point3dCollection> outlineNearPts, Dictionary<Polyline, HashSet<Polyline>> outlineWalls,
             Dictionary<Polyline, HashSet<Point3d>> outlineClumns, ref Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts,
-            ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts, ref Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples, 
+            ref Dictionary<Polyline, List<Point3d>> outline2ZeroPts, ref List<Tuple<Point3d, Point3d>> priority1stBorderNearTuples,
             double MaxBeamLength = 13000, double SimilarAngle = Math.PI / 8)
         {
             List<Point3d> fstPtsS = new List<Point3d>();
@@ -238,6 +238,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var outlineNearPt in outlineNearPts)
             {
                 curOutline = outlineNearPt.Key;
+                List<Line> exdLines = new List<Line>();
+                LineDealer.Polyline2Lines(curOutline).ForEach(o => exdLines.Add(LineDealer.ReduceLine(o, -2000)));
                 if (!outline2BorderNearPts.ContainsKey(curOutline))
                 {
                     outline2BorderNearPts.Add(curOutline, new Dictionary<Point3d, HashSet<Point3d>>());
@@ -270,7 +272,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             outline2BorderNearPts[curOutline][borderPt].Add(cntNearPt);
                         }
-                        StructureDealer.AddLineTodicTuples(borderPt, cntNearPt, ref priority1stDicTuples);
+                        //StructureDealer.AddLineTodicTuples(borderPt, cntNearPt, ref priority1stDicTuples);
+                        priority1stBorderNearTuples.Add(new Tuple<Point3d, Point3d>(borderPt, cntNearPt));
                     }
                 }
 
@@ -310,10 +313,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     Vector3d baseDirection = outlinePt - nearPt;
                     for (int i = 0; i < 4; ++i)
                     {
-                        Vector3d aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis);
+                        Vector3d aimDirection = baseDirection.RotateBy(Math.PI / 2 * i, Vector3d.ZAxis).GetNormal();
+                        
                         //Get VerticalPoint
                         Point3d verticalPt = GetObject.GetClosestPointByDirection(nearPt, aimDirection, MaxBeamLength, curOutline);
-                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > MaxBeamLength) 
+                        if (verticalPt == nearPt || verticalPt.DistanceTo(nearPt) > MaxBeamLength)
                         {
                             continue;
                         }
@@ -332,10 +336,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                         {
                             curBorderPt = StructureDealer.BestConnectPt(nearPt, verticalPt, fstPts, thdPts, outlineWalls[curOutline], closetLine, SimilarAngle, MaxBeamLength);
                         }
-                        if (curBorderPt.DistanceTo(nearPt) > MaxBeamLength)
+                        var disb2n = curBorderPt.DistanceTo(nearPt);
+                        if (disb2n > MaxBeamLength || disb2n < 500 || curBorderPt.DistanceTo(curOutline.GetClosePoint(curBorderPt)) > 500)
                         {
                             continue;
                         }
+
                         if (!outline2BorderNearPts[curOutline].ContainsKey(curBorderPt))
                         {
                             outline2BorderNearPts[curOutline].Add(curBorderPt, new HashSet<Point3d>());
@@ -356,75 +362,11 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="findPolylineFromLines"></param>
         public static void BuildPolygons(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
-            Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
-            foreach (var dicTuple in dicTuples)
-            {
-                foreach (var edPt in dicTuple.Value)
-                {
-                    if (!lineVisit.ContainsKey(new Tuple<Point3d, Point3d>(dicTuple.Key, edPt)))
-                    {
-                        lineVisit.Add(new Tuple<Point3d, Point3d>(dicTuple.Key, edPt), 0);
-                    }
-                }
-            }
-            List<Tuple<Point3d, Point3d>> tuppleList = lineVisit.Keys.ToList();
-            foreach (var tuple in tuppleList)
-            {
-                if (lineVisit[tuple] == 0)
-                {
-                    var tmpLines = new List<Tuple<Point3d, Point3d>>();
-                    lineVisit[tuple] = 1;
-                    tmpLines.Add(tuple);
-                    var curTuple = new Tuple<Point3d, Point3d>(tuple.Item1, tuple.Item2);
-                    int flag = 0;
-                    while (true)
-                    {
-                        Point3d nextPt = GetNextConnectPoint(curTuple.Item1, curTuple.Item2, dicTuples);
-                        if (nextPt == curTuple.Item1) //find a leaf
-                        {
-                            flag = 1;
-                            break;
-                        }
-                        curTuple = new Tuple<Point3d, Point3d>(curTuple.Item2, nextPt);
-                        if (lineVisit[curTuple] == 1)
-                        {
-                            if (curTuple.Item2 != nextPt)
-                            {
-                                flag = 1;
-                            }
-                            break;
-                        }
-                        lineVisit[curTuple] = 1;
-                        tmpLines.Add(curTuple);
-                        if (nextPt == tuple.Item1) // had find a circle
-                        {
-                            break;
-                        }
-                    }
-                    if (tmpLines.Count > 1 && flag != 1)
-                    {
-                        //var polyline = LineDealer.Tuples2Polyline(tmpLines);
-                        //polyline.ColorIndex = 3;
-                        //HostApplicationServices.WorkingDatabase.AddToModelSpace(polyline);
-                        foreach (var tmpLine in tmpLines)
-                        {
-                            if (!findPolylineFromLines.ContainsKey(tmpLine))
-                            {
-                                findPolylineFromLines.Add(tmpLine, tmpLines);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        public static void BuildPolygonsB(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
-        {
             HashSet<Tuple<Point3d, Point3d>> lineVisit = new HashSet<Tuple<Point3d, Point3d>>();
             HashSet<Tuple<Point3d, Point3d>> tuppleList = LineDealer.DicTuplesToTuples(dicTuples);
             foreach (var tuple in tuppleList)
             {
-                if(!lineVisit.Contains(tuple))
+                if (!lineVisit.Contains(tuple))
                 {
                     var tmpLines = new List<Tuple<Point3d, Point3d>>();
                     lineVisit.Add(tuple);
@@ -444,14 +386,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             }
                             break;
                         }
-                        lineVisit.Add(curTuple);
+                        if (!lineVisit.Contains(curTuple))
+                        {
+                            lineVisit.Add(curTuple);
+                        }
                         tmpLines.Add(curTuple);
                         if (nextPt == tuple.Item1) // had find a circle
                         {
                             break;
                         }
                     }
-                    //if (tmpLines.Count > 1 && flag != 1)
+                    //if (LineDealer.Tuples2Polyline(tmpLines).Closed == true && tmpLines.Count > 1 && flag != 1)
                     if (flag != 1)
                     {
                         foreach (var tmpLine in tmpLines)
@@ -468,9 +413,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         public static void BuildPolygonsC(Dictionary<Point3d, HashSet<Point3d>> dicTuples, ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
         {
             List<Line> lines = new List<Line>();
-            foreach(var dicTuple in dicTuples)
+            foreach (var dicTuple in dicTuples)
             {
-                foreach(var point in dicTuple.Value)
+                foreach (var point in dicTuple.Value)
                 {
                     lines.Add(new Line(dicTuple.Key, point));
                 }
@@ -479,7 +424,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             foreach (var polyline in polylines)
             {
                 var tuples = LineDealer.Polyline2Tuples(polyline);
-                foreach(var tuple in tuples)
+                foreach (var tuple in tuples)
                 {
                     if (!findPolylineFromLines.ContainsKey(tuple))
                     {
@@ -519,46 +464,26 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// split block
         /// </summary>
         /// <param name="findPolylineFromLines"></param>
-        public static void SplitBlock(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void SplitBlock(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, double splitArea = 0.0)
         {
-            //Remove closeBorder Lines
-            //这个删除只是删除了一个方向，可能需要删除两个方向，总之这个不稳
-            if (closeBorderLines != null)
-            {
-                foreach (var closeBorderLine in closeBorderLines)
-                {
-                    if (findPolylineFromLines.ContainsKey(new Tuple<Point3d, Point3d>(closeBorderLine.Key, closeBorderLine.Value)))
-                    {
-                        findPolylineFromLines.Remove(new Tuple<Point3d, Point3d>(closeBorderLine.Value, closeBorderLine.Key));
-                    }
-                }
-            }
             //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
-            Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
-            foreach (var tuple in findPolylineFromLines.Keys)
-            {
-                if (!lineVisit.ContainsKey(tuple))
-                {
-                    lineVisit.Add(tuple, 0);
-                }
-            }
+            HashSet<Tuple<Point3d, Point3d>> lineVisit = new HashSet<Tuple<Point3d, Point3d>>();
             List<List<Tuple<Point3d, Point3d>>> splitedPolylines = new List<List<Tuple<Point3d, Point3d>>>();
-            List<Tuple<Point3d, Point3d>> lines = lineVisit.Keys.ToList();
+            List<Tuple<Point3d, Point3d>> lines = findPolylineFromLines.Keys.ToList();
             foreach (var line in lines)
             {
-                if (lineVisit[line] == 0)
+                if (!lineVisit.Contains(line) && findPolylineFromLines.ContainsKey(line))
                 {
-                    if (findPolylineFromLines.ContainsKey(line) && findPolylineFromLines[line].Count > 5)
+                    var polyline = LineDealer.Tuples2Polyline(findPolylineFromLines[line], 1.0);
+                    if ((findPolylineFromLines[line].Count == 5 && (splitArea != 0 && polyline.Area > splitArea)) || findPolylineFromLines[line].Count > 5)
                     {
-                        StructureDealer.SplitPolyline(findPolylineFromLines[line], ref splitedPolylines);
+                        StructureDealer.SplitPolylineB(findPolylineFromLines[line], ref splitedPolylines, splitArea);
                         var lList = findPolylineFromLines[line].ToList();
                         foreach (var l in lList)
                         {
-                            lineVisit[l] = 1;
-                            if (findPolylineFromLines.ContainsKey(l))
+                            if (!lineVisit.Contains(l))
                             {
-                                findPolylineFromLines.Remove(l);
+                                lineVisit.Add(l);
                             }
                         }
                     }
@@ -567,215 +492,149 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             // change structure
             AddPolylinesToDic(splitedPolylines, ref findPolylineFromLines);
         }
-        public static void SplitBlockB(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            Dictionary<Point3d, Point3d> closeBorderLines = null, double splitArea = 0.0)
-        {
-            //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
-            Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
-            foreach (var tuple in findPolylineFromLines.Keys)
-            {
-                if (!lineVisit.ContainsKey(tuple))
-                {
-                    lineVisit.Add(tuple, 0);
-                }
-            }
-            List<List<Tuple<Point3d, Point3d>>> splitedPolylines = new List<List<Tuple<Point3d, Point3d>>>();
-            List<Tuple<Point3d, Point3d>> lines = lineVisit.Keys.ToList();
-            foreach (var line in lines)
-            {
-                if (lineVisit[line] == 0 && findPolylineFromLines.ContainsKey(line))
-                {
-                    var polyline = LineDealer.Tuples2Polyline(findPolylineFromLines[line], 1.0);
-
-                    if ((findPolylineFromLines[line].Count == 5 && (splitArea != 0 && polyline.Area > splitArea)) || findPolylineFromLines[line].Count > 5)
-                    {
-                        StructureDealer.SplitPolylineB(findPolylineFromLines[line], ref splitedPolylines, splitArea);
-                        var lList = findPolylineFromLines[line].ToList();
-                        foreach (var l in lList)
-                        {
-                            lineVisit[l] = 1;
-                        }
-                    }
-                }
-            }
-            // change structure
-            AddPolylinesToDicB(splitedPolylines, ref findPolylineFromLines);
-        }
         /// <summary>
         /// Merge neighbor fragments to one and split if it can
-        /// 缺乏当一个三角形有多个可用时选择哪个的策略
         /// </summary>
         /// <param name="findPolylineFromLines"></param>
-        public static void MergeFragments(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            Dictionary<Point3d, Point3d> closeBorderLines = null)
+        public static void MergeFragments(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines, HashSet<Point3d> borderPts, double splitArea = 0.0)
         {
-            //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
-            Dictionary<Tuple<Point3d, Point3d>, int> lineVisit = new Dictionary<Tuple<Point3d, Point3d>, int>();
-            foreach (var tuple in findPolylineFromLines.Keys)
-            {
-                if (!lineVisit.ContainsKey(tuple))
-                {
-                    lineVisit.Add(tuple, 0);
-                }
-            }
-            List<List<Tuple<Point3d, Point3d>>> mergedPolylines = new List<List<Tuple<Point3d, Point3d>>>();
-            List<Tuple<Point3d, Point3d>> lines = lineVisit.Keys.ToList();
-            foreach (var line in lines)
-            {
-                if (lineVisit[line] == 0)
-                {
-                    Tuple<Point3d, Point3d> converseLine = new Tuple<Point3d, Point3d>(line.Item2, line.Item1);
-                    if (!findPolylineFromLines.ContainsKey(converseLine) || !findPolylineFromLines.ContainsKey(line)
-                        || ContainLines(findPolylineFromLines[converseLine], closeBorderLines) > 1)
-                    {
-                        continue;
-                    }
-                    if (findPolylineFromLines[converseLine].Count == 3 && (findPolylineFromLines[line].Count >= 5 || findPolylineFromLines[line].Count == 3))
-                    {
-                        List<Tuple<Point3d, Point3d>> evenLines =
-                            StructureDealer.MergePolyline(findPolylineFromLines[line], findPolylineFromLines[converseLine]);
-                        int obtuseAngleCount = LineDealer.ObtuseAngleCount(evenLines);
-                        if (obtuseAngleCount == -1 || obtuseAngleCount > 0)
-                        {
-                            foreach (var l in findPolylineFromLines[converseLine])
-                            {
-                                lineVisit[l] = 1;
-                            }
-                            continue;
-                        }
-                        StructureDealer.SplitPolyline(evenLines, ref mergedPolylines);
-                        if (findPolylineFromLines.ContainsKey(line))
-                        {
-                            findPolylineFromLines.Remove(line);
-                        }
-                        if (findPolylineFromLines.ContainsKey(converseLine))
-                        {
-                            findPolylineFromLines.Remove(converseLine);
-                        }
-                        AddPolylinesToDic(mergedPolylines, ref findPolylineFromLines);
-                    }
-                }
-            }
-        }
-        public static void MergeFragmentsB(ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines,
-            HashSet<Point3d> borderPts,Dictionary<Point3d, Point3d> closeBorderLines = null, double splitArea = 0.0)
-        {
-            //record line state: 0.init(exist & havenot seen); 1.visited and chose to stay; 2.vistited and chose to delete
             HashSet<Tuple<Point3d, Point3d>> lineVisit = new HashSet<Tuple<Point3d, Point3d>>();
-            
             List<List<Tuple<Point3d, Point3d>>> mergedPolylines = new List<List<Tuple<Point3d, Point3d>>>();
             List<Tuple<Point3d, Point3d>> lines = findPolylineFromLines.Keys.ToList();
+            double minDegree;
+            double curDegree;
             foreach (var line in lines)
             {
-                Tuple<Point3d, Point3d> converseLine = new Tuple<Point3d, Point3d>(line.Item2, line.Item1);
-                if (!lineVisit.Contains(line))
+                if (!lineVisit.Contains(line) && findPolylineFromLines[line].Count == 3)
                 {
-                    if (!findPolylineFromLines.ContainsKey(converseLine) || !findPolylineFromLines.ContainsKey(line))//|| ContainLines(findPolylineFromLines[converseLine], closeBorderLines) > 1)
+                    int cnt = 0;
+                    //如果存在于边界的点的数量大于2，则不进行合并处理
+                    foreach (var tuple in findPolylineFromLines[line])
                     {
-                        continue;
-                    }
-                    
-                    if (findPolylineFromLines[line].Count == 3)
-                    {
-                        int cnt = 0;
-                        //如果存在于边界的点的数量大于2，则不进行合并处理
-                        foreach(var tuple in findPolylineFromLines[line])
+                        if (borderPts.Contains(tuple.Item1))
                         {
-                            if (borderPts.Contains (tuple.Item1))
-                            {
-                                ++cnt;
-                            }
-                            if (borderPts.Contains(tuple.Item2))
-                            {
-                                ++cnt;
-                            }
-                            if (cnt > 2)
-                            {
-                                break;
-                            }
+                            ++cnt;
+                        }
+                        if (borderPts.Contains(tuple.Item2))
+                        {
+                            ++cnt;
                         }
                         if (cnt > 2)
                         {
+                            break;
+                        }
+                    }
+                    if (cnt > 2)
+                    {
+                        if (!lineVisit.Contains(line))
+                        {
+                            lineVisit.Add(line);
+                        }
+                        continue;
+                    }
+                    mergedPolylines.Clear();
+                    Tuple<Point3d, Point3d> curConverseLine;
+                    Tuple<Point3d, Point3d> bestSplitLine = line;
+                    List<Tuple<Point3d, Point3d>> curEvenLines = new List<Tuple<Point3d, Point3d>>();
+                    List<Tuple<Point3d, Point3d>> beastEvenLines = new List<Tuple<Point3d, Point3d>>();
+                    minDegree = Math.PI * 2;
+                    //合并
+                    //找到最合适的那个合并线
+                    foreach (var curSplitLine in findPolylineFromLines[line])
+                    {
+                        curConverseLine = new Tuple<Point3d, Point3d>(curSplitLine.Item2, curSplitLine.Item1);
+                        if (!findPolylineFromLines.ContainsKey(curConverseLine) || !findPolylineFromLines.ContainsKey(curSplitLine))
+                        {
                             continue;
                         }
-
-                        if (findPolylineFromLines[converseLine].Count >= 5 || findPolylineFromLines[converseLine].Count == 3)
+                        if (findPolylineFromLines[curConverseLine].Count >= 5)
                         {
-                            List<Tuple<Point3d, Point3d>> evenLines =
-                                StructureDealer.MergePolyline(findPolylineFromLines[line], findPolylineFromLines[converseLine]);
-                            int obtuseAngleCount = LineDealer.ObtuseAngleCount(evenLines);
-                            if (obtuseAngleCount == -1 || obtuseAngleCount > 0)
+                            beastEvenLines = StructureDealer.MergePolyline(findPolylineFromLines[curSplitLine], findPolylineFromLines[curConverseLine]);
+                            bestSplitLine = curSplitLine;
+                            break;
+                        }
+                        else if (findPolylineFromLines[curConverseLine].Count == 3)
+                        {
+                            curEvenLines = StructureDealer.MergePolyline(findPolylineFromLines[curSplitLine], findPolylineFromLines[curConverseLine]);
+                            //该四边形最大角的度数，最小的那个
+                            curDegree = LineDealer.GetBiggestAngel(curEvenLines, borderPts);
+                            if (curDegree > Math.PI / 6 * 5)
                             {
-                                foreach (var l in findPolylineFromLines[line])
-                                {
-                                    if(!lineVisit.Contains(l))
-                                        lineVisit.Add(l);
-                                }
                                 continue;
                             }
-                            StructureDealer.SplitPolylineB(evenLines, ref mergedPolylines, splitArea);
-                            if (findPolylineFromLines.ContainsKey(line))
+                            if (curDegree < minDegree)
                             {
-                                findPolylineFromLines.Remove(line);
+                                minDegree = curDegree;
+                                bestSplitLine = curSplitLine;
+                                beastEvenLines = curEvenLines;
                             }
-                            if (findPolylineFromLines.ContainsKey(converseLine))
-                            {
-                                findPolylineFromLines.Remove(converseLine);
-                            }
-                            AddPolylinesToDic(mergedPolylines, ref findPolylineFromLines);
                         }
+                    }
+                    foreach (var l in findPolylineFromLines[bestSplitLine])
+                    {
+                        if (!lineVisit.Contains(l))
+                        {
+                            lineVisit.Add(l);
+                        }
+                    }
+                    if (LineDealer.ObtuseAngleCount(beastEvenLines) != 0)
+                    {
+                        continue;
+                    }
+                    curConverseLine = new Tuple<Point3d, Point3d>(bestSplitLine.Item2, bestSplitLine.Item1);
+                    if (!findPolylineFromLines.ContainsKey(curConverseLine))
+                    {
+                        continue;
+                    }
+                    foreach (var l in findPolylineFromLines[curConverseLine])
+                    {
+                        if (!lineVisit.Contains(l))
+                        {
+                            lineVisit.Add(l);
+                        }
+                    }
+                    if (findPolylineFromLines.ContainsKey(bestSplitLine))
+                    {
+                        findPolylineFromLines.Remove(bestSplitLine);
+                    }
+                    curConverseLine = new Tuple<Point3d, Point3d>(bestSplitLine.Item2, bestSplitLine.Item1);
+                    if (findPolylineFromLines.ContainsKey(curConverseLine))
+                    {
+                        findPolylineFromLines.Remove(curConverseLine);
+                    }
+                    //分割
+                    StructureDealer.SplitPolylineB(beastEvenLines, ref mergedPolylines, splitArea);
+                    
+                    AddPolylinesToDic(mergedPolylines, ref findPolylineFromLines);
+                }
+            }
+        }
+
+        public static void AddPolylinesToDic(List<List<Tuple<Point3d, Point3d>>> splitedPolylines,
+            ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
+        {
+            foreach (var splitedPolyline in splitedPolylines)
+            {
+                if (splitedPolyline.Count > 0)
+                {
+                    foreach (var l in splitedPolyline)
+                    {
+                        if (findPolylineFromLines.ContainsKey(l))
+                        {
+                            findPolylineFromLines.Remove(l);
+                        }
+                        findPolylineFromLines.Add(l, splitedPolyline);
                     }
                 }
             }
         }
 
-        public static void AddPolylinesToDic(List<List<Tuple<Point3d, Point3d>>> splitedPolylines, 
-            ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
-        {
-            foreach (var splitedPolyline in splitedPolylines)
-            {
-                if (splitedPolyline.Count > 0)
-                {
-                    foreach (var l in splitedPolyline)
-                    {
-                        if (findPolylineFromLines.ContainsKey(l))
-                        {
-                            findPolylineFromLines.Remove(l);
-                        }
-                        findPolylineFromLines.Add(l, splitedPolyline);
-                    }
-                }
-            }
-        }
-        public static void AddPolylinesToDicB(List<List<Tuple<Point3d, Point3d>>> splitedPolylines,
-            ref Dictionary<Tuple<Point3d, Point3d>, List<Tuple<Point3d, Point3d>>> findPolylineFromLines)
-        {
-            foreach (var splitedPolyline in splitedPolylines)
-            {
-                if (splitedPolyline.Count > 0)
-                {
-                    //var polyline = LineDealer.Tuples2Polyline(splitedPolyline);
-                    ////打印
-                    //polyline.ColorIndex = 2;
-                    //HostApplicationServices.WorkingDatabase.AddToModelSpace(polyline);
-                    //var tuples =  LineDealer.Polyline2Tuples(polyline);
-                    foreach (var l in splitedPolyline)
-                    {
-                        if (findPolylineFromLines.ContainsKey(l))
-                        {
-                            findPolylineFromLines.Remove(l);
-                        }
-                        findPolylineFromLines.Add(l, splitedPolyline);
-                    }
-                }
-            }
-        }
         public static int ContainLines(List<Tuple<Point3d, Point3d>> oriTuples, Dictionary<Point3d, Point3d> closeBorderLines)
         {
             int cnt = 0;
-            foreach(var oriTuple in oriTuples)
+            foreach (var oriTuple in oriTuples)
             {
-                if(closeBorderLines.ContainsKey(oriTuple.Item1) && closeBorderLines[oriTuple.Item1] == oriTuple.Item2)
+                if (closeBorderLines.ContainsKey(oriTuple.Item1) && closeBorderLines[oriTuple.Item1] == oriTuple.Item2)
                 {
                     cnt++;
                 }

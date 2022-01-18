@@ -31,7 +31,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 if (g.Properties.ContainsKey("Category") && (g.Properties["Category"] as string).Contains("Beam"))
                 {
-                    if(g.Properties.ContainsKey("BottomDistanceToFloor") && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) >= BeamHeight)
+                    if(g.Properties.ContainsKey("Height") && Convert.ToInt32(g.Properties["Height"]) >= BeamHeight)
                     {
                         objs.Add(g.Boundary);
                     }

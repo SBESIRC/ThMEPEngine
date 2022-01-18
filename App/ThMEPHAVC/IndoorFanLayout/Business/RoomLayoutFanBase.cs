@@ -111,18 +111,24 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         }
                         if (count < 1 || count < _fanRectangle.MinVentCount)
                             continue;
+                        var startPoint = centerPoint + fanRect.FanDirection.Negate().MultiplyBy(length / 2);
                         if (count == 1)
                         {
                             //一个时放置末尾
-                            var ventCenter = centerPoint + fanRect.FanDirection.MultiplyBy(length / 2 - _fanRectangle.VentRect.VentMinDistanceToEnd);
+                            var ventCenterDisToFan = length - _fanRectangle.VentRect.VentMinDistanceToEnd - _fanRectangle.FanDistanceToStart;
+                            ventCenterDisToFan = IndoorFanDistance.DistanceToMultiple(ventCenterDisToFan, IndoorFanDistance.MultipleValue);
+                            var ventCenter = startPoint + fanRect.FanDirection.MultiplyBy(ventCenterDisToFan + _fanRectangle.FanDistanceToStart);
                             fanRect.InnerVentRects.Add(new FanInnerVentRect(GetFanVentPolyline(ventCenter, fanRect.FanDirection)));
                         }
                         else
                         {
                             //>=2;开始结尾各一个，中间等分放置
-                            var startCenter = centerPoint - fanRect.FanDirection.MultiplyBy(length / 2 - _fanRectangle.VentRect.VentMinDistanceToStart);
+                            var startDis = _fanRectangle.VentRect.VentMinDistanceToStart - _fanRectangle.FanDistanceToStart;
+                            startDis = IndoorFanDistance.DistanceToMultiple(startDis, IndoorFanDistance.MultipleValue);
+                            var startCenter = startPoint + fanRect.FanDirection.MultiplyBy(startDis + _fanRectangle.FanDistanceToStart);
                             fanRect.InnerVentRects.Add(new FanInnerVentRect(GetFanVentPolyline(startCenter, fanRect.FanDirection)));
                             var dis = canLayoutLength / (count - 1);
+                            dis = IndoorFanDistance.DistanceToMultiple(dis, IndoorFanDistance.MultipleValue);
                             var currentPoint = startCenter + fanRect.FanDirection.MultiplyBy(dis);
                             while (currentPoint.DistanceTo(startCenter) < canLayoutLength + 100)
                             {

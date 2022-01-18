@@ -9,6 +9,7 @@ using Linq2Acad;
 using Dreambuild.AutoCAD;
 using DotNetARX;
 using System;
+using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -185,8 +186,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
-            var boundPt1 = line.GetBoundPt(buildLines1, rect1, ptsIndex, out bool hasBuilding);
-            var boundPt2 = line.GetBoundPt(buildLines2, rect2, ptsIndex, out bool hasBuilding2);
+            var boundPt1 = line.GetBoundPt(buildLines1, rect1, area, ptsIndex, out bool hasBuilding);
+            var boundPt2 = line.GetBoundPt(buildLines2, rect2, area, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
             if(!hasBuilding)
             {
@@ -295,11 +296,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 #if DEBUG
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
-                foreach (var seg in segLines)
+                var splitterDebugLayerName = "AI-分割线-Debug";
+                if (!currentDb.Layers.Contains(splitterDebugLayerName))
                 {
-                    currentDb.CurrentSpace.Add(seg);
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, splitterDebugLayerName, 30);
                 }
 
+                foreach (var seg in segLines)
+                {
+                    seg.Layer = splitterDebugLayerName;
+                    currentDb.CurrentSpace.Add(seg);
+                }
             }
 #endif
 

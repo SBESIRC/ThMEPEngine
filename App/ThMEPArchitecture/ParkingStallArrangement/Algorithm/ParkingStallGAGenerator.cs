@@ -412,6 +412,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         // run代码部分
         public List<Chromosome> Run(List<Chromosome> histories, bool recordprevious)
         {
+            Logger?.Information($"\n");
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");

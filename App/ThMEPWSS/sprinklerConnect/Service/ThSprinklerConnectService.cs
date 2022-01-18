@@ -184,7 +184,7 @@ namespace ThMEPWSS.SprinklerConnect.Service
                         }
 
                         // 找出距离点位较近的支干管虚拟点
-                        var virtualPtList = realPts[i].SearchVirtualPt(SprinklerParameter.SubMainPipe, 2.0 * DTTol);
+                        var virtualPtList = realPts[i].SearchVirtualPt(SprinklerParameter.SubMainPipe, 2.5 * DTTol);
                         if (virtualPtList.Count == 0)
                         {
                             continue;

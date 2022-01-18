@@ -203,7 +203,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return fromPt;
         }
-        public static Point3d GetPointByDirection(Point3d fromPt ,Vector3d aimDirection, Point3dCollection basePts, double tolerance = Math.PI / 12, double constrain = 9000)
+        public static Point3d GetPointByDirection(Point3d fromPt, Vector3d aimDirection, Point3dCollection basePts, double tolerance = Math.PI / 12, double constrain = 9000)
         {
             double minFstCross = double.MaxValue;
             double minSndCross = double.MaxValue;
@@ -270,7 +270,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 double curDis = fromPt.DistanceTo(curPt);
                 if (curRotate < tolerance && curDis < constrain && curDis > 200)
                 {
-                    if(curDis < minDis)
+                    if (curDis < minDis)
                     {
                         ansPt = curPt;
                         minDis = curDis;
@@ -315,7 +315,30 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 return ansPt;
             }
         }
-
+        public static Point3d GetClosestPointByDirectionB(Point3d basePt, Vector3d vector, double range, List<Line> exdLines, ref Line vtPtLine)
+        {
+            var directionLine = new Line(basePt, basePt + vector * range);
+            double minDis = double.MaxValue;
+            double curDis;
+            Point3d ansPt = basePt;
+            foreach (var exdLine in exdLines)
+            {
+                var pts = LineDealer.IntersectWith(directionLine, exdLine);
+                if (pts.Count == 0)
+                {
+                    continue;
+                }
+                Point3d pt = pts[0];
+                curDis = basePt.DistanceTo(pt);
+                if (curDis < minDis)
+                {
+                    minDis = curDis;
+                    ansPt = pt;
+                    vtPtLine = exdLine;
+                }
+            }
+            return ansPt;
+        }
         /// <summary>
         /// 将包含在某多边形内部的点加入这个多边形，并组成结构
         /// </summary>
@@ -463,7 +486,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 vec18X = vecB;
                 vec18Y = vecC;
             }
-            if(min90 < min180)
+            if (min90 < min180)
             {
                 var angelXY = vec9X.GetAngleTo(vec9Y, Vector3d.ZAxis);
                 if (vec9Z.GetAngleTo(vec9X, Vector3d.ZAxis) > Math.PI - angelXY / 2)

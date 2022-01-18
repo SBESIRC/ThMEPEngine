@@ -208,19 +208,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         {
             Clear();//清空所有参数
 
-            //var areas = new List<Polyline>();
+            var areas = new List<Polyline>();
             var tmpBoundary = OuterBoundary.Clone() as Polyline;
-            //areas.Add(tmpBoundary);
-
-            //init splitting lines
-            //for (int i = 0; i < genome.Count; i++)
-            //{
-            //    Gene gene = genome[i];
-            //    Split(gene, ref areas);
-            //    var line = GetSegLine(gene);
-            //    SegLines.Add(line);
-            //    SegLineIndexDic.Add(i, line);
-            //}
 
             for (int i = 0; i < genome.Count; i++)
             {
@@ -230,9 +219,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SegLineIndexDic.Add(i, line);
             }
             
+            if(SeglineNeighborIndexDic is null)
+            {
+                areas.Add(tmpBoundary);
 
-            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
-            if(areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
+                //init splitting lines
+                for (int i = 0; i < genome.Count; i++)
+                {
+                    Gene gene = genome[i];
+                    Split(gene, ref areas);
+                }
+            }
+            else
+            {
+                areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+            }
+            if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
             {
                 return false;//必定是个不合理的解
             }

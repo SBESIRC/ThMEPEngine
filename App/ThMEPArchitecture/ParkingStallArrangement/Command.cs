@@ -77,7 +77,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (outerBrder.SegLines.Count == 0)//分割线数目为0
             {
                 Active.Editor.WriteMessage("分割线不存在！");
@@ -217,7 +217,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
         {
-            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara);
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger);
             if (!dataprocessingFlag) return;
             ParkingStallGAGenerator geneAlgorithm = null;
 

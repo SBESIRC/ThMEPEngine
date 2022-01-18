@@ -27,6 +27,10 @@
         /// </summary>
         public int MinVentCount { get; set; }
         /// <summary>
+        /// 风机距离起点位置
+        /// </summary>
+        public double FanDistanceToStart { get; set; }
+        /// <summary>
         /// 最大风口个数
         /// </summary>
         public int MaxVentCount { get; set; }
