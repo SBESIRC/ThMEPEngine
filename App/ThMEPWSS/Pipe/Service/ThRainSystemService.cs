@@ -3999,6 +3999,10 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         {
                             return viewModel?.Params.CondenseFloorDrainDN ?? dft;
                         }
+                        else if (gpItem.PipeType is PipeType.FL0)
+                        {
+                            return viewModel?.Params.WaterWellFloorDrainDN ?? dft;
+                        }
                         else
                         {
                             return viewModel?.Params.BalconyFloorDrainDN ?? dft;
