@@ -145,9 +145,36 @@ panels:
         - text: "室内机\r\n布置"
           attributes: { "IsVisible": true, "IsEnabled": true }
     attributes: { "IsVisible": true, "IsEnabled": true }
-  - UID: "pnlHVACPLAN"
-    name: "HVACPLAN"
-    title: "平面图"
+  - UID: "pnlHVACPLANV"
+    name: "HVACPLANV"
+    title: "风平面"
+    rowPanels:
+      - text: ""
+        items:
+          - text: "风管路由"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "插风管立管"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "插风口"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "插风管断线"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "风平面"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+      - text: ""
+        items:
+          - text: "风管修改"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+          - text: "风管留洞"
+            attributes: { "IsVisible": true, "IsEnabled": true }
+    attributes: { "IsVisible": true, "IsEnabled": true }
+  - UID: "pnlHVACPLANH"
+    name: "HVACPLANH"
+    title: "水平面"
     rowPanels:
       - text: ""
         items:
