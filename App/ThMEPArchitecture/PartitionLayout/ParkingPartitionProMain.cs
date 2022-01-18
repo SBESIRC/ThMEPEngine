@@ -43,9 +43,9 @@ namespace ThMEPArchitecture.PartitionLayout
             CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
             DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
             DisModulus = DisCarAndHalfLane * 2;
-            LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2;
+            LengthCanGIntegralModulesConnectSingle = 4 * DisVertCarWidth + DisLaneWidth / 2;
             LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
-            LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 3;
+            LengthCanGAdjLaneConnectSingle = DisLaneWidth / 2 + DisVertCarWidth * 4;
             LengthCanGAdjLaneConnectDouble = DisLaneWidth + DisVertCarWidth * 8;
             GeneratePillars = gpillars;
             Walls = walls;
@@ -64,11 +64,13 @@ namespace ThMEPArchitecture.PartitionLayout
         public ThCADCoreNTSSpatialIndex ObstaclesSpatialIndex;
         public ThCADCoreNTSSpatialIndex CarBoxesSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public ThCADCoreNTSSpatialIndex LaneSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+        public ThCADCoreNTSSpatialIndex LaneBufferSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public ThCADCoreNTSSpatialIndex CarSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public List<Lane> IniLanes = new List<Lane>();
         private List<Polyline> CarSpots = new List<Polyline>();
         private List<Polyline> Pillars = new List<Polyline>();
         private List<Polyline> CarBoxes = new List<Polyline>();
+        private List<Polyline> LaneBoxes = new List<Polyline>();
         private List<CarModule> CarModules = new List<CarModule>();
         private List<Point3d> ObstacleVertexes = new List<Point3d>();
         public List<Polyline> BuildingBoxes = new List<Polyline>();
@@ -387,21 +389,26 @@ namespace ThMEPArchitecture.PartitionLayout
                                 generate = true;
                                 break;
                             }
-                            if (HasParallelLaneForwardExisted(split, vec, DisVertCarWidth + DisLaneWidth, 6000)) continue;
                             if (IsConnectedToLane(split, true) && IsConnectedToLane(split, false) && split.Length < LengthCanGIntegralModulesConnectDouble) continue;
                             paras.SetNotBeMoved = i;
                             var pl = CreatPolyFromLines(split, splitback);
                             var plback = pl.Clone() as Polyline;
                             plback.TransformBy(Matrix3d.Displacement(-vec * DisCarAndHalfLane));
+                            paras.CarModulesToAdd.Add(new CarModule(plback, splitori, vec));
+                            paras.CarBoxesToAdd.Add(plback);
+                            generate = true;
+                            generate_lane_length = split.Length;
+                            double dis_to_move = 0;
+                            if (HasParallelLaneForwardExisted(split, vec, DisParallelCarWidth + DisLaneWidth, 0, ref dis_to_move))
+                            {
+                                pl.TransformBy(Matrix3d.Displacement(vec * dis_to_move));
+                                split.TransformBy(Matrix3d.Displacement(vec * dis_to_move));
+                            }
                             paras.CarBoxesToAdd.Add(pl);
                             CarModule module = new CarModule(pl, split, -vec);
                             paras.CarModulesToAdd.Add(module);
-                            paras.CarModulesToAdd.Add(new CarModule(plback, splitori, vec));
-                            paras.CarBoxesToAdd.Add(plback);
                             Lane ln = new Lane(split, vec);
                             paras.LanesToAdd.Add(ln);
-                            generate = true;
-                            generate_lane_length = split.Length;
                         }
                         if (quitcycle) break;
                     }
@@ -552,7 +559,9 @@ namespace ThMEPArchitecture.PartitionLayout
         private void GenerateCarsOnRestLanes()
         {
             LaneSpatialIndex.Update(IniLanes.Select(e => CreatePolyFromLine(e.Line)).ToCollection(), new DBObjectCollection());
-            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth);
+            LaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2 - 10)));
+            LaneBufferSpatialIndex.Update(LaneBoxes.ToCollection(), new DBObjectCollection());
+            var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;
@@ -560,9 +569,9 @@ namespace ThMEPArchitecture.PartitionLayout
                 var line = CreateLine(vl);
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength
-                    , true, true, false, false, true, true);
+                    , true, false, false, false, true, true,false);
             }
-            vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength);
+            vertlanes = GeneratePerpModuleLanes(DisParallelCarWidth + DisLaneWidth / 2, DisParallelCarLength, false);
             foreach (var k in vertlanes)
             {
                 var vl = k.Line;
@@ -570,7 +579,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 var line = CreateLine(vl);
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
                 GenerateCarsAndPillarsForEachLane(line, k.Vec, DisParallelCarLength, DisParallelCarWidth
-                    , true, true, false, false, true, true);
+                    , true, false, false, false, true, true, false);
             }
         }
 
