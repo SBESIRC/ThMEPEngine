@@ -123,7 +123,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
 
             ParkingStallGAGenerator geneAlgorithm = null;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic,null, areas.Count);
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();
@@ -197,7 +197,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             layoutPara.Set(solution.Genome);
             Draw.DrawSeg(solution);
-            layoutPara.Dispose();
+            //layoutPara.Dispose();
         }
     }
 }

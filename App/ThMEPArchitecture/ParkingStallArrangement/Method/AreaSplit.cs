@@ -265,7 +265,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             if (buildLines.Count == 0)//区域内没有建筑物
             {
                 hasBuilding = false;
-                if (areaPtsIndex is null)
+                if (areaPtsIndex is null)//之前二分逻辑的距离
                 {
                     var pts = segArea.GetPoints().ToList();
                     return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
@@ -286,23 +286,57 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 
             }
             var closedPts = new List<Point3d>();
-            foreach(var build in buildLines)
+            if(line.GetDirection() == -1)//水平线
             {
-                try
+                var buildList = new List<BlockReference>();
+                foreach (var build in buildLines)
                 {
-                    var br = build as BlockReference;
-                    var pline = br.GetRect();
-                    var pts = pline.GetPoints().ToList();
-                    closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+                    buildList.Add(build as BlockReference);
                 }
-                catch (Exception ex)
+                var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
+                var rect = closeBuild.GetRect();
+                var plines = GetPlines(closeBuild);
+                plines.ForEach(pl => pl.GetPoints().ForEach(p => closedPts.Add(p)));
+
+                foreach (var pt in closedPts)
                 {
-                    ;
+                    var tempLine = new Line(new Point3d(), new Point3d());
                 }
             }
+            else//竖直线
+            {
+                foreach (var build in buildLines)
+                {
+                    try
+                    {
+                        var br = build as BlockReference;
+                        var pline = br.GetRect();
+                        var pts = pline.GetPoints().ToList();
+                        closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
+                    }
+                }
+            }
+            
+            
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
         
+        private static List<Polyline> GetPlines(BlockReference bkr)
+        {
+            var plines = new List<Polyline>();
+            var objs = new DBObjectCollection();
+            bkr.Explode(objs);
+
+            objs.Cast<Entity>().Where(e => e is Polyline && (e as Polyline).Closed).ForEach(e => plines.Add(e as Polyline));
+
+            return plines;
+        }
+
         private static bool GetValueType(this Line line, Point3d pt)
         {
             //判断点是直线的上限还是下限
