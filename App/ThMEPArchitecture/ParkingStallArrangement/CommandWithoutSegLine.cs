@@ -95,8 +95,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var gaPara = new GaParameter(sortedSegLines);
             var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
             var usedLines = new List<int>();
-            var splitRst = Dfs.dfsSplitTiny(ref areas, gaPara, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals);
-
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            var splitRst = Dfs.dfsSplitTiny(ref areas, gaPara, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals, stopWatch);
+            if (!splitRst) return;
             var autoSpliterLayerName = $"AI-自动分割线{index}";
             if (!acadDatabase.Layers.Contains(autoSpliterLayerName))
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, autoSpliterLayerName, 30);

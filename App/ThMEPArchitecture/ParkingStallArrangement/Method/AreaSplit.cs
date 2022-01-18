@@ -613,10 +613,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             var segAreas = segLine.SplitByLine(area);
             rstAreas = new List<Polyline>();//分割线分割生成的区域
-            if (segAreas.Count < 2)
+            if (segAreas.Count != 2)//不是两个区域直接退出
             {
                 return false;
             }
+
             var buildingNums = new List<int>();//分割区域内的建筑物数目
             var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
             var res = sortedAreas.Take(2);

@@ -51,11 +51,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool dfsSplitTiny(ref List<Polyline> areas, GaParameter gaParameter, ref List<int> usedLines, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double>  maxVals, ref List<double> minVals)
+            ref List<double>  maxVals, ref List<double> minVals, Stopwatch stopwatch)
         {
             if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
             {
                 return true;
+            }
+            if(stopwatch.Elapsed.TotalSeconds > 10)
+            {
+                stopwatch.Stop();
+                return false;
             }
 
             for (int i = 0; i < gaParameter.LineCount; i++)
@@ -74,7 +79,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
 
             //递归搜索
-            return dfsSplitTiny(ref areas, gaParameter, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals);
+            return dfsSplitTiny(ref areas, gaParameter, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals,stopwatch);
         }
 
 
