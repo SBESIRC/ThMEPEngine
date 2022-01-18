@@ -36,6 +36,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             ActionName = "生成";
             _CommandMode = CommandMode.WithoutUI;
             ParameterViewModel = new ParkingStallArrangementViewModel();
+            ParameterViewModel.JustCreateSplittersChecked = false;
         }
 
         public WithoutSegLineCmd(ParkingStallArrangementViewModel vm)//根据自动生成的分割线得到车位排布结果
@@ -56,7 +57,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
-                    Run(currentDb);
+                    var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
+                    if (!rstDataExtract)
+                    {
+                        return;
+                    }
+                    for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
+                    {
+                        Run(currentDb, outerBrder, i);
+                    }
                 }
             }
             catch (Exception ex)
@@ -72,49 +81,58 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             base.AfterExecute();
         }
 
-        public void Run(AcadDatabase acadDatabase)
+        public void Run(AcadDatabase acadDatabase, OuterBrder outerBrder, int index = 0)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (!rstDataExtract)
-            {
-                return;
-            }
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
-            var sortSegLines = new List<Line>();
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
+            //var sortSegLines = new List<Line>();
+            //var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
             var gaPara = new GaParameter(outerBrder.SegLines);
 
             var maxVals = new List<double>();
             var minVals = new List<double>();
-            var buildNums = outerBrder.Building.Count;
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            double threshSecond = 20;
-            int throughBuildNums = 0;
 
-            var splitRst = Dfs.dfsSplitWithoutSegline(area, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex, 
-                buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
-            if(!splitRst)
-            {
-                return;
-            }
+            //var buildNums = outerBrder.Building.Count;
+            //var stopwatch = new Stopwatch();
+            //stopwatch.Start();
+            //double threshSecond = 20;
+            //int throughBuildNums = 0;
 
-            gaPara.Set(sortSegLines, maxVals, minVals);
-            foreach (var seg in sortSegLines)
+            //var splitRst = Dfs.dfsSplitWithoutSegline(area, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex,
+            //    buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
+
+            //if (!splitRst)
+            //{
+            //    return;
+            //}
+
+            var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
+            var sortedSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var autoSpliterLayerName = $"AI-自动分割线{index}";
+            if (!acadDatabase.Layers.Contains(autoSpliterLayerName))
+                ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, autoSpliterLayerName, 30);
+
+            foreach (var seg in sortedSegLines)
             {
+                seg.Layer = autoSpliterLayerName;
                 acadDatabase.CurrentSpace.Add(seg);
             }
+
+            if (ParameterViewModel.JustCreateSplittersChecked) return;
+
+            gaPara.Set(sortedSegLines, maxVals, minVals);
             var segLineDic = new Dictionary<int, Line>();
-            for (int i = 0; i < sortSegLines.Count; i++)
+            for (int i = 0; i < sortedSegLines.Count; i++)
             {
-                segLineDic.Add(i, sortSegLines[i]);
+                segLineDic.Add(i, sortedSegLines[i]);
             }
 
             var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
             var linePtDic = Intersection.GetLinePtDic(ptDic);
             var intersectPtCnt = ptDic.Count;//交叉点数目
             var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
+
             foreach (var num in ptDic.Keys)
             {
                 var random = new Random();
@@ -123,7 +141,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
 
             ParkingStallGAGenerator geneAlgorithm = null;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic,null, areas.Count);
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic, directionList, linePtDic,null, areas.Count);
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();
@@ -156,6 +174,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             catch
             {
             }
+            
+            string autoCarSpotLayer = $"AI-停车位{index}";
+            string autoColumnLayer = $"AI-柱子{index}";
 
             var solution = rst.First();
             histories.Add(rst.First());
@@ -171,27 +192,27 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
                         try
                         {
-                            partitionpro.ProcessAndDisplay();
+                            partitionpro.ProcessAndDisplay(autoCarSpotLayer, autoColumnLayer);
                         }
                         catch (Exception ex)
                         {
                             ;
                         }
-                        continue;
+                       // continue;
                     }
 
-                    ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
-                    {
-                        try
-                        {
-                            partition.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            partition.Dispose();
-                        }
-                    }
+                    //ParkingPartition partition = new ParkingPartition();
+                    //if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
+                    //{
+                    //    try
+                    //    {
+                    //        partition.ProcessAndDisplay();
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        partition.Dispose();
+                    //    }
+                    //}
                 }
             }
 

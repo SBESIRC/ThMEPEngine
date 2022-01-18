@@ -225,15 +225,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var tmp = new List<SegLineEx>();
                 visited.ForEach(seg => tmp.Add(seg.Clone()));
                 rstSegLines.AddRange(tmp);
-#if DEBUG
-                using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                {
-                    foreach (var line in visited)
-                    {
-                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
-                    }
-                }
-#endif
+//#if DEBUG
+//                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+//                {
+//                    foreach (var line in visited)
+//                    {
+//                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
+//                    }
+//                }
+//#endif
                 successedSeg = true;
                 return;
             }
