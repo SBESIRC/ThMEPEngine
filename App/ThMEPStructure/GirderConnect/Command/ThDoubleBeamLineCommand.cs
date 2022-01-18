@@ -85,6 +85,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 ImportService.ImportMainBeamInfo();
                 //导入文字样式
                 ImportService.ImportTextStyle();
+                var textStyleId = acad.TextStyles.Element("TH-STYLE3").ObjectId;
 
                 bool CreatGroup = true;//是否分组
                 if (UserChoice == "地下室顶板")
@@ -92,6 +93,7 @@ namespace ThMEPStructure.GirderConnect.Command
                     //主梁
                     ThBuildBeam buildMainBeam = new ThBuildBeam(beamLine, new List<Line>(), new List<Line>(), intersectCollection);
                     var mainBeams = buildMainBeam.build(UserChoice);
+                    mainBeams.ForEach(o => o.Value.TextStyleId = textStyleId);
                     if (beamLine.Count == mainBeams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();
@@ -128,7 +130,7 @@ namespace ThMEPStructure.GirderConnect.Command
 
                     ThBuildBeam buildMainBeam = new ThBuildBeam(beamLineForOwner, beamLineForSecondaryBeam, secondaryBeamLine, intersectCollection);
                     var beams = buildMainBeam.build(UserChoice);
-
+                    beams.ForEach(o => o.Value.TextStyleId = textStyleId);
                     if (beamLine.Count + secondaryBeamLine.Count == beams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();
