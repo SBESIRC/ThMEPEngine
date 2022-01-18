@@ -98,6 +98,7 @@ namespace ThMEPHVAC.Command
             var allLeadLines = _indoorFanData.GetAllLeadLine();
             bool isCool = IndoorFanParameter.Instance.ChangeLayoutModel.HotColdType == EnumHotColdType.Cold;
             var fanType = IndoorFanParameter.Instance.ChangeLayoutModel.FanType;
+            var returnType = IndoorFanParameter.Instance.ChangeLayoutModel.AirReturnType;
             var correctionFactor = IndoorFanParameter.Instance.ChangeLayoutModel.CorrectionFactor;
             using (var acdb = AcadDatabase.Active())
             {
@@ -138,7 +139,7 @@ namespace ThMEPHVAC.Command
                         continue;
                     }
                     string fanName = canUseFans.OrderBy(c=>c.FanRealCoolLoad).First().FanNumber;
-                    var rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor);
+                    var rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor,returnType);
                     double width = rectangle.Width;
                     var changes = new List<FanLayoutDetailed>();
                     switch (fanType) 

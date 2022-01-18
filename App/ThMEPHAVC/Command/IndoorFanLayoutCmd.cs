@@ -134,6 +134,7 @@ namespace ThMEPHVAC.Command
             var angle = Vector3d.XAxis.GetAngleTo(_xAxis);
             var fanLayoutRects = new List<FanLayoutRect>();
             bool isCool = IndoorFanParameter.Instance.LayoutModel.HotColdType == EnumHotColdType.Cold;
+            var returnType = IndoorFanParameter.Instance.LayoutModel.AirReturnType;
             var fanType = IndoorFanParameter.Instance.LayoutModel.FanType;
             using (var acdb = AcadDatabase.Active())
             {
@@ -214,11 +215,11 @@ namespace ThMEPHVAC.Command
                         if (string.IsNullOrEmpty(fanName))
                             continue;
                         layoutAreas = calcLayoutArea.CalcLayoutGroupAreaDir(hisFanDir);
-                        rectangle = fanRectFormFanData.GetFanRectangle(fanName,fanType,isCool, correctionFactor);
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName,fanType,isCool, correctionFactor, returnType);
                     }
                     else
                     {
-                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor);
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor, returnType);
                         layoutAreas = calcLayoutArea.GetRoomInsterAreas(dir, rectangle);
                     }
                     if (layoutAreas.Count < 1 || rectangle == null)
@@ -271,7 +272,7 @@ namespace ThMEPHVAC.Command
                         if (canUseFans.Count < 1)
                             continue;
                         fanName = canUseFans.First();
-                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor);
+                        rectangle = fanRectFormFanData.GetFanRectangle(fanName, fanType, isCool, correctionFactor, returnType);
                         var addFans = fanLayout.GetRoomCenterFan(rectangle, roomLoad);
                         foreach (var fan in addFans)
                         {

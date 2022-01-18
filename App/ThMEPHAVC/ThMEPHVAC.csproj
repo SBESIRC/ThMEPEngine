@@ -75,6 +75,7 @@
     <Compile Include="IndoorFanLayout\DataEngine\ThIndoorFanData.cs" />
     <Compile Include="IndoorFanLayout\IndoorFanCommon.cs" />
     <Compile Include="IndoorFanLayout\IndoorFanBlockServices.cs" />
+    <Compile Include="IndoorFanLayout\IndoorFanDistance.cs" />
     <Compile Include="IndoorFanLayout\Models\AreaRegionType.cs" />
     <Compile Include="IndoorFanLayout\Models\DivisionArea.cs" />
     <Compile Include="IndoorFanLayout\Models\FanLayoutModels.cs" />
