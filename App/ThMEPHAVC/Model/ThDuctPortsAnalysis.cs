@@ -1058,10 +1058,13 @@ namespace ThMEPHVAC.Model
                     tmpEndLines.Add(l);
                     set.Add(l.Clone() as Line);
                 }
-                // 如果末端线与风口有交则添加，否则从搜索的中心线中删除所有到三通的线，主管段上共线的线也可以被过滤掉
-                FilterNoPortCenterLine(orgLines, set, pointDetector.connectLines, p, pointDetector.endPoints[p]);
                 if (portParam.genStyle == GenerationStyle.Auto)
                     endLines.Add(set);
+                else
+                {
+                    // 如果末端线与风口有交则添加，否则从搜索的中心线中删除所有到三通的线，主管段上共线的线也可以被过滤掉
+                    FilterNoPortCenterLine(orgLines, set, pointDetector.connectLines, p, pointDetector.endPoints[p]);
+                }
             }
             mainLines = pointDetector.connectLines;
             foreach (Line l in tmpEndLines)
