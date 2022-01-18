@@ -185,8 +185,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var rect2 = line.GetHalfBuffer(false, width);//下、左半区域
             var buildLines1 = buildLinesSpatialIndex.SelectCrossingPolygon(rect1);
             var buildLines2 = buildLinesSpatialIndex.SelectCrossingPolygon(rect2);
-            var boundPt1 = line.GetBoundPt(buildLines1, rect1, ptsIndex, out bool hasBuilding);
-            var boundPt2 = line.GetBoundPt(buildLines2, rect2, ptsIndex, out bool hasBuilding2);
+            var boundPt1 = line.GetBoundPt(buildLines1, rect1, area, ptsIndex, out bool hasBuilding);
+            var boundPt2 = line.GetBoundPt(buildLines2, rect2, area, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
             if(!hasBuilding)
             {
