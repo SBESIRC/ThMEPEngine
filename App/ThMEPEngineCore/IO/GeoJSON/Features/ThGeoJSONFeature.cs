@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.IO.GeoJSON
                 {
                     if (polyline.Closed)
                     {
-                        var geo = polyline.ToNTSPolygon();
+                        var geo = polyline.ToNTSPolygon().Buffer(0);
                         var attributesTable = new AttributesTable(Attributes);
                         var feature = new Feature(geo, attributesTable);
                         return feature;
@@ -60,7 +60,7 @@ namespace ThMEPEngineCore.IO.GeoJSON
                 }
                 else if (Geometry is MPolygon mPolygon)
                 {
-                    var geo = mPolygon.ToNTSPolygon();
+                    var geo = mPolygon.ToNTSPolygon().Buffer(0);
                     var attributesTable = new AttributesTable(Attributes);
                     var feature = new Feature(geo, attributesTable);
                     return feature;
