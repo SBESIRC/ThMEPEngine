@@ -146,7 +146,7 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             GenerateParkingSpaces();
             Dispose();
-            Display();
+            Display(carLayerName, columnLayerName);
             return CarSpots.Count;
         }
 

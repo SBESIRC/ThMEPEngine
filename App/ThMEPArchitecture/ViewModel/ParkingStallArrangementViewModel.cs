@@ -32,7 +32,7 @@ namespace ThMEPArchitecture.ViewModel
 
         public bool JustCreateSplittersChecked
         {
-            get { return _JustCreateSplittersChecked = true; }
+            get { return _JustCreateSplittersChecked; }
             set 
             { 
                 _JustCreateSplittersChecked = value; 

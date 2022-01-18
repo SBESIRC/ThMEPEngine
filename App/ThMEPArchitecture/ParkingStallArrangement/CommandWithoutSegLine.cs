@@ -85,29 +85,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         {
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
-            //var sortSegLines = new List<Line>();
-            //var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-            var gaPara = new GaParameter(outerBrder.SegLines);
+            
 
             var maxVals = new List<double>();
             var minVals = new List<double>();
 
-            //var buildNums = outerBrder.Building.Count;
-            //var stopwatch = new Stopwatch();
-            //stopwatch.Start();
-            //double threshSecond = 20;
-            //int throughBuildNums = 0;
-
-            //var splitRst = Dfs.dfsSplitWithoutSegline(area, throughBuildNums, ref areas, ref sortSegLines, buildLinesSpatialIndex,
-            //    buildNums, ref maxVals, ref minVals, stopwatch, threshSecond);
-
-            //if (!splitRst)
-            //{
-            //    return;
-            //}
-
             var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
             var sortedSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
+            var gaPara = new GaParameter(sortedSegLines);
+            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
+            var usedLines = new List<int>();
+            var splitRst = Dfs.dfsSplitTiny(ref areas, gaPara, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals);
 
             var autoSpliterLayerName = $"AI-自动分割线{index}";
             if (!acadDatabase.Layers.Contains(autoSpliterLayerName))
@@ -165,6 +153,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
 
+            geneAlgorithm.Logger = Logger;
+
             var rst = new List<Chromosome>();
             var histories = new List<Chromosome>();
             try
@@ -198,21 +188,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                         {
                             ;
                         }
-                       // continue;
                     }
-
-                    //ParkingPartition partition = new ParkingPartition();
-                    //if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
-                    //{
-                    //    try
-                    //    {
-                    //        partition.ProcessAndDisplay();
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        partition.Dispose();
-                    //    }
-                    //}
                 }
             }
 

@@ -9,6 +9,7 @@ using Linq2Acad;
 using Dreambuild.AutoCAD;
 using DotNetARX;
 using System;
+using ThMEPEngineCore;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -295,11 +296,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 #if DEBUG
             using (AcadDatabase currentDb = AcadDatabase.Active())
             {
-                foreach (var seg in segLines)
+                var splitterDebugLayerName = "AI-分割线-Debug";
+                if (!currentDb.Layers.Contains(splitterDebugLayerName))
                 {
-                    currentDb.CurrentSpace.Add(seg);
+                    ThMEPEngineCoreLayerUtils.CreateAILayer(currentDb.Database, splitterDebugLayerName, 30);
                 }
 
+                foreach (var seg in segLines)
+                {
+                    seg.Layer = splitterDebugLayerName;
+                    currentDb.CurrentSpace.Add(seg);
+                }
             }
 #endif
 
