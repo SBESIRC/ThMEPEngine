@@ -64,6 +64,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
+                    
                     Run(currentDb);
                 }
             }
@@ -82,7 +83,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara);
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger);
             if (!dataprocessingFlag) return;
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 

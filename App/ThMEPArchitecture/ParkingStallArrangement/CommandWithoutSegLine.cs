@@ -74,7 +74,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
+            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
             if (!rstDataExtract)
             {
                 return;
