@@ -127,7 +127,6 @@
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThMEPOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
-    <Compile Include="Algorithm\ThRegionDivisionService.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\Command\FireAlarmSystemLayoutCommand.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\DeletePoints.cs" />
     <Compile Include="AreaLayout\CenterLineLayout\LayoutProcess\LayoutOpt.cs" />

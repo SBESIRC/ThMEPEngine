@@ -326,69 +326,6 @@ namespace ThMEPEngineCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THRegionDivision", CommandFlags.Modal)]
-        public void THRegionDivision()
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                //获取外包框
-                List<Polyline> frameLst = new List<Polyline>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acdb.Element<Polyline>(obj);
-                    frameLst.Add(frame.Clone() as Polyline);
-                }
-
-                foreach (var pline in frameLst)
-                {
-                    ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
-                    var rectangle = thRegionDivision.DivisionRegion(pline);
-                    foreach (var item in rectangle)
-                    {
-                        acdb.ModelSpace.Add(item);
-                    }
-                }
-            }
-        }
-
-        private static List<Point3d> GetPoints(string fileName)
-        {
-            var results = new List<Point3d>();
-            using (StreamReader sr = new StreamReader(fileName))
-            {
-                string line = "";
-                while ((line = sr.ReadLine()) != null)
-                {
-                    List<double> values = new List<double>();
-                    Regex reg = new Regex(@"\d+[.]?\d+");
-                    foreach (Match item in reg.Matches(line))
-                    {
-                        values.Add(Convert.ToDouble(item.Value));
-                    }
-                    results.Add(new Point3d(values[0], values[1], 0.0));
-                }
-            }
-            return results;
-        }
-
         [CommandMethod("TIANHUACAD", "THTestOldBuildingExtractor", CommandFlags.Modal)]
         public void THTestOldBuildingExtractor()
         {
