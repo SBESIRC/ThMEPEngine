@@ -37,9 +37,9 @@ namespace ThMEPWSS.Sprinkler.Analysis
         private HashSet<Line> DistanceCheck(List<ThIfcDistributionFlowElement> sprinklers, double tolerance, Entity entity)
         {
             var sprinklersClone = sprinklers.OfType<ThSprinkler>()
-                                            .Where(o => o.Category == Category)
-                                            .Where(o => entity.EntityContains(o.Position))
-                                            .ToList();
+                .Where(o => o.Category == Category)
+                .Where(o => entity.EntityContains(o.Position))
+                .ToList();
             var result = new HashSet<Line>();
             while (sprinklersClone.Count > 0)
             {
@@ -56,8 +56,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
         private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Entity entity)
         {
             var polygon = entity.ToNTSPolygonalGeometry();
-            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("BottomDistanceToFloor")
-                                                      || Convert.ToDouble(g.Properties["BottomDistanceToFloor"]) > BeamHeight)
+            var geometriesFilter = geometries.Where(g => !g.Properties.ContainsKey("Height")
+                                                      || Convert.ToDouble(g.Properties["Height"]) > BeamHeight)
                                              .Select(g => g.Boundary)
                                              .Where(g => polygon.Intersects(g.ToNTSGeometry()))
                                              .ToCollection();

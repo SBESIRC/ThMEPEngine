@@ -72,7 +72,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var objs = acadDatabase.ModelSpace
                     .OfType<AlignedDimension>()
                     .Where(o => o.Layer == layerName).ToCollection();
-                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var bufferPoly = polyline.Buffer(1.0)[0] as Polyline;
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 spatialIndex.SelectCrossingPolygon(bufferPoly)
                             .OfType<AlignedDimension>()
@@ -96,7 +96,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 var objs = acadDatabase.ModelSpace
                     .OfType<Polyline>()
                     .Where(o => o.Layer == layerName).ToCollection();
-                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                var bufferPoly = polyline.Buffer(1.0)[0] as Polyline;
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 spatialIndex.SelectCrossingPolygon(bufferPoly)
                             .OfType<Polyline>()
@@ -112,7 +112,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
                     var objsTidal = acadDatabase.ModelSpace
                         .OfType<MPolygon>()
                         .Where(o => o.Layer == layerName).ToCollection();
-                    var bufferPolygon = polyline.Buffer(1)[0] as Polyline;
+                    var bufferPolygon = polyline.Buffer(1.0)[0] as Polyline;
                     var polygonSpatialIndex = new ThCADCoreNTSSpatialIndex(objsTidal);
                     polygonSpatialIndex.SelectCrossingPolygon(bufferPolygon)
                                 .OfType<MPolygon>()

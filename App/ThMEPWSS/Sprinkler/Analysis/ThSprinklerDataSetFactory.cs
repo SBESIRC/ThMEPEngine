@@ -28,7 +28,7 @@ namespace ThMEPWSS.Sprinkler.Analysis
             UpdateTransformer(collection);
             var manger = Extract(database); // visitor manager,提取的是原始数据
             manger.MoveToOrigin(Transformer); // 移动到原点
-            
+
             var extractors = new List<ThExtractorBase>()
             {
                 new ThSprinklerArchitectureWallExtractor()
@@ -75,14 +75,14 @@ namespace ThMEPWSS.Sprinkler.Analysis
                 },
                 new ThSprinklerWindowExtractor()
                     {
-                        ElementLayer="AI-窗",
+                        ElementLayer = "AI-窗",
                         Transformer = Transformer,
                         Db3ExtractResults = manger.DB3WindowVisitor.Results,
                     },
                 new ThSprinklerRoomExtractor()
                 {
-                    IsWithHole=false,
-                    UseDb3Engine=true,
+                    IsWithHole = false,
+                    UseDb3Engine = true,
                     Transformer = Transformer,
                 },
             };

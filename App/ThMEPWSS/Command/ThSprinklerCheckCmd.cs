@@ -50,7 +50,7 @@ namespace ThMEPWSS.Command
                 };
 
                 var remainder = new DBObjectCollection();
-                var polylines = ThSprinklerLayoutAreaUtils.GetFrames(out remainder);
+                var polylines = ThSprinklerLayoutAreaUtils.GetFrames(out remainder).Where(p => p.Area > 0.8e6).ToList();
                 if (polylines.Count == 0 && remainder.Count == 0)
                 {
                     return;

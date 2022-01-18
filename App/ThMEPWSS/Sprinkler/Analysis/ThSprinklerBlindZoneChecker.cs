@@ -31,8 +31,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
             {
                 var holes = new List<Polyline>();
                 var polygon = pline.ToNTSPolygon();
-                var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor")
-                                                             && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
+                var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("Height")
+                                                             && Convert.ToInt32(g.Properties["Height"]) < BeamHeight)
                                                              || (g.Properties["Category"] as string).Contains("Room")))
                                                  .Select(g => g.Boundary)
                                                  .Where(g => polygon.Intersects(g.ToNTSGeometry()))
@@ -135,8 +135,8 @@ namespace ThMEPWSS.Sprinkler.Analysis
         private HashSet<Line> BuildingCheck(List<ThGeometry> geometries, HashSet<Line> lines, Polyline pline)
         {
             var polygon = pline.ToNTSPolygon();
-            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("BottomDistanceToFloor")
-                                                         && Convert.ToInt32(g.Properties["BottomDistanceToFloor"]) < BeamHeight)
+            var geometriesFilter = geometries.Where(g => !((g.Properties.ContainsKey("Height")
+                                                         && Convert.ToInt32(g.Properties["Height"]) < BeamHeight)
                                                          || (g.Properties["Category"] as string).Contains("Room")))
                                              .Select(g => g.Boundary)
                                              .Where(g => polygon.Intersects(g.ToNTSGeometry()))
