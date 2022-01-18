@@ -110,7 +110,8 @@ namespace ThMEPLighting.IlluminationLighting
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var layoutBlkNameN = ThIlluminationCommon.lightTypeDict[_lightType];
                 var layoutBlkNameE = ThFaCommon.BlkName_EmergencyLight;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.NormalLighting];
+                var cleanBlkName = new List<String>();
+                cleanBlkName.AddRange(ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.NormalLighting]);
                 if (_ifLayoutEmg)
                 {
                     cleanBlkName.AddRange(ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.EmergencyLighting]);
