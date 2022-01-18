@@ -464,6 +464,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         if (isBreak)
                             break;
                     }
+                    //多个UCS,两个UCS可能没有同排的，这时使用第一个
+                    firstIndex = firstIndex < 0 ? 0 : firstIndex;
                     group.GroupFirstId = group.OrderGroupIds[firstIndex];
                     changeAreaId = group.UcsGroupId;
                     haveChange = true;
