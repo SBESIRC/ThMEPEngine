@@ -618,25 +618,6 @@ namespace ThMEPWSS.FlatDiagramNs
                             var y2lst = T(y2ls);
                             var fl0st = T(fl0s);
                             var fl0sf = F(fl0s);
-                            PipeType getPipeType(Point2d pt)
-                            {
-                                var p = pt.ToNTSPoint();
-                                if (nlst(p)) return PipeType.NL;
-                                if (y1lst(p)) return PipeType.Y1L;
-                                if (y2lst(p)) return PipeType.Y2L;
-                                if (fl0st(p)) return PipeType.FL0;
-                                return PipeType.Unknown;
-                            }
-                            string getPipeDn(PipeType type)
-                            {
-                                return type switch
-                                {
-                                    PipeType.Y2L => vm.Params.BalconyRainPipeDN,
-                                    PipeType.NL => vm.Params.CondensePipeVerticalDN,
-                                    PipeType.Unknown => null,
-                                    _ => IRRESPONSIBLENESS,
-                                };
-                            }
                             string getDN(Geometry shooter)
                             {
                                 if (nlst(shooter)) return vm.Params.CondensePipeVerticalDN;
@@ -804,14 +785,6 @@ namespace ThMEPWSS.FlatDiagramNs
                                 foreach (var gpGeo in gpGeos)
                                 {
                                     var pps = ppsf(gpGeo);
-                                    foreach (var pp in pps)
-                                    {
-                                        var dn = getPipeDn(getPipeType(pp.GetCenter()));
-                                        if(dn is not null)
-                                        {
-                                            modify(GeoFac.GetLines(gpGeo, skipPolygon: THESAURUSOBSTINACY).Select(x => x.Buffer(THESAURUSHOUSING)).ToGeometry(), info => info.Text = dn);
-                                        }
-                                    }
                                     if (pps.Count == THESAURUSHOUSING)
                                     {
                                         var pp = pps[THESAURUSSTAMPEDE];

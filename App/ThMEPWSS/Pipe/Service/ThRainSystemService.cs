@@ -2471,8 +2471,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (s is THESAURUSREGION or THESAURUSTABLEAU)
                         {
                             var drData = drDatas[i];
-                            if (drData.HasRainPortSymbols.Contains(label)) return THESAURUSOBSTINACY;
-                            if (getRainPortId(label) >= THESAURUSSTAMPEDE) return THESAURUSOBSTINACY;
+                            return drData.HasRainPortSymbols.Contains(label);
                         }
                     }
                 }
@@ -2488,8 +2487,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (s is THESAURUSREGION or THESAURUSTABLEAU)
                         {
                             var drData = drDatas[i];
-                            if (drData.HasWaterSealingWell.Contains(label)) return THESAURUSOBSTINACY;
-                            if (getWaterSealingWellId(label) >= THESAURUSSTAMPEDE) return THESAURUSOBSTINACY;
+                            return drData.HasWaterSealingWell.Contains(label);
                         }
                     }
                 }
@@ -2816,8 +2814,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                         if (s is THESAURUSREGION or THESAURUSTABLEAU)
                         {
                             var drData = drDatas[i];
-                            if (drData.OutletWrappingPipeDict.ContainsValue(label)) return THESAURUSOBSTINACY;
-                            if (drData.HasWrappingPipe.Contains(label)) return THESAURUSOBSTINACY;
+                            return drData.OutletWrappingPipeDict.ContainsValue(label);
                         }
                     }
                 }
@@ -4958,7 +4955,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     {
                                                         var fixV = new Vector2d(QUOTATIONWITTIG, THESAURUSSTAMPEDE);
                                                         var p = vecs.GetLastPoint(bsPt.OffsetY(-CONSCRIPTIONIST - VÖLKERWANDERUNG) + v + fixV);
-                                                        if (gpItem.PipeType is PipeType.NL or PipeType.Y2L)
+                                                        if (gpItem.PipeType is PipeType.NL)
                                                         {
                                                             p = p.OffsetX(-QUOTATIONWITTIG);
                                                         }
@@ -4989,7 +4986,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                                     var dy = QUOTATIONTRANSFERABLE;
                                                     if (gpItem.Hangings[i].HasSideFloorDrain)
                                                     {
-                                                        dy = -MECHANOCHEMISTRY - (HEIGHT - QUOTATIONBASTARD);
+                                                        dy = -MECHANOCHEMISTRY;
                                                     }
                                                     var segs = vecs.ToGLineSegments(bsPt.OffsetY(-CONSCRIPTIONIST - VÖLKERWANDERUNG + dy) + v);
                                                     drawDomePipes(segs);
@@ -5451,7 +5448,7 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                     var run = runs.TryGet(i);
                                     if (run != null)
                                     {
-                                        Dr.DrawDN_2(info.EndPoint.OffsetXY(THESAURUSFORMULATE, THESAURUSSTAMPEDE), CIRCUMCONVOLUTION, dn);
+                                        Dr.DrawDN_2(info.EndPoint.OffsetXY(THESAURUSFORMULATE, -HEIGHT), CIRCUMCONVOLUTION, dn);
                                     }
                                 }
                             }
@@ -5964,7 +5961,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
         public Dictionary<string, int> DitchIds;
         public Dictionary<int, string> OutletWrappingPipeDict;
         public HashSet<string> HasCondensePipe;
-        public HashSet<string> HasWrappingPipe;
         public HashSet<string> HasBrokenCondensePipes;
         public HashSet<string> HasNonBrokenCondensePipes;
         public HashSet<string> PlsDrawCondensePipeHigher;
@@ -5992,7 +5988,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             WrappingPipeRadius220115 ??= new List<KeyValuePair<string, string>>();
             Y1LVerticalPipeRects ??= new List<GRect>();
             Y1LVerticalPipeRectLabels ??= new List<string>();
-            HasWrappingPipe ??= new HashSet<string>();
             GravityWaterBuckets ??= new List<GRect>();
             SideWaterBuckets ??= new List<GRect>();
             _87WaterBuckets ??= new List<GRect>();
@@ -7084,16 +7079,13 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                                             return;
                                         }
                                     }
-                                    for (double bufSize = THESAURUSSTAMPEDE; bufSize < QUOTATIONWITTIG; bufSize += HYPERDISYLLABLE)
+                                    foreach (var well in item.WaterWells)
                                     {
-                                        foreach (var well in item.WaterWells)
+                                        if (well.Buffer(MISAPPREHENSIVE).Intersects(wlgeo))
                                         {
-                                            if (well.Buffer(bufSize).Intersects(wlgeo))
-                                            {
-                                                var waterWellLabel = THESAURUSSPECIFICATION;
-                                                waterwellLabelDict[label] = waterWellLabel;
-                                                return;
-                                            }
+                                            var waterWellLabel = THESAURUSSPECIFICATION;
+                                            waterwellLabelDict[label] = waterWellLabel;
+                                            return;
                                         }
                                     }
                                 }
@@ -7411,16 +7403,12 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
                 }
                 {
                 }
+                foreach (var pp in item.VerticalPipes)
                 {
-                    var wlinesGeosf = GeoFac.CreateIntersectsSelector(wlinesGeos);
-                    var wpst = GeoFac.CreateIntersectsTester(item.WrappingPipes);
-                    foreach (var kv in lbDict)
+                    lbDict.TryGetValue(pp, out string label);
+                    if (label != null)
                     {
-                        if (!IsRainLabel(kv.Value)) continue;
-                        if (wlinesGeosf(kv.Key).Any(x => wpst(x)))
-                        {
-                            drData.HasWrappingPipe.Add(kv.Value);
-                        }
+                        DrawTextLazy(label, pp.ToGRect().LeftTop.ToPoint3d());
                     }
                 }
                 exItem.LabelDict = lbDict.Select(x => new Tuple<Geometry, string>(x.Key, x.Value)).ToList();
@@ -7960,7 +7948,6 @@ namespace ThMEPWSS.ReleaseNs.RainSystemNs
             static bool f(string s)
             {
                 if (s == null) return INTRAVASCULARLY;
-                if (s.StartsWith(PSEUDOSCOPICALLY)) return INTRAVASCULARLY;
                 if (IsMaybeLabelText(s)) return THESAURUSOBSTINACY;
                 return INTRAVASCULARLY;
             }

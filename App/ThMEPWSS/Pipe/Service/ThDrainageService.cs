@@ -1196,7 +1196,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         }
                                         else
                                         {
-                                            DrawPipeButtomHeightSymbol(THESAURUSEUPHORIA, THESAURUSSTAMPEDE, info.EndPoint.OffsetY(HEIGHT / THESAURUSCOMMUNICATION - THESAURUSPERVADE));
+                                            DrawPipeButtomHeightSymbol(THESAURUSEUPHORIA, THESAURUSSTAMPEDE, info.EndPoint.OffsetY(HEIGHT / THESAURUSCOMMUNICATION));
                                         }
                                     }
                                 }
@@ -1694,7 +1694,7 @@ namespace ThMEPWSS.ReleaseNs.DrainageSystemNs
                                         pt1 = info.EndPoint.OffsetY(DETERMINATENESS + QUINQUARTICULAR);
                                     }
                                 }
-                                _DrawCheckPoint(pt1.OffsetY(PHYSIOLOGICALLY), THESAURUSOBSTINACY);
+                                _DrawCheckPoint(pt1, THESAURUSOBSTINACY);
                                 if (storey == THESAURUSREGION)
                                 {
                                     var dx = -POLYOXYMETHYLENE;
