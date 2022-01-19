@@ -49,7 +49,6 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                     beam.Item2.Linetype = "ByLayer";
                     code.Layer = BeamConfig.MainBeamTextLayerName;
                     code.ColorIndex = (int)ColorIndex.BYLAYER;
-                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                     LineDic.Add(beam.Item1, H);
                     LineDic.Add(beam.Item2, H);
@@ -92,7 +91,6 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                     beam.Item2.Linetype = "ByLayer";
                     code.Layer = BeamConfig.MainBeamTextLayerName;
                     code.ColorIndex = (int)ColorIndex.BYLAYER;
-                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                     LineDic.Add(beam.Item1, H);
                     LineDic.Add(beam.Item2, H);
@@ -119,7 +117,6 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                     beam.Item2.Linetype = "ByLayer";
                     code.Layer = BeamConfig.SecondaryBeamTextLayerName;
                     code.ColorIndex = (int)ColorIndex.BYLAYER;
-                    code.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                     results.Add(beam, code);
                 }
             });
