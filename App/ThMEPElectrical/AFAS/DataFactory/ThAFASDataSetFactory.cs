@@ -13,9 +13,9 @@ using ThMEPEngineCore;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASDataSetFactoryNew
+    public class ThAFASDataSetFactory
     {
-        public ThAFASDataSetFactoryNew()
+        public ThAFASDataSetFactory()
         { }
         private ThMEPOriginTransformer Transformer { get; set; }
         public List<ThExtractorBase> Extractors { get; set; }

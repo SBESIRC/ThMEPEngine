@@ -15,7 +15,7 @@ using ThMEPElectrical.AFAS.Interface;
 
 namespace ThMEPElectrical.FireAlarmDistance.Data
 {
-    public class ThAFASDistanceDataSetFactoryNew : ThMEPDataSetFactory
+    public class ThAFASDistanceDataSetFactory : ThMEPDataSetFactory
     {
         /////input
         public bool ReferBeam { get; set; } = true;
@@ -25,7 +25,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
 
         /////output
         private List<ThGeometry> Geos { get; set; }
-        public ThAFASDistanceDataSetFactoryNew()
+        public ThAFASDistanceDataSetFactory()
         {
             Geos = new List<ThGeometry>();
             InputExtractors = new List<ThExtractorBase>();

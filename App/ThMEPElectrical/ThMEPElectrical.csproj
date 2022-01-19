@@ -34,7 +34,7 @@
     <Compile Include="AFAS\DataFactory\ThAFASDataQueryService.cs" />
     <Compile Include="AFAS\Model\ThAFASDataPass.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
-    <Compile Include="AFAS\DataFactory\ThAFASDataSetFactoryNew.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataSetFactory.cs" />
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
@@ -145,7 +145,7 @@
     <Compile Include="FireAlarmDistance\Command\ThAFASBroadcastCmd.cs" />
     <Compile Include="FireAlarmDistance\Command\ThAFASManualAlarmCmd.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataQueryService.cs" />
-    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
     <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
     <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
     <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />

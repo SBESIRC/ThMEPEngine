@@ -75,7 +75,7 @@ namespace ThMEPElectrical.AFAS.Utils
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ///////////获取数据元素,已转回原位置附近////////
-                var datasetFactory = new ThAFASDataSetFactoryNew();
+                var datasetFactory = new ThAFASDataSetFactory();
                 datasetFactory.SetTransformer(transformer);
                 datasetFactory.GetElements(acadDatabase.Database, pts);
                 var extractors = datasetFactory.Extractors;
@@ -100,7 +100,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 var transformer = dataPass.Transformer;
 
                 ///////////处理原始建筑数据,已转回原位置附近////////
-                var localDataFactory = new ThAFASDistanceDataSetFactoryNew()
+                var localDataFactory = new ThAFASDistanceDataSetFactory()
                 {
                     ReferBeam = referBeam,
                     NeedConverage = needConverage,
