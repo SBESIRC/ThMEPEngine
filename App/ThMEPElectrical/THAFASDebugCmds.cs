@@ -452,7 +452,7 @@ namespace ThMEPElectrical
             var Radius = 3000;
             var frame = ThAFASSelectFrameUtil.GetMPolygon();
 
-            var dis = 400;
+            //var dis = 400;
             var areaPoints = new List<Point3d>();
 
             if (frame.Area > Radius * Radius * 0.2)

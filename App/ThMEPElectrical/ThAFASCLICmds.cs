@@ -20,82 +20,9 @@ using ThMEPElectrical.FireAlarmDistance.Command;
 
 namespace ThMEPElectrical
 {
-    public class ThAFASCmds
+    public class ThAFASCLICmds
     {
-        [CommandMethod("TIANHUACAD", "THFASmoke", CommandFlags.Session)]
-        public void THFASmoke()
-        {
-            using (var cmd = new ThAFASSmokeCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THFADisplay", CommandFlags.Session)]
-        public void THFADisplay()
-        {
-            using (var cmd = new ThAFASDisplayDeviceLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THFAMonitor", CommandFlags.Session)]
-        public void THFAMonitor()
-        {
-            using (var cmd = new ThAFASFireProofMonitorLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THFATel", CommandFlags.Session)]
-        public void THFATel()
-        {
-            using (var cmd = new ThAFASFireTelLayoutCmd())
-            {
-                cmd.Execute();
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THFAGas", CommandFlags.Session)]
-        public void THFAGas()
-        {
-            using (var cmd = new ThAFASGasCmd())
-            {
-                cmd.Execute();
-            }
-
-        }
-
-        [CommandMethod("TIANHUACAD", "THFABroadcast", CommandFlags.Session)]
-        public void THFABroadcast()
-        {
-#if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThAFASBroadcastCmd())
-            {
-                cmd.Execute();
-            }
-#else
-            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
-#endif
-        }
-
-        [CommandMethod("TIANHUACAD", "THFAManualAlarm", CommandFlags.Session)]
-        public void THFAManualAlarm()
-        {
-#if (ACAD2016 || ACAD2018)
-            using (var cmd = new ThAFASManualAlarmCmd())
-            {
-                cmd.Execute();
-            }
-#else
-            Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");
-#endif
-        }
-
-        //---------------无ui模式
-        [CommandMethod("TIANHUACAD", "THHZBJNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THHZBJ", CommandFlags.Session)]
         public void THHZBJNoUI()
         {
 #if (ACAD2016 || ACAD2018)
@@ -226,8 +153,7 @@ namespace ThMEPElectrical
 #endif
         }
 
-
-        [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFASMOKE", CommandFlags.Session)]
         public void THFASmokeNoUI()
         {
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
@@ -267,7 +193,7 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance = null;
         }
 
-        [CommandMethod("TIANHUACAD", "THFADisplayNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFADISPLAY", CommandFlags.Session)]
         public void THFADisplayNoUI()
         {
             var rst = ThAFASUtils.SettingInt("\n楼层显示器：住宅（0）公建（1）", 1);
@@ -289,7 +215,7 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance = null;
         }
 
-        [CommandMethod("TIANHUACAD", "THFAMonitorNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFAMONITOR", CommandFlags.Session)]
         public void THFAMonitorNoUI()
         {
             FireAlarmSetting.Instance.LayoutItemList.Clear();
@@ -308,7 +234,7 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance = null;
         }
 
-        [CommandMethod("TIANHUACAD", "THFATelNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFATEL", CommandFlags.Session)]
         public void THFATelNoUI()
         {
             FireAlarmSetting.Instance.LayoutItemList.Clear();
@@ -327,7 +253,7 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance = null;
         }
 
-        [CommandMethod("TIANHUACAD", "THFAGasNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFAGAS", CommandFlags.Session)]
         public void THFAGasNoUI()
         {
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
@@ -352,7 +278,7 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance = null;
         }
 
-        [CommandMethod("TIANHUACAD", "THFABroadcastNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFABROADCAST", CommandFlags.Session)]
         public void THFABroadcastNoUI()
         {
 #if (ACAD2016 || ACAD2018)
@@ -390,7 +316,7 @@ namespace ThMEPElectrical
 #endif
         }
 
-        [CommandMethod("TIANHUACAD", "THFAManualAlarmNoUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "-THFAMANUALALARM", CommandFlags.Session)]
         public void THFAManualAlarmNoUI()
         {
 #if (ACAD2016 || ACAD2018)
@@ -446,7 +372,5 @@ namespace ThMEPElectrical
                 ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
             }
         }
-
-
     }
 }

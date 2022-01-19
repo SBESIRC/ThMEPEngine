@@ -35,7 +35,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion("1.8.6.0")]
 [assembly: AssemblyFileVersion("1.8.6.0")]
 
-[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASUICmds))]
+[assembly: CommandClass(typeof(ThMEPElectrical.ThAFASCLICmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.THAFASDebugCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThAuxiliaryCmds))]
 [assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
