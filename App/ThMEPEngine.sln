@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31911.196
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPEngineCore", "ThMEPEngineCore\ThMEPEngineCore.csproj", "{AD98390A-569D-4774-AA3E-D9F00BC84CD6}"
 EndProject
@@ -59,7 +59,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPStructure", "ThMEPStru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPArchitecture", "ThMEPArchitecture\ThMEPArchitecture.csproj", "{65557B89-67B5-4776-A2D5-68DA51D5296A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Architecture.WPI.UI", "TianHua.Architecture.WPI.UI\TianHua.Architecture.WPI.UI.csproj", "{CF10B087-ACE3-4A1D-B125-E0EA4B0E2F29}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Architecture.WPF.UI", "TianHua.Architecture.WPI.UI\TianHua.Architecture.WPF.UI.csproj", "{CF10B087-ACE3-4A1D-B125-E0EA4B0E2F29}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Structure.WPF.UI", "TianHua.Structure.WPF.UI\TianHua.Structure.WPF.UI.csproj", "{7292613F-E26A-4FD8-883B-E2E136CC3A96}"
 EndProject
@@ -1536,7 +1536,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
 		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
+		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
 	EndGlobalSection
 EndGlobal
