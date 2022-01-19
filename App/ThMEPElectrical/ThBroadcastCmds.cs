@@ -96,7 +96,7 @@ namespace ThMEPElectrical
                     }
 
                     //处理车道线
-                    var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+                    var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 300.0, 2.0, Math.PI / 180.0);
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
                    

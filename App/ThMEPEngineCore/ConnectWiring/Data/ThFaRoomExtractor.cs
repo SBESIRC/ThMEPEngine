@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.GeojsonExtractor;
@@ -66,6 +67,7 @@ namespace ThMEPEngineCore.ConnectWiring.Data
                     else resHoles.Add(mPolygon.Loops()[i]);
                 }
             }
+            polyFrame = polyFrame.Buffer(1000)[0] as Polyline;
             return new KeyValuePair<Polyline, List<Polyline>>(polyFrame, resHoles);
         }
 
