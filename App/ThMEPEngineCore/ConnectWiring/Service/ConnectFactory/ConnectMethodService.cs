@@ -460,6 +460,11 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
                     while (!pt.IsPointOnLine(line,1))
                     {
                         i--;
+                        if(i == 0)
+                        {
+                            //针对我们没办法处理的'乱线'，暂时直接抛弃掉
+                            return new Polyline();
+                        }
                         line = new Line(wiring.GetPoint3dAt(i - 1), wiring.GetPoint3dAt(i));
                     }
                     newpolyline.AddVertexAt(0, pt.ToPoint2D(), 0, 0, 0);

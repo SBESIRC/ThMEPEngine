@@ -31,15 +31,15 @@ namespace ThMEPEngineCore.ConnectWiring
 {
     public class ConnectWiringService
     {
-        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false,List<string> allConfigBlocks = null)
+        public void Routing(List<WiringLoopModel> configInfo, bool wall = false, bool column = false, List<string> allConfigBlocks = null)
         {
             //获取所有的块
             var ConfigBlocks = configInfo.SelectMany(x => x.loopInfoModels.First().blocks.Select(y => y.blockName)).ToList();
-            if(!ConfigBlocks.Any())
+            if (!ConfigBlocks.Any())
             {
                 return;
             }
-            if(allConfigBlocks.IsNull())
+            if (allConfigBlocks.IsNull())
             {
                 allConfigBlocks = ConfigBlocks;
             }
@@ -59,7 +59,7 @@ namespace ThMEPEngineCore.ConnectWiring
             BranchConnectingFactory connectingFactory = new BranchConnectingFactory();
             MultiLoopService multiLoopService = new MultiLoopService();
             var data = GetData(holes, outFrame, block, !wall, !column);
-            
+
             var CenterLine = new List<ThGeometry>();
             if (Convert.ToInt16(Application.GetSystemVariable("USERR3")) == 1)
             {
@@ -117,7 +117,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     if (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1)
                     {
                         string path = Path.Combine(Active.DocumentDirectory, string.Format(Outputpath, Active.DocumentName, LoopName));
-                        File.WriteAllText(path, dataGeoJson);
+                        File.WriteAllText(path, res);
                     }
                     if (!res.Contains("error"))
                     {
@@ -137,16 +137,16 @@ namespace ThMEPEngineCore.ConnectWiring
                         }
 
                         Dictionary<LoopInfoModel, List<Polyline>> loops = new Dictionary<LoopInfoModel, List<Polyline>>() { { info.loopInfoModels.First(), lines } };
-                        if (info.loopInfoModels.Count > 1)
-                        {
-                            loops = multiLoopService.CreateLoop(info, lines, resBlocks);
-                        }
                         resBlocks = resBlocks.Select(o =>
                         {
                             var entity = o.Clone() as BlockReference;
                             Transformer.Transform(entity);
                             return entity;
                         }).ToList();
+                        if (info.loopInfoModels.Count > 1)
+                        {
+                            loops = multiLoopService.CreateLoop(info, lines, resBlocks);
+                        }
                         foreach (var loop in loops)
                         {
                             List<Polyline> resLines = new List<Polyline>();
