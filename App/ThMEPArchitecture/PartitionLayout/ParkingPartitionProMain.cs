@@ -508,6 +508,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     gline = glines.First();
                     if (ClosestPointInCurves(gline.GetCenter(), IniLanes.Select(e => e.Line).ToList()) < 1)
                         continue;
+                    if (gline.Length < LengthCanGAdjLaneConnectSingle) continue;
                     paras.LanesToAdd.Add(new Lane(gline, CreateVector(line).GetNormal()));
                     paras.LanesToAdd.Add(new Lane(gline, -CreateVector(line).GetNormal()));
                     paras.CarBoxesToAdd.Add(CreatePolyFromLine(gline));

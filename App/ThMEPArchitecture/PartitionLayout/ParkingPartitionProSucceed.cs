@@ -172,6 +172,8 @@ namespace ThMEPArchitecture.PartitionLayout
             var points = new List<Point3d>();
             points = ObstacleVertexes.Where(e => pl.IsPointInFast(e)).OrderBy(e => line.GetClosestPointTo(e, false).DistanceTo(e)).ToList();
             if (points.Count() == 0) return -1;
+            var ltest_ob_near_boundary = CreateLineFromStartPtAndVector(points.First(), vec, DisVertCarLength);
+            if (ltest_ob_near_boundary.Intersect(Boundary, Intersect.OnBothOperands).Count > 0) return -1;
             var dist = line.GetClosestPointTo(points.First(), false).DistanceTo(points.First());
             var lperp = CreateLineFromStartPtAndVector(line.GetCenter().TransformBy(Matrix3d.Displacement(vec * 100)), vec, dist + 1);
             var lanes = IniLanes.Where(e => IsParallelLine(e.Line, line))
@@ -673,7 +675,8 @@ namespace ThMEPArchitecture.PartitionLayout
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
-                if (ClosestPointInCurvesFast(line.StartPoint, Obstacles) < 10)
+                double dis_judge_under_building = 2000;
+                if (ClosestPointInCurvesFast(line.StartPoint, Obstacles) < dis_judge_under_building)
                 {
                     var dis = ClosestPointInVertCurves(line.StartPoint, line, IniLanes.Select(e => e.Line).ToList());
                     if (dis >= DisLaneWidth + DisPillarLength - 1 && Math.Abs(dis - DisCarAndHalfLane) > 1)
