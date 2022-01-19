@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Runtime;
+using TianHua.Structure.WPF.UI.Command;
 
 namespace TianHua.Structure.WPF.UI
 {
@@ -6,12 +7,19 @@ namespace TianHua.Structure.WPF.UI
     {
         public void Initialize()
         {
-            throw new System.NotImplementedException();
         }
 
         public void Terminate()
         {
-            throw new System.NotImplementedException();
+        }
+
+        [CommandMethod("TIANHUACAD", "THCLUI", CommandFlags.Session)]
+        public void THCLUI()
+        {
+            using (var cmd = new SecondaryBeamCmd())
+            {
+                cmd.Execute();
+            }
         }
     }
 }
