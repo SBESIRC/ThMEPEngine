@@ -142,6 +142,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThCircularArcConflictAvoidService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThCircularArcConnectionBuilder.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThCrossLinkCalculator.cs" />
+    <Compile Include="Garage\Service\LayoutResult\ThDefaultLinkWireFilter.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThFilterLinkWireService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThJumpWireDirectionCalculator.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThJumpWireDirectionConfig.cs" />
@@ -149,6 +150,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThLightNodeBranchLinkService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLightNodeCrossLinkService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLightNodeSameLinkService.cs" />
+    <Compile Include="Garage\Service\LayoutResult\ThLightRouteService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLineRoadQueryService.cs" />
     <Compile Include="Garage\Engine\ThGarageLightingEngine.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLinkLineUtils.cs" />
