@@ -440,7 +440,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 this.CollectedData.HorizontalPipes = new List<Line>();
-                foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE"))))
+                foreach (var e in Entities.OfType<Entity>().Where(e => (e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE"))
+                || (e.Layer.Contains("W") && e.Layer.Contains("RAIN") && e.Layer.Contains("PIPE"))))
                 {
                     var layer = e.Layer;
                     if (e is Line line && line.Length > 0)
@@ -483,7 +484,8 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                         }
                     }
                 }
-                foreach (var e in Entities.OfType<Entity>().Where(e => ((e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE")))
+                foreach (var e in Entities.OfType<Entity>().Where(e => ((e.Layer == "W-FRPT-DRAI-PIPE") || (e.Layer == "W-RAIN-PIPE") || (e.Layer.Contains("W") && e.Layer.Contains("DRAI") && e.Layer.Contains("PIPE"))
+                || (e.Layer.Contains("W") && e.Layer.Contains("RAIN") && e.Layer.Contains("PIPE")))
                      && PressureDrainageUtils.IsTianZhengElement(e)).Where(e => e.ExplodeToDBObjectCollection().OfType<Polyline>().Any()))
                 {
                     var layer = e.Layer;
