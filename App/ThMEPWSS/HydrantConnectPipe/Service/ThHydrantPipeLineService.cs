@@ -16,12 +16,13 @@ using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPEngineCore.CAD;
 using ThMEPWSS.UndergroundFireHydrantSystem.Extract;
+using ThMEPWSS.HydrantConnectPipe.Command;
 
 namespace ThMEPWSS.HydrantConnectPipe.Service
 {
     public class ThHydrantPipeLineService
     {
-        public void GetHydrantLoopAndBranchLines(ref List<Line> loopLines, ref List<Line> branchLines,  Point3dCollection selectArea)
+        public void GetHydrantLoopAndBranchLines(ref List<Line> loopLines, ref List<Line> branchLines, Point3d startPt,  Point3dCollection selectArea)
         {
             //获取环管标记点
             var pipeMarkEngine = new ThHydrantPipeMarkRecognitionEngine();
@@ -29,9 +30,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var pipeMarks = pipeMarkEngine.GetPipeMarks();
 
             var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
-            List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn,selectArea);
+            List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn, startPt,selectArea);
             loopLines = GetMainPipeLines(pipeLines,pipeMarks, fireHydrantSysIn);
             branchLines = pipeLines.Except(loopLines).ToList();
+            loopLines = ThHydrantConnectPipeUtils.CleanLines(loopLines);
+            branchLines = ThHydrantConnectPipeUtils.CleanLines(branchLines);
             loopLines = PipeLineList.CleanLaneLines3(loopLines);
             branchLines = PipeLineList.CleanLaneLines3(branchLines);
             loopLines.RemoveAll(l => IsMarkLine(l, pipeMarks));
@@ -142,7 +145,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 
             return tmpPipeLines;
         }
-        private List<Line> GetPipeLines(ref FireHydrantSystemIn fireHydrantSysIn,Point3dCollection selectArea) 
+        private List<Line> GetPipeLines(ref FireHydrantSystemIn fireHydrantSysIn, Point3d startPt, Point3dCollection selectArea) 
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
@@ -157,34 +160,26 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
                 PipeLine.AddPipeLine(dbObjs, ref fireHydrantSysIn, ref pointList, ref lineList);
 
                 PipeLineList.PipeLineAutoConnect(ref lineList);
-                
+                var tmpLines = ThHydrantConnectPipeUtils.FindInlineLines(startPt, ref lineList, 10);
                 pointList.Clear();
-                var starPts = lineList.Select(l=> new Point3dEx(l.StartPoint)).ToList();
-                var endPts = lineList.Select(l => new Point3dEx(l.EndPoint)).ToList();
+                var starPts = tmpLines.Select(l=> new Point3dEx(l.StartPoint)).ToList();
+                var endPts = tmpLines.Select(l => new Point3dEx(l.EndPoint)).ToList();
                 pointList.AddRange(starPts);
                 pointList.AddRange(endPts);
 
-                PipeLine.PipeLineSplit(ref lineList, pointList,1.0,2.0);//管线打断
+                PipeLine.PipeLineSplit(ref tmpLines, pointList,1.0,2.0);//管线打断
 
                 fireHydrantSysIn.PtDic = new Dictionary<Point3dEx, List<Point3dEx>>();//清空  当前点和邻接点字典对
-                foreach (var L in lineList)
+                foreach (var L in tmpLines)
                 {
                     var pt1 = new Point3dEx(L.StartPoint,12);
                     var pt2 = new Point3dEx(L.EndPoint,12);
                     ThPointCountService.AddPoint(ref fireHydrantSysIn, ref pt1, ref pt2);
                 }
 
-                return lineList;
+                return tmpLines;
             }
         }
-        public List<Line> GetHydrantMainLine(Point3dCollection selectArea)
-        {
-            var fireHydrantSysIn = new FireHydrantSystemIn();//输入参数
-            List<Line> pipeLines = GetPipeLines(ref fireHydrantSysIn, selectArea);
-            pipeLines = PipeLineList.CleanLaneLines3(pipeLines);
-            return pipeLines;
-        }
-
         public void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines, List<BlockReference> valves, List<BlockReference> pipeMarks, Point3dCollection selectArea)
         {
             using (var acadDatabase = AcadDatabase.Active())

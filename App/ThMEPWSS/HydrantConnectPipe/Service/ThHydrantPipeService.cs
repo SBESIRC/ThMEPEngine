@@ -14,12 +14,40 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
 {
     public class ThHydrantPipeService
     {
+        public List<ThHydrantPipe> GetTCHFireHydrantPipeFromLayer(Point3dCollection selectArea)//从天正里面提取立管
+        {
+            using (var database = AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Use(database.Database))
+            {
+                var hydrantPipe = acadDb.ModelSpace.OfType<Entity>().Where(o => ThMEPEngineCore.Algorithm.ThMEPTCHService.IsTCHElement(o))
+                    .Where( c => IsLayer(c.Layer)).ToList();
+                var map = new Dictionary<Polyline, Circle>();
+                foreach (var pipe in hydrantPipe)
+                {
+                    DBObjectCollection objs = new DBObjectCollection();
+                    pipe.Explode(objs);
+                    foreach(var obj in objs)
+                    {
+                        if(obj is Circle)
+                        {
+                            var c = obj as Circle;
+                            map.Add(c.ToRectangle(),c);
+                        }
+                    }
+                }
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(map.Keys.ToCollection());
+                var dbObjects = spatialIndex.SelectCrossingPolygon(selectArea);
+                var rst = new List<ThHydrantPipe>();
+                dbObjects.Cast<Polyline>().ForEach(p => rst.Add(ThHydrantPipe.Create(map[p])));
+                return rst;
+            }
+        }
         public List<ThHydrantPipe> GetFireHydrantPipeFromLayer(Point3dCollection selectArea)//从层里面提取立管
         {
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
-                var hydrantPipe = acadDb.ModelSpace.OfType<Circle>().Where(o => o.Layer == "W-FRPT-HYDT-EQPM" || o.Layer == "W-FRPT-HYDT" || o.Layer == "W-FRPT-EXTG").ToList();
+                var hydrantPipe = acadDb.ModelSpace.OfType<Circle>().Where(o => IsLayer(o.Layer)).ToList();
                 var map = new Dictionary<Polyline, Circle>();
                 hydrantPipe.ForEach(o => map.Add(o.ToRectangle(),o));
 
@@ -51,9 +79,19 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         public List<ThHydrantPipe> GetFireHydrantPipe(Point3dCollection selectArea)
         {
             List<ThHydrantPipe> fireHydrantPipes = new List<ThHydrantPipe>();
+            fireHydrantPipes.AddRange(GetTCHFireHydrantPipeFromLayer(selectArea));
             fireHydrantPipes.AddRange(GetFireHydrantPipeFromLayer(selectArea));
             fireHydrantPipes.AddRange(GetFireHydrantPipeFromBR(selectArea));
             return fireHydrantPipes;
+        }
+
+        private bool IsLayer(string layer)
+        {
+            if(layer.ToUpper() == "W-FRPT-HYDT-EQPM" || layer.ToUpper() == "W-FRPT-HYDT" || layer.ToUpper() == "W-FRPT-EXTG")
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

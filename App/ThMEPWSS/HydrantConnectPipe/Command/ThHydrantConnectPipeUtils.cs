@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.HydrantConnectPipe.Model;
 
@@ -168,7 +169,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             Circle circle = new Circle(pt, new Vector3d(0, 0, 1), radius);
             return circle.ToRectangle();
         }
-
         public static List<Line> GetNearbyLine(Point3d pt,List<Line> lines,int N = 3)
         {
             List<Line> returnLines = new List<Line>();
@@ -184,12 +184,100 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             }
             return returnLines;
         }
-
         public static bool IsIntersect(Entity firstLine, Entity secLine)
         {
             var ptLst = new Point3dCollection();
             firstLine.IntersectWith(secLine, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
             if (ptLst.Count != 0)
+            {
+                return true;
+            }
+            return false;
+        }
+        public static List<Line> CleanLines(List<Line> lines)
+        {
+            if(lines.Count == 0)
+            {
+                return lines;
+            }
+            var mt = Matrix3d.Displacement(lines[0].GetMidpoint().GetVectorTo(Point3d.Origin));
+            lines.ForEach(o => o.TransformBy(mt));
+            var retLines = new List<Line>();
+            ThLaneLineCleanService cleanServiec = new ThLaneLineCleanService();
+            var allLineColles = cleanServiec.CleanNoding(lines.ToCollection());
+            foreach (var l in allLineColles)
+            {
+                var line = l as Line;
+                retLines.Add(line);
+            }
+            retLines.ForEach(o => o.TransformBy(mt.Inverse()));
+            return retLines;
+        }
+        public static List<Line> FindInlineLines(Point3d pt,ref List<Line> targetLines, double tolerance)//差点关联线
+        {
+            var retLines = new List<Line>();
+            var objectLine = FindLines(pt,ref targetLines,tolerance);
+            if(objectLine == null)
+            {
+                return retLines;
+            }
+            retLines = FindInlineLines(objectLine, ref targetLines, tolerance);
+            return retLines;
+        }
+        public static List<Line> FindInlineLines(Line objectLine, ref List<Line> targetLines, double tolerance)//差点关联线
+        {
+            var retLines = new List<Line>();
+            var findedLine = FindLines(objectLine, ref targetLines, tolerance);
+            foreach (var line in findedLine)
+            {
+                retLines.AddRange(FindInlineLines(line, ref targetLines, tolerance));
+            }
+            retLines.AddRange(findedLine);
+            return retLines;
+        }
+        public static Line FindLines(Point3d pt, ref List<Line> targetLines, double tolerance)
+        {
+            foreach (var l in targetLines)
+            {
+                if (l.StartPoint.DistanceTo(pt) < tolerance)
+                {
+                    targetLines.Remove(l);
+                    return l;
+                }
+                else if (l.EndPoint.DistanceTo(pt) < tolerance)
+                {
+                    targetLines.Remove(l);
+                    return l;
+                }
+            }
+            return null;
+        }
+        public static List<Line> FindLines(Line objectLine, ref List<Line> targetLines, double tolerance)
+        {
+            var retLines = new List<Line>();
+            var remLines = new List<Line>();
+            foreach(var line in targetLines)
+            {
+                if(IsInlineLine(objectLine,line, tolerance))
+                {
+                    retLines.Add(line);
+                    remLines.Add(line);
+                }
+            }
+            targetLines = targetLines.Except(remLines).ToList();
+            return retLines;
+        }
+        public static bool IsInlineLine(Line objectLine,Line targetLine, double tolerance)
+        {
+            var objectPt1 = objectLine.StartPoint;
+            var objectPt2 = objectLine.EndPoint;
+            var targetPt1 = targetLine.StartPoint;
+            var targetPt2 = targetLine.EndPoint;
+            if(targetLine.PointOnLine(objectPt1,false,tolerance) || targetLine.PointOnLine(objectPt2,false,tolerance))
+            {
+                return true;
+            }
+            else if(objectLine.PointOnLine(targetPt1, false, tolerance) || objectLine.PointOnLine(targetPt2, false, tolerance))
             {
                 return true;
             }

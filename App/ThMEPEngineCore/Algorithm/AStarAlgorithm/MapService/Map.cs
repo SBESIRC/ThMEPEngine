@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -79,6 +80,15 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
 
             ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjColl);
         }
+        /// <summary>
+        /// 主要是为了解决c类型的ployline做Buffer以后，变成了两根ployline
+        /// </summary>
+        /// <param name="_holes"></param>
+        public void SetObstacle2(List<Polyline> _holes)
+        {
+            var mPolygons = _holes.SelectMany(x => x.Buffer(avoidHoleDistance,true).Cast<MPolygon>()).ToList();
+            ObstacleSpatialIndex = new ThCADCoreNTSSpatialIndex(mPolygons.ToCollection());
+        }
         public void SetRoom(List<Line> _rooms)
         {
             rooms = _rooms;
@@ -92,11 +102,6 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.MapService
         public void SetStartAndEndInfo(Point3d _startPt)
         {
             this.startPt = mapHelper.SetStartAndEndInfo(_startPt, endInfo);
-            if(holes != null)
-            {
-                //InitObstacle();
-            }
-            
             if(rooms != null)
             {
                 InitRoom();

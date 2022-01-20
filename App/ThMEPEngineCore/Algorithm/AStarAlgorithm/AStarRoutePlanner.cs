@@ -47,6 +47,11 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
             //设置障碍物
             map.SetObstacle(holes);
         }
+        public void SetObstacle2(List<Polyline> holes)
+        {
+            //设置障碍物
+            map.SetObstacle2(holes);
+        }
         public void SetRoom(List<Line> holes)
         {
             map.SetRoom(holes);

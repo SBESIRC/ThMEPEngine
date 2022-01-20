@@ -409,10 +409,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             }
             lines = lines.OrderBy(o => o.DistanceToPoint(pt)).ToList();
             int lineCount = lines.Count;
-            //if(lines.Count > 10)
-            //{
-            //    lineCount = 10;
-            //}
+            if(lines.Count > 10)
+            {
+                lineCount = 10;
+            }
 
             var hydrantpaths = new List<Polyline>();
             for(int i = 0;i < lineCount; i++)
@@ -458,7 +458,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         }
         private Polyline HydrantPath(Point3d pt,Line line)
         {
-            if(line.Length < 1000.0)
+            if(line.Length < 100.0)
             {
                 return null;
             }
@@ -540,12 +540,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             aStarRoute.costGetter = costGetter;
             aStarRoute.PathAdjuster = pathAdjuster;
             //----设置障碍物
-            aStarRoute.SetObstacle(holes);
+            aStarRoute.SetObstacle2(holes);
             //----设置房间
             aStarRoute.SetRoom(rooms);
             //----计算路径
             var path = aStarRoute.Plan(startPt);
-
             return path;
         }
         private double PathCost(Polyline polyLine)
