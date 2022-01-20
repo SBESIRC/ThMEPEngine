@@ -90,7 +90,7 @@ namespace ThMEPElectrical.AFAS.Utils
             var transformer = new ThMEPOriginTransformer(center);
             return transformer;
         }
-        public static List<ThGeometry> GetDistLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThickness, bool needConverage)
+        public static List<ThGeometry> GetDistLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThickness, bool needConverage)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -125,7 +125,7 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
-        public static List<ThGeometry> GetFixLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList)
+        public static List<ThGeometry> GetFixLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -135,7 +135,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 var transformer = dataPass.Transformer;
 
                 ///////////处理原始建筑数据,已转回原位置附近////////
-                var localDataFactory = new ThAFASFixLayoutDataSetFactoryNew()
+                var localDataFactory = new ThAFASFixLayoutDataSetFactory()
                 {
                     InputExtractors = extractors,
                 };
@@ -157,7 +157,7 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
-        public static List<ThGeometry> GetAreaLayoutData2(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
+        public static List<ThGeometry> GetAreaLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -167,7 +167,7 @@ namespace ThMEPElectrical.AFAS.Utils
                 var transformer = dataPass.Transformer;
 
                 ///////////处理原始建筑数据,已转回原位置附近////////
-                var localDataFactory = new ThAFASAreaDataSetFactoryNew()
+                var localDataFactory = new ThAFASAreaDataSetFactory()
                 {
                     ReferBeam = referBeam,
                     WallThick = wallThick,

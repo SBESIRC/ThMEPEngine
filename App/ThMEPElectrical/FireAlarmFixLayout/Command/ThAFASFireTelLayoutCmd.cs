@@ -72,7 +72,7 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
 
                 //--------------提取数据
                 //var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
-                var geos = ThAFASUtils.GetFixLayoutData2(ThAFASDataPass.Instance, extractBlkList);
+                var geos = ThAFASUtils.GetFixLayoutData(ThAFASDataPass.Instance, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;

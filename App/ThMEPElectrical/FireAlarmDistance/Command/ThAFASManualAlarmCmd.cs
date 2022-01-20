@@ -76,7 +76,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 var wallThickness = 100;
                 var referBeam = false;
                 //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
                 if (geos.Count == 0)
                 {
                     return;

@@ -137,7 +137,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
-    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
     <Compile Include="FireAlarmArea\Command\ThAFASGasCmd.cs" />
@@ -154,7 +154,7 @@
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
     <Compile Include="AFAS\Utils\ThFaCleanService.cs" />
-    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Service\ThAFASFixUtil.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
