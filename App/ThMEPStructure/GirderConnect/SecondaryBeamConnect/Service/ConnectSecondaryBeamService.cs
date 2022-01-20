@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System;
@@ -53,16 +54,18 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
 
         public static ObjectIdList InsertEntity(List<Entity> ents)
         {
-            ObjectIdList objectIds = new ObjectIdList();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                foreach (var item in ents)
-                {
-                    var objId = acadDatabase.ModelSpace.Add(item);
-                    objectIds.Add(objId);
-                }
+                // 添加到图纸中
+                ents.ForEach(o => acadDatabase.ModelSpace.Add(o));
+
+                // 设置文字图层
+                var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+                ents.OfType<DBText>().ForEach(o => o.TextStyleId = textStyleId);
+
+                // 返回图元Id
+                return new ObjectIdList(ents.Select(o => o.ObjectId).ToArray());
             }
-            return objectIds;
         }
 
         public static void Erase(ObjectIdCollection objs)
