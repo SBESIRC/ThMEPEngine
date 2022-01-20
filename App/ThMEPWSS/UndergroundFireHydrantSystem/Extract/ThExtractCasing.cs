@@ -19,7 +19,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 var Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
-                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsValveBlock(o));
+                   .Where(o => IsHYDTPipeLayer(o.Layer) && IsTargetBlock(o));
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                 var dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
 
@@ -32,10 +32,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return layer.ToUpper() == "W-BUSH";
         }
 
-        private bool IsValveBlock(BlockReference blockReference)
+        private bool IsTargetBlock(BlockReference blockReference)
         {
-            var blkName = blockReference.GetEffectiveName().ToUpper();
-            return blkName.Contains("套管");
+            try
+            {
+                var blkName = blockReference.GetEffectiveName().ToUpper();
+                return blkName.Contains("套管");
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

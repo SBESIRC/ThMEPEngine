@@ -52,8 +52,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 {
                     ExplodeBlock(br, DBobjsResults);
                 }
-                else//天正对象
+                else if(IsTargetObject(db as Entity))//天正对象
                 {
+                    if((db as Entity).Layer == "W-FRPT-HYDT-PIPE")
+                    {
+                        continue;
+                    }
                     ExplodeTZBlock(db as Entity, DBobjsResults);
                 } 
             }
@@ -76,7 +80,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
         private static bool IsTargetLayer(string layer)//立管图层
         {
             return (layer.Contains("FRPT") && !layer.Contains("SPRL")) //包含FRPT且不包含SPRL
-                 ||(layer.Contains("HYDT")); //包含HYDT
+                 ||(layer.Contains("HYDT"))//包含HYDT
+                 ; //不包含消火栓横管图层
         }
         private static bool IsTargetObject(Entity ent)
         {
@@ -122,17 +127,40 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             if (ent is null) return;
             //炸天正块
             var objs = new DBObjectCollection();
-            ent.Explode(objs);//把块炸开
+            try
+            {
+                ent.Explode(objs);//把块炸开
+            }
+            catch
+            {
+                return;
+            }
+            //此处无法支持天正对象炸开后为空的情况
+            if(objs.Count == 0)
+            {
+                if(ent.GetRXClass().DxfName.ToUpper().Contains("TCH_PIPEFITTING"))
+                {
+                    var maxPt = ent.GeometricExtents.MaxPoint;
+                    var minPt = ent.GeometricExtents.MinPoint;
+                    if (maxPt.DistanceTo(minPt) < 1.0)//几何形状是一个点
+                    {
+                        var dbPt = new DBPoint(maxPt);
+                        DBobjsResults.Add(dbPt);
+                    }
+                    return;
+                }
+            }
             foreach (var obj in objs)//遍历
             {
                 if (obj is Circle circle)//圆
                 {
                     var dbPt = new DBPoint(circle.Center);
                     DBobjsResults.Add(dbPt);
+                    continue;
                 }
-                if (ent.GetType().Name.Equals("ImpEntity"))//天正对象
+                if (IsTargetObject(obj as Entity))//天正对象
                 {
-                    ExplodeTZBlock(obj as BlockReference, DBobjsResults);//炸
+                    ExplodeTZBlock(obj as Entity, DBobjsResults);//炸
                 }
             }
         }
@@ -168,7 +196,14 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             {
                 if (e is BlockReference br)
                 {
-                    return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                    try
+                    {
+                        return br.GetEffectiveName().ToUpper().Contains(blockName.ToUpper());
+                    }
+                    catch
+                    {
+                        return false;
+                    }
                 }
                 return false;
             };
