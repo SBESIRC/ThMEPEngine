@@ -13,7 +13,7 @@ namespace TianHua.Structure.WPF.UI
         {
         }
 
-        [CommandMethod("TIANHUACAD", "THCLUI", CommandFlags.Session)]
+        [CommandMethod("TIANHUACAD", "THCLSCUI", CommandFlags.Session)]
         public void THCLUI()
         {
             using (var cmd = new SecondaryBeamCmd())

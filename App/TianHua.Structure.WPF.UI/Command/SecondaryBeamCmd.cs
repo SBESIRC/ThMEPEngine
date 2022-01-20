@@ -16,7 +16,7 @@ namespace TianHua.Structure.WPF.UI.Command
         public SecondaryBeamCmd()
         {
             this.ActionName = "天华次梁UI";
-            this.CommandName = "THCLUI";
+            this.CommandName = "THCLSCUI";
         }
 
         public override void SubExecute()

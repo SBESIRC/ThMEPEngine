@@ -19,26 +19,30 @@
                         <Label>楼层选择</Label>
                     </GroupBox.Header>
                     <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
-                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"
-                            VerticalContentAlignment="Bottom" Margin="10,0,0,0">
+                        <RadioButton x:Name="BasementRoof" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"
+                            VerticalContentAlignment="Bottom" Margin="10,0,0,0" Checked="BasementRoof_Checked">
                             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="地下室顶板" ></Label>
                         </RadioButton>
-                        <CheckBox Margin="30,5,0,5" IsChecked="True">不剖分</CheckBox>
-                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
-                             VerticalContentAlignment="Bottom" Margin="10,0,0,0">
+                        <StackPanel Name="panel1">
+                            <CheckBox Margin="30,5,0,5" IsEnabled="False" IsChecked="True">不剖分</CheckBox>
+                        </StackPanel>
+                        <RadioButton Name="BasementMidboard" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                             VerticalContentAlignment="Bottom" Margin="10,0,0,0" Checked="BasementModboard_Checked">
                             <Label VerticalContentAlignment="Bottom" Padding="0" Focusable="False" Content="地下室中板" ></Label>
                         </RadioButton>
-                        <CheckBox Margin="30,5,0,5" IsChecked="True">最小双向板控制参数（m）</CheckBox>
-                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
-                            <Label FontFamily="Arial" Content="dmin"></Label>
-                            <TextBox x:Name="dminTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
-                            <Label FontFamily="Arial" Content="dmax"></Label>
-                            <TextBox x:Name="dmaxTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
-                        </StackPanel>
-                        <CheckBox Margin="30,5,0,5" IsChecked="True">最小单向板控制参数（m）</CheckBox>
-                        <StackPanel Orientation="Horizontal" Margin="35,0,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
-                            <Label FontFamily="Arial" Content="dmin"></Label>
-                            <TextBox x:Name="dmincTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                        <StackPanel Name="panel2">
+                            <CheckBox Margin="30,5,0,5" IsEnabled="False" IsChecked="True">最小双向板控制参数（m）</CheckBox>
+                            <StackPanel Orientation="Horizontal" Margin="35,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
+                                <Label FontFamily="Arial" Content="dmin"></Label>
+                                <TextBox x:Name="txtDa" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                                <Label FontFamily="Arial" Content="dmax"></Label>
+                                <TextBox x:Name="txtDb" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                            </StackPanel>
+                            <CheckBox Margin="30,5,0,5" IsEnabled="False" IsChecked="True">最小单向板控制参数（m）</CheckBox>
+                            <StackPanel Orientation="Horizontal" Margin="35,0,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
+                                <Label FontFamily="Arial" Content="dmin"></Label>
+                                <TextBox x:Name="txtDc" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
@@ -51,19 +55,19 @@
                         <Label>区域选择</Label>
                     </GroupBox.Header>
                     <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
-                        <RadioButton  VerticalAlignment="Center" Focusable="True"
+                        <RadioButton Name="SelectionRectangle" VerticalAlignment="Center" Focusable="True"
                             VerticalContentAlignment="Bottom" FocusManager.IsFocusScope="False" IsChecked="True" Margin="10,0,0,0">
                             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="矩形框选" ></Label>
                         </RadioButton>
-                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                        <RadioButton Name="SelectionPolygon" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
                             VerticalContentAlignment="Bottom" Margin="10,5,0,5">
                             <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="多边形框选" ></Label>
                         </RadioButton>
                     </StackPanel>
                 </GroupBox>
                 <StackPanel HorizontalAlignment="Center" Margin="0,45,0,0">
-                    <cus:ImageButton Margin="0,0,0,10" Content="恢复默认" Width="85" Height="24"></cus:ImageButton>
-                    <cus:ImageButton Content="确定" Width="85" Height="24"></cus:ImageButton>
+                    <cus:ImageButton Margin="0,0,0,10" Content="恢复默认" Width="85" Height="24" Click="ResetButton_Click"></cus:ImageButton>
+                    <cus:ImageButton Content="确定" Width="85" Height="24" Click="ConfirmButton_Click"></cus:ImageButton>
                 </StackPanel>
             </StackPanel>
         </Grid>
