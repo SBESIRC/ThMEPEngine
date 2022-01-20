@@ -4,8 +4,6 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp
@@ -13,15 +11,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
     public class LayoutToStructure
     {
         readonly double minWidth = 500;
-
+        readonly double minLayoutLineLength = 400.0;
         private Polyline _maxPolyline;
+        private List<Polyline> _innerPolylines;
         private double _maxDistanceToLine;
         private List<Line> _maxLines;
-        public LayoutToStructure(Polyline outMaxPline,double maxDisToLine) 
+        public LayoutToStructure(Polyline outMaxPline,List<Polyline> innerPolylines,double maxDisToLine) 
         {
             _maxPolyline = outMaxPline;
             _maxDistanceToLine = maxDisToLine;
             _maxLines = new List<Line>();
+            _innerPolylines = new List<Polyline>();
             if (null != outMaxPline)
             {
                 var polyline = _maxPolyline.DPSimplify(10);
@@ -33,6 +33,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         continue;
                     _maxLines.Add(new Line(sp, ep));
                 }
+            }
+            foreach (var item in innerPolylines) 
+            {
+                _innerPolylines.Add(item);
             }
         }
         public Dictionary<Point3d, Vector3d> GetLayoutStructPt(Point3d lineSp,Point3d lineEp, List<Polyline> columns, List<Polyline> walls, Vector3d sideDir, bool spCalc = true)
@@ -214,7 +218,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <returns></returns>
         public (Point3d, Vector3d)? GetColumnLayoutPoint(Polyline column, Point3d pt, Vector3d dir)
         {
-            var layoutLine = GetLayoutStructLine(column, pt, dir, out Point3d closetPt);
+            var layoutLine = GetLayoutStructLine(column, pt, dir, out Point3d closetPt,out Vector3d outDir);
             if (layoutLine == null)
             {
                 return null;
@@ -233,6 +237,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 layoutDir = -layoutDir;
             }
+            if (!CheckLayoutPointInMaxPolyline(layoutPt, outDir))
+                return null;
+            if (!CheckLayoutLineCanLayout(layoutPt, layoutLine, outDir, layoutDir))
+                return null;
             return (layoutPt, layoutDir);
         }
 
@@ -243,10 +251,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private Line GetLayoutStructLine(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        private Line GetLayoutStructLine(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt,out Vector3d outDir)
         {
             var closetPt = polyline.GetClosestPointTo(pt, false);
             layoutPt = closetPt;
+            outDir = new Vector3d();
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
             var lineOutDir = EmgPilotLampUtil.PolylineOutDir(polyline);
             Line layoutLine = null;
@@ -258,6 +267,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (Math.Abs(otherDir.DotProduct(xDir)) >= Math.Abs(dir.DotProduct(xDir)))
                     continue;
                 layoutLine = item.Key;
+                outDir = item.Value;
                 break;
             }
             return layoutLine;
@@ -378,6 +388,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var layoutPt= GetLineLayoutPoint(item.canLayoutLine, pt, lineSp);
                     if (!CheckLayoutPointInMaxPolyline(layoutPt.Value, item.sideDirection))
                         continue;
+                    if (!CheckLayoutLineCanLayout(layoutPt.Value, item.canLayoutLine, item.sideDirection, item.layoutDirection))
+                        continue;
                     var prjToLine = EmgPilotLampUtil.PointToLine(layoutPt.Value, lineSp, lineDir);
                     var vectorPt = prjToLine - layoutPt.Value;
                     if (vectorPt.DotProduct(item.sideDirection) <0.1)
@@ -411,6 +423,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     var layoutPt = GetLineLayoutPoint(item.canLayoutLine, pt, lineSp);
                     if (!CheckLayoutPointInMaxPolyline(layoutPt.Value, item.sideDirection))
+                        continue;
+                    if (!CheckLayoutLineCanLayout(layoutPt.Value, item.canLayoutLine, item.sideDirection, item.layoutDirection))
                         continue;
                     var prjToLine = EmgPilotLampUtil.PointToLine(layoutPt.Value, lineSp, lineDir);
                     var vectorPt = prjToLine - layoutPt.Value;
@@ -552,6 +566,38 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 return true;
             var checkPoint = layoutPoint + outVector.MultiplyBy(outEx);
             return _maxPolyline.Contains(checkPoint);
+        }
+        bool CheckLayoutLineCanLayout(Point3d layoutPoint,Line layoutLine, Vector3d outVector,Vector3d lightDir,double outEx = 100) 
+        {
+            double lineLength = layoutLine.Length;
+            if (lineLength < minLayoutLineLength && Math.Abs(lineLength - minLayoutLineLength) > 10)
+                return false;
+            var sp = layoutPoint + lightDir.MultiplyBy(minLayoutLineLength / 2);
+            var ep = layoutPoint - lightDir.MultiplyBy(minLayoutLineLength/2);
+            var maxInnerLines = _maxPolyline.Trim(new Line(sp, ep)).OfType<Curve>();
+            var moveSp = sp + outVector.MultiplyBy(outEx);
+            var moveEp = ep + outVector.MultiplyBy(outEx);
+            //进一步偏移看看是否在轮廓内
+            if (maxInnerLines.Count() < 1)
+                maxInnerLines = _maxPolyline.Trim(new Line(moveSp, moveEp)).OfType<Curve>();
+            if (maxInnerLines.Count() < 1)
+                return false;
+            var length = maxInnerLines.First().GetLength();
+            if (length < minLayoutLineLength && Math.Abs(length - minLayoutLineLength) > 10)
+                return false; 
+            foreach (var item in _innerPolylines) 
+            {
+                maxInnerLines = item.Trim(new Line(moveSp, moveEp),true).OfType<Curve>();
+                //进一步偏移看看是否在内轮廓外
+                if (maxInnerLines.Count() < 1)
+                    maxInnerLines = item.Trim(new Line(moveSp, moveEp),true).OfType<Curve>();
+                if (maxInnerLines.Count() < 1)
+                    return false;
+                length = maxInnerLines.First().GetLength();
+                if (length < minLayoutLineLength && Math.Abs(length - minLayoutLineLength) > 10)
+                    return false;
+            }
+            return true;
         }
     }
     class LineLayout

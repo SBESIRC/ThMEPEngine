@@ -91,7 +91,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     indicator.allNodeRoutes.AddRange(lampLineNode.cacheNodeRoutes);
                     mainLines.ForEach(c => indicator.mainLines.Add(c));
                     assitHostLines.ForEach(c => indicator.assistHostLines.Add(c));
-                    EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,columns, walls, indicator);
+                    EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,pline.Value,columns, walls, indicator);
                     var res = emgLampIndicator.CalcLayout(this._isHostFirst);
 
                     //计算车道线中间的吊装云线表达
