@@ -99,24 +99,26 @@ namespace ThMEPHVAC.FanConnect.Command
                     foreach (var obj in result.Value.GetObjectIds())
                     {
                         var entity = acadDb.Element<Entity>(obj);
-                        if (entity is BlockReference)
+                        if (entity is BlockReference blk)
                         {
-                            var blk = entity as BlockReference;
+                            var blkName = blk.GetEffectiveName();
                             if (sysType == 0)//水系统
                             {
-                                if (blk.GetEffectiveName() == "AI-FCU(两管制)" || blk.GetEffectiveName() == "AI-FCU(四管制)"
-                                    || blk.GetEffectiveName() == "AI-吊顶式空调箱")
+                                if (blkName == "AI-FCU(两管制)" || 
+                                    blkName == "AI-FCU(四管制)" || 
+                                    blkName == "AI-吊顶式空调箱")
                                 {
                                     retModeles.Add(GetFanFromBlockReference(blk));
                                 }
-                                else if (blk.GetEffectiveName() == "AI-水管断线")
+                                else if (blkName == "AI-水管断线")
                                 {
                                     retModeles.Add(GetFanFromBlockReference(blk));
                                 }
                             }
                             else if (sysType == 1)//冷媒系统
                             {
-                                if (blk.GetEffectiveName() == "AI-中静压VRF室内机(风管机)" || blk.GetEffectiveName() == "AI-VRF室内机(四面出风型)")
+                                if (blkName == "AI-中静压VRF室内机(风管机)" || 
+                                    blkName == "AI-VRF室内机(四面出风型)")
                                 {
                                     retModeles.Add(GetFanFromBlockReference(blk));
                                 }
