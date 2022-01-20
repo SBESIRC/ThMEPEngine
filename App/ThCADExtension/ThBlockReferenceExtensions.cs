@@ -153,6 +153,21 @@ namespace ThCADExtension
             }
         }
 
+        public static bool IsRegular(this BlockReference br)
+        {
+            // https://spiderinnet1.typepad.com/blog/2012/06/autocad-net-iterate-through-only-regular-blocks.html
+            using (var acadDatabase = AcadDatabase.Use(br.Database))
+            {
+                var btRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
+                return !btRecord.IsLayout &&
+                    !btRecord.IsDependent &&
+                    !btRecord.IsDynamicBlock &&
+                    !btRecord.IsAnonymous &&
+                    !btRecord.IsFromExternalReference &&
+                    !btRecord.IsFromOverlayReference;
+            }
+        }
+
         // mimic the Burst command
         //  https://adndevblog.typepad.com/autocad/2015/06/programmatically-mimic-the-burst-command.html
         public static void Burst(this BlockReference blockReference, DBObjectCollection blockEntities)
