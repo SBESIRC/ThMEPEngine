@@ -6,8 +6,8 @@
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
                     xmlns:converters="clr-namespace:TianHua.Electrical.UI.CapitalConverter"
                     SizeToContent="WidthAndHeight" mc:Ignorable="d" ResizeMode="NoResize" Title="天华提资转换"
-                    Width="150" Height="260" HorizontalContentAlignment="Left" 
-                    MinWidth="150" MinHeight="260" MaxHeight="300" MaxWidth="200" >
+                    Width="192" Height="260" HorizontalContentAlignment="Left" 
+                    MinWidth="192" MinHeight="260" MaxHeight="300" MaxWidth="200" >
     <Window.Resources>
         <ResourceDictionary>
             <converters:CapitalOpsBooleanConverter x:Key="CapitalOpsConverter"/>
@@ -16,12 +16,13 @@
             </Style>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
+    <Grid Margin="4"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
         <Grid.RowDefinitions>
             <RowDefinition Height="2*"/>
             <RowDefinition Height="3*"/>
             <RowDefinition Height="1*"/>
-            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="1*"/>
+            <RowDefinition Height="0.9*"/>
         </Grid.RowDefinitions>
         <Border Grid.Row="0" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
             <StackPanel >
@@ -44,15 +45,23 @@
                 Converter={StaticResource CapitalOpsConverter},ConverterParameter=2}"></RadioButton>
             </StackPanel>
         </Border>
-        <Border Grid.Row="2" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+        <Border Grid.Row="2" Margin="0,3" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
             <StackPanel Orientation="Horizontal">
-                <Label Content="图块比例" Height="24"></Label>
-                <ComboBox Margin="5,0" Name="cbBlkScale" Width="60" Height="20"
+                <Label Content="负载标注样式" Height="24"></Label>
+                <ComboBox Margin="5,0" Name="cbBlkFrame" Width="92" Height="20" HorizontalAlignment = "Right"
+                      ItemsSource="{Binding BlkFrames,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                      Text="{Binding BlkFrame,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
+            </StackPanel>
+        </Border>
+        <Border Grid.Row="3" Margin="0,3" Background="White" BorderBrush="Black" BorderThickness="1,1,1,1" CornerRadius="3">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="图块比例    " Height="24"></Label>
+                <ComboBox Margin="5,0" Name="cbBlkScale" Width="92" Height="20" HorizontalAlignment = "Right"
                       ItemsSource="{Binding BlkScales,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                       Text="{Binding BlkScale,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></ComboBox>
             </StackPanel>
         </Border>
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="4" Margin="0,3" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="btnUpdateCompare" Content="更新比对" Width="60" Height="20" Margin="0,0" 
                     Visibility="Hidden" IsEnabled="False" Click="btnUpdateCompare_Click"></Button>
             <Button x:Name="btnCapitalConvert" Content="提资转换" Width="60" Height="20" Margin="5,0" 

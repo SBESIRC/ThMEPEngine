@@ -24,6 +24,7 @@
         public static readonly string PROPERTY_VARIABLE_FREQUENCY = "变频";
         public static readonly string PROPERTY_DUAL_FREQUENCY = "双频";
         public static readonly string PROPERTY_ALL_FREQUENCY = "变频、双速或定频";
+        public static readonly string PROPERTY_LOAD_FILP = "翻转状态1";
 
         public static readonly string PROPERTY_VALUE_FIRE_POWER = "消防电源";
         public static readonly string PROPERTY_VALUE_NON_FIRE_POWER = "非消防电源";
