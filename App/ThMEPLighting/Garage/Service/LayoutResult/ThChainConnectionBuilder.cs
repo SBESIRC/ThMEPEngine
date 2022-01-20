@@ -59,8 +59,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // *** 收集创建的线
             Wires = Wires.Union(linkWires);
             Wires = Wires.Union(jumpWires);
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = MergeWire(Wires);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
         }
 
         private void BuildDoubleRow()

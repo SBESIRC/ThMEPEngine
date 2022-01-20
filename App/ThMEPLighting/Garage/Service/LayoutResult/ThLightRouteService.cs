@@ -40,6 +40,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 Traverse(o, o.StartPoint);
                 Traverse(o, o.EndPoint);
+                if(IsTraverseLightMidPoint)
+                {
+                    Traverse(o, o.GetMidPt());
+                }
             });
         }
         private void Traverse(Line link,Point3d port)
@@ -70,7 +74,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }
                 return;
             }
-            if (wires.OfType<Curve>().Where(o=> wires.Contains(o)).Any())
+            if (routes.OfType<Curve>().Where(o=> wires.Contains(o)).Any())
             {
                 return;  // 路径产生自交
             }
@@ -170,13 +174,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Target = target;
             Wires = wires;
         }
-        public static ThLightLink Create(ThLinkEntity source, ThLinkEntity target, List<Curve> wires)
-        {
-            return new ThLightLink(source, target, wires);
-        }
-        /// <summary>
-        /// 连线的长度
-        /// </summary>
         public double Length
         {
             get
@@ -184,21 +181,61 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return Sum();
             }
         }
+        /// <summary>
+        /// 连线的长度
+        /// </summary>
         private double Sum()
         {
             var length = 0.0;
-            foreach(Curve wire in Wires)
+            foreach (Curve wire in Wires)
             {
-                if(wire is Line line)
+                if (wire is Line line)
                 {
                     length += line.Length;
                 }
-                else if(wire is Arc arc)
+                else if (wire is Arc arc)
                 {
                     length += arc.Length;
                 }
             }
             return length;
+        }
+        private bool IsSamePath(List<Curve> firstCurves, List<Curve> secondCurves)
+        {
+            if (firstCurves.Count == secondCurves.Count)
+            {
+                int i = 0, j = 0;
+                int count = firstCurves.Count;
+                for (; i < count; i++)
+                {
+                    if (secondCurves.IndexOf(firstCurves[i]) != i)
+                    {
+                        break;
+                    }
+                }
+                for (; j < count; j++)
+                {
+                    if (secondCurves.IndexOf(firstCurves[j]) != (count - j - 1))
+                    {
+                        break;
+                    }
+                }
+                return i == count || j == count;
+            }
+            return false;
+        }
+        public bool IsEqual(ThLightLink other)
+        {
+            if((this.Source.IsEqual(other.Source) && this.Target.IsEqual(other.Target)) ||
+                (this.Source.IsEqual(other.Target) && this.Target.IsEqual(other.Source)))
+            {
+                return IsSamePath(this.Wires, other.Wires);
+            }
+            return false;
+        }
+        public static ThLightLink Create(ThLinkEntity source, ThLinkEntity target, List<Curve> wires)
+        {
+            return new ThLightLink(source, target, wires);
         }
     }
     class ThLinkEntity
@@ -211,6 +248,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Id = id;
             Light = light;
             LinkPt = linkPt;
+        }
+        public bool IsEqual(ThLinkEntity other)
+        {
+            return this.Id == other.Id;
         }
         public static ThLinkEntity Create(string id, Entity light, Point3d linkPt)
         {
