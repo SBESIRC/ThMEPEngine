@@ -59,7 +59,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                 // 添加到图纸中
                 ents.ForEach(o => acadDatabase.ModelSpace.Add(o));
 
-                // 设置文字图层
+                // 设置文字样式
                 var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                 ents.OfType<DBText>().ForEach(o => o.TextStyleId = textStyleId);
 
