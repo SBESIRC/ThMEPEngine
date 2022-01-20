@@ -140,6 +140,7 @@ namespace ThMEPLighting.FEI
             }
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
+            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).OfType<Curve>().ToList()).ToList();
             return sprayLines;
         }
 

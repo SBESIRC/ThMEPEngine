@@ -48,7 +48,12 @@ namespace ThMEPWSS.Command
                 Active.Editor.WriteMessage(ex.Message);
             }
         }
-
+        private void ReclaimMemory()
+        {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.WaitForFullGCComplete();
+        }
         public override void AfterExecute()
         {
             base.AfterExecute();
@@ -130,6 +135,11 @@ namespace ThMEPWSS.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var selectArea = Common.Utils.SelectAreas();//生成候选区域
+                var markEngine = new ThExtractPipeMark();//提取消火栓环管标记
+
+                var mark = markEngine.Extract(acadDatabase.Database, selectArea);
+                ;
             }
         }
     }

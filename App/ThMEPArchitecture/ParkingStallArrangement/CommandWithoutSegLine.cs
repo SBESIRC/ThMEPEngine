@@ -161,7 +161,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var histories = new List<Chromosome>();
             try
             {
-                rst = geneAlgorithm.Run(histories, false);
+                rst = geneAlgorithm.Run2(histories, false);
             }
             catch
             {
@@ -169,7 +169,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             
             string autoCarSpotLayer = $"AI-停车位{index}";
             string autoColumnLayer = $"AI-柱子{index}";
-
+            
             var solution = rst.First();
             histories.Add(rst.First());
             for (int k = 0; k < histories.Count; k++)
@@ -182,6 +182,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     {
                         var partitionpro = new ParkingPartitionPro();
                         ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        if (!partitionpro.Validate()) continue;
                         try
                         {
                             partitionpro.ProcessAndDisplay(autoCarSpotLayer, autoColumnLayer);
@@ -195,7 +196,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
 
             layoutPara.Set(solution.Genome);
-            Draw.DrawSeg(solution);
+
+            string finalSplitterLayerName = $"AI-最终分割线{index}";
+            Draw.DrawSeg(solution, finalSplitterLayerName);
             //layoutPara.Dispose();
         }
     }

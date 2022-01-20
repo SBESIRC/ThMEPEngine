@@ -45,7 +45,6 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
         }
 
         
-
         public static double GetLinesDist(this Line l1, Line l2)
         {
             var dist1 = l1.StartPoint.DistanceTo(l2.StartPoint);
@@ -63,7 +62,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
             return Math.Min(dist1, dist2);
         }
 
-        public static bool GetNearestPt(this Point3dEx pt, ref Point3dEx tpt, List<Point3dEx> pts, double tolerance = 150)
+        public static bool GetNearestPt(this Point3dEx pt, ref Point3dEx tpt, List<Point3dEx> pts, double tolerance = 250)
         {
             foreach (var p in pts)
             {

@@ -79,7 +79,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 //--------------提取数据
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
                 //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
+                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
                 if (geos.Count == 0)
                 {
                     return;

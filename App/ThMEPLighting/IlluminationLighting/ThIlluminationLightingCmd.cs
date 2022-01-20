@@ -122,7 +122,7 @@ namespace ThMEPLighting.IlluminationLighting
 
                 //--------------提取数据
                 //var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false);
-                var geos = ThAFASUtils.GetAreaLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false);
+                var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false);
                 if (geos.Count == 0)
                 {
                     return;

@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Linq2Acad;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Algorithm.Distance;
 using NetTopologySuite.Algorithm.Locate;
@@ -180,6 +181,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 Positions.Add(p);
             innerPointCount = innerPoints.Count;
 
+            
+
             //计算每个点的覆盖区域
             CalDetectArea();
             //CalResponsibleArea();
@@ -200,25 +203,25 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             ConvertBlind();
         }
 
-        //判断是地上图纸还是地下图纸
-        private bool CheckUpOrUnder()
-        {
-            double AverageLayoutArea = layouts.Sum(o => o.Area) / layouts.Count;//可布置区域平均面积
+        ////判断是地上图纸还是地下图纸
+        //private bool CheckUpOrUnder()
+        //{
+        //    double AverageLayoutArea = layouts.Sum(o => o.Area) / layouts.Count;//可布置区域平均面积
 
-            int squareNum = 0;
-            foreach (var layout in layouts)
-            {
-                var MinRect = layout.Shell.ToDbPolyline().OBB();
-                double length = MinRect.GetLineSegmentAt(0).Length;
-                double width = MinRect.GetLineSegmentAt(1).Length;
-                var l_w = Math.Abs(length / width);
-                if (l_w > 0.5 && l_w < 2)
-                    squareNum++;
-            }
-            double SquareProportion = 1.0 * squareNum / layouts.Count;
+        //    int squareNum = 0;
+        //    foreach (var layout in layouts)
+        //    {
+        //        var MinRect = layout.Shell.ToDbPolyline().OBB();
+        //        double length = MinRect.GetLineSegmentAt(0).Length;
+        //        double width = MinRect.GetLineSegmentAt(1).Length;
+        //        var l_w = Math.Abs(length / width);
+        //        if (l_w > 0.5 && l_w < 2)
+        //            squareNum++;
+        //    }
+        //    double SquareProportion = 1.0 * squareNum / layouts.Count;
 
-            return (AverageLayoutArea > 1e7 && SquareProportion > 0.5 && layouts.Count > 5 && columnCenters.Count > 10);
-        }
+        //    return (AverageLayoutArea > 1e7 && SquareProportion > 0.5 && layouts.Count > 5 && columnCenters.Count > 10);
+        //}
 
         //计算探测范围
         public void CalDetectArea()
@@ -262,8 +265,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
         //加点
         public void AddPoints()
         {
+            int i = 0;
             while (blind.Area > 100)
             {
+                var lastBlindArea = blind.Area;
                 //先处理掉非polygon的元素
                 if (blind is GeometryCollection geom)
                 {
@@ -281,6 +286,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 //一次只处理一个polygon
                 if (!blind.IsEmpty)
                     RemoveBlind(blind);
+                if (Math.Abs(blind.Area - lastBlindArea) < 1)
+                    break;
             }
         }
         //删点
@@ -433,30 +440,10 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 this.blind = this.blind.Difference(targetToMove);
                 return;
             }
-            ////能够探测到中心点的可布置区域
-            //var target_layouts = OverlayNGRobust.Overlay(vis,
-            //    ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygon_layouts.ToArray()), SpatialFunction.Intersection);
+
             //初始化目标点
             var target = new Coordinate(center.X + Radius, center.Y + Radius);
-            ////距离盲区中心最近的四条线
-            //var nearlines = lines.OrderBy(o => o.Distance(center)).Take(lines.Count > 4 ? 4 : lines.Count).ToList();
-            //var targetPoints = new List<Coordinate>();
-            //foreach(var line in nearlines)
-            //{
-            //    var geo=OverlayNGRobust.Overlay(target_layouts, line.ToDbLine().ToNTSLineString(), SpatialFunction.Intersection);
-            //    if(geo is MultiLineString)
-            //    {
-            //        foreach(LineString line1 in geo as MultiLineString)
-            //            targetPoints.Add(new Coordinate((line1[0].X + line1[1].X)/2, (line1[0].Y + line1[1].Y)/2));
-            //    }
-            //    else if(geo is LineString ls)
-            //    {
-            //        if(ls.Count>0)
-            //            targetPoints.Add(new Coordinate((ls[0].X + ls[1].X)/2, (ls[0].Y + ls[1].Y)/2));
-            //    }
-            //}
-            //if (targetPoints.Count > 0)
-            //    target = targetPoints.OrderBy(o => o.Distance(center)).First();
+
             if (target.Distance(center) > Radius)
             {
                 //优先找可布置区域的中心点

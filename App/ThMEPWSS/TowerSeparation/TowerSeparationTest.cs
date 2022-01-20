@@ -49,6 +49,7 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 dataQuery.ClassifyData();
                 var TowerExtractor = new TowerExtractor();
 
+                //DrawUtils.ShowGeometry(dataQuery.ShearWallList, "testForPolyline", 2);
                 var shearWalls = TowerExtractor.Extractor(dataQuery.ShearWallList, frame);
                 DrawUtils.ShowGeometry(shearWalls, "testForExtractor", 1);
 

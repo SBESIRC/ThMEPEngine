@@ -1,52 +1,32 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
-using ThMEPEngineCore.Extension;
-using ThMEPEngineCore.Data;
-using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
-using ThMEPElectrical.AFAS.Service;
-using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Utils;
-using ThMEPElectrical.AFAS.Interface;
-
+using ThMEPEngineCore;
 
 namespace ThMEPElectrical.AFAS.Data
 {
-    public class ThAFASDataSetFactory : ThMEPDataSetFactory
+    public class ThAFASDataSetFactory
     {
-        public bool NeedConverage { get; set; } = true;
-        public bool NeedDetective { get; set; } = false;
-        public bool ReferBeam { get; set; } = true;
-        public double WallThick { get; set; } = 100;
-        public List<string> BlkNameList { get; set; } = new List<string>();
-        private List<ThGeometry> Geos { get; set; }
-
         public ThAFASDataSetFactory()
+        { }
+        private ThMEPOriginTransformer Transformer { get; set; }
+        public List<ThExtractorBase> Extractors { get; set; }
+        public void SetTransformer(ThMEPOriginTransformer transformer)
         {
-            Geos = new List<ThGeometry>();
+            Transformer = transformer;
         }
-        protected override ThMEPDataSet BuildDataSet()
-        {
-            return new ThMEPDataSet()
-            {
-                Container = Geos,
-            };
-        }
-
-        protected override void GetElements(Database database, Point3dCollection collection)
+        public void GetElements(Database database, Point3dCollection collection)
         {
             // ArchitectureWall、Shearwall、Column、Room、Hole
-            UpdateTransformer(collection);
+           
             var vm = Extract(database); // visitor manager,提取的是原始数据
             vm.MoveToOrigin(Transformer); // 移动到原点
 
@@ -72,9 +52,8 @@ namespace ThMEPElectrical.AFAS.Data
             fireApartExtractor.Group(storeyExtractor.StoreyIds); //判断防火分区属于哪个楼层框线
             fireApartExtractor.BuildFireAPartIds(); //创建防火分区编号
 
-
-            var extractors = new List<ThExtractorBase>()
-                {
+            Extractors = new List<ThExtractorBase>()
+            {
                     new ThAFASArchitectureWallExtractor()
                     {
                         ElementLayer = "AI-墙",
@@ -105,7 +84,7 @@ namespace ThMEPElectrical.AFAS.Data
                     {
                         UseDb3Engine=true,
                         Transformer = Transformer,
-                    },          
+                    },
                     new ThAFASBeamExtractor()
                     {
                         ElementLayer = "AI-梁",
@@ -134,116 +113,29 @@ namespace ThMEPElectrical.AFAS.Data
                         ElementLayer = "AI-洞",
                         Transformer = Transformer,
                     },
-                      new ThFireAlarmBlkExtractor()
+                    new ThAFASCenterLineExtractor()
                     {
-                        Transformer = Transformer ,
-                        BlkNameList = this.BlkNameList, //add needed all blk name string 
-                    },
-
+                        Transformer = Transformer,
+                        ElementLayer=ThMEPEngineCoreLayerUtils.LANECENTERLINE,
+                    }
             };
-            extractors.ForEach(o => o.Extract(database, collection));
 
-            //把楼层信息传入到提取器中，对于不在防火分区内的图形要判断在哪个楼层
-            extractors.ForEach(o =>
-            {
-                if (o is ISetStorey iStorey)
-                {
-                    iStorey.Set(storeyInfos);
-                }
-            });
+            Extractors.ForEach(o => o.Extract(database, collection));
 
-            //将房间外扩的区域得到的差集作为墙传入到建筑墙中(?fix 独有)
-            var selfBuildWalls = BuildWalls(extractors);
-            var architectureWallExtractor = extractors.Where(
-                o => o is ThAFASArchitectureWallExtractor).First()
-                as ThAFASArchitectureWallExtractor;
-            architectureWallExtractor.Walls.AddRange(selfBuildWalls);
+            Extractors.Add(storeyExtractor);
+            Extractors.Add(fireApartExtractor);
 
-            // 用防火分区对房间进行分割，保留在防火分区内的房间 （dist 独有
-            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
-            var splitRooms = roomExtractor.SplitByFrames(fireApartExtractor.FireCompartments);
-            roomExtractor.UpdateRooms(splitRooms);
-
-            //用防火分区对墙、柱...分组,不能放到前面，fix有添加墙体
-            extractors.ForEach(o =>
-            {
-                if (o is IGroup group)
-                {
-                    group.Group(fireApartExtractor.FireApartIds);
-                }
-            });
-
-            //找到防火门、防火卷帘邻接的防火分区
-            var faDoorExtractor = extractors.Where(o => o is ThAFASDoorOpeningExtractor).First() as ThAFASDoorOpeningExtractor;
-            faDoorExtractor.SetTags(fireApartExtractor.FireApartIds);
-            var fireProofShutter = extractors.Where(o => o is ThAFASFireProofShutterExtractor).First() as ThAFASFireProofShutterExtractor;
-            fireProofShutter.SetTags(fireApartExtractor.FireApartIds);
-
-            // 把房间传给门提取器            
-            faDoorExtractor.SetRooms(roomExtractor.Rooms);
-
-            //把洞传给门提取器
-            var holeExtractor = extractors.Where(o => o is ThAFASHoleExtractor).First() as ThAFASHoleExtractor;
-            faDoorExtractor.SetHoles(holeExtractor.HoleDic.Keys.ToList());
-
-            //提取可布区域
-            if (NeedConverage == true)
-            {
-                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam);
-                placeConverage.Set(storeyInfos);
-                placeConverage.Group(fireApartExtractor.FireApartIds);
-                extractors.Add(placeConverage);
-            }
-
-            //提取探测区域
-            if (NeedDetective == true)
-            {
-                var detectiveConverage = BuildDetectionRegion(extractors, WallThick);
-                extractors.Add(detectiveConverage);
-            }
-
-            //收集数据
-            //最后将楼层框线和防火分区提取器加入，生成Geometries
-            extractors.Add(storeyExtractor);
-            extractors.Add(fireApartExtractor);
-            extractors.ForEach(o => Geos.AddRange(o.BuildGeometries()));
-
-            // 移回原位
-            extractors.ForEach(o =>
+            //////移回原位，保留，之后不是所有的extractor会被选。必须回原位
+            Extractors.ForEach(o =>
             {
                 if (o is ITransformer iTransformer)
                 {
                     iTransformer.Reset();
                 }
             });
-
-            Geos.ProjectOntoXYPlane();
         }
 
-        private ThAFASDetectionRegionExtractor BuildDetectionRegion(List<ThExtractorBase> extractors, double wallThick)
-        {
-            var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
-            var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
-            var columnExtract = extractors.Where(x => x is ThAFASColumnExtractor).FirstOrDefault() as ThAFASColumnExtractor;
-            var beamExtract = extractors.Where(x => x is ThAFASBeamExtractor).FirstOrDefault() as ThAFASBeamExtractor;
-            var holeExtract = extractors.Where(x => x is ThAFASHoleExtractor).FirstOrDefault() as ThAFASHoleExtractor;
-
-            var detectionRegionExtract = new ThAFASDetectionRegionExtractor()
-            {
-                Rooms = roomExtract.Rooms,
-                Walls = wallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList(),
-                Columns = columnExtract.Columns.Select(x => ThIfcColumn.Create(x)).ToList(),
-                Beams = beamExtract.Beams,
-                Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
-                WallThickness = wallThick,
-                Transformer = Transformer,
-            };
-
-            detectionRegionExtract.Extract(null, new Point3dCollection());
-
-            return detectionRegionExtract;
-        }
-
+       
 
         private ThBuildingElementVisitorManager Extract(Database database)
         {
@@ -262,27 +154,6 @@ namespace ThMEPElectrical.AFAS.Data
             extractor.Accept(visitors.DB3DoorStoneVisitor);
             extractor.Extract(database);
             return visitors;
-        }
-        private List<Entity> BuildWalls(List<ThExtractorBase> extractors)
-        {
-            var roomExtractor = extractors.Where(o => o is ThAFASRoomExtractor).First() as ThAFASRoomExtractor;
-            var handleBufferService = new ThHandleRoomBufferService(roomExtractor.GetEntities());
-            extractors.ForEach(o =>
-            {
-                if (o is ThAFASArchitectureWallExtractor ||
-                o is ThAFASShearWallExtractor ||
-                o is ThAFASColumnExtractor ||
-                o is ThAFASWindowExtractor ||
-                o is ThAFASDoorOpeningExtractor ||
-                o is ThAFASBeamExtractor ||
-                o is ThAFASRailingExtractor ||
-                o is ThAFASFireProofShutterExtractor)
-                {
-                    handleBufferService.Add(o.GetEntities());
-                }
-            });
-            handleBufferService.Handle();
-            return handleBufferService.Walls;
         }
     }
 }

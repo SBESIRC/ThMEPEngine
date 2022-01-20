@@ -163,7 +163,7 @@ namespace ThMEPWSS.WaterSupplyPipeSystem.model
             };
             acadDatabase.CurrentSpace.Add(PipePolyLine);
 
-            var text1 = ThText.PipeText(ptPipeNumLs[0], PipeNumber);
+            var text1 = ThText.PipeText(ptPipeNumLs[0].OffsetY(50), PipeNumber);
             acadDatabase.CurrentSpace.Add(text1);
 
             if (i < 0)

@@ -83,13 +83,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void Run(AcadDatabase acadDatabase)
         {
-            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger);
+            var isDirectlyArrange = true;
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange);
             if (!dataprocessingFlag) return;
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 
             var rst = geneAlgorithm.Run();
 
-            layoutPara.Set(rst);      
+            layoutPara.DirectlyArrangementSetParameter(rst);      
             int count = 0;
             for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
             {
@@ -98,6 +99,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
                     try
                     {
                         count += partitionpro.ProcessAndDisplay();

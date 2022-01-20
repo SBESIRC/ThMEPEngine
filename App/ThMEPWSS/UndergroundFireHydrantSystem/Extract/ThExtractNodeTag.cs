@@ -25,7 +25,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     Results = acadDatabase
                    .ModelSpace
                    .OfType<BlockReference>()
-                   .Where(o => IsNode(o.GetEffectiveName()));
+                   .Where(o => IsTargetBlock(o));
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
                     DBobj = spatialIndex.SelectCrossingPolygon(polygon);
 
@@ -38,10 +38,18 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             }
         }
 
-        private bool IsNode(string node)
+        private bool IsTargetBlock(BlockReference block)
         {
-            return node.ToUpper() == "消火栓环管节点标记" ||
-                   node.ToUpper() == "消火栓环管节点标记-2";
+            try
+            {
+                var blockName = block.GetEffectiveName();
+                return blockName == "消火栓环管节点标记" ||
+                       blockName == "消火栓环管节点标记-2";
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public void GetPointList(ref FireHydrantSystemIn fireHydrantSysIn)

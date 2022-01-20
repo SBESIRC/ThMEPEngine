@@ -3,11 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
@@ -17,13 +14,14 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private double _wallLightMergeAngle = 45;
         private IndicatorLight _targetInfo;
         private Polyline _maxPolyline;
+        private List<Polyline> _innerPolylines;
         private double _lineSideSpaceExt = 6000;
         private List<Polyline> _targetColums;
         private double _minDisToLight = 2500;
         private List<Polyline> _targetWalls;
         private double _lightSpace = 10000;//灯具最大间距
         //壁装的在线的那一侧
-        public EmgWallLight(Polyline outPolyline,IndicatorLight targetInfo, List<Polyline> columns, List<Polyline> walls, double lineMergAngle,double maxSpace) 
+        public EmgWallLight(Polyline outPolyline,List<Polyline> innerPolylines,IndicatorLight targetInfo, List<Polyline> columns, List<Polyline> walls, double lineMergAngle,double maxSpace) 
         {
             _lightSpace = maxSpace;
             _targetInfo = targetInfo;
@@ -31,6 +29,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             _maxPolyline = outPolyline;
             _targetColums = new List<Polyline>();
             _targetWalls = new List<Polyline>();
+            _innerPolylines = new List<Polyline>();
             if (null != columns && columns.Count > 0)
             {
                 foreach (var item in columns)
@@ -48,6 +47,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         continue;
                     _targetWalls.Add(item);
                 }
+            }
+            foreach (var item in innerPolylines) 
+            {
+                _innerPolylines.Add(item);
             }
         }
         public List<LineGraphNode> GetLineWallGraphNodes() 
@@ -186,7 +189,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sp = checkLine.StartPoint;
             var sideDir = lineInfo.layoutLineSide;
             var lineLength = checkLine.Length;
-            LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _lineSideSpaceExt);
+            LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _innerPolylines, _lineSideSpaceExt);
             int count = (int)Math.Ceiling(lineLength / _lightSpace);
             double step = lineLength / count;
             step = _lightSpace;
@@ -272,7 +275,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sp = checkLine.StartPoint;
             var sideDir = lineInfo.layoutLineSide;
             var lineLength = checkLine.Length;
-            LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _lineSideSpaceExt);
+            LayoutToStructure toStructure = new LayoutToStructure(_maxPolyline, _innerPolylines, _lineSideSpaceExt);
             var startPt = sp - lineInfo.lineDir.MultiplyBy(500);
             var endPoint = startPt + lineInfo.lineDir.MultiplyBy(_lightSpace / 2);
             //起点优化，中间按间距计算，起点根据剩余距离计算

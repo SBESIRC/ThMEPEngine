@@ -21,6 +21,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private List<LightLayout> _ligthLayouts;
         private Vector3d _normal = Vector3d.ZAxis;
         private Polyline _maxPolyline;
+        private List<Polyline> _innerPolylines;
         private double _lightSpace = 10000;//灯具最大间距
         private double _lightOffset = 800;//单方向灯具偏移距离
         private double _lightDeleteMaxSpace = 10000;
@@ -36,7 +37,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private List<Line> _mainLines;
         private EmgWallLight _emgWallLight;
         Dictionary<LineGraphNode, List<LightLayout>> _lineWallLights = new Dictionary<LineGraphNode, List<LightLayout>>();
-        public EmgLampIndicatorLight(Polyline outPolyline,List<Polyline> columns, List<Polyline> walls, IndicatorLight indicator)
+        public EmgLampIndicatorLight(Polyline outPolyline,List<Polyline> innerPolylines,List<Polyline> columns, List<Polyline> walls, IndicatorLight indicator)
         {
             this._lightSpace = ThEmgLightService.Instance.MaxLightSpace;
             this._lightOffset = ThEmgLightService.Instance.HostLightMoveOffSet;
@@ -50,6 +51,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             _ligthLayouts = new List<LightLayout>();
             _wallGraphNodes = new List<LineGraphNode>();
             _hostLightNodes = new List<GraphNode>();
+            _innerPolylines = new List<Polyline>();
             if (null != columns && columns.Count > 0)
             {
                 foreach (var item in columns)
@@ -68,8 +70,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     _targetWalls.Add(item);
                 }
             }
+            foreach (var item in innerPolylines) 
+            {
+                _innerPolylines.Add(item);
+            }
             _targetInfo = indicator;
-            _emgWallLight = new EmgWallLight(outPolyline, _targetInfo, _targetColums, _targetWalls, _wallLightMergeAngle, _lightSpace);
+            _emgWallLight = new EmgWallLight(outPolyline, _innerPolylines, _targetInfo, _targetColums, _targetWalls, _wallLightMergeAngle, _lightSpace);
 
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));

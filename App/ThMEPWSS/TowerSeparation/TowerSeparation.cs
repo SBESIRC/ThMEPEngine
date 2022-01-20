@@ -11,6 +11,7 @@ using GeometryExtensions;
 using ThMEPEngineCore.CAD;
 using System.Linq;
 using DotNetARX;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPWSS.TowerSeparation.TowerExtract
 {
@@ -26,13 +27,27 @@ namespace ThMEPWSS.TowerSeparation.TowerExtract
             {
                 return new List<Polyline>();
             }
-            Point3dCollection shearWalls = FindCenterForPolygon(shearWallList);
+            var newShearWallList = new List<Polyline>();
+            foreach(Polyline wall in shearWallList)
+            {
+                newShearWallList.Add(ThCADCoreNTSEntityExtension.Intersection(wall,fireZone).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault());
+            }
+            //DrawUtils.ShowGeometry(newShearWallList, "testForPolyline", 2);
+            //Point3dCollection shearWalls = FindCenterForPolygon(shearWallList);
+            Point3dCollection shearWalls = new Point3dCollection();
+            foreach(var wall in shearWallList)
+            {
+                for(int i = 0; i<wall.NumberOfVertices; ++i)
+                {
+                    shearWalls.Add(wall.GetPoint3dAt(i));
+                }
+            }
             List<Polyline> result = new List<Polyline>();
             double epsilon = 8000;
             int minPts = 2;
             List<Point3dCollection> clusters = ClusterWorker.getClusters(shearWalls, epsilon , minPts);
-            List<List<Point3d>> clusterPoints = getShearwallClusterPoints(clusters);
-            foreach (List<Point3d> cluster in clusterPoints)
+            //List<List<Point3d>> clusterPoints = getShearwallClusterPoints(clusters);
+            foreach (var cluster in clusters)
             {
                 //Extents3d temp = Point3dCollectionExtensions.ToExtents3d(cluster);
                 //List<Point2d> temp = new List<Point2d>();
@@ -40,7 +55,7 @@ namespace ThMEPWSS.TowerSeparation.TowerExtract
                 //temp.GetConvexHull();
                 //List<Point3d> convexPoint = new List<Point3d>();
                 //temp.ForEach(o => convexPoint.Add(o.ToPoint3d()));
-                Polyline extentRec = GetConvexHull(cluster);
+                Polyline extentRec = GetConvexHull(cluster.Cast<Point3d>().ToList());
 
                 //DotNetARX.PolylineTools.CreatePolyline(extentRec, GeometryEx.GetConvexHull(cluster));
                 //extentRec.CreatePolyline(temp.GetConvexHull());
@@ -74,7 +89,9 @@ namespace ThMEPWSS.TowerSeparation.TowerExtract
             }
             foreach (Polyline pl in ConvexHull)
             {
-                result.Add(ThMEPOrientedBoundingBox.CalObb(pl));
+                //var obb = ThMEPOrientedBoundingBox.CalObb(pl);
+                var intersection = ThCADCoreNTSEntityExtension.Intersection(pl, fireZone).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
+                result.Add(intersection);
             }
             return result;
             //return ConvexHull;

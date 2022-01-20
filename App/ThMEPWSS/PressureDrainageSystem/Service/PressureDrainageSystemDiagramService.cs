@@ -117,7 +117,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     }
                     DBText bText = new DBText();
                     string textstring = i == 0 ? "地库顶板" : "B" + i.ToString() + "F";
-                    DefinePropertiesOfCADDBTexts(bText, "W-NOTE", textstring, floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(textHeight, textHeight, 0))), textHeight, DbHelper.GetTextStyleId("TH-STYLE3"));
+                    DefinePropertiesOfCADDBTexts(bText, "W-NOTE", textstring, floorLines[i].StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(textHeight, textHeight, 0))), textHeight);
                     bText.AddToCurrentSpace();
                     Dictionary<string, string> atts01 = new();
                     atts01.Add("标高", "X.XX");
@@ -386,6 +386,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             using (AcadDatabase adb = AcadDatabase.Active())
             {
                 List<Extents3d> maxExts = new();
+                var textStyle= DbHelper.GetTextStyleId("TH-STYLE3");
                 for (int i = 0; i < allEntities.Count; i++)
                 {
                     double minX = allBlocks[i][0].Position.X;
@@ -433,9 +434,18 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 {
                     Matrix3d mat = Matrix3d.Displacement(new Vector3d(totalspacine, 0, 0));
                     foreach (var ent in allEntities[i])
-                    {
-                        ent.TransformBy(mat);
-                        ent.AddToCurrentSpace();
+                    {               
+                        if (ent is DBText text)
+                        {
+                            text.TextStyleId = textStyle;
+                            text.TransformBy(mat);
+                            text.AddToCurrentSpace();
+                        }
+                        else
+                        {
+                            ent.TransformBy(mat);
+                            ent.AddToCurrentSpace();
+                        }
                     }
                     foreach (var br in allBlocks[i])
                     {
@@ -1374,7 +1384,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                             foreach (var identifier in pipeLineSystemUnit.PipeLineUnits[parLayers[parLayers.Count - 1]].VerticalPipes[parIndexes[parIndexes.Count - 1]].SameTypeIdentifiers)
                             {
                                 DBText dBText = new DBText();
-                                DefinePropertiesOfCADDBTexts(dBText, "W-NOTE", identifier, ptlocId, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"));
+                                DefinePropertiesOfCADDBTexts(dBText, "W-NOTE", identifier, ptlocId, textHeight);
                                 Extents3d ext = (Extents3d)dBText.Bounds;
                                 textLength = ext.ToRectangle().Length / 2 > textLength ? ext.ToRectangle().Length / 2 : textLength;
                                 identifer.Add(new List<DBText>());
@@ -1534,14 +1544,14 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             double textSpacing = 400;
             for (int i = 0; i < bTexts.Count; i++)
             {
-                DefinePropertiesOfCADDBTexts(bTexts[i], "W-NOTE", bTexts[i].TextString, new Point3d(ptloc_br_tmp_01.X, ptloc_br_tmp_01.Y + textSpacing * i, 0), textHeight, DbHelper.GetTextStyleId("TH-STYLE3"));
+                DefinePropertiesOfCADDBTexts(bTexts[i], "W-NOTE", bTexts[i].TextString, new Point3d(ptloc_br_tmp_01.X, ptloc_br_tmp_01.Y + textSpacing * i, 0), textHeight);
             }
             double paraQ = pump.paraQ;
             double paraH = pump.paraH;
             double paraN = pump.paraN;
             Point3d ptloc_br_tmp_06 = new Point3d(ptLocPumpRec.X + 300, ptLocPumpRec.Y - frameHeigth / 2 - 1100, 0);
             dB6.TextString = "Q=" + paraQ.ToString() + "m3/h,H=" + paraH.ToString() + "m,N=" + paraN.ToString() + "kW";
-            DefinePropertiesOfCADDBTexts(dB6, "W-NOTE", dB6.TextString, ptloc_br_tmp_06, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
+            DefinePropertiesOfCADDBTexts(dB6, "W-NOTE", dB6.TextString, ptloc_br_tmp_06, textHeight,TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
             bTexts.Add(dB6);
             Point3d pointtmp01 = new(ptLocPumpRec.X, ptLocPumpRec.Y - frameHeigth / 2 - 800, 0);
             Extents3d ext = (Extents3d)dB6.Bounds;
@@ -1556,7 +1566,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             entities.Add(line02);
             Point3d ptloc_br_tmp_05 = new Point3d(line01.GetMidpoint().X, line01.GetMidpoint().Y + textHeight, 0);
             dB5.TextString = pump.Location + " " + pump.Allocation;
-            DefinePropertiesOfCADDBTexts(dB5, "W-NOTE", dB5.TextString, ptloc_br_tmp_05, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextMid, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
+            DefinePropertiesOfCADDBTexts(dB5, "W-NOTE", dB5.TextString, ptloc_br_tmp_05, textHeight, TextHorizontalMode.TextMid, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
             bTexts.Add(dB5);
             bTexts.ForEach(o => entities.Add(o));
             Point3d ptloc_ply_tmp = new Point3d(ptLocPumpRec.X - frameWidth / 2 - 650, ptLocPumpRec.Y - frameHeigth / 2 - 800, 0);
@@ -1570,7 +1580,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             entities.Add(ply);
             DBText db07 = new();
             Point3d ptloc_ply_tmp03 = ply.GetMidpoint().TransformBy(Matrix3d.Displacement(new Vector3d(0, textHeight, 0)));
-            DefinePropertiesOfCADDBTexts(db07, "W-NOTE", pump.Serial + "#集水井", ptloc_ply_tmp03, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextMid, TextVerticalMode.TextVerticalMid);
+            DefinePropertiesOfCADDBTexts(db07, "W-NOTE", pump.Serial + "#集水井", ptloc_ply_tmp03, textHeight, TextHorizontalMode.TextMid, TextVerticalMode.TextVerticalMid);
             entities.Add(db07);
             DBText db_dim_annot = new();
             Point3d ptloc_dim_annot = ptloc_ply_tmp01.TransformBy(Matrix3d.Displacement(new Vector3d(0, -dim_offset_annot, 0)));
@@ -1578,7 +1588,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
             if (dim_length > 0)
                 str_tmpdim = dim_length.ToString();
             string str_annot = "注：集水井尺寸" + pump.Length + "*" + pump.Width + "*" + str_tmpdim + " mm(h)";
-            DefinePropertiesOfCADDBTexts(db_dim_annot, "W-NOTE", str_annot, ptloc_dim_annot, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid);
+            DefinePropertiesOfCADDBTexts(db_dim_annot, "W-NOTE", str_annot, ptloc_dim_annot, textHeight, TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid);
             entities.Add(db_dim_annot);
             if (parLayers[parLayers.Count - 1] == 0)
             {
@@ -1659,7 +1669,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     {
                         lineIdpump.Add(lineId);
                         DBText dBText = new DBText();
-                        DefinePropertiesOfCADDBTexts(dBText, "W-NOTE", p, new Point3d(ptlocid02.X, ptlocid02.Y + textHeight, 0), textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextRight);
+                        DefinePropertiesOfCADDBTexts(dBText, "W-NOTE", p, new Point3d(ptlocid02.X, ptlocid02.Y + textHeight, 0), textHeight,  TextHorizontalMode.TextRight);
                         identifer.Add(new List<DBText>());
                         identifer[identifer.Count - 1].Add(dBText);
                         string str = pump.Allocation + pump.PumpCount.ToString() + pump.Serial + pump.paraH.ToString() + pump.paraN.ToString() + pump.paraQ.ToString();
@@ -1812,7 +1822,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                     int ind = pump.Location.IndexOf('梯');
                     text = pump.Location.Substring(0, ind + 1);
                 }
-                DefinePropertiesOfCADDBTexts(dBText1, "W-NOTE", text, ptlocRec, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextCenter);
+                DefinePropertiesOfCADDBTexts(dBText1, "W-NOTE", text, ptlocRec, textHeight, TextHorizontalMode.TextCenter);
                 tmpBTexts.Add(dBText1);
                 Point3d ptmp4 = line1.GetMidpoint();
                 Point3d ptmp5 = ptmp4.TransformBy(Matrix3d.Displacement(new Vector3d(0, guideLineHeight, 0)));
@@ -1825,11 +1835,11 @@ namespace ThMEPWSS.PressureDrainageSystem.Service
                 DBText dBText2 = new DBText();
                 string str_tmp1 = pump.Location.Contains("梯") ? "电梯基坑" : "电缆沟";
                 string str1 = str_tmp1 + "预埋镀锌钢管，管内底平基坑底";
-                DefinePropertiesOfCADDBTexts(dBText2, "W-NOTE", str1, ptlocText2, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
+                DefinePropertiesOfCADDBTexts(dBText2, "W-NOTE", str1, ptlocText2, textHeight, TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
                 tmpBTexts.Add(dBText2);
                 DBText dBText3 = new DBText();
                 dBText3.TextString = "2xDNXXX,i=0.01";
-                DefinePropertiesOfCADDBTexts(dBText3, "W-NOTE", dBText3.TextString, ptlocText3, textHeight, DbHelper.GetTextStyleId("TH-STYLE3"), TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
+                DefinePropertiesOfCADDBTexts(dBText3, "W-NOTE", dBText3.TextString, ptlocText3, textHeight,  TextHorizontalMode.TextLeft, TextVerticalMode.TextVerticalMid, (int)ColorIndex.White);
                 tmpBTexts.Add(dBText3);
                 Point3d ptmp7 = ptlocRec_tmp.TransformBy(Matrix3d.Displacement(new Vector3d(-diselv, 0, 0)));
                 Dictionary<string, string> atts = new Dictionary<string, string>();

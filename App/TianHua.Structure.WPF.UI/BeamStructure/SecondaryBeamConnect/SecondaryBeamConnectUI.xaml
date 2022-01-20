@@ -1,0 +1,71 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect.SecondaryBeamConnectUI"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="次梁连线参数">
+    <Grid Focusable="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Margin="10,10,10,10">
+            <StackPanel Width="220">
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label>楼层选择</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"
+                            VerticalContentAlignment="Bottom" Margin="10,0,0,0">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="地下室顶板" ></Label>
+                        </RadioButton>
+                        <CheckBox Margin="30,5,0,5" IsChecked="True">不剖分</CheckBox>
+                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                             VerticalContentAlignment="Bottom" Margin="10,0,0,0">
+                            <Label VerticalContentAlignment="Bottom" Padding="0" Focusable="False" Content="地下室中板" ></Label>
+                        </RadioButton>
+                        <CheckBox Margin="30,5,0,5" IsChecked="True">最小双向板控制参数（m）</CheckBox>
+                        <StackPanel Orientation="Horizontal" Margin="35,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
+                            <Label FontFamily="Arial" Content="dmin"></Label>
+                            <TextBox x:Name="dminTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                            <Label FontFamily="Arial" Content="dmax"></Label>
+                            <TextBox x:Name="dmaxTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                        </StackPanel>
+                        <CheckBox Margin="30,5,0,5" IsChecked="True">最小单向板控制参数（m）</CheckBox>
+                        <StackPanel Orientation="Horizontal" Margin="35,0,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
+                            <Label FontFamily="Arial" Content="dmin"></Label>
+                            <TextBox x:Name="dmincTxt" Width="30" HorizontalContentAlignment="Center" Text=""></TextBox>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1" Margin="10,10,10,10">
+            <StackPanel Width="150">
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label>区域选择</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <RadioButton  VerticalAlignment="Center" Focusable="True"
+                            VerticalContentAlignment="Bottom" FocusManager.IsFocusScope="False" IsChecked="True" Margin="10,0,0,0">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="矩形框选" ></Label>
+                        </RadioButton>
+                        <RadioButton  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                            VerticalContentAlignment="Bottom" Margin="10,5,0,5">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="多边形框选" ></Label>
+                        </RadioButton>
+                    </StackPanel>
+                </GroupBox>
+                <StackPanel HorizontalAlignment="Center" Margin="0,45,0,0">
+                    <cus:ImageButton Margin="0,0,0,10" Content="恢复默认" Width="85" Height="24"></cus:ImageButton>
+                    <cus:ImageButton Content="确定" Width="85" Height="24"></cus:ImageButton>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</cus:ThCustomWindow>

@@ -101,7 +101,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
 
                 //--------------提取数据
                 //var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false); //38s
-                var geos = ThAFASUtils.GetAreaLayoutData2(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false); //38s
+                var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false); //38s
                 if (geos.Count == 0)
                 {
                     return;

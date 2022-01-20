@@ -128,7 +128,6 @@ namespace ThMEPStructure.GirderConnect.Command
 
                     ThBuildBeam buildMainBeam = new ThBuildBeam(beamLineForOwner, beamLineForSecondaryBeam, secondaryBeamLine, intersectCollection);
                     var beams = buildMainBeam.build(UserChoice);
-
                     if (beamLine.Count + secondaryBeamLine.Count == beams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();

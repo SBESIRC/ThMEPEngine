@@ -34,7 +34,7 @@
     <Compile Include="AFAS\DataFactory\ThAFASDataQueryService.cs" />
     <Compile Include="AFAS\Model\ThAFASDataPass.cs" />
     <Compile Include="AFAS\DataFactory\ThAFASDataUtils.cs" />
-    <Compile Include="AFAS\DataFactory\ThAFASDataSetFactoryNew.cs" />
+    <Compile Include="AFAS\DataFactory\ThAFASDataSetFactory.cs" />
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
@@ -137,7 +137,7 @@
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="DCL\Data\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="DCL\Data\ThDclEStoreyExtractor.cs" />
-    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmArea\Data\ThAFASAreaDataSetFactory.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASGasLayoutParameter.cs" />
     <Compile Include="FireAlarmArea\Service\ThFaGasRoomTypeService.cs" />
     <Compile Include="FireAlarmArea\Command\ThAFASGasCmd.cs" />
@@ -145,7 +145,7 @@
     <Compile Include="FireAlarmDistance\Command\ThAFASBroadcastCmd.cs" />
     <Compile Include="FireAlarmDistance\Command\ThAFASManualAlarmCmd.cs" />
     <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataQueryService.cs" />
-    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmDistance\Data\ThAFASDistanceDataSetFactory.cs" />
     <Compile Include="FireAlarmDistance\Model\ThAFASBCLayoutParameter.cs" />
     <Compile Include="FireAlarmDistance\Service\ThAFASDistanceLayoutService.cs" />
     <Compile Include="FireAlarmDistance\Service\ThFABCStairService.cs" />
@@ -154,7 +154,7 @@
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireProofMonitorLayoutCmd.cs" />
     <Compile Include="FireAlarmFixLayout\Command\ThAFASFireTelLayoutCmd.cs" />
     <Compile Include="AFAS\Utils\ThFaCleanService.cs" />
-    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactoryNew.cs" />
+    <Compile Include="FireAlarmFixLayout\Data\ThAFASFixLayoutDataSetFactory.cs" />
     <Compile Include="FireAlarmFixLayout\Service\ThAFASFixUtil.cs" />
     <Compile Include="FireAlarmArea\Data\ThAFASAreaDataQueryService.cs" />
     <Compile Include="FireAlarmArea\Model\ThAFASSmokeLayoutParameter.cs" />
