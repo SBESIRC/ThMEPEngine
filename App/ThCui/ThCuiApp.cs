@@ -3,13 +3,12 @@ using AcHelper;
 using System.IO;
 using ThMEPIdentity;
 using ThCADExtension;
+using System.Reflection;
 using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using System.Reflection;
-using System.Linq;
 
 namespace TianHua.AutoCAD.ThCui
 {
@@ -190,7 +189,7 @@ namespace TianHua.AutoCAD.ThCui
             AcadApp.Idle -= Application_OnIdle_Cmd_Veto;
 
             // 显示登陆提示
-            Active.Editor.WriteLine("请先登陆天华三维协同后再使用天华MEP工具集！");
+            Active.Editor.WriteLine("未登录天华三维协同或此功能未开放，请登录三维协同平台或联系管理员。");
         }
 
         private void Application_OnIdle_Ribbon(object sender, EventArgs e)
@@ -321,8 +320,15 @@ namespace TianHua.AutoCAD.ThCui
                 bool bVeto = false;
                 if (ThMEPCmdService.Instance.IsTHCommand(cmdName))
                 {
-                   // 在未登陆的情况下，不能运行
-                   bVeto = !ThAcsSystemService.Instance.IsLogged;
+                    // 在未登陆的情况下，不能运行
+                    bVeto = !ThAcsSystemService.Instance.IsLogged;
+
+                    // 授权用户
+                    if (!bVeto)
+                    {
+                        var eid = ThAcsSystemService.Instance.EmployeeId;
+                        bVeto = !ThMEPCmdService.Instance.IsAuthorizedTHCommand(cmdName, eid);
+                    }
                 }
 
                 // Veto
