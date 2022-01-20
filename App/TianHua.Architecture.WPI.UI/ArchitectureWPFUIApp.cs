@@ -21,6 +21,9 @@ namespace TianHua.Architecture.WPI.UI
         [CommandMethod("TIANHUACAD", "THDXCW", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
         {
+#if  (!DEBUG)
+            if(!Utils.IsCorrectPassCode()) return;
+#endif
             var w = new UiParkingStallArrangement();
             AcadApp.ShowModelessWindow(w);
         }

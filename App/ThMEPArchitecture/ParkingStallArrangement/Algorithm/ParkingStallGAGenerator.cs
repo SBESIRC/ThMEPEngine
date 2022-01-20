@@ -434,53 +434,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             
             return solutions;
         }
-
-        private List<Chromosome> CreateFirstPopulation2()
-        {
-            List<Chromosome> solutions = new List<Chromosome>();
-
-            for (int i = 0; i < FirstPopulationSize; ++i)//
-            {
-                var solution = new Chromosome();
-                solution.Logger = this.Logger;
-                var genome = ConvertLineToGene(i);//创建初始基因序列
-
-                solution.Genome = genome;
-                //Draw.DrawSeg(solution);
-                if (solution.IsVaild(LayoutPara, ParameterViewModel))
-                {
-                    solution.Genome = genome;
-                    solutions.Add(solution);
-                }
-            }
-            // 添加初始画的分割线
-            var orgSolution = new Chromosome();
-            orgSolution.Logger = this.Logger;
-            var orgGenome = ConvertLineToGene();//创建初始基因序列
-            orgSolution.Genome = orgGenome;
-            //Draw.DrawSeg(solution);
-            solutions.Add(orgSolution);
-
-            while(solutions.Count < FirstPopulationSize)
-            {
-                // 初始的不够，随机生成
-                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
-                if (FoundVaild)
-                {
-                    solutions.Add(solution);
-                }
-                else
-                {
-                    // 没找到则在之前解随机挑选一个
-                    var idx = RandInt(solutions.Count);
-                    solutions.Add(solutions[idx].Clone());
-                }
-            }
-            
-            return solutions;
-        }
-
-
         #endregion
         #region
         // run代码部分

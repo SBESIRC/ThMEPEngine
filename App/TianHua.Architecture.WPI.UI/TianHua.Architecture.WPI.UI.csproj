@@ -35,6 +35,7 @@
     <Compile Include="UI\UiParkingStallArrangement.xaml.cs">
       <DependentUpon>UiParkingStallArrangement.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Utils\Utils.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
