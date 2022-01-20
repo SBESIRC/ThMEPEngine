@@ -395,6 +395,78 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return true;
         }
+
+        public bool DirectlyArrangementSetParameter(List<Gene> genome)
+        {
+            Clear();//清空所有参数
+            var tmpBoundary = OuterBoundary.Clone() as Polyline;
+
+            for (int i = 0; i < genome.Count; i++)
+            {
+                Gene gene = genome[i];
+                var line = GetSegLine(gene);
+                SegLines.Add(line);
+                SegLineIndexDic.Add(i, line);
+            }
+
+            //If in manual mode
+            var areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+
+            System.Diagnostics.Debug.WriteLine($"Line count:{SegLines.Count}");
+            System.Diagnostics.Debug.WriteLine($"Area count:{areas.Count}");
+
+            try
+            {
+                SegLineSpatialIndex = new ThCADCoreNTSSpatialIndex(SegLines.ToCollection());
+                Areas.AddRange(areas);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                tmpBoundary.Dispose();
+            }
+
+            // update other parameters
+            for (int i = 0; i < PtDic.Count; i++)
+            {
+                var line1 = SegLines[PtDic[i][0]];//拿到第一根分割线
+                var line2 = SegLines[PtDic[i][1]];//拿到第二根分割线
+                var pt = line1.Intersect(line2, Intersect.ExtendBoth).First();
+                IntersectPt.Add(pt);//交点添加
+            }
+            for (int i = 0; i < Areas.Count; i++)
+            {
+                AreaNumber.Add(i);
+                Id2AllSubAreaDic.Add(i, Areas[i]);
+
+                //todo: optimize
+                var buildingBlocksInSubArea = GetBuildings(Areas[i]);
+
+                SubAreaId2BuildingBlockDic.Add(i, buildingBlocksInSubArea);
+                var segLines = GetSegLines(Areas[i], out List<int> lineNums);
+
+                Id2AllSegLineDic.Add(i, segLines);
+                AreaSegLineDic.Add(i, lineNums);
+                SubAreaId2SegsDic.Add(i, GetAreaSegs(Areas[i], Id2AllSegLineDic[i], out List<Polyline> areaWall));
+                SubAreaId2OuterWallsDic.Add(i, areaWall);
+
+                var bdBoxes = new List<Polyline>();//临时建筑物外包线
+                var allCuttersInSubArea = new List<List<Polyline>>();//临时建筑物框线
+                foreach (var build in buildingBlocksInSubArea)
+                {
+                    var rect = build.GetRect();
+                    var cuttersInBuilding = AllShearwallsSpatialIndex.SelectCrossingPolygon(rect).Cast<Polyline>().ToList();
+                    bdBoxes.Add(rect);
+                    allCuttersInSubArea.Add(cuttersInBuilding);
+                }
+                BuildingBoxes.Add(i, bdBoxes);
+                SubAreaId2ShearWallsDic.Add(i, allCuttersInSubArea);
+            }
+            return true;
+        }
+
         private void GetPtNumAndDir(List<int> lineNums, out List<int> pointNums, out List<int> directions)
         {
             pointNums = new List<int>();

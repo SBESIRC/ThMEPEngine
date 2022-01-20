@@ -24,7 +24,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
     public static class Preprocessing
     {
-        public static bool DataPreprocessing(AcadDatabase acadDatabase,out GaParameter gaPara, out LayoutParameter layoutPara, Serilog.Core.Logger Logger = null)
+        public static bool DataPreprocessing(AcadDatabase acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder,Logger);
             gaPara = new GaParameter();
@@ -53,7 +53,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 seglineDic.Add(index++, line);
             }
-            WindmillSplit.Split(area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
+            WindmillSplit.Split(isDirectlyArrange, area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
                 out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt);
             gaPara.Set(outerBrder.SegLines, maxVals, minVals);
 
