@@ -127,6 +127,11 @@
                 <File Id="FILE_Autoloader_PackageContents_Support_LoadCalculationConfig_Room" Source="$(var.AutoloaderContentsPath)\Support\LoadCalculationConfig\房间功能映射表.xlsx" KeyPath="yes" />
             </Component>
         </DirectoryRef>
+        <DirectoryRef Id="DIR_Autoloader_Contents_Support_BeamStructure">
+            <Component Id="CMP_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" Guid="{62C089D8-53F4-401F-BDE7-63327B02831A}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" Source="$(var.AutoloaderContentsPath)\Support\BeamStructure\SecondaryBeamConfig.json" KeyPath="yes" />
+            </Component>
+        </DirectoryRef>
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
@@ -168,6 +173,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Config" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Room" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Wire_Layer_Configuration" />
         </ComponentGroup>
     </Fragment>
