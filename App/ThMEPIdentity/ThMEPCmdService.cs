@@ -14,8 +14,27 @@ namespace ThMEPIdentity
         internal ThMEPCmdService() { }
         public static ThMEPCmdService Instance { get { return instance; } }
 
+        private readonly Dictionary<string, string> WHITELIST = new Dictionary<string, string>
+        {
+            // 数字化设计中心
+            {"THAFL", "户型平面"},
+            {"THAEC", "参数建构"},
+            {"THDIM", "轴网标注"},
+            {"THFLR", "厨卫家具"},
+            {"THPLT", "淡彩出图"},
+            {"THDATA", "一键解析"},
+            {"THAREA", "更新面积表"},
+            {"THSEL", "批量选择"},
+            {"THBLD", "生成标准楼栋块"},
+            {"THSAMPLEPLAN", "素材库"},
+        };
+
         public bool IsTHCommand(string name)
         {
+            if (WHITELIST.ContainsKey(name))
+            {
+                return false;
+            }
             return name.StartsWith("TH");
         }
 
