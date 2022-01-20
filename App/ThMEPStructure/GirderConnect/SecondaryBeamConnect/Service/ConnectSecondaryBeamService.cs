@@ -64,7 +64,7 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service
                 ents.OfType<DBText>().ForEach(o => o.TextStyleId = textStyleId);
 
                 // 返回图元Id
-                return new ObjectIdList(ents.Select(o => o.ObjectId).ToArray());
+                return new ObjectIdList(ents.Select(e => e.ObjectId).Where(o => o.IsValid).ToArray());
             }
         }
 
