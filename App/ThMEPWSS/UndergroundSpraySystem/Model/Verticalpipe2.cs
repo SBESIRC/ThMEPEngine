@@ -136,15 +136,17 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                     if (dbObj is BlockReference br)
                     {
-
-                        if (br.GetEffectiveName().Contains("室内消火栓平面") || br.GetEffectiveName().Contains("蝶阀") ||
-                            br.GetEffectiveName().Contains("灭火器") || br.GetEffectiveName().Contains("水流指示器") ||
-                            br.GetEffectiveName().Contains("压力表"))
+                        var blkName = br.GetEffectiveName();
+                        if (blkName.Contains("室内消火栓平面") || 
+                            blkName.Contains("蝶阀") ||
+                            blkName.Contains("灭火器") ||
+                            blkName.Contains("水流指示器") ||
+                            blkName.Contains("压力表"))
                         {
                             indx += 1;
                             continue;
                         }
-                        else if (br.GetEffectiveName().Contains("带定位立管"))
+                        else if (blkName.Contains("带定位立管"))
                         {
                             var objs1 = new DBObjectCollection();//创建 object 集合
                             if (bkr is null)
