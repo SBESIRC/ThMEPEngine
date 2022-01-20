@@ -49,7 +49,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
         /// <param name="colorIndex"></param>
         /// <param name="lineType"></param>
         /// <param name="lineWeight"></param>
-        public static void DefinePropertiesOfCADDBTexts(DBText dB, string layer, string textString, Point3d alignmentPoint, double height, ObjectId textStyleId, TextHorizontalMode horizontalMode = TextHorizontalMode.TextLeft, TextVerticalMode verticalMode = TextVerticalMode.TextVerticalMid, int colorIndex = (int)ColorIndex.BYLAYER, string lineType = "BYLAYER", LineWeight lineWeight = LineWeight.ByLayer, double widthFactor = 0.7)
+        public static void DefinePropertiesOfCADDBTexts(DBText dB, string layer, string textString, Point3d alignmentPoint, double height, TextHorizontalMode horizontalMode = TextHorizontalMode.TextLeft, TextVerticalMode verticalMode = TextVerticalMode.TextVerticalMid, int colorIndex = (int)ColorIndex.BYLAYER, string lineType = "BYLAYER", LineWeight lineWeight = LineWeight.ByLayer, double widthFactor = 0.7)
         {
             dB.WidthFactor = widthFactor;
             dB.Layer = layer;
@@ -60,7 +60,7 @@ namespace ThMEPWSS.PressureDrainageSystem.Utils
             dB.VerticalMode = verticalMode;
             dB.AlignmentPoint = alignmentPoint;
             dB.TextString = textString;
-            dB.TextStyleId = textStyleId;
+            //dB.TextStyleId = textStyleId;
             dB.Height = height;
             return;
         }

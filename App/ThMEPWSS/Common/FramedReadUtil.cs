@@ -29,9 +29,16 @@ namespace ThMEPWSS.Common
 
                 foreach (var block in allBlockReference)
                 {
-                    if (!block.GetEffectiveName().Equals(floorBlockName))
-                        continue;
-                    resFloors.Add(new FloorFramed(block, block.Id));
+                    try
+                    {
+                        if (!block.GetEffectiveName().Equals(floorBlockName))
+                            continue;
+                        resFloors.Add(new FloorFramed(block, block.Id));
+                    }
+                    catch
+                    {
+                        //The Method GetEffectiveName is unstable and there is no influence in this case using try_catch.
+                    }
                 }
             }
             return resFloors;
