@@ -60,6 +60,7 @@ namespace TianHua.Electrical.UI
                 var cmd = new ThBConvertCommand()
                 {
                     Scale = uiCapitalConverter.Parameter.BlkScaleValue,
+                    FrameStyle = uiCapitalConverter.Parameter.BlkFrameValue,
                 };
                 if (uiCapitalConverter.Parameter.HavcOps &&
                     uiCapitalConverter.Parameter.WssOps)

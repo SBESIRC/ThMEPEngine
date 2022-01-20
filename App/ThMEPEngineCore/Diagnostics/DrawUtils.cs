@@ -190,7 +190,7 @@ namespace ThMEPEngineCore.Diagnostics
             text.TextString = s;
             text.Rotation = 0;
             text.Height = hight;
-            text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            //text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
 
             DrawUtils.ShowGeometry(text, LayerName, colorIndex, lineWeightNum);
         }

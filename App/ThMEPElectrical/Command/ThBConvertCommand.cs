@@ -43,6 +43,11 @@ namespace ThMEPElectrical.Command
         public double Scale { get; set; }
 
         /// <summary>
+        /// 标注样式
+        /// </summary>
+        public string FrameStyle { get; set; }
+
+        /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="mode"></param>
@@ -240,13 +245,16 @@ namespace ThMEPElectrical.Command
                                     // 导入目标图块
                                     var targetBlockName = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME);
                                     var targetBlockLayer = transformedBlock.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER);
+                                    if (FrameStyle == "标注无边框" && (targetBlockName == "电动机及负载标注" || targetBlockName == "负载标注"))
+                                    {
+                                        targetBlockName += "2";
+                                    }
                                     currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(targetBlockName), false);
                                     currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(targetBlockLayer), false);
 
-
                                     // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                                     // 修正插入动态块的图层顺序
-                                    if (targetBlockName == "电动机及负载标注")
+                                    if (targetBlockName.Contains( "电动机及负载标注"))
                                     {
                                         var wipeOut = new ThBConvertWipeOut();
                                         wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);

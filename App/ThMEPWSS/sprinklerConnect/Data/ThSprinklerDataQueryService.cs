@@ -88,5 +88,13 @@ namespace ThMEPWSS.SprinklerConnect.Data
             RoomList = Rooms.Select(x => x.Boundary).OfType<Polyline>().ToList();
             ColumnList = Columns.Select(x => x.Boundary).OfType<Polyline>().ToList();
         }
+
+        public void Print()
+        {
+            ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(ArchitectureWallList, "l0archiWall", 1);
+            ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(ShearWallList, "l0shearWall", 1);
+            ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(RoomList, "l0room", 30);
+            ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(ColumnList, "l0column", 3);
+        }
     }
 }

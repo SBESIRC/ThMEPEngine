@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Linq2Acad;
 using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.ApplicationServices;
+using GeometryExtensions;
 
 namespace ThMEPWSS.Pipe
 {
@@ -75,6 +76,15 @@ namespace ThMEPWSS.Pipe
         public static Tuple<Point3d, Point3d> SelectPoints()
         {
             return ThMEPWSS.Common.Utils.SelectPoints();
+        }
+        public static Point3d SelectPoint()
+        {
+            var point1 = Active.Editor.GetPoint("\n请选择起点位置\n");
+            if (point1.Status != PromptStatus.OK)
+            {
+                return new Point3d();
+            }
+            return point1.Value.TransformBy(Active.Editor.UCS2WCS());
         }
         public static Point3dCollection SelectRange()
         {

@@ -131,7 +131,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
 
             ParkingStallGAGenerator geneAlgorithm = null;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic, directionList, linePtDic,null, areas.Count);
+            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic, 
+                directionList, linePtDic,null, areas.Count, usePline, Logger);
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();

@@ -38,6 +38,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             CommandName = "-THDXQYFG";
             ActionName = "生成";
             _CommandMode = CommandMode.WithoutUI;
+            ParameterViewModel = new ParkingStallArrangementViewModel();
         }
 
         public ThParkingStallArrangementCmd(ParkingStallArrangementViewModel vm)
@@ -218,7 +219,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
         {
-            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger);
+            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
             if (!dataprocessingFlag) return;
             ParkingStallGAGenerator geneAlgorithm = null;
 
@@ -234,10 +236,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
                 if (popSize.Status != PromptStatus.OK) return;
 
-                ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
-                parameterViewModel.IterationCount = iterationCnt.Value;
-                parameterViewModel.PopulationCount = popSize.Value;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
+                ParameterViewModel.IterationCount = iterationCnt.Value;
+                ParameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else
             {

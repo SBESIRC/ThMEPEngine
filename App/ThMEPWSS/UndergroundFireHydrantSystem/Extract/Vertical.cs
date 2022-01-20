@@ -218,17 +218,27 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return blkVisitor.Results.Select(o => o.Geometry).ToCollection();
         }
 
+        private static bool IsRepeatedPt(Point3dEx pt, List<Point3dEx> verticalPts)
+        {
+            double tor = 100.0;
 
+            foreach (var pt2 in verticalPts)//去掉在一定范围内的重复点
+            {
+                if (pt2._pt.DistanceTo(pt._pt) < tor)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
         public List<Point3dEx> CreatePointList()
         {
             VerticalPts = new List<Point3dEx>();
-
             foreach (var db in DBobjsResults)
             {
-                ;
                 var centerPt = (db as DBPoint).Position;
                 var pt = new Point3dEx(new Point3d(centerPt.X, centerPt.Y, 0));
-                if (!VerticalPts.Contains(pt))
+                if(!IsRepeatedPt(pt, VerticalPts))
                 {
                     VerticalPts.Add(pt);
                 }
@@ -248,6 +258,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return VerticalPts;
         }
     }
+
 
 
     public class ThVerticalExtractionVisitor : ThDistributionElementExtractionVisitor

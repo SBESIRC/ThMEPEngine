@@ -83,10 +83,16 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                 using (var database = AcadDatabase.Active())
                 {
                     ImportBlockFile();
-
+                    //选择起点
+                    var startPt = ThWGeUtils.SelectPoint();
+                    if (startPt.IsEqualTo(new Point3d()))
+                    {
+                        return;
+                    }
                     var input = ThWGeUtils.SelectPoints();//获取范围
                     if (input.Item1.IsEqualTo(input.Item2))
                     {
+                        Active.Editor.WriteMessage("框选范围为空！\n");
                         return;
                     }
                     Active.Editor.WriteMessage(System.DateTime.Now.ToString("yyyy-MM-dd HH：mm：ss：ffff"));
@@ -104,13 +110,18 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     var windWells = ThHydrantDataManager.GetWindWells(range);//获取风井
                     var hydrants = ThHydrantDataManager.GetFireHydrants(range);//获取消火栓
                     var hydrantPipes = ThHydrantDataManager.GetFireHydrantPipes(range);//获取立管
+                    if(hydrantPipes.Count == 0 || hydrants.Count == 0)
+                    {
+                        Active.Editor.WriteMessage("找不到立管或者消火栓！\n");
+                        return;
+                    }
                     var buildRooms = ThHydrantDataManager.GetBuildRoom(range);//获取建筑房间
                     var otherPileLines = ThHydrantDataManager.GetOtherPipeLineList(range);//获取其他管线
                     var hydrantValve = ThHydrantDataManager.GetHydrantValve(range);//获取蝶阀
                     var pipeMark = ThHydrantDataManager.GetHydrantPipeMark(range);//获取管径标记
                     List<Line> loopLines = new List<Line>();
                     List<Line> branchLines = new List<Line>();
-                    ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, range);//获取环管和支路
+                    ThHydrantDataManager.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, startPt, range);//获取环管和支路
                     var pathService = new ThCreateHydrantPathService();
                     foreach (var shearWall in shearWalls)
                     {
@@ -144,7 +155,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
                     pathService.SetTermination(loopLines);
                     pathService.InitData();
 
-                    
                     if (ConfigInfo.isCoveredGraph)
                     {
                         //branchLines 包含所有的支路（需要删除和不需要删除的数据）

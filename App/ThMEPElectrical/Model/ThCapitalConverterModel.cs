@@ -9,12 +9,15 @@ namespace ThMEPElectrical.Model
         public ThCapitalConverterModel()
         {
             blkScale = "1:100";
+            blkFrame = "标注带边框";
             equipOps = CapitalOP.All;
             havcOps = true;
             wssOps = true;
             BlkScales = new ObservableCollection<string>(new List<string> { "1:100", "1:150" });
+            BlkFrames = new ObservableCollection<string>(new List<string> { "标注带边框", "标注无边框" });
         }
         public ObservableCollection<string> BlkScales { get; set; }
+        public ObservableCollection<string> BlkFrames { get; set; }
 
         private bool havcOps;
         public bool HavcOps
@@ -71,13 +74,33 @@ namespace ThMEPElectrical.Model
                 RaisePropertyChanged("BlkScale");
             }
         }
-
         public double BlkScaleValue
         {
             get
             {
                 string[] values = blkScale.Split(':');
                 return double.Parse(values[1]);
+            }
+        }
+
+        private string blkFrame = "";
+        public string BlkFrame
+        {
+            get
+            {
+                return blkFrame;
+            }
+            set
+            {
+                blkFrame = value;
+                RaisePropertyChanged("BlkFrame");
+            }
+        }
+        public string BlkFrameValue
+        {
+            get
+            {
+                return blkFrame;
             }
         }
 

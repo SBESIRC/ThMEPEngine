@@ -26,6 +26,14 @@ namespace ThCADCore.NTS
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
+        public static DBObjectCollection Buffer(this Polyline polyline, double distance,bool keepHole)
+        {
+            var buffer = new BufferOp(polyline.ToNTSPolygon(), new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection(keepHole);
+        }
 
         public static Polyline Buffer(this Line line, double distance)
         {

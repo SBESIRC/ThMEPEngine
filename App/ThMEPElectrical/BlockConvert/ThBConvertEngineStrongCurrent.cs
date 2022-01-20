@@ -401,6 +401,14 @@ namespace ThMEPElectrical.BlockConvert
             {
                 target.Attributes[ThBConvertCommon.PROPERTY_LOAD_USAGE] = ThBConvertUtils.LoadUsage(source);
             }
+
+            // 翻转状态
+            if(target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP) 
+                && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
+            {
+                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP, 
+                    source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
+            }
         }
     }
 }

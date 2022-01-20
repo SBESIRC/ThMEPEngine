@@ -84,7 +84,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public void Run(AcadDatabase acadDatabase)
         {
             var isDirectlyArrange = true;
-            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange);
+            bool usePline = true;
+            var dataprocessingFlag = Preprocessing.DataPreprocessing(acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, isDirectlyArrange, usePline);
             if (!dataprocessingFlag) return;
             var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
 

@@ -49,6 +49,7 @@
                                 <Directory Id="DIR_Autoloader_Contents_Resources" Name="Resources" />
                                 <Directory Id="DIR_Autoloader_Contents_Support" Name="Support">
                                     <Directory Id="DIR_Autoloader_Contents_Support_DesignData" Name="DesignData" />
+                                    <Directory Id="DIR_Autoloader_Contents_Support_BeamStructure" Name="BeamStructure" />
                                     <Directory Id="DIR_Autoloader_Contents_Support_SecurityPlaneConfig" Name="SecurityPlaneConfig" />
                                     <Directory Id="DIR_Autoloader_Contents_Support_LoadCalculationConfig" Name="LoadCalculationConfig" />
                                 </Directory>

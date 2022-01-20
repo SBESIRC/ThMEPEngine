@@ -60,7 +60,8 @@ namespace ThMEPLighting.DSFEL
             var compareRoom = GTRooms.Where(x => x.roomA.Any(y => room.Tags.Any(z => RoomConfigTreeService.CompareRoom(y, z)))).ToList();
             if (compareRoom.Count <= 0)
             {
-                if (GTRooms.Any(x => x.roomA.Any(y => otherRooms.SelectMany(z => z.Tags).Any(z => RoomConfigTreeService.CompareRoom(y, z)))))
+                if (GTRooms.Any(x => x.roomA.Any(y => otherRooms.SelectMany(z => z.Tags).Any(z => RoomConfigTreeService.CompareRoom(y, z))))
+                    && !GTRooms.Any(x => x.roomB.Any(y => room.Tags.Any(z => RoomConfigTreeService.CompareRoom(y, z)))))
                 {
                     return true;
                 }

@@ -29,6 +29,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConfigModel.cs" />
     <Compile Include="BeamStructure\SecondaryBeamConnect\SecondaryBeamConnectUI.xaml.cs">
       <DependentUpon>SecondaryBeamConnectUI.xaml</DependentUpon>
     </Compile>
@@ -47,6 +48,10 @@
       <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThControlLibraryWPF\ThControlLibraryWPF.csproj">
       <Project>{17F707AF-855C-416C-A55E-DFF6FF92FC30}</Project>
       <Name>ThControlLibraryWPF</Name>
@@ -54,6 +59,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{AD98390A-569D-4774-AA3E-D9F00BC84CD6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPStructure\ThMEPStructure.csproj">
+      <Project>{0D803D87-011D-48EE-AF5C-B1216BE7F8AB}</Project>
+      <Name>ThMEPStructure</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

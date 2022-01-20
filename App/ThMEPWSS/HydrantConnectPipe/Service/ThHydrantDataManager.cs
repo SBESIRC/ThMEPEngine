@@ -19,10 +19,10 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             var pipeService = new ThHydrantPipeService();
             return pipeService.GetFireHydrantPipe(selectArea);
         }
-        public static void GetHydrantLoopAndBranchLines(ref List<Line> loopLines, ref List<Line> branchLines, Point3dCollection selectArea)
+        public static void GetHydrantLoopAndBranchLines(ref List<Line> loopLines, ref List<Line> branchLines, Point3d startPt, Point3dCollection selectArea)
         {
             var hydrantMainLineService = new ThHydrantPipeLineService();
-            hydrantMainLineService.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, selectArea);
+            hydrantMainLineService.GetHydrantLoopAndBranchLines(ref loopLines, ref branchLines, startPt, selectArea);
         }
         public static List<ThCivilAirWall> GetCivilAirWalls(Point3dCollection selectArea)
         {
@@ -68,12 +68,6 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
         {
             var buildRoomService = new ThBuildRoomService();
             return buildRoomService.GetBuildRoom(selectArea);
-        }
-        public static List<Line> ConnectLine(Point3dCollection selectArea)
-        {
-            var hydrantMainLineService = new ThHydrantPipeLineService();
-            var lines = hydrantMainLineService.GetHydrantMainLine(selectArea);
-            return lines;
         }
         public static void RemoveBranchLines(List<Line> branchLines, List<Line> loopLines,List<BlockReference> valves, List<BlockReference> pipeMarks, Point3dCollection selectArea)
         {

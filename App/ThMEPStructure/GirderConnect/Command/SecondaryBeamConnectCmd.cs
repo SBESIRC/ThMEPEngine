@@ -16,6 +16,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Command;
+using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
 using ThMEPStructure.GirderConnect.Service;
 
@@ -39,25 +40,35 @@ namespace ThMEPStructure.GirderConnect.Command
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 // 选择范围
-                var pts = GetRangePoints();
+                var pts = new Point3dCollection();
+                if (SecondaryBeamLayoutConfig.RegionSelection==1)
+                {
+                    pts = GetRangePoints();
+                }
+                else
+                {
+                    using (var pc = new PointCollector(PointCollector.Shape.Polygon, new List<string>()))
+                    {
+                        try
+                        {
+                            pc.Collect();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                        pts = pc.CollectedPoints.Cast<Point3d>().ToCollection();
+                    }
+                }
                 if (pts.Count == 0)
                 {
                     return;
                 }
-                var options = new PromptKeywordOptions("\n请选择处理方式:");
-                options.Keywords.Add("地下室中板", "Z", "地下室中板(Z)");
-                options.Keywords.Add("地下室顶板", "D", "地下室顶板(D)");
-                options.Keywords.Default = "地下室中板";
-                var result = Active.Editor.GetKeywords(options);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                if (result.StringResult == "地下室顶板")
+                if (SecondaryBeamLayoutConfig.FloorSelection == 1)
                 {
                     Active.WriteMessage("\n建议采用框架大板、加腋大板方式");
                 }
-                else if (result.StringResult == "地下室中板")
+                else if (SecondaryBeamLayoutConfig.FloorSelection == 2)
                 {
                     //ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pts[0]);
                     //暂时不处理超远问题，因为目前主梁有一些问题，增加了一些不必要的后处理
@@ -67,7 +78,7 @@ namespace ThMEPStructure.GirderConnect.Command
                     Polyline polyline = pts.CreatePolyline();
                     originTransformer.Transform(polyline);
                     //获取主梁线和边框线
-                    var beamLine = getPrimitivesService.GetBeamLine(polyline , out ObjectIdCollection objs);
+                    var beamLine = getPrimitivesService.GetBeamLine(polyline, out ObjectIdCollection objs);
                     var wallBound = getPrimitivesService.GetWallBound(polyline);
                     beamLine = beamLine.Union(wallBound).ToList();
                     var houseBound = getPrimitivesService.GetHouseBound(polyline);
