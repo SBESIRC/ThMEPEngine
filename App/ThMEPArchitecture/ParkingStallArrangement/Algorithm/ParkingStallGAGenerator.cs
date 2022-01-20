@@ -136,7 +136,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             return result;
         }
-
+        public bool IsVaild(LayoutParameter layoutPara, ParkingStallArrangementViewModel ParameterViewModel)
+        {
+            return layoutPara.IsVaildGenome(Genome, ParameterViewModel);
+        }
         public void Clear()
         {
             Genome.Clear();
@@ -375,38 +378,108 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             return genome;
         }
-        private List<Chromosome> CreateFirstPopulation(bool accordingSegline)
+
+        private bool RandomCreateChromosome(out Chromosome solution, int N = 1000)
+        {
+            // Try N times
+            solution = new Chromosome();
+            for (int j = 0; j < N; j++)
+            {
+                var genome = new List<Gene>();
+                for (int i = 0; i < GaPara.LineCount; i++)
+                {
+                    var line = GaPara.SegLine[i];
+                    var dir = line.GetValue(out double value, out double startVal, out double endVal);
+                    double LowerBound = GaPara.MinValues[i] + value;
+                    double UpperBound = GaPara.MaxValues[i] + value;
+                    var RandValue = RandDoubleInRange(LowerBound, UpperBound);
+                    Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
+                    genome.Add(gene);
+                }
+                solution.Genome = genome;
+                if (solution.IsVaild(LayoutPara, ParameterViewModel))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private List<Chromosome> CreateFirstPopulation()
         {
             List<Chromosome> solutions = new List<Chromosome>();
-            if (accordingSegline)
+            // 添加初始画的分割线,该届必须是合理解
+            var orgSolution = new Chromosome();
+            orgSolution.Logger = this.Logger;
+            var orgGenome = ConvertLineToGene();//创建初始基因序列
+            orgSolution.Genome = orgGenome;
+            //Draw.DrawSeg(solution);
+            solutions.Add(orgSolution);
+
+            while (solutions.Count < FirstPopulationSize)
+            {
+                // 随机生成 其余的解
+                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
+                if (FoundVaild)
+                {
+                    solutions.Add(solution);
+                }
+                else
+                {
+                    // 没找到则在之前解随机挑选一个
+                    var idx = RandInt(solutions.Count);
+                    solutions.Add(solutions[idx].Clone());
+                }
+            }
+            
+            return solutions;
+        }
+
+        private List<Chromosome> CreateFirstPopulation2()
+        {
+            List<Chromosome> solutions = new List<Chromosome>();
+
+            for (int i = 0; i < FirstPopulationSize; ++i)//
             {
                 var solution = new Chromosome();
                 solution.Logger = this.Logger;
-                var genome = ConvertLineToGene();//创建初始基因序列
+                var genome = ConvertLineToGene(i);//创建初始基因序列
+
                 solution.Genome = genome;
                 //Draw.DrawSeg(solution);
-                solutions.Add(solution);
-            }
-            else
-            {
-                for (int i = 0; i < FirstPopulationSize; ++i)//
+                if (solution.IsVaild(LayoutPara, ParameterViewModel))
                 {
-                    var solution = new Chromosome();
-                    solution.Logger = this.Logger;
-                    var genome = ConvertLineToGene(i);//创建初始基因序列
                     solution.Genome = genome;
-                    //Draw.DrawSeg(solution);
                     solutions.Add(solution);
                 }
-                var orgSolution = new Chromosome();
-                orgSolution.Logger = this.Logger;
-                var orgGenome = ConvertLineToGene();//创建初始基因序列
-                orgSolution.Genome = orgGenome;
-                //Draw.DrawSeg(solution);
-                solutions.Add(orgSolution);
             }
+            // 添加初始画的分割线
+            var orgSolution = new Chromosome();
+            orgSolution.Logger = this.Logger;
+            var orgGenome = ConvertLineToGene();//创建初始基因序列
+            orgSolution.Genome = orgGenome;
+            //Draw.DrawSeg(solution);
+            solutions.Add(orgSolution);
+
+            while(solutions.Count < FirstPopulationSize)
+            {
+                // 初始的不够，随机生成
+                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
+                if (FoundVaild)
+                {
+                    solutions.Add(solution);
+                }
+                else
+                {
+                    // 没找到则在之前解随机挑选一个
+                    var idx = RandInt(solutions.Count);
+                    solutions.Add(solutions[idx].Clone());
+                }
+            }
+            
             return solutions;
         }
+
+
         #endregion
         #region
         // run代码部分
@@ -420,11 +493,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             List<Chromosome> selected = new List<Chromosome>();
             try
             {
-                var pop = CreateFirstPopulation(IterationCount == 1);//创建第一代
-                if (IterationCount == 1)
-                {
-                    return pop;
-                }
+                var pop = CreateFirstPopulation();//创建第一代
 
                 var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
                 Active.Editor.WriteMessage(strFirstPopCnt);
@@ -611,6 +680,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             return General.Utils.RandDouble();
         }
+        private double RandDoubleInRange(double LowerBound, double UpperBound)
+        {
+            return RandDouble() * (UpperBound - LowerBound) + LowerBound;
+        }
         #endregion
         #region
         // run2代码部分
@@ -626,11 +699,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             List<Chromosome> selected = new List<Chromosome>();
 
-            var pop = CreateFirstPopulation(IterationCount == 1);//创建第一代
-            if (IterationCount == 1)
-            {
-                return pop;
-            }
+            var pop = CreateFirstPopulation();
             var strFirstPopCnt = $"第一代种群数量: {pop.Count}\n";
             Active.Editor.WriteMessage(strFirstPopCnt);
             Logger?.Information(strFirstPopCnt);
@@ -639,7 +708,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             int maxNums = 0;
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            int lamda;
+            int lamda; //变异方差，随代数递减
 
             while (curIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)
             {

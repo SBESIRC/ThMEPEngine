@@ -68,11 +68,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 //1. check parallel, perpendicular
                 if (Math.Abs(line.StartPoint.X - line.EndPoint.X) > tol && Math.Abs(line.StartPoint.Y - line.EndPoint.Y) > tol)
                 {
-                    Logger?.Information("发现非正交分割线 ！");
-                    Logger?.Information("起始点：" + line.StartPoint.ToString() + "终点：" + line.EndPoint.ToString() + "的分割线不符合要求");
-                    Active.Editor.WriteMessage("发现非正交分割线 ！");
-                    Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString());
-                    Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString());
+                    Logger?.Information("发现非正交分割线 ！\n");
+                    Logger?.Information("起始点：" + line.StartPoint.ToString() + "终点：" + line.EndPoint.ToString() + "的分割线不符合要求\n");
+                    Active.Editor.WriteMessage("发现非正交分割线 ！\n");
+                    Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString() + "\n");
+                    Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString()+"\n");
                     return false;
                 }
                 //2. check intersection points
@@ -85,11 +85,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 var orderPts = pts.OrderBy(p => p.DistanceTo(line.StartPoint)).ToList();
                 if (orderPts.Count < 2)
                 {
-                    Logger?.Information("该分割线只有" + orderPts.Count.ToString() + "个交点");
-                    Logger?.Information("起始点："+ line.StartPoint.ToString()+"终点："+ line.EndPoint.ToString()+"的分割线不符合要求");
-                    Active.Editor.WriteMessage("该分割线只有"+ orderPts.Count.ToString() + "个交点");
-                    Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString());
-                    Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString());
+                    Logger?.Information("该分割线只有" + orderPts.Count.ToString() + "个交点" + "\n");
+                    Logger?.Information("起始点："+ line.StartPoint.ToString()+"终点："+ line.EndPoint.ToString()+"的分割线不符合要求" + "\n");
+                    Active.Editor.WriteMessage("该分割线只有"+ orderPts.Count.ToString() + "个交点" + "\n");
+                    Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString() + "\n");
+                    Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString() + "\n");
                     return false;
                 }
                 // Check if two intersection points on the segline are the same

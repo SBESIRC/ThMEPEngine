@@ -13,7 +13,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.PartitionLayout;
-
+using ThMEPArchitecture.ViewModel;
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
     public class LayoutParameter:IDisposable
@@ -149,7 +149,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             Id2AllSubAreaDic.ForEach(e => e.Value.Dispose());
             Id2AllSubAreaDic.Clear();
 
-            SubAreaId2BuildingBlockDic.Clear();//这个暂时不支持dispose
+            SubAreaId2BuildingBlockDic.Clear();
 
             foreach (var lines in Id2AllSegLineDic.Values)
             {
@@ -204,6 +204,88 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             SegLineIndexDic.Clear();
         }
 
+        public bool IsVaildGenome(List<Gene> Genome, ParkingStallArrangementViewModel parameterViewModel)
+        {
+            var tmpBoundary = OuterBoundary.Clone() as Polyline;
+            var tmpSegLines = new List<Line>();
+            var tmpSegLineIndexDic = new Dictionary<int, Line>();
+            List<Polyline> areas = null;
+            try
+            {
+                for (int i = 0; i < Genome.Count; i++)
+                {
+                    Gene gene = Genome[i];
+                    var line = gene.ToLine();
+                    tmpSegLines.Add(line);
+                    tmpSegLineIndexDic.Add(i, line);
+                }
+                if (SeglineNeighborIndexDic is null)
+                {
+                    //If in automation mode
+                    //
+                    areas.Add(tmpBoundary);
+
+                    //init splitting lines
+                    for (int i = 0; i < Genome.Count; i++)
+                    {
+                        Gene gene = Genome[i];
+                        Split(gene, ref areas);
+                    }
+                }
+                else
+                {
+                    //If in manual mode
+                    //
+                    areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
+                }
+
+                if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
+                {
+                    return false;//必定是个不合理的解
+                }
+
+                double areaTolerance = 1.0;//面积容差
+                double areasTotalArea = 0;//分割后区域总面积
+                areas.ForEach(a => areasTotalArea += a.Area);
+                if (areasTotalArea - areaTolerance > OuterBoundary.Area)
+                {
+                    return false;//分割后的总面积不能大于原始面积
+                }
+                foreach (var area in areas)
+                {
+                    //var areaSPIdx = new ThCADCoreNTSSpatialIndex(new List<Polyline> { area });
+                    // 求area和building的交集
+                    var buildLines = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
+                    var pts = area.Intersect(OuterBoundary, Intersect.OnBothOperands);
+
+                    if (buildLines.Count == 0)// 区域内没有建筑
+                    {
+                        if (area.Area < 0.25 * (parameterViewModel.RoadWidth * parameterViewModel.RoadWidth))//区域面积小于车道宽的平方
+                        {
+                            return false;
+                        }
+                        if (pts.Count == 0)//空腔
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message);               
+            }
+            finally
+            {
+                tmpBoundary?.Dispose();
+                tmpSegLines?.ForEach(l => l.Dispose());
+                areas?.ForEach(a => a.Dispose());
+                tmpSegLineIndexDic.Clear();
+                tmpSegLineIndexDic = null;
+            }
+
+            return true;
+        }
         public bool Set(List<Gene> genome)
         {
             Clear();//清空所有参数
@@ -221,6 +303,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             
             if(SeglineNeighborIndexDic is null)
             {
+                //If in automation mode
+                //
                 areas.Add(tmpBoundary);
 
                 //init splitting lines
@@ -232,8 +316,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             else
             {
+                //If in manual mode
+                //
                 areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
             }
+
             if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
             {
                 return false;//必定是个不合理的解
@@ -281,14 +368,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 SubAreaId2BuildingBlockDic.Add(i, buildingBlocksInSubArea);
                 var segLines = GetSegLines(Areas[i], out List<int> lineNums);
 
-                //continue; //700m
-
                 Id2AllSegLineDic.Add(i, segLines);
                 AreaSegLineDic.Add(i, lineNums);
                 SubAreaId2SegsDic.Add(i, GetAreaSegs(Areas[i], Id2AllSegLineDic[i], out List<Polyline> areaWall));
                 SubAreaId2OuterWallsDic.Add(i, areaWall);
-
-                //continue; //900
 
                 var bdBoxes = new List<Polyline>();//临时建筑物外包线
                 var allCuttersInSubArea = new List<List<Polyline>>();//临时建筑物框线
@@ -309,12 +392,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         return false;
                     }
                 }
-
-                //continue; //1.5
-
-                //todo: area main diretion related stuff
-                //GetPtNumAndDir(lineNums, out List<int> pointNums, out List<int> directions);
-                //SubAreaSeg( i,  areas, pointNums, directions, bdBoxes);
             }
             return true;
         }
