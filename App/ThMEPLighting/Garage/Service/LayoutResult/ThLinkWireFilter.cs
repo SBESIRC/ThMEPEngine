@@ -17,11 +17,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection LinkWires { get; set; }
         private ThQueryPointService PointQuery { get; set; }
         private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
+        public ThLinkWireFilter()
+        {
+            //
+        }
         public ThLinkWireFilter(DBObjectCollection linkWires, Point3dCollection lightPositions)
         {
             LinkWires = linkWires;
             PointQuery = new ThQueryPointService(lightPositions.OfType<Point3d>().ToList());
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(linkWires);
+        }
+        public virtual void Filter()
+        {
+            //
         }
         public DBObjectCollection FilterBranch(List<Line> edges)
         {
@@ -179,5 +187,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 return null;
             }
         }
+        
     }
+    
 }

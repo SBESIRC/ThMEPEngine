@@ -38,7 +38,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         public override void Build()
         {
-
             // 灯线线槽
             if(YnBuildCableTray)
             {

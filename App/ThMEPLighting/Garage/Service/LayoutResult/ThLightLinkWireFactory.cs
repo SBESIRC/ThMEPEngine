@@ -1,13 +1,13 @@
-﻿using System;
+﻿using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -22,38 +22,44 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         public override void Build()
         {
-            var breakLines = new List<Line>();
+            var lights = new DBObjectCollection();
             LightEdges.ForEach(e =>
             {
                 var dir = e.Edge.LineDirection();
-                e.LightNodes.ForEach(n => breakLines.Add(CalculateBreakLine(n, dir)));
+                e.LightNodes.ForEach(n => lights.Add(CalculateBreakLine(n, dir,LampLength)));
             });
-
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(breakLines.ToCollection());
-            Func<Line, List<Line>> Query = (Line l) =>
-             {
-                 var poly = ThDrawTool.ToRectangle(l.StartPoint, l.EndPoint, 2.0);
-                 var objs = spatialIndex.SelectCrossingPolygon(poly);
-                 return objs.OfType<Line>().ToList();
-             };
-
-
-            LightEdges.ForEach(e =>
-            {
-                var lines = Query(e.Edge);
-                lines = lines.Where(l => 
-                ThGeometryTool.IsCollinearEx(e.Edge.StartPoint, e.Edge.EndPoint, l.StartPoint, l.EndPoint)).ToList();
-                var res = e.Edge.Difference(lines);
-                res.ForEach(l => Results.Add(l));
-            });
+            Results = ThLinkWireBreakService.Break(LightEdges.Select(o => o.Edge).ToCollection(), lights);
         }
 
-        private Line CalculateBreakLine(ThLightNode lightNode,Vector3d dir)
+        private Line CalculateBreakLine(ThLightNode lightNode,Vector3d dir,double lampLength)
         {
-            var sideBreakLength = DefaultNumbers.Contains(lightNode.Number) ? 0.0 : LampSideIntervalLength;
-            var pt1 = lightNode.Position - dir.MultiplyBy(LampLength / 2.0 + sideBreakLength);
-            var pt2 = lightNode.Position + dir.MultiplyBy(LampLength / 2.0 + sideBreakLength);
+            var pt1 = lightNode.Position - dir.MultiplyBy(lampLength / 2.0);
+            var pt2 = lightNode.Position + dir.MultiplyBy(lampLength / 2.0);
             return new Line(pt1, pt2);
+        }
+       
+    }
+    internal class ThLinkWireBreakService
+    {
+        public static DBObjectCollection Break(DBObjectCollection wires, DBObjectCollection lights)
+        {
+            var results = new DBObjectCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(lights);
+            wires.OfType<Line>().ForEach(e =>
+            {
+                var lines = Query(spatialIndex, e);
+                lines = lines.Where(l =>
+                ThGeometryTool.IsCollinearEx(e.StartPoint, e.EndPoint, l.StartPoint, l.EndPoint)).ToList();
+                var res = e.Difference(lines);
+                res.ForEach(l => results.Add(l));
+            });
+            return results;
+        }
+        private static List<Line> Query(ThCADCoreNTSSpatialIndex spatialIndex, Line line)
+        {
+            var poly = ThDrawTool.ToRectangle(line.StartPoint, line.EndPoint, 2.0);
+            var objs = spatialIndex.SelectCrossingPolygon(poly);
+            return objs.OfType<Line>().ToList();
         }
     }
 }

@@ -498,7 +498,6 @@ namespace ThMEPLighting.Garage
             //单位化、修正方向
             return lines.Select(o => ThGarageLightUtils.NormalizeLaneLine(o)).ToList();
         }
-        
         public static Tuple<Line, Point3d> FindPriorityStart(this List<Line> lines,double tolerance=1.0)
         {
             var instance = ThQueryLineService.Create(lines);
@@ -537,7 +536,6 @@ namespace ThMEPLighting.Garage
             });
             return results;
         }
-
         public static Point3dCollection RemoveNeibourDuplicatedPoints(this Point3dCollection pts, double tolerance = 1.0)
         {
             // pts是一段Polyline的点集合， 移除相邻的重复点
@@ -560,7 +558,6 @@ namespace ThMEPLighting.Garage
             }
             return result;
         }
-
         public static Polyline BufferPath(this Polyline path, double offsetDis,bool isSingle=true)
         {
             var poly = new Polyline();
@@ -624,6 +621,16 @@ namespace ThMEPLighting.Garage
         public static void ThDispose(this DBObjectCollection dbObjs)
         {
             dbObjs.OfType<DBObject>().ToList().ForEach(o => o.Dispose());
+        }
+        public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> keyValuePairs)
+        {
+            var dict = new Dictionary<TKey, TValue>();
+            var dictAsIDictionary = (IDictionary<TKey, TValue>)dict;
+            foreach (var property in keyValuePairs)
+            {
+                (dictAsIDictionary).Add(property);
+            }
+            return dict;
         }
     }
 }

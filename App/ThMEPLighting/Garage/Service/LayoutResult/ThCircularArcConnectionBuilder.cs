@@ -9,8 +9,6 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
-using System;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -44,97 +42,96 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         private void BuildSingleRow()
         {
-            // 创建连接线，按照灯长度把灯所在的边打断
+            // *** 创建连接线
             var edges = GetEdges();
-            var linkWireObjs = CreateSingleRowLinkWire(edges); 
+            CreateLinkWire(DefaultNumbers[0], edges); 
+            CreateSingleRowJumpWire(Graphs);
+            CreateSingleRowBranchCornerJumpWire(Graphs);
 
-            // 建议允许最大的回路编号是4
-            var sameLinkJumpWireRes = CreateSingleRowJumpWire(Graphs);
-            var branchCornerJumpWireRes = CreateSingleRowBranchCornerJumpWire(Graphs);
+            // *** 过滤多余的线
+            var linkWires = FindWires(DefaultNumbers[0]);
+            linkWires = FilerLinkWire(linkWires, edges, LightPositionDict);
+            var jumpWires = FilterJumpWire();
 
-            // 过滤分支上的线
-            var totalEdges = GetEdges();
-            linkWireObjs = FilterSingleRowLinkWire(linkWireObjs, totalEdges, branchCornerJumpWireRes.Item2);
+            // *** 用非默认编号打断默认灯线
+            linkWires = BreakWire(linkWires);
 
-            // 收集创建的线            
-            Wires = Wires.Union(sameLinkJumpWireRes);
-            Wires = Wires.Union(branchCornerJumpWireRes.Item1);
-            Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength);
+            // *** 收集创建的线
+            Wires = Wires.Union(linkWires);
+            Wires = Wires.Union(jumpWires);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = MergeWire(Wires);
         }
 
         private void BuildDoubleRow()
         {
             var totalEdges = GetEdges();
-
-            // 将1、2线边上的灯线用灯块打断，并过滤末端
-            var linkWireObjs = CreateDoubleRowLinkWire(totalEdges);
-            linkWireObjs = FilterDoubleRowLinkWire(linkWireObjs, totalEdges);
-
+            // *** 创建
+            // 将1、2线边上的灯线用灯块打断
+            CreateDoubleRowLinkWire(totalEdges);
             // 创建直段上的跳线(类似于拱形)
-            var jumpWireRes = CreateDoubleRowJumpWire(totalEdges);
+            CreateDoubleRowJumpWire(totalEdges);
+            // 连接弯头跨区
+            CreateElbowStraitLinkJumpWire(totalEdges);
+            // 连接T型跨区
+            CreateThreeWayCornerStraitLinksJumpWire(totalEdges);
+            // 创建十字路口的线
+            CreateCrossCornerStraitLinkJumpWire(totalEdges);
+
+            // *** 过滤
+            var linkWires = new DBObjectCollection();
+            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.First), DefaultNumbers[0]);
+            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
+            linkWires = linkWires.Union(firstLinkWires);
+            linkWires = linkWires.Union(secondLinkWires);
+            // 过滤跳接线
+            var jumpWireRes = FilterJumpWire();
+
+            // *** 把非默认灯两边打断 
+            linkWires = BreakWire(linkWires);
+
+            // *** 打断 + 合并
+            Wires = Wires.Union(linkWires);
+            Wires = Wires.Union(jumpWireRes);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
+            Wires = MergeWire(Wires);
+
             // 与灯具避梁
             //var avoidService = new ThCircularArcConflictAvoidService(
             //    ArrangeParameter.LampLength, jumpWireRes, LightPositionDict);
             //avoidService.Avoid();
             //jumpWireRes = avoidService.Results;
-
-            // 连接弯头跨区
-            var elbowJumpWireRes = CreateElbowStraitLinkJumpWire(totalEdges);
-
-            // 连接T型跨区
-            var threewayJumpWireRes = CreateThreeWayCornerStraitLinksJumpWire(totalEdges);
-
-            // 创建十字路口的线
-            var crossJumpWireRes = CreateCrossCornerStraitLinkJumpWire(totalEdges);
-
-            // 收集创建的线            
-            Wires = Wires.Union(jumpWireRes);
-            Wires = Wires.Union(elbowJumpWireRes);
-            Wires = Wires.Union(crossJumpWireRes);
-            Wires = Wires.Union(threewayJumpWireRes);
-            Wires = Wires.Union(linkWireObjs); // 切记：请在BreakWire之后，添加进去
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
-            Wires = MergeWire(Wires);
         }
 
-        private DBObjectCollection CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
+        private void CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
         {
             var results = new DBObjectCollection();
             graphs.ForEach(g =>
             {
                 var sameLinks = FindLightNodeLinkOnSamePath(g.Links);
-                var branchBwtweenLinks = FindLightNodeLinkOnBetweenBranch(g);
-                branchBwtweenLinks = branchBwtweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
+                var branchBetweenLinks = FindLightNodeLinkOnBetweenBranch(g);
+                branchBetweenLinks = branchBetweenLinks.Where(o => !IsExsited(sameLinks, o)).ToList();
                 BuildSameLink(sameLinks);               
-                BuildSameLink(branchBwtweenLinks);
-                sameLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-                branchBwtweenLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                BuildSameLink(branchBetweenLinks);
+                sameLinks.ForEach(l => AddToLoopWireGroup(l));
+                branchBetweenLinks.ForEach(l => AddToLoopWireGroup(l));
             });
-            return results;
         }
 
-        private Tuple<DBObjectCollection, List<Tuple<Line, Point3d>>>
-            CreateSingleRowBranchCornerJumpWire(List<ThLightGraphService> graphs)
+        private void CreateSingleRowBranchCornerJumpWire(List<ThLightGraphService> graphs)
         {
             // 连接主分支到分支的跳线
-            var wires = new DBObjectCollection();
-            var branchPtPairs = new List<Tuple<Line, Point3d>>();
             graphs.ForEach(g =>
             {
-                var res = FindLightNodeLinkOnMainBranch(g);
-                BuildBranchCornerLink(res.Item1);
-                res.Item1.SelectMany(l => l.JumpWires).ForEach(e => wires.Add(e));
-                branchPtPairs.AddRange(res.Item2);
+                var nodeLinks = FindLightNodeLinkOnMainBranch(g);
+                BuildBranchCornerLink(nodeLinks);
+                nodeLinks.ForEach(l => AddToLoopWireGroup(l));
             });
-            return Tuple.Create(wires, branchPtPairs);
         }
 
-        private DBObjectCollection CreateDoubleRowJumpWire(List<ThLightEdge> edges)
+        private void CreateDoubleRowJumpWire(List<ThLightEdge> edges)
         {
             // 绘制同一段上的具有相同编号的跳线
-            var results = new DBObjectCollection();
             var graphs = BuildGraphs(edges);
             graphs.ForEach(g =>
             {
@@ -143,10 +140,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 branchBwtweenLinks = branchBwtweenLinks.Where(o => !IsExsited(lightNodeLinks, o)).ToList();
                 BuildSameLink(lightNodeLinks);
                 BuildSameLink(branchBwtweenLinks);
-                lightNodeLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
-                branchBwtweenLinks.SelectMany(l => l.JumpWires).ForEach(e => results.Add(e));
+                lightNodeLinks.ForEach(l => AddToLoopWireGroup(l));
+                branchBwtweenLinks.ForEach(l => AddToLoopWireGroup(l));
             });
-            return results;
         }
 
         private void BuildSameLink(List<ThLightNodeLink> lightNodeLinks)
@@ -162,7 +158,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             };
             jumpWireFactory.Build();
         }
-
 
         private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
         {

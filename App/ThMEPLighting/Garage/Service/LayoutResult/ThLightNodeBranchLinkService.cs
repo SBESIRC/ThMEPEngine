@@ -21,12 +21,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<ThLightEdge> Edges => Graph.GraphEdges;
         private List<ThLinkPath> Links => Graph.Links;
         private List<Line> EdgeLines => Edges.Select(o => o.Edge).ToList();
-        public List<Tuple<Line, Point3d>> BranchPtPairs { get; private set; } //获取分支点,用于过滤
         public ThLightNodeBranchLinkService(ThLightGraphService graph)
         {
             Graph = graph;
             DefaultStartNumber = "";
-            BranchPtPairs = new List<Tuple<Line, Point3d>>();
         }
         public List<ThLightNodeLink> LinkMainBranch()
         {
@@ -268,14 +266,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item1, branch1LinkNodes, branch2LinkNodes));
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item2, branch1LinkNodes, branch2LinkNodes));
-            //
-            results.ForEach(o =>
-            {
-                var secondLightEdge = FindEdgeByNode(branch1LinkPath.Edges.Union(branch2LinkPath.Edges).ToList(), o.Second.Id);
-                var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
-                var secondEdge = secondLightLinkPath.Edges.First();
-                AddToBranchPtPairs(secondEdge.Edge, secondLightLinkPath.Start);
-            });
             return results;
         }
         private List<ThLightNodeLink> LinkMainBranch(ThLightEdge mainEdge, ThLightEdge branchEdge)
@@ -298,11 +288,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var branchLinkNodes = FindBranchLinkNodes(branchLinkPath.Edges, branchEdge);
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item1, branchLinkNodes, new List<ThLightNode>()));
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item2, branchLinkNodes, new List<ThLightNode>()));
-            //
-            if (results.Count>0)
-            {
-                AddToBranchPtPairs(branchEdge.Edge, linkPt.Value);
-            }
             return results;
         }
         private List<ThLightNodeLink> LinkMainBranch(ThLightEdge mainEdge, ThLightEdge branch1Edge, ThLightEdge branch2Edge)
@@ -327,27 +312,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var branch1LinkNodes = FindBranchLinkNodes(branch1LinkPath.Edges, branch1Edge);
             var branch2LinkNodes = FindBranchLinkNodes(branch2LinkPath.Edges, branch2Edge);
             results.AddRange(FindNodeLinks(mainLinkNodes, branch1LinkNodes, branch2LinkNodes));
-            // 
-            results.ForEach(o =>
-            {
-                var secondLightEdge = FindEdgeByNode(branch1LinkPath.Edges.Union(branch2LinkPath.Edges).ToList(), o.Second.Id);
-                var secondLightLinkPath = FindLinkPath(secondLightEdge.Id);
-                var secondEdge = secondLightLinkPath.Edges.First();
-                AddToBranchPtPairs(secondEdge.Edge, secondLightLinkPath.Start);
-            });
             return results;
         }
-        private void AddToBranchPtPairs(Line branch,Point3d crossPt)
-        {
-            bool isExist = BranchPtPairs
-                .Where(o => new List<Line> { o.Item1 }.Contains(branch))
-                .Where(o => crossPt.IsEqualTo(o.Item2, new Tolerance(1.0, 1.0)))
-                .Any();
-            if (!isExist)
-            {
-                BranchPtPairs.Add(Tuple.Create(branch, crossPt));
-            }
-        }
+       
         private Tuple<List<ThLightNode>, List<ThLightNode>> FindPreNextNodes(
             List<ThLightEdge> linkPathEdges,ThLightEdge preEdge,Point3d branchPt)
         {
@@ -367,15 +334,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .ToList();
             return Tuple.Create(prevLinkNodes, nextLinkNodes);
         }
-
-        //private List<ThLightNode> FindBranchLinkNodes(
-        //    List<ThLightEdge> linkPathEdges, ThLightEdge branchEdge, Point3d branchPt)
-        //{
-        //    var currentEdges = GetEdgeSamePathSegment(linkPathEdges, branchEdge.Id);
-        //    var linkNodes = TakeLightNodes(currentEdges, branchPt, NumberLoop);
-        //    linkNodes = DifferentByNumber(linkNodes);
-        //    return linkNodes;
-        //}
         private List<ThLightNode> FindBranchLinkNodes(
             List<ThLightEdge> linkPathEdges, ThLightEdge branchEdge)
         {

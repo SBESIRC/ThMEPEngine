@@ -14,7 +14,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     internal class ThLightRouteService
     {
-        private bool IsTraverseLightMidPoint = false;
+        public bool IsTraverseLightMidPoint { get; set; } 
         private DBObjectCollection Wires { get; set; }
         private DBObjectCollection Lights { get; set; }
         private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
@@ -28,6 +28,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Wires = wires;
             Lights = lights;
             Links = new List<ThLightLink>();
+            IsTraverseLightMidPoint=false;
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(Wires);
             LightSpatialIndex = new ThCADCoreNTSSpatialIndex(Lights);
             Lights.OfType<Curve>().ForEach(o => LightId.Add(o, Guid.NewGuid().ToString()));
@@ -171,6 +172,32 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public static ThLightLink Create(ThLinkEntity source, ThLinkEntity target, List<Curve> wires)
         {
             return new ThLightLink(source, target, wires);
+        }
+        /// <summary>
+        /// 连线的长度
+        /// </summary>
+        public double Length
+        {
+            get
+            {
+                return Sum();
+            }
+        }
+        private double Sum()
+        {
+            var length = 0.0;
+            foreach(Curve wire in Wires)
+            {
+                if(wire is Line line)
+                {
+                    length += line.Length;
+                }
+                else if(wire is Arc arc)
+                {
+                    length += arc.Length;
+                }
+            }
+            return length;
         }
     }
     class ThLinkEntity
