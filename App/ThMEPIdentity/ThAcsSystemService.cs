@@ -58,6 +58,11 @@ namespace ThMEPIdentity
         public string UserId => Response.ContainsName("UserId") ? Response["UserId"] : string.Empty;
 
         /// <summary>
+        /// 工号
+        /// </summary>
+        public string EmployeeId => Response.ContainsName("WorkNo") ? Response["WorkNo"] : string.Empty;
+
+        /// <summary>
         /// 项目编号
         /// </summary>
         public string ProjectNumber => Response.ContainsName("PrjNo") ? Response["PrjNo"] : string.Empty;
