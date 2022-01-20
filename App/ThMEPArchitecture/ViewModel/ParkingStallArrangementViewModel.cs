@@ -14,6 +14,18 @@ namespace ThMEPArchitecture.ViewModel
 
     public class ParkingStallArrangementViewModel : NotifyPropertyChangedBase
     {
+        private bool _usePolylineAsObstacle = true;
+
+        public bool UsePolylineAsObstacle
+        {
+            get { return _usePolylineAsObstacle; }
+            set
+            {
+                _usePolylineAsObstacle = value;
+                RaisePropertyChanged("UsePolylineAsObstacle");
+            }
+        }
+
         private CommandTypeEnum _CommandType = CommandTypeEnum.RunWithoutIteration;
         public CommandTypeEnum CommandType
         {

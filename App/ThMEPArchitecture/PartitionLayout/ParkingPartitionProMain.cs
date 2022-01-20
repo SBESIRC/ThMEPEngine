@@ -243,9 +243,9 @@ namespace ThMEPArchitecture.PartitionLayout
                 LogMomery("Before PostProcess : ");
                 PostProcess();
                 LogMomery("After PostProcess : ");
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.WaitForFullGCComplete();
+                //GC.Collect();
+                //GC.WaitForPendingFinalizers();
+                //GC.WaitForFullGCComplete();
                 LogMomery("After GCinPartition : ");
             }
         }

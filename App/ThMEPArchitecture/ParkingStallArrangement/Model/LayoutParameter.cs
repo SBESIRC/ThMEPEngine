@@ -46,6 +46,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Dictionary<int, List<int>> SeglineNeighborIndexDic { get; set; }//分割线临近线
 
         public int SegAreasCnt { get; set; }//初始分割线
+        public bool UsePline { get; set; }//建筑物框线，true使用polyline，false使用hatch
+        private Serilog.Core.Logger Logger { get; set; }
 
         private ThCADCoreNTSSpatialIndex _AllShearwallSpatialIndex = null;
 
@@ -59,7 +61,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     var allCuttersList = new List<List<Polyline>>();//临时建筑物框线
                     foreach (BlockReference buildingBlock in BuildingBlocks)
                     {
-                        var cuttersInBuilding = buildingBlock.GetCutters();
+                        var cuttersInBuilding = buildingBlock.GetCutters(UsePline, Logger);
 //#if DEBUG
 //                        using (AcadDatabase currentDb = AcadDatabase.Active())
 //                        {
@@ -105,7 +107,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
         }
         public LayoutParameter(Polyline outerBoundary, DBObjectCollection buildingBlocks, List<Line> segLines, Dictionary<int, List<int>> ptDic, Dictionary<int, bool> directionList,
-            Dictionary<LinePairs, int> linePtDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null, int segAreasCnt = 0)
+            Dictionary<LinePairs, int> linePtDic, Dictionary<int, List<int>> seglineNeighborIndexDic = null, 
+            int segAreasCnt = 0, bool usePline = true, Serilog.Core.Logger logger = null)
         {
             InitialWalls = outerBoundary.Clone() as Polyline;
             OuterBoundary = outerBoundary;
@@ -134,6 +137,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             LinePtDic = linePtDic;
             SeglineNeighborIndexDic = seglineNeighborIndexDic;
             SegAreasCnt = segAreasCnt;
+            UsePline = usePline;
+            Logger = logger;
         }
 
         public void Clear()
@@ -792,18 +797,43 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
 
     public static class Plines
     {
-        public static List<Polyline> GetCutters(this BlockReference br)
+        public static List<Polyline> GetCutters(this BlockReference br, bool usePline = true, Serilog.Core.Logger Logger = null)
         {
             var plines = new List<Polyline>();
             var dbObjs = new DBObjectCollection();
             br.Explode(dbObjs);
             foreach (var obj in dbObjs)
             {
-                if (obj is Polyline pline)
+                if(usePline)
                 {
-                    if(pline.Closed)
+                    if (obj is Polyline pline)
                     {
-                        plines.Add(pline);
+                        if (pline.Closed)
+                        {
+                            plines.Add(pline);
+                        }
+                        else
+                        {
+                            Logger?.Information("存在不闭合的多段线！");
+                        }
+                    }
+                }
+                else
+                {
+                    //use hatch
+                    if(obj is Hatch hatch)
+                    {
+                        var pl = (Polyline)hatch.Boundaries()[0];
+                        var plrec = pl.GeometricExtents;
+                        var rec = hatch.GeometricExtents;
+                        if (plrec.GetCenter().DistanceTo(rec.GetCenter()) > 1)
+                        {
+                            pl.TransformBy(Matrix3d.Mirroring(new Line3d(new Point3d(0, 0, 0), new Point3d(0, 1, 0))));
+                            plrec = pl.GeometricExtents;
+                            var vec = new Vector3d(rec.MinPoint.X - plrec.MinPoint.X, rec.MinPoint.Y - plrec.MinPoint.Y, 0);
+                            pl.TransformBy(Matrix3d.Displacement(vec));
+                        }
+                        plines.Add(pl);
                     }
                 }
             }

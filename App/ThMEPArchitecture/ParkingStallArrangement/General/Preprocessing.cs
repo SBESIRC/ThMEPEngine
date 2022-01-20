@@ -24,7 +24,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
     public static class Preprocessing
     {
-        public static bool DataPreprocessing(AcadDatabase acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false)
+        public static bool DataPreprocessing(AcadDatabase acadDatabase, out GaParameter gaPara, out LayoutParameter layoutPara, 
+            Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder,Logger);
             gaPara = new GaParameter();
@@ -69,7 +70,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 directionList.Add(num, flag);//默认给全横向
             }
             layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, 
-                seglineIndexDic, segAreasCnt);
+                seglineIndexDic, segAreasCnt, usePline, Logger);
 
             return true;
         }
