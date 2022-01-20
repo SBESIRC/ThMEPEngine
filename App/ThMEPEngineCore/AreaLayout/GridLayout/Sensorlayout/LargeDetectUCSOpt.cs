@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using Linq2Acad;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Overlay;
@@ -83,7 +84,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                     dblayout.Rotate(center, -angle);
                     tarlayout = dblayout.ToNTSPolygon();
                 }
-                if (tarlayout != null)
+                if (tarlayout != null && tarlayout.Area > 10)
                     this.layouts.Add(tarlayout);
             }
             //提取旋转后的探测区域

@@ -108,6 +108,8 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout
                 foreach (var column in inputArea.columns)
                     holesInLayout.Add(column.ToNTSPolygon());
                 var layoutRegion = NTSlayout.Difference(OverlayNGRobust.Union(holesInLayout.ToArray()));
+                if (layout.Area < 200)
+                    continue;
                 if (layoutRegion is Polygon polygon)
                     layouts.Add(polygon);
                 else if (layoutRegion is MultiPolygon multi)
