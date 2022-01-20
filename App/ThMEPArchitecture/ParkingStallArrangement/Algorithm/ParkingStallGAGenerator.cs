@@ -194,6 +194,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var partitionpro = new ParkingPartitionPro();
                     ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
                     try
                     {
                         var partitionBoundary = new PartitionBoundary(partitionpro.Boundary.Vertices());

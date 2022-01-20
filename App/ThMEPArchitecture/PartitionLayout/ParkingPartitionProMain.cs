@@ -59,6 +59,7 @@ namespace ThMEPArchitecture.PartitionLayout
         public List<Polyline> Walls;
         public List<Polyline> Obstacles;
         public Polyline Boundary;
+        public Polyline OutBoundary;
         private Polyline BoundingBox;
         private double MaxLength;
         public ThCADCoreNTSSpatialIndex ObstaclesSpatialIndex;
@@ -108,6 +109,34 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void InitialzeDatas(List<Line> iniLanes)
         {
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (count > 10) break;
+                if (iniLanes.Count < 2) break;
+                for (int i = 0; i < iniLanes.Count - 1; i++)
+                {
+                    var joined = false;
+                    for (int j = i + 1; j < iniLanes.Count; j++)
+                    {
+                        if (IsParallelLine(iniLanes[i], iniLanes[j]) && (iniLanes[i].StartPoint.DistanceTo(iniLanes[j].StartPoint) == 0
+                            || iniLanes[i].StartPoint.DistanceTo(iniLanes[j].EndPoint) == 0
+                            || iniLanes[i].EndPoint.DistanceTo(iniLanes[j].StartPoint) == 0
+                            || iniLanes[i].EndPoint.DistanceTo(iniLanes[j].EndPoint) == 0))
+                        {
+                            var pl = JoinCurves(new List<Polyline>(), new List<Line>() { iniLanes[i], iniLanes[j] }).Cast<Polyline>().First();
+                            var line=new Line(pl.StartPoint, pl.EndPoint);
+                            iniLanes.RemoveAt(j);
+                            iniLanes.RemoveAt(i);
+                            iniLanes.Add(line);
+                            joined = true;
+                            break;
+                        }
+                    }
+                    if (joined) break;
+                }
+            }
             foreach (var e in iniLanes)
             {
                 var vec = CreateVector(e).GetPerpendicularVector().GetNormal();
@@ -117,6 +146,26 @@ namespace ThMEPArchitecture.PartitionLayout
                 IniLanes.Add(new Lane(e, vec));
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Vertices().Cast<Point3d>()));
+        }
+
+        public bool Validate()
+        {
+            double length_judge_lane_nextto_wall = 30000;
+            var lines = IniLanes.Select(e => e.Line);
+            var pls = lines.Select(l => l.Buffer(DisLaneWidth / 2));
+            var segs = new List<Curve>();
+            try
+            {
+                segs = SplitCurve(OutBoundary, pls.ToCollection()).Where(e => IsInAnyBoxes(e.GetPointAtParam(e.EndParam / 2), pls.ToList())).ToList();
+            }
+            catch
+            {
+                return true;
+            }
+            double length = 0;
+            segs.ForEach(e => length += e.GetLength());
+            if (length > length_judge_lane_nextto_wall) return false;
+            return true;
         }
 
         public void Dispose()
