@@ -41,17 +41,8 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                ////Get MPolygon
-                //var objs = new DBObjectCollection();
-                //objs.Add(frame);
-                //foreach (var hole in holeList)// --------------------------------------------
-                //{
-                //    hole.Closed = true;
-                //    objs.Add(hole);
-                //}
-                //MPolygon roomForCenterLine = objs.BuildMPolygon();
-
                 GetRoomHoleMPoly(out var roomForCL);
+                roomForCL = roomForCL.Buffer(1, true)[0] as MPolygon;
                 DrawUtils.ShowGeometry(roomForCL, "l0roomForCL", 123, 30);
                 if (layoutList.Count == 0)
                 {
@@ -62,10 +53,10 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Command
                 centerLinePts.ForEach(x => DrawUtils.ShowGeometry(x, "l0centerline", 1, 25, 30, "X"));
 
                 GetRoomMPoly(out var roomForBlind, out var nonDeployableArea);
-                DrawUtils.ShowGeometry(roomForBlind, "l0roomForBlind", 233, 30);
+                //DrawUtils.ShowGeometry(roomForBlind, "l0roomForBlind", 233, 30);
 
                 GetLayoutMPoly(out var layoutForPlace);
-                layoutForPlace.ForEach(x => DrawUtils.ShowGeometry(x, "l0layoutForPlace", 190, 30));
+                //layoutForPlace.ForEach(x => DrawUtils.ShowGeometry(x, "l0layoutForPlace", 190, 30));
 
                 //计算布置点位
                 var layoutServer = new LayoutOpt()

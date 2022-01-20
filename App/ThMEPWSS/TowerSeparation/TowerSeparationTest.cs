@@ -47,11 +47,12 @@ namespace ThMEPWSS.SprinklerConnect.Cmd
                 var geos = dataset.Create(acadDatabase.Database, frame.Vertices()).Container;
                 var dataQuery = new ThSprinklerDataQueryService(geos);
                 dataQuery.ClassifyData();
+                dataQuery.Print();
                 var TowerExtractor = new TowerExtractor();
 
                 //DrawUtils.ShowGeometry(dataQuery.ShearWallList, "testForPolyline", 2);
                 var shearWalls = TowerExtractor.Extractor(dataQuery.ShearWallList, frame);
-                DrawUtils.ShowGeometry(shearWalls, "testForExtractor", 1);
+                DrawUtils.ShowGeometry(shearWalls, "l0testForExtractor", 1);
 
                 //foreach(Polyline l in shearWalls)
                 //{
