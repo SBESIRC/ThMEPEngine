@@ -1,142 +1,140 @@
 ﻿using System;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
     internal class ThLinkWireFilter
     {
-        private DBObjectCollection LinkWires { get; set; }
-        private ThQueryPointService PointQuery { get; set; }
-        private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
-        public ThLinkWireFilter()
+        /*
+         *  --------***-------***-------***--------***---------
+         *   --- 代表在Edge上创建的线 Wires
+         *   *** 代表默认灯自己的线 Lights
+         *   目的是为了过滤此类的线: 一端连着灯，一端未连灯
+         *   一个编号代表一个回路，每个回路都有自己连接的线
+         */
+        #region ---------- input ------------
+        /// <summary>
+        /// 灯线
+        /// </summary>
+        private DBObjectCollection Wires { get; set; }
+        /// <summary>
+        /// 灯
+        /// </summary>
+        private DBObjectCollection Lights { get; set; }
+
+        #endregion
+        #region ---------- output ----------
+        public DBObjectCollection Results { get; private set; }
+        #endregion
+
+        public ThLinkWireFilter(
+            DBObjectCollection wires,
+            DBObjectCollection lights)
         {
-            //
+            Wires = wires;
+            Lights = lights;
+            Results = new DBObjectCollection();
         }
-        public ThLinkWireFilter(DBObjectCollection linkWires, Point3dCollection lightPositions)
+
+        public void Filter()
         {
-            LinkWires = linkWires;
-            PointQuery = new ThQueryPointService(lightPositions.OfType<Point3d>().ToList());
-            WireSpatialIndex = new ThCADCoreNTSSpatialIndex(linkWires);
-        }
-        public virtual void Filter()
-        {
-            //
-        }
-        public DBObjectCollection FilterBranch(List<Line> edges)
-        {
-            var garbages = new DBObjectCollection();
-            edges.GetThreeWays().Where(o=>o.Count==3).ForEach(o =>
+            var lightRoute = new ThLightRouteService(Wires, Lights)
             {
-                var pairs = o.GetLinePairs();
-                var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
-                if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
-                {
-                    var branch = o.FindBranch(mainPair.Item1, mainPair.Item2);
-                    var linkPt = mainPair.Item1.FindLinkPt(branch);
-                    var line = FindBranchCloseWire(branch,linkPt.Value);
-                    if (line != null)
-                    {
-                        garbages.Add(line);
-                    }
-                }
-            });
-            return Remove(LinkWires, garbages);
+                IsTraverseLightMidPoint = true,
+            };
+            lightRoute.Traverse();
+            lightRoute.Links.ForEach(l => AddToResults(l.Wires));
         }
-        public DBObjectCollection FilterBranch(List<Tuple<Line, Point3d>> branchPtPairs)
+
+        private List<ThLightLink> Select(List<ThLightLink> links)
         {
-            var garbages = new DBObjectCollection();
-            branchPtPairs.ForEach(o =>
+            var results = new List<ThLightLink>();
+            while(links.Count>0)
             {
-                var line = FindBranchCloseWire(o.Item1, o.Item2);
-                if (line != null)
-                {
-                    garbages.Add(line);
-                }
-            });
-            return Remove(LinkWires, garbages);
-        }
-        public DBObjectCollection FilterElbow(List<Line> edges)
-        {
-            var garbages = new DBObjectCollection();
-            edges.GetElbows().Where(o => o.Count == 2).ForEach(o =>
-            {
-                
-                if (!o[0].IsLessThan45Degree(o[1]))
-                {
-                    var linkPt = o[0].FindLinkPt(o[1]);
-                    var line1 = FindBranchCloseWire(o[0], linkPt.Value);
-                    if (line1 != null)
-                    {
-                        garbages.Add(line1);
-                    }
-                    var line2 = FindBranchCloseWire(o[1], linkPt.Value);
-                    if (line2 != null)
-                    {
-                        garbages.Add(line2);
-                    }
-                }
-            });
-            return Remove(LinkWires, garbages);
-        }
-        private Line FindBranchCloseWire(Line branch,Point3d crossPt)
-        {
-            var newBranch = branch.ExtendLine(-1.0);
-            var outline = CreateOutline(newBranch.StartPoint, newBranch.EndPoint,
-                ThGarageLightCommon.RepeatedPointDistance);
-            var lines = Query(outline).OfType<Line>()
-                .Where(o => branch.IsCollinear(o, 1.0)).ToList();
-            var firstLightPos = Point3d.Origin;
-            if(FindBranchCloseLight(branch, crossPt, out firstLightPos))
-            {
-                lines = Sort(lines, crossPt, firstLightPos);
-                lines = Filter(lines, crossPt, firstLightPos);
+                var first = links.First();
+                var sameIdLinks = links.Where(o => IsSourceTargetIdEqual(first, o)).ToList();
+                var shortest = sameIdLinks.OrderBy(o => o.Length).First();
+                results.Add(shortest);
+                sameIdLinks.ForEach(o => links.Remove(o));
             }
-            return lines.Count > 0 ? lines.First() : null;
-        }
-
-        private bool FindBranchCloseLight(Line branch, Point3d crossPt,out Point3d findPt)
-        {
-            findPt = Point3d.Origin;
-            var pts = Query(branch);            
-            if(pts.Count>0)
-            {
-                pts = pts.OrderBy(o => o.DistanceTo(crossPt)).ToList();
-                findPt = pts.First();
-                return true;
-            }
-            return false;
-        }
-
-        private List<Line> Sort(List<Line> lines, Point3d sp, Point3d ep)
-        {
-            // 根据sp到ep的方向
-            return lines
-                .OrderBy(e => e.GetMidPt().GetProjectPtOnLine(sp, ep).DistanceTo(sp))
-                .ToList();
-        }
-
-        private List<Line> Filter(List<Line> lines, Point3d sp, Point3d ep)
-        {
-            var line = new Line(sp, ep);
-            var results = lines
-                .Where(o => o.GetMidPt().IsPointOnCurve(line, ThGarageLightCommon.RepeatedPointDistance))
-                .ToList();
-            line.Dispose();
             return results;
         }
 
-        private Polyline CreateOutline(Point3d start,Point3d end,double width)
+        private bool IsSourceTargetIdEqual(ThLightLink first, ThLightLink second)
         {
-            return ThDrawTool.ToOutline(start, end, 1.0);
+            return (first.Source.Id == second.Source.Id && first.Target.Id == second.Target.Id) ||
+                (first.Source.Id == second.Target.Id && first.Target.Id == second.Source.Id);
+        }
+
+        private void AddToResults(List<Curve> pathLines)
+        {
+            pathLines
+                .Where(o => !Results.Contains(o))
+                .ForEach(o => Results.Add(o));
+        }
+    }
+    internal class ThJumpWireFilter
+    {
+        /*
+         *      /----------------------\      /----------------------\
+         *     /                        \    /                        \
+         *    /                          \  /                          \
+         *  ***                          ***                           ***
+         *   - / 代表跳接线（用来连接两盏灯）
+         *   *** 代表默认灯
+         *   目的是为了过滤此类的线: 一端连着灯，一端未连灯,
+         *   一个编号代表一个回路，每个回路都有自己连接的线
+         */
+        #region ---------- input ------------
+        /// <summary>
+        /// 灯线
+        /// </summary>
+        private DBObjectCollection Wires { get; set; }
+        /// <summary>
+        /// 灯坐标位置
+        /// </summary>
+        Dictionary<Point3d, Tuple<double, string>> LightPos { get; set; }
+        /// <summary>
+        /// 灯长
+        /// </summary>
+        private double LampLength { get; set; }
+        #endregion
+        private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
+        public Dictionary<Point3d, Tuple<double, string>> Results { get; private set; }
+        public ThJumpWireFilter(
+            DBObjectCollection wires,
+            Dictionary<Point3d, Tuple<double,string>> lightPos,
+            double lampLength)
+        {
+            Wires = wires;
+            LightPos = lightPos;
+            LampLength = lampLength;
+            WireSpatialIndex = new ThCADCoreNTSSpatialIndex(wires);
+            Results = new Dictionary<Point3d, Tuple<double, string>>();
+        }
+
+        public void Filter()
+        {
+            LightPos.ForEach(o =>
+            {
+                var light = ThBuildLightLineService.CreateLine(o.Key, o.Value.Item1, LampLength);
+                var extents = Extend(light.StartPoint, light.EndPoint,ThGarageLightCommon.RepeatedPointDistance);
+                var outline = CreatePolyline(extents.Item1, extents.Item2, ThGarageLightCommon.RepeatedPointDistance * 2.0);
+                var wires = Query(outline);
+                if(wires.Count == 0)
+                {
+                    Results.Add(o.Key,o.Value);
+                }
+                light.Dispose(); // 释放资源
+                outline.Dispose(); // 
+            });
         }
 
         private DBObjectCollection Query(Polyline outline)
@@ -144,50 +142,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return WireSpatialIndex.SelectCrossingPolygon(outline);
         }
 
-        private List<Point3d> Query(Line edge)
+        private Polyline CreatePolyline(Point3d start,Point3d endPt,double width)
         {
-            return PointQuery.Query(edge);
+            return ThDrawTool.ToOutline(start, endPt, width);
         }
 
-        private DBObjectCollection Remove(DBObjectCollection linkWires,DBObjectCollection garbages)
+        private Tuple<Point3d,Point3d> Extend(Point3d start, Point3d endPt,double length)
         {
-            return linkWires
-                .OfType<Entity>()
-                .Where(o => !garbages.Contains(o))
-                .ToCollection();
+            var dir = start.GetVectorTo(endPt).GetNormal();
+            var newStart = start - dir.MultiplyBy(length);
+            var newEnd = endPt + dir.MultiplyBy(length);
+            return Tuple.Create(newStart, newEnd);
         }
-
-        private DBObjectCollection FindFilterLines(DBObjectCollection linkWires)
-        {
-            var garbages = new DBObjectCollection();
-            var threeWays = linkWires.OfType<Line>().ToList().GetThreeWays();
-            threeWays
-                .Where(o => o.Count == 3)
-                .ForEach(o =>
-                {
-                    var branch = FilterLines(o);
-                    if (branch != null)
-                    {
-                        garbages.Add(branch);
-                    }
-                });
-            return garbages;
-        }
-
-        private Line FilterLines(List<Line> lines)
-        {
-            var pairs = lines.GetLinePairs();
-            var mainPair = pairs.OrderBy(k => k.Item1.GetLineOuterAngle(k.Item2)).First();
-            if (mainPair.Item1.IsLessThan45Degree(mainPair.Item2))
-            {
-                return lines.FindBranch(mainPair.Item1, mainPair.Item2);
-            }
-            else
-            {
-                return null;
-            }
-        }
-        
     }
-    
 }

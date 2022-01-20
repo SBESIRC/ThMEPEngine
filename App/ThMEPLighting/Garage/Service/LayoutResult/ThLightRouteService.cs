@@ -31,6 +31,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             IsTraverseLightMidPoint=false;
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(Wires);
             LightSpatialIndex = new ThCADCoreNTSSpatialIndex(Lights);
+            LightId = new Dictionary<Curve, string>();
             Lights.OfType<Curve>().ForEach(o => LightId.Add(o, Guid.NewGuid().ToString()));
         }
         public void Traverse()

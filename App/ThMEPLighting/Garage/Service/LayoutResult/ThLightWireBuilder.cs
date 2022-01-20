@@ -1,17 +1,16 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
-using System.Linq;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPLighting.Common;
-using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore;
-using ThCADExtension;
+using ThMEPLighting.Common;
+using ThMEPEngineCore.Algorithm;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -89,34 +88,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             };
             lightWireFactory.Build();
             LoopWireGroupDict.Add(defaultNumber, lightWireFactory.Results); // 添加默认回路的线
-        }
-        protected List<ThLightNodeLink> GetCrossOppositeLinks()
-        {
-            // 创建十字路口对面的跳接线
-            if(CenterSideDicts.Count>0)
-            {
-                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkOppositeCross();
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
-        }
-        protected List<ThLightNodeLink> GetThreeWayOppositeLinks()
-        {
-            // 创建T型路口跳接线
-            if (CenterSideDicts.Count > 0)
-            {
-                var edges = Graphs.SelectMany(g => g.GraphEdges).ToList();
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkOppositeThreeWay();
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
         }
         protected List<ThLightNodeLink> GetCrossCornerStraitLinks(List<ThLightEdge> edges)
         {
@@ -227,7 +198,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var otherLightLines = ThBuildLightLineService.Build(otherLights,
                 ArrangeParameter.LampLength);
             linkWires = linkWires.Union(otherLightLines); // 把非默认编号的灯线传入，作为连接线使用
-            var filter = new ThDefaultLinkWireFilter(linkWires, defaultLightLines);
+            var filter = new ThLinkWireFilter(linkWires, defaultLightLines);
             filter.Filter();
             var results = filter.Results.Difference(otherLightLines);
 
@@ -242,15 +213,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var numbers = edges.SelectMany(o => o.LightNodes).Select(o => o.Number).Distinct().ToList();
             var lightPosDict = LightPositionDict.Where(o => numbers.Contains(o.Value.Item2)).ToDictionary();
             return FilerLinkWire(linkWires, edges, lightPosDict);
-        }
-        protected DBObjectCollection FilterDoubleRowBranchLinkWire(DBObjectCollection linkWires, List<ThLightEdge> edges)
-        {
-            var lightWireFactory = new ThLightBlockFactory(edges);
-            lightWireFactory.Build();
-            var filter = new ThLinkWireFilter(linkWires, lightWireFactory.Results.Keys.ToCollection());
-            return filter.FilterBranch(edges.Select(o => o.Edge).ToList());
-        }
-
+        }        
         protected DBObjectCollection FilterJumpWire()
         {
             var results = new DBObjectCollection();
@@ -331,29 +294,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkService = new ThLightNodeBranchLinkService(graph);
             return linkService.LinkBetweenBranch();
         }
-
-        protected List<ThLightEdge> AddLinkCrossEdges()
-        {
-            // 将十字处、T字处具有相同EdgePattern的边直接连接
-            var results = new List<ThLightEdge>();
-            var edges = GetEdges();
-            var calculator = new ThCrossLinkCalculator(edges, CenterSideDicts);
-            calculator.BuildCrossLinkEdges().ForEach(o =>
-            {
-                if (!results.Select(e => e.Edge).ToList().GeometryContains(o.Edge, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE))
-                {
-                    results.Add(o);
-                }
-            });
-            calculator.BuildThreeWayLinkEdges().ForEach(o =>
-            {
-                if (!results.Select(e => e.Edge).ToList().GeometryContains(o.Edge, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE))
-                {
-                    results.Add(o);
-                }
-            });
-            return results;
-        }
         protected void CreateDoubleRowLinkWire(List<ThLightEdge> edges)
         {
             var firstEdges = GetEdges(edges, EdgePattern.First);
@@ -361,21 +301,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateLinkWire(DefaultNumbers[0],firstEdges);
             CreateLinkWire(DefaultNumbers[1], secondEdges);
         }
-
-        protected DBObjectCollection FilterSingleRowLinkWire(DBObjectCollection linkWires, List<ThLightEdge> edges,
-            List<Tuple<Line,Point3d>> branchPtPairs)
-        {
-            var results = new DBObjectCollection();
-            var lightWireFactory = new ThLightBlockFactory(edges);
-            lightWireFactory.Build();
-            var filter1 = new ThLinkWireFilter(linkWires,lightWireFactory.Results.Keys.ToCollection());
-            results = filter1.FilterBranch(branchPtPairs);
-
-            //var filter2 = new ThLinkWireFilter(results, lightWireFactory.Results.Keys.ToCollection());
-            //results = filter2.FilterElbow(edges.Select(o => o.Edge).ToList());
-            return results;
-        }
-
         protected List<ThLightGraphService> BuildGraphs(List<ThLightEdge> edges)
         {
             // 为了1、2号线使用
@@ -397,7 +322,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 o.First.Position, o.Second.Position, link.First.Position, link.Second.Position))
                 .Any();
         }
-
         protected void AddToLoopWireGroup(ThLightNodeLink link)
         {
             // 此函数用来收集每个回路的灯线，用于后期过滤线
