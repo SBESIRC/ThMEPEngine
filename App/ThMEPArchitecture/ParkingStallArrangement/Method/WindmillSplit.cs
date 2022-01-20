@@ -125,7 +125,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
         }
 
-        public static List<Polyline> Split(Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
+        public static List<Polyline> Split(bool isDirectlyArrange, Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
             ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
         {
             var areas = new List<Polyline>() { area };
@@ -136,42 +136,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var cutRst = SegLineCut(segLines, area, out List<Line> cutlines);
 
             var width = GetMaxWidth(area);
-
+            
             for (int i = 0; i < cutlines.Count; i++)
             {
-                var l = cutlines[i];
-                l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
+                if (isDirectlyArrange)
+                {
+                    maxVals.Add(0);
+                    minVals.Add(0);
+                }
+                else
+                {
+                    var l = cutlines[i];
+                    l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
 
-                maxVals.Add(maxVal2);
-                minVals.Add(minVal2);
-                //var l = cutlines[i];
-                //var rst = cutRst[i];//是否被墙线切割
-                //if(rst)//被墙线切割的直接用墙线的起始终止点
-                //{
-                //    var rst2 = l.GetMaxMinVal(area, out double maxVal, out double minVal);
-                //    if (rst2)//直接用墙线和障碍物最近作为依据
-                //    {
-                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
-
-                //        maxVals.Add(Math.Min(maxVal, maxVal2));
-                //        minVals.Add(Math.Max(minVal, minVal2));
-                //    }
-                //    else
-                //    {
-                //        l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
-
-                //        maxVals.Add(maxVal2);
-                //        minVals.Add(minVal2);
-                //    }
-                //}
-                //else
-                //{
-                //    l.GetMaxMinVal(buildLinesSpatialIndex, out double maxVal2, out double minVal2);
-
-                //    maxVals.Add(maxVal2);
-                //    minVals.Add(minVal2);
-                //}
-
+                    maxVals.Add(maxVal2);
+                    minVals.Add(minVal2);
+                }
             }
             return rstAreas;
         }
