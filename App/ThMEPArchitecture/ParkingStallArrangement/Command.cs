@@ -181,6 +181,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch { }
                 }
+                if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
 
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
@@ -268,6 +269,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             for (int k = 0; k < histories.Count; k++)
             {
                 layoutPara.Set(histories[k].Genome);
+                if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
                     var use_partition_pro = true;

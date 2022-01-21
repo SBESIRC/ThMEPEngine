@@ -57,6 +57,30 @@ namespace ThMEPArchitecture.PartitionLayout
             //}
         }
 
+        public static bool IsConnectedLines(Line a, Line b)
+        {
+            if (a.StartPoint.DistanceTo(b.StartPoint) < 1 || a.StartPoint.DistanceTo(b.EndPoint) < 1
+                || a.EndPoint.DistanceTo(b.StartPoint) < 1 || a.EndPoint.DistanceTo(b.EndPoint) < 1) return true;
+            else return false;
+        }
+
+        public static void RemoveDuplicatedLines(List<Line> lines)
+        {
+            if (lines.Count < 2) return;
+            for (int i = 0; i < lines.Count - 1; i++)
+            {
+                for (int j = i + 1; j < lines.Count; j++)
+                {
+                    if ((lines[i].StartPoint.DistanceTo(lines[j].StartPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].EndPoint) < 1)
+                        || (lines[i].StartPoint.DistanceTo(lines[j].EndPoint) < 1 && lines[i].EndPoint.DistanceTo(lines[j].StartPoint) < 1))
+                    {
+                        lines.RemoveAt(j);
+                        j--;
+                    }
+                }
+            }
+        }
+
         public static Point3d AveragePoint(Point3d a, Point3d b)
         {
             return new Point3d((a.X + b.X) / 2, (a.Y + b.Y / 2), (a.Z + b.Z) / 2);

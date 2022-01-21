@@ -791,7 +791,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             BuildingBlockSpatialIndex.Dispose();
             SegLineSpatialIndex?.Dispose();
             AllShearwallsSpatialIndex?.Dispose();
-            AllShearwallsMPolygonSpatialIndex?.Dispose();
+            //AllShearwallsMPolygonSpatialIndex?.Dispose();
         }
     }
 

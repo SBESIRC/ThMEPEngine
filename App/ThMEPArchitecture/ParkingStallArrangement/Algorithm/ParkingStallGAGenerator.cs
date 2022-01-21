@@ -126,7 +126,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var rst = layoutPara.Set(Genome);
             if (!rst) return 0;
+
             GeoUtilities.LogMomery("SolutionStart: ");
+            if (!IsValidatedSolutions(layoutPara)) return -1;
             int result = GetParkingNums(layoutPara, parameterViewModel);
             GeoUtilities.LogMomery("SolutionEnd: ");
             //Thread.Sleep(3);
@@ -136,6 +138,89 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             return result;
         }
+
+        public static bool IsValidatedSolutions(LayoutParameter layoutPara)
+        {
+            var lanes = new List<Line>();
+            var boundary = layoutPara.OuterBoundary;
+            for (int k = 0; k < layoutPara.AreaNumber.Count; k++)
+            {
+                layoutPara.SubAreaId2SegsDic.TryGetValue(k, out List<Line> iniLanes);
+                lanes.AddRange(iniLanes);
+            }
+            var tmplanes = new List<Line>();
+            //与边界邻近的无效车道线剔除
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                var buffer = lanes[i].Buffer(2750 - 1);
+                var splits = GeoUtilities.SplitCurve(boundary, buffer);
+                if (splits.Count() == 1) continue;
+                splits = splits.Where(e => buffer.Contains(e.GetPointAtParam(e.EndParam / 2))).Where(e => e.GetLength() > 1).ToArray();
+                if (splits.Count() == 0) continue;
+                var split = splits.First();
+                var ps = lanes[i].GetClosestPointTo(split.StartPoint, false);
+                var pe = lanes[i].GetClosestPointTo(split.EndPoint, false);
+                var splitline = new Line(ps, pe);
+                var splitedlines = GeoUtilities.SplitLine(lanes[i], new List<Point3d>() { ps, pe });
+                splitedlines = splitedlines.Where(e => e.GetCenter().DistanceTo(splitline.GetClosestPointTo(e.GetCenter(), false)) > 1).ToList();
+                lanes.RemoveAt(i);
+                tmplanes.AddRange(splitedlines);
+                i--;
+            }
+            lanes.AddRange(tmplanes);
+            GeoUtilities.RemoveDuplicatedLines(lanes);
+            //连接碎车道线
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (count > 10) break;
+                if (lanes.Count < 2) break;
+                for (int i = 0; i < lanes.Count - 1; i++)
+                {
+                    var joined = false;
+                    for (int j = i + 1; j < lanes.Count; j++)
+                    {
+                        if (GeoUtilities.IsParallelLine(lanes[i], lanes[j]) && (lanes[i].StartPoint.DistanceTo(lanes[j].StartPoint) == 0
+                            || lanes[i].StartPoint.DistanceTo(lanes[j].EndPoint) == 0
+                            || lanes[i].EndPoint.DistanceTo(lanes[j].StartPoint) == 0
+                            || lanes[i].EndPoint.DistanceTo(lanes[j].EndPoint) == 0))
+                        {
+                            var pl = GeoUtilities.JoinCurves(new List<Polyline>(), new List<Line>() { lanes[i], lanes[j] }).Cast<Polyline>().First();
+                            var line = new Line(pl.StartPoint, pl.EndPoint);
+                            if (Math.Abs(line.Length - lanes[i].Length - lanes[j].Length) < 1)
+                            {
+                                lanes.RemoveAt(j);
+                                lanes.RemoveAt(i);
+                                lanes.Add(line);
+                                joined = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (joined) break;
+                }
+            }
+            //判断是否有孤立的车道线
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                bool connected = false;
+                for (int j = 0; j < lanes.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        if (GeoUtilities.IsConnectedLines(lanes[i], lanes[j]) || lanes[i].Intersect(lanes[j], Intersect.OnBothOperands).Count > 0)
+                        {
+                            connected = true;
+                            break;
+                        }
+                    }
+                }
+                if (!connected) return false;
+            }
+            return true;
+        }
+
         public bool IsVaild(LayoutParameter layoutPara, ParkingStallArrangementViewModel ParameterViewModel)
         {
             return layoutPara.IsVaildGenome(Genome, ParameterViewModel);
