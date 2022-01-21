@@ -91,42 +91,49 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             var rst = geneAlgorithm.Run();
 
-            layoutPara.DirectlyArrangementSetParameter(rst);      
+            layoutPara.DirectlyArrangementSetParameter(rst);
             int count = 0;
-            for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+            if (!Chromosome.IsValidatedSolutions(layoutPara))
             {
-                var use_partition_pro = true;
-                if (use_partition_pro)
+                count = -1;
+            }
+            else
+            {
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    var partitionpro = new ParkingPartitionPro();
-                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                    if (!partitionpro.Validate()) continue;
-                    try
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
                     {
-                        count += partitionpro.ProcessAndDisplay();
-                    }
-                    catch (Exception ex)
-                    {
-                        ;
-                    }
-                    continue;
-                }
-                else
-                {
-                    ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
-                    {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        if (!partitionpro.Validate()) continue;
                         try
                         {
-                            count += partition.ProcessAndDisplay();
+                            count += partitionpro.ProcessAndDisplay();
                         }
                         catch (Exception ex)
                         {
-                            Logger.Error(ex.Message);
-                            partition.Dispose();
+                            ;
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        ParkingPartition partition = new ParkingPartition();
+                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                        {
+                            try
+                            {
+                                count += partition.ProcessAndDisplay();
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex.Message);
+                                partition.Dispose();
+                            }
                         }
                     }
-                }          
+                }
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();
