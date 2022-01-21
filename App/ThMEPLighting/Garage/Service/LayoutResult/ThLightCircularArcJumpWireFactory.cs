@@ -287,20 +287,18 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 if (link.Edges.Count == 2)
                 {
-                    var firstMidPt = link.Edges[0].GetMidPt();
-                    var secondMidPt = link.Edges[1].GetMidPt();
                     var firstDir = link.Edges[0].LineDirection();
                     var secondDir = link.Edges[1].LineDirection();
-                    var firstExtent = firstMidPt + firstDir.MultiplyBy(100);
-                    var secondExtent = secondMidPt + secondDir.MultiplyBy(100);
-                    var firstLine = new Line(firstMidPt, firstExtent);
-                    var secondLine = new Line(secondMidPt, secondExtent);
+                    var firstExtent = link.First.Position + firstDir.GetPerpendicularVector().MultiplyBy(100);
+                    var secondExtent = link.Second.Position + secondDir.GetPerpendicularVector().MultiplyBy(100);
+                    var firstLine = new Line(link.First.Position, firstExtent);
+                    var secondLine = new Line(link.Second.Position, secondExtent);
                     var pts = firstLine.IntersectWithEx(secondLine, Intersect.ExtendBoth);
                     firstLine.Dispose();
                     secondLine.Dispose();
                     if(pts.Count>0)
                     {
-                        return firstMidPt.GetVectorTo(pts[0]).GetNormal();
+                        return link.First.Position.GetVectorTo(pts[0]).GetNormal();
                     }
                 }
             }
