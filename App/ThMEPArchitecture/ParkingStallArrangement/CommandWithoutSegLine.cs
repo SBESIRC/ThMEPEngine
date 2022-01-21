@@ -149,6 +149,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 ParameterViewModel.IterationCount = iterationCnt.Value;
                 ParameterViewModel.PopulationCount = popSize.Value;
+                ParameterViewModel.MaxTimespan = 180;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else

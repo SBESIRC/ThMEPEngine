@@ -144,6 +144,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
                 parameterViewModel.IterationCount = iterationCnt.Value;
                 parameterViewModel.PopulationCount = popSize.Value;
+                parameterViewModel.MaxTimespan = 180;
                 geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
             }
             else

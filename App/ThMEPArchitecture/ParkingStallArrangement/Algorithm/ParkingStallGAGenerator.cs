@@ -260,7 +260,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         Random Rand = new Random();
 
         //Genetic Algorithm parameters
-        readonly int MaxTime;
+        readonly double MaxTime;
         readonly int IterationCount = 10;
         int PopulationSize;
 
@@ -298,7 +298,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MaxTime = 180;
+            MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
 
