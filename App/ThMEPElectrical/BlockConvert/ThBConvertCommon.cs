@@ -11,6 +11,8 @@
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL = "内含图块";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_INSERT_MODE = "插入模式";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER = "外形图层";
 
         public static readonly string PROPERTY_POWER_VOLTAGE = "电压";
         public static readonly string PROPERTY_POWER_QUANTITY = "电量";

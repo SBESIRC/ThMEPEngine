@@ -77,7 +77,7 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        public override void Displacement(ObjectId blkRef, ThBlockReferenceData srcBlockData, Tuple<string, string> insertMode)
         {
             var name = srcBlockData.EffectiveName;
             if (name.Contains("风机") ||
@@ -87,15 +87,15 @@ namespace ThMEPElectrical.BlockConvert
                 name.Contains("冷水机组") ||
                 name.Contains("冷却塔"))
             {
-                TransformByFansCenter(blkRef, srcBlockData);
+                TransformByFansCenter(blkRef, srcBlockData, insertMode.Item2);
             }
-            else if (name.Contains("潜水泵"))
+            else if (insertMode.Item1.Contains("Basepoint"))
             {
                 TransformByPosition(blkRef, srcBlockData);
             }
             else
             {
-                TransformByCenter(blkRef, srcBlockData);
+                TransformByCenter(blkRef, srcBlockData, insertMode.Item2);
             }
         }
 
@@ -175,14 +175,14 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByFansCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        private void TransformByFansCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData, string geometryLayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetMCS2WCS = targetBlockData.BlockTransform.PreMultiplyBy(targetBlockData.OwnerSpace2WCS);
-                var scrApproCentriod = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var scrApproCentriod = srcBlockData.GetCentroidPoint(geometryLayer).TransformBy(srcBlockData.OwnerSpace2WCS);
                 var offset = Point3d.Origin.TransformBy(targetMCS2WCS).GetVectorTo(scrApproCentriod);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
 
@@ -281,14 +281,14 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blkRef"></param>
         /// <param name="srcBlockData"></param>
-        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData)
+        private void TransformByCenter(ObjectId blkRef, ThBlockReferenceData srcBlockData, string geometryLayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blkRef.Database))
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var targetBlockData = new ThBlockReferenceData(blkRef);
                 var targetCentriodPoint = targetBlockData.GetCentroidPoint().TransformBy(targetBlockData.OwnerSpace2WCS);
-                var scrCentriodPoint = srcBlockData.GetCentroidPoint().TransformBy(srcBlockData.OwnerSpace2WCS);
+                var scrCentriodPoint = srcBlockData.GetCentroidPoint(geometryLayer).TransformBy(srcBlockData.OwnerSpace2WCS);
                 var offset = targetCentriodPoint.GetVectorTo(scrCentriodPoint);
                 blockReference.TransformBy(Matrix3d.Displacement(offset));
             }

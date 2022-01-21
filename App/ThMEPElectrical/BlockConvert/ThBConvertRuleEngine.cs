@@ -84,6 +84,14 @@ namespace ThMEPElectrical.BlockConvert
                 column++;
                 target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INTERNAL] = StringFilter(table.Rows[row][column].ToString());
 
+                // 内含图块
+                column++;
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_INSERT_MODE] = StringFilter(table.Rows[row][column].ToString());
+
+                // 内含图块
+                column++;
+                target.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_GEOMETRY_LAYER] = StringFilter(table.Rows[row][column].ToString());
+
                 // 创建映射规则
                 rules.Add(new ThBConvertRule()
                 {

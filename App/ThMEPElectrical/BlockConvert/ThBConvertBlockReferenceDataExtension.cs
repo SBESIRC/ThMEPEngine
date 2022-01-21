@@ -31,7 +31,7 @@ namespace ThMEPElectrical.BlockConvert
                          name.Contains("冷水机组") ||
                          name.Contains("冷却塔"))
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer == "0" || e.Layer.Contains("H-EQUP"))
                         .Where(e => !e.Layer.Contains("DIMS"))
                         .Where(e => e is Curve || e is BlockReference)
@@ -39,15 +39,45 @@ namespace ThMEPElectrical.BlockConvert
                 }
                 else if (name.Contains("防火阀"))
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer != "DEFPOINTS")
                         .Where(e => e is Circle || e is BlockReference)
                         .ToCollection();
                 }
                 else
                 {
-                    entities = entities.Cast<Entity>()
+                    entities = entities.OfType<Entity>()
                         .Where(e => e.Layer != "DEFPOINTS")
+                        .Where(e => e is Curve || e is BlockReference)
+                        .ToCollection();
+                }
+                if (entities.Count == 0)
+                {
+                    return Point3d.Origin;
+                }
+                return entities.GeometricExtents().CenterPoint();
+            }
+        }
+
+        public static Point3d GetCentroidPoint(this ThBlockReferenceData data, string geometryLayer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(data.Database))
+            {
+                var entities = new DBObjectCollection();
+                var blkref = acadDatabase.Element<BlockReference>(data.ObjId);
+                blkref.ExplodeWithVisible(entities);
+                var name = data.EffectiveName;
+                if (name.Contains("防火阀"))
+                {
+                    entities = entities.OfType<Entity>()
+                        .Where(e => e.Layer == geometryLayer)
+                        .Where(e => e is Circle || e is BlockReference)
+                        .ToCollection();
+                }
+                else
+                {
+                    entities = entities.OfType<Entity>()
+                        .Where(e => e.Layer == geometryLayer)
                         .Where(e => e is Curve || e is BlockReference)
                         .ToCollection();
                 }
@@ -85,23 +115,19 @@ namespace ThMEPElectrical.BlockConvert
                     lines = entities.OfType<Line>()
                         .Where(e => e.Layer == "0")
                         .ToList();
-                    lines = lines.OrderByDescending(o => o.Length).ToList();
-
-                    if(lines.Count > 0)
+                    if(lines.Count == 1)
                     {
-                        var closeDist = lines[0].DistanceTo(data.Position, false);
-                        var closePt = GetLineCenter(lines[0].StartPoint, lines[0].EndPoint);
-                        for (int i = 1; i < lines.Count && i < 3; i++)
-                        {
-                            var distance = lines[i].DistanceTo(data.Position, false);
-                            var center = GetLineCenter(lines[i].StartPoint, lines[i].EndPoint);
-                            if (distance < closeDist + 1.0)
-                            {
-                                closeDist = distance;
-                                closePt = center;
-                            }
-                        }
-                        return closePt;
+                        return GetLineCenter(lines[0].StartPoint, lines[0].EndPoint);
+                    }
+                    else if(lines.Count > 1)
+                    {
+                        lines = lines.OrderBy(l => l.DistanceTo(data.Position, false)).ToList();
+                        var closeLine = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
+                        return GetLineCenter(closeLine.StartPoint, closeLine.EndPoint);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException();
                     }
                 }
                 else if (name.Contains("E-BFAS610"))
@@ -129,7 +155,6 @@ namespace ThMEPElectrical.BlockConvert
                 {
                     throw new NotImplementedException();
                 }
-                return new Point3d();
             }
         }
 

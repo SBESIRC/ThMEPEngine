@@ -284,7 +284,7 @@ namespace ThMEPElectrical.Command
                                     }
                                     else
                                     {
-                                        engine.Displacement(objId, o);
+                                        engine.Displacement(objId, o, rule.InsertMode());
                                     }
 
                                     var targetBlockData = new ThBlockReferenceData(objId);
