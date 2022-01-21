@@ -93,19 +93,13 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             var isVisible = equipmentType == BlindType.VisibleArea ? true : false;
             foreach (var p in points)
             {
-                Polygon detectHasPt = null;
                 if (detectSpatialIdx != null)
                 {
-                    detectHasPt = GetDetect(p, detectSpatialIdx);
-                }
-                if (detectHasPt != null)
-                {
+                    var detectHasPt = GetDetect(p, detectSpatialIdx);
                     detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), detectHasPt, radius, isVisible));
                 }
                 else
-                {
                     detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), room, radius, isVisible));
-                }
             }
 
             var poly = OverlayNGRobust.Union(detect.ToArray());
@@ -120,17 +114,11 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         private static Polygon GetDetect(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)
         {
             //计算包含该点的可布置区域
-            Polygon ans = null;
             var min = new Point3d(point.X - 1, point.Y - 1, 0);
             var max = new Point3d(point.X + 1, point.Y + 1, 0);
 
-            var a = detectSpatialIdx.SelectCrossingWindow(min, max).OfType<MPolygon>();
-            if (a.Count() > 0)
-            {
-                ans = a.First().ToNTSPolygon();
-            }
-
-            return ans;
+            var d = detectSpatialIdx.SelectCrossingWindow(min, max).Cast<MPolygon>().First().ToNTSPolygon();
+            return d;
         }
 
         public static Polyline GetDetectPolyline(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)

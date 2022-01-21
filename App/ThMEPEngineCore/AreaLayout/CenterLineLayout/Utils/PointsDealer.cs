@@ -373,27 +373,22 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             using (var objs = (new Point3dCollection(points.ToArray())).ToDBObjects())
             {
                 var spIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var ptsInArea = spIndex.SelectCrossingPolygon(Area);
-
-                if (ptsInArea.Count > 0)
+                var spIndex2 = new ThCADCoreNTSSpatialIndex(spIndex.SelectCrossingPolygon(Area));
+                var neighbours = spIndex2.NearestNeighbours(center, 1);
+                if (neighbours.Count >= 1)
                 {
-                    var spIndex2 = new ThCADCoreNTSSpatialIndex(ptsInArea);
-                    var neighbours = spIndex2.NearestNeighbours(center, 1);
-                    if (neighbours.Count >= 1)
-                    {
-                        return (neighbours[0] as DBPoint).Position;
-                    }
+                    return (neighbours[0] as DBPoint).Position;
                 }
 
                 // 到更大的范围查找
-                var neighboursInAll = spIndex.NearestNeighbours(center, 1);
-                if (neighboursInAll.Count >= 1)
+                neighbours = spIndex.NearestNeighbours(center, 1);
+                if (neighbours.Count >= 1)
                 {
-                    return (neighboursInAll[0] as DBPoint).Position;
+                    return (neighbours[0] as DBPoint).Position;
                 }
 
                 // 出现异常情况
-                return new Point3d();
+                throw new ArgumentException();
             }
         }
 
