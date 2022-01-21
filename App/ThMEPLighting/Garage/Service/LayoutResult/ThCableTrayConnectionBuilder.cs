@@ -48,15 +48,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 CableTrayPorts = cableTrayBuildEngine.CenterWithPorts;
             }
 
+            // 布灯点
+            LightPositionDict = BuildLightPos();
+
             // 灯编号
             NumberTexts = BuildNumberText(
                 ArrangeParameter.Width/2.0,
                 ArrangeParameter.LightNumberTextGap,
                 ArrangeParameter.LightNumberTextHeight, 
                 ArrangeParameter.LightNumberTextWidthFactor);
-
-            // 布灯点
-            LightPositionDict = BuildLightPos();
         }
 
         private List<Line> BuildCrossLinks()

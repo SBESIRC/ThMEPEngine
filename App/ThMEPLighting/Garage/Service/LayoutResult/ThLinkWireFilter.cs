@@ -88,17 +88,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     overlaps.Remove(o.Item1);
                     // 找到具有与tartget相同的链路
                     overlaps = overlaps.Where(l => l.Source.IsEqual(tartget) || l.Target.IsEqual(tartget)).ToList();
-                    if (overlaps.Count == 1)
+                    overlaps.ForEach(l =>
                     {
                         var wires = new DBObjectCollection();
                         o.Item1.Wires.ForEach(w => wires.Add(w));
-                        overlaps[0].Wires.ForEach(w => wires.Add(w));
+                        l.Wires.ForEach(w => wires.Add(w));
                         int threewayNumber = GetThreewayNumber(wires);
-                        if(threewayNumber==1)
+                        if (threewayNumber == 1)
                         {
                             results.AddRange(FindPublic(o.Item1.Wires, overlaps[0].Wires));
                         }
-                    }
+                    });
                 }
             });
             return results;
