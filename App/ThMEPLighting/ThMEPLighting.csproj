@@ -153,6 +153,7 @@
     <Compile Include="Garage\Service\LayoutResult\ThLineRoadQueryService.cs" />
     <Compile Include="Garage\Engine\ThGarageLightingEngine.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThLinkLineUtils.cs" />
+    <Compile Include="Garage\Service\LayoutResult\ThStraitLinkCreator.cs" />
     <Compile Include="Garage\Service\Number\ThPassNumberService.cs" />
     <Compile Include="Garage\Service\Number\ThSecondNumberService.cs" />
     <Compile Include="Garage\Service\ThDirectionLightGraphService.cs" />
@@ -207,8 +208,8 @@
     <Compile Include="Garage\Service\ThAdjustSingleRowDistributePosService.cs" />
     <Compile Include="Garage\Service\ThCdzmLightGraphService.cs" />
     <Compile Include="Garage\Service\LayoutPoint\ThLayoutPointService.cs" />
-    <Compile Include="Garage\Service\LayoutPoint\ThQueryBeamService.cs" />
-    <Compile Include="Garage\Service\LayoutPoint\ThQueryColumnService.cs" />
+    <Compile Include="Garage\Service\ThQueryBeamService.cs" />
+    <Compile Include="Garage\Service\ThQueryColumnService.cs" />
     <Compile Include="Garage\Service\ThLayoutAreaService.cs" />
     <Compile Include="Garage\Service\ThLightGraphServiceExtention.cs" />
     <Compile Include="Garage\Service\ThFirstSecondPairService.cs" />

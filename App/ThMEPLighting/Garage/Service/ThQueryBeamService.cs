@@ -1,4 +1,5 @@
 ﻿using NFox.Cad;
+using System;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
@@ -7,9 +8,9 @@ using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Garage.Service.LayoutPoint
+namespace ThMEPLighting.Garage.Service
 {
-    public class ThQueryBeamService
+    public class ThQueryBeamService:IDisposable
     {
         private List<ThIfcBeam> Beams { get; set; }
         private ThMEPOriginTransformer Transformer { get; set; }
@@ -17,6 +18,14 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         {
             Extract(database);
             GetTransformer();
+        }
+        public void Dispose()
+        {
+            Beams
+                .Where(o => o.Outline != null)
+                .Select(o => o.Outline)
+                .ToCollection()
+                .ThDispose();
         }
         private void Extract(Database database)
         {

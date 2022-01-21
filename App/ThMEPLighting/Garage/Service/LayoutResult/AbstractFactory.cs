@@ -46,6 +46,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// 文字与偏移线的间隙
         /// </summary>
         public double Gap { get; set; }
+        public Dictionary<Point3d, Tuple<double, string>> LightPositionDict { get; set; }
         #endregion
         public NumberTextFactory(List<ThLightEdge> lightEdges)
         {
@@ -54,8 +55,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             TextHeight = 300.0;
             TextWidthFactor = 0.65;
             LightEdges = lightEdges;
+            LightPositionDict = new Dictionary<Point3d, Tuple<double, string>>();
         }
         public abstract DBObjectCollection Build();
+        protected bool IsExisted(Point3d position, string number, double angle)
+        {
+            return LightPositionDict
+                .Where(o => o.Key.DistanceTo(position) <= ThGarageLightCommon.RepeatedPointDistance)
+                .Where(o => o.Value.Item2 == number)
+                .Where(o => Math.Abs(o.Value.Item1 - angle) <= 1e-4)
+                .Any();
+        }
     }
     public abstract class LightWireFactory
     {
@@ -282,7 +292,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return JumpWireDirectionQuery.Query(number, position);
         }
-        private Vector3d? GetJumpWireDirection(Point3d position)
+        protected Vector3d? GetJumpWireDirection(Point3d position)
         {
             if (JumpWireDirectionQuery == null)
             {

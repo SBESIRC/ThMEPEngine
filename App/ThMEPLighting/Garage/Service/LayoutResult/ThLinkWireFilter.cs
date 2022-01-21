@@ -32,8 +32,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private DBObjectCollection Lights { get; set; }
         #endregion
         #region ---------- output ----------
-        private Dictionary<Curve, int> WireUseNumberDict { get; set; }
         public DBObjectCollection Results { get; private set; }
+        public Dictionary<Point3d, Tuple<double, string>> RemovedLight { get; private set; }
         #endregion
 
         public ThLinkWireFilter(
@@ -223,12 +223,44 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// </summary>
         private double LampLength { get; set; }
         #endregion
+        public Dictionary<Point3d, Tuple<double, string>> RemovedLightPos { get; private set; }
+        public ThJumpWireFilter(DBObjectCollection wires, double lampLength,
+            Dictionary<Point3d, Tuple<double, string>> lightPos)
+        {
+            Wires = wires;
+            LightPos = lightPos;
+            LampLength = lampLength;
+        }
+        public void Filter()
+        {
+            var lightFilter = new ThLightFilter(Wires, LampLength, LightPos);
+            lightFilter.Filter();
+            RemovedLightPos = lightFilter.Results;
+        }
+    }
+    internal class ThLightFilter
+    {
+        /*
+         * 过滤灯没有连线的情况
+         */
+        #region ---------- input ------------
+        /// <summary>
+        /// 灯线
+        /// </summary>
+        private DBObjectCollection Wires { get; set; }
+        /// <summary>
+        /// 灯坐标位置
+        /// </summary>
+        Dictionary<Point3d, Tuple<double, string>> LightPos { get; set; }
+        /// <summary>
+        /// 灯长
+        /// </summary>
+        private double LampLength { get; set; }
+        #endregion
         private ThCADCoreNTSSpatialIndex WireSpatialIndex { get; set; }
         public Dictionary<Point3d, Tuple<double, string>> Results { get; private set; }
-        public ThJumpWireFilter(
-            DBObjectCollection wires,
-            Dictionary<Point3d, Tuple<double,string>> lightPos,
-            double lampLength)
+        public ThLightFilter(DBObjectCollection wires,double lampLength,
+           Dictionary<Point3d, Tuple<double, string>> lightPos)
         {
             Wires = wires;
             LightPos = lightPos;
@@ -236,35 +268,33 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             WireSpatialIndex = new ThCADCoreNTSSpatialIndex(wires);
             Results = new Dictionary<Point3d, Tuple<double, string>>();
         }
-
         public void Filter()
         {
             LightPos.ForEach(o =>
             {
                 var light = ThBuildLightLineService.CreateLine(o.Key, o.Value.Item1, LampLength);
-                var extents = Extend(light.StartPoint, light.EndPoint,ThGarageLightCommon.RepeatedPointDistance);
+                var extents = Extend(light.StartPoint, light.EndPoint, ThGarageLightCommon.RepeatedPointDistance);
                 var outline = CreatePolyline(extents.Item1, extents.Item2, ThGarageLightCommon.RepeatedPointDistance * 2.0);
                 var wires = Query(outline);
-                if(wires.Count == 0)
+                if (wires.Count == 0)
                 {
-                    Results.Add(o.Key,o.Value);
+                    Results.Add(o.Key, o.Value);
                 }
                 light.Dispose(); // 释放资源
                 outline.Dispose(); // 
             });
         }
-
         private DBObjectCollection Query(Polyline outline)
         {
             return WireSpatialIndex.SelectCrossingPolygon(outline);
         }
 
-        private Polyline CreatePolyline(Point3d start,Point3d endPt,double width)
+        private Polyline CreatePolyline(Point3d start, Point3d endPt, double width)
         {
             return ThDrawTool.ToOutline(start, endPt, width);
         }
 
-        private Tuple<Point3d,Point3d> Extend(Point3d start, Point3d endPt,double length)
+        private Tuple<Point3d, Point3d> Extend(Point3d start, Point3d endPt, double length)
         {
             var dir = start.GetVectorTo(endPt).GetNormal();
             var newStart = start - dir.MultiplyBy(length);

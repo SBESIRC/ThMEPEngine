@@ -33,11 +33,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         public Dictionary<Line, Tuple<List<Line>, List<Line>>> CenterSideDicts { get; set; }
         public List<Tuple<Point3d, Dictionary<Line, Vector3d>>> CenterGroupLines { get; set; }
         #endregion
-        #region ---------- 输出 ----------
+        #region ---------- 输出 -----------
         public ObjectIdList ObjIds { get; protected set; }
+        // 把最后要打印的灯线存入到此词典中
         public DBObjectCollection Wires { get; protected set; }
+        // 把最后要打印的灯编号文字存入到此词典中
         protected DBObjectCollection NumberTexts { get; set; }
+        // 把最后要打印的灯存入到此词典中
         protected Dictionary<Point3d, Tuple<double,string>> LightPositionDict { get; set; }
+        // 把要移除的灯存入到此词典中
+        protected Dictionary<Point3d, Tuple<double, string>> RemovedLightPositionDict { get; set; }
+        // 将每个回路的灯线存入到此词典中
         protected Dictionary<string,DBObjectCollection> LoopWireGroupDict { get; set; }
         #endregion
         public ThLightWireBuilder(List<ThLightGraphService> graphs)
@@ -54,8 +60,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CurrentUserCoordinateSystem = Matrix3d.Identity;
             LoopWireGroupDict = new Dictionary<string, DBObjectCollection>();
             LightPositionDict = new Dictionary<Point3d, Tuple<double, string>>();
-            CenterGroupLines = new List<Tuple<Point3d, Dictionary<Line, Vector3d>>>();
             CenterSideDicts = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
+            CenterGroupLines = new List<Tuple<Point3d, Dictionary<Line, Vector3d>>>();
+            RemovedLightPositionDict = new Dictionary<Point3d, Tuple<double, string>>();
         }
         public abstract void Build();
         public abstract void Reset();
@@ -69,6 +76,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 Height = height,
                 TextHeight = textHeight,
                 TextWidthFactor = textWidthFactor,
+                LightPositionDict = LightPositionDict
             };
             return textFactory.Build();
         }
@@ -89,103 +97,25 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             lightWireFactory.Build();
             LoopWireGroupDict.Add(defaultNumber, lightWireFactory.Results); // 添加默认回路的线
         }
-        protected List<ThLightNodeLink> GetCrossCornerStraitLinks(List<ThLightEdge> edges)
-        {
-            // 创建十字路口同一域具有相同1、2线的跳接线
-            if (CenterSideDicts.Count > 0)
-            {                
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkCrossCorner();
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
-        }
+        
         protected void CreateElbowStraitLinkJumpWire(List<ThLightEdge> edges)
         {
-            var results = new DBObjectCollection();
-            var lightNodeLinks = GetElbowStraitLinks(edges);
-            if (lightNodeLinks.Count == 0)
-            {
-                return ;
-            }
-            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-            {
-                CenterSideDicts = this.CenterSideDicts,
-                DirectionConfig = this.DirectionConfig,
-                LampLength = this.ArrangeParameter.LampLength,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-            };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildStraitLinks();
+            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
+            var lightNodeLinks = creator.CreateElbowStraitLinkJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
         }
         protected void CreateThreeWayCornerStraitLinksJumpWire(List<ThLightEdge> edges)
         {
-            var lightNodeLinks = GetThreeWayCornerStraitLinks(edges);
-            if (lightNodeLinks.Count == 0)
-            {
-                return ;
-            }
-            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-            {
-                CenterSideDicts = this.CenterSideDicts,
-                DirectionConfig = this.DirectionConfig,
-                LampLength = this.ArrangeParameter.LampLength,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-            };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildStraitLinks();
+            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
+            var lightNodeLinks = creator.CreateThreeWayCornerStraitLinksJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
         }
         protected void CreateCrossCornerStraitLinkJumpWire(List<ThLightEdge> edges)
         {
             //绘制十字路口跨区具有相同编号的的跳线
-            var lightNodeLinks = GetCrossCornerStraitLinks(edges);
-            if (lightNodeLinks.Count == 0)
-            {
-                return ;
-            }
-            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-            {
-                CenterSideDicts = this.CenterSideDicts,
-                DirectionConfig = this.DirectionConfig,
-                LampLength = this.ArrangeParameter.LampLength,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-            };
-            jumpWireFactory.BuildSideLinesSpatialIndex();
-            jumpWireFactory.BuildStraitLinks();
+            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
+            var lightNodeLinks = creator.CreateCrossCornerStraitLinkJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
-        }
-        protected List<ThLightNodeLink> GetThreeWayCornerStraitLinks(List<ThLightEdge> edges)
-        {
-            // 创建T型路口跳接线
-            if (CenterSideDicts.Count > 0)
-            {
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkThreeWayCorner(); // 连接T型拐角处
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
-        }
-        protected List<ThLightNodeLink> GetElbowStraitLinks(List<ThLightEdge> edges)
-        {
-            // 创建弯头跨区跳接线
-            if (CenterSideDicts.Count > 0)
-            {
-                var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkElbowCorner(); // 连接T型拐角处
-            }
-            else
-            {
-                return new List<ThLightNodeLink>();
-            }
         }
         protected DBObjectCollection FilerLinkWire(DBObjectCollection linkWires,List<ThLightEdge> edges,
             Dictionary<Point3d,Tuple<double,string>> lightPosDict)
@@ -207,9 +137,22 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             otherLightLines.ThDispose();
             return results;
         }
+        protected void FilterUnLinkWireLight(DBObjectCollection linkWires,string number)
+        {
+            // 过滤没有连接线的灯
+            var results = new DBObjectCollection();
+            var loopLightPos = LightPositionDict.Where(o => o.Value.Item2 == number).ToDictionary();
+            var filter = new ThLightFilter(linkWires, ArrangeParameter.LampLength, loopLightPos);
+            filter.Filter();
+            // *** 更新 ***
+            filter.Results.ForEach(v => LightPositionDict.Remove(v.Key));
+            filter.Results.ForEach(v => RemovedLightPositionDict.Add(v.Key, v.Value));
+        }
         protected DBObjectCollection FilterDoubleRowLinkWire(List<ThLightEdge> edges, string defaultNumber)
         {
             var linkWires = FindWires(defaultNumber);
+            var removedLightWires = BuildRemoveLightLines(edges); // 对于没有连线的灯，将成为灯线
+            linkWires = linkWires.Union(removedLightWires);
             var numbers = edges.SelectMany(o => o.LightNodes).Select(o => o.Number).Distinct().ToList();
             var lightPosDict = LightPositionDict.Where(o => numbers.Contains(o.Value.Item2)).ToDictionary();
             return FilerLinkWire(linkWires, edges, lightPosDict);
@@ -225,32 +168,35 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     var jumpWires = FindWires(loop.Key);
                     results = results.Union(jumpWires);
                     var loopLightPos = LightPositionDict.Where(o=>o.Value.Item2== loop.Key).ToDictionary();
-                    var filter = new ThJumpWireFilter(jumpWires, loopLightPos,ArrangeParameter.LampLength);
+                    var filter = new ThJumpWireFilter(jumpWires, ArrangeParameter.LampLength, loopLightPos);
                     filter.Filter();
-                    filter.Results.ForEach(v=>LightPositionDict.Remove(v.Key));
+
+                    // *** 更新 ***
+                    filter.RemovedLightPos.ForEach(v => LightPositionDict.Remove(v.Key));
+                    filter.RemovedLightPos.ForEach(v => RemovedLightPositionDict.Add(v.Key,v.Value));
                 }
             });
             return results;
         }
-
         protected DBObjectCollection BreakWire(DBObjectCollection objs, Matrix3d currentUserCoordinateSystem, double length)
         {
             // 对存在交叉的线路进行短线，更偏向于Y轴的线路被更偏向于X轴的线路打断，短线间距300（弧线不打断）
             var breakService = new ThBreakLineService(currentUserCoordinateSystem, length);
             return breakService.Break(objs);
         }
-
         protected DBObjectCollection BreakWire(DBObjectCollection wires)
         {
             // 用非默认编号灯打断默认编号灯线
+            var results = new DBObjectCollection();
+            results = results.Union(wires.OfType<Arc>().ToCollection());
             var otherLights = LightPositionDict.Where(o => !DefaultNumbers.Contains(o.Value.Item2)).ToDictionary();
             var otherLightLines = ThBuildLightLineService.Build(otherLights,
                 ArrangeParameter.LampLength + ArrangeParameter.LightWireBreakLength);
-            var results = ThLinkWireBreakService.Break(wires, otherLightLines);
+            var breakLines = ThLinkWireBreakService.Break(wires.OfType<Line>().ToCollection(), otherLightLines);
+            results = results.Union(breakLines);
             otherLightLines.ThDispose();
             return results;
         }
-
         protected DBObjectCollection MergeWire(DBObjectCollection linkWires)
         {
             var results = new DBObjectCollection();
@@ -267,6 +213,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(o => o.EdgePattern == edgePattern)
                .ToList();
         }
+        protected List<string> GetLightNodeNumbers(List<ThLightEdge> edges)
+        {
+            return edges.SelectMany(o=>o.LightNodes).Select(o=>o.Number).Distinct().ToList();
+        }
         protected List<ThLightEdge> GetEdges()
         {
             return Graphs
@@ -278,7 +228,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkService = new ThLightNodeSameLinkService(links);
             return linkService.FindLightNodeLinkOnSamePath();
         }
-
         protected List<ThLightNodeLink> FindLightNodeLinkOnMainBranch(ThLightGraphService graph)
         {
             var linkService = new ThLightNodeBranchLinkService(graph)
@@ -288,7 +237,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             };
             return linkService.LinkMainBranch();
         }
-
         protected List<ThLightNodeLink> FindLightNodeLinkOnBetweenBranch(ThLightGraphService graph)
         {
             var linkService = new ThLightNodeBranchLinkService(graph);
@@ -342,6 +290,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         protected DBObjectCollection FindWires(string loopNumber)
         {
             return LoopWireGroupDict.ContainsKey(loopNumber) ? LoopWireGroupDict[loopNumber] : new DBObjectCollection();
+        }
+        protected DBObjectCollection BuildRemoveLightLines(List<ThLightEdge> edges)
+        {
+            var lightNodeNumbers = GetLightNodeNumbers(edges);
+            lightNodeNumbers = lightNodeNumbers.Where(o => !DefaultNumbers.Contains(o)).ToList();
+            return BuildRemoveLightLines(lightNodeNumbers);
+        }
+        private DBObjectCollection BuildRemoveLightLines(List<string> numbers)
+        {
+            return RemovedLightPositionDict
+                .Where(o => numbers.Contains(o.Value.Item2))
+                .Select(o => ThBuildLightLineService.CreateLine(o.Key, o.Value.Item1, ArrangeParameter.LampLength))
+                .ToCollection();
         }
         #region----------Printer----------
         protected void SetDatabaseDefault(Database db)

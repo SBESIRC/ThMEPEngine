@@ -170,21 +170,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 }).Any();
             }).Any();
         }
-        private DBObjectCollection GetIntersectCurves(Line line, ThCADCoreNTSSpatialIndex spatialIndex, double length)
-        {
-            var onCurves = FindCurves(line, spatialIndex);
-            var direction = line.LineDirection();
-            return onCurves.OfType<Curve>()
-            .Where(e =>
-            {
-                var inters = GetIntersPtNotOnPort(line, e);
-                return inters.OfType<Point3d>().Where(p =>
-                {
-                    var ptPair = BuildBreakLineSP(p, direction, length);
-                    return IsInLine(ptPair.Item1, line, 1.0) && IsInLine(ptPair.Item2, line, 1.0);
-                }).Any();
-            }).ToCollection();
-        }
         private Curve GetIntersectCurve(Line line, ThCADCoreNTSSpatialIndex spatialIndex, double length)
         {
             var onCurves = FindCurves(line, spatialIndex);

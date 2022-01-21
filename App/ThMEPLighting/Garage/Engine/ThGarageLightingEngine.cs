@@ -17,15 +17,33 @@ namespace ThMEPLighting.Garage.Engine
         private Database Db { get; set; }
         private ThCableTrayParameter CableTrayParameter { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
+        private ThQueryColumnService ColumnQuery { get; set; }
+        private ThQueryBeamService BeamQuery { get; set; }
         public ThGarageLightingEngine(Database db,ThLightArrangeParameter arrangeParameter)
         {
             Db = db;
             ArrangeParameter = arrangeParameter;
             CableTrayParameter = new ThCableTrayParameter();
+            if (ArrangeParameter.LayoutMode == LayoutMode.ColumnSpan)
+            {
+                ColumnQuery = new ThQueryColumnService(Db);
+            }
+            else if (ArrangeParameter.LayoutMode == LayoutMode.AvoidBeam ||
+                ArrangeParameter.LayoutMode == LayoutMode.SpanBeam)
+            {
+                BeamQuery = new ThQueryBeamService(Db);
+            }
         }
         public void Dispose()
         {
-            //ToDO
+            if(ColumnQuery!=null)
+            {
+                ColumnQuery.Dispose();
+            }
+            if (BeamQuery != null)
+            {
+                BeamQuery.Dispose();
+            }
         }
         public void Start(List<ThRegionBorder> regionBorders)
         {
@@ -42,18 +60,15 @@ namespace ThMEPLighting.Garage.Engine
             normalRegionBorders.ForEach(r =>
             {
                 var singleRowRegionBorder = GetSubRegionBorder(singRowRegionBorders, r.Id);
-
                 // begin
                 r.Transform();
-                singleRowRegionBorder.Transform();
-
+                singleRowRegionBorder.Transform(); // for test
                 // 布置
                 int loopNumber = 0;
                 var lightGraphs = new List<ThLightGraphService>();               
                 var centerSideDicts = new Dictionary<Line, Tuple<List<Line>, List<Line>>>();
                 var centerGroupLines = new List<Tuple<Point3d, Dictionary<Line, Vector3d>>>();
                 Layout(r, ref loopNumber, ref lightGraphs, ref centerSideDicts,ref centerGroupLines);
-
                 // 提示
                 bool isReturn = ShowTip(loopNumber);
                 if(!isReturn)
@@ -94,7 +109,6 @@ namespace ThMEPLighting.Garage.Engine
                     ((IPrinter)lightWireBuilder).Print(Db); // 打印新生成的布置结果
                     lightWireBuilder.Reset(); // 对生成的结果进行还原
                 }
-
                 r.Reset(); // 对框中的元素进行还原
             });
         }
@@ -241,12 +255,12 @@ namespace ThMEPLighting.Garage.Engine
             // 获取安装模式获取对应的柱、梁信息
             if (ArrangeParameter.LayoutMode == LayoutMode.ColumnSpan)
             {
-                regionBorders.GetColumns(Db);
+                regionBorders.ForEach(o => o.Columns = ColumnQuery.SelectCrossPolygon(o.RegionBorder));
             }
             else if (ArrangeParameter.LayoutMode == LayoutMode.AvoidBeam ||
                 ArrangeParameter.LayoutMode == LayoutMode.SpanBeam)
             {
-                regionBorders.GetBeams(Db);
+                regionBorders.ForEach(o => o.Beams = BeamQuery.SelectCrossPolygon(o.RegionBorder));
             }
         }
         private List<string> GetDefaultStartNumbers()

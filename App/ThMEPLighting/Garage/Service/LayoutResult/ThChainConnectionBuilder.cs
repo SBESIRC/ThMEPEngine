@@ -49,10 +49,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateSingleRowBranchCornerJumpWire(Graphs);
 
             // *** 过滤多余的线
+            var jumpWires = FilterJumpWire(); // 过滤跳线
+
             var linkWires = FindWires(DefaultNumbers[0]);
+            var removedLightWires = BuildRemoveLightLines(edges);
+            linkWires = linkWires.Union(removedLightWires);
             linkWires = FilerLinkWire(linkWires, edges,LightPositionDict);
-            var jumpWires = FilterJumpWire();
-          
+            FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
+            
             // *** 用非默认编号打断默认灯线
             linkWires = BreakWire(linkWires);
 
@@ -79,23 +83,26 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateCrossCornerStraitLinkJumpWire(totalEdges);
 
             // *** 过滤
-            // 过滤默认编号的连接线
-            var linkWires = new DBObjectCollection();
-            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges,EdgePattern.First),DefaultNumbers[0]);
-            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
-            linkWires = linkWires.Union(firstLinkWires);
-            linkWires = linkWires.Union(secondLinkWires);
             // 过滤跳接线
             var jumpWireRes = FilterJumpWire();
 
+            // 过滤默认编号的连接线
+            var linkWires = new DBObjectCollection();
+            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges,EdgePattern.First),DefaultNumbers[0]);
+            FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
+            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
+            FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
+            linkWires = linkWires.Union(firstLinkWires);
+            linkWires = linkWires.Union(secondLinkWires);
+            
             // *** 把非默认灯两边打断 
             linkWires = BreakWire(linkWires);
 
             // *** 打断 + 合并
             Wires = Wires.Union(linkWires);
             Wires = Wires.Union(jumpWireRes);
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = MergeWire(Wires);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
         }
 
         private void CreateSingleRowJumpWire(List<ThLightGraphService> graphs)
@@ -157,15 +164,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
         {
             // 用于单排布置
-            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-            {
-                CenterSideDicts = this.CenterSideDicts,
-                DirectionConfig = this.DirectionConfig,
-                LampLength = this.ArrangeParameter.LampLength,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-            };
-            jumpWireFactory.BuildStraitLinks();
+            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
+            creator.CreateWireForStraitLink(lightNodeLinks);
         }
 
         public override void Reset()
@@ -186,7 +186,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             using (var acadDatabase = AcadDatabase.Use(db))
             {
                 var objIds = new ObjectIdList();
-                Wires.OfType<Line>().ForEach(l =>
+                Wires.OfType<Curve>().ForEach(l =>
                 {
                     var objId = acadDatabase.ModelSpace.Add(l);
                     l.Layer = CableTrayParameter.JumpWireParameter.Layer;

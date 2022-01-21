@@ -49,9 +49,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateSingleRowBranchCornerJumpWire(Graphs);
 
             // *** 过滤多余的线
-            var linkWires = FindWires(DefaultNumbers[0]);
-            linkWires = FilerLinkWire(linkWires, edges, LightPositionDict);
             var jumpWires = FilterJumpWire();
+
+            var linkWires = FindWires(DefaultNumbers[0]);
+            var removedLightWires = BuildRemoveLightLines(edges);
+            linkWires = linkWires.Union(removedLightWires);
+            linkWires = FilerLinkWire(linkWires, edges, LightPositionDict);
+            FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
 
             // *** 用非默认编号打断默认灯线
             linkWires = BreakWire(linkWires);
@@ -59,8 +63,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // *** 收集创建的线
             Wires = Wires.Union(linkWires);
             Wires = Wires.Union(jumpWires);
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = MergeWire(Wires);
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
         }
 
         private void BuildDoubleRow()
@@ -79,13 +83,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateCrossCornerStraitLinkJumpWire(totalEdges);
 
             // *** 过滤
-            var linkWires = new DBObjectCollection();
-            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.First), DefaultNumbers[0]);
-            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
-            linkWires = linkWires.Union(firstLinkWires);
-            linkWires = linkWires.Union(secondLinkWires);
             // 过滤跳接线
             var jumpWireRes = FilterJumpWire();
+
+            var linkWires = new DBObjectCollection();
+            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.First), DefaultNumbers[0]);
+            FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
+            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
+            FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
+            linkWires = linkWires.Union(firstLinkWires);
+            linkWires = linkWires.Union(secondLinkWires);
 
             // *** 把非默认灯两边打断 
             linkWires = BreakWire(linkWires);
@@ -93,9 +100,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // *** 打断 + 合并
             Wires = Wires.Union(linkWires);
             Wires = Wires.Union(jumpWireRes);
-            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
             Wires = MergeWire(Wires);
-
+            Wires = BreakWire(Wires, CurrentUserCoordinateSystem, ArrangeParameter.LightWireBreakLength); // 打断
+            
             // 与灯具避梁
             //var avoidService = new ThCircularArcConflictAvoidService(
             //    ArrangeParameter.LampLength, jumpWireRes, LightPositionDict);
@@ -124,7 +131,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             graphs.ForEach(g =>
             {
                 var nodeLinks = FindLightNodeLinkOnMainBranch(g);
-                BuildBranchCornerLink(nodeLinks);
+                BuildMainBranchLink(nodeLinks);
                 nodeLinks.ForEach(l => AddToLoopWireGroup(l));
             });
         }
@@ -159,32 +166,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             jumpWireFactory.Build();
         }
 
-        private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
+        private void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
         {
             // 用于单排布置
-            var jumpWireFactory = new ThLightLinearJumpWireFactory(lightNodeLinks)
-            {
-                CenterSideDicts = this.CenterSideDicts,
-                DirectionConfig = this.DirectionConfig,
-                LampLength = this.ArrangeParameter.LampLength,
-                LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
-            };
-            jumpWireFactory.BuildStraitLinks();
+            var creator = new ThStraitLinkCreator(ArrangeParameter,DirectionConfig,CenterSideDicts);
+            creator.CreateWireForStraitLink(lightNodeLinks);
         }
-
-        //private void BuildBranchCornerLink(List<ThLightNodeLink> lightNodeLinks)
-        //{
-        //    var jumpWireFactory = new ThLightCircularArcJumpWireFactory(lightNodeLinks)
-        //    {
-        //        CenterSideDicts = this.CenterSideDicts,
-        //        DirectionConfig = this.DirectionConfig,
-        //        LampLength = this.ArrangeParameter.LampLength,
-        //        LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-        //        Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
-        //    };
-        //    jumpWireFactory.BuildCrossLinks();
-        //}
 
         public override void Reset()
         {

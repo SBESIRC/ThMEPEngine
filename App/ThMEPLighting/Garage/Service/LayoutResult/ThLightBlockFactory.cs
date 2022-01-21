@@ -26,7 +26,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 {   
                     if (!string.IsNullOrEmpty(n.Number) && !Results.ContainsKey(n.Position))
                     {
-                        Results.Add(n.Position, Tuple.Create(m.Edge.Angle, n.Number));
+                        Results.Add(n.Position, Tuple.Create(normalLine.Angle, n.Number));
                     }
                 });
             });

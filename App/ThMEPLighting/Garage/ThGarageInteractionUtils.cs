@@ -250,24 +250,6 @@ namespace ThMEPLighting.Garage
             transformer.Reset(objs);
         }
 
-        public static void GetColumns(this List<ThRegionBorder> regionBorders, Database database)
-        {
-            var columnQueryService = new ThQueryColumnService(database);
-            regionBorders.ForEach(b =>
-            {
-                b.Columns = columnQueryService.SelectCrossPolygon(b.RegionBorder);
-            });
-        }
-
-        public static void GetBeams(this List<ThRegionBorder> regionBorders, Database database)
-        {
-            var beamQueryService = new ThQueryBeamService(database);
-            regionBorders.ForEach(b =>
-            {
-                b.Beams = beamQueryService.SelectCrossPolygon(b.RegionBorder);
-            });
-        }
-
         /// <summary>
         /// 获取图纸上所有布置的灯块
         /// </summary>
