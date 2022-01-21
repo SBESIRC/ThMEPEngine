@@ -507,11 +507,19 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var preVertex = tuples[n - 1].Item1 - tuples[n - 1].Item2;
             for (int i = 0; i < n; ++i)
             {
-                double curDegree = preVertex.GetAngleTo((tuples[i].Item2 - tuples[i].Item1));
+                double curDegree = preVertex.GetAngleTo(tuples[i].Item2 - tuples[i].Item1, -Vector3d.ZAxis);
                 preVertex = tuples[i].Item1 - tuples[i].Item2;
+                if (curDegree > Math.PI / 18 * 17)
+                {
+                    return -1;
+                }
                 if ((borderPts.Contains(tuples[i].Item1) && borderPts.Contains(tuples[i].Item2)) || (borderPts.Contains(tuples[(i + n - 1) % n].Item1) && borderPts.Contains(tuples[(i + n - 1) % n].Item2)))
                 {
                     continue;
+                }
+                if (curDegree > Math.PI / 6 * 5)
+                {
+                    return -1;
                 }
                 if (curDegree > biggestDegree)
                 {
@@ -538,6 +546,9 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             return tuples;
         }
 
+        /// <summary>
+        /// DCEL的双向线转换为单线
+        /// </summary>
         public static HashSet<Tuple<Point3d, Point3d>> UnifyTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
         {
             var ansTuples = new HashSet<Tuple<Point3d, Point3d>>();
