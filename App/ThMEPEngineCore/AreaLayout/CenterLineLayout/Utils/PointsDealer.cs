@@ -1,13 +1,13 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System;
+using DotNetARX;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
 using System.Collections;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using DotNetARX;
-using ThCADExtension;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
 {
@@ -370,41 +370,27 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         /// <returns></returns>
         public static Point3d GetNearestPoint(Point3d center, List<Point3d> points, Polyline Area)
         {
-            Point3d ans = new Point3d();
-            var newPtList = new List<Point3d>();
-            if (Area != null && Area.Area > 0)
+            using (var objs = (new Point3dCollection(points.ToArray())).ToDBObjects())
             {
-                newPtList = points.Where(x => Area.ContainsOrOnBoundary(x)).ToList();
-            }
-            else
-            {
-                newPtList = points;
-            }
-
-            ans = GetNearestPoint(center, newPtList);
-
-            return ans;
-        }
-
-        private static Point3d GetNearestPoint(Point3d center, List<Point3d> points)
-        {
-            double minDis = double.MaxValue;
-            double tmpDis;
-            Point3d ans = new Point3d();
-
-            foreach (Point3d pt in points)
-            {
-                tmpDis = center.DistanceTo(pt);
-                if (tmpDis < minDis)
+                var spIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var spIndex2 = new ThCADCoreNTSSpatialIndex(spIndex.SelectCrossingPolygon(Area));
+                var neighbours = spIndex2.NearestNeighbours(center, 1);
+                if (neighbours.Count >= 1)
                 {
-                    minDis = tmpDis;
-                    ans = pt;
+                    return (neighbours[0] as DBPoint).Position;
                 }
+
+                // 到更大的范围查找
+                neighbours = spIndex.NearestNeighbours(center, 1);
+                if (neighbours.Count >= 1)
+                {
+                    return (neighbours[0] as DBPoint).Position;
+                }
+
+                // 出现异常情况
+                throw new ArgumentException();
             }
-            return ans;
         }
-
-
 
         /// <summary>
         /// 获取两个点的中心点
