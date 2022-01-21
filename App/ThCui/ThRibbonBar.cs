@@ -615,7 +615,7 @@ namespace TianHua.AutoCAD.ThCui
 
             row.AddNewButton("主梁生成",
                 "天华主梁生成",
-                "THZLSC",
+                "THZLSCUI",
                 "天华主梁生成",
                 "IDI_THCAD_THZLSC_SMALL",
                 "IDI_THCAD_THZLSC_LARGE",
@@ -623,7 +623,7 @@ namespace TianHua.AutoCAD.ThCui
 
             row.AddNewButton("次梁生成",
                 "天华次梁生成",
-                "THCLSC",
+                "THCLSCUI",
                 "天华次梁生成",
                 "IDI_THCAD_THCLSC_SMALL",
                 "IDI_THCAD_THCLSC_LARGE",

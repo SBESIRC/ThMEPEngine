@@ -128,6 +128,9 @@
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_Support_BeamStructure">
+            <Component Id="CMP_Autoloader_PackageContents_Support_BeamStructure_MainBeamConfig" Guid="{A26F4E44-32F7-46D0-80F0-D617EB20A135}" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents_Support_BeamStructure_MainBeamConfig" Source="$(var.AutoloaderContentsPath)\Support\BeamStructure\MainBeamConfig.json" KeyPath="yes" />
+            </Component>
             <Component Id="CMP_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" Guid="{62C089D8-53F4-401F-BDE7-63327B02831A}" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" Source="$(var.AutoloaderContentsPath)\Support\BeamStructure\SecondaryBeamConfig.json" KeyPath="yes" />
             </Component>
@@ -173,6 +176,7 @@
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Evacuation_Direction" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Config" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_LoadCalculationConfig_Room" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_BeamStructure_MainBeamConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_BeamStructure_SecondaryBeamConfig" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Wire_Layer_Configuration" />
         </ComponentGroup>
