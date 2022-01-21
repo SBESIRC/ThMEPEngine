@@ -410,11 +410,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
+            double tol = 1e-4;
             // get absolute coordinate of segline
             var line = GaPara.SegLine[i];
             var dir = line.GetValue(out double value, out double startVal, out double endVal);
-            LowerBound = GaPara.MinValues[i] + value;
-            UpperBound = GaPara.MaxValues[i] + value;
+            if (Math.Abs(GaPara.MaxValues[i] - GaPara.MinValues[i])< tol)
+            {
+                LowerBound = value;
+                UpperBound = value;
+            }
+            else
+            {
+                var Bound1 = GaPara.MinValues[i] + value;
+                var Bound2 = GaPara.MaxValues[i] + value;
+
+                LowerBound = Math.Min(Bound1,Bound2);
+                UpperBound = Math.Max(Bound1,Bound2);
+            }
         }
 
         private void ReclaimMemory()
@@ -476,8 +488,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                    double LowerBound = GaPara.MinValues[i] + value;
-                    double UpperBound = GaPara.MaxValues[i] + value;
+                    double LowerBound = LowerUpperBound[i].Item1;
+                    double UpperBound = LowerUpperBound[i].Item2;
                     var RandValue = RandDoubleInRange(LowerBound, UpperBound);
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
@@ -504,51 +516,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             while (solutions.Count < FirstPopulationSize)
             {
                 // 随机生成 其余的解
-                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
-                if (FoundVaild)
-                {
-                    solutions.Add(solution);
-                }
-                else
-                {
-                    // 没找到则在之前解随机挑选一个
-                    var idx = RandInt(solutions.Count);
-                    solutions.Add(solutions[idx].Clone());
-                }
-            }
-            
-            return solutions;
-        }
-
-        private List<Chromosome> CreateFirstPopulation2()
-        {
-            List<Chromosome> solutions = new List<Chromosome>();
-
-            for (int i = 0; i < FirstPopulationSize; ++i)//
-            {
-                var solution = new Chromosome();
-                solution.Logger = this.Logger;
-                var genome = ConvertLineToGene(i);//创建初始基因序列
-
-                solution.Genome = genome;
-                //Draw.DrawSeg(solution);
-                if (solution.IsVaild(LayoutPara, ParameterViewModel))
-                {
-                    solution.Genome = genome;
-                    solutions.Add(solution);
-                }
-            }
-            // 添加初始画的分割线
-            var orgSolution = new Chromosome();
-            orgSolution.Logger = this.Logger;
-            var orgGenome = ConvertLineToGene();//创建初始基因序列
-            orgSolution.Genome = orgGenome;
-            //Draw.DrawSeg(solution);
-            solutions.Add(orgSolution);
-
-            while(solutions.Count < FirstPopulationSize)
-            {
-                // 初始的不够，随机生成
                 var FoundVaild = RandomCreateChromosome(out Chromosome solution);
                 if (FoundVaild)
                 {
@@ -756,7 +723,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound, int MaxIter = 1000)
         {
-            return General.Utils.RandNormalInRange(loc, scale, LowerBound, UpperBound, MaxIter);
+            double tol = 1e-4;
+            if (UpperBound- LowerBound <= tol) return loc;
+
+            else return General.Utils.RandNormalInRange(loc, scale, LowerBound, UpperBound, MaxIter);
         }
         private int RandInt(int range)
         {
@@ -768,7 +738,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
-            return RandDouble() * (UpperBound - LowerBound) + LowerBound;
+            double tol = 1e-4;
+            if (UpperBound - LowerBound < tol) return LowerBound ;
+            else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
         }
         #endregion
         #region
@@ -940,7 +912,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double maxVal = LowerUpperBound[j].Item2;
                     //var dist = Math.Min(maxVal - minVal, MutationUpperBound);
                     var dist = maxVal - minVal;
-                    s[i].Genome[j].Value = RandDouble() * dist + minVal;
+                    s[i].Genome[j].Value = RandDoubleInRange(minVal, maxVal);
                 }
             }
         }
