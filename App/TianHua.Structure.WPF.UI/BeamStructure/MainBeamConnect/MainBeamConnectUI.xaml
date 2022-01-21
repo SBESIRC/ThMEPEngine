@@ -1,0 +1,74 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Structure.WPF.UI.BeamStructure.MainBeamConnect.MainBeamConnectUI"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="主梁连线参数">
+    <Grid Focusable="False">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Grid Grid.Column="0" Margin="10,10,10,10">
+            <StackPanel Orientation="Vertical" Width="220">
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label>五边形版剖分</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <RadioButton x:Name="nonSplit"  VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsChecked="True" IsTabStop="True"
+                            VerticalContentAlignment="Bottom" Margin="10,5,0,5" Checked="NonSplit_Checked">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="不剖分" ></Label>
+                        </RadioButton>
+                        <RadioButton x:Name="split" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                             VerticalContentAlignment="Bottom" Margin="10,0,0,0" Checked="Split_Checked">
+                            <Label VerticalContentAlignment="Bottom" Padding="0" Focusable="False" Content="剖分" ></Label>
+                        </RadioButton>
+                        <StackPanel Name="panel1" Orientation="Horizontal" Margin="25,0,0,0" Height="24" Focusable="False" IsEnabled="False" HorizontalAlignment="Left">
+                            <Label FontFamily="Arial" Content="最大控制面积（m2）"></Label>
+                            <TextBox x:Name="txtSplitArea" Margin="0,0,0,0" Width="30" HorizontalContentAlignment="Center" Text="52"/>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label>超长提示</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,5" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <CheckBox x:Name="overlengthCheck" Margin="10,5,0,5" IsChecked="True" Checked="OverLength_Checked" Unchecked="OverLength_UnChecked">梁长度超过限值时，显红色</CheckBox>
+                        <StackPanel  Name="panel2" Orientation="Horizontal" Margin="25,0,0,0" Height="24" Focusable="False" HorizontalAlignment="Left">
+                            <Label FontFamily="Arial" Content="长度限值（m）"></Label>
+                            <TextBox x:Name="txtOverLength" Margin="0,0,0,0" Width="30" HorizontalContentAlignment="Center" Text="9" Height="24" VerticalAlignment="Top"></TextBox>
+                        </StackPanel>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </Grid>
+        <Grid Grid.Column="1" Margin="10,10,10,10">
+            <StackPanel Width="150">
+                <GroupBox>
+                    <GroupBox.Header>
+                        <Label>区域选择</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <RadioButton  Name="SelectionRectangle" VerticalAlignment="Center" Focusable="True"
+                            VerticalContentAlignment="Bottom" FocusManager.IsFocusScope="False" IsChecked="True" Margin="10,5,0,0">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="矩形框选" ></Label>
+                        </RadioButton>
+                        <RadioButton Name="SelectionPolygon" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                            VerticalContentAlignment="Bottom" Margin="10,5,0,5">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="多边形框选" ></Label>
+                        </RadioButton>
+                    </StackPanel>
+                </GroupBox>
+                <StackPanel HorizontalAlignment="Center" Margin="0,40,0,0" RenderTransformOrigin="0.504,0.655">
+                    <cus:ImageButton Margin="40,0,0,10" Content="恢复默认" Width="85" Height="24"  Click="ResetButton_Click"></cus:ImageButton>
+                    <cus:ImageButton Margin="40,0,0,0" Content="确定" Width="85" Height="24" Click="ConfirmButton_Click"></cus:ImageButton>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</cus:ThCustomWindow>

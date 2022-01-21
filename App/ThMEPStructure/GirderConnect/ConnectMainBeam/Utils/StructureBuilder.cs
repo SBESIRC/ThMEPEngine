@@ -558,7 +558,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                             curEvenLines = StructureDealer.MergePolyline(findPolylineFromLines[curSplitLine], findPolylineFromLines[curConverseLine]);
                             //该四边形最大角的度数，最小的那个
                             curDegree = LineDealer.GetBiggestAngel(curEvenLines, borderPts);
-                            if (curDegree > Math.PI / 6 * 5)
+                            if (curDegree == -1)
                             {
                                 continue;
                             }

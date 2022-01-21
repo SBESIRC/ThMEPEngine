@@ -29,6 +29,25 @@ namespace ThMEPIdentity
             {"THSAMPLEPLAN", "素材库"},
         };
 
+        private readonly Dictionary<string, string> USERWHITELIST = new Dictionary<string, string>
+        {
+            // 上海公建一所
+            {"000329", "黄先岳"},
+            {"000167", "马恒"},
+            {"000769", "黄国强"},
+
+            // 武汉天华建筑八所
+            {"009978", "王宽"},
+            {"000881", "王旭升"},
+            {"000124", "胡建科"},
+
+            // 武汉天华建筑十所
+            {"000981", "冯云聪"},
+
+            // 武汉天华总师室
+            {"025143", "齐雪钦"},
+        };
+
         public bool IsTHCommand(string name)
         {
             if (WHITELIST.ContainsKey(name))
@@ -36,6 +55,18 @@ namespace ThMEPIdentity
                 return false;
             }
             return name.StartsWith("TH");
+        }
+
+        public bool IsAuthorizedTHCommand(string cmd, string eid)
+        {
+            // 车位布置
+            if (cmd == "THDXCW")
+            {
+                return USERWHITELIST.ContainsKey(eid);
+            }
+
+            // 其他命令
+            return true;
         }
 
         public string Description(string name)

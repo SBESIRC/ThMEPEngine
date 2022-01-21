@@ -405,7 +405,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="outlines"></param>
         /// <param name="points"></param>
         /// <returns></returns>
-        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(HashSet<Polyline> outlines, List<Point3d> points, double bufferLength = 500)
+        public static Dictionary<Polyline, HashSet<Point3d>> GetOutline2BorderPts(List<Polyline> outlines, List<Point3d> points, double bufferLength = 500)
         {
             var outline2BorderPts = new Dictionary<Polyline, HashSet<Point3d>>();
             var dbPoints = points.Select(p => new DBPoint(p)).ToCollection();
@@ -430,7 +430,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <returns></returns>
         public static Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> CreateOutline2BorderNearPts(Dictionary<Point3d, HashSet<Point3d>> dicTuples, List<Polyline> polylines)
         {
-            var outline2BorderPts = GetOutline2BorderPts(polylines.ToHashSet(), dicTuples.Keys.ToList());
+            var outline2BorderPts = GetOutline2BorderPts(polylines, dicTuples.Keys.ToList());
             var outline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
             foreach (var outline in outline2BorderPts.Keys)
             {

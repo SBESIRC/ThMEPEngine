@@ -43,10 +43,29 @@ namespace ThMEPStructure.GirderConnect.Command
         {
 #if (ACAD2016 || ACAD2018)
             using (var acdb = AcadDatabase.Active())
-            using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
+            //using (var pc = new PointCollector(PointCollector.Shape.Window, new List<string>()))
             {
                 // 选择范围
-                var pts = GetRangePoints();
+                var pts = new Point3dCollection();
+                if (MainBeamLayoutConfig.RegionSelection == true)
+                {
+                    pts = GetRangePoints();
+                }
+                else
+                {
+                    using (var pc = new PointCollector(PointCollector.Shape.Polygon, new List<string>()))
+                    {
+                        try
+                        {
+                            pc.Collect();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                        pts = pc.CollectedPoints.Cast<Point3d>().ToCollection();
+                    }
+                }
                 if(pts.Count == 0)
                 {
                     return;
@@ -85,17 +104,17 @@ namespace ThMEPStructure.GirderConnect.Command
                 var outerWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var olCrossPts = new Dictionary<Polyline, HashSet<Point3d>>();
 
-                //处理算法输入
+                //处理输入
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
                     clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
 
                 //计算
                 var connectService = new Connect();
-                connectService.SimilarAngle = Math.PI / 8;
-                connectService.SimilarPointsDis = 500;
-                connectService.SamePointsDis = 1;
-                connectService.MaxBeamLength = 13000;
-                connectService.SplitArea = 52000000;
+                connectService.SimilarAngle = MainBeamLayoutConfig.SimilarAngle;
+                connectService.SimilarPointsDis = MainBeamLayoutConfig.SimilarPointsDis;
+                connectService.SamePointsDis = MainBeamLayoutConfig.SamePointsDis;
+                connectService.MaxBeamLength = MainBeamLayoutConfig.MaxBeamLength;
+                connectService.SplitArea = MainBeamLayoutConfig.SplitSelection == true ? MainBeamLayoutConfig.SplitArea : 0;
 
                 var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts, transformer);
 
@@ -105,7 +124,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 outerWalls.ForEach(o => intersectCollection.Add(o.Key));
                 outsideColumns.ForEach(o => intersectCollection.Add(o as Polyline));
 
-                //处理算法输出
+                //处理输出
                 var lines = MainBeamPostProcess.MPostProcess(dicTuples, intersectCollection);
 
                 //还原到原始位置
@@ -116,7 +135,8 @@ namespace ThMEPStructure.GirderConnect.Command
 
                 //打印到Cad                
                 ImportService.ImportMainBeamInfo(); //导入主梁信息
-                MainBeamPostProcess.Output(lines);
+                double standardLength = MainBeamLayoutConfig.OverLengthSelection == true ? MainBeamLayoutConfig.OverLength : 0;
+                MainBeamPostProcess.Output(lines, standardLength);
             }
 #else
             Active.Editor.WriteLine("此功能只支持CAD2016暨以上版本");

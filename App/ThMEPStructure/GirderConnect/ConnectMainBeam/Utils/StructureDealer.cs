@@ -93,7 +93,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             var polyline = LineDealer.Tuples2Polyline(tuples);
 
-            if (n < 5 || (n == 5 && polyline.Area < splitArea))
+            if (n < 5 || (n == 5 && (splitArea == 0 || polyline.Area < splitArea)))
             {
                 if (LineDealer.Tuples2Polyline(tuples).Closed == true)
                 {
@@ -703,7 +703,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansTuple;
         }
-        public static HashSet<Tuple<Point3d, Point3d>> CloseBorderA(HashSet<Polyline> polylines, List<Point3d> oriPoints)
+        public static HashSet<Tuple<Point3d, Point3d>> CloseBorderA(List<Polyline> polylines, List<Point3d> oriPoints)
         {
             var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints);
             HashSet<Point3d> ptVisit = new HashSet<Point3d>();
@@ -738,7 +738,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return ansTuple;
         }
-        public static Dictionary<Point3d, Point3d> CloseBorderB(HashSet<Polyline> polylines, List<Point3d> oriPoints)
+        public static Dictionary<Point3d, Point3d> CloseBorderB(List<Polyline> polylines, List<Point3d> oriPoints)
         {
             var outline2BorderPts = PointsDealer.GetOutline2BorderPts(polylines, oriPoints);
             Dictionary<Point3d, Point3d> ansDic = new Dictionary<Point3d, Point3d>();
@@ -1105,7 +1105,8 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 foreach (var tupleB in tmpTuples)
                 {
                     //若两线相交，删除长线
-                    if (tupleA == tupleB || (tupleA.Item1.DistanceTo(tupleB.Item2) < devision && tupleB.Item1.DistanceTo(tupleA.Item2) < devision) || !LineDealer.IsIntersect(newTupA.Item1, newTupA.Item2, tuple2deduce[tupleB].Item1, tuple2deduce[tupleB].Item2))
+                    if (tupleA == tupleB || (tupleA.Item1.DistanceTo(tupleB.Item2) < devision && tupleB.Item1.DistanceTo(tupleA.Item2) < devision) 
+                        || !LineDealer.IsIntersect(newTupA.Item1, newTupA.Item2, tuple2deduce[tupleB].Item1, tuple2deduce[tupleB].Item2))
                     {
                         continue;
                     }
@@ -1204,13 +1205,12 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             var dicTuples = RemoveLineIntersectWithOutline(outline2BorderNearPts, ref priority1stBorderNearTuples, 600);
 
             Dictionary<Point3d, HashSet<Point3d>> priority1stDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+            //ReduceSimilarLine(ref dicTuples, priority1stDicTuples, tolerance);
             priority1stBorderNearTuples.ForEach(o => AddLineTodicTuples(o.Item1, o.Item2, ref priority1stDicTuples));
             ReduceSimilarLine(ref dicTuples, priority1stDicTuples, tolerance);
             RemoveIntersectLines(ref dicTuples);
 
-            var newOutline2BorderNearPts = new Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>>();
-            newOutline2BorderNearPts = PointsDealer.CreateOutline2BorderNearPts(dicTuples, outline2BorderNearPts.Keys.ToList());
-            return newOutline2BorderNearPts;
+            return PointsDealer.CreateOutline2BorderNearPts(dicTuples, outline2BorderNearPts.Keys.ToList());
         }
     }
 }

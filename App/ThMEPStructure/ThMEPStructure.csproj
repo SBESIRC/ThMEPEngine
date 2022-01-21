@@ -30,6 +30,7 @@
     <Compile Include="GirderConnect\Command\ThBeamConnectorCommand.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\ConnectProcess\Connect.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Data\LayerDealer.cs" />
+    <Compile Include="GirderConnect\ConnectMainBeam\Data\MainBeamLayoutConfig.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\CenterLine.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\GetObject.cs" />
     <Compile Include="GirderConnect\ConnectMainBeam\Utils\LineDealer.cs" />

@@ -126,7 +126,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             var rst = layoutPara.Set(Genome);
             if (!rst) return 0;
+
             GeoUtilities.LogMomery("SolutionStart: ");
+            if (!IsValidatedSolutions(layoutPara)) return -1;
             int result = GetParkingNums(layoutPara, parameterViewModel);
             GeoUtilities.LogMomery("SolutionEnd: ");
             //Thread.Sleep(3);
@@ -136,6 +138,89 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
             return result;
         }
+
+        public static bool IsValidatedSolutions(LayoutParameter layoutPara)
+        {
+            var lanes = new List<Line>();
+            var boundary = layoutPara.OuterBoundary;
+            for (int k = 0; k < layoutPara.AreaNumber.Count; k++)
+            {
+                layoutPara.SubAreaId2SegsDic.TryGetValue(k, out List<Line> iniLanes);
+                lanes.AddRange(iniLanes);
+            }
+            var tmplanes = new List<Line>();
+            //与边界邻近的无效车道线剔除
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                var buffer = lanes[i].Buffer(2750 - 1);
+                var splits = GeoUtilities.SplitCurve(boundary, buffer);
+                if (splits.Count() == 1) continue;
+                splits = splits.Where(e => buffer.Contains(e.GetPointAtParam(e.EndParam / 2))).Where(e => e.GetLength() > 1).ToArray();
+                if (splits.Count() == 0) continue;
+                var split = splits.First();
+                var ps = lanes[i].GetClosestPointTo(split.StartPoint, false);
+                var pe = lanes[i].GetClosestPointTo(split.EndPoint, false);
+                var splitline = new Line(ps, pe);
+                var splitedlines = GeoUtilities.SplitLine(lanes[i], new List<Point3d>() { ps, pe });
+                splitedlines = splitedlines.Where(e => e.GetCenter().DistanceTo(splitline.GetClosestPointTo(e.GetCenter(), false)) > 1).ToList();
+                lanes.RemoveAt(i);
+                tmplanes.AddRange(splitedlines);
+                i--;
+            }
+            lanes.AddRange(tmplanes);
+            GeoUtilities.RemoveDuplicatedLines(lanes);
+            //连接碎车道线
+            int count = 0;
+            while (true)
+            {
+                count++;
+                if (count > 10) break;
+                if (lanes.Count < 2) break;
+                for (int i = 0; i < lanes.Count - 1; i++)
+                {
+                    var joined = false;
+                    for (int j = i + 1; j < lanes.Count; j++)
+                    {
+                        if (GeoUtilities.IsParallelLine(lanes[i], lanes[j]) && (lanes[i].StartPoint.DistanceTo(lanes[j].StartPoint) == 0
+                            || lanes[i].StartPoint.DistanceTo(lanes[j].EndPoint) == 0
+                            || lanes[i].EndPoint.DistanceTo(lanes[j].StartPoint) == 0
+                            || lanes[i].EndPoint.DistanceTo(lanes[j].EndPoint) == 0))
+                        {
+                            var pl = GeoUtilities.JoinCurves(new List<Polyline>(), new List<Line>() { lanes[i], lanes[j] }).Cast<Polyline>().First();
+                            var line = new Line(pl.StartPoint, pl.EndPoint);
+                            if (Math.Abs(line.Length - lanes[i].Length - lanes[j].Length) < 1)
+                            {
+                                lanes.RemoveAt(j);
+                                lanes.RemoveAt(i);
+                                lanes.Add(line);
+                                joined = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (joined) break;
+                }
+            }
+            //判断是否有孤立的车道线
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                bool connected = false;
+                for (int j = 0; j < lanes.Count; j++)
+                {
+                    if (i != j)
+                    {
+                        if (GeoUtilities.IsConnectedLines(lanes[i], lanes[j]) || lanes[i].Intersect(lanes[j], Intersect.OnBothOperands).Count > 0)
+                        {
+                            connected = true;
+                            break;
+                        }
+                    }
+                }
+                if (!connected) return false;
+            }
+            return true;
+        }
+
         public bool IsVaild(LayoutParameter layoutPara, ParkingStallArrangementViewModel ParameterViewModel)
         {
             return layoutPara.IsVaildGenome(Genome, ParameterViewModel);
@@ -260,7 +345,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         Random Rand = new Random();
 
         //Genetic Algorithm parameters
-        readonly int MaxTime;
+        readonly double MaxTime;
         readonly int IterationCount = 10;
         int PopulationSize;
 
@@ -298,7 +383,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MaxTime = 180;
+            MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
 
@@ -325,11 +410,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
+            double tol = 1e-4;
             // get absolute coordinate of segline
             var line = GaPara.SegLine[i];
             var dir = line.GetValue(out double value, out double startVal, out double endVal);
-            LowerBound = GaPara.MinValues[i] + value;
-            UpperBound = GaPara.MaxValues[i] + value;
+            if (Math.Abs(GaPara.MaxValues[i] - GaPara.MinValues[i])< tol)
+            {
+                LowerBound = value;
+                UpperBound = value;
+            }
+            else
+            {
+                var Bound1 = GaPara.MinValues[i] + value;
+                var Bound2 = GaPara.MaxValues[i] + value;
+
+                LowerBound = Math.Min(Bound1,Bound2);
+                UpperBound = Math.Max(Bound1,Bound2);
+            }
         }
 
         private void ReclaimMemory()
@@ -391,8 +488,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     var line = GaPara.SegLine[i];
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
-                    double LowerBound = GaPara.MinValues[i] + value;
-                    double UpperBound = GaPara.MaxValues[i] + value;
+                    double LowerBound = LowerUpperBound[i].Item1;
+                    double UpperBound = LowerUpperBound[i].Item2;
                     var RandValue = RandDoubleInRange(LowerBound, UpperBound);
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
@@ -419,51 +516,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             while (solutions.Count < FirstPopulationSize)
             {
                 // 随机生成 其余的解
-                var FoundVaild = RandomCreateChromosome(out Chromosome solution);
-                if (FoundVaild)
-                {
-                    solutions.Add(solution);
-                }
-                else
-                {
-                    // 没找到则在之前解随机挑选一个
-                    var idx = RandInt(solutions.Count);
-                    solutions.Add(solutions[idx].Clone());
-                }
-            }
-            
-            return solutions;
-        }
-
-        private List<Chromosome> CreateFirstPopulation2()
-        {
-            List<Chromosome> solutions = new List<Chromosome>();
-
-            for (int i = 0; i < FirstPopulationSize; ++i)//
-            {
-                var solution = new Chromosome();
-                solution.Logger = this.Logger;
-                var genome = ConvertLineToGene(i);//创建初始基因序列
-
-                solution.Genome = genome;
-                //Draw.DrawSeg(solution);
-                if (solution.IsVaild(LayoutPara, ParameterViewModel))
-                {
-                    solution.Genome = genome;
-                    solutions.Add(solution);
-                }
-            }
-            // 添加初始画的分割线
-            var orgSolution = new Chromosome();
-            orgSolution.Logger = this.Logger;
-            var orgGenome = ConvertLineToGene();//创建初始基因序列
-            orgSolution.Genome = orgGenome;
-            //Draw.DrawSeg(solution);
-            solutions.Add(orgSolution);
-
-            while(solutions.Count < FirstPopulationSize)
-            {
-                // 初始的不够，随机生成
                 var FoundVaild = RandomCreateChromosome(out Chromosome solution);
                 if (FoundVaild)
                 {
@@ -671,7 +723,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound, int MaxIter = 1000)
         {
-            return General.Utils.RandNormalInRange(loc, scale, LowerBound, UpperBound, MaxIter);
+            double tol = 1e-4;
+            if (UpperBound- LowerBound <= tol) return loc;
+
+            else return General.Utils.RandNormalInRange(loc, scale, LowerBound, UpperBound, MaxIter);
         }
         private int RandInt(int range)
         {
@@ -683,7 +738,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
-            return RandDouble() * (UpperBound - LowerBound) + LowerBound;
+            double tol = 1e-4;
+            if (UpperBound - LowerBound < tol) return LowerBound ;
+            else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
         }
         #endregion
         #region
@@ -855,7 +912,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double maxVal = LowerUpperBound[j].Item2;
                     //var dist = Math.Min(maxVal - minVal, MutationUpperBound);
                     var dist = maxVal - minVal;
-                    s[i].Genome[j].Value = RandDouble() * dist + minVal;
+                    s[i].Genome[j].Value = RandDoubleInRange(minVal, maxVal);
                 }
             }
         }

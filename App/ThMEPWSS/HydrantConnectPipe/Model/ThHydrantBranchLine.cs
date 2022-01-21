@@ -308,7 +308,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                 }
                 double tmpAngle = angle + Math.PI / 2.0;
                 var tmpVecotr = new Vector3d(Math.Cos(tmpAngle), Math.Sin(tmpAngle), 0.0);
-                position = position + 150 * tmpVecotr;
+                position = position + 450 * tmpVecotr;
 
                 var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-FRPT-HYDT-DIMS", riserName, position, new Scale3d(1, 1, 1), angle);
                 var blk = acadDatabase.Element<BlockReference>(blkId);
@@ -328,6 +328,11 @@ namespace ThMEPWSS.HydrantConnectPipe.Model
                         }
                     }
                 }
+                var obb = blk.ToOBB(blk.BlockTransform);
+                var center = obb.GetCenter();
+                var movVector = center.GetVectorTo(position);
+                position = position + movVector;
+                blk.Position = position;
                 return true;
             }
             else

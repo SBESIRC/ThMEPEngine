@@ -146,7 +146,12 @@ namespace ThMEPElectrical.BlockConvert
                             var sum = 0;
                             foreach (var c in configuration)
                             {
-                                var num = ThStringTools.ChineseToNumber(c.ToString());
+                                var cClone = c;
+                                if(c == '两')
+                                {
+                                    cClone = '二';
+                                }
+                                var num = ThStringTools.ChineseToNumber(cClone.ToString());
                                 if (num > -1)
                                 {
                                     sum += num;

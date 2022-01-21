@@ -50,10 +50,11 @@ namespace ThMEPArchitecture.PartitionLayout
             GeneratePillars = gpillars;
             Walls = walls;
             Obstacles = obstacles;
-            Boundary = boundary;
+            Boundary = boundary.DPSimplify(1);
             BoundingBox = Boundary.GeometricExtents.ToRectangle();
             MaxLength = BoundingBox.Length / 2;
             InitialzeDatas(iniLanes);
+            Boundary = JoinCurves(walls, iniLanes)[0];
         }
 
         public List<Polyline> Walls;

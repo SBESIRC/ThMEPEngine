@@ -34,7 +34,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 {
                     FindCount += AreaData.Data.BlockData.BlockStatistics[name] * ThBlockConfigModel.BlockConfig.First(x => x.UniqueName == name).CoefficientOfExpansion;//计数*权重
                 });
-                DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid };
                 WireCircuitText.TextString = "总线点位数量："+FindCount;
                 WireCircuitText.Position = new Point3d(16500, OuterFrameLength * FloorNum + 200, 0);
                 WireCircuitText.Layer = ThAutoFireAlarmSystemCommon.CountBlockByLayer;

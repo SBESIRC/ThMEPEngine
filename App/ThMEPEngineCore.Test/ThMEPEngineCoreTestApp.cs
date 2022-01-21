@@ -24,7 +24,7 @@ using GeometryExtensions;
 using ThMEPEngineCore.Diagnostics;
 using NetTopologySuite.Geometries;
 using NFox.Cad;
-
+using ThMEPEngineCore.Algorithm.FrameComparer;
 
 namespace ThMEPEngineCore.Test
 {
@@ -548,6 +548,17 @@ namespace ThMEPEngineCore.Test
                 throw new NotSupportedException();
             }
             return results;
+        }
+        [CommandMethod("TIANHUACAD", "ThMEPFrameComparerTest", CommandFlags.Modal)]
+        public void ThMEPFrameComparerTest()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var room = new ThFrameExactor(CompareFrameType.ROOM);
+                var comp = new ThMEPFrameComparer(room.curGraph, room.reference);
+                var painter = new ThFramePainter();
+                painter.Draw(comp, room.dicCode2Id, CompareFrameType.ROOM);
+            }
         }
     }
 }

@@ -22,46 +22,23 @@ namespace ThMEPStructure.GirderConnect.Data
             var tuples = LineDealer.DicTuplesToTuples(dicTuples);
             return TuplesToLines(tuples);
         }
-        public static void Output(List<Line> lines)
+        public static void Output(List<Line> lines, double standardLength)
         {
             using (var acdb = AcadDatabase.Active())
             {
                 lines.ForEach(line =>
                 {
                     line.Layer = BeamConfig.MainBeamLayerName;
-                    if (line.Length > 9000) { line.ColorIndex = 7; }
-                    else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
+                    if (standardLength == 0) { line.ColorIndex = 1; }
+                    else
+                    {
+                        if (line.Length > standardLength) { line.ColorIndex = 1; }
+                        else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
+                    }
                     line.Linetype = "ByLayer";
                     acdb.ModelSpace.Add(line);
                 });
             }
-        }
-
-        /// <summary>
-        /// DCEL的双向线转换为单线
-        /// </summary>
-        /// <param name="tuples"></param>
-        /// <returns></returns>
-        public static HashSet<Tuple<Point3d, Point3d>> UnifyTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
-        {
-            var ansTuples = new HashSet<Tuple<Point3d, Point3d>>();
-            foreach (var kv in dicTuples)
-            {
-                var ptSet = kv.Value;
-                foreach(var pt in ptSet)
-                {
-                    if (kv.Key.DistanceTo(pt) <= 10) continue;
-
-                    var positiveTuple = new Tuple<Point3d, Point3d>(kv.Key, pt);
-                    var negativeTuple = new Tuple<Point3d, Point3d>(pt, kv.Key);
-
-                    if (!ansTuples.Contains(positiveTuple) && !ansTuples.Contains(negativeTuple))
-                    {
-                        ansTuples.Add(positiveTuple);
-                    }
-                }
-            }
-            return ansTuples;
         }
 
         public static List<Line> TuplesToLines(HashSet<Tuple<Point3d, Point3d>> tuples)

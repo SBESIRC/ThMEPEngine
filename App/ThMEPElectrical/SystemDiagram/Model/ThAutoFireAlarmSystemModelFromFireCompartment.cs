@@ -256,8 +256,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     Rotation = blkrefs.Rotation;
                 }
                 InsertBlockService.ImportFireDistrictLayerAndStyle(db);
-                var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
-                List<Entity> DrawEntitys = new List<Entity>();
+                List<DBText> DrawEntitys = new List<DBText>();
                 addFloorss.ForEach(f =>
                 {
                     f.FireDistricts.ForEach(fireDistrict =>
@@ -265,16 +264,15 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         //画防火分区名字
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
-                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
+                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer};
                             newDBText.Rotation = Rotation;
                             DrawEntitys.Add(newDBText);
                         }
                     });
                 });
-                foreach (Entity item in DrawEntitys)
-                {
-                    acadDatabase.ModelSpace.Add(item);
-                }
+                DrawEntitys.ForEach(e => acadDatabase.ModelSpace.Add(e));
+                var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
+                DrawEntitys.ForEach(e => e.TextStyleId = textStyle.Id);
             }
         }
 

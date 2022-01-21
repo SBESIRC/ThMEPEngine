@@ -40,7 +40,7 @@ namespace ThMEPLighting.DSFEL.ExitService
                 var intersectRooms = roomInfo.Where(x => (x.Boundary as Polyline).Intersects(door)).ToList();
                 ExitModel exit = new ExitModel();
                 if (intersectRooms.Count == 1)
-                {  
+                {
                     Polyline roomBound = intersectRooms[0].Boundary as Polyline;
                     if (true/*CalDoorOpenDir(door, roomBound)*/)
                     {
@@ -56,7 +56,7 @@ namespace ThMEPLighting.DSFEL.ExitService
                     foreach (var room in intersectRooms)
                     {
                         Polyline roomBound = room.Boundary as Polyline;
-                        if (dSFELConfig.CheckExitRoom(room, intersectRooms.Where(x=>x.Boundary != room.Boundary).ToList()))
+                        if (dSFELConfig.CheckExitRoom(room, intersectRooms.Where(x => x.Boundary != room.Boundary).ToList()))
                         {
                             exit.exitType = ExitType.EvacuationExit;
                             exit.room = roomBound;
@@ -101,6 +101,15 @@ namespace ThMEPLighting.DSFEL.ExitService
             var pt1 = pts[0];
             pts = pts.Where(x => !x.IsEqualTo(pt1, new Tolerance(0.01, 0.01))).ToList();
             var pt2 = pts[0];
+            var checkPts = pts.Where(x => !x.IsEqualTo(pt2, new Tolerance(0.01, 0.01))).OrderBy(x => x.DistanceTo(pt1)).ToList();
+            var pt3 = checkPts[0];
+            if (Math.Abs(room.Distance(pt2) - room.Distance(pt3)) < 10)
+            {
+                if (pt3.DistanceTo(pt1) > pt2.DistanceTo(pt1))
+                {
+                    pt2 = pt3;
+                }
+            }
             pts = pts.OrderBy(x => pt1.DistanceTo(x)).ToList();
             var moveDir = (pt1 - pts[0]).GetNormal();
             var layoutPt = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
@@ -121,6 +130,15 @@ namespace ThMEPLighting.DSFEL.ExitService
             var pt1 = pts[0];
             pts = pts.Where(x => !x.IsEqualTo(pt1, new Tolerance(0.01, 0.01))).ToList();
             var pt2 = pts[0];
+            pts = pts.Where(x => !x.IsEqualTo(pt2, new Tolerance(0.01, 0.01))).OrderBy(x => x.DistanceTo(pt1)).ToList();
+            var pt3 = pts[0];
+            if (Math.Abs(room.Distance(pt2) - room.Distance(pt3)) < 10)
+            {
+                if (pt3.DistanceTo(pt1) > pt2.DistanceTo(pt1))
+                {
+                    pt2 = pt3;
+                }
+            }
             var dir = (pt1 - pt2).GetNormal();
             if (dir.DotProduct(Vector3d.XAxis) < 0)
             {

@@ -79,7 +79,7 @@ namespace ThMEPWSS.Pipe
         }
         public static Point3d SelectPoint()
         {
-            var point1 = Active.Editor.GetPoint("\n请选择起点位置\n");
+            var point1 = Active.Editor.GetPoint("\n请指定环管标记起点");
             if (point1.Status != PromptStatus.OK)
             {
                 return new Point3d();
