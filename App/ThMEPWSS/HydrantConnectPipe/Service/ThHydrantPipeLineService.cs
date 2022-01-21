@@ -37,7 +37,7 @@ namespace ThMEPWSS.HydrantConnectPipe.Service
             branchLines = ThHydrantConnectPipeUtils.CleanLines(branchLines);
             loopLines = PipeLineList.CleanLaneLines3(loopLines);
             branchLines = PipeLineList.CleanLaneLines3(branchLines);
-            loopLines.RemoveAll(l => IsMarkLine(l, pipeMarks));
+//            loopLines.RemoveAll(l => IsMarkLine(l, pipeMarks));
         }
         private bool IsMarkLine(Line l, List<ThHydrantPipeMark> marks)
         {
