@@ -183,6 +183,10 @@ namespace ThMEPElectrical.SystemDiagram.Service
                         item.Move(offset);
                         item.TransformBy(conversionMatrix);
                         var objId = acadDatabase.ModelSpace.Add(item);
+                        if(item is DBText dBText)
+                        {
+                            dBText.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+                        }
                         objectIds.Add(objId);
                     }
                 }

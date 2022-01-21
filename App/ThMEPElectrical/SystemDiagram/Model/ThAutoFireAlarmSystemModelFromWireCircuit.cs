@@ -234,9 +234,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     Rotation = blkrefs.Rotation;
                 }
-                var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
-                var WireCircuittextStyle = acadDatabase.TextStyles.Element("TH-STYLE3");
-                List<Entity> DrawEntitys = new List<Entity>();
+                List<DBText> DrawFireDistrictEntitys = new List<DBText>();
+                List<DBText> DrawWireCircuitEntitys = new List<DBText>();
                 addFloorss.ForEach(f =>
                 {
                     f.FireDistricts.ForEach(fireDistrict =>
@@ -244,26 +243,29 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         //画防火分区名字
                         if (fireDistrict.DrawFireDistrictNameText && fireDistrict.DrawFireDistrict)
                         {
-                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer, TextStyleId = textStyle.Id };
+                            var newDBText = new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer};
                             newDBText.Rotation = Rotation;
-                            DrawEntitys.Add(newDBText);
+                            DrawFireDistrictEntitys.Add(newDBText);
                         }
                         //画电回路编号
                         fireDistrict.WireCircuits.ForEach(cw =>
                         {
                             if (cw.DrawWireCircuit && cw.DrawWireCircuitText)
                             {
-                                var newDBText = new DBText() { Height = 300, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = cw.WireCircuitName, Position = cw.TextPoint, AlignmentPoint = cw.TextPoint, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer, TextStyleId = WireCircuittextStyle.Id };
+                                var newDBText = new DBText() { Height = 300, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextString = cw.WireCircuitName, Position = cw.TextPoint, AlignmentPoint = cw.TextPoint, Layer = ThAutoFireAlarmSystemCommon.WireCircuitByLayer };
                                 newDBText.Rotation = Rotation;
-                                DrawEntitys.Add(newDBText);
+                                DrawWireCircuitEntitys.Add(newDBText);
                             }
                         });
                     });
                 });
-                foreach (Entity item in DrawEntitys)
-                {
-                    acadDatabase.ModelSpace.Add(item);
-                }
+                DrawFireDistrictEntitys.ForEach(e => acadDatabase.ModelSpace.Add(e));            
+                var textStyle = acadDatabase.TextStyles.Element("TH-STYLE1");
+                DrawFireDistrictEntitys.ForEach(e => e.TextStyleId = textStyle.Id);
+
+                DrawWireCircuitEntitys.ForEach(e => acadDatabase.ModelSpace.Add(e));
+                var WireCircuittextStyle = acadDatabase.TextStyles.Element("TH-STYLE3");
+                DrawWireCircuitEntitys.ForEach(e => e.TextStyleId = WireCircuittextStyle.Id);
             }
         }
 

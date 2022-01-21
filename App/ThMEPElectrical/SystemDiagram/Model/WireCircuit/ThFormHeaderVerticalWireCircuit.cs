@@ -28,7 +28,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 OnePolyLine.AddVertexAt(2, new Point2d(0, OuterFrameLength * FloorIndex), 0, 0, 0);
                 OnePolyLine.AddVertexAt(3, new Point2d(0, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(OnePolyLine);
-                DBText OneText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                DBText OneText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid};
                 OneText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader1;
                 OneText.Position = new Point3d(-1500, OuterFrameLength * this.FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight, 0);
                 OneText.AlignmentPoint = OneText.Position;
@@ -41,7 +41,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 TwoPolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
                 TwoPolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * ThAutoFireAlarmSystemCommon.SystemColLeftNum, OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(TwoPolyLine);
-                DBText TwoText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                DBText TwoText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid };
                 TwoText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader2;
                 TwoText.Position = new Point3d(9000, OuterFrameLength * this.FloorIndex + 2250, 0);
                 TwoText.AlignmentPoint = TwoText.Position;
@@ -54,7 +54,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 ThreePolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
                 ThreePolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight * 2), 0, 0, 0);
                 Result.Add(ThreePolyLine);
-                DBText ThreeText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                DBText ThreeText = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid };
                 ThreeText.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramChartHeader3;
                 ThreeText.Position = new Point3d(40500, OuterFrameLength * this.FloorIndex + 2250, 0);
                 ThreeText.AlignmentPoint = ThreeText.Position;
@@ -71,7 +71,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         PolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (i + 1), OuterFrameLength * FloorIndex), 0, 0, 0);
                         PolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (i + 1), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
                         Result.Add(PolyLine);
-                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid};
                         Text.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramTitleBars[i];
                         Text.Position = new Point3d(OuterFrameLength * i + 1500, OuterFrameLength * this.FloorIndex + 750, 0);
                         Text.AlignmentPoint = Text.Position;
@@ -87,7 +87,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         PolyLine.AddVertexAt(2, new Point2d(OuterFrameLength * (i + 2), OuterFrameLength * FloorIndex), 0, 0, 0);
                         PolyLine.AddVertexAt(3, new Point2d(OuterFrameLength * (i + 2), OuterFrameLength * FloorIndex + ThAutoFireAlarmSystemCommon.SystemDiagramChartHeight), 0, 0, 0);
                         Result.Add(PolyLine);
-                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        DBText Text = new DBText() { Height = 500, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid};
                         Text.TextString = ThAutoFireAlarmSystemCommon.SystemDiagramTitleBars[i];
                         Text.Position = new Point3d(OuterFrameLength * i + 3000, OuterFrameLength * this.FloorIndex + 750, 0);
                         Text.AlignmentPoint = Text.Position;
@@ -125,7 +125,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 var floorData = this.AllFireDistrictData[i];
                 if(floorData.FireDistrictName.Length<10)
                 {
-                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid };
                     Text.TextString = floorData.FireDistrictName;
                     Text.Position = new Point3d(-1500, OuterFrameLength * i + 1500, 0);
                     Text.AlignmentPoint = Text.Position;
@@ -139,13 +139,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     {
                         Findindex = floorData.FireDistrictName.IndexOf('F') + 1;
                     }
-                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    DBText Text = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid };
                     Text.TextString = floorData.FireDistrictName.Substring(0,Findindex);
                     Text.Position = new Point3d(-1500, OuterFrameLength * i + 1800, 0);
                     Text.AlignmentPoint = Text.Position;
                     Result.Add(Text);
 
-                    DBText Text1 = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    DBText Text1 = new DBText() { Height = 500, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid};
                     Text1.TextString = floorData.FireDistrictName.Substring(Findindex,floorData.FireDistrictName.Length- Findindex);
                     Text1.Position = new Point3d(-1500, OuterFrameLength * i + 1200, 0);
                     Text1.AlignmentPoint = Text1.Position;
@@ -153,7 +153,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (floorData.DrawCircuitName)
                 {
-                    DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                    DBText WireCircuitText = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid};
                     WireCircuitText.TextString = floorData.WireCircuitName;
                     WireCircuitText.Position = new Point3d(16500, OuterFrameLength * i + 2200, 0);
                     WireCircuitText.AlignmentPoint = WireCircuitText.Position;

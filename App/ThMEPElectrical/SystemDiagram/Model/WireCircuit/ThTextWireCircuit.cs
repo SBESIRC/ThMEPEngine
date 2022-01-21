@@ -31,7 +31,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         {
                             Quantity = this.fireDistrict.Data.BlockData.BlockStatistics["手动火灾报警按钮(带消防电话插座)"];
                         }
-                        DBText QuantityText = new DBText() { Height = 250, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        DBText QuantityText = new DBText() { Height = 250, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid};
                         QuantityText.TextString = Quantity.ToString();
                         QuantityText.Position = x.QuantityPosition.Add(new Vector3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1), 0));
                         QuantityText.AlignmentPoint = QuantityText.Position;
@@ -39,7 +39,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     }
                     if (x.ShowText && (this.fireDistrict.Data.BlockData.BlockStatistics[x.UniqueName] > 0 || !x.CanHidden))
                     {
-                        DBText Text = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
+                        DBText Text = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid};
                         Text.TextString = x.BlockNameRemark;
                         Text.Position = x.TextPosition.Add(new Vector3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1), 0));
                         Text.AlignmentPoint = Text.Position;
