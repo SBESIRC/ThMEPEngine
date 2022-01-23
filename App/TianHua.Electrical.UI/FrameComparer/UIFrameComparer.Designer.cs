@@ -43,13 +43,17 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.columnRegionRange,
             this.columnObjRange,
             this.columnReference});
+            this.listViewComparerRes.FullRowSelect = true;
+            this.listViewComparerRes.GridLines = true;
             this.listViewComparerRes.HideSelection = false;
+            this.listViewComparerRes.LabelEdit = true;
             this.listViewComparerRes.Location = new System.Drawing.Point(12, 50);
             this.listViewComparerRes.Name = "listViewComparerRes";
             this.listViewComparerRes.Size = new System.Drawing.Size(249, 292);
             this.listViewComparerRes.TabIndex = 0;
             this.listViewComparerRes.UseCompatibleStateImageBehavior = false;
             this.listViewComparerRes.View = System.Windows.Forms.View.Details;
+            this.listViewComparerRes.ItemSelectionChanged += new System.Windows.Forms.ListViewItemSelectionChangedEventHandler(this.listViewComparerRes_ItemSelectionChanged);
             // 
             // columnRegionRange
             // 
@@ -85,7 +89,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.GraphPath.Size = new System.Drawing.Size(181, 20);
             this.GraphPath.TabIndex = 2;
             // 
-            // FrameComparer
+            // UIFrameComparer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -95,7 +99,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.Controls.Add(this.listViewComparerRes);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "FrameComparer";
+            this.Name = "UIFrameComparer";
             this.Text = "房间框线对比";
             this.ResumeLayout(false);
 

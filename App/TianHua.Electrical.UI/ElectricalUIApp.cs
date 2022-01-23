@@ -167,11 +167,10 @@ namespace TianHua.Electrical.UI
                 var comp = new ThMEPFrameComparer(room.curGraph, room.reference);
                 var painter = new ThFramePainter();
                 painter.Draw(comp, room.dicCode2Id, CompareFrameType.ROOM);
-                using (var dlg = new UIFrameComparer(comp))
+                using (var dlg = new UIFrameComparer(comp, room.dicCode2Id))
                 {
-                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
-                    {
-                    }
+                    if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
+                        return;
                 }
             }
             
