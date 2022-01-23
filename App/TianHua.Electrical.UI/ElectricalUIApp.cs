@@ -1,14 +1,18 @@
-﻿using Linq2Acad;
+﻿using System.Windows.Forms;
+using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPElectrical;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Command;
 using ThMEPElectrical.BlockConvert;
+using TianHua.Electrical.UI.FrameComparer;
 using TianHua.Electrical.UI.FireAlarm;
 using TianHua.Electrical.UI.ThBroadcast;
 using TianHua.Electrical.UI.SecurityPlaneUI;
 using TianHua.Electrical.UI.CapitalConverter;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPEngineCore.Algorithm.FrameComparer;
+using ThMEPEngineCore.Algorithm;
 
 namespace TianHua.Electrical.UI
 {
@@ -152,6 +156,25 @@ namespace TianHua.Electrical.UI
                 }
                 return ThMEPElectricalService.Instance.Parameter;
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFJKX", CommandFlags.Modal)]
+        public void FrameComparerUI()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var room = new ThFrameExactor(CompareFrameType.ROOM);
+                var comp = new ThMEPFrameComparer(room.curGraph, room.reference);
+                var painter = new ThFramePainter();
+                painter.Draw(comp, room.dicCode2Id, CompareFrameType.ROOM);
+                using (var dlg = new UIFrameComparer(comp))
+                {
+                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                    {
+                    }
+                }
+            }
+            
         }
     }
 }
