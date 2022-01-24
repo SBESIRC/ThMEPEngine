@@ -44,7 +44,7 @@ namespace TianHua.Electrical.UI.FrameComparer
                     var entity = db.ModelSpace.ElementOrDefault(id);
                     if (entity != null)
                     {
-                        Active.Editor.ZoomToObjects(new Entity[] { entity }, 4.0);
+                        Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
                     }
                 }
             }
