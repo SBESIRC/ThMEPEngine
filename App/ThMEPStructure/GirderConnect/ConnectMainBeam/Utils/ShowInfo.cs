@@ -31,7 +31,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <param name="colerIndex"></param>
         public static void ShowPolyline(List<Tuple<Point3d, Point3d>> tuples, int colerIndex = 1)
         {
-            var polyline = LineDealer.Tuples2Polyline(tuples);
+            var polyline = TypeConvertor.Tuples2Polyline(tuples);
             polyline.ColorIndex = colerIndex;
             HostApplicationServices.WorkingDatabase.AddToModelSpace(polyline);
         }

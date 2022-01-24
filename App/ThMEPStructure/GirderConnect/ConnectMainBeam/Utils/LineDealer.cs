@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using NFox.Cad;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -32,91 +35,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return ansTuples;
-        }
-
-        /// <summary>
-        /// Convert style: polyline -> tuple list
-        /// </summary>
-        public static List<Tuple<Point3d, Point3d>> Polyline2Tuples(Polyline polyline, double tolerance = 1.0)
-        {
-            List<Tuple<Point3d, Point3d>> tuples = new List<Tuple<Point3d, Point3d>>();
-            Point3d prePoint = polyline.GetPoint3dAt(0);
-            int n = polyline.NumberOfVertices;
-            for (int i = 1; i < n; ++i)
-            {
-                Point3d curPoint = polyline.GetPoint3dAt(i);
-                if (prePoint.DistanceTo(curPoint) <= tolerance)
-                {
-                    continue;
-                }
-                tuples.Add(new Tuple<Point3d, Point3d>(prePoint, curPoint));
-                prePoint = curPoint;
-            }
-            if (polyline.GetPoint3dAt(0) != polyline.GetPoint3dAt(n - 1))
-            {
-                tuples.Add(new Tuple<Point3d, Point3d>(polyline.GetPoint3dAt(n - 1), polyline.GetPoint3dAt(0)));
-            }
-            return tuples;
-        }
-        public static List<Line> Polyline2Lines(Polyline polyline, double tolerance = 1.0)
-        {
-            List<Line> lines = new List<Line>();
-            Point3d prePoint = polyline.GetPoint3dAt(0);
-            int n = polyline.NumberOfVertices;
-            for (int i = 1; i < n; ++i)
-            {
-                Point3d curPoint = polyline.GetPoint3dAt(i);
-                if (prePoint.DistanceTo(curPoint) <= tolerance)
-                {
-                    continue;
-                }
-                lines.Add(new Line(prePoint, curPoint));
-                prePoint = curPoint;
-            }
-            if (polyline.GetPoint3dAt(0) != polyline.GetPoint3dAt(n - 1))
-            {
-                lines.Add(new Line(polyline.GetPoint3dAt(n - 1), polyline.GetPoint3dAt(0)));
-            }
-            return lines;
-        }
-
-        /// <summary>
-        /// Convert style: tuple list -> polyline
-        /// </summary>
-        public static Polyline Tuples2Polyline(List<Tuple<Point3d, Point3d>> tuples, double tolerance = 1.0)
-        {
-            Polyline polyline = new Polyline();
-            int n = tuples.Count;
-            if (n == 0)
-            {
-                return polyline;
-            }
-            else if (n == 1)
-            {
-                polyline.AddVertexAt(0, new Point2d(tuples[0].Item1.X, tuples[0].Item1.Y), 0, 0, 0);
-                polyline.AddVertexAt(1, new Point2d(tuples[0].Item2.X, tuples[0].Item2.Y), 0, 0, 0);
-                return polyline;
-            }
-            else
-            {
-                var edges = OrderTuples(tuples);
-                polyline.AddVertexAt(0, new Point2d(tuples[0].Item1.X, tuples[0].Item1.Y), 0, 0, 0);
-                int cnt = 1;
-                foreach (var edge in edges)
-                {
-                    if (edge.Item1.DistanceTo(edge.Item2) <= tolerance)
-                    {
-                        continue;
-                    }
-                    polyline.AddVertexAt(cnt, new Point2d(edge.Item2.X, edge.Item2.Y), 0, 0, 0);
-                    ++cnt;
-                }
-                if (polyline.GetPoint3dAt(0).DistanceTo(polyline.GetPoint3dAt(cnt - 1)) < 10)
-                {
-                    polyline.Closed = true;
-                }
-                return polyline;
-            }
         }
 
         /// <summary>
@@ -211,7 +129,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
+                    DicTuplesDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
         }
@@ -251,7 +169,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
+                    DicTuplesDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
             //delete line from B to A
@@ -274,7 +192,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
                 if (cnt >= 2)
                 {
-                    StructureDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
+                    DicTuplesDealer.DeleteFromDicTuples(tuple.Item1, tuple.Item2, ref dicTuples);
                 }
             }
         }
@@ -333,24 +251,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         }
 
         /// <summary>
-        /// Add lines to a line set who does not have them brfore
-        /// </summary>
-        public static void AddSpecialLine(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts, ref Dictionary<Point3d, HashSet<Point3d>> dicTuples)
-        {
-            foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
-            {
-                foreach (var borderPt2NearPt in borderPt2NearPts)
-                {
-                    var borderPt = borderPt2NearPt.Key;
-                    foreach (var nearPt in borderPt2NearPt.Value)
-                    {
-                        StructureDealer.AddLineTodicTuples(borderPt, nearPt, ref dicTuples);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Points of Entity intersect with Entity
         /// <param name="firstEntity"></param>
         /// <param name="secondEntity"></param>
@@ -362,108 +262,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
             plane.Dispose();
             return pts;
-        }
-
-        /// <summary>
-        /// Merge points whose very close to each other in double line structure
-        /// </summary>
-        /// <param name="tuples"> 原始数据（可能有误差）</param>
-        /// <param name="basePts"> 基于这些点 </param>
-        /// <param name="deviation"> 误差</param>
-        public static Dictionary<Point3d, HashSet<Point3d>> TuplesStandardize(HashSet<Tuple<Point3d, Point3d>> tuples, List<Point3d> basePts, double deviation = 1)
-        {
-            Dictionary<Point3d, HashSet<Point3d>> dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
-            Point3d tmpPtA = new Point3d();
-            Point3d tmpPtB = new Point3d();
-            foreach (var tuple in tuples)
-            {
-                int flag = 0;
-                foreach (Point3d ptA in basePts)
-                {
-                    if (ptA.DistanceTo(tuple.Item1) < deviation)
-                    {
-                        flag = 1;
-                        tmpPtA = ptA;
-                        break;
-                    }
-                }
-                if (flag == 0)
-                {
-                    tmpPtA = tuple.Item1;
-                }
-
-                flag = 0;
-                foreach (Point3d ptB in basePts)
-                {
-                    if (ptB.DistanceTo(tuple.Item2) < deviation)
-                    {
-                        flag = 1;
-                        tmpPtB = ptB;
-                        break;
-                    }
-                }
-                if (flag == 0)
-                {
-                    tmpPtB = tuple.Item2;
-                }
-                StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
-            }
-            return dicTuples;
-        }
-
-        /// <summary>
-        /// Merge points whose very close to each other in double line structure
-        /// If there is a single line, add a compair one
-        /// </summary>
-        /// <param name="dicTuples"> 原始数据（可能有误差）</param>
-        /// <param name="basePts"> 基于这些点 </param>
-        /// <param name="deviation"> 误差</param>
-        public static void DicTuplesStandardize(ref Dictionary<Point3d, HashSet<Point3d>> dicTuples, List<Point3d> basePts, double deviation = 1)
-        {
-            Point3d tmpPtA = new Point3d();
-            Point3d tmpPtB = new Point3d();
-            var newDicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
-            foreach (var dicTuple in dicTuples)
-            {
-                newDicTuples.Add(dicTuple.Key, dicTuple.Value);
-            }
-            dicTuples.Clear();
-            foreach (var dicTuple in newDicTuples)
-            {
-                var hashpts = dicTuple.Value.ToList();
-                foreach (var edPt in hashpts)
-                {
-                    int flag = 0;
-                    foreach (Point3d ptA in basePts)
-                    {
-                        if (ptA.DistanceTo(dicTuple.Key) < deviation)
-                        {
-                            flag = 1;
-                            tmpPtA = ptA;
-                            break;
-                        }
-                    }
-                    if (flag == 0)//profs there is no nearest point
-                    {
-                        tmpPtA = dicTuple.Key;
-                    }
-                    flag = 0;
-                    foreach (Point3d ptB in basePts)
-                    {
-                        if (ptB.DistanceTo(edPt) < deviation)
-                        {
-                            flag = 1;
-                            tmpPtB = ptB;
-                            break;
-                        }
-                    }
-                    if (flag == 0)//no nearest point
-                    {
-                        tmpPtB = edPt;
-                    }
-                    StructureDealer.AddLineTodicTuples(tmpPtA, tmpPtB, ref dicTuples);
-                }
-            }
         }
 
         /// <summary>
@@ -529,22 +327,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             return biggestDegree;
         }
 
-        public static HashSet<Tuple<Point3d, Point3d>> DicTuplesToTuples(Dictionary<Point3d, HashSet<Point3d>> dicTuples)
-        {
-            HashSet<Tuple<Point3d, Point3d>> tuples = new HashSet<Tuple<Point3d, Point3d>>();
-            if (dicTuples.IsNull())
-            {
-                return tuples;
-            }
-            foreach (var dicTuple in dicTuples)
-            {
-                foreach (var point in dicTuple.Value)
-                {
-                    tuples.Add(new Tuple<Point3d, Point3d>(dicTuple.Key, point));
-                }
-            }
-            return tuples;
-        }
 
         /// <summary>
         /// DCEL的双向线转换为单线
@@ -571,6 +353,58 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             return ansTuples;
         }
 
+        /// <summary>
+        /// 在线集中删除掉穿过Outline过长的线
+        /// </summary>
+        public static Dictionary<Point3d, HashSet<Point3d>> RemoveLineIntersectWithOutline(Dictionary<Polyline, Dictionary<Point3d, HashSet<Point3d>>> outline2BorderNearPts,
+           ref List<Tuple<Point3d, Point3d>> priority1stBorderNearTuples, double intersectLength)
+        {
+            var dicTuples = new Dictionary<Point3d, HashSet<Point3d>>();
+            var borderToNearLines = new List<Tuple<Point3d, Point3d>>();
+            outline2BorderNearPts.Values.ForEach(o => o.ForEach(kv => kv.Value.ForEach(pt => borderToNearLines.Add(new Tuple<Point3d, Point3d>(kv.Key, pt)))));
+            HashSet<Polyline> outlines = outline2BorderNearPts.Keys.ToHashSet();
+            foreach (var borderToNearLine in borderToNearLines)
+            {
+                bool flag = false;
+                var line = ReduceTupleB(borderToNearLine, intersectLength);
+                foreach (var outline in outlines)
+                {
+                    if (line.Intersect(outline, 0).Count > 0)
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == true)
+                {
+                    continue;
+                }
+                DicTuplesDealer.AddLineTodicTuples(borderToNearLine.Item1, borderToNearLine.Item2, ref dicTuples);
+            }
+            foreach (var borderToNearLine in priority1stBorderNearTuples)
+            {
+                bool flag = false;
+                var line = ReduceTupleB(borderToNearLine, intersectLength);
+                foreach (var outline in outlines)
+                {
+                    if (line.Intersect(outline, 0).Count > 0)
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (flag == true)
+                {
+                    continue;
+                }
+                DicTuplesDealer.AddLineTodicTuples(borderToNearLine.Item1, borderToNearLine.Item2, ref dicTuples);
+            }
+            return dicTuples;
+        }
+
+        /// <summary>
+        /// 剪短一条线
+        /// </summary>
         public static Tuple<Point3d, Point3d> ReduceTuple(Tuple<Point3d, Point3d> tuple, double length)
         {
             var direction = (tuple.Item2 - tuple.Item1).GetNormal();

@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Algorithm;
 using ThMEPStructure.GirderConnect.Data.Utils;
 
 namespace ThMEPStructure.GirderConnect.Data

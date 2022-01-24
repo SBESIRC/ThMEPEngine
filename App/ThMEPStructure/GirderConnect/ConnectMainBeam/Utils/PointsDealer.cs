@@ -5,11 +5,9 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad;
 using AcHelper;
-using Linq2Acad;
 using ThCADExtension;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
 using ThMEPEngineCore.Service;
@@ -104,7 +102,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
         /// <returns></returns>
         public static List<Point3d> NearPoints(Dictionary<Polyline, Point3dCollection> poly2points, Point3dCollection points)
         {
-            VoronoiDiagramNearPoints(points, poly2points);
+            BorderConnectToNear.VoronoiDiagramNearPoints(points, poly2points);
 
             List<Point3d> ansPts = new List<Point3d>();
             foreach (var pts in poly2points.Values)
@@ -118,43 +116,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                 }
             }
             return ansPts;
-        }
-
-        /// <summary>
-        /// Get Near Points By VoronoiDiagram
-        /// </summary>
-        /// <param name="points"></param>
-        /// <param name="poly2points"></param>
-        public static void VoronoiDiagramNearPoints(Point3dCollection points, Dictionary<Polyline, Point3dCollection> poly2points)
-        {
-            var voronoiDiagram = new VoronoiDiagramBuilder();
-            voronoiDiagram.SetSites(points.ToNTSGeometry());
-
-            foreach (Polygon polygon in voronoiDiagram.GetSubdivision().GetVoronoiCellPolygons(ThCADCoreNTSService.Instance.GeometryFactory))
-            {
-                if (polygon.IsEmpty)
-                {
-                    continue;
-                }
-                var polyline = polygon.ToDbPolylines().First();
-                foreach (Point3d pt in points)
-                {
-                    if (polyline.Contains(pt))
-                    {
-                        if (poly2points != null)
-                        {
-                            foreach (var pl2pts in poly2points)
-                            {
-                                if (!pl2pts.Value.Contains(pt) && pl2pts.Key.Intersects(polyline))
-                                {
-                                    pl2pts.Value.Add(pt);
-                                }
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -251,7 +212,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             //首先找出中心线
             //var lines = ThMEPPolygonService.CenterLine(polygon.ToDbMPolygon());
             var lines = GetCenterLines(pline);
-            Dictionary<Point3d, HashSet<Point3d>> pt2Pts = LinesToTuples(lines);
+            Dictionary<Point3d, HashSet<Point3d>> pt2Pts = TypeConvertor.Lines2Tuples(lines);
 
             //对块进行分割
             var walls = new DBObjectCollection();
@@ -300,33 +261,6 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
                     }
                 }
             }
-        }
-
-        public static Dictionary<Point3d, HashSet<Point3d>> LinesToTuples(List<Line> lines)
-        {
-            Dictionary<Point3d, HashSet<Point3d>> pt2Pts = new Dictionary<Point3d, HashSet<Point3d>>();
-            foreach (var line in lines)
-            {
-                var stPt = line.StartPoint;
-                var edPt = line.EndPoint;
-                if (!pt2Pts.ContainsKey(stPt))
-                {
-                    pt2Pts.Add(stPt, new HashSet<Point3d>());
-                }
-                if (!pt2Pts[stPt].Contains(edPt))
-                {
-                    pt2Pts[stPt].Add(edPt);
-                }
-                if (!pt2Pts.ContainsKey(edPt))
-                {
-                    pt2Pts.Add(edPt, new HashSet<Point3d>());
-                }
-                if (!pt2Pts[edPt].Contains(stPt))
-                {
-                    pt2Pts[edPt].Add(stPt);
-                }
-            }
-            return pt2Pts;
         }
 
         /// <summary>
