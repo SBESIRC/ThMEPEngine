@@ -53,11 +53,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             };
             lightRoute.Traverse();
             var links = lightRoute.Links;
-            links = DuplicateRemove(links);
-            var garbages = new List<Tuple<ThLightLink, ThLightLink>>(); // <丢弃的链路，保留的链路>
-            var results = Select(links.Select(o=>o).ToList(),out garbages);
-            var eraseCurves = Filter(garbages, links);
-            results.ForEach(l => AddToResults(l.Wires));
+            links = DuplicateRemove(links); // 去掉路径相同的链路
+            links.ForEach(l => AddToResults(l.Wires)); // 把链路的边添加到Results中
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results); // 供后面查询使用
+             
+            // 查找具有相同起、终点的链路
+            var sameLinks = Select(links.Select(o=>o).ToList());
+
+            // 查找要被过滤的边
+            var eraseCurves = Filter(sameLinks, links,spatialIndex);
+
+            // 从Results里移除eraseCurves中的边
             RemoveFromResults(eraseCurves);
         }
 
@@ -74,33 +80,70 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
         }
         
-        private List<Curve> Filter(List<Tuple<ThLightLink, ThLightLink>> garbages,List<ThLightLink> links)
+        private List<Curve> Filter(
+            List<Tuple<ThLightLink, ThLightLink>> sameLinks,
+            List<ThLightLink> links, 
+            ThCADCoreNTSSpatialIndex spatialIndex)
         {
+            /*                 (2)    
+             * ----------|------------
+             *           |   /
+             *       (1) |  /(shortest)
+             *           | /
+             *           |/
+             */
+            // 1和2形成的路由和shortest产生冲突，优先保留Shortest
             var results = new List<Curve>();
-            garbages.ForEach(o =>
+            sameLinks.ForEach(o =>
             {
                 // 找到跳接线终点连接的灯
-                var tartget = FindTarget(o.Item2); 
-                if(tartget!=null)
+                var tartget = FindTarget(o.Item1); // Item1->Shortest
+                var cornerPts = FindCornerPts(o.Item2.Wires.OfType<Line>().ToList());
+                if (cornerPts.Count == 1 && IsThreewayPt(cornerPts[0], spatialIndex))
                 {
-                    // 找到与丢弃的链路具有共边的链路
-                    var overlaps = FindOverlapLinks(links, o.Item1);
-                    overlaps.Remove(o.Item1);
+                    var overlaps = FindOverlapLinks(links, o.Item2); //Item2(1,2)
+                    overlaps.Remove(o.Item2);
                     // 找到具有与tartget相同的链路
                     overlaps = overlaps.Where(l => l.Source.IsEqual(tartget) || l.Target.IsEqual(tartget)).ToList();
                     overlaps.ForEach(l =>
                     {
-                        var wires = new DBObjectCollection();
-                        o.Item1.Wires.ForEach(w => wires.Add(w));
-                        l.Wires.ForEach(w => wires.Add(w));
-                        int threewayNumber = GetThreewayNumber(wires);
-                        if (threewayNumber == 1)
+                        var pubs = FindPublic(o.Item2.Wires, l.Wires);
+                        pubs.ForEach(p =>
                         {
-                            results.AddRange(FindPublic(o.Item1.Wires, overlaps[0].Wires));
-                        }
+                            if(!results.Contains(p))
+                            {
+                                results.Add(p);
+                            }
+                        });
                     });
                 }
             });
+            return results;
+        }
+
+        private bool IsThreewayPt(Point3d pt, ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            var outline = pt.CreateSquare(ThGarageLightCommon.RepeatedPointDistance);
+            var objs = spatialIndex.SelectCrossingPolygon(outline).OfType<Line>().ToCollection();
+            outline.Dispose();
+            return objs.Count == 3;
+        }
+
+        private List<Point3d> FindCornerPts(List<Line> lines)
+        {
+            var results = new List<Point3d>();
+            for (int i =0;i< lines.Count-1;i++)
+            {
+                var linkPtRes = lines[i].FindLinkPt(lines[i + 1]);
+                if (!linkPtRes.HasValue)
+                {
+                    break;
+                }
+                if(!lines[i].IsLessThan45Degree(lines[i+1]))
+                {
+                    results.Add(linkPtRes.Value);
+                }
+            }
             return results;
         }
 
@@ -145,38 +188,26 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             return results;
         }
-        private List<ThLightLink> Select(List<ThLightLink> links,
-            out List<Tuple<ThLightLink, ThLightLink>> garbages)
+        private List<Tuple<ThLightLink, ThLightLink>> Select(List<ThLightLink> links)
         {
-            var results = new List<ThLightLink>();
-            garbages = new List<Tuple<ThLightLink, ThLightLink>>();
-            while(links.Count>0)
+            /*-----------|------------
+             *           |   /
+             *           |  /(shortest)
+             *           | /
+             *           |/
+             */
+            var results = new List<Tuple<ThLightLink, ThLightLink>>();
+            for (int i = 0; i < links.Count; i++)
             {
-                var first = links.First();
-                var sameIdLinks = links.Where(o => IsSourceTargetIdEqual(first, o)).ToList();
-                sameIdLinks.ForEach(o => links.Remove(o));
-                if(sameIdLinks.Count == 1)
-                {
-                    results.Add(sameIdLinks[0]);
-                }
-                else if(sameIdLinks.Count == 2)
+                var sameIdLinks = links.Where(o => IsSourceTargetIdEqual(links[i], o)).ToList();
+                if (sameIdLinks.Count == 2)
                 {
                     var shortest = sameIdLinks.OrderBy(o => o.Wires.Count).First(); // 保留连线数量最少的
                     if (shortest.Wires.Count == 1)
                     {
                         sameIdLinks.Remove(shortest);
-                        results.Add(shortest);
-                        garbages.Add(Tuple.Create(sameIdLinks[0], shortest));
+                        results.Add(Tuple.Create(shortest,sameIdLinks[0]));
                     }
-                    else
-                    {
-                        results.AddRange(sameIdLinks);
-                    }
-                }
-                else 
-                {
-                    //
-                    results.AddRange(sameIdLinks);
                 }
             }
             return results;

@@ -159,7 +159,7 @@ namespace ThMEPLighting.Garage
                 return lines.Cast<Line>().ToList();
             }
         }
-        public static List<Line> Merge(this List<Line> curves)
+        public static List<Line> CleanNoding(this List<Line> curves)
         {
             if (curves.Count == 0)
             {
@@ -169,7 +169,7 @@ namespace ThMEPLighting.Garage
             {
                 var lines = curves.ToCollection();
                 var cleanInstance = new ThLaneLineCleanService();
-                lines = cleanInstance.Clean(lines);
+                lines = cleanInstance.CleanNoding(lines);
                 return lines.Cast<Line>().ToList();
             }
         }

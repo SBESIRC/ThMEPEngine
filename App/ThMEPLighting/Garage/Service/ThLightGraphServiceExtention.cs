@@ -59,37 +59,17 @@ namespace ThMEPLighting.Garage.Service
         {
             return edges.Sum(e => e.LightNodes.Count);
         }
-        public static List<ThLightGraphService> CreateGraphs(this List<Line> lines)
+        private static bool IsExisted(List<Line> lines,Point3d port,double tolerance)
         {
-            var lightEdges = lines.Select(l => new ThLightEdge(l)).ToList();
-            var results = new List<ThLightGraphService>();
-            while (lightEdges.Count > 0)
-            {
-                if (lightEdges.Where(o => o.IsDX).Count() == 0)
-                {
-                    break;
-                }
-                Point3d findSp = lightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
-
-                //对灯线边建图,创建从findSp开始可以连通的图
-                var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
-                lightGraph.Build();
-
-                //找到从ports中的点出发拥有最长边的图
-                var centerEdges = new List<ThLightEdge>();
-                lightGraph.Links.ForEach(o => o.Edges.ForEach(p => centerEdges.Add(new ThLightEdge(p.Edge))));
-                var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
-                centerEdges.ForEach(o => o.IsTraversed = false);
-
-                // 使用珣若算的最优起点重新建图
-                var newLightGraph = new ThCdzmLightGraphService(centerEdges, centerStart);
-                newLightGraph.Build();
-                //newLightGraph.Print();
-
-                lightEdges = lightEdges.Where(o => o.IsTraversed == false).ToList();
-                results.Add(newLightGraph);
-            }
-            return results;
+            return lines
+                .Where(o => o.StartPoint.DistanceTo(port) <= tolerance || o.EndPoint.DistanceTo(port) <= tolerance)
+                .Any();
+        }
+        private static Point3d GetGraphStartPt(List<Line> lines)
+        {
+            var mergedLines = lines.CleanNoding();
+            var edges = mergedLines.Select(o => new ThLightEdge(o)).ToList();
+            return LaneServer.getMergedOrderedLane(edges);
         }
         public static List<ThLightGraphService> CreateGraphs(this List<ThLightEdge> lightEdges)
         {
@@ -110,16 +90,18 @@ namespace ThMEPLighting.Garage.Service
                 //对灯线边建图,创建从findSp开始可以连通的图
                 var lightGraph = new ThCdzmLightGraphService(lightEdges, findSp);
                 lightGraph.Build();
-
                 var traversedLightEdges = lightGraph.GraphEdges;
 
                 //找到从ports中的点出发拥有最长边的图
-                var centerEdges = traversedLightEdges.Select(e => new ThLightEdge(e.Edge)).ToList();
-                var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
+                var prioritySp = GetGraphStartPt(traversedLightEdges.Select(o => o.Edge).ToList());
+                if (!IsExisted(traversedLightEdges.Select(o => o.Edge).ToList(), prioritySp, 1.0))
+                {
+                    prioritySp = findSp;
+                }
 
                 // 使用珣若算的最优起点重新建图
                 traversedLightEdges.ForEach(e => e.IsTraversed = false);
-                var newLightGraph = new ThCdzmLightGraphService(traversedLightEdges, centerStart);
+                var newLightGraph = new ThCdzmLightGraphService(traversedLightEdges, prioritySp);
                 newLightGraph.Build();
                 //newLightGraph.Print();
 
@@ -128,6 +110,7 @@ namespace ThMEPLighting.Garage.Service
             }
             return results;
         }
+
         public static List<ThLightGraphService> CreateCdzmGraphs(this List<ThLightEdge> lightEdges)
         {
             // 传入的Edges是

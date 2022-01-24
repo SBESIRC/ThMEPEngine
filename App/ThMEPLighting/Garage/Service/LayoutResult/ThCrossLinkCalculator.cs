@@ -425,13 +425,24 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             if (neibourDict.ContainsKey(current))
             {
-                var res = current.Merge(neibourDict[current]);
+                var res = Merge(current,neibourDict[current]);
                 var triangle = current.GetTwoLinkLineMergeTriangle(neibourDict[current]);
                 return Tuple.Create(res, triangle);
             }
             return Tuple.Create(current, new Polyline() { Closed=true});
         }
-        
+
+        private Line Merge(Line first, Line second)
+        {
+            var pts = new List<Point3d>();
+            pts.Add(second.StartPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint));
+            pts.Add(second.EndPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint));
+            pts.Add(first.StartPoint);
+            pts.Add(first.EndPoint);
+            var pair = pts.GetCollinearMaxPts();
+            return new Line(pair.Item1, pair.Item2);
+        }
+
         protected List<Line> Sort(List<Line> centers)
         {
             // 把十字路口车道线按照逆时针排序
@@ -647,8 +658,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
         protected List<ThLightEdge> FilterEdgesByTriangle(List<Polyline> triangles, List<ThLightEdge> edges)
         {
-            var lines = FilterEdgesByTriangle(triangles, edges.Select(o => o.Edge).ToList());
-            return edges.Where(o=> lines.Contains(o.Edge)).ToList();
+            //var lines = FilterEdgesByTriangle(triangles, edges.Select(o => o.Edge).ToList());
+            //return edges.Where(o=> lines.Contains(o.Edge)).ToList();
+            // 暂不处理
+            return edges;
         }
 
         protected List<ThLightEdge> Sort(List<ThLightEdge> edges, Point3d sp, Point3d ep)

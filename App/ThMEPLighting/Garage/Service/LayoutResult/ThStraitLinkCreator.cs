@@ -84,7 +84,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 DirectionConfig = this.DirectionConfig,
                 LampLength = this.ArrangeParameter.LampLength,
                 LampSideIntervalLength = this.ArrangeParameter.LampSideIntervalLength,
-                Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
+                Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine*2,
             };
             jumpWireFactory.BuildStraitLinks();
         }
