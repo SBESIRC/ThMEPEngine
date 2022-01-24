@@ -83,7 +83,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 }
 
             }
-            lineList = CleanLaneLines3(lineList);
+            //lineList = CleanLaneLines3(lineList);
         }
 
          public static void PipeLineAutoConnect(ref List<Line> lineList)
