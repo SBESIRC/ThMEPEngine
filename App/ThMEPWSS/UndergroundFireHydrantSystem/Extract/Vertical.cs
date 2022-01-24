@@ -55,7 +55,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                 }
                 else if(IsTargetObject(db as Entity))//天正对象
                 {
-                    if((db as Entity).Layer == "W-FRPT-HYDT-PIPE")
+                    if(IsPipeLayer((db as Entity).Layer))
                     {
                         continue;
                     }
@@ -78,6 +78,11 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
             return rstSpatialIndex.SelectCrossingPolygon(polygon);
         }
 
+        private static bool IsPipeLayer(string layer)
+        {
+            return layer.Contains("W-FRPT") && layer.Contains("HYDT") && layer.Contains("PIPE");
+        }
+       
         private static bool IsTargetLayer(string layer)//立管图层
         {
             return (layer.Contains("FRPT") && !layer.Contains("SPRL")) //包含FRPT且不包含SPRL
