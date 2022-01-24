@@ -221,7 +221,8 @@ namespace ThMEPWSS.HydrantConnectPipe.Command
             {
                 return retLines;
             }
-            retLines = FindInlineLines(objectLine, ref targetLines, tolerance);
+            retLines.Add(objectLine);
+            retLines.AddRange(FindInlineLines(objectLine, ref targetLines, tolerance));
             return retLines;
         }
         public static List<Line> FindInlineLines(Line objectLine, ref List<Line> targetLines, double tolerance)//差点关联线
