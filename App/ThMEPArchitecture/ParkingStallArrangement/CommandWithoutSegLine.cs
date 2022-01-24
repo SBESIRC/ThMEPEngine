@@ -41,7 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public WithoutSegLineCmd(ParkingStallArrangementViewModel vm)//根据自动生成的分割线得到车位排布结果
         {
-            CommandName = "THZDCWPZ";
+            CommandName = "THZDCWBZ";
             ActionName = "自动分割线迭代";//天华无分割线车位布置
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;
