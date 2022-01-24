@@ -47,8 +47,8 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
                     }
                     ExplodeLabelLine(dbObj as Entity, LabelLineCollection);
                 }
-                var cleanServiec = new ThLaneLineCleanService();
-                LabelLineCollection = cleanServiec.CleanNoding(LabelLineCollection);
+                //var cleanServiec = new ThLaneLineCleanService();
+                //LabelLineCollection = cleanServiec.CleanNoding(LabelLineCollection);
                 return LabelLineCollection;
             }
         }
