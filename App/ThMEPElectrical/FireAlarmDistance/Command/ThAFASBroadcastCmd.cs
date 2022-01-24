@@ -77,6 +77,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
+                ThStopWatchService.Start();
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
                 //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
@@ -89,33 +90,34 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 dataQuery.ExtendPriority(cleanBlkName, _scale);
                 dataQuery.FilterBeam();
                 dataQuery.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("提取数据耗时：");
 
                 //--------------布置广播
                 var geojson = ThGeoOutput.Output(dataQuery.Data);
+                if (ThMEPDebugService.IsEnabled())
+                {
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
+                    ThMEPLoggingService.WriteToFile(path, geojson);
+                }
 
+                //--------------处理中
+                ThStopWatchService.ReStart();
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
                 {
                     StepDistance = _stepLength,
                     MountMode = _mode,
                 };
-
-#if DEBUG
-                {
-                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
-                    File.WriteAllText(path, geojson);
-                }
-#endif
-
-                //--------------处理中
                 var outJson = engine.Place(geojson, context);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("布置广播计算耗时：");
 
-#if DEBUG
+                if (ThMEPDebugService.IsEnabled())
                 {
                     string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
-                    File.WriteAllText(path, outJson);
+                    ThMEPLoggingService.WriteToFile(path, outJson);
                 }
-#endif
 
                 var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
