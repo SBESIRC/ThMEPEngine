@@ -35,8 +35,9 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Extract
 
             var Results2 = ExtractBlocks(acadDatabase.Database, "定位立管");
 
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
-            var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+            //var spatialIndex = new ThCADCoreNTSSpatialIndex(Results.ToCollection());
+            //var DBObjs = spatialIndex.SelectCrossingPolygon(polygon);
+            var DBObjs = Results.ToCollection();
 
             //spatialIndex不支持圆
             var map = new Dictionary<Polyline, Circle>();

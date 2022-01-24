@@ -48,7 +48,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public GenerateParkingStallDirectlyCmd(ParkingStallArrangementViewModel vm)
         {
-            CommandName = "THDXCW";
+            CommandName = "THZDCWBZ";
             ActionName = "直接生成";
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;

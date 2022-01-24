@@ -60,7 +60,7 @@ namespace ThMEPIdentity
         public bool IsAuthorizedTHCommand(string cmd, string eid)
         {
             // 车位布置
-            if (cmd == "THDXCW")
+            if (cmd == "THZDCWBZ")
             {
                 return USERWHITELIST.ContainsKey(eid);
             }

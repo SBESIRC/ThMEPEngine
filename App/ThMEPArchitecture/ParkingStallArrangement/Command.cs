@@ -43,7 +43,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public ThParkingStallArrangementCmd(ParkingStallArrangementViewModel vm)
         {
-            CommandName = "THDXCW";
+            CommandName = "THZDCWBZ";
             ActionName = "手动分割线迭代生成";
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;
