@@ -141,6 +141,7 @@ namespace ThMEPEngineCore.ConnectWiring
                         {
                             var entity = o.Clone() as BlockReference;
                             Transformer.Transform(entity);
+                            entity = Z0Block(entity);
                             return entity;
                         }).ToList();
                         if (info.loopInfoModels.Count > 1)
@@ -459,6 +460,18 @@ namespace ThMEPEngineCore.ConnectWiring
             //}
 
             return geos;
+        }
+
+        /// <summary>
+        /// Z值归0
+        /// </summary>
+        /// <param name="curves"></param>
+        /// <returns></returns>
+        private BlockReference Z0Block(BlockReference entity)
+        {
+            entity.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, 1e99)));
+            entity.TransformBy(Matrix3d.Displacement(new Vector3d(0, 0, -1e99)));
+            return entity;
         }
     }
 }
