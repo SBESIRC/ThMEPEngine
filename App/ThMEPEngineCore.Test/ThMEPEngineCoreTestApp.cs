@@ -549,16 +549,5 @@ namespace ThMEPEngineCore.Test
             }
             return results;
         }
-        [CommandMethod("TIANHUACAD", "ThMEPFrameComparerTest", CommandFlags.Modal)]
-        public void ThMEPFrameComparerTest()
-        {
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                var room = new ThFrameExactor(CompareFrameType.ROOM);
-                var comp = new ThMEPFrameComparer(room.curGraph, room.reference);
-                var painter = new ThFramePainter();
-                painter.Draw(comp, room.dicCode2Id, CompareFrameType.ROOM);
-            }
-        }
     }
 }
