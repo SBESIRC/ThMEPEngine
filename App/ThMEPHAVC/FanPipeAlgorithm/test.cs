@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPHVAC.FanPipeAlgorithm
 {
-    class test
+    class Test
     {
 
 

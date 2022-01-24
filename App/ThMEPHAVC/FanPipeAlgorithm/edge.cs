@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace ThMEPHVAC.FanPipeAlgorithm
 {
-    public class edge
+    public class Edge
     {
         //变量
         public double rx1, ry1, rx2, ry2;  //端点真实坐标
-        public int x1, y1, x2, y2;      //端点网格坐标
+        public int x1, y1, x2, y2;         //端点网格坐标
         public int angle = 0;
         public int area_id = -1;
         public bool fix_first_stage = false;
         public bool fix_second_stage = false;
 
-        public edge(int x1, int y1, int x2, int y2)
+        public Edge(int x1, int y1, int x2, int y2)
         {
             this.x1 = x1;
             this.y1 = y1;
@@ -34,13 +34,10 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             fix_first_stage = false;
             fix_second_stage = false;
-            //attached = false;
-
-            //area_id = "None";
 
         }
 
-        public edge(double x1, double y1, double x2, double y2)
+        public Edge(double x1, double y1, double x2, double y2)
         {
             this.rx1 = x1;
             this.ry1 = y1;
@@ -58,9 +55,6 @@ namespace ThMEPHVAC.FanPipeAlgorithm
 
             fix_first_stage = false;
             fix_second_stage = false;
-            //attached = false;
-
-            //area_id = "None";
 
         }
 

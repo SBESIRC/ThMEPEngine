@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPHVAC.FanPipeAlgorithm
 {
-    class tool
+    class Tool
     {
         //swap
         public void Swap<T>(ref T a, ref T b)
