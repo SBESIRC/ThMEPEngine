@@ -41,7 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
         public WithoutSegLineCmd(ParkingStallArrangementViewModel vm)//根据自动生成的分割线得到车位排布结果
         {
-            CommandName = "THDXCW";
+            CommandName = "THZDCWPZ";
             ActionName = "自动分割线迭代";//天华无分割线车位布置
             ParameterViewModel = vm;
             _CommandMode = CommandMode.WithUI;
@@ -132,8 +132,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             ParkingStallGAGenerator geneAlgorithm = null;
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic, 
-                directionList, linePtDic,null, areas.Count, usePline, Logger);
+            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic,
+                directionList, linePtDic, null, areas.Count, usePline, Logger);
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();
@@ -169,10 +169,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             catch
             {
             }
-            
+
             string autoCarSpotLayer = $"AI-停车位{index}";
             string autoColumnLayer = $"AI-柱子{index}";
-            
+
             var solution = rst.First();
             histories.Add(rst.First());
             for (int k = 0; k < histories.Count; k++)

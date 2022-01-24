@@ -16,10 +16,10 @@ namespace TianHua.Architecture.WPI.UI
         }
 
         /// <summary>
-        /// 地下车库车位排布, 天华地下车位(THDXCW)
+        /// 地下车库车位排布, 天华地下车位(THZDCWPZ)
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THDXCW", CommandFlags.Modal)]
-        public void ThCreateWaterSuplySystemDiagramWithUI()
+        [CommandMethod("TIANHUACAD", "THZDCWPZ", CommandFlags.Modal)]
+        public void ThCreateParkingStallsWithUI()
         {
             var w = new UiParkingStallArrangement();
             AcadApp.ShowModelessWindow(w);
