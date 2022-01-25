@@ -516,7 +516,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Method\MainLoop.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\PtDist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\SubLoop.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystemUIViewModel.cs" />
+    <Compile Include="ViewModel\FireHydrantSystemUIViewModel.cs" />
     <Compile Include="UndergroundFireHydrantSystem\ThFireHydrantCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractCasing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractFireHydrant.cs" />

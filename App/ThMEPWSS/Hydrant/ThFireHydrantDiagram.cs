@@ -594,6 +594,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
         public const int THESAURUSREPERCUSSION = 4096;
         public const string DISORGANIZATION = "TCH_PIPE";
         public const int HYPERDISYLLABLE = 100;
+        public const string THESAURUSWINDFALL = "TCH_VPIPEDIM";
         public const string THESAURUSDURESS = "TCH_TEXT";
         public const string THESAURUSFACILITATE = "TCH_MTEXT";
         public const string THESAURUSINHARMONIOUS = "TCH_MULTILEADER";
@@ -1209,7 +1210,7 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                             else
                             {
                                 var dxfName = ent.GetRXClass().DxfName.ToUpper();
-                                if (dxfName is THESAURUSDURESS or THESAURUSFACILITATE or THESAURUSINHARMONIOUS)
+                                if (dxfName is THESAURUSDURESS or THESAURUSFACILITATE or THESAURUSINHARMONIOUS or THESAURUSWINDFALL)
                                 {
                                     yield return ent.ExplodeToDBObjectCollection().OfType<Entity>().SelectMany(e => getTargets(e)).ToGeometry().Tag(ent);
                                 }
@@ -1324,12 +1325,21 @@ namespace ThMEPWSS.FireNumFlatDiagramNs
                                             var t = DrawTextLazy(text, TEXTHEIGHT, _r.LeftButtom);
                                             t.Layer = LeaderLayer;
                                             t.WidthFactor = THESAURUSDISPASSIONATE;
+                                            ByLayer(t);
                                             DrawingQueue.Enqueue(adb =>
                                             {
                                                 t.TextStyleId = GetTextStyleId(CONTROVERSIALLY);
                                             });
-                                            DrawLineSegmentLazy(labelline1).Layer = LeaderLayer;
-                                            DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom)).Layer = LeaderLayer;
+                                            {
+                                                var e = DrawLineSegmentLazy(labelline1);
+                                                e.Layer = LeaderLayer;
+                                                ByLayer(e);
+                                            }
+                                            {
+                                                var e = DrawLineSegmentLazy(new GLineSegment(r.LeftButtom, r.RightButtom));
+                                                e.Layer = LeaderLayer;
+                                                ByLayer(e);
+                                            }
                                             addsankaku(rpl);
                                             return;
                                         }

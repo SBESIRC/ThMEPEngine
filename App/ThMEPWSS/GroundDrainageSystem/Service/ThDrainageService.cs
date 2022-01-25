@@ -2960,7 +2960,7 @@
             var COUNT = pipeGroupItems.Count;
             var dy = HEIGHT - 1800.0;
             var __dy = 300;
-            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, null);
+            DrawDrainageSystemDiagram(basePoint, pipeGroupItems, allNumStoreyLabels, allStoreys, start, end, OFFSET_X, SPAN_X, HEIGHT, COUNT, dy, __dy, DrainageSystemDiagramViewModel.Singleton);
         }
         public static void DrawAiringSymbol(Point2d pt, bool canPeopleBeOnRoof)
         {
