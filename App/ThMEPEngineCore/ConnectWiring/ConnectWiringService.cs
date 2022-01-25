@@ -11,6 +11,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO;
 using Newtonsoft.Json;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,6 +28,7 @@ using ThMEPEngineCore.ConnectWiring.Service;
 using ThMEPEngineCore.ConnectWiring.Service.ConnectFactory;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.ConnectWiring
 {
@@ -77,6 +79,7 @@ namespace ThMEPEngineCore.ConnectWiring
             string Outputpath = "{0}_{1}_Output.geojson";
             foreach (var info in configInfo)
             {
+                DeleteOriginalLine(outFrame.Clone() as Polyline, Transformer, info.loopInfoModels.Select(o => o.LineType).ToList());
                 var LoopName = info.loopInfoModels[0].LineContent;
                 var blockInfos = info.loopInfoModels.First().blocks;
                 var configBlocks = blockInfos.Select(x => x.blockName);
@@ -363,7 +366,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     var resPoly = ThMPolygonTool.CreateMPolygon(o, polys.Cast<Curve>().ToList());
                     var geometry = new ThGeometry();
                     geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, BuiltInCategory.UCSPolyline.ToString());
-                    geometry.Properties.Add(ThExtractorPropertyNameManager.VectorName, new Vector3d(1,0,0).ToString());
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.VectorName, new Vector3d(1, 0, 0).ToString());
                     geometry.Boundary = resPoly;
                     geos.Add(geometry);
                 });
@@ -381,12 +384,12 @@ namespace ThMEPEngineCore.ConnectWiring
             {
                 foreach (Entity entity in objs)
                 {
-                    if(entity is Polyline polyline)
+                    if (entity is Polyline polyline)
                     {
                         if (polyline.Area < 10000)
                             continue;
                     }
-                    else if(entity is MPolygon mPolygon)
+                    else if (entity is MPolygon mPolygon)
                     {
                         if (mPolygon.Area < 10000)
                             continue;
@@ -439,7 +442,7 @@ namespace ThMEPEngineCore.ConnectWiring
                     allUCSPolys.Add(ThMEPFrameService.Normalize(frame.Clone() as Polyline));
                 }
             }
-            
+
             foreach (var item in allUCSPolys)
             {
                 objs.Add(item);
@@ -461,6 +464,40 @@ namespace ThMEPEngineCore.ConnectWiring
             //}
 
             return geos;
+        }
+
+        /// <summary>
+        /// 删除原有线
+        /// </summary>
+        /// <param name="Boundary"></param>
+        private void DeleteOriginalLine(Polyline Boundary, ThMEPOriginTransformer Transformer, List<string> layers)
+        {
+            using (AcadDatabase acad = AcadDatabase.Active())
+            {
+                var objIDs = new ObjectIdCollection();
+                var lines = acad.ModelSpace
+                            .OfType<Polyline>()
+                            .Where(p => layers.Contains(p.Layer));
+                var LineDic = lines.ToDictionary(key => key.Clone() as Polyline, value => value.Id);
+                var objs = new DBObjectCollection();
+                LineDic.ForEach(x =>
+                {
+                    var transCurve = x.Key;
+                    Transformer.Transform(transCurve);
+                    objs.Add(transCurve);
+                });
+                Transformer.Transform(Boundary);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var dbobjs = spatialIndex.SelectWindowPolygon(Boundary);
+                objIDs =LineDic.Where(o => dbobjs.Contains(o.Key)).Select(o => o.Value).ToObjectIdCollection();
+                foreach (ObjectId objId in objs)
+                {
+                    var entity = acad.Element<Polyline>(objId);
+                    entity.UpgradeOpen();
+                    entity.Erase();
+                    entity.DowngradeOpen();
+                }
+            }
         }
     }
 }
