@@ -36,7 +36,7 @@ namespace ThMEPElectrical.SystemDiagram.Extension
             BlockIO = new ThCADCoreNTSSpatialIndex(blockBoundary);
         }
 
-        public static int GetQuantity(Polyline boundary)
+        public static int GetQuantity(Polyline boundary, Polyline IOBoundary = null)
         {
             var BufferPL = boundary.BufferPL(25)[0] as Polyline;
             var lineCollection = Lines.SelectFence(BufferPL);//块OBB buffer25找起点
@@ -64,13 +64,17 @@ namespace ThMEPElectrical.SystemDiagram.Extension
             else
             {
                 var IOCollection= BlockIO.SelectFence(BufferPL);
+                if(!IOBoundary.IsNull())
+                {
+                    IOCollection.Remove(IOBoundary);
+                }
                 if(IOCollection.Count == 1)
                 {
                     Polyline IOpolyline = IOCollection[0] as Polyline;
                     if (BufferPL.Contains(IOpolyline))
                         return 1;
                     else
-                        return GetQuantity(IOpolyline);
+                        return GetQuantity(IOpolyline, boundary);//阻止两个'IO'块互相循环
                 }
             }
             return 1;
