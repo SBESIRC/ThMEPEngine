@@ -16,6 +16,18 @@ namespace ThCADExtension
             var direction = line.LineDirection();
             return new Line(line.StartPoint - direction * distance, line.EndPoint + direction * distance);
         }
+
+        public static bool IsCollinear(this Line line, Line other)
+        {
+            var linearEntity = line.GetGeCurve() as LinearEntity3d;
+            var linearEntityOther = other.GetGeCurve() as LinearEntity3d;
+            if (linearEntity != null && linearEntityOther != null)
+            {
+                return linearEntity.IsColinearTo(linearEntityOther);
+            }
+            return false;
+        }
+
         public static Polyline Tesslate(this Line line,double length)
         {
             var pts = new Point3dCollection();
@@ -42,6 +54,7 @@ namespace ThCADExtension
             }
             return poly;
         }
+
         public static bool LineIsIntersection(this Line line, Line targetLine)
         {
             //严格判断线段是否相交
