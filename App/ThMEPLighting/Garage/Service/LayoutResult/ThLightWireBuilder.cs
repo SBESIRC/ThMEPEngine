@@ -339,7 +339,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                                 CableTrayParameter.LaneLineBlockParameter.Layer,
                                 ThGarageLightCommon.LaneLineLightBlockName,
                                 m.Key,
-                                new Scale3d(ArrangeParameter.PaperRatio),
+                                new Scale3d(100.0),
                                 m.Value.Item1
                                 );
                     objIds.Add(blkId);
