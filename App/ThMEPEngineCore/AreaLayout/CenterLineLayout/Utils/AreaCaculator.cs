@@ -85,7 +85,6 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
         //    }
         //}
 
-
         public static Geometry BlandArea(MPolygon mPolygon, List<Point3d> points, double radius, BlindType equipmentType, ThCADCoreNTSSpatialIndex detectSpatialIdx, Geometry EmptyDetect)
         {
             var detect = new List<Polygon>();
@@ -93,13 +92,15 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             var isVisible = equipmentType == BlindType.VisibleArea ? true : false;
             foreach (var p in points)
             {
-                if (detectSpatialIdx != null)
+               
+                Polygon detectHasPt = detectSpatialIdx != null ? GetDetect(p, detectSpatialIdx) : null;
+                //能探测到中心点的布置区域
+                Polygon d = DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), (detectHasPt != null ? detectHasPt : room), radius, isVisible);
+                if (d != null)
                 {
-                    var detectHasPt = GetDetect(p, detectSpatialIdx);
-                    detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), detectHasPt, radius, isVisible));
+                    detect.Add(d);
                 }
-                else
-                    detect.Add(DetectCalculator.CalculateDetect(new Coordinate(p.X, p.Y), room, radius, isVisible));
+          
             }
 
             var poly = OverlayNGRobust.Union(detect.ToArray());
@@ -109,16 +110,20 @@ namespace ThMEPEngineCore.AreaLayout.CenterLineLayout.Utils
             return blind;
         }
 
-
-
         private static Polygon GetDetect(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)
         {
-            //计算包含该点的可布置区域
+            // 计算包含该点的可布置区域
+            Polygon ans = null;
             var min = new Point3d(point.X - 1, point.Y - 1, 0);
             var max = new Point3d(point.X + 1, point.Y + 1, 0);
 
-            var d = detectSpatialIdx.SelectCrossingWindow(min, max).Cast<MPolygon>().First().ToNTSPolygon();
-            return d;
+            var crossDetect = detectSpatialIdx.SelectCrossingWindow(min, max).OfType<MPolygon>();
+            if (crossDetect.Count() > 0)
+            {
+                ans = crossDetect.First().ToNTSPolygon();
+            }
+
+            return ans;
         }
 
         public static Polyline GetDetectPolyline(Point3d point, ThCADCoreNTSSpatialIndex detectSpatialIdx)
