@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore.AFASRegion.Utls;
 using ThMEPEngineCore.CAD;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model.Algorithm;
 using ThMEPStructure.GirderConnect.SecondaryBeamConnect.Service;
@@ -80,14 +81,23 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
         /// </summary>
         public void AdjustmentDirection()
         {
-            //分类，划分区隔
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(250000,0,0)));
-            CorrectWrongDir();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(500000, 0, 0)));
-            GroupBeamNodes();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(750000, 0, 0)));
-            CorrectWrongDir();
-            //DrawGraph(Matrix3d.Displacement(new Vector3d(-250000, 0, 0)));
+            //自主寻找
+            if (SecondaryBeamLayoutConfig.DirectionSelection == 1)
+            {
+                //分类，划分区隔
+                //DrawGraph(Matrix3d.Displacement(new Vector3d(250000,0,0)));
+                CorrectWrongDir();
+                //DrawGraph(Matrix3d.Displacement(new Vector3d(500000, 0, 0)));
+                GroupBeamNodes();
+                //DrawGraph(Matrix3d.Displacement(new Vector3d(750000, 0, 0)));
+                CorrectWrongDir();
+                //DrawGraph(Matrix3d.Displacement(new Vector3d(-250000, 0, 0)));
+            }
+            //人工指定
+            else if(SecondaryBeamLayoutConfig.DirectionSelection == 2)
+            {
+                CorrectedDir(SecondaryBeamLayoutConfig.MainDir);
+            }
         }
 
 
@@ -154,6 +164,23 @@ namespace ThMEPStructure.GirderConnect.SecondaryBeamConnect.Model
                     }
                 }
                 nodes = NextNodes.Distinct().ToList();
+            }
+        }
+
+        private void CorrectedDir(Vector3d vector)
+        {
+            foreach (var node in this.Nodes)
+            {
+                //没有可布置的次梁或次梁布置不可调整，直接跳过
+                if (!node.HaveLayoutBackUp || node.LayoutLines.SecondaryBeamLines.Count == 0)
+                {
+                    continue;
+                }
+                if (!node.LayoutLines.vector.IsParallelWithTolerance(vector, 25))
+                {
+                    //Swap
+                    node.SwapLayout();
+                }
             }
         }
 
