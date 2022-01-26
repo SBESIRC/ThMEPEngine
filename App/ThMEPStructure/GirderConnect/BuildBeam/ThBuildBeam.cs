@@ -41,14 +41,6 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = BeamConfig.MainBeamLayerName;
-                    beam.Item2.Layer = BeamConfig.MainBeamLayerName;
-                    beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
-                    beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
-                    beam.Item1.Linetype = "ByLayer";
-                    beam.Item2.Linetype = "ByLayer";
-                    code.Layer = BeamConfig.MainBeamTextLayerName;
-                    code.ColorIndex = (int)ColorIndex.BYLAYER;
                     results.Add(beam, code);
                     LineDic.Add(beam.Item1, H);
                     LineDic.Add(beam.Item2, H);
@@ -97,8 +89,17 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 }
             });
             results = handleConflict(results, LineDic);
-            results.ToList().ForEach(o =>
+
+            results.ForEach(o =>
             {
+                o.Key.Item1.Layer = BeamConfig.MainBeamLayerName;
+                o.Key.Item2.Layer = BeamConfig.MainBeamLayerName;
+                o.Key.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
+                o.Key.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
+                o.Key.Item1.Linetype = "ByLayer";
+                o.Key.Item2.Linetype = "ByLayer";
+                o.Value.Layer = BeamConfig.MainBeamTextLayerName;
+                o.Value.ColorIndex = (int)ColorIndex.BYLAYER;
                 Outlines.Add(o.Key.Item1);
                 Outlines.Add(o.Key.Item2);
             });

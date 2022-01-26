@@ -98,22 +98,17 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.ConnectProcess
             //tuples = StructureDealer.DelaunayTriangulationConnect(allPts);
             tuples = StructureDealer.VoronoiDiagramConnect(allPts);
             dicTuples = TypeConvertor.Tuples2DicTuples(tuples, allPts.Cast<Point3d>().ToList());
-            foreach (var borderPt2NearPts in outline2BorderNearPts.Values)
-            {
-                foreach (var bordrPt in borderPt2NearPts.Keys)
-                {
-                    if (dicTuples.ContainsKey(bordrPt))
-                    {
-                        foreach (var nearPt in dicTuples[bordrPt])
-                        {
-                            if (!borderPt2NearPts[bordrPt].Contains(nearPt) && !borderPt2NearPts.ContainsKey(nearPt))
-                            {
+            outline2BorderNearPts.Values.ForEach(borderPt2NearPts => {
+                borderPt2NearPts.Keys.ForEach(bordrPt => {
+                    if (dicTuples.ContainsKey(bordrPt)) {
+                        dicTuples[bordrPt].ForEach(nearPt => {
+                            if (!borderPt2NearPts[bordrPt].Contains(nearPt) && !borderPt2NearPts.ContainsKey(nearPt)) {
                                 borderPt2NearPts[bordrPt].Add(nearPt);
                             }
-                        }
+                        });
                     }
-                }
-            }
+                });
+            });
             LineDealer.DeleteSameClassLine(borderPts, ref dicTuples);
             LineDealer.DeleteDiffClassLine(borderPts, clumnPts, ref dicTuples);
             DicTuplesDealer.AddSpecialLine(outline2BorderNearPts, ref dicTuples);

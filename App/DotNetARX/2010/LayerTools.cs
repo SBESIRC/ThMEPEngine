@@ -279,5 +279,36 @@ namespace DotNetARX
                 }
             }
         }
+
+        /// <summary>
+        /// 将图层冻结
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        public static void FrozenLayer(this Database db, string layerName)
+        {
+            try
+            {
+                //打开层表
+                LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+                //如果不存在名为layerName的图层，则返回
+                if (!lt.Has(layerName)) return;
+                ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+                                                 //以写的方式打开名为layerName的层表记录
+                LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+                if (ltr != null)
+                {
+                    if (!ltr.IsFrozen)
+                    {
+                        ltr.IsFrozen = true;
+                    }
+                }
+            }
+            catch
+            {
+                // 不能冻结正在使用的图层
+                // 这里暂时不做任何处理
+            }
+        }
     }
 }

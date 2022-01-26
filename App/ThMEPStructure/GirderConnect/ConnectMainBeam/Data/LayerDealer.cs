@@ -61,6 +61,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Data
             using (var acdb = AcadDatabase.Active())
             {
                 acdb.Database.OffLayer(layerName);
+                acdb.Database.FrozenLayer(layerName);
             }
         }
     }
