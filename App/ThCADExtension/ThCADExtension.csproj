@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="COMTool.cs" />
+    <Compile Include="DisposableList.cs" />
     <Compile Include="InvokeTool.cs" />
     <Compile Include="PointCollector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
