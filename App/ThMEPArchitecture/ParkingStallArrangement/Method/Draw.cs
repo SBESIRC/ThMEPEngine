@@ -61,7 +61,25 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
+        }
 
+
+        public static void DrawSeg(List<Line> lines, string layerNames )
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                for (int i = 0; i < lines.Count; i++)
+                {
+                    var line = lines[i];
+                    try
+                    {
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 0);
+                    }
+                    catch { }
+                    line.LayerId = DbHelper.GetLayerId(layerNames);
+                    acadDatabase.CurrentSpace.Add(line);
+                }
+            }
         }
     }
 }

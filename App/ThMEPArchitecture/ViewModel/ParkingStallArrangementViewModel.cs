@@ -251,19 +251,19 @@ namespace ThMEPArchitecture.ViewModel
                 else if(value == CommandRunSpeedEnum.General)
                 {
                     IterationCount = 20;
-                    PopulationCount = 40;
+                    PopulationCount = 50;
                     MaxTimespan = 30;
                 }
                 else if(value == CommandRunSpeedEnum.Slow)//slow
                 {
                     IterationCount = 30;
-                    PopulationCount = 100;
+                    PopulationCount = 150;
                     MaxTimespan = 60;
                 }
                 else
                 {
-                    IterationCount = 30;
-                    PopulationCount = 100;
+                    IterationCount = 50;
+                    PopulationCount = 200;
                     MaxTimespan = 300;
                 }
                 RaisePropertyChanged("CommandRunSpeed");

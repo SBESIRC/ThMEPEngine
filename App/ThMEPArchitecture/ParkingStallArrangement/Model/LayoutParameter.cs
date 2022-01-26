@@ -214,7 +214,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var tmpBoundary = OuterBoundary.Clone() as Polyline;
             var tmpSegLines = new List<Line>();
             var tmpSegLineIndexDic = new Dictionary<int, Line>();
-            List<Polyline> areas = null;
+            List<Polyline> areas = new List<Polyline>();
             try
             {
                 for (int i = 0; i < Genome.Count; i++)

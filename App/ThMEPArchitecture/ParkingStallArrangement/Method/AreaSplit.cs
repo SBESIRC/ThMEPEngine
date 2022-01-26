@@ -285,7 +285,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         }
                         if(pts.Count == 0)
                         {
-                            ;
+                            var Ls = segArea.ToLines();
+                            foreach(Line l in Ls)
+                            {
+                                pts.AddRange(l.Intersect(area, Intersect.OnBothOperands));
+                            }
+
                         }
                         return pts.OrderBy(e => line.GetMinDist(e)).Last();//返回最远距离
                     }
