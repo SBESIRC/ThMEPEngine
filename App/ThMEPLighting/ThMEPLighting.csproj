@@ -136,6 +136,7 @@
     <Compile Include="Garage\Service\Arrange\ThSecondwayArrangeService.cs" />
     <Compile Include="Garage\Service\Arrange\ThFirstwayArrangeService.cs" />
     <Compile Include="Garage\Service\Arrange\ThThirdwayArrangeService.cs" />
+    <Compile Include="Garage\Service\LayoutPoint\ThLayoutPointCalculator.cs" />
     <Compile Include="Garage\Service\LayoutPoint\ThLayoutPointOptimizeService.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThArcDrawTool.cs" />
     <Compile Include="Garage\Service\LayoutResult\ThBuildLightLineService.cs" />

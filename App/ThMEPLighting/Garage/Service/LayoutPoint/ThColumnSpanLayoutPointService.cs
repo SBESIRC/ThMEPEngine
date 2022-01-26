@@ -1,10 +1,11 @@
-﻿using NFox.Cad;
-using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
+﻿using System.Linq;
 using System.Collections.Generic;
+using NFox.Cad;
+using ThCADCore.NTS;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutPoint
 {
@@ -20,23 +21,41 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         public override List<Point3d> Layout(List<Line> dxLines)
         {
             var results = new List<Point3d>();
+            var newDxLines = ThMergeLightLineService.Merge(dxLines);
+            newDxLines.ForEach(link =>
+            {
+                var unLayoutLines = link.SelectMany(l => GetProjectionLines(l)).ToList();
+                var pts = PolylineDistribute(link, unLayoutLines, this.Interval, this.Margin);
+                results.AddRange(pts);
+                unLayoutLines.ForEach(l => l.Dispose());
+            });
             var splitLines = Split(dxLines);
             return LinearDistribute(splitLines,this.Margin,this.Interval);
+        }
+        private List<Line> GetProjectionLines(Line l)
+        {
+            var results = new List<Line>();
+            var columns = Query(l);
+            return columns.OfType<Polyline>().Select(p => GetProjectionLine(p, l)).ToList();
+        }
+
+        private Line GetProjectionLine(Polyline poly,Line line)
+        {
+            var pts = poly.Vertices();
+            var projectionPts = pts.OfType<Point3d>().Select(p => p.GetProjectPtOnLine(line.StartPoint, line.EndPoint)).ToList();
+            var pair = ThGeometryTool.GetCollinearMaxPts(projectionPts);
+            return new Line(pair.Item1, pair.Item2);
         }
 
         public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
             var results = new List<Point3d>();
-            var newL1Lines = Merge(L1Lines);
-            var newL2Lines = Merge(L2Lines);
-            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(newL1Lines, newL2Lines);
-            var l1PubLayoutPoints = Layout(l1l2PubExclusiveLines.L1Pubs); // L1上创建的点
-            var l2PubLayoutPoints = GetL2LayoutPointByPass(l1PubLayoutPoints, L1Lines, L2Lines);
-            var l1ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L1Exclusives);
+            var l1l2PubExclusiveLines = CalculatePubExclusiveLines(L1Lines, L2Lines);
+            var l1LayoutPoints = Layout(L1Lines); // L1上创建的点
+            var l2PassPoints = GetL2LayoutPointByPass(l1LayoutPoints, L1Lines, L2Lines); // L1 传递到 L2上的点
             var l2ExclusiveLayoutPoints = Layout(l1l2PubExclusiveLines.L2Exclusives);
-            results.AddRange(l1PubLayoutPoints);
-            results.AddRange(l2PubLayoutPoints);
-            results.AddRange(l1ExclusiveLayoutPoints);
+            results.AddRange(l1LayoutPoints);
+            results.AddRange(l2PassPoints);
             results.AddRange(l2ExclusiveLayoutPoints);
             return results;
         }

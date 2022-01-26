@@ -57,6 +57,16 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             return results;
         }
 
+        protected List<Point3d> PolylineDistribute(List<Line> segments,List<Line> unLayoutLines, double interval, double margin)
+        {
+            // segments 是组成一段Polyline连续的线段
+            // Lmin = D*(N-1)+1600
+            var results = new List<Point3d>();
+            var calculator = new ThLayoutPointCalculator(segments, unLayoutLines, interval, margin);
+            calculator.Layout();            
+            return calculator.Results;
+        }
+
         protected List<Point3d>  GetL2LayoutPointByPass(List<Point3d> L1LayoutPoints,List<Line> L1Lines, List<Line> L2Lines)
         {
             // 把L1布置的点偏移到L2上
