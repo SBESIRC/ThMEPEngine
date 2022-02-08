@@ -7,7 +7,6 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
@@ -43,17 +42,26 @@ namespace ThMEPEngineCore.AFASRegion.Service
             thcolumnsSpatialIndex = new ThCADCoreNTSSpatialIndex(thcolumns);
 
             //获取梁
+            var highbeams = new DBObjectCollection();
+            var nohighbeams = new DBObjectCollection();
             var thBeams = beams.Cast<ThIfcLineBeam>().ToList();
             thBeams.ForEach(x => x.ExtendBoth(20, 20));
-
-            var highbeams = thBeams.Where(o => -(o.DistanceToFloor + WallThickness) > 600).Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
+            foreach(var beam in thBeams)
+            {
+                var delta = beam.BottomElevation() - WallThickness;
+                if (delta > 600)
+                {
+                    highbeams.Add(beam.Outline);
+                }
+                else if (delta > 0)
+                {
+                    nohighbeams.Add(beam.Outline);
+                }
+            }
             thhighbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(highbeams);
-
-            var nohighbeams = thBeams.Where(o => -(o.DistanceToFloor + WallThickness) <= 600).Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
             thnohighbeamsSpatialIndex = new ThCADCoreNTSSpatialIndex(nohighbeams);
 
             //获取墙
-            //var thWalls = walls.Select(o => o.Outline).Cast<AcPolygon>().ToCollection();
             var wallOutlines = walls.Select(o => o.Outline);
             var thWalls = wallOutlines.OfType<AcPolygon>().ToCollection();
             var thWallsMpoly = wallOutlines.OfType<MPolygon>();
