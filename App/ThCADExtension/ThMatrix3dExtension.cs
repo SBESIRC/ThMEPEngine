@@ -52,7 +52,7 @@ namespace ThCADExtension
         /// <param name="scale"></param>
         /// <param name="rotate"></param>
         /// <param name="translate"></param>
-        public static void Decompose(this Matrix3d mat, out Matrix3d scale, out Matrix3d rotate,out Matrix3d mirror, out Matrix3d translate)
+        public static void Decompose(this Matrix3d mat, out Matrix3d scale, out Matrix3d rotate, out Matrix3d mirror, out Matrix3d translate)
         {
             // https://adndevblog.typepad.com/autocad/2014/08/decomposing-material-mapper-transform-matrix.html
             // Scale - assume always positive, and must be non-zero
@@ -96,11 +96,11 @@ namespace ThCADExtension
             rotate = Matrix3d.Rotation(zAngle, Vector3d.ZAxis, Point3d.Origin);
 
             var identity = Matrix3d.Identity.ToArray();
-            if (Math.Sign( mat[0,0] + mat[0,1]) != Math.Sign(rotate[0, 0] + rotate[0, 1]))
+            if (Math.Sign(mat[0, 0] + mat[0, 1]) != Math.Sign(rotate[0, 0] + rotate[0, 1]))
             {
                 identity[0] = -identity[0];
             }
-            else if(Math.Sign(mat[1, 0] + mat[1, 1]) != Math.Sign(rotate[1, 0] + rotate[1, 1]))
+            else if (Math.Sign(mat[1, 0] + mat[1, 1]) != Math.Sign(rotate[1, 0] + rotate[1, 1]))
             {
                 identity[5] = -identity[5];
             }

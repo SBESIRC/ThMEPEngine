@@ -254,7 +254,7 @@ namespace ThMEPElectrical.Command
 
                                     // 动态块的Bug：导入含有Wipeout的动态块，DrawOrder丢失
                                     // 修正插入动态块的图层顺序
-                                    if (targetBlockName.Contains( "电动机及负载标注"))
+                                    if (targetBlockName.Contains("电动机及负载标注"))
                                     {
                                         var wipeOut = new ThBConvertWipeOut();
                                         wipeOut.FixWipeOutDrawOrder(currentDb.Database, targetBlockName);
