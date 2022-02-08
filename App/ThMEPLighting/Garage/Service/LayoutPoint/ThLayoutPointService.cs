@@ -91,7 +91,32 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             });
 
             return results;
-        } 
+        }
+        protected List<Line> GetProjectionLinesByPass(List<Line> lines, List<Line> oneLines, List<Line> twoLines)
+        {
+            // lines 是存在于oneLines上的
+            // twoLines 是 oneLines 偏移的线
+            var results = new List<Line>();
+            var lineQuery = ThQueryLineService.Create(lines);
+            var firstPairService = new ThFirstSecondPairService(oneLines, twoLines, DoubleRowOffsetDis);
+            oneLines.ForEach(l =>
+            {
+                var collinearLines = lineQuery.QueryCollinearLines(l.StartPoint,l.EndPoint);
+                var pairs = firstPairService.Query(l);
+                if(pairs.Count>0)
+                {
+                    var first = pairs.First();
+                    collinearLines.ForEach(o =>
+                    {
+                        var sp = o.StartPoint.GetProjectPtOnLine(first.StartPoint,first.EndPoint);
+                        var ep = o.EndPoint.GetProjectPtOnLine(first.StartPoint, first.EndPoint);
+                        results.Add(new Line(sp,ep));
+                    });
+                }
+            });
+            return results;
+        }
+
 
         protected bool IsFitToInstall(Point3d lightPt,Point3d lineSp,Point3d lineEp,double sideTolerance=2.0)
         {

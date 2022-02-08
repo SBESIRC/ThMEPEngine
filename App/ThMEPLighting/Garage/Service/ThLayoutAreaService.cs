@@ -21,7 +21,7 @@ namespace ThMEPLighting.Garage.Service
         /// <param name="polygons"></param>
         /// <param name="filterInner"></param>
         /// <returns></returns>
-        public static List<Line> Calculate(this List<Line> lines, DBObjectCollection polygons,bool filterInner=true)
+        public static List<Line> CalculateLayoutParts(this List<Line> lines, DBObjectCollection polygons)
         {
             // 查询
             var spatialIndex = new ThCADCoreNTSSpatialIndex(polygons);
@@ -42,53 +42,49 @@ namespace ThMEPLighting.Garage.Service
                 }
                 else
                 {
-                    var curves = ToCurves(objs);
-                    var interPts = l.IntersectPts(curves);
-                    var splitRes = l.Split(interPts.OfType<Point3d>().ToList(), 1.0);
-                    splitRes.ForEach(s => results.Add(s));
+                    var splitRes = Split(l, polygons, 1.0);
+                    var outerRes = splitRes.GetOutter(polygons);
+                    outerRes.OfType<Line>().ForEach(s => results.Add(s));
                 }
             });
-
-            //过滤在polygons内的线
-            if(filterInner)
-            {
-                results = results.FilterInner(polygons);
-                //results.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 1);
-                //polygons.Cast<Entity>().ToList().CreateGroup(AcHelper.Active.Database, 3);
-            }
-            
             return results.OfType<Line>().ToList();
         }
 
-        public static List<Line> Calculate(this Line line, DBObjectCollection polygons, bool filterInner = true)
+        /// <summary>
+        /// 计算可以布置的线
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="polygons"></param>
+        /// <param name="filterInner"></param>
+        /// <returns></returns>
+        public static List<Line> CalculateUnLayoutParts(this List<Line> lines, DBObjectCollection polygons)
         {
             // 查询
             var spatialIndex = new ThCADCoreNTSSpatialIndex(polygons);
-            var rec = line.Buffer(1.0);
-            var objs = spatialIndex.SelectCrossingPolygon(rec);
+            Func<Line, DBObjectCollection> Query = (l) =>
+            {
+                var rec = l.Buffer(1.0);
+                return spatialIndex.SelectCrossingPolygon(rec);
+            };
 
             var results = new DBObjectCollection();
-            if (objs.Count == 0)
+            var clones = lines.Select(o => o.Clone() as Line).ToCollection();
+            clones.OfType<Line>().ForEach(l =>
             {
-                results.Add(line.Clone() as Line);
-            }
-            else
-            {
-                var splitRes = line.Split(objs);
-                splitRes.ForEach(s => results.Add(s));
-            }
-
-            //过滤在polygons内的线
-            if (filterInner)
-            {
-                results = results.FilterInner(polygons);
-            }
+                var objs = Query(l);
+                if (objs.Count > 0)
+                {
+                    var splitRes = Split(l, polygons, 1.0);  
+                    var innerRes = splitRes.GetInner(polygons); // 获取在polygons内的线
+                    innerRes.OfType<Line>().ForEach(s => results.Add(s));
+                }
+            });
             return results.OfType<Line>().ToList();
         }
 
-        private static List<Line> Split(this Line line,DBObjectCollection objs)
+        private static DBObjectCollection Split(Line line,DBObjectCollection objs,double closeDis)
         {
-            var results = new List<Line>();
+            var results = new DBObjectCollection();
             var curves = ToCurves(objs);
             var interPts = line.IntersectPts(curves);
             var splitRes = line.Split(interPts.OfType<Point3d>().ToList(), 1.0);
@@ -118,7 +114,14 @@ namespace ThMEPLighting.Garage.Service
             return result;
         }
 
-        private static DBObjectCollection FilterInner(this DBObjectCollection lines, DBObjectCollection polygons,  double bufferDis = 1.0)
+        private static DBObjectCollection GetOutter(this DBObjectCollection lines, DBObjectCollection polygons,  double bufferDis = 1.0)
+        {
+            // 过滤在Polygon内部的线
+            var filterRes = lines.GetInner(polygons, bufferDis);
+            return lines.Difference(filterRes);
+        }
+
+        private static DBObjectCollection GetInner(this DBObjectCollection lines, DBObjectCollection polygons, double bufferDis = 1.0)
         {
             // 过滤在Polygon内部的线
             var filterRes = new DBObjectCollection();
@@ -126,11 +129,11 @@ namespace ThMEPLighting.Garage.Service
             var bufferService = new ThNTSBufferService();
             polygons.OfType<Entity>().ForEach(e =>
             {
-                var bufferObj = bufferService.Buffer(e, bufferDis);               
+                var bufferObj = bufferService.Buffer(e, bufferDis);
                 var objs = spatialIndex.SelectWindowPolygon(bufferObj);
                 filterRes = filterRes.Union(objs);
             });
-            return lines.Difference(filterRes);
+            return filterRes;
         }
 
         private static Point3dCollection IntersectPts(this Line line,List<Curve> curves)
