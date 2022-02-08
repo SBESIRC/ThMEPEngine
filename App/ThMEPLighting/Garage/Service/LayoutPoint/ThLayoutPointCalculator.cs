@@ -22,7 +22,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         private List<Line> UnLayoutLines { get; set; }
         public List<Point3d> Results { get; set; }
         private double Step = 5.0;
-        private int MaxGeneration = 100;
+        private int MaxGeneration = 150;
 
         public ThLayoutPointCalculator(List<Line> dxLines,List<Line> unLayoutLines,double interval,double margin)
         {
@@ -34,19 +34,26 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         }
         public void Layout()
         {
-            double interval = Interval;
+            var pts = Distribute(DxLines, Margin, Interval);
+            if(IsValid(pts))
+            {
+                Results = pts;
+                return;
+            }
             int i = 1;
             while (true)
             {
-                var pts = Distribute(DxLines, Margin, interval);
-                if (IsValid(pts))
+                var pts1 = Distribute(DxLines, Margin, Interval - i * Step);
+                if (IsValid(pts1))
                 {
-                    Results = pts;
+                    Results = pts1;
                     break;
                 }
-                else
+                var pts2 = Distribute(DxLines, Margin, Interval + i * Step);
+                if (IsValid(pts2))
                 {
-                    interval -= Step;
+                    Results = pts2;
+                    break;
                 }
                 if (++i > MaxGeneration)
                 {
@@ -62,7 +69,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             var spatialIndex = new ThCADCoreNTSSpatialIndex(dbPoints);
             var isIn = IsIn(spatialIndex); // 判断点是否在不可布区域内
             dbPoints.ThDispose(); // 释放资源
-            return isIn;
+            return isIn ? false : true;
         }
 
         private bool IsIn(ThCADCoreNTSSpatialIndex spatialIndex)
@@ -73,7 +80,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                 var objs = spatialIndex.SelectCrossingPolygon(outline);
                 outline.Dispose();
                 return objs.Count > 0;
-            }).Any(); ;
+            }).Any();
         }
 
         private DBObjectCollection ToDBPoints(List<Point3d> pts)
@@ -83,15 +90,22 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
 
         private List<Point3d> Distribute(List<Line> lines, double margin, double interval)
         {
-            var polyline = lines.ToPolyline();
-            var pts = GetPoints(polyline);
-            var lineParameter = new ThLineSplitParameter
+            if(interval>=0)
             {
-                Margin = margin,
-                Interval = interval,
-                Segment = pts,
-            };
-            return lineParameter.Distribute();
+                var polyline = lines.ToPolyline();
+                var pts = GetPoints(polyline);
+                var lineParameter = new ThLineSplitParameter
+                {
+                    Margin = margin,
+                    Interval = interval,
+                    Segment = pts,
+                };
+                return lineParameter.Distribute();
+            }
+            else
+            {
+                return new List<Point3d>();
+            }
         }
         private List<Point3d> GetPoints(Polyline pLine)
         {

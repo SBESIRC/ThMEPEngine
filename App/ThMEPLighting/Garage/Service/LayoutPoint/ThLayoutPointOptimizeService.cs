@@ -47,10 +47,11 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         private bool IsRemove(Point3d pt)
         {
             var ownerEdge = FindEdge(pt);
-
             var groups = Query(pt);
-            groups.Remove(pt);
-
+            if(groups.Contains(pt))
+            {
+                groups.Remove(pt);
+            }
             foreach(Point3d neibour in groups)
             {
                 if(IsOnSameEdge(pt, neibour) && IsPtAtCorner(pt))

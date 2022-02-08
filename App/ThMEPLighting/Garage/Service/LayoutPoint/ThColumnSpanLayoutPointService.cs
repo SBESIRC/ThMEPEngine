@@ -29,8 +29,7 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                 results.AddRange(pts);
                 unLayoutLines.ForEach(l => l.Dispose());
             });
-            var splitLines = Split(dxLines);
-            return LinearDistribute(splitLines,this.Margin,this.Interval);
+            return results;
         }
         private List<Line> GetProjectionLines(Line l)
         {

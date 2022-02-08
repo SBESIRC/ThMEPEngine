@@ -92,18 +92,21 @@ namespace ThMEPLighting.Garage.Model
             // 移动到原点
             // 若图元离原点非常远（大于1E+10)，精度会受很大影响
             Transformer.Transform(DxCenterLines.ToCollection());
-            Transformer.Transform(FdxCenterLines.ToCollection());
             Transformer.Transform(RegionBorder);
-            Columns.ForEach(c => Transformer.Transform(c.Outline));
-            Beams.ForEach(c => Transformer.Transform(c.Outline));
+            if(!ForSingleRowCableTrunking)
+            {
+                Transformer.Transform(FdxCenterLines.ToCollection());
+                Columns.ForEach(c => Transformer.Transform(c.Outline));
+                Beams.ForEach(c => Transformer.Transform(c.Outline));
 
-            // 移动框中已布置的元素
-            UpgradeOpen();
-            Transformer.Transform(Lights.ToCollection());
-            Transformer.Transform(Texts.ToCollection());
-            Transformer.Transform(CenterLines.ToCollection());
-            Transformer.Transform(SideLines.ToCollection());
-            Transformer.Transform(JumpWires.ToCollection());
+                // 移动框中已布置的元素
+                UpgradeOpen();
+                Transformer.Transform(Lights.ToCollection());
+                Transformer.Transform(Texts.ToCollection());
+                Transformer.Transform(CenterLines.ToCollection());
+                Transformer.Transform(SideLines.ToCollection());
+                Transformer.Transform(JumpWires.ToCollection());
+            }
         }
 
         public void Reset()

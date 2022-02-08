@@ -60,9 +60,10 @@ namespace ThMEPLighting.Garage.Engine
             normalRegionBorders.ForEach(r =>
             {
                 var singleRowRegionBorder = GetSubRegionBorder(singRowRegionBorders, r.Id);
-                // begin
+                // 移动到近原点位置，解决超远问题
                 r.Transform();
-                singleRowRegionBorder.Transform(); // for test
+                singleRowRegionBorder.Transform();
+
                 // 布置
                 int loopNumber = 0;
                 var lightGraphs = new List<ThLightGraphService>();               
