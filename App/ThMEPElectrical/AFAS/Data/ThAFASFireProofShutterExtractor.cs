@@ -91,7 +91,7 @@ namespace ThMEPElectrical.AFAS.Data
             {
                 var enlarge = bufferService.Buffer(o, 5.0);
                 var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count > 0)
+                if (neibours.Count > 0 && FireDoorNeibourIds.ContainsKey (o)==false)
                 {
                     FireDoorNeibourIds.Add(o, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
                 }

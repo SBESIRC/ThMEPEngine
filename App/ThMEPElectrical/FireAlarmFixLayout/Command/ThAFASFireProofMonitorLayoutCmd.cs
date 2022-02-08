@@ -54,13 +54,6 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                ////画框，提数据，转数据
-                //var pts = ThAFASUtils.GetFrameBlk();
-                //if (pts.Count == 0)
-                //{
-                //    return;
-                //}
-
                 //------------
                 var transformer = ThAFASDataPass.Instance.Transformer;
                 var pts = ThAFASDataPass.Instance.SelectPts;
@@ -68,20 +61,16 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                 //--------------初始图块信息
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var layoutBlkName = ThFaCommon.BlkName_Monitor;
-                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.Monitor ];
+                var cleanBlkName = ThFaCommon.LayoutBlkList[(int)ThFaCommon.LayoutItemType.Monitor];
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
-                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
                 //--------------提取数据
-                //var geos = ThAFASUtils.GetFixLayoutData(pts, extractBlkList);
                 var geos = ThAFASUtils.GetFixLayoutData(ThAFASDataPass.Instance, extractBlkList);
                 if (geos.Count == 0)
                 {
                     return;
                 }
                 //------------转回原点
-                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
                 ThAFASUtils.TransformToZero(transformer, geos);
 
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。
@@ -103,22 +92,13 @@ namespace ThMEPElectrical.FireAlarmFixLayout.Command
                     transformer.Reset(ref pt);
                     pairs.Add(new KeyValuePair<Point3d, Vector3d>(pt, p.Value));
                 });
-                pairs.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.Key, x.Value, "l0MonitorResult", 3, 30));
+                pairs.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.Key, x.Value, "l0MonitorResult", 1, 30));
+                pairs.ForEach(x => ThMEPEngineCore.Diagnostics.DrawUtils.ShowGeometry(x.Key, "l0MonitorResult", 1, 30, 500));
+
 
                 //------------对插入真实块
                 ThFireAlarmInsertBlk.InsertBlock(pairs, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
                 ThAFASUtils.TransformReset(transformer, geos);
-                ////Print
-                //pairs.ForEach(p =>
-                //{
-                //    var circlePoint = new Circle(p.Key, Vector3d.ZAxis, 50.0);
-                //    var circleArea = new Circle(p.Key, Vector3d.ZAxis, 8500.0);
-                //    var line = new Line(p.Key, p.Key + p.Value.GetNormal().MultiplyBy(200));
-                //    var ents1 = new List<Entity>() { circlePoint, line };
-                //    var ents2 = new List<Entity>() { circleArea };
-                //    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents1, acadDatabase.Database, 1);
-                //    ThMEPEngineCore.CAD.ThAuxiliaryUtils.CreateGroup(ents2, acadDatabase.Database, 3);
-                //});
             }
         }
     }
