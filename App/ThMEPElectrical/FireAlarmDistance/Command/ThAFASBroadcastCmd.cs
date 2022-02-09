@@ -74,12 +74,10 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 var layoutBlkName = _mode == ThAFASPlacementMountModeMgd.Wall ? ThFaCommon.BlkName_Broadcast_Wall : ThFaCommon.BlkName_Broadcast_Ceiling;
                 var cleanBlkName = new List<string>() { layoutBlkName };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
                 ThStopWatchService.Start();
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
-                //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
                 var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
                 if (geos.Count == 0)
                 {
@@ -121,7 +119,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
 
                 var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
-                ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
+                ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0JsonOutput", 212, 30, 200));
 
                 //--------------接入楼梯
                 var layoutParameter = new ThAFASBCLayoutParameter()
@@ -138,7 +136,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 ThFABCStairService.CleanStairRoomPt(layoutParameter.StairPartResult, roomBoundary, ref ptsOutput);
 
                 var ptDirList = ThAFASDistanceLayoutService.FindOutputPtsDir(ptsOutput, roomBoundary);
-                ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
+                ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 1, 30, 200));
 
                 ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
