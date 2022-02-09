@@ -305,7 +305,7 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                 var newLine = new Line(line.StartPoint - dir * 5, line.EndPoint + dir * 5);
                 gridCollections.Add(newLine);
             }
-            var regions = gridCollections.PolygonsEx().UnionPolygons().Cast<Polyline>().OrderBy(x => x.Area).ToList();
+            var regions = gridCollections.PolygonsEx().UnionPolygons().Cast<Polyline>().OrderByDescending(x => x.Area).ToList();
             if (regions.Count <= 0)
             {
                 return null;
