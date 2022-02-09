@@ -58,9 +58,11 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         public List<FanLayoutRect> GetRoomCenterFan(FanRectangle fanRectangle,double roomTableLoad) 
         {
-            var layoutDir = _allGroups.First().FirstRowDir;
-            var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
             var addFans = new List<FanLayoutRect>();
+            var layoutDir = _allGroups.First().FirstRowDir;
+            if (layoutDir.Length < 0.5)
+                return addFans;
+            var otherDir = Vector3d.ZAxis.CrossProduct(layoutDir);
             //如果房间没有布置任何风机，根据负荷，在中心处进行均布
             var fanCount = (int)Math.Ceiling(roomTableLoad / fanRectangle.Load);
             var roomCenter = IndoorFanCommon.PolylinCenterPoint(_roomOutPLine) + layoutDir.Negate().MultiplyBy(fanRectangle.MaxLength/2);
@@ -82,6 +84,10 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             {
                 var fanCenterPoint = startPoint - otherDir.MultiplyBy(stepLength*i);
                 var fanRect = CenterToRect(fanCenterPoint, layoutDir, fanRectangle.MaxLength, otherDir, fanRectangle.Width);
+                if (fanRect.Area < 10) 
+                {
+                
+                }
                 var fanLayoutRect = new FanLayoutRect(fanRect, fanRectangle.Width, layoutDir);
                 fanLayoutRect.FanDirection = layoutDir;
                 CalcFanVent(fanLayoutRect, fanRectangle);

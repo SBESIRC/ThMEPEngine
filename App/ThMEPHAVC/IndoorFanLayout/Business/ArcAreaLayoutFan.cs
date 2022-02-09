@@ -25,7 +25,38 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return _roomIntersectAreas;
            
             LayoutFanRectFirstStep();
-            //return _roomIntersectAreas;
+            //排布完成后，进行检查删除逻辑
+            var delFans = CheckAndRemoveLayoutFan();
+            if (delFans.Count > 0)
+            {
+                //有删除重新进行排布计算
+                foreach (var area in _roomIntersectAreas)
+                {
+                    continue;
+                    if (!delFans.Any(c => c.CellId == area.divisionArea.Uid))
+                        continue;
+                    area.FanLayoutAreaResult.Clear();
+                    CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                    OneDivisionAreaCalcFanRectangle(area, _fanRectangle);
+                }
+            }
+            else
+            {
+                var addFanCellIds = CheckAndAddLayoutFan();
+                if (addFanCellIds.Count > 0)
+                {
+                    //需要添加 重新进行排布计算
+                    foreach (var area in _roomIntersectAreas)
+                    {
+                        continue;
+                        if (!addFanCellIds.Any(c => c == area.divisionArea.Uid))
+                            continue;
+                        area.FanLayoutAreaResult.Clear();
+                        CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                        OneDivisionAreaCalcFanRectangle(area, _fanRectangle);
+                    }
+                }
+            }
             while (true)
             {
                 bool haveChange = false;
