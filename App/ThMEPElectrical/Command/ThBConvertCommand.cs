@@ -298,6 +298,21 @@ namespace ThMEPElectrical.Command
                                                         e.Erase();
                                                     }
                                                 });
+                                    // 对电动机及负载标注、负载标注单独处理
+                                    if (!objId.IsErased && targetBlockName.Contains("负载标注"))
+                                    {
+                                        var name = KeepChinese(targetBlockName);
+                                        targetBlocks.Select(t => t.Data as ThBlockReferenceData)
+                                                .Where(t => ThMEPXRefService.OriginalFromXref(t.EffectiveName).Contains(name))
+                                                .ForEach(t =>
+                                                {
+                                                    if (t.Position.DistanceTo(targetBlockData.Position) < 10.0)
+                                                    {
+                                                        var e = currentDb.Element<Entity>(t.ObjId, true);
+                                                        e.Erase();
+                                                    }
+                                                });
+                                    }
 
                                     // 设置动态块可见性
                                     if (!objId.IsErased)
@@ -356,7 +371,7 @@ namespace ThMEPElectrical.Command
                                         {
                                             if (!b.IsErased)
                                             {
-                                                engine.SetDatbaseProperties(b, o, targetBlockLayer);
+                                                engine.SetDatabaseProperties(b, o, targetBlockLayer);
                                             }
                                         });
                                     }
@@ -398,6 +413,24 @@ namespace ThMEPElectrical.Command
             transformer.Reset(objs);
             transformer.Reset(frame);
             return filters;
+        }
+
+        private string KeepChinese(string str)
+        {
+            //声明存储结果的字符串
+            var chineseString = "";
+
+            //将传入参数中的中文字符添加到结果字符串中
+            for (int i = 0; i < str.Length; i++)
+            {
+                if (str[i] >= 0x4E00 && str[i] <= 0x9FA5) //汉字
+                {
+                    chineseString += str[i];
+                }
+            }
+
+            //返回保留中文的处理结果
+            return chineseString;
         }
     }
 }

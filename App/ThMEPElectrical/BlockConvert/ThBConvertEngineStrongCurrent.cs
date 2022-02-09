@@ -52,7 +52,7 @@ namespace ThMEPElectrical.BlockConvert
 
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
+        public override void SetDatabaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
