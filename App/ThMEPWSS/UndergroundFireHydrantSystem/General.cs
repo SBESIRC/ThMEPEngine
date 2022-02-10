@@ -4,6 +4,7 @@ using ThMEPWSS.UndergroundFireHydrantSystem.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using System.Linq;
 
 namespace ThMEPWSS.UndergroundFireHydrantSystem
 {
@@ -64,15 +65,20 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem
 
         public static bool GetNearestPt(this Point3dEx pt, ref Point3dEx tpt, List<Point3dEx> pts, double tolerance = 250)
         {
+            var rangePts = new List<Point3dEx>();
             foreach (var p in pts)
             {
                 if (p._pt.DistanceTo(pt._pt) < tolerance)
                 {
-                    tpt = p;
-                    return true;
+                    rangePts.Add(p);
+                    //tpt = p;
+                    //return true;
                 }
             }
-            return false;
+            if(rangePts.Count == 0) return false;
+            var sortedPts = rangePts.OrderBy(p => p._pt.DistanceTo(pt._pt)).ToList();
+            tpt = sortedPts.First();
+            return true;
         }
     }
 }
