@@ -6,14 +6,14 @@ using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Algorithm.FrameComparer
 {
-    public class ThMEFrameTextComparer
+    public class ThMEPFrameTextComparer
     {
         private Point3d srtP;
         private Dictionary<int, string> dicTexts;         // 文字外包框到文字参数的映射
         private ThCADCoreNTSSpatialIndex orgTextBounds;
         private Dictionary<int, HashSet<string>> dicFrameTexts;   // 外包框到文字参数的映射
         
-        public ThMEFrameTextComparer(ThMEPFrameComparer frameComp)
+        public ThMEPFrameTextComparer(ThMEPFrameComparer frameComp)
         {
             // 检查UnChanged 和 Changed 的功能是否变化
             Init(frameComp);
