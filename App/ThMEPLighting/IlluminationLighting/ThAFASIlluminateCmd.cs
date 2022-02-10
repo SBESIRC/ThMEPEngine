@@ -27,6 +27,7 @@ namespace ThMEPLighting.IlluminationLighting
             FireAlarmSetting.Instance.Scale = 100;
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.RoofThickness = wallThick;
+            FireAlarmSetting.Instance.BufferDist = 500;
             FireAlarmSetting.Instance.IlluRadiusNormal = radiusN;
             FireAlarmSetting.Instance.IlluRadiusEmg = radiusE;
             FireAlarmSetting.Instance.IlluLightType = 0;

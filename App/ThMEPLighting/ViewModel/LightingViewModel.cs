@@ -210,6 +210,21 @@ namespace ThMEPLighting.ViewModel
                 OnPropertyChanged("RoofThickness");
             }
         }
+        //避梁距离
+        private double _BufferDist = 500;
+        public double BufferDist
+        {
+            get
+            {
+                return _BufferDist;
+            }
+            set
+            {
+                _BufferDist = value;
+                OnPropertyChanged("BufferDist");
+            }
+        }
+
 
         //需要加这个值。否则存不住结果
         private bool _NotShouldConsiderBeam = false;

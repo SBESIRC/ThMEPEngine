@@ -37,6 +37,7 @@
     <Compile Include="AFAS\DataFactory\ThAFASDataSetFactory.cs" />
     <Compile Include="AFAS\Data\ThAFASDetectionRegionExtractor.cs" />
     <Compile Include="AFAS\Data\ThAFASCenterLineExtractor.cs" />
+    <Compile Include="AFAS\Model\ThBeamDataParameter.cs" />
     <Compile Include="AFAS\Service\ThHandlePlaceConverage.cs" />
     <Compile Include="AFAS\Utils\LogUtil.cs" />
     <Compile Include="AFAS\Utils\ThAFASRoomUtils.cs" />

@@ -29,6 +29,8 @@ namespace ThMEPElectrical.AFAS.Data
         public bool ReferBeam { get; set; } = true;
 
         public double WallThickness { get; set; } = 100;
+
+        public double BufferDist { get; set; } = 500;
         #endregion
 
 
@@ -90,14 +92,13 @@ namespace ThMEPElectrical.AFAS.Data
             cmd.Columns = Columns.Cast<ThIfcBuildingElement>().ToList();
             cmd.Walls = Walls.Cast<ThIfcBuildingElement>().ToList();
             cmd.Holes = Holes;
-            cmd.BufferDistance = 500;
+            cmd.BufferDistance = BufferDist;
             cmd.ReferBeams = ReferBeam;
             cmd.WallThickness = WallThickness;
 
             //获取可布置区域
             var poly = pts.CreatePolyline();
             CanLayoutAreas = cmd.DivideRoomWithPlacementRegion(poly);
-            //  CanLayoutAreas.ForEach(e => transformer.Transform(e)); //移动到原点，和之前所有的Extractor保持一致
         }
 
         public void Print(Database database)
@@ -117,7 +118,6 @@ namespace ThMEPElectrical.AFAS.Data
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            //CanLayoutAreas.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
             foreach (var o in CanLayoutAreas)
             {
                 if (GroupOwner.ContainsKey(o) == false)

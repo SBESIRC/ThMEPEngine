@@ -2,9 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using Autodesk.AutoCAD.ApplicationServices;
-using AcHelper;
-using AcHelper.Commands;
 using Linq2Acad;
 
 using ThMEPEngineCore.Command;
@@ -12,8 +9,6 @@ using ThMEPElectrical.AFAS;
 using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.AFAS.Utils;
 using ThMEPElectrical.AFAS.Model;
-using ThMEPElectrical.AFAS.Data;
-using ThMEPLighting.IlluminationLighting;
 using ThMEPLighting.ViewModel;
 
 namespace ThMEPLighting.Command
@@ -47,44 +42,6 @@ namespace ThMEPLighting.Command
                 {
                     ThAFASDataPass.Instance = new ThAFASDataPass();
 
-                    //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
-                    //if (selectPts.Count == 0)
-                    //{
-                    //    return;
-                    //}
-
-                    //var transformer = ThAFASUtils.GetTransformer(selectPts);
-
-                    //////////导入所有块，图层信息
-                    //var extractBlkList = ThFaCommon.BlkNameList;
-                    //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
-                    //////////清除所选的块
-                    //var cleanBlkList = new List<string>() { ThFaCommon.BlkName_CircleCeiling,
-                    //                                    ThFaCommon.BlkName_DomeCeiling,
-                    //                                    ThFaCommon.BlkName_InductionCeiling,
-                    //                                    ThFaCommon.BlkName_Downlight,
-                    //                                   };
-                    //if (_UiConfigs.IfLayoutEmgChecked)
-                    //{
-                    //    cleanBlkList.Add(ThFaCommon.BlkName_EmergencyLight);
-                    //}
-
-                    //var previousEquipmentData = new ThAFASBusinessDataSetFactory()
-                    //{
-                    //    BlkNameList = cleanBlkList,
-                    //};
-                    //previousEquipmentData.SetTransformer(transformer);
-                    //var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
-                    //var cleanEquipment = localEquipmentData.Container;
-                    //ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
-
-                    /////////////获取数据元素,已转回原位置附近////////
-                    //var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
-                    //ThAFASDataPass.Instance.Extractors = extractors;
-                    //ThAFASDataPass.Instance.Transformer = transformer;
-                    //ThAFASDataPass.Instance.SelectPts = selectPts;
-
                     ThAFASUtils.AFASPrepareStep();
 
                     if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
@@ -110,6 +67,7 @@ namespace ThMEPLighting.Command
             FireAlarmSetting.Instance.Scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
             FireAlarmSetting.Instance.Beam = _UiConfigs.ShouldConsiderBeam == true ? 1 : 0;
             FireAlarmSetting.Instance.RoofThickness = _UiConfigs.RoofThickness;
+            FireAlarmSetting.Instance.BufferDist = _UiConfigs.BufferDist;
 
             FireAlarmSetting.Instance.IlluRadiusNormal = _UiConfigs.RadiusNormal;
             FireAlarmSetting.Instance.IlluRadiusEmg = _UiConfigs.RadiusEmg;

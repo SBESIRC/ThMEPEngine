@@ -34,36 +34,6 @@ namespace ThMEPElectrical.AFAS.Command
             {
                 ThAFASDataPass.Instance = new ThAFASDataPass();
 
-                //var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
-                //if (selectPts.Count == 0)
-                //{
-                //    return;
-                //}
-
-                //var transformer = ThAFASUtils.GetTransformer(selectPts);
-
-                //////////导入所有块，图层信息
-                //var extractBlkList = ThFaCommon.BlkNameList;
-                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
-                //////////清除所选的块
-                //var cleanBlkList = FireAlarmSetting.Instance.LayoutItemList.SelectMany(x => ThFaCommon.LayoutBlkList[x]).ToList();
-                //var previousEquipmentData = new ThAFASBusinessDataSetFactory()
-                //{
-                //    BlkNameList = cleanBlkList,
-                //    //  InputExtractors = extractors,
-                //};
-                //previousEquipmentData.SetTransformer(transformer);
-                //var localEquipmentData = previousEquipmentData.Create(acadDatabase.Database, selectPts);
-                //var cleanEquipment = localEquipmentData.Container;
-                //ThAFASUtils.CleanPreviousEquipment(cleanEquipment);
-
-                /////////////获取数据元素,已转回原位置附近////////
-                //var extractors = ThAFASUtils.GetBasicArchitectureData(selectPts, transformer);
-                //ThAFASDataPass.Instance.Extractors = extractors;
-                //ThAFASDataPass.Instance.Transformer = transformer;
-                //ThAFASDataPass.Instance.SelectPts = selectPts;
-
                 ThAFASUtils.AFASPrepareStep();
                 if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
                 {
@@ -123,8 +93,7 @@ namespace ThMEPElectrical.AFAS.Command
             }
 
             ThAFASDataPass.Instance = null;
-            //FireAlarmSetting.Instance.LayoutItemList.Clear();
-
+          
         }
     }
 }

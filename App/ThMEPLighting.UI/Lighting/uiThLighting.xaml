@@ -1,15 +1,4 @@
-﻿<!--<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
-                     x:Class="TianHua.Lighting.UI.uiThLighting"
-                         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                      xmlns:s="clr-namespace:System;assembly=mscorlib"
-                         xmlns:viewmodels="clr-namespace:ThMEPLighting.Lighting.ViewModels;assembly=ThMEPLighting"
-                                         Title="照明" SizeToContent="Manual" Height="780"
-                                        Width="450" MaxWidth="1000" MaxHeight="1000"
-                         mc:Ignorable="d" >-->
-<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
+﻿<cus:ThCustomWindow  xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" 
                      x:Class="TianHua.Lighting.UI.uiThLighting"
                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -98,20 +87,20 @@
                              IsChecked ="{Binding NotShouldConsiderBeam }" >不考虑梁</RadioButton>
                 </StackPanel>
 
-                <Grid  Margin="10,5,0,0" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="0.5*"/>
-                        <ColumnDefinition Width="0.5*"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                        <Label Content ="板顶厚度"  />
-                        <cus:InputTextBox   Width ="70"   TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
-                        <Label Content="mm"/>
-                    </StackPanel>
-                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
-                    </StackPanel>
-                </Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                    <Label Content ="板顶厚度"  />
+                    <cus:InputTextBox Margin="10,5,5,5" Width ="70" TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                    <Label Content="mm"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
+                    <Label Content ="避梁距离"  />
+                    <cus:InputTextBox Margin="10,5,5,5" Width ="70" TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding BufferDist,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                    <Label Content="mm"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Grid.Column="1" Name="btnLayout" Width="100" Height="25" Click="btnPlace_Click" Margin="5">布置</Button>
+                </StackPanel>
+
             </StackPanel>
             <GroupBox IsEnabled="True" >
                 <GroupBox.Header>

@@ -23,7 +23,6 @@ using ThMEPElectrical.AFAS.ViewModel;
 using ThMEPElectrical.FireAlarmArea;
 using ThMEPElectrical.FireAlarmArea.Data;
 
-//using ThMEPLighting.Lighting.ViewModels;
 using ThMEPLighting.IlluminationLighting.Model;
 using ThMEPLighting.IlluminationLighting.Service;
 
@@ -31,8 +30,6 @@ namespace ThMEPLighting.IlluminationLighting
 {
     public class IlluminationLightingCmd : ThMEPBaseCommand, IDisposable
     {
-        //   readonly LightingViewModel _UiConfigs;
-
         private ThIlluminationCommon.LightTypeEnum _lightType = ThIlluminationCommon.LightTypeEnum.circleCeiling;
         private double _scale = 100;
         private bool _referBeam = true;
@@ -40,11 +37,11 @@ namespace ThMEPLighting.IlluminationLighting
         private double _radiusE = 6000;
         private bool _ifLayoutEmg = true;
         private bool _ifEmgAsNormal = false;
-        private double _wallThick = 100;
+        private double _wallThickness = 100;
+        private double _bufferDist = 500;
 
         public IlluminationLightingCmd()
         {
-            // _UiConfigs = uiConfigs;
             InitialCmdInfo();
             InitialSetting();
         }
@@ -57,24 +54,10 @@ namespace ThMEPLighting.IlluminationLighting
 
         private void InitialSetting()
         {
-            //if (_UiConfigs != null)
-            //{
-            //    _scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
-            //    _lightType = _UiConfigs.LightingType;
-            //    _radiusN = _UiConfigs.RadiusNormal;
-            //    _radiusE = _UiConfigs.RadiusEmg;
-            //    _referBeam = _UiConfigs.ShouldConsiderBeam;
-            //    _ifLayoutEmg = _UiConfigs.IfLayoutEmgChecked;
-            //    _ifEmgAsNormal = _UiConfigs.IfEmgUsedForNormal;
-            //    _wallThick = _UiConfigs.RoofThickness;
-            //}
-            //else
-            //{
-            //    SettingNoUI();
-            //}
             _scale = FireAlarmSetting.Instance.Scale;
             _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
-            _wallThick = FireAlarmSetting.Instance.RoofThickness;
+            _wallThickness = FireAlarmSetting.Instance.RoofThickness;
+            _bufferDist = FireAlarmSetting.Instance.BufferDist;
 
             _lightType = (ThIlluminationCommon.LightTypeEnum)FireAlarmSetting.Instance.IlluLightType;
             _radiusN = FireAlarmSetting.Instance.IlluRadiusNormal;
@@ -96,12 +79,6 @@ namespace ThMEPLighting.IlluminationLighting
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                //--------------画框，提数据，转数据
-                //var pts = ThAFASUtils.GetFrameBlk();
-                //if (pts.Count == 0)
-                //{
-                //    return;
-                //}
 
                 var transformer = ThAFASDataPass.Instance.Transformer;
                 var pts = ThAFASDataPass.Instance.SelectPts;
@@ -118,37 +95,28 @@ namespace ThMEPLighting.IlluminationLighting
                 }
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
 
-                //ThFireAlarmInsertBlk.PrepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
-
                 //--------------提取数据
-                //var geos = ThAFASUtils.GetAreaLayoutData(pts, extractBlkList, _referBeam, _wallThick, false);
-                var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThick, false);
+                var beamDataParameter = new ThBeamDataParameter();
+                beamDataParameter.ReferBeam = _referBeam;
+                beamDataParameter.WallThickness = _wallThickness;
+                beamDataParameter.BufferDist = _bufferDist;
+
+                var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter, false);
                 if (geos.Count == 0)
                 {
                     return;
                 }
 
                 //--------------数据转回原点
-                //var transformer = ThAFASUtils.TransformToOrig(pts, geos);
                 ThAFASUtils.TransformToZero(transformer, geos);
 
                 //--------------处理数据：找洞。分类数据：墙，柱，可布区域，避让。扩大避让。定义房间名称类型
                 var dataQuery = new ThAFASAreaDataQueryService(geos, avoidBlkName);
-                //洞,必须先做找到框线
-                //dataQuery.AnalysisHoles();
-                //dataQuery.ClassifyData();
                 dataQuery.AddMRoomDict();
                 dataQuery.ClassifyDataNew();//先分房间再扩大
                 var priorityExtend = ThAFASUtils.GetPriorityExtendValue(cleanBlkName, _scale);
                 dataQuery.ExtendPriority(priorityExtend);
                 var roomType = ThFaIlluminationRoomTypeService.GetIllunimationType(dataQuery.Rooms, dataQuery.RoomFrameDict);
-
-                //foreach (var frame in dataQuery.FrameList)
-                //{
-                //    DrawUtils.ShowGeometry(frame, string.Format("l0room"), 30);
-                //    DrawUtils.ShowGeometry(dataQuery.FrameHoleList[frame], string.Format("l0hole"), 140);
-                //    DrawUtils.ShowGeometry(dataQuery.FrameLayoutList[frame].Cast<Entity>().ToList(), "l0PlaceCoverage", 200);
-                //}
 
                 //--------------定义传数据
                 string LogFileName = Path.Combine(Active.DocumentDirectory, Active.DocumentName + ".log");
@@ -172,7 +140,6 @@ namespace ThMEPLighting.IlluminationLighting
 
                 //接入楼梯
                 var stairBlkResult = ThIlluminationStairService.LayoutStair(layoutParameter);
-                ////
 
                 ThAFASIlluminationEngine.ThFaIlluminationLayoutEngine(dataQuery, layoutParameter, out var lightResult, out var blindsResult);
 
@@ -203,7 +170,7 @@ namespace ThMEPLighting.IlluminationLighting
                 {
                     return;
                 }
-                _wallThick = wallThickness.Value;
+                _wallThickness = wallThickness.Value;
             }
 
             var radiusN = Active.Editor.GetInteger("\n正常照明灯具布置半径(mm)");

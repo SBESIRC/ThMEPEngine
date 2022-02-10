@@ -16,12 +16,7 @@ namespace TianHua.Lighting.UI
     {
         LightingViewModel UIConfigs = null;
         public static uiThLighting Instance = null;
-        //static uiThLighting()
-        //{
-        //    var items = UIConfigs.Items;
-        //    items.Add(new LightingViewModel.Item() { Text = "全选" });
-        //    items.Add(new LightingViewModel.Item() { Text = "AD-SIGN" });
-        //}
+     
         static uiThLighting()
         {
             Instance = new uiThLighting();

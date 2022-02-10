@@ -11,15 +11,12 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Data;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.GeojsonExtractor;
-using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Data;
-using ThMEPElectrical.AFAS.Utils;
-using ThMEPElectrical.AFAS.Interface;
+using ThMEPElectrical.AFAS.Model;
 
 namespace ThMEPElectrical.FireAlarmArea.Data
 {
@@ -27,8 +24,8 @@ namespace ThMEPElectrical.FireAlarmArea.Data
     {
         /////input
         public bool NeedDetective { get; set; } = false;
-        public bool ReferBeam { get; set; } = true;
-        public double WallThick { get; set; } = 100;
+        public ThBeamDataParameter BeamDataParameter { get; set; }
+
         public List<ThExtractorBase> InputExtractors { get; set; }
         /////output
         private List<ThGeometry> Geos { get; set; }
@@ -75,13 +72,13 @@ namespace ThMEPElectrical.FireAlarmArea.Data
             });
 
             //提取可布区域
-            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam, WallThick);
+            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, BeamDataParameter);
             extractors.Add(placeConverage);
 
             //提取探测区域
             if (NeedDetective == true)
             {
-                var detectiveConverage = BuildDetectionRegion(extractors, WallThick);
+                var detectiveConverage = BuildDetectionRegion(extractors, BeamDataParameter.WallThickness);
                 extractors.Add(detectiveConverage);
             }
 
