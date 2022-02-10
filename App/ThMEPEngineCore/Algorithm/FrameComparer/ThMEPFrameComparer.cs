@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
-using DotNetARX;
-using Linq2Acad;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -15,8 +15,10 @@ namespace ThMEPEngineCore.Algorithm
         public DBObjectCollection ErasedFrame;
         public HashSet<Polyline> AppendedFrame;// 仅在外参中包含的多段线
         public HashSet<Polyline> unChangedFrame;
-        public Dictionary<Polyline, Tuple<Polyline, double>> ChangedFrame;// 外参 -> (本土, 相似度)
-        private Point3d srtP;
+        public Dictionary<Polyline, Tuple<Polyline, double>> ChangedFrame;// 外参 -> (本图, 相似度)
+        public Point3d srtP;
+        private const float FRAME_AREA_FLOOR = 1000f;
+        private const float PL_HEAD_TAIL_LIMIT = 500f;
         private DBObjectCollection tarFrames;   // 外参框线
         private DBObjectCollection srcFrames;   // 本图框线
         private Dictionary<int, Polyline> dicMp2Polyline;
@@ -107,9 +109,12 @@ namespace ThMEPEngineCore.Algorithm
             var frames = new DBObjectCollection();
             foreach (Polyline frame in tarFrames)
             {
-                var mp = frame.ToNTSPolygon().ToDbMPolygon();
+                var simplyPl = DoProcPl(frame);
+                if (simplyPl.Area < FRAME_AREA_FLOOR)
+                    continue;
+                var mp = CreateMP(simplyPl);
                 frames.Add(mp);
-                dicMp2Polyline.Add(mp.GetHashCode(), frame);
+                dicMp2Polyline.Add(mp.GetHashCode(), simplyPl);
             }
             tarFrameIndex = new ThCADCoreNTSSpatialIndex(frames);
         }
@@ -117,17 +122,14 @@ namespace ThMEPEngineCore.Algorithm
         {
             foreach (Polyline pl in srcFrames)
             {
-                var simpPl = pl.DPSimplify(5);
-                var mp = CreateMP(simpPl);
-                var res = tarFrameIndex.SelectCrossingPolygon(mp);
+                var simplyPl = DoProcPl(pl);
+                if (simplyPl.Area < FRAME_AREA_FLOOR)
+                    continue;
+                var res = tarFrameIndex.SelectCrossingPolygon(CreateMP(simplyPl));
                 if (res.Count == 0)
-                {
                     ErasedFrame.Add(pl);// 仅在本图中
-                }
                 else if (res.Count == 1)
-                {
                     CheckSimilarity(pl, dicMp2Polyline[(res[0] as MPolygon).GetHashCode()]);
-                }
                 else
                 {
                     // 交一个面积最大的区域，区分是完全重合还是部分重合
@@ -135,22 +137,58 @@ namespace ThMEPEngineCore.Algorithm
                 }
             }
         }
+        private Polyline DoProcPl(Polyline pl)
+        {
+            var simpPl = pl.DPSimplify(5);
+            simpPl.Closed = true;
+            var vs = simpPl.Vertices();
+            if (vs.Count < 1)
+                return new Polyline();
+            var firstP = vs[0];
+            var lastP = vs[vs.Count - 1];
+            var dis = firstP.DistanceTo(lastP);
+            if (Math.Abs(dis) < 1e-3 || dis > PL_HEAD_TAIL_LIMIT)
+                return simpPl;
+            else
+            {
+                vs.RemoveAt(vs.Count - 1);
+                var pl1 = new Polyline();
+                pl1.CreatePolyline(vs);
+                vs.RemoveAt(0);
+                vs.Add(lastP);
+                var pl2 = new Polyline();
+                pl2.CreatePolyline(vs);
+                return Math.Abs(simpPl.Area - pl1.Area) < Math.Abs(simpPl.Area - pl2.Area) ? pl1 : pl2;
+            }
+        }
         private void SelectMaxCrossArea(Polyline pl, DBObjectCollection crossPolygons)
         {
-            var maxPl = new Polyline();
-            double maxArea = double.MinValue;
+            var maxCrossPl = new Polyline();
+            double maxCrossArea = double.MinValue;
+            var minBoundPl = new Polyline();
+            double minBoundArea = double.MaxValue;
             foreach (MPolygon crossPl in crossPolygons)
             {
                 var realCrossPl = dicMp2Polyline[crossPl.GetHashCode()];
                 var crossArea = CalcCrossArea(pl, realCrossPl);
-                if (crossArea > maxArea)
+                var diffArea = Math.Abs(crossArea - pl.Area);
+                if (diffArea < 1e-3 && crossPl.Area >= pl.Area)
                 {
-                    maxArea = crossArea;
-                    maxPl = realCrossPl;
+                    if (crossPl.Area < minBoundArea)
+                    {
+                        minBoundArea = crossPl.Area;
+                        minBoundPl = realCrossPl;
+                    }
+                    continue;
+                }
+                if (crossArea > maxCrossArea)
+                {
+                    maxCrossArea = crossArea;
+                    maxCrossPl = realCrossPl;
                 }
             }
-            if (maxPl.Area > 10)
-                CheckSimilarity(pl, maxPl);
+            var detectPl = maxCrossPl.Area > 0 ? maxCrossPl : minBoundPl;
+            CheckSimilarity(pl, detectPl);
         }
         private double CalcCrossArea(Polyline p1, Polyline p2)
         {
@@ -196,34 +234,6 @@ namespace ThMEPEngineCore.Algorithm
         private MPolygon CreateMP(Polyline pl)
         {
             return pl.ToNTSPolygon().ToDbMPolygon();
-        }
-        private ThCADCoreNTSSpatialIndex CreatePl2Text(out Dictionary<int, string> dic)
-        {
-            var curText = ReadCurGraphTexts();
-            var bounds = new DBObjectCollection();
-            dic = new Dictionary<int, string>();
-            foreach (var t in curText)
-            {
-                var cp = t.Bounds.GetValueOrDefault().CenterPoint();
-                var pl = new Polyline();
-                pl.CreatePolygon(cp.ToPoint2D(), 4, 10);
-                var mp = pl.ToNTSPolygon().ToDbMPolygon();
-                dic.Add(mp.GetHashCode(), t.TextString);
-                bounds.Add(mp);
-            }
-            return new ThCADCoreNTSSpatialIndex(bounds);
-        }
-        public static List<DBText> ReadCurGraphTexts()
-        {
-            using (var db = AcadDatabase.Active())
-            {
-                var texts = new List<DBText>();
-                var dbTexts = db.ModelSpace.OfType<DBText>();
-                foreach (var t in dbTexts)
-                    if (t.Layer == "AI-房间名称")
-                        texts.Add(t);
-                return texts;
-            }
         }
     }
 }
