@@ -152,14 +152,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
 
             // 把有Sides的中心线与其相邻的线合并
-            var firstExtent = MergeNeibour(first, neibourDict);
-            var secondExtent = MergeNeibour(second, neibourDict);
-            var cornerArea = firstExtent.Item1.CreateParallelogram(secondExtent.Item1);
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
 
             // 获取与first、second平行的边
             var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
-            includeEdges = FilterEdgesByTriangle(new List<Polyline> { firstExtent.Item2, secondExtent.Item2 }, includeEdges);
-
+            
             var firstEdges = FilterEdges(includeEdges, first, neibourDict);
             var secondEdges = FilterEdges(includeEdges, second, neibourDict);
 
@@ -255,14 +254,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
 
             // 把有Sides的中心线与其相邻的线合并
-            var firstExtent = MergeNeibour(first, neibourDict);
-            var secondExtent = MergeNeibour(second, neibourDict);
-            var cornerArea = firstExtent.Item1.CreateParallelogram(secondExtent.Item1);
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
             
             // 获取与first、second平行的边
             var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
-            includeEdges = FilterEdgesByTriangle(new List<Polyline> { firstExtent.Item2, secondExtent.Item2 }, includeEdges);
-
             var firstEdges = FilterEdges(includeEdges, first, neibourDict);
             var secondEdges = FilterEdges(includeEdges, second, neibourDict); 
 
@@ -314,9 +311,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
 
             // 把有Sides的中心线与其相邻的线合并
-            var firstExtent = MergeNeibour(first, neibourDict);
-            var secondExtent = MergeNeibour(second, neibourDict);
-            var cornerArea = firstExtent.Item1.CreateParallelogram(secondExtent.Item1);
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var cornerArea = firstLines.CreateParallelogram(secondLines);
 
             // 获取与first、second平行的边
             var includeEdges = GroupEdges(cornerArea, sideEdges); // 分组
@@ -390,18 +387,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             sideEdges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
 
             // 把有Sides的中心线与其相邻的线合并(后期再优化)
-            var firstEdge = MergeNeibour(first, neibourDict);
-            var branchEdge = MergeNeibour(branch, neibourDict);
-            var secondEdge = MergeNeibour(second, neibourDict);
+            var firstLines = MergeNeibour(first, neibourDict);
+            var branchLines = MergeNeibour(branch, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
 
-            var firstArea = firstEdge.Item1.CreateParallelogram(branchEdge.Item1);
+            var firstArea = firstLines.CreateParallelogram(branchLines);
             var firstIncludeEdges = GroupEdges(firstArea, sideEdges); // firstArea包含的边
-            firstIncludeEdges = FilterEdgesByTriangle(new List<Polyline> { firstEdge.Item2, branchEdge.Item2 }, firstIncludeEdges);
-
-            var secondArea = secondEdge.Item1.CreateParallelogram(branchEdge.Item1);
+            
+            var secondArea = secondLines.CreateParallelogram(branchLines);
             var secondIncludeEdges = GroupEdges(secondArea, sideEdges); // secondArea包含的边
-            secondIncludeEdges = FilterEdgesByTriangle(new List<Polyline> { secondEdge.Item2, branchEdge.Item2 }, secondIncludeEdges);
-
+           
             var firstEdges = FilterEdges(firstIncludeEdges, first, neibourDict); 
             var branchEdges = FilterEdges(firstIncludeEdges, branch, neibourDict);
 

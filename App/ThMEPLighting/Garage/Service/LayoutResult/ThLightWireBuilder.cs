@@ -125,8 +125,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var defaultLights = lightPosDict.Where(o => DefaultNumbers.Contains(o.Value.Item2)).ToDictionary();
 
             var defaultLightLines = ThBuildLightLineService.Build(defaultLights, ArrangeParameter.LampLength);
-            var otherLightLines = ThBuildLightLineService.Build(otherLights,
-                ArrangeParameter.LampLength);
+            var otherLightLines = ThBuildLightLineService.Build(otherLights,ArrangeParameter.LampLength);
             linkWires = linkWires.Union(otherLightLines); // 把非默认编号的灯线传入，作为连接线使用
             var filter = new ThLinkWireFilter(linkWires, defaultLightLines);
             filter.Filter();

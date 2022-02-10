@@ -339,6 +339,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var currentEdges = GetEdgeSamePathSegment(linkPathEdges, branchEdge.Id);
             var linkNodes = currentEdges.SelectMany(e => e.LightNodes).ToList(); 
             linkNodes = DifferentByPosition(linkNodes);
+            linkNodes = DifferentByNumber(linkNodes);
             return linkNodes;
         }
         private List<ThLightNodeLink> FindNodeLinks(List<ThLightNode> nodes,

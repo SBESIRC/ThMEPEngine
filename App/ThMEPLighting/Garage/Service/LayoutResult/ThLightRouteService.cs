@@ -158,7 +158,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 返回中点与pt相连的物体
             return objs
                     .OfType<Line>()
-                    .Where(o => IsLink(o.GetMidPt(), pt))
+                    .Where(o => IsLink(o.GetMidPt(), pt) || ThGeometryTool.IsPointInLine(o.StartPoint,o.EndPoint,pt))
                     .ToCollection();
         }
     }

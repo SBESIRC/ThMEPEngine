@@ -99,23 +99,37 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 // 找到跳接线终点连接的灯
                 var tartget = FindTarget(o.Item1); // Item1->Shortest
                 var cornerPts = FindCornerPts(o.Item2.Wires.OfType<Line>().ToList());
-                if (cornerPts.Count == 1 && IsThreewayPt(cornerPts[0], spatialIndex))
+                if (cornerPts.Count == 1)
                 {
-                    var overlaps = FindOverlapLinks(links, o.Item2); //Item2(1,2)
-                    overlaps.Remove(o.Item2);
-                    // 找到具有与tartget相同的链路
-                    overlaps = overlaps.Where(l => l.Source.IsEqual(tartget) || l.Target.IsEqual(tartget)).ToList();
-                    overlaps.ForEach(l =>
+                    var degree = GetDegree(cornerPts[0], spatialIndex);
+                    if(degree==3)
                     {
-                        var pubs = FindPublic(o.Item2.Wires, l.Wires);
-                        pubs.ForEach(p =>
+                        var overlaps = FindOverlapLinks(links, o.Item2); //Item2(1,2)
+                        overlaps.Remove(o.Item2);
+                        // 找到具有与tartget相同的链路
+                        overlaps = overlaps.Where(l => l.Source.IsEqual(tartget) || l.Target.IsEqual(tartget)).ToList();
+                        overlaps.ForEach(l =>
                         {
-                            if(!results.Contains(p))
+                            var pubs = FindPublic(o.Item2.Wires, l.Wires);
+                            pubs.ForEach(p =>
                             {
-                                results.Add(p);
+                                if (!results.Contains(p))
+                                {
+                                    results.Add(p);
+                                }
+                            });
+                        });
+                    }
+                    else if(degree == 2)
+                    {
+                        o.Item2.Wires.ForEach(w =>
+                        {
+                            if (!results.Contains(w))
+                            {
+                                results.Add(w);
                             }
                         });
-                    });
+                    }
                 }
                 else if(cornerPts.Count == 0 && o.Item1.Wires.Count==1 && o.Item2.Wires.Count==1)
                 {
@@ -129,12 +143,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return results;
         }
 
-        private bool IsThreewayPt(Point3d pt, ThCADCoreNTSSpatialIndex spatialIndex)
+        private int GetDegree(Point3d pt, ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var outline = pt.CreateSquare(ThGarageLightCommon.RepeatedPointDistance);
             var objs = spatialIndex.SelectCrossingPolygon(outline).OfType<Line>().ToCollection();
             outline.Dispose();
-            return objs.Count == 3;
+            return objs.Count;
         }
 
         private List<Point3d> FindCornerPts(List<Line> lines)

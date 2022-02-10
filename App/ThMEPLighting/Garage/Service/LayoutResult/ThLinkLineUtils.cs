@@ -1,11 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 
@@ -67,6 +67,67 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var third = first + vec1 + vec2;
             var points = new Point3dCollection() { first, second, third, four };
             return points.CreatePolyline();
+        }
+
+        public static Polyline CreateParallelogram(this List<Line> line1s,List<Line> line2s)
+        {
+            /*
+             *       |
+             *       | (line2s[1])
+             *       
+             *       | (line2s[0])
+             *       |
+             *       --------    ------- 
+             *       (line1s[0])  (line1s[1])
+             *       // line1s和line2s中是有序的，请参照图示
+             *       // line1s[0]和line2s[0]不能平行
+             */
+            if (line1s.Count==0 || line2s.Count==0)
+            {
+                return new Polyline { Closed = true };
+            }
+            if(line1s[0].IsParallelToEx(line2s[0]))
+            {
+                return new Polyline { Closed = true };
+            }
+            var linkPt = line1s[0].FindLinkPt(line2s[0]);
+            if(linkPt.HasValue)
+            {
+                var line1Direction = line1s[0].LineDirection();
+                var line2Direction = line2s[0].LineDirection();
+                var firstPoly = line1s.ToPolyline(linkPt.Value);
+                var secondPoly = line2s.ToPolyline(linkPt.Value);
+                var firstEndPt = firstPoly.EndPoint;
+                var secondEndPt = secondPoly.EndPoint;
+                var firstExtent = firstEndPt + line2Direction.MultiplyBy(100);
+                var secondExtent = secondEndPt + line1Direction.MultiplyBy(100);
+                var newLine1 = new Line(firstEndPt, firstExtent);
+                var newLine2 = new Line(secondEndPt, secondExtent);
+                var inters = newLine1.IntersectWithEx(newLine2, Intersect.ExtendBoth);
+                var pts = new Point3dCollection();
+                if (inters.Count==1)
+                {
+                    var firstPts = firstPoly.Vertices();
+                    var secondPts = secondPoly.Vertices();
+                    firstPts.OfType<Point3d>().ForEach(p=>pts.Add(p));
+                    pts.Add(inters[0]);
+                    secondPts.OfType<Point3d>().Reverse().ForEach(p => pts.Add(p));
+                    if(pts[pts.Count-1].IsEqualTo(pts[0],new Tolerance(1.0,1.0)))
+                    {
+                        pts.RemoveAt(pts.Count-1);
+                    }
+                }
+                // 释放
+                newLine1.Dispose();
+                newLine2.Dispose();
+                firstPoly.Dispose();
+                secondPoly.Dispose();
+                return pts.CreatePolyline();
+            }
+            else
+            {
+                return new Polyline { Closed = true };
+            }
         }
 
         public static List<Line> GroupSides(this Polyline partition, List<Line> sides)

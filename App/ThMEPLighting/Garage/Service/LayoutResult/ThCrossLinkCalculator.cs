@@ -176,24 +176,19 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var neibourDict = CreateNeibourDict(centers);
             var edges = GetCenterSideEdges(centers);
             edges.AddRange(GetCenterSideEdges(neibourDict.Values.ToList()));
-            var firstEdge = MergeNeibour(first, neibourDict);
-            var secondEdge = MergeNeibour(second, neibourDict);
-            var branchEdge = MergeNeibour(branch, neibourDict);
+            var firstLines = MergeNeibour(first, neibourDict);
+            var secondLines = MergeNeibour(second, neibourDict);
+            var branchLines = MergeNeibour(branch, neibourDict);
 
-            var firstArea = firstEdge.Item1.CreateParallelogram(branchEdge.Item1);
-            var secondArea = secondEdge.Item1.CreateParallelogram(branchEdge.Item1);
-
+            var firstArea = firstLines.CreateParallelogram(branchLines);
+            var secondArea = secondLines.CreateParallelogram(branchLines);
             var firstEdges = GroupEdges(firstArea, edges); // 分组
-            firstEdges = FilterEdgesByTriangle(new List<Polyline> { firstEdge.Item2, branchEdge.Item2 }, firstEdges);
-
             var secondEdges = GroupEdges(secondArea, edges);// 分组
-            secondEdges = FilterEdgesByTriangle(new List<Polyline> { secondEdge.Item2, branchEdge.Item2 }, secondEdges);
-
+            
             firstEdges = firstEdges.Where(o => o.Direction.IsParallelToEx(first.LineDirection())).ToList();
             secondEdges = secondEdges.Where(o => o.Direction.IsParallelToEx(second.LineDirection())).ToList();
 
             var linkPt = first.FindLinkPt(second, ThGarageLightCommon.RepeatedPointDistance);
-
             if (linkPt.HasValue)
             {
                 var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint, first.EndPoint);
@@ -421,15 +416,25 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return null;
         }
 
-        protected Tuple<Line,Polyline> MergeNeibour(Line current, Dictionary<Line,Line> neibourDict)
+        //protected Tuple<Line,Polyline> MergeNeibour(Line current, Dictionary<Line,Line> neibourDict)
+        //{
+        //    if (neibourDict.ContainsKey(current))
+        //    {
+        //        var res = Merge(current,neibourDict[current]);
+        //        var triangle = current.GetTwoLinkLineMergeTriangle(neibourDict[current]);
+        //        return Tuple.Create(res, triangle);
+        //    }
+        //    return Tuple.Create(current, new Polyline() { Closed=true});
+        //}
+
+        protected List<Line> MergeNeibour(Line current, Dictionary<Line, Line> neibourDict)
         {
+            var results = new List<Line>() { current};
             if (neibourDict.ContainsKey(current))
             {
-                var res = Merge(current,neibourDict[current]);
-                var triangle = current.GetTwoLinkLineMergeTriangle(neibourDict[current]);
-                return Tuple.Create(res, triangle);
+                results.Add(neibourDict[current]);
             }
-            return Tuple.Create(current, new Polyline() { Closed=true});
+            return results;
         }
 
         private Line Merge(Line first, Line second)
