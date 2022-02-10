@@ -1,16 +1,105 @@
-﻿using Autodesk.AutoCAD.Geometry;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
+    /// <summary>
+    /// 负载类型
+    /// </summary>
+    public enum ThPDSLoadType
+    {
+        /// <summary>
+        /// 电动机
+        /// </summary>
+        Motor,
+
+        /// <summary>
+        /// 风机
+        /// </summary>
+        Fan,
+
+        /// <summary>
+        /// 水泵
+        /// </summary>
+        Pump,
+
+        /// <summary>
+        /// 防火卷帘
+        /// </summary>
+        FireResistantShutter,
+
+        /// <summary>
+        /// 电动门
+        /// </summary>
+        ElectricDoor,
+
+        /// <summary>
+        /// 电动窗
+        /// </summary>
+        ElectricWindow,
+
+        /// <summary>
+        /// 电梯
+        /// </summary>
+        Elevator,
+
+        /// <summary>
+        /// 自动扶梯
+        /// </summary>
+        Escalator,
+
+        /// <summary>
+        /// 自动人行道
+        /// </summary>
+        MovingSidewalk,
+
+        /// <summary>
+        /// 机械停车设备
+        /// </summary>
+        MechanicalParkingDevice,
+
+        /// <summary>
+        /// 配电箱（住户/租户配电箱、照明/动力配电箱、隔离开关箱）
+        /// </summary>
+        DistributionPanel,
+
+        /// <summary>
+        /// 照明灯具
+        /// </summary>
+        Luminaire,
+
+        /// <summary>
+        /// 插座
+        /// </summary>
+        Socket,
+
+        /// <summary>
+        /// 等效负载
+        /// </summary>
+        LumpedLoad,
+
+        /// <summary>
+        /// 空调设备（空调机组、新风机组、冷却塔、多联机、冷冻/冷却水机组，风冷/地源热泵机组等）
+        /// </summary>
+        AirConditioningEquipment,
+
+        /// <summary>
+        /// 锅炉
+        /// </summary>
+        Boiler,
+
+        /// <summary>
+        /// 充电桩（快充、慢充）
+        /// </summary>
+        Charger,
+    }
+
     /// <summary>
     /// 负载
     /// </summary>
     public class ThPDSLoad
     {
         /// <summary>
-        /// 负载编号
+        /// 特征编号
         /// </summary>
-        public string LoadID { get; set; }
+        public ThPDSID ID { get; set; }
 
         /// <summary>
         /// 额定电压
@@ -26,26 +115,6 @@ namespace TianHua.Electrical.PDS.Model
         /// 是否是消防设备
         /// </summary>
         public string FireLoad { get; set; }
-
-        /// <summary>
-        /// 上级配电箱编号
-        /// </summary>
-        public string SourcePanelID { get; set; }
-
-        /// <summary>
-        /// 回路ID
-        /// </summary>
-        public string CircuitID { get; set; }
-
-        /// <summary>
-        /// 回路编号
-        /// </summary>
-        public string CircuitNumber { get; set; }
-
-        /// <summary>
-        /// 用户自定义描述
-        /// </summary>
-        public string Description { get; set; }
 
         /// <summary>
         /// 主用设备数量
@@ -78,23 +147,8 @@ namespace TianHua.Electrical.PDS.Model
         public double PowerFactor { get; set; }
 
         /// <summary>
-        /// 所属DWG
+        /// 位置信息
         /// </summary>
-        public string ReferenceDWG { get; set; }
-
-        /// <summary>
-        /// 楼层
-        /// </summary>
-        public int FloorNumber { get; set; }
-
-        /// <summary>
-        /// 房间
-        /// </summary>
-        public string RoomType { get; set; }
-
-        /// <summary>
-        /// 基点坐标
-        /// </summary>
-        public Point3d BasePoint { get; set; }
+        public ThPDSLocation Location { get; set; }
     }
 }

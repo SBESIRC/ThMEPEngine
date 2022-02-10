@@ -1,6 +1,4 @@
-﻿using Autodesk.AutoCAD.Geometry;
-
-namespace TianHua.Electrical.PDS.Model
+﻿namespace TianHua.Electrical.PDS.Model
 {
     /// <summary>
     /// 回路类型
@@ -44,14 +42,9 @@ namespace TianHua.Electrical.PDS.Model
     public class ThPDSCircuit
     {
         /// <summary>
-        /// 回路ID
+        /// 特征编号
         /// </summary>
-        public string UID { get; set; }
-
-        /// <summary>
-        /// 回路编号
-        /// </summary>
-        public string Number { get; set; }
+        public ThPDSID ID { get; set; }
 
         /// <summary>
         /// 回路类型
@@ -62,21 +55,6 @@ namespace TianHua.Electrical.PDS.Model
         /// 额定电压
         /// </summary>
         public double KV { get; set; }
-
-        /// <summary>
-        /// 上级配电箱编号
-        /// </summary>
-        public string SourcePanelID { get; set; }
-
-        /// <summary>
-        /// 负载编号
-        /// </summary>
-        public string LoadID { get; set; }
-
-        /// <summary>
-        /// 用户自定义描述
-        /// </summary>
-        public string Description { get; set; }
 
         /// <summary>
         /// 安装功率
@@ -99,23 +77,8 @@ namespace TianHua.Electrical.PDS.Model
         public double PowerFactor { get; set; }
 
         /// <summary>
-        /// 所属DWG
+        /// 位置信息
         /// </summary>
-        public string ReferenceDWG { get; set; }
-
-        /// <summary>
-        /// 楼层
-        /// </summary>
-        public int FloorNumber { get; set; }
-
-        /// <summary>
-        /// 房间
-        /// </summary>
-        public string RoomType { get; set; }
-
-        /// <summary>
-        /// 基点坐标
-        /// </summary>
-        public Point3d BasePoint { get; set; }
+        public ThPDSLocation Location { get; set; }
     }
 }
