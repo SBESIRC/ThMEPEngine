@@ -158,7 +158,7 @@ namespace TianHua.Electrical.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJKX", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFJKXDB", CommandFlags.Modal)]
         public void FrameComparerUI()
         {
             var room = new ThFrameExactor(CompareFrameType.ROOM);
