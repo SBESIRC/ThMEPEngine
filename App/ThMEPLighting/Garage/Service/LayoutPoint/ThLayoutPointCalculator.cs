@@ -34,10 +34,9 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         }
         public void Layout()
         {
-            var pts = Distribute(DxLines, Margin, Interval);
-            if(IsValid(pts))
+            Results = Distribute(DxLines, Margin, Interval);
+            if(IsValid(Results))
             {
-                Results = pts;
                 return;
             }
             int i = 1;

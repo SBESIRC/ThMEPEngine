@@ -35,9 +35,9 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             CreateWireForStraitLink(lightNodeLinks);
             return lightNodeLinks;
         }
-        public List<ThLightNodeLink> CreateThreeWayCornerStraitLinksJumpWire(List<ThLightEdge> edges)
+        public List<ThLightNodeLink> CreateThreeWayStraitLinksJumpWire(List<ThLightEdge> edges)
         {
-            var lightNodeLinks = GetThreeWayCornerStraitLinks(edges);
+            var lightNodeLinks = GetThreeWayStraitLinks(edges);
             CreateWireForStraitLink(lightNodeLinks);
             return lightNodeLinks;
         }
@@ -94,7 +94,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             if (CenterSideDicts.Count > 0)
             {
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkElbowCorner(); // 连接T型拐角处
+                return crossLinker.LinkElbow(); // 连接T型拐角处
             }
             else
             {
@@ -107,20 +107,20 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             if (CenterSideDicts.Count > 0)
             {
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkCrossCorner();
+                return crossLinker.LinkCross();
             }
             else
             {
                 return new List<ThLightNodeLink>();
             }
         }
-        private List<ThLightNodeLink> GetThreeWayCornerStraitLinks(List<ThLightEdge> edges)
+        private List<ThLightNodeLink> GetThreeWayStraitLinks(List<ThLightEdge> edges)
         {
             // 创建T型路口跳接线
             if (CenterSideDicts.Count > 0)
             {
                 var crossLinker = new ThLightNodeCrossLinkService(edges, CenterSideDicts);
-                return crossLinker.LinkThreeWayCorner(); // 连接T型拐角处
+                return crossLinker.LinkThreeWay(); // 连接T型拐角处
             }
             else
             {

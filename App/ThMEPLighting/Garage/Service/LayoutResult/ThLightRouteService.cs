@@ -54,26 +54,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         private void Traverse(Point3d pt,List<Curve> routes,ThLinkEntity source)
         {
-            var outline = CreatePolyline(pt, ThGarageLightCommon.RepeatedPointDistance);
-            var wires = Query(WireSpatialIndex, outline);
+            var wires = Query(WireSpatialIndex, pt);
             if(routes.Count>0)
             {
                 wires.Remove(routes.Last());
             }            
             wires = FindPortLinks(wires, pt); // 线与线的连接只能在端点
-            if (wires.Count == 0)
-            {
-                var lights = FindLights(Query(LightSpatialIndex, outline), pt);
-                lights.Remove(source.Light);
-                if (lights.Count > 0)
-                {
-                    // 表示找到连接的灯
-                    var first = lights.OfType<Curve>().First();
-                    var target = ThLinkEntity.Create(FindId(first), first, pt);
-                    Links.Add(ThLightLink.Create(source,target,routes));
-                }
-                return;
-            }
             if (routes.OfType<Curve>().Where(o=> wires.Contains(o)).Any())
             {
                 return;  // 路径产生自交
@@ -85,10 +71,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     var nextPt = pt.GetNextLinkPt(wire.StartPoint, wire.EndPoint);
                     var newRoutes = routes.Select(o => o).ToList();
                     newRoutes.Add(wire);
+                    var lights = FindLights(Query(LightSpatialIndex, nextPt), nextPt);
+                    lights.Remove(source.Light);
+                    if (lights.Count > 0)
+                    {
+                        // 表示找到连接的灯
+                        var first = lights.OfType<Curve>().First();
+                        var target = ThLinkEntity.Create(FindId(first), first, nextPt);
+                        Links.Add(ThLightLink.Create(source, target, newRoutes));
+                        continue;
+                    }
                     Traverse(nextPt, newRoutes, source);
                 }
             }
         }
+
         private DBObjectCollection FindLights(DBObjectCollection lights,Point3d pt)
         {
             var results = new DBObjectCollection();
@@ -105,12 +102,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             return LightId.ContainsKey(curve) ? LightId[curve] : Guid.NewGuid().ToString();
         }
 
-        private DBObjectCollection Query(ThCADCoreNTSSpatialIndex spatialIndex, Polyline frame)
+        private DBObjectCollection Query(ThCADCoreNTSSpatialIndex spatialIndex, Point3d pt)
         {
-            return spatialIndex
+            var results = new DBObjectCollection();
+            var frame = CreatePolyline(pt, ThGarageLightCommon.RepeatedPointDistance);
+            results = spatialIndex
                 .SelectCrossingPolygon(frame).OfType<Curve>()
                 .Where(o=>o is Line || o is Arc)
                 .ToCollection();
+            frame.Dispose();
+            return results;
         }
         private Polyline CreatePolyline(Point3d pt,double width = 2.5)
         {

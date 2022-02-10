@@ -36,6 +36,7 @@ namespace ThMEPLighting.Garage.Service
             lines.ForEach(l =>
             {
                 var linePts = Query(l, tolerance);
+                linePts = linePts.Where(p => !result.Values.SelectMany(o=>o).Contains(p)).ToList();
                 result.Add(l, linePts);
             });
             return result;

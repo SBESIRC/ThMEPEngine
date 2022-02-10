@@ -17,7 +17,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
     {
         private ThLightGraphService Graph { get; set; }
         public string DefaultStartNumber { get; set; }
-        public int NumberLoop { get; set; } = 3;
         private List<ThLightEdge> Edges => Graph.GraphEdges;
         private List<ThLinkPath> Links => Graph.Links;
         private List<Line> EdgeLines => Edges.Select(o => o.Edge).ToList();
@@ -323,11 +322,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var prevHalfEdges = FindEdges(currentEdges, twoHalfs.Item1);
             var nextHalfEdges = FindEdges(currentEdges, twoHalfs.Item2);
 
-            var prevLinkNodes = TakeLightNodes(prevHalfEdges, branchPt, NumberLoop);
-            var nextLinkNodes = TakeLightNodes(nextHalfEdges, branchPt, NumberLoop);
-            prevLinkNodes = FilterPrevLinkNodes(prevLinkNodes);
+            var prevLinkNodes = TakeLightNodes(prevHalfEdges, branchPt);
+            var nextLinkNodes = TakeLightNodes(nextHalfEdges, branchPt);
             prevLinkNodes = DifferentByNumber(prevLinkNodes);
             nextLinkNodes = DifferentByNumber(nextLinkNodes);
+            prevLinkNodes = FilterPrevLinkNodes(prevLinkNodes);
             nextLinkNodes = nextLinkNodes
                 .Where(o => !prevLinkNodes.Select(n => n.Number)
                 .Contains(o.Number))
@@ -386,7 +385,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         private List<ThLightNode> FilterPrevLinkNodes(List<ThLightNode> nodes)
         {
-            var results = new List<ThLightNode>();
             int index = -1;
             for (int i = 0; i < nodes.Count; i++)
             {
@@ -397,18 +395,23 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             }
             if(index>=0)
             {
+                var results = new List<ThLightNode>();
                 for (int i = 0; i <= index ; i++)
                 {
                     results.Add(nodes[i]);
                 }
-            }            
-            return results;
+                return results;
+            }
+            else
+            {
+                return nodes;
+            }
         }
-        private List<ThLightNode> TakeLightNodes(List<ThLightEdge> edges, Point3d startPt,int number)
+        private List<ThLightNode> TakeLightNodes(List<ThLightEdge> edges, Point3d startPt)
         {
             var results = new List<ThLightNode>();
             var nodes = SortNodes(edges, startPt);
-            for (int i = 0; i < nodes.Count && i< number; i++)
+            for (int i = 0; i < nodes.Count; i++)
             {
                 results.Add(nodes[i]);
             }

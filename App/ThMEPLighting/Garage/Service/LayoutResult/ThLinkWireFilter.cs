@@ -117,6 +117,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                         });
                     });
                 }
+                else if(cornerPts.Count == 0 && o.Item1.Wires.Count==1 && o.Item2.Wires.Count==1)
+                {
+                    // 用于处理跳线和连接线冲突
+                    if (!results.Contains(o.Item2.Wires[0]))
+                    {
+                        results.Add(o.Item2.Wires[0]);
+                    }
+                }
             });
             return results;
         }
@@ -202,11 +210,30 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 var sameIdLinks = links.Where(o => IsSourceTargetIdEqual(links[i], o)).ToList();
                 if (sameIdLinks.Count == 2)
                 {
-                    var shortest = sameIdLinks.OrderBy(o => o.Wires.Count).First(); // 保留连线数量最少的
-                    if (shortest.Wires.Count == 1)
+                    if(sameIdLinks[0].Wires.Count== sameIdLinks[1].Wires.Count)
                     {
-                        sameIdLinks.Remove(shortest);
-                        results.Add(Tuple.Create(shortest,sameIdLinks[0]));
+                        if(sameIdLinks[0].Wires.Count==1)
+                        {
+                            if(sameIdLinks[0].Wires[0] is Arc)
+                            {
+                                var shortest = sameIdLinks[0];
+                                results.Add(Tuple.Create(shortest, sameIdLinks[1]));
+                            }
+                            else if(sameIdLinks[1].Wires[0] is Arc)
+                            {
+                                var shortest = sameIdLinks[1];
+                                results.Add(Tuple.Create(shortest, sameIdLinks[0]));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var shortest = sameIdLinks.OrderBy(o => o.Wires.Count).First(); // 保留连线数量最少的
+                        if (shortest.Wires.Count == 1)
+                        {
+                            sameIdLinks.Remove(shortest);
+                            results.Add(Tuple.Create(shortest, sameIdLinks[0]));
+                        }
                     }
                 }
             }

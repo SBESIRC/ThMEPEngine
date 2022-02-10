@@ -73,15 +73,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // *** 创建
             // 将1、2线边上的灯线用灯块打断
             CreateDoubleRowLinkWire(totalEdges);
-            // 创建直段上的跳线(类似于拱形)
-            CreateDoubleRowJumpWire(totalEdges);
+
+            // 创建直段上的跳线(类似于拱形)            
+            CreateSingleRowJumpWire(Graphs);
+            // 连接分支
+            CreateSingleRowBranchCornerJumpWire(Graphs);
             // 连接弯头跨区
             CreateElbowStraitLinkJumpWire(totalEdges);
             // 连接T型跨区
-            CreateThreeWayCornerStraitLinksJumpWire(totalEdges);
-            // 创建十字路口的线
-            CreateCrossCornerStraitLinkJumpWire(totalEdges);
-
+            CreateThreeWayStraitLinksJumpWire(totalEdges);
+      
             // *** 过滤
             // 过滤跳接线
             var jumpWireRes = FilterJumpWire();
@@ -130,9 +131,13 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 连接主分支到分支的跳线
             graphs.ForEach(g =>
             {
-                var nodeLinks = FindLightNodeLinkOnMainBranch(g);
-                BuildMainBranchLink(nodeLinks);
-                nodeLinks.ForEach(l => AddToLoopWireGroup(l));
+                var defaultNumber =GetDefaultNumber(g.GraphEdges.SelectMany(o => o.LightNodes).Select(o => o.Number).ToList());
+                if(!string.IsNullOrEmpty(defaultNumber))
+                {
+                    var nodeLinks = FindLightNodeLinkOnMainBranch(g, defaultNumber);
+                    BuildMainBranchLink(nodeLinks);
+                    nodeLinks.ForEach(l => AddToLoopWireGroup(l));
+                }
             });
         }
 

@@ -104,10 +104,10 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lightNodeLinks = creator.CreateElbowStraitLinkJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
         }
-        protected void CreateThreeWayCornerStraitLinksJumpWire(List<ThLightEdge> edges)
+        protected void CreateThreeWayStraitLinksJumpWire(List<ThLightEdge> edges)
         {
             var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
-            var lightNodeLinks = creator.CreateThreeWayCornerStraitLinksJumpWire(edges);
+            var lightNodeLinks = creator.CreateThreeWayStraitLinksJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
         }
         protected void CreateCrossCornerStraitLinkJumpWire(List<ThLightEdge> edges)
@@ -152,7 +152,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         {
             var linkWires = FindWires(defaultNumber);
             var removedLightWires = BuildRemoveLightLines(edges); // 对于没有连线的灯，将成为灯线
-            linkWires = linkWires.Union(removedLightWires);
+            linkWires = linkWires.Union(removedLightWires);           
             var numbers = edges.SelectMany(o => o.LightNodes).Select(o => o.Number).Distinct().ToList();
             var lightPosDict = LightPositionDict.Where(o => numbers.Contains(o.Value.Item2)).ToDictionary();
             return FilerLinkWire(linkWires, edges, lightPosDict);
@@ -228,12 +228,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkService = new ThLightNodeSameLinkService(links);
             return linkService.FindLightNodeLinkOnSamePath();
         }
-        protected List<ThLightNodeLink> FindLightNodeLinkOnMainBranch(ThLightGraphService graph)
+        protected List<ThLightNodeLink> FindLightNodeLinkOnMainBranch(ThLightGraphService graph,string defaultNumber)
         {
             var linkService = new ThLightNodeBranchLinkService(graph)
             {
-                NumberLoop = ArrangeParameter.GetLoopNumber(graph.CalculateLightNumber()),
-                DefaultStartNumber = DefaultNumbers.Count > 0 ? DefaultNumbers.First() : "",
+                DefaultStartNumber = defaultNumber,
             };
             return linkService.LinkMainBranch();
         }
@@ -296,6 +295,17 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lightNodeNumbers = GetLightNodeNumbers(edges);
             lightNodeNumbers = lightNodeNumbers.Where(o => !DefaultNumbers.Contains(o)).ToList();
             return BuildRemoveLightLines(lightNodeNumbers);
+        }
+        protected string GetDefaultNumber(List<string> lightNodeNumbers)
+        {
+            foreach(var number in DefaultNumbers)
+            {
+                if(lightNodeNumbers.Contains(number))
+                {
+                    return number;
+                }   
+            }
+            return "";
         }
         private DBObjectCollection BuildRemoveLightLines(List<string> numbers)
         {

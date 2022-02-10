@@ -630,6 +630,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lines = EdgeQuery.QueryCollinearLines(line.StartPoint, line.EndPoint, width);
             return lines.Where(o => line.HasCommon(o)).ToList();
         }
+        protected List<ThLightEdge> GetEdges(List<Line> lines)
+        {
+            // 传入ThLightEdge的几何中心线，返回所在的边
+            return Edges.Where(o => lines.Contains(o.Edge)).ToList();
+        }
         protected List<ThLightEdge> GroupEdges(Polyline partition, List<ThLightEdge> edges)
         {
             var results = new List<ThLightEdge>();
