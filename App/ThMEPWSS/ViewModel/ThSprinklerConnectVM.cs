@@ -5,8 +5,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using DotNetARX;
 using Dreambuild.AutoCAD;
-using GalaSoft.MvvmLight.Command;
 using Linq2Acad;
+using Microsoft.Toolkit.Mvvm.Input;
 using NFox.Cad;
 
 using ThMEPWSS.Command;

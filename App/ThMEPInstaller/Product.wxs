@@ -15,7 +15,7 @@
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
-            <ComponentGroupRef Id="ProductComponentsAppMvvmLight" />
+            <ComponentGroupRef Id="ProductComponentsAppToolkitMvvm" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppCGAL" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />

@@ -60,9 +60,6 @@
     </Compile>
     <Compile Include="MEPLightingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UI\ExampleUI.xaml.cs">
-      <DependentUpon>ExampleUI.xaml</DependentUpon>
-    </Compile>
     <Compile Include="UI\uiEvaIndicatorSign.xaml.cs">
       <DependentUpon>uiEvaIndicatorSign.xaml</DependentUpon>
     </Compile>
@@ -70,7 +67,6 @@
       <DependentUpon>uiParkingLight.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\EvaSignViewModel.cs" />
-    <Compile Include="ViewModels\ExampleViewModel.cs" />
     <Compile Include="ViewModels\MultiCheckItem.cs" />
     <Compile Include="ViewModels\ParkingLightViewModel.cs" />
     <Compile Include="WiringConnecting\ThWiringConnectingUI.xaml.cs">
@@ -108,11 +104,6 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="MvvmLight">
-      <Version>5.4.1.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
   <ItemGroup>
@@ -127,10 +118,6 @@
     <Page Include="Lighting\uiThLighting.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="UI\ExampleUI.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\uiEvaIndicatorSign.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -184,6 +171,11 @@
     <Resource Include="Resource\Image\应急照明灯.png" />
     <Resource Include="Resource\Image\感应吸顶灯.png" />
     <Resource Include="Resource\Image\筒灯.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.1.2</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

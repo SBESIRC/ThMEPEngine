@@ -3,8 +3,8 @@ using ThMEPWSS.Command;
 using System.Windows.Input;
 using ThMEPWSS.Hydrant.Model;
 using ThMEPWSS.Hydrant.Service;
-using GalaSoft.MvvmLight.Command;
 using System.Collections.ObjectModel;
+using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ThMEPWSS.ViewModel
 {
