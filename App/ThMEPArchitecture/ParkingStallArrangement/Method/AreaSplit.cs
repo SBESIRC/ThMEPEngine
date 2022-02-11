@@ -431,8 +431,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var objs = new DBObjectCollection();
             bkr.Explode(objs);
 
-            objs.Cast<Entity>().Where(e => e is Polyline && (e as Polyline).Closed).ForEach(e => plines.Add(e as Polyline));
-
+            //objs.Cast<Entity>().Where(e => e is Polyline && (e as Polyline).Closed).ForEach(e => plines.Add(e as Polyline));
+            objs.Cast<Entity>().Where(e => e is Polyline).ForEach(e => plines.Add(e as Polyline));
             return plines;
         }
 
