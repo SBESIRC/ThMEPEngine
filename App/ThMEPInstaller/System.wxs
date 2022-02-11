@@ -11,9 +11,6 @@
       <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" Guid="{F18B5C4E-38F0-4DAF-8DD4-E1FA18FAF7B3}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Memory.dll" />
       </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Debug" Guid="{7DEF3167-F410-4732-B856-4B9F66D603B7}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\System.Windows.Interactivity.dll" />
-      </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -23,9 +20,6 @@
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" Guid="{9966093C-0918-4FB8-9E44-FE109CB429D7}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Memory.dll" />
       </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Debug" Guid="{00C3ED1E-2CA5-4B9F-8B8B-A7380C8AB6DA}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\System.Windows.Interactivity.dll" />
-      </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
       <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -34,9 +28,6 @@
       </Component>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" Guid="{75BB3E62-2C14-4FD1-8E24-99E0D07F5188}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Memory.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Debug" Guid="{3D465B8A-3467-4F07-BCBC-1CA618E22D45}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\System.Windows.Interactivity.dll" />
       </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
@@ -48,9 +39,6 @@
       <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" Guid="{638C6AFF-1BC7-455D-AAB9-8C712AE2493C}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Memory.dll" />
       </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Release" Guid="{E365EF74-FE4E-4975-9432-C3C775DC9BA4}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\System.Windows.Interactivity.dll" />
-      </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
       <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -59,9 +47,6 @@
       </Component>
       <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" Guid="{F9C80FB7-6821-4AC2-BB24-53DB4A9B096E}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Memory.dll" />
-      </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Release" Guid="{D411D614-E570-43C4-8CE1-0DC07E1982BD}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\System.Windows.Interactivity.dll" />
       </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -72,9 +57,6 @@
       <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" Guid="{4CAD2FF9-DC92-47D8-ABCE-4E71788EBAB8}" Win64="yes">
         <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Memory_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Memory.dll" />
       </Component>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Release" Guid="{8002246F-C0F6-44B5-8F2D-38FF2818B383}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\System.Windows.Interactivity.dll" />
-      </Component>
     </DirectoryRef>
     <?endif?>
   </Fragment>
@@ -83,23 +65,17 @@
       <?if $(var.Configuration) = Debug ?>
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Debug" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Debug" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Debug" />
       <?elseif $(var.Configuration) = Release ?>
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Memory_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Buffers_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_System_Windows_Interactivity_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Memory_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Buffers_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_System_Windows_Interactivity_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Memory_Release" />
       <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Buffers_Release" />
-      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_System_Windows_Interactivity_Release" />
       <?endif?>
     </ComponentGroup>
   </Fragment>
