@@ -320,33 +320,21 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var firstEdges = FilterEdges(includeEdges, first, neibourDict);
             var secondEdges = FilterEdges(includeEdges, second, neibourDict);
 
-            var lines = new List<Line>();
-            lines.AddRange(firstEdges.Select(o => o.Edge));
-            lines.AddRange(secondEdges.Select(o => o.Edge));
+            firstEdges.SelectMany(o => o.LightNodes).Select(o => o.Position);
 
-            // 获取交点
-            var query = new ThLineRoadQueryService(lines);
-            var elbows = query.GetCorner()
-                .Where(o => IsElbow(o[0],o[1]))
-                .Where(o=> GetCenter(o).HasValue)
-                .OrderBy(o=> GetCenter(o).Value.DistanceTo(linkPt.Value));
-            var threeways = query.GetThreeWay().Where(o => GetCenter(o).HasValue)
-                .OrderBy(o => GetCenter(o).Value.DistanceTo(linkPt.Value)); 
-            var crosses = query.GetCross().Where(o => GetCenter(o).HasValue)
-                .OrderBy(o => GetCenter(o).Value.DistanceTo(linkPt.Value));
-            if(elbows.Count()>0)
+            var firstFarwayPt = linkPt.Value.GetNextLinkPt(first.StartPoint,first.EndPoint);
+            var secondFarwayPt = linkPt.Value.GetNextLinkPt(second.StartPoint, second.EndPoint);
+            firstEdges = firstEdges.OrderBy(o => o.Edge.GetMidPt().GetProjectPtOnLine(linkPt.Value, firstFarwayPt).DistanceTo(linkPt.Value)).ToList();
+            secondEdges = secondEdges.OrderBy(o => o.Edge.GetMidPt().GetProjectPtOnLine(linkPt.Value, secondFarwayPt).DistanceTo(linkPt.Value)).ToList();
+            if(firstEdges.Count==0 || secondEdges.Count==0)
             {
-                return IsHasIsolatedEdge(GetEdges(elbows.First()));
+                return false;
             }
-            if (threeways.Count() > 0)
+            if(firstEdges.Count==1 && secondEdges.Count == 1)
             {
-                return IsHasIsolatedEdge(GetEdges(threeways.First()));
+                return firstEdges[0].EdgePattern != secondEdges[0].EdgePattern;
             }
-            if (crosses.Count() > 0)
-            {
-                return IsHasIsolatedEdge(GetEdges(crosses.First()));
-            }
-            return false;
+            return true;
         }
 
         private bool IsHasIsolatedEdge(List<ThLightEdge> edges)
