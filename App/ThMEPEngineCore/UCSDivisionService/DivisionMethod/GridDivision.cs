@@ -93,15 +93,20 @@ namespace ThMEPEngineCore.UCSDivisionService.DivisionMethod
                     var intersectPolys = exceptPolygons.Where(x => (x.Intersects(polygon) || polygon.Contains(x)) && !x.Contains(polygon)).ToList();
                     var regions = cutGridRegionService.CutRegion(polygon, gridLines[polygonKey], intersectPolys, gridTypes[polygonKey]);
                     GridModel gridModel = new GridModel();
-                    gridModel.allLines = gridLines[polygonKey];
-                    gridModel.regions = regions;
-                    gridModel.GridPolygon = polygon;
                     if (gridTypes[polygonKey] == GridType.ArcGrid)
                     {
+                        gridModel = new ArcGridModel();
+                        gridModel.allLines = gridLines[polygonKey];
+                        gridModel.regions = regions;
+                        gridModel.GridPolygon = polygon;
                         gridModel.centerPt = (gridLines[polygonKey].First(x => x is Arc) as Arc).Center;
                     }
                     else if (gridTypes[polygonKey] == GridType.LineGrid)
                     {
+                        gridModel = new LineGridModel();
+                        gridModel.allLines = gridLines[polygonKey];
+                        gridModel.regions = regions;
+                        gridModel.GridPolygon = polygon;
                         var firLine = gridLines[polygonKey].First(x => x is Line) as Line;
                         gridModel.vector = (firLine.EndPoint - firLine.StartPoint).GetNormal();
                     }

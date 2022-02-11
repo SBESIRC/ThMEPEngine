@@ -56,18 +56,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 }
             }
             //LayoutFanRectFirstStep(false);
-            //判断是否需要更改方向
-            if (_changeLayoutDir) 
-            {
-                foreach (var areaCell in _roomIntersectAreas) 
-                {
-                    foreach (var item in areaCell.FanLayoutAreaResult) 
-                    {
-                        foreach (var fan in item.FanLayoutResult)
-                            fan.FanDirection = fan.FanDirection.Negate();
-                    }
-                }
-            }
+            CheckChangeLayoutDir();
             while (true)
             {
                 bool haveChange = false;

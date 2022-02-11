@@ -25,14 +25,45 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return _roomIntersectAreas;
            
             LayoutFanRectFirstStep();
-            //排布完成后，进行检查删除逻辑
+            //排布完成后，进行检查添加和删除逻辑
+            CheckDeleteAddFan();
+            CheckChangeLayoutDir();
+            int maxCount = _roomIntersectAreas.Count * 2;
+            while (true)
+            {
+                if (maxCount < 0)
+                    break;
+                bool haveChange = false;
+                foreach (var item in _roomIntersectAreas)
+                {
+                    if (item.FanLayoutAreaResult == null || item.FanLayoutAreaResult.Count < 1)
+                        continue;
+                    haveChange = CheckAndAlignmentFan(item, true);
+                    if (haveChange)
+                        break;
+                    haveChange = CheckAndAlignmentFan(item, false);
+                    if (haveChange)
+                        break;
+                }
+                maxCount -= 1;
+                if (!haveChange)
+                    break;
+            }
+            AdjustmentFanRectSize();
+            //排布内部的小风口
+            LayoutFanVent();
+            AlignmentFanVent();
+            return _roomIntersectAreas;
+        }
+        void CheckDeleteAddFan() 
+        {
             var delFans = CheckAndRemoveLayoutFan();
             if (delFans.Count > 0)
             {
                 //有删除重新进行排布计算
                 foreach (var area in _roomIntersectAreas)
                 {
-                    continue;
+                    //continue;
                     if (!delFans.Any(c => c.CellId == area.divisionArea.Uid))
                         continue;
                     area.FanLayoutAreaResult.Clear();
@@ -48,7 +79,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     //需要添加 重新进行排布计算
                     foreach (var area in _roomIntersectAreas)
                     {
-                        continue;
+                        //continue;
                         if (!addFanCellIds.Any(c => c == area.divisionArea.Uid))
                             continue;
                         area.FanLayoutAreaResult.Clear();
@@ -57,30 +88,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     }
                 }
             }
-            while (true)
-            {
-                bool haveChange = false;
-                foreach (var item in _roomIntersectAreas)
-                {
-                    if (item.FanLayoutAreaResult == null || item.FanLayoutAreaResult.Count < 1)
-                        continue;
-                    haveChange = CheckAndAlignmentFan(item, true);
-                    if (haveChange)
-                        break;
-                    haveChange = CheckAndAlignmentFan(item, false);
-                    if (haveChange)
-                        break;
-                }
-                if (!haveChange)
-                    break;
-            }
-            AdjustmentFanRectSize();
-            //排布内部的小风口
-            LayoutFanVent();
-            AlignmentFanVent();
-            return _roomIntersectAreas;
         }
-        
         void AlignmentFanVent() 
         {
             //扇形区域根据风口，进行调整对齐，并调整风机长度
@@ -305,16 +313,21 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         void LayoutFanRectFirstStep()
         {
+            _changeLayoutDir = false;
             for (int j = _firstGroupIndex; j >= 0; j--)
             {
                 var curretnPoint = _allGroupCenterOrders[j];
                 var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(curretnPoint) < 1).First().Key;
+                int layoutCount = 0;
                 foreach (var item in _roomIntersectAreas)
                 {
                     if (item.GroupId != currentGroupId)
                         continue;
                     OneDivisionAreaCalcFanRectangle(item, _fanRectangle);
+                    layoutCount += item.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
                 }
+                if (j == _firstGroupIndex)
+                    _changeLayoutDir = layoutCount < 1;
             }
             for (int j = _firstGroupIndex + 1; j < _allGroupCenterOrders.Count; j++)
             {
@@ -327,6 +340,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     OneDivisionAreaCalcFanRectangle(item, _fanRectangle);
                 }
             }
+            
         }
         void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle)
         {

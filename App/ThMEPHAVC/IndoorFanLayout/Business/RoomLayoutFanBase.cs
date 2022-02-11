@@ -31,19 +31,19 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         protected double _minStartDistane = 500;
         protected bool _changeLayoutDir = false;
         //一个区域内有可能会有多个UCS,不进行坐标系转换到XOY平面
-        public RoomLayoutFanBase(Dictionary<string, List<string>> divisionAreaNearIds,Vector3d xAxis,Vector3d yAxis)
+        public RoomLayoutFanBase(Dictionary<string, List<string>> divisionAreaNearIds, Vector3d xAxis, Vector3d yAxis)
         {
             _divisionAreaNearIds = new Dictionary<string, List<string>>();
             _roomIntersectAreas = new List<DivisionRoomArea>();
             _allGroupCenterOrders = new List<Point3d>();
             _UCSXAxis = xAxis;
             _UCSYAxis = yAxis;
-            foreach (var item in divisionAreaNearIds) 
+            foreach (var item in divisionAreaNearIds)
             {
                 _divisionAreaNearIds.Add(item.Key, item.Value);
             }
         }
-        public void InitRoomData(Polyline roomOutPLine, List<Polyline> innerPLines, double roomLoad) 
+        public void InitRoomData(Polyline roomOutPLine, List<Polyline> innerPLines, double roomLoad)
         {
             _roomPLine = roomOutPLine;
             _roomInnerPLine = new List<Polyline>();
@@ -54,7 +54,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var area = roomOutPLine.Area - _roomInnerPLine.Sum(c => c.Area);
             _roomUnitLoad = roomLoad / area;
         }
-        protected void CalcRoomLoad(AreaLayoutGroup layoutGroup, bool isLayoutByVertical = false) 
+        protected void CalcRoomLoad(AreaLayoutGroup layoutGroup, bool isLayoutByVertical = false)
         {
             _layoutGroup = layoutGroup;
             _roomIntersectAreas.Clear();
@@ -65,7 +65,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             foreach (var item in layoutGroup.GroupDivisionAreas)
                 _roomIntersectAreas.Add(item);
             _firstGroupIndex = layoutGroup.OrderGroupIds.IndexOf(layoutGroup.GroupFirstId);
-            foreach (var item in layoutGroup.GroupCenterPoints) 
+            foreach (var item in layoutGroup.GroupCenterPoints)
             {
                 _allGroupCenterOrders.Add(item.Value);
                 _allGroupPoints.Add(item.Key, item.Value);
@@ -181,7 +181,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return calcDelFans;
         }
-        protected List<string> CheckAndAddLayoutFan() 
+        protected List<string> CheckAndAddLayoutFan()
         {
             var addFanCellIds = new List<string>();
             var areaLoad = 0.0;
@@ -196,17 +196,17 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var addFans = layoutResultCheck.RowAddFan(orderRowIds, out List<LayoutRow> ucsRowFans);
             if (addFans.Count != orderRowIds.Count)
                 return addFanCellIds;
-            for (int i = 0; i < orderRowIds.Count; i++) 
+            for (int i = 0; i < orderRowIds.Count; i++)
             {
                 var addCount = addFans[i];
                 if (addCount < 1)
                     continue;
                 var rowId = orderRowIds[i];
                 var thisRowCells = ucsRowFans.Where(c => c.RowGroupId == rowId).First().RowCells;
-                var cellDiff = thisRowCells.ToDictionary(c=>c.CellId,x=>x.CellLayoutDiffNeed);
-                while (addCount > 0) 
+                var cellDiff = thisRowCells.ToDictionary(c => c.CellId, x => x.CellLayoutDiffNeed);
+                while (addCount > 0)
                 {
-                    var cellId = cellDiff.OrderByDescending(c=>c.Value).First().Key;
+                    var cellId = cellDiff.OrderByDescending(c => c.Value).First().Key;
                     addFanCellIds.Add(cellId);
                     foreach (var areaCell in _roomIntersectAreas)
                     {
@@ -220,6 +220,20 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 }
             }
             return addFanCellIds;
+        }
+        protected void CheckChangeLayoutDir()
+        {
+            //判断是否需要更改方向
+            if (!_changeLayoutDir || _roomIntersectAreas == null)
+                return;
+            foreach (var areaCell in _roomIntersectAreas)
+            {
+                foreach (var item in areaCell.FanLayoutAreaResult)
+                {
+                    foreach (var fan in item.FanLayoutResult)
+                        fan.FanDirection = fan.FanDirection.Negate();
+                }
+            }
         }
         protected Polyline GetFanVentPolyline(Point3d centerPoint, Vector3d fanDir)
         {
@@ -241,7 +255,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             poly.AddVertexAt(3, pt2.ToPoint2D(), 0, 0, 0);
             return poly;
         }
-   
+
         protected Polyline CenterToRect(Point3d centerPoint, Vector3d lengthDir, double length, Vector3d widthDir, double width)
         {
             var pt1 = centerPoint + lengthDir.MultiplyBy(length / 2);
@@ -439,9 +453,9 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             }
             return nearAreas;
         }
-        protected void CalcLayoutArea(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d vector,bool calcFanCount =true)
+        protected void CalcLayoutArea(DivisionRoomArea divisionAreaFan, FanRectangle fanRectangle, Vector3d vector, bool calcFanCount = true)
         {
-            var fanCount = calcFanCount?(int)Math.Ceiling(divisionAreaFan.NeedLoad / fanRectangle.Load):divisionAreaFan.NeedFanCount;
+            var fanCount = calcFanCount ? (int)Math.Ceiling(divisionAreaFan.NeedLoad / fanRectangle.Load) : divisionAreaFan.NeedFanCount;
             divisionAreaFan.NeedFanCount = fanCount;
             if (fanCount < 1)
                 return;
@@ -544,8 +558,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     var tempDis = Math.Abs((centerPoint - origin).DotProduct(dir));
                     if (tempDis > moveDis * i && tempDis < (moveDis * (i + 1)))
                     {
-                        rowCenterPoints.Add(centerPoint,pline);
-                        thisRowPlines.Add(pline); 
+                        rowCenterPoints.Add(centerPoint, pline);
+                        thisRowPlines.Add(pline);
                     }
                 }
                 var points = rowCenterPoints.Select(c => c.Key).ToList();
@@ -589,7 +603,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var epAngle = arcXVector.GetAngleTo((orderPoints.Last() - center).GetNormal(), arcNormal);
             var maxAngle = epAngle - spAngle;
 
-            if (dirLength < fanRectangle.Width || maxAngle * innerRadius < fanRectangle.MinLength) 
+            if (dirLength < fanRectangle.Width || maxAngle * innerRadius < fanRectangle.MinLength)
                 return;
             //行数=主方向能排列的最大行数
             int rowCount = Math.Min(fanCount, (int)Math.Floor((dirLength + 800) / (fanRectangle.Width + 800)));
@@ -599,7 +613,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             divisionAreaFan.ColumnCount = columnCount;
             //根据列数等分区域
             var splitAreas = SpliteAreasByVertical(divisionAreaFan, columnCount);
-            for(int i = 0; i < columnCount; i++)
+            for (int i = 0; i < columnCount; i++)
             {
                 var dir = i % 2 == 0 ? divisionAreaFan.GroupDir : divisionAreaFan.GroupDir.Negate();
                 var areas = splitAreas[i];
@@ -642,14 +656,14 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var disAngle = 200 / innerRadius;//相邻区域间距角
             //角度步长
             var moveAngle = maxAngle / columnCount;
-            for(int i = 0; i < columnCount; i++)
+            for (int i = 0; i < columnCount; i++)
             {
                 var thisColumnPlines = new List<Polyline>();
                 var startVector = arcXVector.RotateBy(spAngle + moveAngle * i + (i > 0 ? disAngle : 0), arcNormal);
                 var endVector = arcXVector.RotateBy(spAngle + moveAngle * (i + 1) + (i < columnCount - 1 ? -disAngle : 0), arcNormal);
                 //一列的两条直边
-                var sLine = new Line(center + startVector.MultiplyBy(innerRadius*0.8), center + startVector.MultiplyBy(outRadius*1.2));
-                var eLine = new Line(center + endVector.MultiplyBy(innerRadius*0.8), center + endVector.MultiplyBy(outRadius)*1.2);
+                var sLine = new Line(center + startVector.MultiplyBy(innerRadius * 0.8), center + startVector.MultiplyBy(outRadius * 1.2));
+                var eLine = new Line(center + endVector.MultiplyBy(innerRadius * 0.8), center + endVector.MultiplyBy(outRadius) * 1.2);
                 var curves = new List<Curve>();
                 foreach (var pline in divisionArea.RoomLayoutAreas)
                 {
@@ -671,7 +685,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         continue;
                     var centerPoint = IndoorFanCommon.PolylinCenterPoint(pline);
                     var tempAngle = arcXVector.GetAngleTo((centerPoint - center).GetNormal(), arcNormal);
-                    if (tempAngle > spAngle + moveAngle * i && tempAngle < (spAngle + moveAngle * (i + 1))) 
+                    if (tempAngle > spAngle + moveAngle * i && tempAngle < (spAngle + moveAngle * (i + 1)))
                         thisColumnPlines.Add(pline);
                 }
                 columnPolylines.Add(thisColumnPlines);

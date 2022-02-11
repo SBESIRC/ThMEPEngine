@@ -59,7 +59,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             else
             {
                 //这里只有弧形区域
-                CalcGroupAreaColumn();
+                CalcGroupAreaColumn(fanMinLength);
                 CalcGroupPointOrderByVertical();
             }
         }
@@ -126,15 +126,6 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                             continue;
                         areaPoints.AddRange(thisOrderPoints);
                         linePoints.Add(point);
-                        //var checkDir = (point - first).GetNormal();
-                        //var angle = otherDir.GetAngleTo(checkDir);
-                        //angle %= Math.PI;
-                        //if (angle > _precisionAngle && angle < Math.PI - _precisionAngle)
-                        //    continue;
-                        //var dot = (point - first).DotProduct(this.FirstDir);
-                        //if (Math.Abs(dot) > 2000)
-                        //    continue;
-                        //linePoints.Add(point);
                     }
                 }
                 foreach (var point in linePoints)
@@ -149,8 +140,8 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 {
                     if (linePoints.Any(c => c.DistanceTo(item.divisionArea.CenterPoint) < 5))
                     {
-                        thisAreas.Add(item);
                         item.GroupId = groupId;
+                        thisAreas.Add(item);
                         foreach (var pl in item.RealIntersectAreas) 
                         {
                             var thisGroupPoints = new List<Point3d>();
@@ -174,21 +165,16 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                     continue;
                 if (canLayoutFan)
                     firstRowGroupId = groupId;
-                //if ((roomWidth / length) < 2.0) 
-                //{
-                //    firstRowGroupId = groupId;
-                //}
             }
             if (string.IsNullOrEmpty(firstRowGroupId)) 
             {
                 var firstCenter = allAreaCenterPoints.First();
                 firstRowGroupId = GroupCenterPoints.Where(c => c.Value.DistanceTo(firstCenter) < 10).FirstOrDefault().Key;
-                firstRowGroupId = GroupCenterPoints.First().Key;
             }
                
             this.GroupFirstId = firstRowGroupId;
         }
-        void CalcGroupAreaColumn()
+        void CalcGroupAreaColumn(double fanMinLength)
         {
             //获取区域按钮垂直极轴方向进行分组
             if (this.GroupDivisionAreas.Count < 1)
@@ -200,10 +186,14 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             var arc = firstArea.divisionArea.AreaCurves.OfType<Arc>().First();
             var arcXVector = arc.Ecs.CoordinateSystem3d.Xaxis;
             var arcNormal = arc.Normal;
-            var orderDic = CircleArcUtil.PointOderByArcAngle(areaCenterPoints,centerPoint,arcNormal,arcXVector); //areaCenterPoints.OrderBy(c => arcXVector.GetAngleTo((c - centerPoint).GetNormal(), arcNormal)).ToList();
-            double columnAllAreas = 0.0;
-            double columnAreaRadio = 0.0;
-            bool haveFirst = false;
+            var orderDic = CircleArcUtil.PointOderByArcAngle(areaCenterPoints,centerPoint,arcNormal,arcXVector);
+            var tempDic = new Dictionary<Point3d, double>();
+            foreach (var item in areaCenterPoints) 
+            {
+                var tempDir = item - centerPoint;
+                tempDic.Add(item, tempDir.DotProduct(FirstDir));
+            }
+            areaCenterPoints = tempDic.OrderByDescending(c => c.Value).Select(c => c.Key).ToList();
             while (areaCenterPoints.Count > 0)
             {
                 string groupId = Guid.NewGuid().ToString();
@@ -222,11 +212,6 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                         if (Math.Abs(dot) > 1000)
                             continue;
                         linePoints.Add(point);
-                        //方向一致
-                        //var pointDir = (point - first).GetNormal();
-                        //var deltaAngle = pointDir.GetAngleTo(thisDir) / Math.PI * 180;
-                        //if (Math.Abs(deltaAngle) < 1 || Math.Abs(180 - deltaAngle) < 1 || Math.Abs(-180 - deltaAngle) < 1) 
-                        //    linePoints.Add(point);
                     }
                 }
                 foreach (var point in linePoints)
@@ -235,36 +220,71 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
 
                 //检查相交面积和比值
                 var thisAreas = new List<DivisionRoomArea>();
-                double thisAllAreas = 0.0;
-                double thisInsertAreas = 0.0;
+                //double thisAllAreas = 0.0;
+                //double thisInsertAreas = 0.0;
+                //foreach (var item in this.GroupDivisionAreas)
+                //{
+                //    if (linePoints.Any(c => c.DistanceTo(item.divisionArea.CenterPoint) < 5))
+                //    {
+                //        thisAreas.Add(item);
+                //        item.GroupId = groupId;
+                //        thisAllAreas += item.divisionArea.AreaPolyline.Area;
+                //        thisInsertAreas += item.RealIntersectAreas.Sum(c => c.Area);
+                //    }
+                //}
+                
+                //if (haveFirst)
+                //    continue;
+                //var ratio = thisInsertAreas / thisAllAreas;
+                //if (ratio > 0.4)
+                //{
+                //    haveFirst = true;
+                //    columnAllAreas = thisAllAreas;
+                //    columnAreaRadio = ratio;
+                //    firstColumnId = groupId;
+                //}
+                //else if (ratio > columnAreaRadio)
+                //{
+                //    columnAllAreas = thisAllAreas;
+                //    columnAreaRadio = ratio;
+                //    firstColumnId = groupId;
+                //}
+                bool canLayoutFan = false;
+                double length = 0.0;
                 foreach (var item in this.GroupDivisionAreas)
                 {
                     if (linePoints.Any(c => c.DistanceTo(item.divisionArea.CenterPoint) < 5))
                     {
-                        thisAreas.Add(item);
                         item.GroupId = groupId;
-                        thisAllAreas += item.divisionArea.AreaPolyline.Area;
-                        thisInsertAreas += item.RealIntersectAreas.Sum(c => c.Area);
+                        thisAreas.Add(item);
+                        foreach (var pl in item.RealIntersectAreas)
+                        {
+                            var thisGroupPoints = new List<Point3d>();
+                            thisGroupPoints.AddRange(IndoorFanCommon.GetPolylinePoints(pl));
+                            thisGroupPoints = ThPointVectorUtil.PointsOrderByDirection(thisGroupPoints, otherDir, false);
+                            var thisLength = Math.Abs((thisGroupPoints.First() - thisGroupPoints.Last()).DotProduct(otherDir));
+                            if (!canLayoutFan && thisLength > 1800 + Math.Abs(IndoorFanCommon.RoomBufferOffSet * 2))
+                            {
+                                thisGroupPoints = ThPointVectorUtil.PointsOrderByDirection(thisGroupPoints, FirstDir, false);
+                                var dirLength = Math.Abs((thisGroupPoints.First() - thisGroupPoints.Last()).DotProduct(FirstDir));
+                                canLayoutFan = dirLength > fanMinLength + Math.Abs(IndoorFanCommon.RoomBufferOffSet * 2);
+                            }
+                            length += Math.Abs(thisLength);
+                        }
                     }
                 }
                 var center = GroupColumnCenterPoints(thisAreas);
                 this.GroupCenterPoints.Add(groupId, center);
-                if (haveFirst)
+
+                if (!string.IsNullOrEmpty(firstColumnId))
                     continue;
-                var ratio = thisInsertAreas / thisAllAreas;
-                if (ratio > 0.4)
-                {
-                    haveFirst = true;
-                    columnAllAreas = thisAllAreas;
-                    columnAreaRadio = ratio;
+                if (canLayoutFan)
                     firstColumnId = groupId;
-                }
-                else if (ratio > columnAreaRadio)
-                {
-                    columnAllAreas = thisAllAreas;
-                    columnAreaRadio = ratio;
-                    firstColumnId = groupId;
-                }
+            }
+            if (string.IsNullOrEmpty(firstColumnId))
+            {
+                var firstCenter = areaCenterPoints.First();
+                firstColumnId = GroupCenterPoints.Where(c => c.Value.DistanceTo(firstCenter) < 10).FirstOrDefault().Key;
             }
             this.GroupFirstId = firstColumnId;
         }

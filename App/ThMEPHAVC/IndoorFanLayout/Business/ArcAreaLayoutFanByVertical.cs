@@ -26,6 +26,10 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                 return _roomIntersectAreas;
             //初始排布风机外框
             LayoutFanRectFirstStep();
+            //检查删除和增加风机
+            CheckDeleteAddFan();
+            //检查风机的排布方向是否需要修正
+            CheckChangeLayoutDir();
             //周向对齐调整
             AdjustFanRectByRadius();
             //径向对齐调整
@@ -38,28 +42,63 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
         }
         private void LayoutFanRectFirstStep()
         {
-            bool dirChange = true;
+            _changeLayoutDir = false;
             //按照逆时针方向每列布置
             for (int j = 0; j < _allGroupCenterOrders.Count; j++)
             {
-                if (j == _firstGroupIndex) dirChange = false;
+                int layoutCount = 0;
                 var currentPoint = _allGroupCenterOrders[j];
                 var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(currentPoint) < 1).First().Key;
                 foreach (var item in _roomIntersectAreas)
                 {
                     if (item.GroupId != currentGroupId)
                         continue;
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, dirChange, true);
+                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, true);
+                    layoutCount += item.FanLayoutAreaResult.Sum(c => c.FanLayoutResult.Count);
+                }
+                if (j == _firstGroupIndex)
+                    _changeLayoutDir = layoutCount < 1;
+            }
+        }
+        void CheckDeleteAddFan()
+        {
+            var delFans = CheckAndRemoveLayoutFan();
+            if (delFans.Count > 0)
+            {
+                //有删除重新进行排布计算
+                foreach (var area in _roomIntersectAreas)
+                {
+                    //continue;
+                    if (!delFans.Any(c => c.CellId == area.divisionArea.Uid))
+                        continue;
+                    area.FanLayoutAreaResult.Clear();
+                    CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                    OneDivisionAreaCalcFanRectangle(area, _fanRectangle,true);
+                }
+            }
+            else
+            {
+                var addFanCellIds = CheckAndAddLayoutFan();
+                if (addFanCellIds.Count > 0)
+                {
+                    //需要添加 重新进行排布计算
+                    foreach (var area in _roomIntersectAreas)
+                    {
+                        //continue;
+                        if (!addFanCellIds.Any(c => c == area.divisionArea.Uid))
+                            continue;
+                        area.FanLayoutAreaResult.Clear();
+                        CalcLayoutArea(area, _fanRectangle, _groupYVector, false);
+                        OneDivisionAreaCalcFanRectangle(area, _fanRectangle, true);
+                    }
                 }
             }
         }
         private void AdjustFanRectByRadius()
         {
-            bool dirChange = true;
             //按照顺时针方向检查每列的对齐情况
             for (int j = _allGroupCenterOrders.Count - 1; j >= 0; j--)
             {
-                if (j == _firstGroupIndex) dirChange = false;
                 var currentPoint = _allGroupCenterOrders[j];
                 var currentGroupId = _allGroupPoints.Where(c => c.Value.DistanceTo(currentPoint) < 1).First().Key;
                 foreach (var item in _roomIntersectAreas)
@@ -83,7 +122,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
                             continue;
                         thisColumn.FanLayoutResult.Clear();
                     }
-                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, dirChange, false);
+                    OneDivisionAreaCalcFanRectangle(item, _fanRectangle, false);
                 }
             }
         }
@@ -163,29 +202,29 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             //    tmpList.Add(poly);
             //}
             ////查看相邻结果
-            //foreach (var roomArea in _roomIntersectAreas)
-            //{
-            //    index = (index + 1) % 8;
-            //    var division = roomArea.divisionArea;
-            //    var originPoint = division.CenterPoint;
-            //    var nearAreas = GetNearDivisionAreasByRadius(division, division.ArcCenterPoint, true);
-            //    if (nearAreas != null && nearAreas.Count >= 1)
-            //    {
-            //        foreach (var item in nearAreas)
-            //        {
-            //            var targetPoint = item.divisionArea.CenterPoint;
-            //            var targetDir = (targetPoint - originPoint).GetNormal();
-            //            Polyline poly = new Polyline();
-            //            poly.Closed = true;
-            //            poly.ColorIndex = index;
-            //            poly.AddVertexAt(0, originPoint.ToPoint2D(), 0, 0, 0);
-            //            poly.AddVertexAt(1, (targetPoint + 1000 * targetDir.RotateBy(-Math.PI / 2, Vector3d.ZAxis)).ToPoint2D(), 0, 0, 0);
-            //            poly.AddVertexAt(2, (targetPoint + 1000 * targetDir.RotateBy(Math.PI / 2, Vector3d.ZAxis)).ToPoint2D(), 0, 0, 0);
-            //            tmpList.Add(poly);
-            //        }
+            foreach (var roomArea in _roomIntersectAreas)
+            {
+                index = (index + 1) % 8;
+                var division = roomArea.divisionArea;
+                var originPoint = division.CenterPoint;
+                var nearAreas = GetNearDivisionAreasByRadius(division, division.ArcCenterPoint, true);
+                if (nearAreas != null && nearAreas.Count >= 1)
+                {
+                    foreach (var item in nearAreas)
+                    {
+                        var targetPoint = item.divisionArea.CenterPoint;
+                        var targetDir = (targetPoint - originPoint).GetNormal();
+                        Polyline poly = new Polyline();
+                        poly.Closed = true;
+                        poly.ColorIndex = index;
+                        poly.AddVertexAt(0, originPoint.ToPoint2D(), 0, 0, 0);
+                        poly.AddVertexAt(1, (targetPoint + 1000 * targetDir.RotateBy(-Math.PI / 2, Vector3d.ZAxis)).ToPoint2D(), 0, 0, 0);
+                        poly.AddVertexAt(2, (targetPoint + 1000 * targetDir.RotateBy(Math.PI / 2, Vector3d.ZAxis)).ToPoint2D(), 0, 0, 0);
+                        tmpList.Add(poly);
+                    }
 
-            //    }
-            //}
+                }
+            }
             //查看分割区域
             //foreach (var area in _roomIntersectAreas)
             //{
@@ -233,7 +272,7 @@ namespace ThMEPHVAC.IndoorFanLayout.Business
             return nearFans;
         }
         //单个分割区域的排布
-        private void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, bool dirChange, bool isAlignByRight)
+        private void OneDivisionAreaCalcFanRectangle(DivisionRoomArea divisionArea, FanRectangle fanRectangle, bool isAlignByRight)
         {
 
             var fanCount = divisionArea.NeedFanCount;
