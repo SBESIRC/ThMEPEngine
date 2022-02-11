@@ -1,7 +1,6 @@
 ﻿using System;
 using ThMEPEngineCore.Command;
 using TianHua.Structure.WPF.UI.BeamStructure.BuildBeam;
-using TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Structure.WPF.UI.Command
