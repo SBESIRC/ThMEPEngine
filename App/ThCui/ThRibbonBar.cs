@@ -631,7 +631,7 @@ namespace TianHua.AutoCAD.ThCui
 
             row.AddNewButton("双线生成",
                 "天华双线生成",
-                "THSXSC",
+                "THSXSCUI",
                 "天华双线生成",
                 "IDI_THCAD_THSXSC_SMALL",
                 "IDI_THCAD_THSXSC_LARGE",

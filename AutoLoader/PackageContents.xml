@@ -611,6 +611,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THCLSCUI" Global="THCLSCUI" />
                 <Command Local="THZLSCUI" Global="THZLSCUI" />
+                <Command Local="THSXSCUI" Global="THSXSCUI" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -621,6 +622,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THCLSCUI" Global="THCLSCUI" />
                 <Command Local="THZLSCUI" Global="THZLSCUI" />
+                <Command Local="THSXSCUI" Global="THSXSCUI" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -631,6 +633,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THCLSCUI" Global="THCLSCUI" />
                 <Command Local="THZLSCUI" Global="THZLSCUI" />
+                <Command Local="THSXSCUI" Global="THSXSCUI" />
             </Commands>
         </ComponentEntry>
     </Components>
