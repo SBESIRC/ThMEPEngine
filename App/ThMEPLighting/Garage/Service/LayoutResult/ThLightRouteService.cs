@@ -58,8 +58,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             if(routes.Count>0)
             {
                 wires.Remove(routes.Last());
-            }            
-            wires = FindPortLinks(wires, pt); // 线与线的连接只能在端点
+            }   
+            if(routes.Count==0)
+            {
+                wires = FindPortLinks(wires, pt); // 线与线的连接只能在端点
+            }
             if (routes.OfType<Curve>().Where(o=> wires.Contains(o)).Any())
             {
                 return;  // 路径产生自交
@@ -68,20 +71,32 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             {
                 foreach (Curve wire in wires)
                 {
-                    var nextPt = pt.GetNextLinkPt(wire.StartPoint, wire.EndPoint);
-                    var newRoutes = routes.Select(o => o).ToList();
-                    newRoutes.Add(wire);
-                    var lights = FindLights(Query(LightSpatialIndex, nextPt), nextPt);
-                    lights.Remove(source.Light);
-                    if (lights.Count > 0)
+                    var nextPts = new List<Point3d>();
+                    if(IsLink(pt,wire))
                     {
-                        // 表示找到连接的灯
-                        var first = lights.OfType<Curve>().First();
-                        var target = ThLinkEntity.Create(FindId(first), first, nextPt);
-                        Links.Add(ThLightLink.Create(source, target, newRoutes));
-                        continue;
+                        nextPts.Add(pt.GetNextLinkPt(wire.StartPoint, wire.EndPoint));
                     }
-                    Traverse(nextPt, newRoutes, source);
+                    else
+                    {
+                        nextPts.Add(wire.StartPoint);
+                        nextPts.Add(wire.EndPoint);
+                    }
+                    foreach(Point3d nextPt in nextPts)
+                    {
+                        var newRoutes = routes.Select(o => o).ToList();
+                        newRoutes.Add(wire);
+                        var lights = FindLights(Query(LightSpatialIndex, nextPt), nextPt);
+                        lights.Remove(source.Light);
+                        if (lights.Count > 0)
+                        {
+                            // 表示找到连接的灯
+                            var first = lights.OfType<Curve>().First();
+                            var target = ThLinkEntity.Create(FindId(first), first, nextPt);
+                            Links.Add(ThLightLink.Create(source, target, newRoutes));
+                            continue;
+                        }
+                        Traverse(nextPt, newRoutes, source);
+                    }
                 }
             }
         }

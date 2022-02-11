@@ -30,10 +30,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         /// 灯
         /// </summary>
         private DBObjectCollection Lights { get; set; }
+
+        private List<BranchLinkFilterPath> BranchFilterPaths { get; set; }
         #endregion
         #region ---------- output ----------
         public DBObjectCollection Results { get; private set; }
-        public Dictionary<Point3d, Tuple<double, string>> RemovedLight { get; private set; }
         #endregion
 
         public ThLinkWireFilter(
@@ -45,7 +46,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             Results = new DBObjectCollection();
         }
 
-        public void Filter()
+        public ThLinkWireFilter(
+            DBObjectCollection wires,
+            List<BranchLinkFilterPath> filterPaths)
+        {
+            Wires = wires;
+            BranchFilterPaths = filterPaths;
+            Results = new DBObjectCollection();
+        }
+
+        public void Filter1()
         {
             var lightRoute = new ThLightRouteService(Wires, Lights)
             {
@@ -55,17 +65,56 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var links = lightRoute.Links;
             links = DuplicateRemove(links); // 去掉路径相同的链路
             links.ForEach(l => AddToResults(l.Wires)); // 把链路的边添加到Results中
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(Results); // 供后面查询使用
+            ////var spatialIndex = new ThCADCoreNTSSpatialIndex(Results); // 供后面查询使用
              
-            // 查找具有相同起、终点的链路
-            var sameLinks = Select(links.Select(o=>o).ToList());
+            ////// 查找具有相同起、终点的链路
+            ////var sameLinks = Select(links.Select(o=>o).ToList());
 
-            // 查找要被过滤的边
-            var eraseCurves = Filter(sameLinks, links,spatialIndex);
+            ////// 查找要被过滤的边
+            ////var eraseCurves = Filter(sameLinks, links,spatialIndex);
 
-            // 从Results里移除eraseCurves中的边
-            RemoveFromResults(eraseCurves);
+            ////// 从Results里移除eraseCurves中的边
+            ////RemoveFromResults(eraseCurves);
         }
+
+        public void Filter2()
+        {
+            // 查找要过滤路径上的灯线
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(Wires);
+            var paths = BranchFilterPaths.Where(o => o.Edges.Count > 0).Select(o => o.GetPath()).ToList();
+            var collector = new DBObjectCollection();
+            paths.ForEach(p =>
+            {
+                var outline = Buffer(p, 1.0);
+                if(outline.Area>1.0)
+                {
+                    var wires = spatialIndex.SelectCrossingPolygon(outline).OfType<Line>().ToCollection();
+                    var pathLines = p.ToLines();
+                    wires = wires.OfType<Line>().Where(l => pathLines.Where(o => l.IsCollinear(o, 1.0)).Any()).ToCollection();
+                    wires = wires.OfType<Line>().Where(l => pathLines.Where(o => l.HasCommon(o, 1.0)).Any()).ToCollection();
+                    collector = collector.Union(wires);
+                }
+            });
+
+            // 返回值
+            Results = Wires.Difference(collector);
+        }
+
+        private Polyline Buffer(Polyline path,double length)
+        {
+            var objs = new DBObjectCollection() { path };
+            var results = objs.Buffer(length);
+            var polys = results.OfType<Polyline>().OrderByDescending(p => p.Area);
+            if(polys.Count()>0)
+            {
+                return polys.First();
+            }
+            else
+            {
+                return new Polyline() { Closed=true};
+            }
+        }
+
 
         private ThLinkEntity FindTarget(ThLightLink link)
         {

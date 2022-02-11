@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutResult
 {
@@ -20,10 +21,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private List<ThLightEdge> Edges => Graph.GraphEdges;
         private List<ThLinkPath> Links => Graph.Links;
         private List<Line> EdgeLines => Edges.Select(o => o.Edge).ToList();
+        public List<BranchLinkFilterPath> BranchLinkFilterPaths { get; private set; } 
         public ThLightNodeBranchLinkService(ThLightGraphService graph)
         {
             Graph = graph;
             DefaultStartNumber = "";
+            BranchLinkFilterPaths = new List<BranchLinkFilterPath>();
         }
         public List<ThLightNodeLink> LinkMainBranch()
         {
@@ -287,8 +290,70 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var branchLinkNodes = FindBranchLinkNodes(branchLinkPath.Edges, branchEdge);
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item1, branchLinkNodes, new List<ThLightNode>()));
             results.AddRange(FindNodeLinks(mainLinkNodePairs.Item2, branchLinkNodes, new List<ThLightNode>()));
+
+            // 将分支需要过滤线的路由返回
+            results.ForEach(o =>
+            {
+                var branchNewEdges = Sort(branchLinkPath.Edges, linkPt.Value);
+                var edges = FindBranchPtToLightNodeEdges(branchNewEdges, o.Second);
+                if(edges.Count>0)
+                {
+                    BranchLinkFilterPaths.Add(new BranchLinkFilterPath(o.Second.Number, linkPt.Value, o.Second.Position, edges));
+                }
+            });
             return results;
         }
+
+        private List<ThLightEdge> Sort(List<ThLightEdge> edges, Point3d linkPt)
+        {
+            if (edges.Count > 1)
+            {
+                var first = edges[0].Edge;
+                if (first.StartPoint.DistanceTo(linkPt) <= ThGarageLightCommon.RepeatedPointDistance ||
+                    first.EndPoint.DistanceTo(linkPt) <= ThGarageLightCommon.RepeatedPointDistance)
+                {
+                    return edges;
+                }
+                else
+                {
+                    var results = new List<ThLightEdge>();
+                    for (int i = edges.Count - 1; i >= 0; i--)
+                    {
+                        results.Add(edges[i]);
+                    }
+                    return results;
+                }
+            }
+            else
+            {
+                return edges;
+            }
+        }
+
+        private List<Line> FindBranchPtToLightNodeEdges(List<ThLightEdge> edges,ThLightNode node)
+        {
+            /*
+             *  ------1-------2-------3-------4-------
+             *  eg.比如3灯，返回从起始边到3灯所在的边
+             *  edges是前后首尾连接的边
+             */
+            var results = new List<Line>();
+            var res = edges.Where(o => o.LightNodes.Select(n => n.Id).Contains(node.Id));
+            if(res.Count()==1)
+            {
+                var targetEdge = res.First();
+                for(int i=0;i<edges.Count;i++)
+                {
+                    results.Add(edges[i].Edge);
+                    if (edges[i].Id== targetEdge.Id)
+                    {
+                        break;
+                    }
+                }
+            }
+            return results;
+        }
+
         private List<ThLightNodeLink> LinkMainBranch(ThLightEdge mainEdge, ThLightEdge branch1Edge, ThLightEdge branch2Edge)
         {
             /*
@@ -307,10 +372,32 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var mainLinkPath = FindLinkPath(mainEdge.Id);
             var branch1LinkPath = FindLinkPath(branch1Edge.Id);
             var branch2LinkPath = FindLinkPath(branch2Edge.Id);
+
             var mainLinkNodes = FindBranchLinkNodes(mainLinkPath.Edges, mainEdge);
+            var mainPath = mainLinkPath.Edges.Select(o => o.Edge).ToList().ToPolyline(linkPt.Value);
+            mainLinkNodes = SortNodes(mainLinkNodes, mainPath);
+            mainLinkNodes = DifferentByNumber(mainLinkNodes);
+
             var branch1LinkNodes = FindBranchLinkNodes(branch1LinkPath.Edges, branch1Edge);
+            var branch1Path = branch1LinkPath.Edges.Select(o => o.Edge).ToList().ToPolyline(linkPt.Value);
+            branch1LinkNodes = SortNodes(branch1LinkNodes, branch1Path);
+            branch1LinkNodes = DifferentByNumber(branch1LinkNodes);
+
             var branch2LinkNodes = FindBranchLinkNodes(branch2LinkPath.Edges, branch2Edge);
+            var branch2Path = branch2LinkPath.Edges.Select(o => o.Edge).ToList().ToPolyline(linkPt.Value);
+            branch2LinkNodes = SortNodes(branch2LinkNodes, branch2Path);
+            branch2LinkNodes = DifferentByNumber(branch2LinkNodes);
+
             results.AddRange(FindNodeLinks(mainLinkNodes, branch1LinkNodes, branch2LinkNodes));
+            results.ForEach(o =>
+            {
+                var mainNewEdges = Sort(mainLinkPath.Edges, linkPt.Value);
+                var edges = FindBranchPtToLightNodeEdges(mainNewEdges, o.First);
+                if (edges.Count > 0)
+                {
+                    BranchLinkFilterPaths.Add(new BranchLinkFilterPath(o.First.Number, linkPt.Value, o.First.Position, edges));
+                }
+            });
             return results;
         }
        
@@ -337,9 +424,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             List<ThLightEdge> linkPathEdges, ThLightEdge branchEdge)
         {
             var currentEdges = GetEdgeSamePathSegment(linkPathEdges, branchEdge.Id);
-            var linkNodes = currentEdges.SelectMany(e => e.LightNodes).ToList(); 
+            var linkNodes = GetLightNodes(currentEdges);
             linkNodes = DifferentByPosition(linkNodes);
-            linkNodes = DifferentByNumber(linkNodes);
             return linkNodes;
         }
         private List<ThLightNodeLink> FindNodeLinks(List<ThLightNode> nodes,
@@ -410,27 +496,26 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         }
         private List<ThLightNode> TakeLightNodes(List<ThLightEdge> edges, Point3d startPt)
         {
-            var results = new List<ThLightNode>();
-            var nodes = SortNodes(edges, startPt);
-            for (int i = 0; i < nodes.Count; i++)
+            if(edges.Count==0)
             {
-                results.Add(nodes[i]);
+                return new List<ThLightNode>();
             }
+            var nodes = GetLightNodes(edges);
+            var poly = edges.Select(o => o.Edge).ToList().ToPolyline(startPt);
+            var results = SortNodes(nodes, poly);
+            poly.Dispose();
             return results;
         }
-        private List<ThLightNode> SortNodes(List<ThLightEdge> edges,Point3d startPt)
+
+        private List<ThLightNode> GetLightNodes(List<ThLightEdge> edges)
         {
-            // 1、根据edges所在的路径（从startPt开始）
-            // 2、对边上的点进行排序
-            var results = new List<ThLightNode>();
-            if (edges.Count==0)
-            {
-                return results;
-            }
-            var poly = edges.Select(o => o.Edge).ToList().ToPolyline(startPt);
-            var nodes = edges.SelectMany(e => e.LightNodes).ToList();
-            nodes = nodes.OrderBy(n => n.Position.DistanceTo(poly)).ToList();
-            return nodes;
+            return edges.SelectMany(e => e.LightNodes).ToList();
+        }
+        private List<ThLightNode> SortNodes(List<ThLightNode> nodes,Polyline path)
+        {
+            // 1、根据Edges生成的路径path
+            // 2、对path上的点进行排序
+            return nodes.OrderBy(n => n.Position.DistanceTo(path)).ToList(); 
         }
         private List<ThLightEdge> FindEdges(List<ThLightEdge> edges,List<Line> lines)
         {
@@ -614,6 +699,57 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
         private bool IsInSameLinkPath(List<string> edgeIds)
         {
             return Links.Where(l=> GetEdgeIds(l.Edges).IsContains(edgeIds)).Any();
+        }
+    }
+    public class BranchLinkFilterPath
+    {
+        /*     
+         *               |
+         *              WL01 ->Number, 此处能获取LightNodePosition
+         *               |
+         *             
+         *               |
+         *               |
+         *  ---------BranchLinkPt----------
+         */
+        public string Number { get; private set; } //灯编号
+        public Point3d BranchLinkPt { get; private set; } //分支连接点
+        public Point3d LightNodePosition { get; private set; } //灯位置
+        public List<Line> Edges { get; private set; } // BranchLinkPt到WL01这段的边
+        public BranchLinkFilterPath()
+        {
+            Number = "";
+            Edges = new List<Line>();
+        }
+        public BranchLinkFilterPath(string number,Point3d branchLinkPt,Point3d lightNodePosition,List<Line> edges)
+        {
+            Edges = edges;
+            Number =number;
+            BranchLinkPt = branchLinkPt;
+            LightNodePosition = lightNodePosition;
+        }
+        public Polyline GetPath()
+        {
+            var result = new Polyline();
+            if(Edges.Count==0)
+            {
+                return result;
+            }
+            var path = Edges.ToPolyline(BranchLinkPt);
+            var pts = new Point3dCollection();
+            pts.Add(path.StartPoint);
+            for (int i=0;i<path.NumberOfVertices;i++)
+            {
+                var lineSeg = path.GetLineSegmentAt(i);
+                if (ThGeometryTool.IsPointOnLine(lineSeg.StartPoint,lineSeg.EndPoint, LightNodePosition))
+                {
+                    pts.Add(LightNodePosition);
+                    break;
+                }
+                pts.Add(lineSeg.EndPoint);
+            }
+            path.Dispose();
+            return pts.CreatePolyline(false);
         }
     }
 }

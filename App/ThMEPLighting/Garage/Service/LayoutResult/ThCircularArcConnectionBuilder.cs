@@ -46,15 +46,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var edges = GetEdges();
             CreateLinkWire(DefaultNumbers[0], edges); 
             CreateSingleRowJumpWire(Graphs);
-            CreateSingleRowBranchCornerJumpWire(Graphs);
-
+            var branchFilterPaths = 
+                CreateSingleRowBranchCornerJumpWire(Graphs);
             // *** 过滤多余的线
             var jumpWires = FilterJumpWire();
 
+            // 过滤默认编号上的灯线
             var linkWires = FindWires(DefaultNumbers[0]);
-            var removedLightWires = BuildRemoveLightLines(edges);
-            linkWires = linkWires.Union(removedLightWires);
-            linkWires = FilerLinkWire(linkWires, edges, LightPositionDict);
+            linkWires = FilterLinkWire2(linkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));
+            linkWires = FilerLinkWire1(linkWires, edges);
             FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
 
             // *** 用非默认编号打断默认灯线
@@ -77,7 +77,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 创建直段上的跳线(类似于拱形)            
             CreateSingleRowJumpWire(Graphs);
             // 连接分支
-            CreateSingleRowBranchCornerJumpWire(Graphs);
+            var branchFilterPaths = 
+                CreateSingleRowBranchCornerJumpWire(Graphs);
             // 连接弯头跨区
             CreateElbowStraitLinkJumpWire(totalEdges);
             // 连接T型跨区
@@ -87,10 +88,16 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 过滤跳接线
             var jumpWireRes = FilterJumpWire();
 
+            // 过滤默认编号的连接线
             var linkWires = new DBObjectCollection();
-            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.First), DefaultNumbers[0]);
+            var firstLinkWires = FindWires(DefaultNumbers[0]);
+            firstLinkWires = FilterLinkWire2(firstLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));
+            firstLinkWires = FilerLinkWire1(firstLinkWires, GetEdges(totalEdges, EdgePattern.First));
             FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
-            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
+
+            var secondLinkWires = FindWires(DefaultNumbers[1]);
+            secondLinkWires = FilterLinkWire2(secondLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[1]));
+            secondLinkWires = FilerLinkWire1(secondLinkWires, GetEdges(totalEdges, EdgePattern.Second));
             FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
             linkWires = linkWires.Union(firstLinkWires);
             linkWires = linkWires.Union(secondLinkWires);
@@ -126,21 +133,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             });
         }
 
-        private void CreateSingleRowBranchCornerJumpWire(List<ThLightGraphService> graphs)
-        {
-            // 连接主分支到分支的跳线
-            graphs.ForEach(g =>
-            {
-                var defaultNumber =GetDefaultNumber(g.GraphEdges.SelectMany(o => o.LightNodes).Select(o => o.Number).ToList());
-                if(!string.IsNullOrEmpty(defaultNumber))
-                {
-                    var nodeLinks = FindLightNodeLinkOnMainBranch(g, defaultNumber);
-                    BuildMainBranchLink(nodeLinks);
-                    nodeLinks.ForEach(l => AddToLoopWireGroup(l));
-                }
-            });
-        }
-
         private void CreateDoubleRowJumpWire(List<ThLightEdge> edges)
         {
             // 绘制同一段上的具有相同编号的跳线
@@ -169,13 +161,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 Gap = this.ArrangeParameter.CircularArcTopDistanceToDxLine,
             };
             jumpWireFactory.Build();
-        }
-
-        private void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
-        {
-            // 用于单排布置
-            var creator = new ThStraitLinkCreator(ArrangeParameter,DirectionConfig,CenterSideDicts);
-            creator.CreateWireForStraitLink(lightNodeLinks);
         }
 
         public override void Reset()

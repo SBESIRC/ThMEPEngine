@@ -117,24 +117,74 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var lightNodeLinks = creator.CreateCrossCornerStraitLinkJumpWire(edges);
             lightNodeLinks.ForEach(l=>AddToLoopWireGroup(l));
         }
-        protected DBObjectCollection FilerLinkWire(DBObjectCollection linkWires,List<ThLightEdge> edges,
-            Dictionary<Point3d,Tuple<double,string>> lightPosDict)
+        protected List<BranchLinkFilterPath> CreateSingleRowBranchCornerJumpWire(List<ThLightGraphService> graphs)
+        {
+            var results = new List<BranchLinkFilterPath>();
+            // 连接主分支到分支的跳线
+            graphs.ForEach(g =>
+            {
+                var defaultNumber = GetDefaultNumber(g.GraphEdges.SelectMany(o => o.LightNodes).Select(o => o.Number).ToList());
+                if (!string.IsNullOrEmpty(defaultNumber))
+                {
+                    var res = FindLightNodeLinkOnMainBranch(g, defaultNumber);
+                    results.AddRange(res.Item2);
+                    BuildMainBranchLink(res.Item1);
+                    res.Item1.ForEach(l => AddToLoopWireGroup(l));
+                }
+            });
+            return results;
+        }
+        protected void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
+        {
+            // 用于单排布置
+            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
+            creator.CreateWireForStraitLink(lightNodeLinks);
+        }
+
+        protected DBObjectCollection FilerLinkWire1(DBObjectCollection linkWires,List<ThLightEdge> edges)
         {
             // 过滤默认灯编号的线
+            var numbers = GetLightNodeNumbers(edges);
+            var lightPosDict = LightPositionDict.Where(o => numbers.Contains(o.Value.Item2)).ToDictionary();
+
             var otherLights = lightPosDict.Where(o => !DefaultNumbers.Contains(o.Value.Item2)).ToDictionary();
             var defaultLights = lightPosDict.Where(o => DefaultNumbers.Contains(o.Value.Item2)).ToDictionary();
 
+            var removeLights = BuildRemoveLightLines(numbers);
             var defaultLightLines = ThBuildLightLineService.Build(defaultLights, ArrangeParameter.LampLength);
             var otherLightLines = ThBuildLightLineService.Build(otherLights,ArrangeParameter.LampLength);
             linkWires = linkWires.Union(otherLightLines); // 把非默认编号的灯线传入，作为连接线使用
-            var filter = new ThLinkWireFilter(linkWires, defaultLightLines);
-            filter.Filter();
-            var results = filter.Results.Difference(otherLightLines);
+            linkWires = linkWires.Union(removeLights); // 把移除灯编号的线传入，作为连接线使用
+
+            var results = FilterLinkWire1(linkWires, defaultLightLines);
+            results = results.Difference(otherLightLines);
+            removeLights = removeLights.OfType<DBObject>().Where(o => !results.Contains(o)).ToCollection();
 
             // 释放资源
-            defaultLightLines.ThDispose();
+            removeLights.ThDispose();
             otherLightLines.ThDispose();
+            defaultLightLines.ThDispose();
             return results;
+        }
+
+        private DBObjectCollection FilterLinkWire1(DBObjectCollection wires, DBObjectCollection lights)
+        {
+            var filter = new ThLinkWireFilter(wires, lights);
+            filter.Filter1();
+            return filter.Results;
+        }
+        protected DBObjectCollection FilterLinkWire2(DBObjectCollection wires, List<BranchLinkFilterPath> filterPaths)
+        {
+            if(filterPaths.Count>0)
+            {
+                var filter = new ThLinkWireFilter(wires, filterPaths);
+                filter.Filter2();
+                return filter.Results;
+            }
+            else
+            {
+                return wires;
+            }
         }
         protected void FilterUnLinkWireLight(DBObjectCollection linkWires,string number)
         {
@@ -147,15 +197,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             filter.Results.ForEach(v => LightPositionDict.Remove(v.Key));
             filter.Results.ForEach(v => RemovedLightPositionDict.Add(v.Key, v.Value));
         }
-        protected DBObjectCollection FilterDoubleRowLinkWire(List<ThLightEdge> edges, string defaultNumber)
-        {
-            var linkWires = FindWires(defaultNumber);
-            var removedLightWires = BuildRemoveLightLines(edges); // 对于没有连线的灯，将成为灯线
-            linkWires = linkWires.Union(removedLightWires);           
-            var numbers = edges.SelectMany(o => o.LightNodes).Select(o => o.Number).Distinct().ToList();
-            var lightPosDict = LightPositionDict.Where(o => numbers.Contains(o.Value.Item2)).ToDictionary();
-            return FilerLinkWire(linkWires, edges, lightPosDict);
-        }        
+        
         protected DBObjectCollection FilterJumpWire()
         {
             var results = new DBObjectCollection();
@@ -212,6 +254,11 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 .Where(o => o.EdgePattern == edgePattern)
                .ToList();
         }
+
+        protected List<BranchLinkFilterPath> GetFilterPath(List<BranchLinkFilterPath> paths,string number)
+        {
+            return paths.Where(o => o.Number == number).ToList();
+        }
         protected List<string> GetLightNodeNumbers(List<ThLightEdge> edges)
         {
             return edges.SelectMany(o=>o.LightNodes).Select(o=>o.Number).Distinct().ToList();
@@ -227,13 +274,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkService = new ThLightNodeSameLinkService(links);
             return linkService.FindLightNodeLinkOnSamePath();
         }
-        protected List<ThLightNodeLink> FindLightNodeLinkOnMainBranch(ThLightGraphService graph,string defaultNumber)
+        protected Tuple<List<ThLightNodeLink>,List<BranchLinkFilterPath>> FindLightNodeLinkOnMainBranch(
+            ThLightGraphService graph,string defaultNumber)
         {
             var linkService = new ThLightNodeBranchLinkService(graph)
             {
                 DefaultStartNumber = defaultNumber,
             };
-            return linkService.LinkMainBranch();
+            var nodeLinks = linkService.LinkMainBranch();
+            return Tuple.Create(nodeLinks, linkService.BranchLinkFilterPaths);
         }
         protected List<ThLightNodeLink> FindLightNodeLinkOnBetweenBranch(ThLightGraphService graph)
         {

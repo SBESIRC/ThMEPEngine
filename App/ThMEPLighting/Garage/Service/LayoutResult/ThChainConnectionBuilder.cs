@@ -46,15 +46,15 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var edges = GetEdges();
             CreateLinkWire(DefaultNumbers[0],edges);
             CreateSingleRowJumpWire(Graphs);
-            CreateSingleRowBranchCornerJumpWire(Graphs);
-
+            var branchFilterPaths = 
+                CreateSingleRowBranchCornerJumpWire(Graphs);
             // *** 过滤多余的线
             var jumpWires = FilterJumpWire(); // 过滤跳线
 
+            // 过滤默认编号上的灯线
             var linkWires = FindWires(DefaultNumbers[0]);
-            var removedLightWires = BuildRemoveLightLines(edges);
-            linkWires = linkWires.Union(removedLightWires);
-            linkWires = FilerLinkWire(linkWires, edges,LightPositionDict);
+            linkWires = FilterLinkWire2(linkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));// 过滤分支上的线
+            linkWires = FilerLinkWire1(linkWires, edges);
             FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
             
             // *** 用非默认编号打断默认灯线
@@ -77,7 +77,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             // 创建直段上的跳线(类似于拱形)            
             CreateSingleRowJumpWire(Graphs);
             // 连接分支
-            CreateSingleRowBranchCornerJumpWire(Graphs);
+            var branchFilterPaths = 
+                CreateSingleRowBranchCornerJumpWire(Graphs);
             // 连接弯头跨区
             CreateElbowStraitLinkJumpWire(totalEdges);
             // 连接T型跨区
@@ -89,9 +90,14 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
 
             // 过滤默认编号的连接线
             var linkWires = new DBObjectCollection();
-            var firstLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges,EdgePattern.First),DefaultNumbers[0]);
+            var firstLinkWires = FindWires(DefaultNumbers[0]);
+            firstLinkWires = FilterLinkWire2(firstLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));
+            firstLinkWires = FilerLinkWire1(firstLinkWires, GetEdges(totalEdges, EdgePattern.First));
             FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
-            var secondLinkWires = FilterDoubleRowLinkWire(GetEdges(totalEdges, EdgePattern.Second), DefaultNumbers[1]);
+
+            var secondLinkWires = FindWires(DefaultNumbers[1]);
+            secondLinkWires = FilterLinkWire2(secondLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[1]));
+            secondLinkWires = FilerLinkWire1(secondLinkWires, GetEdges(totalEdges, EdgePattern.Second));
             FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
             linkWires = linkWires.Union(firstLinkWires);
             linkWires = linkWires.Union(secondLinkWires);
@@ -118,19 +124,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 sameLinks.ForEach(l => AddToLoopWireGroup(l));
                 branchBetweenLinks.ForEach(l => AddToLoopWireGroup(l));
             });
-        }
-
-        private void CreateSingleRowBranchCornerJumpWire(
-            List<ThLightGraphService> graphs)
-        {
-            // 连接主分支到分支的跳线
-            foreach(var g in graphs)
-            {
-                string defaultNumber = GetDefaultNumber(g.GraphEdges.SelectMany(o=>o.LightNodes).Select(o=>o.Number).ToList());
-                var res = FindLightNodeLinkOnMainBranch(g, defaultNumber);
-                BuildMainBranchLink(res);
-                res.ForEach(l => AddToLoopWireGroup(l));
-            }
         }
 
         private void CreateDoubleRowJumpWire(List<ThLightEdge> edges)
@@ -161,13 +154,6 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                 OffsetDis2 = this.ArrangeParameter.JumpWireOffsetDistance + this.ArrangeParameter.LightNumberTextGap / 2.0,
             };
             jumpWireFactory.Build();
-        }
-
-        private void BuildMainBranchLink(List<ThLightNodeLink> lightNodeLinks)
-        {
-            // 用于单排布置
-            var creator = new ThStraitLinkCreator(ArrangeParameter, DirectionConfig, CenterSideDicts);
-            creator.CreateWireForStraitLink(lightNodeLinks);
         }
 
         public override void Reset()
