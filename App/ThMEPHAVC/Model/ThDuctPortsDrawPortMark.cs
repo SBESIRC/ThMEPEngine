@@ -45,7 +45,7 @@ namespace ThMEPHVAC.Model
                                                             { "风量", strVolume},
                                                             { "安装属性", "风口底边距地*.**m"} };
                 var obj = acadDb.ModelSpace.ObjectId.InsertBlockReference(
-                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, 1), textAngle, attr);
+                    portMarkLayer, portMarkName, p, new Scale3d(scaleH, scaleH, scaleH), textAngle, attr);
                 ThMEPHVACService.SetAttr(obj, attr, textAngle);
             }
         }
