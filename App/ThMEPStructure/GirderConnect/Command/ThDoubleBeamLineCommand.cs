@@ -41,22 +41,30 @@ namespace ThMEPStructure.GirderConnect.Command
             using (AcadDatabase acad = AcadDatabase.Active())
             {
                 // 选择范围
-                var pts = GetRangePoints();
+                var pts = new Point3dCollection();
+                if (BuildBeamLayoutConfig.RegionSelection==1)
+                {
+                    pts = GetRangePoints();
+                }
+                else
+                {
+                    using (var pc = new PointCollector(PointCollector.Shape.Polygon, new List<string>()))
+                    {
+                        try
+                        {
+                            pc.Collect();
+                        }
+                        catch
+                        {
+                            return;
+                        }
+                        pts = pc.CollectedPoints.Cast<Point3d>().ToCollection();
+                    }
+                }
                 if (pts.Count == 0)
                 {
                     return;
                 }
-                var options = new PromptKeywordOptions("\n请选择处理方式:");
-                options.Keywords.Add("地下室中板", "Z", "地下室中板(Z)");
-                options.Keywords.Add("地下室顶板", "D", "地下室顶板(D)");
-                options.Keywords.Default = "地下室中板";
-                var result = Active.Editor.GetKeywords(options);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var UserChoice = result.StringResult;
-
                 //接入数据
                 var dataFactory = new ThBeamConnectorDataFactory();
                 dataFactory.Create(acad.Database, pts);
@@ -79,19 +87,21 @@ namespace ThMEPStructure.GirderConnect.Command
                 originTransformer.Transform(polyline);
 
                 //获取主梁线
-                var beamLine = getPrimitivesService.GetBeamLine(polyline,out ObjectIdCollection objIDs);
+                var beamLine = getPrimitivesService.GetBeamLine(polyline, out ObjectIdCollection objIDs);
 
                 //导入主梁文字图层
                 ImportService.ImportMainBeamInfo();
+                //导入归一图层
+                ImportService.ImportUniteBeamInfo();
                 //导入文字样式
                 ImportService.ImportTextStyle();
 
                 bool CreatGroup = true;//是否分组
-                if (UserChoice == "地下室顶板")
+                if ((BuildBeamLayoutConfig.EstimateSelection == 1 && BuildBeamLayoutConfig.FormulaEstimateSelection == 1) || BuildBeamLayoutConfig.EstimateSelection == 2 && BuildBeamLayoutConfig.TableEstimateSelection == 1)
                 {
                     //主梁
                     ThBuildBeam buildMainBeam = new ThBuildBeam(beamLine, new List<Line>(), new List<Line>(), intersectCollection);
-                    var mainBeams = buildMainBeam.build(UserChoice);
+                    var mainBeams = buildMainBeam.build(1);
                     if (beamLine.Count == mainBeams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();
@@ -115,7 +125,7 @@ namespace ThMEPStructure.GirderConnect.Command
                     }
 
                 }
-                else if (UserChoice == "地下室中板")
+                else
                 {
                     //导入次梁文字图层
                     ImportService.ImportSecondaryBeamInfo();
@@ -127,7 +137,7 @@ namespace ThMEPStructure.GirderConnect.Command
                     var beamLineForOwner = beamLine.Except(beamLineForSecondaryBeam).ToList();
 
                     ThBuildBeam buildMainBeam = new ThBuildBeam(beamLineForOwner, beamLineForSecondaryBeam, secondaryBeamLine, intersectCollection);
-                    var beams = buildMainBeam.build(UserChoice);
+                    var beams = buildMainBeam.build(2);
                     if (beamLine.Count + secondaryBeamLine.Count == beams.Count)
                     {
                         List<ObjectIdList> Groups = new List<ObjectIdList>();

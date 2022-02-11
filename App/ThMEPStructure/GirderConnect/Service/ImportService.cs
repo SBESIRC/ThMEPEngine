@@ -23,7 +23,6 @@ namespace ThMEPStructure.GirderConnect.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(BeamConfig.MainBeamLayerName);
-                acadDatabase.Database.ImportLayer(BeamConfig.MainBeamTextLayerName);
             }
         }
 
@@ -33,8 +32,17 @@ namespace ThMEPStructure.GirderConnect.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.ImportLayer(BeamConfig.SecondaryBeamLayerName);
-                acadDatabase.Database.ImportLayer(BeamConfig.SecondaryBeamTextLayerName);
                 acadDatabase.Database.ImportLayer(BeamConfig.ErrorLayerName);
+            }
+        }
+
+        public static void ImportUniteBeamInfo()
+        {
+            using (var doclock = AcApp.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.ImportLayer(BeamConfig.UniteBeamLayerName);
+                acadDatabase.Database.ImportLayer(BeamConfig.UniteBeamTextLayerName);
             }
         }
 

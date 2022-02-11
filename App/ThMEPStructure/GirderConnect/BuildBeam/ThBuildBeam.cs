@@ -26,7 +26,12 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             SecondaryBeams = secondaryBeams.Select(o => o.ExtendLine(10)).ToList();
             Outlines = outlines;
         }
-        public Dictionary<Tuple<Line, Line>, DBText> build(string Switch)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Switch">1.地下室顶板 2.地下室中板</param>
+        /// <returns></returns>
+        public Dictionary<Tuple<Line, Line>, DBText> build(int Switch)
         {
             Dictionary<Tuple<Line, Line>, DBText> results = new Dictionary<Tuple<Line, Line>, DBText>();
             //構建单梁线和高度的字典
@@ -34,8 +39,9 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             var code = new DBText();
             MainBeams.ForEach(o =>
             {
-                int B = CalculateMainBeams(o, Switch).Item1;
-                int H = CalculateMainBeams(o, Switch).Item2;
+                var MainBeamsInfo = CalculateMainBeams(o, Switch);
+                int B = MainBeamsInfo.Item1;
+                int H = MainBeamsInfo.Item2;
                 code = AddText(o, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
@@ -52,36 +58,33 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             SecondaryMainBeams.ForEach(o =>
             {
-                int B = CalculateSecondaryMainBeams(o, Switch).Item1;
-                int H = CalculateSecondaryMainBeams(o, Switch).Item2;
+                var SecondaryMainBeamsInfo = CalculateSecondaryMainBeams(o);
+                int B = SecondaryMainBeamsInfo.Item1;
+                int H = SecondaryMainBeamsInfo.Item2;
                 var query = spatialIndex.SelectFence(o);
                 query.Cast<Entity>().ToList().ForEach(i =>
                 {
-                    if (SecondaryBeamsData[i as Line].Item2 + 50 > H)
+                    if (SecondaryBeamsData[i as Line].Item2 + BuildBeamLayoutConfig.BeamCheck > H)
                     {
                         H = SecondaryBeamsData[i as Line].Item2 + 50;
                     }
                 });
                 if (B < H / 4)
                 {
-                    B = H / 4;
-                    if (B % 50 != 0)
-                    {
-                        B = Convert.ToInt32(B / 50) * 50 + 50;
-                    }
+                    B = (int)Math.Floor(1.0 * H / 4 / 50) * 50;
                 }
                 code = AddText(o, B, H);
                 var outline = BuildLinearBeam(o, B);
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = BeamConfig.MainBeamLayerName;
-                    beam.Item2.Layer = BeamConfig.MainBeamLayerName;
+                    beam.Item1.Layer = BeamConfig.UniteBeamLayerName;
+                    beam.Item2.Layer = BeamConfig.UniteBeamLayerName;
                     beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
                     beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
                     beam.Item1.Linetype = "ByLayer";
                     beam.Item2.Linetype = "ByLayer";
-                    code.Layer = BeamConfig.MainBeamTextLayerName;
+                    code.Layer = BeamConfig.UniteBeamTextLayerName;
                     code.ColorIndex = (int)ColorIndex.BYLAYER;
                     results.Add(beam, code);
                     LineDic.Add(beam.Item1, H);
@@ -92,13 +95,13 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
 
             results.ForEach(o =>
             {
-                o.Key.Item1.Layer = BeamConfig.MainBeamLayerName;
-                o.Key.Item2.Layer = BeamConfig.MainBeamLayerName;
+                o.Key.Item1.Layer = BeamConfig.UniteBeamLayerName;
+                o.Key.Item2.Layer = BeamConfig.UniteBeamLayerName;
                 o.Key.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
                 o.Key.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
                 o.Key.Item1.Linetype = "ByLayer";
                 o.Key.Item2.Linetype = "ByLayer";
-                o.Value.Layer = BeamConfig.MainBeamTextLayerName;
+                o.Value.Layer = BeamConfig.UniteBeamTextLayerName;
                 o.Value.ColorIndex = (int)ColorIndex.BYLAYER;
                 Outlines.Add(o.Key.Item1);
                 Outlines.Add(o.Key.Item2);
@@ -110,13 +113,13 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
                 var beam = Difference(outline, Outlines);
                 if (!beam.Item1.IsNull())
                 {
-                    beam.Item1.Layer = BeamConfig.SecondaryBeamLayerName;
-                    beam.Item2.Layer = BeamConfig.SecondaryBeamLayerName;
+                    beam.Item1.Layer = BeamConfig.UniteBeamLayerName;
+                    beam.Item2.Layer = BeamConfig.UniteBeamLayerName;
                     beam.Item1.ColorIndex = (int)ColorIndex.BYLAYER;
                     beam.Item2.ColorIndex = (int)ColorIndex.BYLAYER;
                     beam.Item1.Linetype = "ByLayer";
                     beam.Item2.Linetype = "ByLayer";
-                    code.Layer = BeamConfig.SecondaryBeamTextLayerName;
+                    code.Layer = BeamConfig.UniteBeamTextLayerName;
                     code.ColorIndex = (int)ColorIndex.BYLAYER;
                     results.Add(beam, code);
                 }
@@ -238,63 +241,190 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             return result;
         }
         //计算无次梁搁置主梁BH
-        private Tuple<int, int> CalculateMainBeams(Line SingleBeam, string Switch)
+        private Tuple<int, int> CalculateMainBeams(Line SingleBeam, int Switch)
         {
             double L = SingleBeam.Length;
-            if (Switch is "地下室顶板")
+            int H = 0, B = 0;
+            if (Switch == 1)
             {
-                int H = Math.Max(500, Convert.ToInt32(L / 500) * 50);
-                int B = Math.Max(200, Convert.ToInt32(H / 100) * 50);
-                return (B, H).ToTuple();
-            }
-            else if (Switch is "地下室中板")
-            {
-                int H = Math.Max(300, Convert.ToInt32(L / 750) * 50);
-                int B = H / 3;
-                if (B % 50 == 0)
+                //经验公式估算
+                if (BuildBeamLayoutConfig.EstimateSelection == 1)
                 {
-                    B = Math.Max(200, B);
+                    H = Math.Max(BuildBeamLayoutConfig.FormulaTop.Hmin, (int)Math.Floor(L / BuildBeamLayoutConfig.FormulaTop.LDividesH / 50) * 50);
+                    B = Math.Max(BuildBeamLayoutConfig.FormulaTop.Bmin, (int)Math.Floor(1.0 * H / BuildBeamLayoutConfig.FormulaTop.HDividesB / 50) * 50);
+                }
+                //经验表格估算
+                else
+                {
+                    if(L <= 4000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop1.H;
+                        B = BuildBeamLayoutConfig.TableTop1.B;
+                    }
+                    else if(L <= 6000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop2.H;
+                        B = BuildBeamLayoutConfig.TableTop2.B;
+                    }
+                    else if(L <= 7000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop3.H;
+                        B = BuildBeamLayoutConfig.TableTop3.B;
+                    }
+                    else if (L <= 8000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop4.H;
+                        B = BuildBeamLayoutConfig.TableTop4.B;
+                    }
+                    else if (L <= 9000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop5.H;
+                        B = BuildBeamLayoutConfig.TableTop5.B;
+                    }
+                    else if (L <= 10000)
+                    {
+                        H = BuildBeamLayoutConfig.TableTop6.H;
+                        B = BuildBeamLayoutConfig.TableTop6.B;
+                    }
+                    else
+                    {
+                        H = BuildBeamLayoutConfig.TableTop7.H;
+                        B = BuildBeamLayoutConfig.TableTop7.B;
+                    }
+                }
+            }
+            else if (Switch == 2)
+            {
+                if (BuildBeamLayoutConfig.EstimateSelection == 1)
+                {
+                    H = Math.Max(BuildBeamLayoutConfig.FormulaMiddleB.Hmin, (int)Math.Floor(L / BuildBeamLayoutConfig.FormulaMiddleB.LDividesH / 50) * 50);
+                    B = Math.Max(BuildBeamLayoutConfig.FormulaMiddleB.Bmin, (int)Math.Floor(1.0 * H / BuildBeamLayoutConfig.FormulaMiddleB.HDividesB / 50) * 50);
                 }
                 else
                 {
-                    B = Math.Max(200, Convert.ToInt32(B / 50) * 50 + 50);
+                    if (L <= 6000)
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB1.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB1.B;
+                    }
+                    else if (L <= 7000)
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB2.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB2.B;
+                    }
+                    else if (L <= 8000)
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB3.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB3.B;
+                    }
+                    else if (L <= 9000)
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB4.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB4.B;
+                    }
+                    else if (L <= 10000)
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB5.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB5.B;
+                    }
+                    else
+                    {
+                        H = BuildBeamLayoutConfig.TableMiddleB6.H;
+                        B = BuildBeamLayoutConfig.TableMiddleB6.B;
+                    }
                 }
-                return (B, H).ToTuple();
             }
-            return null;
+            return (B, H).ToTuple();
         }
         //计算有次梁搁置主梁
-        private Tuple<int, int> CalculateSecondaryMainBeams(Line SingleBeam, string Switch)
+        private Tuple<int, int> CalculateSecondaryMainBeams(Line SingleBeam)
         {
             double L = SingleBeam.Length;
-            if (Switch is "地下室顶板")
+            int H = 0, B = 0;
+            //经验公式估算
+            if (BuildBeamLayoutConfig.EstimateSelection == 1)
             {
-                int H = Math.Max(500, Convert.ToInt32(L / 500) * 50);
-                int B = Math.Max(200, Convert.ToInt32(H / 100) * 50);
-                return (B, H).ToTuple();
+                H = Math.Max(BuildBeamLayoutConfig.FormulaMiddleA.Hmin, (int)Math.Floor(L / BuildBeamLayoutConfig.FormulaMiddleA.LDividesH / 50) * 50);
+                B = Math.Max(BuildBeamLayoutConfig.FormulaMiddleA.Bmin, (int)Math.Floor(1.0 * H / BuildBeamLayoutConfig.FormulaMiddleA.HDividesB / 50) * 50);
             }
-            else if (Switch is "地下室中板")
+            //经验表格估算
+            else
             {
-                int H = Math.Max(300, Convert.ToInt32(L / 500) * 50);
-                int B = Math.Max(200, Convert.ToInt32(H / 100) * 50);
-                return (B, H).ToTuple();
+                if (L <= 6000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA1.H;
+                    B = BuildBeamLayoutConfig.TableMiddleA1.B;
+                }
+                else if (L <= 7000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA2.H;
+                    B = BuildBeamLayoutConfig.TableMiddleA2.B;
+                }
+                else if (L <= 8000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA3.H;
+                    B = BuildBeamLayoutConfig.TableMiddleA3.B;
+                }
+                else if (L <= 9000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA4.H;
+                    B = BuildBeamLayoutConfig.TableMiddleA4.B;
+                }
+                else if (L <= 10000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA5.H;
+                    B = BuildBeamLayoutConfig.TableMiddleA5.B;
+                }
+                else
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleA6.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB6.B;
+                }
             }
-
-            return null;
+            return (B, H).ToTuple();
         }
         //计算次梁BH
         private Tuple<int, int> CalculateSecondaryBeams(Line SingleBeam)
         {
             double L = SingleBeam.Length;
-            int H = Math.Max(300, Convert.ToInt32(L / 750) * 50);
-            int B = H / 3;
-            if (B % 50 == 0)
+            int H = 0, B = 0;
+            if (BuildBeamLayoutConfig.EstimateSelection == 1)
             {
-                B = Math.Max(200, B);
+                H = Math.Max(BuildBeamLayoutConfig.FormulaMiddleSecondary.Hmin, (int)Math.Floor(L / BuildBeamLayoutConfig.FormulaMiddleSecondary.LDividesH / 50) * 50);
+                B = Math.Max(BuildBeamLayoutConfig.FormulaMiddleSecondary.Bmin, (int)Math.Floor(1.0 * H / BuildBeamLayoutConfig.FormulaMiddleSecondary.HDividesB / 50) * 50);
             }
             else
             {
-                B = Math.Max(200, Convert.ToInt32(B / 50) * 50 + 50);
+                if (L <= 6000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB1.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB1.B;
+                }
+                else if (L <= 7000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB2.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB2.B;
+                }
+                else if (L <= 8000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB3.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB3.B;
+                }
+                else if (L <= 9000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB4.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB4.B;
+                }
+                else if (L <= 10000)
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB5.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB5.B;
+                }
+                else
+                {
+                    H = BuildBeamLayoutConfig.TableMiddleB6.H;
+                    B = BuildBeamLayoutConfig.TableMiddleB6.B;
+                }
             }
             return (B, H).ToTuple();
         }
@@ -303,8 +433,9 @@ namespace ThMEPStructure.GirderConnect.BuildBeam
             var results = new Dictionary<Line, Tuple<int, int>>();
             SecondaryBeams.ForEach(o =>
             {
-                int B = CalculateSecondaryBeams(o).Item1;
-                int H = CalculateSecondaryBeams(o).Item2;
+                var SecondaryBeamsInfo = CalculateSecondaryBeams(o);
+                int B = SecondaryBeamsInfo.Item1;
+                int H = SecondaryBeamsInfo.Item2;
                 results.Add(o, (B, H).ToTuple());
             });
 
