@@ -40,6 +40,7 @@
     <Compile Include="Command\IndoorFanLayoutCmd.cs" />
     <Compile Include="Command\IndoorFanPlace.cs" />
     <Compile Include="Command\ThHvacIndoorFanExportCmd.cs" />
+    <Compile Include="Common\PretreatmentPolyline.cs" />
     <Compile Include="Common\ThRoomLoadTable.cs" />
     <Compile Include="FanConnect\Command\ThFanPipeConnectExtractCmd.cs" />
     <Compile Include="FanConnect\Command\ThPickRoomExtractCmd.cs" />
