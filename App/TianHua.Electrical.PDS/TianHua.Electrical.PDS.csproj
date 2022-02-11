@@ -26,10 +26,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\ThPDSCircuit.cs" />
+    <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="QuickGraph">
+      <Version>3.6.61119.7</Version>
+    </PackageReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
