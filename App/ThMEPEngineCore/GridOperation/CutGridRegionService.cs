@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.GridOperation
                 extendGrids.AddRange(dbCollec.Cast<Curve>());
             }
 
-            var regions = CetGridRegion(extendGrids, polyline).Where(x => x.Area > 0).ToList();
+            var regions = CetGridRegion(extendGrids, polyline).Where(x => x.Area > 10).ToList();
             //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
             //{
             //    foreach (var item in regions)

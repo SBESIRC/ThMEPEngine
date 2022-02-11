@@ -30,5 +30,14 @@ namespace TianHua.Structure.WPF.UI
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THSXSCUI", CommandFlags.Session)]
+        public void THSXUI()
+        {
+            using (var cmd = new BuildBeamCmd())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

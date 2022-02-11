@@ -52,8 +52,6 @@ namespace ThMEPElectrical
                     wallThickness = ThAFASUtils.SettingDouble("\n板厚", 0);
                 }
 
-
-                //var scale = 100;
                 var extractBlkList = ThFaCommon.BlkNameList;
                 var cleanBlkName = new List<string>();
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
@@ -73,7 +71,12 @@ namespace ThMEPElectrical
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
 
-                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
+                var beamDataParameter = new ThBeamDataParameter();
+                beamDataParameter.ReferBeam = referBeam;
+                beamDataParameter.WallThickness = wallThickness;
+                beamDataParameter.BufferDist = 500;
+
+                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter, needConverage);
 
                 var data = new ThAFASDistanceDataQueryService(geos, avoidBlkName);
                 data.Print();
@@ -140,7 +143,7 @@ namespace ThMEPElectrical
         public void ThFaAreaData()
         {
             var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
-            var wallThick = 0.0;
+            var wallThickness = 0.0;
             var needDetective = true;
             if (referBeam == false)
             {
@@ -148,7 +151,7 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
+                wallThickness = ThAFASUtils.SettingDouble("\n板厚", 0);
                 needDetective = ThAFASUtils.SettingBoolean("\n探测区域：不考虑（0）考虑（1）", 1);
             }
 
@@ -178,12 +181,15 @@ namespace ThMEPElectrical
             ThAFASDataPass.Instance.Transformer = transformer;
             ThAFASDataPass.Instance.SelectPts = selectPts;
 
-            var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThick, needDetective);
+            var beamDataParameter = new ThBeamDataParameter();
+            beamDataParameter.ReferBeam = referBeam;
+            beamDataParameter.WallThickness = wallThickness;
+            beamDataParameter.BufferDist = 500;
+
+            var geos = ThAFASUtils.GetAreaLayoutData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter, needDetective);
 
             var data = new ThAFASAreaDataQueryService(geos, avoidBlkName);
             data.Print();
-            //data.AnalysisHoles();
-            //data.ClassifyData();
             data.AddMRoomDict();
             data.ClassifyDataNew();
             var roomType = FireAlarmArea.Service.ThFaSmokeRoomTypeService.GetSmokeSensorType(data.Rooms, data.RoomFrameDict);
@@ -220,7 +226,7 @@ namespace ThMEPElectrical
         public void THFAAllData()
         {
             var referBeam = ThAFASUtils.SettingBoolean("\n不考虑梁（0）考虑梁（1）", 1);
-            var wallThick = 0.0;
+            var wallThickness = 0.0;
             var needDetective = referBeam;
             if (referBeam == false)
             {
@@ -228,7 +234,7 @@ namespace ThMEPElectrical
             }
             else
             {
-                wallThick = ThAFASUtils.SettingDouble("\n板厚", 0);
+                wallThickness = ThAFASUtils.SettingDouble("\n板厚", 0);
             }
 
             var extractBlkList = ThFaCommon.BlkNameList;
@@ -253,11 +259,15 @@ namespace ThMEPElectrical
                 ThAFASDataPass.Instance.Transformer = transformer;
                 ThAFASDataPass.Instance.SelectPts = selectPts;
 
-                var geos = ThAFASUtils.GetAllData(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThick);
+                var beamDataParameter = new ThBeamDataParameter();
+                beamDataParameter.ReferBeam = referBeam;
+                beamDataParameter.WallThickness = wallThickness;
+                beamDataParameter.BufferDist = 500;
+
+                var geos = ThAFASUtils.GetAllData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter);
 
                 var data = new ThAFASDataQueryService(geos);
                 data.Print();
-
 
                 var fileInfo = new FileInfo(Active.Document.Name);
                 var path = fileInfo.Directory.FullName;

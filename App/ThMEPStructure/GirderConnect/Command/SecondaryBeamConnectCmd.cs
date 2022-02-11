@@ -70,6 +70,52 @@ namespace ThMEPStructure.GirderConnect.Command
                 }
                 else if (SecondaryBeamLayoutConfig.FloorSelection == 2)
                 {
+                    if(SecondaryBeamLayoutConfig.DirectionSelection == 2)
+                    {
+                        var peo = new PromptEntityOptions("\n拾取次梁方向线");
+                        peo.Keywords.Add("选两点", "P", "选两点(P)");
+                        PromptEntityResult result = Active.Editor.GetEntity(peo);
+                        if (result.Status == PromptStatus.OK)
+                        {
+                            var Obj = acad.Element<Entity>(result.ObjectId);
+                            if(Obj is Line line)
+                            {
+                                SecondaryBeamLayoutConfig.MainDir = line.LineDirection();
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
+                        else if(result.Status == PromptStatus.Keyword)
+                        {
+                            //选择插入点
+                            PromptPointOptions options = new PromptPointOptions("请选择方向起始点");
+                            var sResult = Active.Editor.GetPoint(options);
+
+                            if (sResult.Status == PromptStatus.OK)
+                            {
+                                var startPt = sResult.Value;
+                                var transPt = startPt.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                                var endPt = Interaction.GetLineEndPoint("请选择终止点", transPt);
+
+                                if (System.Double.IsNaN(endPt.X) || System.Double.IsNaN(endPt.Y) || System.Double.IsNaN(endPt.Z))
+                                {
+                                    return;
+                                }
+                                SecondaryBeamLayoutConfig.MainDir = startPt.GetVectorTo(endPt).GetNormal();
+                            }
+                            else
+                            {
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+
                     //ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pts[0]);
                     //暂时不处理超远问题，因为目前主梁有一些问题，增加了一些不必要的后处理
                     ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(Point3d.Origin);

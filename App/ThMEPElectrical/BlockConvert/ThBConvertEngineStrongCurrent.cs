@@ -1,16 +1,17 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
-using DotNetARX;
 using System.Linq;
+using System.Collections.Generic;
+
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Linq2Acad;
+using NFox.Cad;
+
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -48,10 +49,10 @@ namespace ThMEPElectrical.BlockConvert
                     ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(target);
                 }
             }
-                
+
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
+        public override void SetDatabaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -136,7 +137,7 @@ namespace ThMEPElectrical.BlockConvert
                         {
                             pumpAttributes["主备关系"] = (string)blockProperties.GetValue("水泵配置");
                         }
-                        
+
                         objId.UpdateAttributesInBlock(new Dictionary<string, string>(pumpAttributes));
                         ThBConvertBlockReferenceDataExtension.AdjustLoadLabel(pumpLabel);
                         if (blockAttributes.ContainsKey("井内水泵台数") && blockProperties.Contains("水泵配置"))
@@ -147,7 +148,7 @@ namespace ThMEPElectrical.BlockConvert
                             foreach (var c in configuration)
                             {
                                 var cClone = c;
-                                if(c == '两')
+                                if (c == '两')
                                 {
                                     cClone = '二';
                                 }
@@ -167,9 +168,8 @@ namespace ThMEPElectrical.BlockConvert
                     }
                 }
             }
-
         }
-        
+
         /// <summary>
         /// 过滤图层后，按几何中心调整位置，并设置标注位置
         /// </summary>
@@ -408,10 +408,10 @@ namespace ThMEPElectrical.BlockConvert
             }
 
             // 翻转状态
-            if(target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP) 
+            if (target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
                 && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
             {
-                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP, 
+                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
                     source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
             }
         }

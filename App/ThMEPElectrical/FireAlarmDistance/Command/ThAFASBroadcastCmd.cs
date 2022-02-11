@@ -27,10 +27,11 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
     public class ThAFASBroadcastCmd : ThMEPBaseCommand, IDisposable
     {
         double _scale = 100;
-        bool _referBeam = true;
         ThAFASPlacementMountModeMgd _mode = ThAFASPlacementMountModeMgd.Wall;
-        double _stepLength = 25000;
+        double _stepLength = 20000;
+        bool _referBeam = true;
         double _wallThickness = 100;
+         double _bufferDist = 500;
 
         public ThAFASBroadcastCmd()
         {
@@ -51,6 +52,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
             _stepLength = FireAlarmSetting.Instance.StepLengthBC;
             _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
             _wallThickness = FireAlarmSetting.Instance.RoofThickness;
+            _bufferDist = FireAlarmSetting.Instance.BufferDist;
         }
         public void Dispose()
         {
@@ -74,12 +76,16 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 var layoutBlkName = _mode == ThAFASPlacementMountModeMgd.Wall ? ThFaCommon.BlkName_Broadcast_Wall : ThFaCommon.BlkName_Broadcast_Ceiling;
                 var cleanBlkName = new List<string>() { layoutBlkName };
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
-                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
+                ThStopWatchService.Start();
                 var needConverage = _mode == ThAFASPlacementMountModeMgd.Wall ? false : true;
-                //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, _referBeam, _wallThickness, needConverage);
+                var beamDataParameter = new ThBeamDataParameter();
+                beamDataParameter.ReferBeam = _referBeam;
+                beamDataParameter.WallThickness = _wallThickness;
+                beamDataParameter.BufferDist = _bufferDist;
+
+                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter, needConverage);
                 if (geos.Count == 0)
                 {
                     return;
@@ -89,37 +95,38 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 dataQuery.ExtendPriority(cleanBlkName, _scale);
                 dataQuery.FilterBeam();
                 dataQuery.ProcessRoomPlacementLabel(ThFaDistCommon.BroadcastTag);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("提取数据耗时：");
 
                 //--------------布置广播
                 var geojson = ThGeoOutput.Output(dataQuery.Data);
+                if (ThMEPDebugService.IsEnabled())
+                {
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
+                    ThMEPLoggingService.WriteToFile(path, geojson);
+                }
 
+                //--------------处理中
+                ThStopWatchService.ReStart();
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
                 {
                     StepDistance = _stepLength,
                     MountMode = _mode,
                 };
-
-#if DEBUG
-                {
-                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.input.geojson", Active.DocumentName));
-                    File.WriteAllText(path, geojson);
-                }
-#endif
-
-                //--------------处理中
                 var outJson = engine.Place(geojson, context);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("布置广播计算耗时：");
 
-#if DEBUG
+                if (ThMEPDebugService.IsEnabled())
                 {
                     string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
-                    File.WriteAllText(path, outJson);
+                    ThMEPLoggingService.WriteToFile(path, outJson);
                 }
-#endif
 
                 var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
-                ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));
+                ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0JsonOutput", 212, 30, 200));
 
                 //--------------接入楼梯
                 var layoutParameter = new ThAFASBCLayoutParameter()
@@ -136,7 +143,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 ThFABCStairService.CleanStairRoomPt(layoutParameter.StairPartResult, roomBoundary, ref ptsOutput);
 
                 var ptDirList = ThAFASDistanceLayoutService.FindOutputPtsDir(ptsOutput, roomBoundary);
-                ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 3, 30, 200));
+                ptDirList.ForEach(x => DrawUtils.ShowGeometry(x.Key, x.Value, "l0Result", 1, 30, 200));
 
                 ThFireAlarmInsertBlk.InsertBlock(ptDirList, _scale, layoutBlkName, ThFaCommon.Blk_Layer[layoutBlkName], true);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);

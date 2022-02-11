@@ -6,8 +6,6 @@
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
              xmlns:validations="clr-namespace:TianHua.Plumbing.WPF.UI.Validations"
              xmlns:converters="clr-namespace:TianHua.Plumbing.WPF.UI.Converter"
-             xmlns:mvvm="http://www.galasoft.ch/mvvmlight"
-             xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
              mc:Ignorable="d" SizeToContent="Height"
              Width="160" MinWidth="160" Title="冲洗点位" ResizeMode="NoResize">
     <Window.Resources>

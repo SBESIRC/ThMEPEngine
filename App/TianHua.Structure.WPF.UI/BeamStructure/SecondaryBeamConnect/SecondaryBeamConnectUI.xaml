@@ -65,9 +65,24 @@
                         </RadioButton>
                     </StackPanel>
                 </GroupBox>
-                <StackPanel HorizontalAlignment="Center" Margin="0,45,0,0">
-                    <cus:ImageButton Margin="0,0,0,10" Content="恢复默认" Width="85" Height="24" Click="ResetButton_Click"></cus:ImageButton>
-                    <cus:ImageButton Content="确定" Width="85" Height="24" Click="ConfirmButton_Click"></cus:ImageButton>
+                <GroupBox Margin="0,7,0,0">
+                    <GroupBox.Header>
+                        <Label>次梁主方向</Label>
+                    </GroupBox.Header>
+                    <StackPanel Orientation="Vertical" Margin="0,0,0,0" Width="auto" Focusable="False" HorizontalAlignment="Left">
+                        <RadioButton Name="AutomaticDir" VerticalAlignment="Center" Focusable="True"
+                            VerticalContentAlignment="Bottom" FocusManager.IsFocusScope="False" IsChecked="True" Margin="10,0,0,0">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="自动寻找" ></Label>
+                        </RadioButton>
+                        <RadioButton Name="ManualDir" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False"
+                            VerticalContentAlignment="Bottom" Margin="10,5,0,5">
+                            <Label VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="人工指定" ></Label>
+                        </RadioButton>
+                    </StackPanel>
+                </GroupBox>
+                <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="0,15,0,0">
+                    <cus:ImageButton Margin="0,0,15,0" Content="恢复默认" Width="75" Height="24" Click="ResetButton_Click"></cus:ImageButton>
+                    <cus:ImageButton Content="确定" Width="60" Height="24" Click="ConfirmButton_Click"></cus:ImageButton>
                 </StackPanel>
             </StackPanel>
         </Grid>

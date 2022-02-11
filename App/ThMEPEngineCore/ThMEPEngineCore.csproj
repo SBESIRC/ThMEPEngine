@@ -111,6 +111,8 @@
     <Compile Include="Algorithm\FastAStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
     <Compile Include="Algorithm\FrameComparer\ThFramePainter.cs" />
     <Compile Include="Algorithm\FrameComparer\ThFrameExactor.cs" />
+    <Compile Include="Algorithm\FrameComparer\ThFrameTextExactor.cs" />
+    <Compile Include="Algorithm\FrameComparer\ThMEPFrameTextComparer.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphBase.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphNodeBase.cs" />
     <Compile Include="Algorithm\GraphDomain\GraphNodeRelation.cs" />
@@ -169,6 +171,7 @@
     <Compile Include="Data\ThMEPDataSetFactory.cs" />
     <Compile Include="Diagnostics\DrawUtils.cs" />
     <Compile Include="Diagnostics\ThMEPDebugService.cs" />
+    <Compile Include="Diagnostics\ThMEPLoggingService.cs" />
     <Compile Include="Diagnostics\ThStopWatchService.cs" />
     <Compile Include="Engine\ThRawBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />

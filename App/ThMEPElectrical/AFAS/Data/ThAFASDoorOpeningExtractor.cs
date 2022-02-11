@@ -236,7 +236,7 @@ namespace ThMEPElectrical.AFAS.Data
             {
                 var enlarge = bufferService.Buffer(o.Outline, 5.0);
                 var neibours = spatialIndex.SelectCrossingPolygon(enlarge);
-                if (neibours.Count == 2)
+                if (neibours.Count == 2 && FireDoorNeibourIds.ContainsKey(o.Outline) == false)
                 {
                     FireDoorNeibourIds.Add(o.Outline, neibours.Cast<Entity>().Select(e => fireApartIds[e]).ToList());
                 }
@@ -267,7 +267,7 @@ namespace ThMEPElectrical.AFAS.Data
         {
             foreach (var o in Doors)
             {
-                if (GroupOwner.ContainsKey(o.Outline ) == false)
+                if (GroupOwner.ContainsKey(o.Outline) == false)
                 {
                     GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline));
                 }

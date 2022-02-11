@@ -9,5 +9,6 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
         public double Db { get; set; }
         public double Dc { get; set; }
         public int RegionSelection { get; set; }
+        public int DirectionSelection { get; set; }
     }
 }

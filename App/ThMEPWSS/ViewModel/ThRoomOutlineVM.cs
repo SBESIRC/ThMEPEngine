@@ -3,8 +3,8 @@ using DotNetARX;
 using Linq2Acad;
 using AcHelper.Commands;
 using System.Windows.Input;
-using GalaSoft.MvvmLight.Command;
 using Autodesk.AutoCAD.DatabaseServices;
+using Microsoft.Toolkit.Mvvm.Input;
 
 namespace ThMEPWSS.ViewModel
 {

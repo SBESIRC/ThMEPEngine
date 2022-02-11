@@ -516,7 +516,7 @@
     <Compile Include="UndergroundFireHydrantSystem\Method\MainLoop.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\PtDist.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Method\SubLoop.cs" />
-    <Compile Include="UndergroundFireHydrantSystem\Model\FireHydrantSystemUIViewModel.cs" />
+    <Compile Include="ViewModel\FireHydrantSystemUIViewModel.cs" />
     <Compile Include="UndergroundFireHydrantSystem\ThFireHydrantCmd.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractCasing.cs" />
     <Compile Include="UndergroundFireHydrantSystem\Extract\ThExtractFireHydrant.cs" />
@@ -671,11 +671,6 @@
     <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MvvmLight">
-      <Version>5.4.1.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
@@ -713,6 +708,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ThSystemDiagramCmds.THJSZC.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Toolkit.Mvvm">
+      <Version>7.1.2</Version>
+    </PackageReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -765,4 +765,8 @@
     </When>
   </Choose>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

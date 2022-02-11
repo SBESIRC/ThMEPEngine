@@ -1,4 +1,7 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADExtension
 {
@@ -40,6 +43,68 @@ namespace ThCADExtension
         public static Matrix3d ToWorld(this CoordinateSystem3d ucs)
         {
             return Matrix3d.Identity.GetTransformFrom(ucs);
+        }
+
+        /// <summary>
+        /// Decompose the Matrix3d
+        /// </summary>
+        /// <param name="mat"></param>
+        /// <param name="scale"></param>
+        /// <param name="rotate"></param>
+        /// <param name="translate"></param>
+        public static void Decompose(this Matrix3d mat, out Matrix3d scale, out Matrix3d rotate, out Matrix3d mirror, out Matrix3d translate)
+        {
+            // https://adndevblog.typepad.com/autocad/2014/08/decomposing-material-mapper-transform-matrix.html
+            // Scale - assume always positive, and must be non-zero
+            var v3dOne = new Vector3d(mat[0, 0], mat[0, 1], mat[0, 2]);
+            var v3dTwo = new Vector3d(mat[1, 0], mat[1, 1], mat[1, 2]);
+            var v3dThree = new Vector3d(mat[2, 0], mat[2, 1], mat[2, 2]);
+
+            var lengthList = new List<double>
+            {
+                v3dOne.Length,
+                v3dTwo.Length,
+                v3dThree.Length,
+            };
+
+            var data = Matrix3d.Identity.ToArray();
+            for (int i = 0; i < 3; i++)
+            {
+                data[i * 5] = data[i * 5] * lengthList[i];
+            }
+            scale = new Matrix3d(data);
+
+            // Translation
+            translate = Matrix3d.Displacement(mat.Translation);
+
+            // Rotation – assume only rotation about the Z axis
+            var acosValue = mat[0, 0] / lengthList[0];
+            if (acosValue > 1.0)
+            {
+                acosValue = 1.0;
+            }
+            else if (acosValue < -1.0)
+            {
+                acosValue = -1.0;
+            }
+            var zAngle = Math.Acos(acosValue);
+            Debug.Assert(0.0 <= zAngle && zAngle <= Math.PI);
+            if (mat[0, 1] > 0.0)
+            {
+                zAngle = 2.0 * Math.PI - zAngle;
+            }
+            rotate = Matrix3d.Rotation(zAngle, Vector3d.ZAxis, Point3d.Origin);
+
+            var identity = Matrix3d.Identity.ToArray();
+            if (Math.Sign(mat[0, 0] + mat[0, 1]) != Math.Sign(rotate[0, 0] + rotate[0, 1]))
+            {
+                identity[0] = -identity[0];
+            }
+            else if (Math.Sign(mat[1, 0] + mat[1, 1]) != Math.Sign(rotate[1, 0] + rotate[1, 1]))
+            {
+                identity[5] = -identity[5];
+            }
+            mirror = new Matrix3d(identity);
         }
     }
 }

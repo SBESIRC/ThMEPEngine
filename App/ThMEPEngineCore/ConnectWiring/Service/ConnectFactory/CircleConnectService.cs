@@ -14,6 +14,7 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
         public override Polyline Connect(Polyline wiring, BlockReference block, LoopBlockInfos Infos, double range)
         {
             ConnectMethodService methodService = new ConnectMethodService();
+            range = block.ScaleFactors.X / 100 * Infos.XRight;
             var connectWiring = methodService.ConnectByCircle(wiring, block, range);
             return connectWiring;
         }

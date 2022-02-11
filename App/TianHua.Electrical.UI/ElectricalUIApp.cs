@@ -158,18 +158,19 @@ namespace TianHua.Electrical.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJKX", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFJKXDB", CommandFlags.Modal)]
         public void FrameComparerUI()
         {
             var room = new ThFrameExactor(CompareFrameType.ROOM);
-            var comp = new ThMEPFrameComparer(room.curGraph, room.reference);
+            var frameComp = new ThMEPFrameComparer(room.curGraph, room.reference);
+            //var textComp = new ThMEFrameTextComparer(frameComp);// 对房间框线需要对文本再进行比对
             using (var acadDatabase = AcadDatabase.Active())
             {
                 // 此处单独使用using域是为了立即显示绘制效果
                 var painter = new ThFramePainter();
-                painter.Draw(comp, room.dicCode2Id, CompareFrameType.ROOM);
+                painter.Draw(frameComp, room.dicCode2Id, CompareFrameType.ROOM);
             }
-            using (var dlg = new UIFrameComparer(comp, room.dicCode2Id))
+            using (var dlg = new UIFrameComparer(frameComp, room.dicCode2Id))
             {
                 if (AcadApp.ShowModalDialog(dlg) != DialogResult.OK)
                     return;

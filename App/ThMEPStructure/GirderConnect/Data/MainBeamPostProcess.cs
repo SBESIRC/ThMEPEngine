@@ -19,9 +19,10 @@ namespace ThMEPStructure.GirderConnect.Data
         public static List<Line> MPostProcess(Dictionary<Point3d, HashSet<Point3d>> dicTuples, DBObjectCollection intersectCollection)
         {
             //var unifiedTyples = UnifyTuples(dicTuples);
-            var tuples = LineDealer.DicTuplesToTuples(dicTuples);
+            var tuples = TypeConvertor.DicTuples2Tuples(dicTuples);
             return TuplesToLines(tuples);
         }
+
         public static void Output(List<Line> lines, double standardLength)
         {
             using (var acdb = AcadDatabase.Active())

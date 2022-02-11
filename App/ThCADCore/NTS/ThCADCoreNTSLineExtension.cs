@@ -4,21 +4,12 @@ using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Buffer;
+using ThCADExtension;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSLineExtension
     {
-        public static bool IsCollinear(this Line line, Line other)
-        {
-            var p1 = line.StartPoint.ToNTSCoordinate();
-            var p2 = line.EndPoint.ToNTSCoordinate();
-            var q1 = other.StartPoint.ToNTSCoordinate();
-            var q2 = other.EndPoint.ToNTSCoordinate();
-            return Orientation.Index(p1, q1, q2) == OrientationIndex.Collinear
-                && Orientation.Index(p2, q1, q2) == OrientationIndex.Collinear;
-        }
-
         public static bool Overlaps(this Line line, Line other)
         {
             return line.ToNTSLineString().Overlaps(other.ToNTSLineString());
@@ -64,7 +55,7 @@ namespace ThCADCore.NTS
 
         public static Coordinate Intersection(this Line line1, Line line2, Intersect intersectType)
         {
-            if(line1.IsCollinear(line2))
+            if (line1.IsCollinear(line2))
             {
                 return null;
                 //throw new NotSupportedException();
@@ -75,7 +66,7 @@ namespace ThCADCore.NTS
             {
                 case Intersect.ExtendBoth:
                     var intersectPt = linesegment1.LineIntersection(linesegment2);
-                    if(intersectPt == null)
+                    if (intersectPt == null)
                     {
                         throw new NotSupportedException();
                     }
@@ -90,7 +81,7 @@ namespace ThCADCore.NTS
             }
             return null;
         }
-        
+
         public static Polyline Buffer(this Line line, double distance, ThBufferEndCapStyle endCapStyle)
         {
             switch(endCapStyle)

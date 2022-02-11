@@ -181,7 +181,7 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
                 Positions.Add(p);
             innerPointCount = innerPoints.Count;
 
-            
+
 
             //计算每个点的覆盖区域
             CalDetectArea();
@@ -229,16 +229,16 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             Detect.Clear();
             foreach (var p in Positions)
             {
-                if (detects.Count > 0)
+                Polygon detectHasPt = detects.Count > 0 ? GetDetect(p) : null;
+                //能探测到中心点的布置区域
+                Polygon detect = DetectCalculator.CalculateDetect(p, (detectHasPt != null ? detectHasPt : room), Radius, IsDetectVisible);
+                if (detect != null)
                 {
-                    var detect = GetDetect(p);
-                    Detect.Add(DetectCalculator.CalculateDetect(p, detect, Radius, IsDetectVisible));
+                    Detect.Add(detect);
                 }
-                else
-                    Detect.Add(DetectCalculator.CalculateDetect(p, room, Radius, IsDetectVisible));
             }
-
         }
+
         //计算盲区
         public void CalBlindArea()
         {
@@ -395,11 +395,11 @@ namespace ThMEPEngineCore.AreaLayout.GridLayout.Sensorlayout
             var max = new Point3d(point.X + 1, point.Y + 1, 0);
 
             var obj = thCADCoreNTSSpatialIndexDetect.SelectCrossingWindow(min, max);
-            MPolygon detect =null;
+            MPolygon detect = null;
             Polygon returnObj = null;
-            if (obj.Count >0)
+            if (obj.Count > 0)
             {
-                detect = obj.OfType <MPolygon>().FirstOrDefault();
+                detect = obj.OfType<MPolygon>().FirstOrDefault();
             }
             if (detect != null)
             {

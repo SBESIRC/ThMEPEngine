@@ -90,7 +90,7 @@ namespace ThMEPElectrical.AFAS.Utils
             var transformer = new ThMEPOriginTransformer(center);
             return transformer;
         }
-        public static List<ThGeometry> GetDistLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThickness, bool needConverage)
+        public static List<ThGeometry> GetDistLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, ThBeamDataParameter beamDataParameter, bool needConverage)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -102,10 +102,9 @@ namespace ThMEPElectrical.AFAS.Utils
                 ///////////处理原始建筑数据,已转回原位置附近////////
                 var localDataFactory = new ThAFASDistanceDataSetFactory()
                 {
-                    ReferBeam = referBeam,
-                    NeedConverage = needConverage,
                     InputExtractors = extractors,
-                    WallThickness = wallThickness,
+                    NeedConverage = needConverage,
+                    BeamDataParameter = beamDataParameter,
                 };
                 localDataFactory.SetTransformer(transformer);
                 var localdataset = localDataFactory.Create(acadDatabase.Database, selectPts);
@@ -157,7 +156,7 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
-        public static List<ThGeometry> GetAreaLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThick, bool needDetective)
+        public static List<ThGeometry> GetAreaLayoutData(ThAFASDataPass dataPass, List<string> extractBlkList, ThBeamDataParameter beamDataParameter, bool needDetective)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -169,10 +168,9 @@ namespace ThMEPElectrical.AFAS.Utils
                 ///////////处理原始建筑数据,已转回原位置附近////////
                 var localDataFactory = new ThAFASAreaDataSetFactory()
                 {
-                    ReferBeam = referBeam,
-                    WallThick = wallThick,
                     NeedDetective = needDetective,
                     InputExtractors = extractors,
+                    BeamDataParameter = beamDataParameter,
                 };
                 localDataFactory.SetTransformer(transformer);
                 var localdataset = localDataFactory.Create(acadDatabase.Database, selectPts);
@@ -197,10 +195,9 @@ namespace ThMEPElectrical.AFAS.Utils
         /// </summary>
         /// <param name="dataPass"></param>
         /// <param name="extractBlkList"></param>
-        /// <param name="referBeam"></param>
-        /// <param name="wallThick"></param>
+        /// <param name="beamDataParameter"></param>
         /// <returns></returns>
-        public static List<ThGeometry> GetAllData(ThAFASDataPass dataPass, List<string> extractBlkList, bool referBeam, double wallThick)
+        public static List<ThGeometry> GetAllData(ThAFASDataPass dataPass, List<string> extractBlkList, ThBeamDataParameter beamDataParameter)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -212,9 +209,8 @@ namespace ThMEPElectrical.AFAS.Utils
                 ///////////处理原始建筑数据,已转回原位置附近////////
                 var localDataFactory = new ThAFASAllSetTestDataFactory()
                 {
-                    ReferBeam = referBeam,
-                    WallThick = wallThick,
                     InputExtractors = extractors,
+                    BeamDataParameter = beamDataParameter,
                 };
                 localDataFactory.SetTransformer(transformer);
                 var localdataset = localDataFactory.Create(acadDatabase.Database, selectPts);
@@ -391,7 +387,7 @@ namespace ThMEPElectrical.AFAS.Utils
             return ans;
         }
 
-        public static double SettingDouble(string hintString,double defaultValue)
+        public static double SettingDouble(string hintString, double defaultValue)
         {
             var ans = 0.0;
 

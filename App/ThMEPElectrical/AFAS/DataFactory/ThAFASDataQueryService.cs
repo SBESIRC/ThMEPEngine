@@ -15,6 +15,7 @@ using ThMEPEngineCore.GeojsonExtractor;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.Model;
+using ThMEPElectrical.AFAS.Model;
 
 namespace ThMEPElectrical.AFAS.Data
 {
@@ -23,12 +24,12 @@ namespace ThMEPElectrical.AFAS.Data
     /// </summary>
     public class ThAFASAllSetTestDataFactory : ThMEPDataSetFactory
     {
-        /////input
-        public bool ReferBeam { get; set; } = true;
-        public double WallThick { get; set; } = 100;
+        //-------input
+        public ThBeamDataParameter BeamDataParameter { get; set; }
+
         public List<ThExtractorBase> InputExtractors { get; set; }
 
-        /////output
+        //-------output
         private List<ThGeometry> Geos { get; set; }
         public ThAFASAllSetTestDataFactory()
         {
@@ -41,7 +42,7 @@ namespace ThMEPElectrical.AFAS.Data
         }
         protected override void GetElements(Database database, Point3dCollection collection)
         {
-            //////其他建筑元素
+            //-------其他建筑元素
             var archiWallExtractor = InputExtractors.Where(o => o is ThAFASArchitectureWallExtractor).First() as ThAFASArchitectureWallExtractor;
             var shearWallExtractor = InputExtractors.Where(o => o is ThAFASShearWallExtractor).First() as ThAFASShearWallExtractor;
             var columnExtractor = InputExtractors.Where(o => o is ThAFASColumnExtractor).First() as ThAFASColumnExtractor;
@@ -81,11 +82,11 @@ namespace ThMEPElectrical.AFAS.Data
             storeyExtractor.Transform();
 
             //提取可布区域
-            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam, WallThick);
+            var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, BeamDataParameter);
             extractors.Add(placeConverage);
 
             //提取探测区域
-            var detectiveConverage = BuildDetectionRegion(extractors, WallThick);
+            var detectiveConverage = BuildDetectionRegion(extractors, BeamDataParameter.WallThickness);
             extractors.Add(detectiveConverage);
 
             // 造中心线Geo数据
@@ -118,7 +119,7 @@ namespace ThMEPElectrical.AFAS.Data
             Geos.ProjectOntoXYPlane();
         }
 
-        private ThAFASDetectionRegionExtractor BuildDetectionRegion(List<ThExtractorBase> extractors, double wallThick)
+        private ThAFASDetectionRegionExtractor BuildDetectionRegion(List<ThExtractorBase> extractors, double wallThickness)
         {
             var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
             var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
@@ -133,7 +134,7 @@ namespace ThMEPElectrical.AFAS.Data
                 Columns = columnExtract.Columns.Select(x => ThIfcColumn.Create(x)).ToList(),
                 Beams = beamExtract.Beams,
                 Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
-                WallThickness = wallThick,
+                WallThickness = wallThickness,
                 Transformer = Transformer,
             };
 

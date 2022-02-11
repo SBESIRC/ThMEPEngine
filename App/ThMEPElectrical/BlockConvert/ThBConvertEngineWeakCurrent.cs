@@ -30,7 +30,7 @@ namespace ThMEPElectrical.BlockConvert
             //
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
+        public override void SetDatabaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -137,24 +137,30 @@ namespace ThMEPElectrical.BlockConvert
             {
                 var blockReference = acadDatabase.Element<BlockReference>(blkRef, true);
                 var position = srcBlockData.Position;
-                double rotation = srcBlockData.Rotation;
+                var rotation = srcBlockData.Rotation;
+
+                srcBlockData.OwnerSpace2WCS.Decompose(out _, out var rotate,out _, out _);
+
                 if (srcBlockData.Normal == new Vector3d(0, 0, -1))
                 {
                     rotation = -rotation;
                 }
                 if (srcBlockData.EffectiveName.Contains("室内消火栓平面"))
                 {
-                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                    blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
+                        .PreMultiplyBy(rotate));
                 }
                 else
                 {
                     if (rotation > Math.PI / 2 && rotation - 10 * ThBConvertCommon.radian_tolerance <= Math.PI * 3 / 2)
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation - Math.PI, Vector3d.ZAxis, position)
+                            .PostMultiplyBy(rotate));
                     }
                     else
                     {
-                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position));
+                        blockReference.TransformBy(Matrix3d.Rotation(rotation, Vector3d.ZAxis, position)
+                            .PostMultiplyBy(rotate));
                     }
                 }
             }
@@ -220,7 +226,9 @@ namespace ThMEPElectrical.BlockConvert
                         }
                     }
                 }
-                blockReference.TransformBy(mirror);
+
+                srcBlockData.OwnerSpace2WCS.Decompose(out _, out _, out var UCSMirror, out _);
+                blockReference.TransformBy(mirror.PreMultiplyBy(UCSMirror));
             }
         }
 

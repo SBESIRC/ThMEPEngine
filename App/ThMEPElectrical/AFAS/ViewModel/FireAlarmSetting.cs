@@ -14,6 +14,8 @@ namespace ThMEPElectrical.AFAS.ViewModel
         public List<int> LayoutItemList { get; set; }
         public double RoofThickness { get; set; }
 
+        public double BufferDist { get; set; }
+
         //----烟温感
         public int RoofHight { get; set; }
         public int RoofGrade { get; set; }
@@ -50,6 +52,7 @@ namespace ThMEPElectrical.AFAS.ViewModel
             RoofHight = 2;
             RoofGrade = 0;
             RoofThickness = 100;
+            BufferDist = 500;
             FixRef = 1.0;
 
             BroadcastLayout = 1;

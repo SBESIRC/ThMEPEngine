@@ -32,6 +32,7 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
+        //-------梁
         private BeamType _Beam { get; set; }
         public BeamType Beam
         {
@@ -46,20 +47,29 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
-        //private LayoutItemType _LayoutItem { get; set; }
-        //public LayoutItemType LayoutItem
-        //{
-        //    get
-        //    {
-        //        return _LayoutItem;
-        //    }
-        //    set
-        //    {
-        //        _LayoutItem = value;
-        //        this.RaisePropertyChanged();
-        //    }
-        //}
+        private double _RoofThickness { get; set; }
+        public double RoofThickness
+        {
+            get { return _RoofThickness; }
+            set
+            {
+                _RoofThickness = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
+        private double _BufferDist { get; set; }
+        public double BufferDist
+        {
+            get { return _BufferDist; }
+            set
+            {
+                _BufferDist = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        //-------布置类型
         private bool _LayoutSmoke { get; set; }
         public bool LayoutSmoke
         {
@@ -136,7 +146,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
             }
         }
 
-
         //-------烟温感
         private UListItemData _RoofHight { get; set; }
         public UListItemData RoofHight
@@ -176,17 +185,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
             set
             {
                 _RoofGradeList = value;
-                this.RaisePropertyChanged();
-            }
-        }
-
-        private double _RoofThickness { get; set; }
-        public double RoofThickness
-        {
-            get { return _RoofThickness; }
-            set
-            {
-                _RoofThickness = value;
                 this.RaisePropertyChanged();
             }
         }
@@ -306,24 +304,26 @@ namespace ThMEPElectrical.AFAS.ViewModel
             LayoutManualAlart = true;
             LayoutMonitor = true;
 
+            //---beam
+            RoofThickness = 100;
+            BufferDist = 500;
 
-            ///smoke
+            //---smoke
             SetRoofHight();
             SetRoofGrade();
-            RoofThickness = 100;
             SetFixRef();
 
-            ///broadcast
+            //---broadcast
             BroadcastLayoutType = BroadcastLayoutType.Wall;
             StepLengthBC = 25;
 
-            ///manual alarm
+            //---manual alarm
             StepLengthMA = 25;
 
-            ///gas
+            //---gas
             GasProtectRadius = 8000;
 
-            ///Floor Display
+            //---Floor Display
             DisplayBuilding = DisplayBuildingType.Resident;
             DisplayBlk = DisplayBlkType.Floor;
         }
@@ -366,17 +366,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
         ConsiderBeam = 1,
 
     }
-
-    //public enum LayoutItemType
-    //{
-    //    Smoke = 0,
-    //    Broadcast = 1,
-    //    FloorDisplay = 2,
-    //    FireTel = 3,
-    //    Gas = 4,
-    //    ManualAlarm = 5,
-    //    FireProofMonitor = 6,
-    //}
 
     public enum BroadcastLayoutType
     {

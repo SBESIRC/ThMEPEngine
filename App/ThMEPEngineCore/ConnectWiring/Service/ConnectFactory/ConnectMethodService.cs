@@ -34,7 +34,8 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
 
         public Polyline ConnectByCircle(Polyline wiring, BlockReference block, double range)
         {
-            Circle circle = new Circle(block.Position, Vector3d.ZAxis, range);
+            var blockPt = new Point3d(block.Position.X, block.Position.Y, 0);
+            Circle circle = new Circle(blockPt, Vector3d.ZAxis, range);
             Point3dCollection pts = new Point3dCollection();
             wiring.IntersectWith(circle, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
             if (pts.Count > 0)
@@ -280,18 +281,60 @@ namespace ThMEPEngineCore.ConnectWiring.Service.ConnectFactory
                 wiring.ReverseCurve();
             }
             Polyline poly = new Polyline();
-            for (int i = 0; i < wiring.NumberOfVertices - 1; i++)
+            if (Math.Abs(connectPt.DistanceTo(wiring.GetPoint3dAt(wiring.NumberOfVertices -2))) < 1)
             {
-                Point3d pt = wiring.GetPoint3dAt(i);
-                Line line = new Line(pt, wiring.GetPoint3dAt((i + 1) % wiring.NumberOfVertices));
-                poly.AddVertexAt(i, pt.ToPoint2D(), 0, 0, 0);
-                if (line.GetClosestPointTo(connectPt, false).DistanceTo(pt) < tol)
+                var newCircle = new Circle() { Center = circle.Center, Radius = circle.Radius * 1.414 };
+                Point3dCollection pts = new Point3dCollection();
+                wiring.IntersectWith(newCircle, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                if (pts.Count > 0)
                 {
-                    poly.AddVertexAt(i + 1, connectPt.ToPoint2D(), 0, 0, 0);
-                    break;
+                    var cutPoint = pts[0];
+                    for (int i = 0; i < wiring.NumberOfVertices; i++)
+                    {
+                        Point3d pt = wiring.GetPoint3dAt(i);
+                        if (newCircle.EntityContains(pt))
+                        {
+                            poly.AddVertexAt(i, cutPoint.ToPoint2D(), 0, 0, 0);
+                            var Line = new Line(circle.Center, cutPoint);
+                            var Intersectpts = new Point3dCollection();
+                            circle.IntersectWith(Line, Intersect.OnBothOperands, Intersectpts, (IntPtr)0, (IntPtr)0);
+                            if (Intersectpts.Count > 0)
+                            {
+                                poly.AddVertexAt(i + 1, Intersectpts[0].ToPoint2D(), 0, 0, 0);
+                                break;
+                            }
+                            else
+                            {
+                                return new Polyline();
+                            }
+                        }
+                        else
+                        {
+                            poly.AddVertexAt(i, pt.ToPoint2D(), 0, 0, 0);
+                        }
+                    }
+                }
+                else
+                {
+                    return new Polyline();
                 }
             }
-
+            else
+            {
+                for (int i = 0; i < wiring.NumberOfVertices; i++)
+                {
+                    Point3d pt = wiring.GetPoint3dAt(i);
+                    if (circle.EntityContains(pt))
+                    {
+                        poly.AddVertexAt(i, connectPt.ToPoint2D(), 0, 0, 0);
+                        break;
+                    }
+                    else
+                    {
+                        poly.AddVertexAt(i, pt.ToPoint2D(), 0, 0, 0);
+                    }
+                }
+            }
             return poly;
         }
 

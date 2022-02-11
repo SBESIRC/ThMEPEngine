@@ -1,0 +1,107 @@
+{
+  "EstimateSelection": 2,
+  "FormulaEstimateSelection": 2,
+  "TableEstimateSelection": 2,
+  "FormulaTop": {
+    "LDividesH": 10,
+    "HDividesB": 2,
+    "Hmin": 500,
+    "Bmin": 300
+  },
+  "FormulaMiddleA": {
+    "LDividesH": 10,
+    "HDividesB": 2,
+    "Hmin": 500,
+    "Bmin": 250
+  },
+  "FormulaMiddleB": {
+    "LDividesH": 15,
+    "HDividesB": 3,
+    "Hmin": 500,
+    "Bmin": 200
+  },
+  "FormulaMiddleSecondary": {
+    "LDividesH": 15,
+    "HDividesB": 3,
+    "Hmin": 500,
+    "Bmin": 200
+  },
+  "TableTop1": {
+    "H": 500,
+    "B": 300
+  },
+  "TableTop2": {
+    "H": 600,
+    "B": 300
+  },
+  "TableTop3": {
+    "H": 700,
+    "B": 300
+  },
+  "TableTop4": {
+    "H": 700,
+    "B": 350
+  },
+  "TableTop5": {
+    "H": 800,
+    "B": 400
+  },
+  "TableTop6": {
+    "H": 900,
+    "B": 450
+  },
+  "TableTop7": {
+    "H": 1000,
+    "B": 500
+  },
+  "TableMiddleA1": {
+    "H": 500,
+    "B": 250
+  },
+  "TableMiddleA2": {
+    "H": 550,
+    "B": 250
+  },
+  "TableMiddleA3": {
+    "H": 600,
+    "B": 250
+  },
+  "TableMiddleA4": {
+    "H": 700,
+    "B": 300
+  },
+  "TableMiddleA5": {
+    "H": 800,
+    "B": 400
+  },
+  "TableMiddleA6": {
+    "H": 900,
+    "B": 450
+  },
+  "TableMiddleB1": {
+    "H": 500,
+    "B": 200
+  },
+  "TableMiddleB2": {
+    "H": 500,
+    "B": 200
+  },
+  "TableMiddleB3": {
+    "H": 550,
+    "B": 200
+  },
+  "TableMiddleB4": {
+    "H": 550,
+    "B": 250
+  },
+  "TableMiddleB5": {
+    "H": 600,
+    "B": 300
+  },
+  "TableMiddleB6": {
+    "H": 700,
+    "B": 300
+  },
+  "BeamCheck": 50,
+  "RegionSelection": 2
+}

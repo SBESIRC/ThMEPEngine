@@ -91,6 +91,11 @@ namespace ThMEPEngineCore.Algorithm
             return results.Cast<Polyline>().FindByMax(o => o.Area);
         }
 
+        public static Polyline Simplify(Polyline frame, double distance)
+        {
+            return frame.TPSimplify(distance);
+        }
+
         private static bool IsClosed(Polyline frame, double tolerance)
         {
             // 支持真实闭合或视觉闭合

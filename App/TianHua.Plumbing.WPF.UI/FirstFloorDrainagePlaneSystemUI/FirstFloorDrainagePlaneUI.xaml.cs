@@ -12,21 +12,28 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using ThControlLibraryWPF;
-using ThMEPLighting.UI.ViewModels;
+using ThControlLibraryWPF.CustomControl;
 
-namespace ThMEPLighting.UI.UI
+namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
 {
     /// <summary>
-    /// ExampleUI.xaml 的交互逻辑
+    /// FirstFloorDrainagePlaneUI.xaml 的交互逻辑
     /// </summary>
-    public partial class ExampleUI : Window
+    public partial class FirstFloorDrainagePlaneUI : ThCustomWindow
     {
-        public ExampleUI()
+        public FirstFloorDrainagePlaneUI()
         {
             InitializeComponent();
-            ExampleViewModel exampleViewModel = new ExampleViewModel();
-            this.DataContext = exampleViewModel;
+        }
+
+        private void btnSltFloor_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void btnGenerate_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

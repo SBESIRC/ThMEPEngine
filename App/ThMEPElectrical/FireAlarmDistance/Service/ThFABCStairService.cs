@@ -108,7 +108,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Service
                 var room = Room.Where(x => x.Contains(ptStair)).FirstOrDefault();
                 if (room != null)
                 {
-                    var PtNeedClean = PtResult.Where(x => room.Contains(x)).ToList();
+                    var PtNeedClean = PtResult.Where(x => room.ContainsOrOnBoundary (x)).ToList();
                     PtClean.AddRange(PtNeedClean);
                 }
             }

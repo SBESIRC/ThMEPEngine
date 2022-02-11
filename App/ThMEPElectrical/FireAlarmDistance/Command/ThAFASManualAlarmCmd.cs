@@ -69,14 +69,16 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 var avoidBlkName = ThFaCommon.BlkNameList.Where(x => cleanBlkName.Contains(x) == false).ToList();
                 var layoutBlkNameBottom = ThFaCommon.BlkName_ManualAlarm;
                 var layoutBlkNameTop = ThFaCommon.BlkName_SoundLightAlarm;
-                //ThFireAlarmInsertBlk.prepareInsert(extractBlkList, ThFaCommon.Blk_Layer.Select(x => x.Value).Distinct().ToList());
 
                 //--------------提取数据
+                ThStopWatchService.Start();
                 var needConverage = false;
-                var wallThickness = 100;
-                var referBeam = false;
-                //var geos = ThAFASUtils.GetDistLayoutData(framePts, extractBlkList, _referBeam, needConverage);
-                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, referBeam, wallThickness, needConverage);
+                var beamDataParameter = new ThBeamDataParameter();
+                beamDataParameter.ReferBeam = false;
+                beamDataParameter.WallThickness = 100;
+                beamDataParameter.BufferDist = 500;
+
+                var geos = ThAFASUtils.GetDistLayoutData(ThAFASDataPass.Instance, extractBlkList, beamDataParameter, needConverage);
                 if (geos.Count == 0)
                 {
                     return;
@@ -86,32 +88,35 @@ namespace ThMEPElectrical.FireAlarmDistance.Command
                 data.ExtendPriority(cleanBlkName, _scale);
                 data.FilterBeam();
                 data.ProcessRoomPlacementLabel(ThFaDistCommon.ManualAlartTag);
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("提取数据耗时：");
 
                 //--------------布置手动报警
                 var geojson = ThGeoOutput.Output(data.Data);
+                if (ThMEPDebugService.IsEnabled())
+                {
+
+                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
+                    ThMEPLoggingService.WriteToFile(path, geojson);
+                }
+
+                //--------------处理中
+                ThStopWatchService.ReStart();
                 ThAFASPlacementEngineMgd engine = new ThAFASPlacementEngineMgd();
                 ThAFASPlacementContextMgd context = new ThAFASPlacementContextMgd()
                 {
                     StepDistance = _stepLength,
                     MountMode = _mode,
                 };
-
-#if DEBUG
-                {
-
-                    string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.MAinput.geojson", Active.DocumentName));
-                    File.WriteAllText(path, geojson);
-                }
-#endif
-                //--------------处理中
                 var outJson = engine.Place(geojson, context);
-
-#if DEBUG
+                ThStopWatchService.Stop();
+                ThStopWatchService.Print("布置手动报警计算耗时：");
+                if (ThMEPDebugService.IsEnabled())
                 {
                     string path = Path.Combine(Active.DocumentDirectory, string.Format("{0}.output.geojson", Active.DocumentName));
-                    File.WriteAllText(path, outJson);
+                    ThMEPLoggingService.WriteToFile(path, outJson);
                 }
-#endif
+
                 var features = ThAFASDistanceLayoutService.Export2NTSFeatures(outJson);
                 var ptsOutput = ThAFASDistanceLayoutService.ConvertGeom(features);
                 ptsOutput.ForEach(x => DrawUtils.ShowGeometry(x, "l0output", 212, 30, 50));

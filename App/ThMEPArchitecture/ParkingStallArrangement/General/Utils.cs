@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using ThMEPArchitecture.PartitionLayout;
+using Accord.Math;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
@@ -81,6 +82,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 return index.Take(n).ToList();
             }
         }
+        // 旧版本截断正态分布，在特殊情况下容易出现不能找到随机数的情况
+        // box muller method
+        // 很多情况不符合截断随机分布
+        // 速度较慢
         public static double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound, int MaxIter = 1000)
         {
             // 如果loc 在范围外调整loc为lower或者upper
@@ -107,6 +112,66 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             //未找到返回loc
             return loc;
         }
+        public static double _truncnormal(double loc, double scale, double LowerBound, double UpperBound)
+        {
+            // min distance bwtween pl&pu
+            double e1 = 1e-10;
+            // min distance to boundary(0 or 1)
+            double e2 = 1e-300;
+            if (LowerBound == UpperBound)
+            {
+                return LowerBound;
+            }
+            var ub = Math.Max(LowerBound, UpperBound);
+            var lb = Math.Min(LowerBound, UpperBound);
+            // transfrom lowerbound and upperbound to use standard normal distribution
+            var trans_l = (lb - loc) / scale;
+            var trans_u = (ub - loc) / scale;
+            var rand1 = RandDouble();
+            double pl = Normal.Function(trans_l);
+            double pu = Normal.Function(trans_u);
+            // convert rand1 to rand2
+            double rand2;
+            double res;
+            // small probobability difference
+            if (pu - pl < e1)
+            {
+                // keep distance to boundary
+                if (pl - 0 < e2)
+                {
+                    pl = e2;
+                }
+                else if (1 - pl < (e2 + e1))
+                {
+                    pl = 1 - (e2 + e1);
+                }
+                pu = pl + e1;
+                rand2 = rand1 * (e1) + pl;
+                var lower = Normal.Inverse(pl);
+                var size = Normal.Inverse(pu) - lower;
+                res = (Normal.Inverse(rand2) - lower) / size;
+                return res * (ub - lb) + lb;
+            }
+            rand2 = (pu - pl) * rand1 + pl;
+            res = Normal.Inverse(rand2);
+            return res * scale + loc;
+        }
+        //RandNormalInRange 的增强版本
+        // inverse CDF method
+        // 对于任意情况的随机数都符合截断正态分布，且输出值永远在范围内
+        // 速度比之前优化100倍以上
+        public static double Truncnormal(double loc, double scale, double LowerBound, double UpperBound)
+        {
+
+            double res = _truncnormal(loc, scale, LowerBound, UpperBound);
+            var ub = Math.Max(LowerBound, UpperBound);
+            var lb = Math.Min(LowerBound, UpperBound);
+            // 输出范围检查
+            if (res < ub && res > lb) return res;
+            // 此函数必定返回范围内的随机数，不在范围内则返回均匀随机数
+            else return RandDouble() * (ub - lb) + lb;
+        }
+
         public static int RandInt(int range)
         {
             //return General.Utils.RandInt(range);

@@ -14,6 +14,7 @@ using ThMEPEngineCore.GeojsonExtractor.Model;
 using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPEngineCore.Model;
 using ThMEPElectrical.AFAS.Data;
+using ThMEPElectrical.AFAS.Model;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Interface;
 using ThMEPElectrical.AFAS.Utils;
@@ -22,7 +23,7 @@ namespace ThMEPElectrical.AFAS.Service
 {
     internal class ThHandlePlaceConverage
     {
-        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, bool referBeam, double wallThickness)
+        public static ThAFASPlaceCoverageExtractor BuildPlaceCoverage(List<ThExtractorBase> extractors, ThMEPEngineCore.Algorithm.ThMEPOriginTransformer transformer, ThBeamDataParameter beamDataParameter)
         {
             var roomExtract = extractors.Where(x => x is ThAFASRoomExtractor).FirstOrDefault() as ThAFASRoomExtractor;
             var wallExtract = extractors.Where(x => x is ThAFASShearWallExtractor).FirstOrDefault() as ThAFASShearWallExtractor;
@@ -38,9 +39,10 @@ namespace ThMEPElectrical.AFAS.Service
                 Columns = columnExtract.Columns.Select(x => ThIfcColumn.Create(x)).ToList(),
                 Beams = beamExtract.Beams,
                 Holes = holeExtract.HoleDic.Select(x => x.Key).ToList(),
-                ReferBeam = referBeam,
                 Transformer = transformer,
-                WallThickness = wallThickness,
+                ReferBeam = beamDataParameter.ReferBeam,
+                WallThickness = beamDataParameter.WallThickness,
+                BufferDist = beamDataParameter.BufferDist,
             };
             placeConverageExtract.Walls.AddRange(archiWallExtract.Walls.Select(w => ThIfcWall.Create(w)).ToList());
 

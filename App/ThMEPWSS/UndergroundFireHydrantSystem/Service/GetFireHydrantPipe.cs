@@ -119,6 +119,10 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 for (int i = 0; i < rstPath.Count - 1; i++)
                 {
                     var pt = rstPath[i];
+                    if(!fireHydrantSysIn.PtTypeDic.ContainsKey(pt))
+                    {
+                        continue;
+                    }
                     double pipeLength = fireHydrantSysIn.PipeWidth;
                     if (branchDic.ContainsKey(pt))
                     {

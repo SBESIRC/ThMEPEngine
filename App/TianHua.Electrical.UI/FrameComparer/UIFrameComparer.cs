@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad;
 using ThMEPEngineCore.Algorithm;
 using ThCADExtension;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace TianHua.Electrical.UI.FrameComparer
 {
@@ -45,9 +46,17 @@ namespace TianHua.Electrical.UI.FrameComparer
                     if (entity != null)
                     {
                         Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
+                        Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+                        HoldWindows();
+                        Focus();
                     }
                 }
             }
+        }
+        public void HoldWindows()
+        {
+            var keywordOptions = new PromptKeywordOptions("\n按 Enter 返回") { AllowNone = true };
+            Active.Editor.GetKeywords(keywordOptions);
         }
     }
 }

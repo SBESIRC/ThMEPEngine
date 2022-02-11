@@ -11,6 +11,8 @@ using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
+using ThMEPArchitecture.ParkingStallArrangement.General;
+using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
 using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
@@ -86,7 +88,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
             
-
             var maxVals = new List<double>();
             var minVals = new List<double>();
 
@@ -198,12 +199,115 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                 }
             }
+            //BreakAndOptimize(segLinesEx, outerBrder, solution);
+            //layoutPara.Set(solution.Genome);
 
+            //string finalSplitterLayerName = $"AI-最终分割线{index}";
+            //Draw.DrawSeg(solution, finalSplitterLayerName);
+            ////layoutPara.Dispose();
+        }
+
+        public void BreakAndOptimize(List<Line> sortedSegLines, OuterBrder outerBrder, Chromosome Orgsolution)// 利用已有的二分，打断，赋值，再迭代
+        {
+            outerBrder.SegLines = sortedSegLines;// 之前的分割线
+            var GaPara = new GaParameter(sortedSegLines);
+
+            //var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
+
+            var segbkparam = new SegBreak(outerBrder, GaPara, true, true);// 纵向且正方向
+            outerBrder.SegLines = segbkparam.NewSegLines;// 生成的分割线
+
+            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
+            Preprocessing.DataPreProcessWithOuterBrder(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+
+            // gaparam 赋值
+            segbkparam.Set(ref gaPara,Orgsolution);
+
+
+            ParkingStallGAGenerator geneAlgorithm = null;
+
+            if (_CommandMode == CommandMode.WithoutUI)
+            {
+                var dirSetted = General.Utils.SetLayoutMainDirection();
+                if (!dirSetted)
+                    return;
+
+                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
+                if (iterationCnt.Status != PromptStatus.OK) return;
+
+                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
+                if (popSize.Status != PromptStatus.OK) return;
+
+                ParameterViewModel.IterationCount = iterationCnt.Value;
+                ParameterViewModel.PopulationCount = popSize.Value;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
+            else
+            {
+                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
+            }
+            geneAlgorithm.Logger = Logger;
+
+            var rst = new List<Chromosome>();
+            var histories = new List<Chromosome>();
+            bool recordprevious = false;
+            try
+            {
+                rst = geneAlgorithm.Run2(histories, recordprevious);
+            }
+            catch (Exception ex)
+            {
+                ;
+            }
+            var solution = rst.First();
+            histories.Add(rst.First());
+            var parkingStallCount = solution.ParkingStallCount;
+            ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, parkingStallCount);
+
+            for (int k = 0; k < histories.Count; k++)
+            {
+                layoutPara.Set(histories[k].Genome);
+                if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
+                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
+                {
+                    var use_partition_pro = true;
+                    if (use_partition_pro)
+                    {
+                        var partitionpro = new ParkingPartitionPro();
+                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                        if (!partitionpro.Validate()) continue;
+                        try
+                        {
+                            partitionpro.ProcessAndDisplay();
+                        }
+                        catch (Exception ex)
+                        {
+                            ;
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        ParkingPartition partition = new ParkingPartition();
+                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
+                        {
+                            try
+                            {
+                                partition.ProcessAndDisplay();
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error(ex.Message);
+                                partition.Dispose();
+                            }
+                        }
+                    }
+                }
+            }
             layoutPara.Set(solution.Genome);
-
-            string finalSplitterLayerName = $"AI-最终分割线{index}";
-            Draw.DrawSeg(solution, finalSplitterLayerName);
-            //layoutPara.Dispose();
+            Draw.DrawSeg(solution);
+            Draw.DrawSeg(sortedSegLines, 123);
         }
     }
 }

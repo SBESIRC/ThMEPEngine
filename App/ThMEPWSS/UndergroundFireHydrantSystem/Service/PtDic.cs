@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using GeometryExtensions;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -254,6 +255,19 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Service
                 catch
                 {
                     ;
+                }
+            }
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var tpt in fireHydrantSysIn.TermPointDic.Values)
+                {
+                    var dbText = new DBText()
+                    {
+                        Position = tpt.PtEx._pt,
+                        Height = 300,
+                        TextString = Convert.ToString(tpt.Type)
+                    };
+                    acadDatabase.CurrentSpace.Add(dbText);
                 }
             }
         }

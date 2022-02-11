@@ -62,6 +62,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" Guid="{0DBC948F-6CD9-4EA0-93D5-ED2CEEE07DBC}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Serilog.Sinks.File.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Debug" Guid="{95DDC608-6BDE-4AB2-B936-5B45DD364BB1}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" Guid="{48C2D904-3D19-43E2-A4B2-D498FE9E4B05}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" Guid="{7443AD40-4641-4E98-A13B-5B4A69F2E39C}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" Guid="{7C84318D-482F-4FF7-AAEE-29794DC13D47}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Accord.Math.Core.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
@@ -122,6 +134,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" Guid="{8C49D56E-8AFE-459A-B9CD-87283E4A5779}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Serilog.Sinks.File.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Debug" Guid="{6BC113E2-B7BB-461C-A8CB-6AC4411EEF61}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Debug" Guid="{18E07C9B-AD10-4DD5-B4CC-6AAEB5DBF949}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Config_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Debug" Guid="{EF3DC825-0ED0-483D-B314-6113F688165B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Math_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Debug" Guid="{0A29F3C9-B5AE-4D98-9A44-45E428CABC17}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Accord.Math.Core.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
             <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -181,6 +205,18 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" Guid="{6E47D01A-6B05-40EB-8F06-B1D3590177E6}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Serilog.Sinks.File.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Debug" Guid="{6BC113E2-B7BB-461C-A8CB-6AC4411EEF61}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Debug" Guid="{18E07C9B-AD10-4DD5-B4CC-6AAEB5DBF949}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Config_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Debug" Guid="{EF3DC825-0ED0-483D-B314-6113F688165B}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Math_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Debug" Guid="{0A29F3C9-B5AE-4D98-9A44-45E428CABC17}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Accord.Math.Core.dll" />
             </Component>
         </DirectoryRef>
         <?elseif $(var.Configuration) = Release ?>
@@ -243,6 +279,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" Guid="{578442B8-64CE-4E56-886E-62767ACC4B0C}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Serilog.Sinks.File.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Release" Guid="{20B16B74-E47E-4DFB-BC99-F22817DD6995}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" Guid="{10C561E7-F945-4E67-870D-04CB3CA08765}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" Guid="{00285874-62C1-4C9E-89F5-EC464BDEE771}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" Guid="{32BA1A8E-8ABD-4562-8987-D250B376DB84}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Accord.Math.Core.dll" />
+            </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
             <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -302,6 +350,18 @@
             </Component>
             <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" Guid="{81FAF773-7276-4ADC-ADB4-DC635FDDC787}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Serilog.Sinks.File.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Release" Guid="{0675EB68-9BFC-4391-BA60-1CEB1F085FC2}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Release" Guid="{3E0C56B3-1BF0-4A80-910B-2D956C5982D3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Config_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Release" Guid="{E7616309-B469-415C-8190-6904FAE227F5}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Math_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Release" Guid="{83CE396F-A711-407C-82D4-58FF65EE1210}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Accord.Math.Core.dll" />
             </Component>
         </DirectoryRef>
         <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -363,6 +423,18 @@
             <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" Guid="{9606F249-18F5-4B2A-8A40-6785A02CA0F3}" Win64="yes">
                 <File Id="FILE_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Serilog.Sinks.File.dll" />
             </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Release" Guid="{A61053DA-68F2-4BE9-A467-6AE213BF4D28}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Accord.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Release" Guid="{8EAA88BE-D23B-442B-8C7A-B6F348B0BAB3}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Config_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Accord.dll.config" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Release" Guid="{FF349499-1261-4780-8E32-D5C4C40C1716}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Math_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Accord.Math.dll" />
+            </Component>
+            <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Release" Guid="{9A2E18EC-07D9-42FF-9DFF-272A786598AC}" Win64="yes">
+                <File Id="FILE_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Accord.Math.Core.dll" />
+            </Component>    
         </DirectoryRef>
         <?endif?>
     </Fragment>
@@ -427,6 +499,18 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Debug" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Debug" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Debug" />
             <?elseif $(var.Configuration) = Release ?>
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
@@ -486,6 +570,18 @@
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Serilog_Sinks_File_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Serilog_Sinks_File_Release" />
             <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Serilog_Sinks_File_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Config_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Accord_Math_Core_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Accord_Math_Core_Release" />
+            <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Accord_Math_Core_Release" />
             <?endif?>
         </ComponentGroup>
     </Fragment>

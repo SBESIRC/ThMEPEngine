@@ -56,11 +56,12 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
         public static void AddPipeLine(DBObjectCollection dbObjs, ref FireHydrantSystemIn fireHydrantSysIn, 
             ref List<Point3dEx> pointList, ref List<Line> lineList)
         {
+            double pipeLenTor = 25.0;
             foreach (var f in dbObjs)
             {
                 if (f is Line fline)
                 {
-                    if(fline.Length < 10)
+                    if(fline.Length < pipeLenTor)
                     {
                         continue;//小于1的直线跳过
                     }
@@ -80,7 +81,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                         var pti = fl.GetPoint3dAt(i);
                         var pt1 = new Point3dEx(ptPre.X, ptPre.Y, 0);
                         var pt2 = new Point3dEx(pti.X, pti.Y, 0);
-                        if(pt1._pt.DistanceTo(pt2._pt) < 10)
+                        if(pt1._pt.DistanceTo(pt2._pt) < pipeLenTor)
                         {
                             continue;
                         }
@@ -93,6 +94,7 @@ namespace ThMEPWSS.UndergroundFireHydrantSystem.Model
                 }
             }
         }
+
         public static void AddValveLine(DBObjectCollection valveDB,
             ref FireHydrantSystemIn fireHydrantSysIn, ref List<Point3dEx> pointList, ref List<Line> lineList, 
             ref List<Line> valveList, ThCADCoreNTSSpatialIndex casingSpatialIndex)

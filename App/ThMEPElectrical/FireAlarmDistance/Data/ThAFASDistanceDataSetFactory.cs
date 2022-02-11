@@ -12,17 +12,16 @@ using ThMEPEngineCore.GeojsonExtractor.Interface;
 using ThMEPElectrical.AFAS.Data;
 using ThMEPElectrical.AFAS.Service;
 using ThMEPElectrical.AFAS.Interface;
+using ThMEPElectrical.AFAS.Model;
 
 namespace ThMEPElectrical.FireAlarmDistance.Data
 {
     public class ThAFASDistanceDataSetFactory : ThMEPDataSetFactory
     {
         /////input
-        public bool ReferBeam { get; set; } = true;
         public bool NeedConverage { get; set; } = true;
         public List<ThExtractorBase> InputExtractors { get; set; }
-        public double WallThickness { get; set; } = 100;
-
+        public ThBeamDataParameter BeamDataParameter { get; set; }
         /////output
         private List<ThGeometry> Geos { get; set; }
         public ThAFASDistanceDataSetFactory()
@@ -30,7 +29,6 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             Geos = new List<ThGeometry>();
             InputExtractors = new List<ThExtractorBase>();
         }
-
 
         protected override ThMEPDataSet BuildDataSet()
         {
@@ -129,7 +127,7 @@ namespace ThMEPElectrical.FireAlarmDistance.Data
             //提取可布区域
             if (NeedConverage == true)
             {
-                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, ReferBeam, WallThickness);
+                var placeConverage = ThHandlePlaceConverage.BuildPlaceCoverage(extractors, Transformer, BeamDataParameter);
                 placeConverage.Set(storeyInfos);
                 placeConverage.Group(fireApartExtractor.FireApartIds);
                 extractors.Add(placeConverage);

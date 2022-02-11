@@ -117,6 +117,7 @@ namespace ThMEPStructure.GirderConnect.ConnectMainBeam.Utils
             }
             return result.Value.GetObjectIds().Select(o => acdb.Element<Polyline>(o)).ToList();
         }
+
         /// <summary>
         /// 获得多个所选多边形的中点
         /// </summary>

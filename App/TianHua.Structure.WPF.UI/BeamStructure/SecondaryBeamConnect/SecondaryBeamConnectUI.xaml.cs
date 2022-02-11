@@ -57,7 +57,8 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
                         Da = SecondaryBeamConfigFromFile.Da,
                         Db = SecondaryBeamConfigFromFile.Db,
                         Dc = SecondaryBeamConfigFromFile.Dc,
-                        RegionSelection = SecondaryBeamConfigFromFile.RegionSelection
+                        RegionSelection = SecondaryBeamConfigFromFile.RegionSelection,
+                        DirectionSelection = SecondaryBeamConfigFromFile.DirectionSelection
                     };
                 }
             }
@@ -69,7 +70,8 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
                     Da = SecondaryBeamConfigFromFile.Da,
                     Db = SecondaryBeamConfigFromFile.Db,
                     Dc = SecondaryBeamConfigFromFile.Dc,
-                    RegionSelection = SecondaryBeamConfigFromFile.RegionSelection
+                    RegionSelection = SecondaryBeamConfigFromFile.RegionSelection,
+                    DirectionSelection = SecondaryBeamConfigFromFile.DirectionSelection
                 };
             }
         }
@@ -89,6 +91,8 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
             this.txtDc.Text = model.Dc.ToString();
             this.SelectionRectangle.IsChecked = model.RegionSelection == 1;
             this.SelectionPolygon.IsChecked = model.RegionSelection == 2;
+            this.AutomaticDir.IsChecked = model.DirectionSelection == 1;
+            this.ManualDir.IsChecked = model.DirectionSelection == 2;
         }
 
         private void ResetButton_Click(object sender, System.Windows.RoutedEventArgs e)
@@ -108,6 +112,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
                 SecondaryBeamLayoutConfig.Dc = dataModel.Dc * 1000;//m -> mm
                 SecondaryBeamLayoutConfig.FloorSelection = dataModel.FloorSelection;
                 SecondaryBeamLayoutConfig.RegionSelection = dataModel.RegionSelection;
+                SecondaryBeamLayoutConfig.DirectionSelection = dataModel.DirectionSelection;
                 SaveConfig(installUrl);
                 CommandHandlerBase.ExecuteFromCommandLine(false, "THCLSC");
                 this.Close();
@@ -129,6 +134,10 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
             {
                 return false;
             }
+            if (model.DirectionSelection != 1 && model.DirectionSelection != 2)
+            {
+                return false;
+            }
             if (model.Da <= 0 || model.Db <= 0 || model.Dc <= 0)
             {
                 return false;
@@ -143,6 +152,7 @@ namespace TianHua.Structure.WPF.UI.BeamStructure.SecondaryBeamConnect
                 SecondaryBeamConfigModel model = new SecondaryBeamConfigModel();
                 model.FloorSelection = this.BasementRoof.IsChecked == true ? 1 : 2;
                 model.RegionSelection = this.SelectionRectangle.IsChecked == true ? 1 : 2;
+                model.DirectionSelection = this.AutomaticDir.IsChecked == true ? 1 : 2;
                 model.Da=double.Parse(this.txtDa.Text);
                 model.Db=double.Parse(this.txtDb.Text);
                 model.Dc=double.Parse(this.txtDc.Text);

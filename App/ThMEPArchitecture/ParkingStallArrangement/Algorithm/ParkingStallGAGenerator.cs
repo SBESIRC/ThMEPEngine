@@ -721,12 +721,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         {
             return General.Utils.RandChoice(UpperBound, n, LowerBound);
         }
-        private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound, int MaxIter = 1000)
+        private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound)
         {
+            
             double tol = 1e-4;
             if (UpperBound- LowerBound <= tol) return loc;
 
-            else return General.Utils.RandNormalInRange(loc, scale, LowerBound, UpperBound, MaxIter);
+            else return General.Utils.Truncnormal(loc, scale, LowerBound, UpperBound);
         }
         private int RandInt(int range)
         {

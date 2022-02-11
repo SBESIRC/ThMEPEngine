@@ -19,9 +19,16 @@ using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 
 namespace ThMEPArchitecture
 {
-
     public partial class ThParkingStallArrangement
     {
+        [CommandMethod("TIANHUACAD", "-THFGXDD", CommandFlags.Modal)]
+        public void ThBreakSegLines()
+        {
+            using (var cmd = new ThBreakSegLinesCmd())
+            {
+                cmd.Execute();
+            }
+        }
         [CommandMethod("TIANHUACAD", "-THDXQYFG", CommandFlags.Modal)]
         public void ThArrangeParkingStall()
         {

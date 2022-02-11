@@ -14,6 +14,8 @@ using ThMEPArchitecture.ParkingStallArrangement.General;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.PartitionLayout;
 using ThMEPArchitecture.ViewModel;
+using ThMEPEngineCore.Algorithm;
+
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
     public class LayoutParameter:IDisposable
@@ -214,7 +216,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var tmpBoundary = OuterBoundary.Clone() as Polyline;
             var tmpSegLines = new List<Line>();
             var tmpSegLineIndexDic = new Dictionary<int, Line>();
-            List<Polyline> areas = null;
+            List<Polyline> areas = new List<Polyline>();
             try
             {
                 for (int i = 0; i < Genome.Count; i++)
@@ -799,18 +801,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
     {
         public static List<Polyline> GetCutters(this BlockReference br, bool usePline = true, Serilog.Core.Logger Logger = null)
         {
+            double closedTor = 5.0;
             var plines = new List<Polyline>();
             var dbObjs = new DBObjectCollection();
             br.Explode(dbObjs);
-            foreach (var obj in dbObjs)
+
+            if(usePline)
             {
-                if(usePline)
+                foreach (var obj in dbObjs)
                 {
                     if (obj is Polyline pline)
                     {
-                        if (pline.Closed)
+                        var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
+                        if (closedPline.Closed)
                         {
-                            plines.Add(pline);
+                            plines.Add(closedPline);
                         }
                         else
                         {
@@ -818,10 +823,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         }
                     }
                 }
-                else
+            }
+            else
+            {
+                foreach (var obj in dbObjs)
                 {
                     //use hatch
-                    if(obj is Hatch hatch)
+                    if (obj is Hatch hatch)
                     {
                         var pl = (Polyline)hatch.Boundaries()[0];
                         var plrec = pl.GeometricExtents;
@@ -837,6 +845,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     }
                 }
             }
+            
             return plines;
         }
     }
