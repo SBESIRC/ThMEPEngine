@@ -506,7 +506,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
                     double LowerBound = LowerUpperBound[i].Item1;
                     double UpperBound = LowerUpperBound[i].Item2;
-                    var RandValue = RandDoubleInRange(LowerBound, UpperBound);
+                    double RandValue;
+                    if (RandDouble() > GoldenRatio)
+                    {
+                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//纯随机数
+                    }
+                    else
+                    {
+                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//随机特殊解
+                    }
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
@@ -537,7 +545,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     if (initgenome.IsVaild(LayoutPara, ParameterViewModel)) solutions.Add(initgenome.Clone());
                 }
             } 
-
             while (solutions.Count < FirstPopulationSize)
             {
                 // 随机生成 其余的解
@@ -767,6 +774,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (UpperBound - LowerBound < tol) return LowerBound ;
             else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
         }
+        private double RandomSpecialNumber(double LowerBound, double UpperBound)
+        {
+            //随机的特殊解，用于卡车位
+            // 输出的之保持在最大最小值之间
+            double tol = 1e-4;
+            if (UpperBound - LowerBound < tol) return LowerBound;
+            else
+            {
+                var parkingLength = ParameterViewModel.VerticalSpotLength;
+                var SolutionLis = new List<double>() { LowerBound, UpperBound};
+                var s1 = LowerBound + parkingLength;
+                var s2 = UpperBound - parkingLength;
+                if (s1 < UpperBound) SolutionLis.Add(s1);
+                if (s2 > LowerBound) SolutionLis.Add(s2);
+                return SolutionLis[RandInt(SolutionLis.Count)];// 随机选一个
+            }
+        }
         #endregion
         #region
         // run2代码部分
@@ -975,15 +999,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double minVal = LowerUpperBound[j].Item1;
                     double maxVal = LowerUpperBound[j].Item2;
 
-                    //if (maxVal - minVal > MutationUpperBound)
-                    //{
-                    //    maxVal = minVal + MutationUpperBound;
-                    //}
                     var loc = s[i].Genome[j].Value;
 
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-
-                    s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
+                    if (RandDouble() > GoldenRatio)
+                    {
+                        s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
+                    }
+                    else
+                    {
+                        s[i].Genome[j].Value = RandomSpecialNumber(minVal, maxVal);
+                    }
 
                 }
             }
