@@ -40,15 +40,22 @@ namespace ThMEPLighting.ParkingStall.Business.Block
                 db.Database.ImportModel(ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, ParkingStallCommon.PARK_LIGHT_LAYER);
                 foreach (var lightInfo in m_LightPlaceInfos)
                 {
-                    var position = lightInfo.Position;
-                    if (null != m_OriginTransformer)
-                        position = m_OriginTransformer.Reset(position);
-                    lightInfo.InsertBlockId = db.Database.InsertModel(
-                        ParkingStallCommon.PARK_LIGHT_LAYER, 
-                        ParkingStallCommon.PARK_LIGHT_BLOCK_NAME,
-                        position, 
-                        scale, 
-                        lightInfo.Angle);
+                    foreach (var point in lightInfo.InsertLightPosisions) 
+                    {
+                        var position = point;
+                        if (null != m_OriginTransformer)
+                            position = m_OriginTransformer.Reset(position);
+                        var id = db.Database.InsertModel(
+                            ParkingStallCommon.PARK_LIGHT_LAYER,
+                            ParkingStallCommon.PARK_LIGHT_BLOCK_NAME,
+                            position,
+                            scale,
+                            lightInfo.Angle);
+                        if (null == id || !id.IsValid)
+                            continue;
+                        lightInfo.InsertLightBlockIds.Add(id);
+                    }
+                    
                 }
             }
         }

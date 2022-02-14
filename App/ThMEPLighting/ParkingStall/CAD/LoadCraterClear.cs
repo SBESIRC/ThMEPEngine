@@ -102,6 +102,35 @@ namespace ThMEPLighting.ParkingStall.CAD
                 }
             }
         }
+        public static void ClearHistoryText(string layerName, Polyline outPolyline, List<Polyline> innerPolylines, ThMEPOriginTransformer originTransformer) 
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Active())
+            {
+                var delEnts = new List<DBText>();
+                var targetDBTexts = currentDb.ModelSpace
+                   .OfType<DBText>().Where(o => o.Layer == layerName);
+                if (targetDBTexts == null || targetDBTexts.Count() < 1)
+                    return;
+                targetDBTexts.ForEach(x =>
+                {
+                    var transDbText = x.Clone() as DBText;
+                    if (null != originTransformer)
+                        originTransformer.Transform(transDbText);
+                    var point = transDbText.Position;
+                    if (outPolyline.Contains(point))
+                        delEnts.Add(x);
+                });
+                if (delEnts.Count < 1)
+                    return;
+                var objs = new DBObjectCollection();
+                delEnts.ForEachDbObject(c => objs.Add(c));
+                foreach (Entity spray in objs)
+                {
+                    spray.UpgradeOpen();
+                    spray.Erase();
+                }
+            }
+        }
         public static void ChangeBlockDrawOrders(List<ObjectId> blockIds)
         {
             if (null == blockIds || blockIds.Count < 1)

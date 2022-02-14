@@ -10,6 +10,7 @@ namespace ThMEPLighting.UI.ViewModels
 {
     class ParkingLightViewModel : NotifyPropertyChangedBase
     {
+        public Parkingillumination parkingStallIllumination { get; }
         public ParkingLightViewModel()
         {
             GroupMaxCount = 25;
@@ -33,6 +34,30 @@ namespace ThMEPLighting.UI.ViewModels
                 ListScales.Add(raise);
             }
             ScaleSelect = ListScales.Where(c => c.Value == (int)ThEnumBlockScale.DrawingScale1_100).FirstOrDefault();
+
+
+            parkingStallIllumination = new Parkingillumination();
+            parkingStallIllumination.MastIllumination = 30;
+            parkingStallIllumination.LightRatedIllumination = 1800;
+            parkingStallIllumination.LightRatedPower = 18;
+            parkingStallIllumination.UtilizationCoefficient = 0.8;
+            parkingStallIllumination.MaintenanceFactor = 0.7;
+            parkingStallIllumination.ShowResult = true;
+            ListParkIlluminationSources = new ObservableCollection<UListItemData>();
+            var itemIllumination = CommonUtil.EnumDescriptionToList(typeof(EnumIllumination));
+            foreach (var item in itemIllumination)
+            {
+                ListParkIlluminationSources.Add(item);
+            }
+            ParkIlluminationSelect = ListParkIlluminationSources.Where(c => c.Value == (int)EnumIllumination.Illumination_30).FirstOrDefault();
+
+            ListParkFactorSources = new ObservableCollection<UListItemData>();
+            var itemUse = CommonUtil.EnumDescriptionToList(typeof(EnumMaintenanceFactor));
+            foreach (var item in itemUse)
+            {
+                ListParkFactorSources.Add(item);
+            }
+            ParkFactorSelect = ListParkFactorSources.Where(c => c.Value == (int)EnumMaintenanceFactor.MaintenanceFactor_0_8).FirstOrDefault();
         }
         private bool? _selectAllLayer { get; set; }
         public bool? SelectAllLayer
@@ -210,6 +235,108 @@ namespace ThMEPLighting.UI.ViewModels
             else
             {
                 SelectAllBlock = null;
+            }
+        }
+        
+        private ObservableCollection<UListItemData> _parkIlluminationSources = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> ListParkIlluminationSources
+        {
+            get { return _parkIlluminationSources; }
+            set 
+            { 
+                _parkIlluminationSources = value; 
+                this.RaisePropertyChanged(); 
+            }
+        }
+        private UListItemData _parkIlluminationSelect { get; set; }
+        public UListItemData ParkIlluminationSelect
+        {
+            get { return _parkIlluminationSelect; }
+            set
+            {
+                _parkIlluminationSelect = value;
+                if (null != _parkIlluminationSelect)
+                {
+                    var str = _parkIlluminationSelect.Name.ToString();
+                    double.TryParse(str, out double dFactor);
+                    parkingStallIllumination.MastIllumination = dFactor;
+                }
+                this.RaisePropertyChanged();
+            }
+        }
+        private ObservableCollection<UListItemData> _parkFactorSources = new ObservableCollection<UListItemData>();
+        public ObservableCollection<UListItemData> ListParkFactorSources
+        {
+            get { return _parkFactorSources; }
+            set
+            {
+                _parkFactorSources = value;
+                this.RaisePropertyChanged();
+            }
+        }
+        private UListItemData _parkFactorSelect { get; set; }
+        public UListItemData ParkFactorSelect
+        {
+            get { return _parkFactorSelect; }
+            set
+            {
+                _parkFactorSelect = value;
+                if (null != _parkFactorSelect)
+                {
+                    var str = _parkFactorSelect.Name.ToString();
+                    double.TryParse(str, out double dFactor);
+                    parkingStallIllumination.MastIllumination = dFactor;
+                }
+                this.RaisePropertyChanged();
+            }
+        }
+        public double LuminousFlux 
+        {
+            get { return parkingStallIllumination.LightRatedIllumination; }
+            set 
+            {
+                parkingStallIllumination.LightRatedIllumination = value;
+                if (value > 3500 || value < 900)
+                    parkingStallIllumination.LightRatedIllumination = 1800;
+                this.RaisePropertyChanged();
+            }
+        }
+        /// <summary>
+        /// 灯具额定功率（W）
+        /// </summary>
+        public double LightRatedPower
+        {
+            get { return parkingStallIllumination.LightRatedPower; }
+            set 
+            {
+                parkingStallIllumination.LightRatedPower = value<0.1?18:value;
+                this.RaisePropertyChanged();
+            }
+        }
+        /// <summary>
+        /// 利用系数
+        /// </summary>
+        public double UtilizationCoefficient 
+        {
+            get { return parkingStallIllumination.UtilizationCoefficient; }
+            set 
+            {
+                parkingStallIllumination.UtilizationCoefficient = value;
+                if (value <= 0 || value >= 2)
+                    parkingStallIllumination.UtilizationCoefficient = 0.8;
+                this.RaisePropertyChanged();
+            }
+        }
+        /// <summary>
+        /// 显示计算结果
+        /// </summary>
+        public bool ShowResult 
+        {
+            get { return parkingStallIllumination.ShowResult; }
+            set 
+            {
+                parkingStallIllumination.ShowResult = value;
+                this.RaisePropertyChanged();
             }
         }
     }

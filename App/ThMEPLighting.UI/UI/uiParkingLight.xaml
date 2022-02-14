@@ -5,15 +5,20 @@
                     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
                     xmlns:local="clr-namespace:ThMEPLighting.UI.UI"
                     xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
+                    xmlns:cusLocal="clr-namespace:ThControlLibraryWPF;assembly=ThControlLibraryWPF"
                     mc:Ignorable="d"
                     ResizeMode="NoResize"
                     Width="200"
                     SizeToContent="Height"
                     Title="地库车位照明"
                     >
+    <Window.Resources>
+        <cusLocal:BoolToVisibilty x:Key="boolToVisibilty"/>
+    </Window.Resources>
     <Grid Margin="5,0,5,0" x:Name="gridForm">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="40"></RowDefinition>
@@ -55,6 +60,81 @@
             </ListView>
         </StackPanel>
         <StackPanel Grid.Row="2">
+            <Grid Height="30">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="30"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="照度控制" Padding="0" VerticalContentAlignment="Center"></Label>
+                <ToggleButton Grid.Column="1"  Height="20" Width="20" Background="Transparent" x:Name="openBtn" IsChecked="False">
+                    <ToggleButton.Template>
+                        <ControlTemplate TargetType="ToggleButton">
+                            <Border Background="{TemplateBinding Background}" BorderThickness="0" ToolTip="{TemplateBinding Content}">
+                                <Path x:Name="pathIcon" 
+                                      Width="16" 
+                                      Height="16"
+                                      Stretch="Uniform"
+                                      Data="M719.30794269 116.4921875l517.40332032 408.32226563L1152.62630207 591.1015625 719.30794269 249.22460937 285.98958332 591.1015625 201.82552082 524.81445313 719.30794269 116.4921875z m0 316.40625l517.40332032 408.32226563L1152.62630207 907.5078125 719.30794269 565.63085938 285.98958332 907.5078125 201.82552082 841.22070313 719.30794269 432.8984375z"
+                                      Fill="Black">
+                                </Path>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="true">
+                                    <Setter TargetName="pathIcon" Property="Data" Value="M710.02539058 907.5078125l-517.40332032-408.32226563L276.7070312 432.89843749 710.02539058 774.77539063 1143.34374995 432.8984375 1227.50781244 499.18554687 710.02539058 907.5078125z m0-316.40624999l-517.40332032-408.32226564L276.7070312 116.4921875 710.02539058 458.36914062 1143.34374995 116.4921875 1227.50781245 182.77929687 710.02539058 591.10156251z"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </ToggleButton.Template>
+                </ToggleButton>
+            </Grid>
+            <Grid Visibility="{Binding ElementName=openBtn,Path=IsChecked,UpdateSourceTrigger=PropertyChanged,NotifyOnSourceUpdated=True,Converter={StaticResource boolToVisibilty}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                </Grid.RowDefinitions>
+                <Label Content="车位照度要求：" Padding="0" Grid.Row="0" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <ComboBox Grid.Row="0" Height="22" Grid.Column="1"
+                          ItemsSource="{Binding ListParkIlluminationSources,Mode=OneWay,NotifyOnSourceUpdated=True}"
+                          SelectedItem="{Binding ParkIlluminationSelect,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+                <Label Content="lx" Grid.Row="0" Grid.Column="2" Margin="5,0,0,0" Padding="0" VerticalContentAlignment="Center"></Label>
+
+                <Label Content="灯具额定光通：" Padding="0" Grid.Row="1" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <cus:InputTextBox Grid.Row="1" Height="22" Grid.Column="1" HintText="范围[900,3500]"
+                                  TextBoxInputType="InputInteger"
+                                  Text="{Binding LuminousFlux,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
+                <Label Content="lm" Grid.Row="1" Grid.Column="2" Margin="5,0,0,0" Padding="0" VerticalContentAlignment="Center"></Label>
+
+                <Label Content="灯具额定功率：" Padding="0" Grid.Row="2" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <cus:InputTextBox TextBoxInputType="InputInteger" NumCanMinus="False"  Grid.Row="2" Height="22" Grid.Column="1"
+                                  HintText="输入正数"
+                                  Text="{Binding LightRatedPower,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
+                <Label Content="W" Grid.Row="2" Grid.Column="2" Margin="5,0,0,0" Padding="0" VerticalContentAlignment="Center"></Label>
+                
+                <Label Content="利用系数：" Padding="0" Grid.Row="3" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <cus:InputTextBox TextBoxInputType="InputDouble" Grid.Row="3" Height="22" Grid.Column="1"
+                                  HintText="输入范围(0,2)"
+                                  Text="{Binding UtilizationCoefficient,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"/>
+
+                <Label Content="维护系数：" Padding="0" Grid.Row="4" Grid.Column="0" VerticalContentAlignment="Center"></Label>
+                <ComboBox Grid.Row="4" Height="22" Grid.Column="1"
+                          ItemsSource="{Binding ListParkFactorSources,Mode=OneWay,NotifyOnSourceUpdated=True}"
+                          SelectedItem="{Binding ParkFactorSelect,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" />
+
+                <CheckBox Grid.Row="5" VerticalContentAlignment="Center" Content="显示计算结果" Grid.Column="0" Grid.ColumnSpan="4"
+                          Checked="CheckBox_Checked" Unchecked="CheckBox_Unchecked"
+                          IsChecked="{Binding ShowResult,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"/>
+            </Grid>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Vertical">
             <Grid Margin="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="30"></RowDefinition>
@@ -82,7 +162,7 @@
                           SelectedItem="{Binding ScaleSelect,Mode=TwoWay,NotifyOnSourceUpdated=True}" />
             </Grid>
         </StackPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="3" HorizontalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Grid.Row="4" HorizontalAlignment="Center">
             <cus:ImageButton ImageTextLocation="TextOnly" Name="btnLayoutLight" Content="灯具布置" TextMargin="10,0,10,0" Height="25" Click="btnLayoutLight_Click"></cus:ImageButton>
             <cus:ImageButton ImageTextLocation="TextOnly" Name="btnConnectLine" Content="自动连线" TextMargin="10,0,10,0" Height="25" Margin="10,0,0,0" Click="btnConnectLine_Click"></cus:ImageButton>
         </StackPanel>

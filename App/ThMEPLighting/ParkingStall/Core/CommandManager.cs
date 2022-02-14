@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
@@ -11,6 +12,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.ParkingStall.Assistant;
+using ThMEPLighting.ParkingStall.Business;
 using ThMEPLighting.ParkingStall.Business.Block;
 using ThMEPLighting.ParkingStall.Business.UserInteraction;
 using ThMEPLighting.ParkingStall.CAD;
@@ -369,6 +371,8 @@ namespace ThMEPLighting.ParkingStall.Core
 
             //var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
             bool addAlert = false;
+            int parkingGroupCount = 0;
+            int layoutLightCount = 0;
             foreach (var polygonInfo in wallPolygonInfos)
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
@@ -399,7 +403,9 @@ namespace ThMEPLighting.ParkingStall.Core
                 }
                 using (AcadDatabase acdb = AcadDatabase.Active())
                 {
-                    LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, _originTransformer); 
+                    LoadCraterClear.ClaerHistoryBlocks(acdb.Database, ParkingStallCommon.PARK_LIGHT_BLOCK_NAME, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, _originTransformer);
+                    LoadCraterClear.ClearHistoryLines(acdb.Database, ParkingStallCommon.PARK_LIGHT_RESULT_LAYER, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, _originTransformer);
+                    LoadCraterClear.ClearHistoryText(ParkingStallCommon.PARK_LIGHT_RESULT_LAYER, polygonInfo.ExternalProfile, polygonInfo.InnerProfiles, _originTransformer);
                 }
                 var lines = new List<Line>();
                 curves.ForEach(e =>
@@ -484,6 +490,10 @@ namespace ThMEPLighting.ParkingStall.Core
                 optimzeLightPlaceInfos.Clear();
                 optimzeLightPlaceInfos.AddRange(canInertorGroup);
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, lightDirection);
+
+                //根据计算每个区域实际要排布的灯
+                ParkingGroupLightIllumination.ParkingGroupLightIlluminationCheck(optimzeLightPlaceInfos, ThParkingStallService.Instance.ParkingStallIllumination);
+                StallTextInsertor.MakeTextInsert(optimzeLightPlaceInfos, ThParkingStallService.Instance.ParkingStallIllumination, _originTransformer);
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos,_originTransformer);
                 // 生成的灯图层前置
                 if (null == optimzeLightPlaceInfos || optimzeLightPlaceInfos.Count < 1)
@@ -491,15 +501,23 @@ namespace ThMEPLighting.ParkingStall.Core
                 var lightBlockIds = new List<ObjectId>();
                 foreach (var lightBlock in optimzeLightPlaceInfos)
                 {
+                    parkingGroupCount += 1;
+                    foreach (var id in lightBlock.InsertLightBlockIds) 
+                    {
+                        lightBlockIds.Add(id);
+                        layoutLightCount += 1;
+                    }
                     if (lightBlock.InsertBlockId == null || lightBlock.InsertBlockId.IsErased)
                         continue;
                     lightBlockIds.Add(lightBlock.InsertBlockId);
+                    layoutLightCount += 1;
                 }
                 LoadCraterClear.ChangeBlockDrawOrders(lightBlockIds);
             }
        
             if(addAlert)
                 ErrorMsgs.Add("框线内没有找到车道线，请确认数据正确后，再进行后续操作。");
+            ErrorMsgs.Add(string.Format("本次运行找到{0}组车位，共布置{1}盏灯具", parkingGroupCount, layoutLightCount));
         }
 
         public void SideLaneConnect()
