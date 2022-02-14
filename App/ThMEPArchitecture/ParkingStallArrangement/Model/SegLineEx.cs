@@ -13,12 +13,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public Line Segline { get; set; }
         public double MaxVal { get; set; }
         public double MinVal { get; set; }
+        public bool Direction { get; set; }
 
         public SegLineEx(Line segline, double maxVal, double minVal)
         {
             Segline = new Line(segline.StartPoint, segline.EndPoint);
             MaxVal = maxVal;
             MinVal = minVal;
+            Direction = Segline.GetDirection() == 1;
         }
 
         public SegLineEx Clone()

@@ -120,17 +120,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         minVals.Add(minVal);
                         break;
                     }
-                    //var rhroughSegline = AreaSplit.ThroughVerticalSeg(wallLine, ref orgAreas, buildLinesSpatialIndex, out maxVal, out minVal);
-                    //if (!(rhroughSegline is null))//分割线纵向贯穿分割区域
-                    //{
-                    //    throughBuildNums++;
-                    //    areas.Remove(area);
-                    //    areas.AddRange(orgAreas);
-                    //    sortSegLines.Add(rhroughSegline);
-                    //    maxVals.Add(maxVal);
-                    //    minVals.Add(minVal);
-                    //    break;
-                    //}
                 }
             }
 
@@ -145,10 +134,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             {
                 return true;
             }
-            //if (stopwatch.Elapsed.TotalSeconds > threshSecond)
-            //{
-            //    return false;
-            //}
+
             var dir = prob[num];//当前分割线的方向
             var flag = false;
             if (dir == '1')
@@ -250,51 +236,373 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        public static void GetAreaRandSeglinesByDfs(Polyline area, int seglineCnt, List<SegLineEx> visited, 
+        public static void GetAreaRandSeglinesByDfs(Polyline orgArea, Polyline area, int seglineCnt, List<SegLineEx> visited, 
             ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg)
         {
-            try
+            if (visited.Count == seglineCnt)
             {
-                if (visited.Count == seglineCnt)
+                var segLinesGroup = SeglinesGrouping(visited);
+                if(segLinesGroup.Count > 1)
                 {
-                    var tmp = new List<SegLineEx>();
-                    visited.ForEach(seg => tmp.Add(seg.Clone()));
-                    rstSegLines.AddRange(tmp);
-                    //#if DEBUG
-                    //                using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                    //                {
-                    //                    foreach (var line in visited)
-                    //                    {
-                    //                        acadDatabase.CurrentSpace.Add(new Line(line.Segline.StartPoint, line.Segline.EndPoint));
-                    //                    }
-                    //                }
-                    //#endif
-                    successedSeg = true;
-                    return;
+                    AddConnectLine(orgArea, visited, buildingSpatialIndex);
                 }
-                var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
-                if (spliters is null) return;
-                if(spliters.Count == 0)
-                {
-                    ;
-                }
-                var selectSegNum = General.Utils.RandInt(spliters.Count - 1);
-                var spliter = spliters[selectSegNum];//选中的分割线
-                var segline = spliter.Seglines;
-                var subAreas = segline.SplitByLine(area); //split area
-                visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
-                foreach (var subArea in subAreas)
-                {
-                    GetAreaRandSeglinesByDfs(subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
-                    if (successedSeg) return;
-                }
+                var tmp = new List<SegLineEx>();
+                visited.ForEach(seg => tmp.Add(seg.Clone()));
+                rstSegLines.AddRange(tmp);
+
+                successedSeg = true;
+                return;
             }
-            catch (Exception ex)
+            var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
+            if (spliters is null) return;
+
+            var selectSegNum = General.Utils.RandInt(spliters.Count - 1);
+            var spliter = spliters[selectSegNum];//选中的分割线
+            var segline = spliter.Seglines;
+            var subAreas = segline.SplitByLine(area); //split area
+            visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
+            foreach (var subArea in subAreas)
             {
-                ;
+                GetAreaRandSeglinesByDfs(orgArea, subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
+                if (successedSeg) return;
             }
         }
 
+        public static void AddConnectLine(Polyline area, List<SegLineEx> visited, 
+            ThCADCoreNTSSpatialIndex buildingSpatialIndex)
+        {
+            var rstSeglinesList = SeglinesGrouping(visited);//分组
+            var rstConnectLines = GetNearestLines(rstSeglinesList);//找到候选连接线
+            foreach(var rst in rstConnectLines)
+            {
+                var line1 = rst[0];
+                var line2 = rst[1];
+                double sval = 0;
+                double eval = 0;
+                double constantVal = 0;
+                if (line1.Direction)//竖直
+                {
+                    var val1 = line1.Segline.StartPoint.Y;
+                    var val2 = line1.Segline.EndPoint.Y;
+                    constantVal = line1.Segline.EndPoint.X;
+                    sval = Math.Min(val1, val2);
+                    eval = Math.Max(eval, val1);
+
+                }
+                else
+                {
+                    var val1 = line1.Segline.StartPoint.X;
+                    var val2 = line1.Segline.EndPoint.X;
+                    constantVal = line1.Segline.EndPoint.Y;
+                    sval = Math.Min(val1, val2);
+                    eval = Math.Max(val1, val2);
+                }
+                var rstLine = GetConnectLine(constantVal, sval, eval, line2, area, buildingSpatialIndex);
+                visited.Add(rstLine);
+            }
+        }
+
+        private static SegLineEx GetConnectLine(double constantVal, double sval, double eval, SegLineEx line2, Polyline area, 
+            ThCADCoreNTSSpatialIndex buildingSpatialIndex)
+        {
+            var areals = new List<Polyline>() { area};
+            var areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areals.ToCollection());
+            double curVal = sval + 5500;
+            Line curLine = new Line();
+            while (curVal < eval)
+            {
+                curLine = CreateTempLine(constantVal, curVal, line2);
+                var linebuffer = curLine.Buffer(1.0);
+                var areaCnt = areaSpatialIndex.SelectCrossingPolygon(linebuffer).Count;
+                var buildCnt = buildingSpatialIndex.SelectCrossingPolygon(linebuffer).Count;
+                if (areaCnt > 0 || buildCnt > 0)
+                {
+                    curVal += 5500;
+                    continue;
+                }
+                break;
+            }
+            var width = WindmillSplit.GetMaxWidth(area);
+            curLine.GetMaxMinVal(area, buildingSpatialIndex, width, out double maxVal2, out double minVal2);
+            return new SegLineEx(curLine, maxVal2, minVal2);
+        }
+
+        private static Line CreateTempLine(double constantVal, double val, SegLineEx line2)
+        {
+            Line line = new Line();
+            if(line2.Direction)//竖直
+            {
+                var spt = new Point3d(constantVal, val, 0);
+                var ept = new Point3d(line2.Segline.StartPoint.X, val, 0);
+                line = new Line(spt, ept);
+            }
+            else
+            {
+                var spt = new Point3d(val, constantVal, 0);
+                var ept = new Point3d(val, line2.Segline.StartPoint.Y, 0);
+                line = new Line(spt, ept);
+            }
+            return line;
+        }
+
+        /// <summary>
+        /// 找到最邻近的两根线
+        /// </summary>
+        /// <param name="rstSeglinesList"></param>
+        /// <returns></returns>
+        private static List<List<SegLineEx>> GetNearestLines(List<List<SegLineEx>> rstSeglinesList)
+        {
+            var rstLines = new List<List<SegLineEx>>();
+            var distLineDic = new Dictionary<double, SegLineEx>();
+            if (rstSeglinesList.Count == 2)
+            {
+                if (rstSeglinesList[0].Count == 1)
+                {
+                    var targetSeg = rstSeglinesList[0][0];
+                    foreach (var seg in rstSeglinesList[1])
+                    {
+                        if (seg.Direction == targetSeg.Direction)
+                        {
+                            var dist = GetLinesDist(seg.Segline, targetSeg.Segline);
+                            if(!distLineDic.ContainsKey(dist))
+                            {
+                                distLineDic.Add(dist, seg);
+                            }
+                        }
+                    }
+                    var rst  = new List<SegLineEx>();
+
+                    rst.Add(targetSeg);
+                    rst.Add(distLineDic.OrderBy(d => d.Key).First().Value);
+                    rstLines.Add(rst);
+                }
+
+                else if (rstSeglinesList[1].Count == 1)
+                {
+                    var targetSeg = rstSeglinesList[1][0];
+                    foreach (var seg in rstSeglinesList[0])
+                    {
+                        if (seg.Direction == targetSeg.Direction)
+                        {
+                            var dist = GetLinesDist(seg.Segline, targetSeg.Segline);
+                            if (!distLineDic.ContainsKey(dist))
+                            {
+                                distLineDic.Add(dist, seg);
+                            }
+                        }
+                    }
+                    var rst = new List<SegLineEx>();
+
+                    rst.Add(targetSeg);
+                    rst.Add(distLineDic.OrderBy(d => d.Key).First().Value);
+                    rstLines.Add(rst);
+                }
+            }
+            if(rstSeglinesList.Count > 2)
+            {
+                var dir = rstSeglinesList[0][0].Direction;
+                if(dir)
+                {
+                    rstSeglinesList = rstSeglinesList.OrderBy(rst => rst[0].Segline.StartPoint.X).ToList();
+                }
+                else
+                {
+                    rstSeglinesList = rstSeglinesList.OrderBy(rst => rst[0].Segline.StartPoint.Y).ToList();
+                }
+                for(int i = 0; i < rstSeglinesList.Count - 1; i++)
+                {
+                    var rst = new List<SegLineEx>();
+                    rst.Add(rstSeglinesList[i][0]);
+                    rst.Add(rstSeglinesList[i+1][0]);
+                    rstLines.Add(rst);
+                }
+            }
+            return rstLines;
+        }
+
+        private static double GetLinesDist(Line line1, Line line2)
+        {
+            var spt1 = line1.StartPoint;
+            var nearestPt = line2.GetClosestPointTo(spt1, true);
+            return nearestPt.DistanceTo(spt1);
+        }
+
+        /// <summary>
+        /// 根据分割线的连接关系进行分组
+        /// </summary>
+        /// <param name="segLines"></param>
+        /// <returns></returns>
+        public static List<List<SegLineEx>> SeglinesGrouping(List<SegLineEx> segLines)
+        {
+            var rstSeglinesList = new List<List<SegLineEx>>();
+
+            var segLinesCnt = segLines.Count;
+
+            var seglineDic = new Dictionary<int, List<int>>();
+            for (int i = 0; i < segLinesCnt - 1; i++)
+            {
+                for(int j = i+1; j < segLinesCnt; j++)
+                {
+                    var seglinei = segLines[i].Segline;
+                    var seglinej = segLines[j].Segline;
+                    if(seglinei.IsIntersect(seglinej))
+                    {
+                        AddItem(seglineDic, i, j);
+                    }
+                }
+                if(!seglineDic.ContainsKey(i))
+                {
+                    seglineDic.Add(i, new List<int>());
+                }
+            }
+            if (!seglineDic.ContainsKey(segLinesCnt-1))
+            {
+                seglineDic.Add(segLinesCnt-1, new List<int>());
+            }
+            var usedLines = new List<int>();
+
+            foreach(var si in seglineDic.Keys)
+            {
+                if (usedLines.Contains(si)) continue;
+                var rstLineGroup = new List<int>();
+                GetLineGroup(si, seglineDic, ref rstLineGroup, ref usedLines);
+                if(rstLineGroup.Count > 0)
+                {
+                    var rstSegs = new List<SegLineEx>();
+                    rstLineGroup.ForEach(i => rstSegs.Add(segLines[i]));
+                    rstSeglinesList.Add(rstSegs);
+                }
+            }
+            return rstSeglinesList;
+        }
+
+        private static void GetLineGroup(int startNum, Dictionary<int, List<int>> seglineDic, ref List<int> rstLineGroup, ref List<int> usedLines)
+        {
+            rstLineGroup.Add(startNum);
+            usedLines.Add(startNum);
+            var cur = startNum;
+            
+            var neighbors = seglineDic[cur];
+            if (neighbors.Count == 0) return;
+            foreach(var p in neighbors)
+            {
+                if(!rstLineGroup.Contains(p))
+                {
+                    GetLineGroup(p, seglineDic, ref rstLineGroup, ref usedLines);
+                }
+            }
+        }
+
+        private static void AddItem(Dictionary<int, List<int>> seglineDic, int i, int j)
+        {
+            if(seglineDic.ContainsKey(i))
+            {
+                seglineDic[i].Add(j);
+            }
+            else
+            {
+                seglineDic.Add(i, new List<int>() { j });
+            }
+
+            if (seglineDic.ContainsKey(j))
+            {
+                seglineDic[j].Add(i);
+            }
+            else
+            {
+                seglineDic.Add(j, new List<int>() { i });
+            }
+        }
+
+
+<<<<<<< HEAD
+        /// <summary>
+        /// 根据分割线的连接关系进行分组
+        /// </summary>
+        /// <param name="segLines"></param>
+        /// <returns></returns>
+        public static List<List<SegLineEx>> SeglinesGrouping(List<SegLineEx> segLines)
+        {
+            var rstSeglinesList = new List<List<SegLineEx>>();
+
+            var segLinesCnt = segLines.Count;
+
+            var seglineDic = new Dictionary<int, List<int>>();
+            for (int i = 0; i < segLinesCnt - 1; i++)
+            {
+                for(int j = i+1; j < segLinesCnt; j++)
+                {
+                    var seglinei = segLines[i].Segline;
+                    var seglinej = segLines[j].Segline;
+                    if(seglinei.IsIntersect(seglinej))
+                    {
+                        AddItem(seglineDic, i, j);
+                    }
+                }
+                if(!seglineDic.ContainsKey(i))
+                {
+                    seglineDic.Add(i, new List<int>());
+                }
+            }
+            var usedLines = new List<int>();
+
+            foreach(var si in seglineDic.Keys)
+            {
+                if (usedLines.Contains(si)) continue;
+                var rstLineGroup = new List<int>();
+                GetLineGroup(si, seglineDic, ref rstLineGroup, ref usedLines);
+                if(rstLineGroup.Count > 0)
+                {
+                    var rstSegs = new List<SegLineEx>();
+                    rstLineGroup.ForEach(i => rstSegs.Add(segLines[i]));
+                    rstSeglinesList.Add(rstSegs);
+                }
+            }
+            return rstSeglinesList;
+        }
+
+        private static void GetLineGroup(int startNum, Dictionary<int, List<int>> seglineDic, ref List<int> rstLineGroup, ref List<int> usedLines)
+        {
+            rstLineGroup.Add(startNum);
+            usedLines.Add(startNum);
+            var cur = startNum;
+            
+            var neighbors = seglineDic[cur];
+            if (neighbors.Count == 0) return;
+            foreach(var p in neighbors)
+            {
+                if(!rstLineGroup.Contains(p))
+                {
+                    GetLineGroup(p, seglineDic, ref rstLineGroup, ref usedLines);
+                }
+            }
+        }
+
+
+        private static void AddItem(Dictionary<int, List<int>> seglineDic, int i, int j)
+        {
+            if(seglineDic.ContainsKey(i))
+            {
+                seglineDic[i].Add(j);
+            }
+            else
+            {
+                seglineDic.Add(i, new List<int>() { j });
+            }
+
+            if (seglineDic.ContainsKey(j))
+            {
+                seglineDic[j].Add(i);
+            }
+            else
+            {
+                seglineDic.Add(j, new List<int>() { i });
+            }
+        }
+
+
+=======
+>>>>>>> fdd710d29906a066b3de713b06562f87d47f504c
         /// <summary>
         /// 判断两组分割线是否相等
         /// </summary>
@@ -327,6 +635,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var orderRst = lineEx.OrderBy(lex => lex.Segline.GetCenterPt().X).ThenByDescending(lex => lex.Segline.GetCenterPt().Y).ToList();//从左向右，从上到下
             return orderRst;
         }
+
         public static List<List<SegLineEx>> GetDichotomySegline(OuterBrder outerBrder)
         {
             var seglinesList = new List<List<SegLineEx>>();
@@ -347,7 +656,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     try
                     {
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerName, 30);
-                        //DbHelper.EnsureLayerOn(layerName);
                     }
                     catch { }
 
@@ -373,10 +681,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
 
             var area = outerBrder.WallLine;
+            var orgArea = outerBrder.WallLine;
             var segs = new List<SegLineEx>();
             var rstSegLines = new List<SegLineEx>();
             var successedSeg = false;
-            GetAreaRandSeglinesByDfs(area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines,ref successedSeg);
+            GetAreaRandSeglinesByDfs(orgArea, area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines,ref successedSeg);
             
             return rstSegLines;
         }
@@ -396,10 +705,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return autoSegLinesList;
         }
 
-
         private static void GetAllVerticalSeg(Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, List<AutoSegLines> autoSegLinesList)
         {
-
             double dist = 5000;
             double laneWidth = 5500;
             var orderPts = area.GetPoints().OrderBy(pt => pt.X);
@@ -437,6 +744,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 startX += laneWidth;
             }
         }
+        
         public static void GetAllHorizontalSeg(Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, List<AutoSegLines> autoSegLinesList)
         {
             var autoSegLines = new AutoSegLines();

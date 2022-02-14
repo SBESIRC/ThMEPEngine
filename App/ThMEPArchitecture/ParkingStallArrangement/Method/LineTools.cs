@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -65,6 +66,89 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return 0;//斜线输出 0
         }
 
+        public static Line ExtendLineEx(this Line line, double tor, int type)
+        {
+            //type: 1,沿着起点扩展；2，沿着终点扩展；3，沿着两个点扩展
+            //tor: 正数扩展负数收缩
+
+            var spt = line.StartPoint;
+            var ept = line.EndPoint;
+            var spt2 = spt;
+            var ept2 = ept;
+            if(line.GetDirection() == 1)//竖线
+            {
+                if(spt.Y > ept.Y)
+                {
+                    if(type == 1)
+                    {
+                        spt.OffSetY(tor);
+                    }
+                    if(type == 2)
+                    {
+                        ept.OffSetY(-tor);
+                    }
+                    if(type == 3)
+                    {
+                        spt.OffSetY(tor);
+                        ept.OffSetY(-tor);
+                    }
+                }
+                else
+                {
+                    if (type == 1)
+                    {
+                        spt.OffSetY(-tor);
+                    }
+                    if (type == 2)
+                    {
+                        ept.OffSetY(tor);
+                    }
+                    if (type == 3)
+                    {
+                        spt.OffSetY(-tor);
+                        ept.OffSetY(tor);
+                    }
+                }
+            }
+            else//横线
+            {
+                if(spt.X > ept.X)
+                {
+                    if(type == 1)
+                    {
+                        spt2=spt.OffSetX(tor);
+                    }
+                    if(type == 2)
+                    {
+                        ept2=ept.OffSetX(-tor);
+                    }
+                    if(type == 3)
+                    {
+                        spt2=spt.OffSetX(tor);
+                        ept2=ept.OffSetX(-tor);
+                    }
+                }
+                else
+                {
+                    if (type == 1)
+                    {
+                        spt2=spt.OffSetX(-tor);
+                    }
+                    if (type == 2)
+                    {
+                        ept2=ept.OffSetX(tor);
+                    }
+                    if (type == 3)
+                    {
+                        spt2=spt.OffSetX(-tor);
+                        ept2=ept.OffSetX(tor);
+                    }
+                }
+            }
+
+            return new Line(spt2, ept2);
+        }
+
         public static bool EqualsTo(this Line line1, Line line2, double tor = 1.0)
         {
             var spt1 = line1.StartPoint;
@@ -80,6 +164,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return true;
             }
             return false;
+        }
+
+        public static bool IsIntersect(this Line line1, Line line2)
+        {
+            var pts = line1.Intersect(line2, 0);
+            return pts.Count > 0;
         }
 
         public static Point3d GetCenterPt(this Line line)

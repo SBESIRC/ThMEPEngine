@@ -15,6 +15,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.PartitionLayout;
 using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
@@ -322,7 +323,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
             else
-            {
+            { 
                 //If in manual mode
                 //
                 areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
@@ -331,6 +332,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
             {
                 return false;//必定是个不合理的解
+            }
+            if(IsInCorrectSegLine(tmpBoundary, SegLines))
+            {
+                return false;
             }
 
             double areaTolerance = 1.0;//面积容差
@@ -401,6 +406,54 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
             return true;
+        }
+
+        public bool IsInCorrectSegLine(Polyline area, List<Line> seglines)
+        {
+            var halfLaneWidth = 2750;
+            double carWidth = 2400;
+            var lines = area.ToLines();
+            var areaPts = new Point3dCollection(area.GetPoints().ToArray());
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
+            foreach(var l in seglines)
+            {
+                var pts = l.Intersect(area, 0);
+                Line validL = new Line();
+                Line extendL = new Line();
+                if (pts.Count == 2)
+                {
+                    validL = new Line(pts[0], pts[1]);
+                    extendL = validL.ExtendLineEx(-carWidth, 3);
+                }
+                if(pts.Count == 1)
+                {
+                    var spt = l.StartPoint;
+                    var ept = l.EndPoint;
+                    if (areaPts.Contains(spt))
+                    {
+                        validL = new Line(spt, pts[0]);
+                        extendL = validL.ExtendLineEx(-carWidth, 1);
+                    }
+                    else
+                    {
+                        validL = new Line(ept, pts[0]);
+                        extendL = validL.ExtendLineEx(-carWidth, 2);
+                    }
+                }
+                if(pts.Count == 0)
+                {
+                    validL = l;
+                    extendL = validL;
+                }
+
+                var rect = extendL.Buffer(halfLaneWidth);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                if (rst.Count > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public bool DirectlyArrangementSetParameter(List<Gene> genome)
