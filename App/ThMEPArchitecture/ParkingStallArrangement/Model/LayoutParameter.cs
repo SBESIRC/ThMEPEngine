@@ -526,7 +526,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return true;
         }
-
+ #region Tobe deleted
         private void GetPtNumAndDir(List<int> lineNums, out List<int> pointNums, out List<int> directions)
         {
             pointNums = new List<int>();
@@ -552,7 +552,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
         }
-
         private void SubAreaSeg(int i, List<Polyline> areas, List<int> pointNums, List<int> directions, List<Polyline> bdBoxes)
         {
             var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
@@ -595,6 +594,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
 
         }
+ #endregion
         private Line GetSegLine(Gene gene)
         {
             Point3d spt, ept;
@@ -628,23 +628,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var dbObjs = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
             return dbObjs.Cast<BlockReference>().ToList();
         }
-        private List<Line> GetSegLines(Polyline area)
-        {
-            var segLines = new List<Line>();
-            try
-            {
-                var newArea = area.Buffer(1.0).OfType<Polyline>().OrderByDescending(p => p.Area).First();
-                var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
-                dbObjs.Cast<Entity>()
-                    .ForEach(e => segLines.Add(e as Line));
-
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return segLines;
-        }
+ 
         private List<Line> GetSegLines(Polyline area, out List<int> lineNums)
         {
             var segLines = new List<Line>();
@@ -865,15 +849,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     if (obj is Polyline pline)
                     {
-                        var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
-                        if (closedPline.Closed)
+                        if(pline.GetPoints().Count() <= 2)
                         {
-                            plines.Add(closedPline);
+                            continue;
                         }
-                        else
+                        try
                         {
-                            Logger?.Information("存在不闭合的多段线！");
+
+                            var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
+                            if (closedPline.Closed)
+                            {
+                                plines.Add(closedPline);
+                            }
+                            else
+                            {
+                                Logger?.Information("存在不闭合的多段线！");
+                            }
                         }
+                        catch(Exception ex)
+                        {
+                            ;
+                        }
+                        
                     }
                 }
             }
