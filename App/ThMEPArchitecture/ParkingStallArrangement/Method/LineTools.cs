@@ -81,32 +81,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     if(type == 1)
                     {
-                        spt.OffSetY(tor);
+                        spt2 = spt.OffSetY(tor);
                     }
                     if(type == 2)
                     {
-                        ept.OffSetY(-tor);
+                        ept2 = ept.OffSetY(-tor);
                     }
                     if(type == 3)
                     {
-                        spt.OffSetY(tor);
-                        ept.OffSetY(-tor);
+                        spt2 = spt.OffSetY(tor);
+                        ept2 = ept.OffSetY(-tor);
                     }
                 }
                 else
                 {
                     if (type == 1)
                     {
-                        spt.OffSetY(-tor);
+                        spt2 = spt.OffSetY(-tor);
                     }
                     if (type == 2)
                     {
-                        ept.OffSetY(tor);
+                        ept2 = ept.OffSetY(tor);
                     }
                     if (type == 3)
                     {
-                        spt.OffSetY(-tor);
-                        ept.OffSetY(tor);
+                        spt2 = spt.OffSetY(-tor);
+                        ept2 = ept.OffSetY(tor);
                     }
                 }
             }

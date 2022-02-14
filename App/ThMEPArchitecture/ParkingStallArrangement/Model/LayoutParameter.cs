@@ -333,7 +333,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             {
                 return false;//必定是个不合理的解
             }
-            if(IsInCorrectSegLine(tmpBoundary, SegLines))
+            if (IsInCorrectSegLine(tmpBoundary, SegLines))
             {
                 return false;
             }
@@ -429,10 +429,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     var spt = l.StartPoint;
                     var ept = l.EndPoint;
-                    if (areaPts.Contains(spt))
+                    if (area.Contains(spt))
                     {
                         validL = new Line(spt, pts[0]);
-                        extendL = validL.ExtendLineEx(-carWidth, 1);
+                        extendL = validL.ExtendLineEx(-carWidth, 2);
                     }
                     else
                     {
