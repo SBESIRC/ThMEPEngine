@@ -1,19 +1,49 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
                     xmlns:local ="clr-namespace:ThControlLibraryWPF.CustomControl">
-    <!-- 最大化按钮形状 -->
-    <PathGeometry x:Key="pathMaximize">
-        <PathGeometry.Figures>
-            M1,1  L1 ,11 L11,11 L11,1 z M0,0 L12,0 L12,12 L0,12 z
-        </PathGeometry.Figures>
-    </PathGeometry>
-    <!-- 还原按钮形状 -->
-    <PathGeometry x:Key="pathRestore">
-        <PathGeometry.Figures>
-            M1,3 L1,11 L9,11 L9,3 z M3,1 L3,2 L10,2 L10,9 L11,9 L11,1 z M2 ,0 L12,0 L12,10 L10,10 L10,12 L0,12 L0,2 L2 ,2 z
-        </PathGeometry.Figures>
-    </PathGeometry>
-    
+
+    <Style TargetType="{x:Type local:WindowButtonBase}" x:Key="WinBtnTheme">
+        <Setter Property="SnapsToDevicePixels" Value="true"/>
+        <Setter Property="BorderBrush" Value="Gray"/>
+        <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True"/>
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="VerticalAlignment" Value="Stretch"/>
+        <!--控件不设置背景色时 Background="{x:Null}" 这会影响一些事件的触发，没有颜色时可以设置Background="Transparent"-->
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="MouseOverBackground" Value="Transparent"/>
+        <Setter Property="MouseOverForeground" Value="White"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type local:WindowButtonBase}" >
+                    <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" 
+                            BorderThickness="{TemplateBinding BorderThickness}" IsHitTestVisible="True"  Focusable="False"
+                            HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                            CornerRadius="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=CornerRadius}" >
+                        <Path x:Name="pathIcon" Stretch="Uniform" Height="12" Width="12" Focusable="False"
+                                  Data="{Binding IconPath,RelativeSource={RelativeSource TemplatedParent},Mode=OneWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=Explicit}"
+                                  Fill="{TemplateBinding Foreground}">
+                        </Path>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <!--鼠标移入事件-->
+                        <Trigger  Property="IsMouseOver" Value="true">
+                            <!--鼠标移入背景颜色-->
+                            <Setter TargetName="border" Property="Background" Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MouseOverBackground}"/>
+                            <!--End 鼠标移入背景颜色-->
+                            <!--鼠标移入前景色-->
+                            <Setter Property="Fill" TargetName="pathIcon" Value="{Binding RelativeSource={RelativeSource Mode=TemplatedParent}, Path=MouseOverForeground}"/>
+                            <!--End 鼠标移入前景色-->
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <ControlTemplate x:Key="WindowTemplateKey" TargetType="{x:Type local:ThCustomWindow}">
         <Border Background="Transparent" BorderBrush="Transparent" Focusable="False">
             <Grid Focusable="True" FocusManager.IsFocusScope="True">
@@ -37,75 +67,63 @@
     <ControlTemplate x:Key="CustomWindowControlTemplate"  TargetType="{x:Type local:ThCustomWindow}">
         <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" Focusable="False" 
 				BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="0" Margin="0" Padding="0">
-            <Grid Width="Auto" Height="Auto" VerticalAlignment="Stretch" Focusable="False">
+            <Grid Width="Auto" Height="Auto" VerticalAlignment="Stretch" Focusable="False" x:Name="main_grid" Background="Transparent">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="29.333"/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Border x:Name="topborder" Grid.Column="0" Background="{TemplateBinding TitleBackground}"  Grid.ColumnSpan="1" Focusable="False">
+                <Border x:Name="topborder" Grid.Column="0"  Background="{TemplateBinding TitleBackground}"  Grid.ColumnSpan="1" Focusable="False">
                     <Grid Focusable="False">
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
-                            <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
+                            <ColumnDefinition Width="Auto"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Focusable="False" Stretch="UniformToFill" Source="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock  Grid.Column="1" Text="{TemplateBinding Title}" Margin="5 0 0 0" FontFamily="微软雅黑,黑体"  Focusable="False"
-                                    FontSize="{TemplateBinding TitleFontSize}"
-                                    FontWeight="{TemplateBinding TitleFontWeight}"
-                                    Foreground="{TemplateBinding TitleForeground}" VerticalAlignment="Center"></TextBlock>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Grid.Column="2" Margin="0">
-                            <Button x:Name="btnMin" Width="28" Height="28" WindowChrome.IsHitTestVisibleInChrome="True" Focusable="False" Visibility="{Binding BtnMinimizeVisibility}" ToolTip="最小化窗体" >
-                                <Button.Template>
-                                    <ControlTemplate>
-                                        <Grid x:Name="grid" Background="Transparent" Focusable="False">
-                                            <Path x:Name="path1" Width="12" Height="12" Fill="#fff" Data="M0,5 L12,5 L12,6 L0,6 z" VerticalAlignment="Center" HorizontalAlignment="Center"></Path>
-                                        </Grid>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="true">
-                                                <Setter TargetName="grid" Property="Background" Value="#176BD1"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button x:Name="btnMax" Width="28" Height="28" WindowChrome.IsHitTestVisibleInChrome="True" Focusable="False"  Visibility="{Binding BtnMaximizeVisibility}" ToolTip="最大化或还原窗体">
-                                <Button.Template>
-                                    <ControlTemplate>
-                                        <Grid x:Name="grid" Background="Transparent" Focusable="False">
-                                            <Path x:Name="path1" Width="12" Height="12" Fill="#fff" Data="{Binding BtnMaximizePathData}" VerticalAlignment="Center" HorizontalAlignment="Center" ></Path>
-                                        </Grid>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="true">
-                                                <Setter TargetName="grid" Property="Background" Value="#176BD1"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
-                            <Button x:Name="btnClose" Width="28" Height="28" Focusable="False" WindowChrome.IsHitTestVisibleInChrome="True" ToolTip="关闭窗体">
-                                <Button.Template>
-                                    <ControlTemplate>
-                                        <Grid x:Name="grid" Background="Transparent" Focusable="False">
-                                            <Path x:Name="path1" Width="12" Height="12" Fill="#fff" Data="M1,0 L6,5 L11,0 L12,1 L7,6 L12,11 L11,12 L6,7 L1,12 L0,11 L5,6 L0,1 z" VerticalAlignment="Center" HorizontalAlignment="Center" ></Path>
-                                        </Grid>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="true">
-                                                <Setter TargetName="grid" Property="Background" Value="Red"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Button.Template>
-                            </Button>
+                        <ToolBar Grid.Column="0" Template="{TemplateBinding  WindownTitleTemplate}"/>
+                        <ToolBar  Grid.Column="1" Template="{TemplateBinding WindowTitleRightTemplate}"/>
+                        <StackPanel Background="Transparent" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch" Grid.Column="2">
+                            <local:WindowButtonMin x:Name="win_min_button" Width="28"  Style="{StaticResource WinBtnTheme}"
+                                                   VerticalAlignment="Stretch" ToolTip="最小化窗体" 
+                                                   IconPath="M0,5 L12,5 L12,6 L0,6 z" 
+                                                   MouseOverBackground="#8E8E90"/>
+                            <local:WindowButtonNormal x:Name="win_normal_button" Width="28" Style="{StaticResource WinBtnTheme}"
+                                                   MouseOverBackground="#8E8E90"
+                                                   IconPath="M1,3 L1,11 L9,11 L9,3 z M3,1 L3,2 L10,2 L10,9 L11,9 L11,1 z M2 ,0 L12,0 L12,10 L10,10 L10,12 L0,12 L0,2 L2 ,2 z" 
+                                                   ToolTip="正常化窗体" />
+                            <local:WindowButtonMax x:Name="win_max_button" Width="28" Style="{StaticResource WinBtnTheme}"
+                                                   MouseOverBackground="#8E8E90"
+                                                   IconPath="M1,1  L1 ,11 L11,11 L11,1 z M0,0 L12,0 L12,12 L0,12 z" 
+                                                   ToolTip="最大化窗体" />
+                            <local:WindowButtonClose  Width="28" Style="{StaticResource WinBtnTheme}"
+                                                   MouseOverBackground="Red"
+                                                   IconPath="M1,0 L6,5 L11,0 L12,1 L7,6 L12,11 L11,12 L6,7 L1,12 L0,11 L5,6 L0,1 z" 
+                                                   ToolTip="关闭窗体" />
                         </StackPanel>
                     </Grid>
 
                 </Border>
+
                 <AdornerDecorator Grid.Row="1" Focusable="False" Margin="0">
-                    <ContentPresenter  HorizontalAlignment="Stretch" Focusable="False" Width="Auto"/>
+                    <ContentPresenter/>
                 </AdornerDecorator>
             </Grid>
         </Border>
+        <ControlTemplate.Triggers>
+            <Trigger Property="WindowState" Value="Maximized">
+                <Setter TargetName="win_normal_button" Property="Visibility" Value="Visible"/>
+                <Setter TargetName="win_max_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="main_grid" Property="Margin" Value="0"/>
+            </Trigger>
+            <Trigger Property="WindowState" Value="Normal">
+                <Setter TargetName="win_normal_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="win_max_button" Property="Visibility" Value="Visible"/>
+            </Trigger>
+            <Trigger Property="ResizeMode" Value="NoResize">
+                <Setter TargetName="win_normal_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="win_max_button" Property="Visibility" Value="Collapsed"/>
+                <Setter TargetName="win_min_button" Property="Visibility" Value="Collapsed"/>
+            </Trigger>
+        </ControlTemplate.Triggers>
     </ControlTemplate>
 
     
@@ -115,7 +133,7 @@
 
     <!--WPF字体模糊通病，这样设置可以使字体尽量清晰 SnapsToDevicePixels="True" FontFamily="SimSun" TextOptions.TextFormattingMode="Display"  
     TextOptions.TextRenderingMode="ClearType" TextOptions.TextHintingMode="Fixed" UseLayoutRounding="True"-->
-    <Style x:Key="CustomWindowStyle" TargetType="{x:Type local:ThCustomWindow}">
+    <Style TargetType="{x:Type local:ThCustomWindow}">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="AllowsTransparency" Value="True"/>
         <Setter Property="TitleBackground" Value="{DynamicResource WindowTitleBackgroundColor}"/>
@@ -127,8 +145,8 @@
         <Setter Property="TitleForeground" Value="{DynamicResource WindowTitleForegroundColor}"/>
         <Setter Property="Background" Value="{DynamicResource BackgroundColor}"></Setter>
         <Setter Property="ResizeMode" Value="NoResize"/>
+        <Setter Property="WindowState" Value="Normal"/>
         <Setter Property="Icon" Value="../../Images/CADIcon.png"/>
-        <Setter Property="ShowInTaskbar" Value="False"/>
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
         <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
@@ -137,11 +155,33 @@
         <Setter Property="Focusable" Value="False"></Setter>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
-                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
+                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" ResizeBorderThickness="4" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
                 </WindowChrome>
             </Setter.Value>
         </Setter>
         <Setter Property="Template" Value="{StaticResource CustomWindowControlTemplate}"/>
+        <Setter Property="WindownTitleTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel Background="Transparent" Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Stretch" Grid.Column="2">
+                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Focusable="False" Stretch="UniformToFill" 
+                               Source="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=Icon}" 
+                               HorizontalAlignment="Center" 
+                               VerticalAlignment="Center" />
+                        <Label Padding="0"  
+                               Margin="5 0 0 0" 
+                               Focusable="False"
+                               Background="Transparent"
+                               FontFamily="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleFontFamily}"
+                               FontWeight="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleFontWeight}"
+                               Foreground="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleForeground}"
+                               FontSize="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=TitleFontSize}"
+                               Content="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type local:ThCustomWindow}},Path=Title}"
+                               VerticalAlignment="Center"/>
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
         <Style.Triggers>
             <Trigger Property="ResizeMode" Value="CanResizeWithGrip">
                 <Setter Property="Template" Value="{StaticResource WindowTemplateKey}"/>

@@ -66,6 +66,7 @@
     <Compile Include="ControlUtils\UListItemData.cs" />
     <Compile Include="ConverterUtil.cs" />
     <Compile Include="CustomControl\ImageButton.cs" />
+    <Compile Include="CustomControl\WindowButtonBase.cs" />
     <Compile Include="CustomProperty\TextBoxBaseProperty.cs" />
     <Compile Include="ModelCloneUtil.cs" />
     <Compile Include="CustomControl\InputTextBox.cs" />

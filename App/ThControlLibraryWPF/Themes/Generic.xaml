@@ -3,6 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:ThControlLibraryWPF">
     <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="pack://application:,,,/ThControlLibraryWPF;component/CustomControlThemes/WindowThemes/CustomStyleWindow.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/ThControlLibraryWPF;component/CustomControlThemes/ButtonThemes/ImageButtonTheme.xaml"></ResourceDictionary>
         <ResourceDictionary Source="pack://application:,,,/ThControlLibraryWPF;component/CustomControlThemes/TextBoxThemes/InputTextBoxTheme.xaml"></ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
