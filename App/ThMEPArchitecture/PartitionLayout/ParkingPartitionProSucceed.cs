@@ -148,7 +148,8 @@ namespace ThMEPArchitecture.PartitionLayout
             return SplitLine(line, points);
         }
 
-        private bool HasParallelLaneForwardExisted(Line line, Vector3d vec, double maxlength, double minlength,ref double dis_to_move)
+        private bool HasParallelLaneForwardExisted(Line line, Vector3d vec, double maxlength, double minlength, ref double dis_to_move
+            , ref Line prepLine)
         {
             var lperp = CreateLineFromStartPtAndVector(line.GetCenter().TransformBy(Matrix3d.Displacement(vec * 100)), vec, maxlength);
             var lins = IniLanes.Where(e => IsParallelLine(line, e.Line))
@@ -168,6 +169,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (dis1 + dis2 < line.Length / 2)
                 {
                     dis_to_move = lin.GetClosestPointTo(line.GetCenter(), true).DistanceTo(line.GetCenter());
+                    prepLine = lperp;
                     return true;
                 }
                 else return false;
@@ -277,7 +279,8 @@ namespace ThMEPArchitecture.PartitionLayout
             if (IsInAnyPolys(iniobsplit.GetCenter(), Obstacles) || iniobsplit.Length < LengthCanGAdjLaneConnectSingle)
                 return generate_lane_length;
             double dis_to_move = 0;
-            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move)) return generate_lane_length;
+            Line perpLine = new Line();
+            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move,ref perpLine)) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
             var offsetline = CreateLine(iniobsplit);
             offsetline.TransformBy(Matrix3d.Displacement(-gvec * DisCarAndHalfLane));
