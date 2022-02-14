@@ -256,6 +256,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
             if (spliters is null) return;
 
+            if(spliters.Count == 0)
+            {
+                return;
+            }
             var selectSegNum = General.Utils.RandInt(spliters.Count - 1);
             var spliter = spliters[selectSegNum];//选中的分割线
             var segline = spliter.Seglines;
@@ -592,14 +596,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
             var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
-
-            var area = outerBrder.WallLine;
-            var orgArea = outerBrder.WallLine;
-            var segs = new List<SegLineEx>();
             var rstSegLines = new List<SegLineEx>();
             var successedSeg = false;
-            GetAreaRandSeglinesByDfs(orgArea, area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines,ref successedSeg);
-            
+            var maxSegCnt = 20;
+            var cnt = 0;
+            while(!successedSeg && cnt++ < maxSegCnt)
+            {
+                var area = outerBrder.WallLine;
+                var orgArea = outerBrder.WallLine;
+                var segs = new List<SegLineEx>();
+                rstSegLines = new List<SegLineEx>();
+                GetAreaRandSeglinesByDfs(orgArea, area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
+            }
+
             return rstSegLines;
         }
 
@@ -620,7 +629,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         private static void GetAllVerticalSeg(Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, List<AutoSegLines> autoSegLinesList)
         {
-            double dist = 5000;
+            double dist = 1.0;
             double laneWidth = 5500;
             var orderPts = area.GetPoints().OrderBy(pt => pt.X);
             var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
@@ -661,7 +670,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static void GetAllHorizontalSeg(Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, List<AutoSegLines> autoSegLinesList)
         {
             var autoSegLines = new AutoSegLines();
-            double dist = 5000;
+            double dist = 1.0;
             double laneWidth = 5500;
             var orderPts = area.GetPoints().OrderBy(pt => pt.X);
             var orderPts2 = area.GetPoints().OrderBy(pt => pt.Y);
@@ -699,6 +708,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
                 startX += laneWidth;
             }
+            ;
         }
     }
 }
