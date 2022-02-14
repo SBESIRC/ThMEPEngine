@@ -1002,7 +1002,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var loc = s[i].Genome[j].Value;
 
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-                    if (RandDouble() > GoldenRatio)
+                    if (RandDouble() < GoldenRatio)
                     {
                         s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
                     }

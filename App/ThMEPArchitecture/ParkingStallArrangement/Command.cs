@@ -307,7 +307,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     layoutPara = layoutParaHB;
                 }
             }
-            Logger?.Information($"最大车位数{solution.ParkingStallCount}");
+            var strBest = $"最大车位数{solution.ParkingStallCount}";
+            Logger?.Information(strBest);
+            Active.Editor.WriteMessage(strBest);
             histories.Add(solution);
             var parkingStallCount = solution.ParkingStallCount;
             ParkingSpace.GetSingleParkingSpace(Logger,  layoutPara, parkingStallCount);
