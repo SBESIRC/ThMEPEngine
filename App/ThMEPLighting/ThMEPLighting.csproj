@@ -17,6 +17,7 @@
   <ItemGroup>
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <Compile Include="Command\ThAFASRouteCommand.cs" />
     <Compile Include="Command\ThLightingRouteComand.cs" />
+    <Compile Include="Common\EnumIllumination.cs" />
     <Compile Include="Common\EnumParkingSource.cs" />
     <Compile Include="Common\ThEnumBlockScale.cs" />
     <Compile Include="DSFEL\DSFELConfigCommon.cs" />
@@ -238,6 +240,9 @@
     <Compile Include="Common\ThGarageLightUtils.cs" />
     <Compile Include="IlluminationLighting\ThIlluminationCommon.cs" />
     <Compile Include="Command\ThLightingLayoutCommand.cs" />
+    <Compile Include="Common\Parkingillumination.cs" />
+    <Compile Include="ParkingStall\Business\StallTextInsertor.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupLightIllumination.cs" />
     <Compile Include="ViewModel\LightingViewModel.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
@@ -414,4 +419,19 @@
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if $(Configuration)==Debug-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET45 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v120\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Debug-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+if $(Configuration)==Release-NET46 (
+Copy /Y "$(SolutionDir)..\Externals\GTE\v140\*.dll" "$(ProjectDir)\$(OutDir)"
+)
+Copy /Y "$(SolutionDir)..\Externals\CGAL\*.dll" "$(ProjectDir)\$(OutDir)"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

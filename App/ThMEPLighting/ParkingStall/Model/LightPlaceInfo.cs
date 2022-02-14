@@ -58,6 +58,8 @@ namespace ThMEPLighting.ParkingStall.Model
         public double LengthFromStart = 0;
 
         public ObjectId InsertBlockId = ObjectId.Null;
+        public List<Point3d> InsertLightPosisions = new List<Point3d>();
+        public List<ObjectId> InsertLightBlockIds = new List<ObjectId>();
         public LightBlockConnectPointInfo LightBlockConnectInfo = null;
 
         public Line LongDirLength;

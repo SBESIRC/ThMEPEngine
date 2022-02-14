@@ -310,6 +310,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     buildList.Add(build as BlockReference);
                 }
+                if(buildList.Count == 0)
+                {
+                    var pts = segArea.Intersect(area, 0);
+                    var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
+                    return sortPts.First();
+                }
                 var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
                 var rect = closeBuild.GetRect();
                 var plines = GetPlines(closeBuild);
@@ -323,6 +329,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     {
                         return pt;
                     }
+                }
+                if(closedPts.Count == 0)//没有障碍物返回当前线与墙线的交点
+                {
+                    var pts = segArea.Intersect(area, 0);
+                    var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
+                    return sortPts.First();
                 }
                 return closedPts.First();
             }
@@ -344,8 +356,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                 }
             }
-            
-            
+
+            if (closedPts.Count == 0)
+            {
+                var pts = segArea.Intersect(area, 0);
+                var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
+                return sortPts.First();
+            }
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
 

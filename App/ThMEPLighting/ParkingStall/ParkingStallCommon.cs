@@ -31,5 +31,9 @@ namespace ThMEPLighting.ParkingStall
 
         public static readonly double ReverseMaxMoveDistance = 850; // 倒车入库最大调整距离
         public static readonly double ParallelMaxMoveDistance = 350; // 侧方停车最大调整
+
+        public static readonly string PARK_LIGHT_RESULT_LAYER = "AI-车位照度";
+        public static readonly string PARK_LIGHT_RESULT_TEXTSTYPENAME = "TH-STYLE3";
+        public static readonly string PARK_LIGHT_RESULT_LAYERLINETYPENAME = "Continuous";
     }
 }

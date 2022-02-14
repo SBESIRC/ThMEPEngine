@@ -39,6 +39,7 @@ namespace ThMEPLighting.IlluminationLighting
         private bool _ifEmgAsNormal = false;
         private double _wallThickness = 100;
         private double _bufferDist = 500;
+        private bool _floorUpDown = true;
 
         public IlluminationLightingCmd()
         {
@@ -55,6 +56,7 @@ namespace ThMEPLighting.IlluminationLighting
         private void InitialSetting()
         {
             _scale = FireAlarmSetting.Instance.Scale;
+            _floorUpDown = FireAlarmSetting.Instance.FloorUpDown == 0 ? false : true;
             _referBeam = FireAlarmSetting.Instance.Beam == 1 ? true : false;
             _wallThickness = FireAlarmSetting.Instance.RoofThickness;
             _bufferDist = FireAlarmSetting.Instance.BufferDist;
@@ -148,53 +150,15 @@ namespace ThMEPLighting.IlluminationLighting
                 ThAFASUtils.TransformReset(transformer, geos);
 
                 //打印
+                if (_floorUpDown == true)
+                {
+                    lightResult.ForEach(x => x.Dir = new Autodesk.AutoCAD.Geometry.Vector3d(0, 1, 0));
+                }
+
                 ThFireAlarmInsertBlk.InsertBlock(lightResult, _scale);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
 
             }
         }
-
-        private void SettingNoUI()
-        {
-
-            var beam = Active.Editor.GetInteger("\n不考虑梁（0）考虑梁（1）");
-            if (beam.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            _referBeam = beam.Value == 1 ? true : false;
-            if (_referBeam == true)
-            {
-                var wallThickness = Active.Editor.GetInteger("\n板厚");
-                if (wallThickness.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                _wallThickness = wallThickness.Value;
-            }
-
-            var radiusN = Active.Editor.GetInteger("\n正常照明灯具布置半径(mm)");
-            if (radiusN.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            _radiusN = radiusN.Value;
-
-            var radiusE = Active.Editor.GetInteger("\n应急照明灯具布置半径(mm)");
-            if (radiusE.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            _radiusE = radiusE.Value;
-
-            var layoutEmg = Active.Editor.GetInteger("\n布置应急照明灯 否（0）是（1）");
-            if (layoutEmg.Status != PromptStatus.OK)
-            {
-                return;
-            }
-            _ifLayoutEmg = layoutEmg.Value == 1 ? true : false;
-
-        }
-
     }
 }

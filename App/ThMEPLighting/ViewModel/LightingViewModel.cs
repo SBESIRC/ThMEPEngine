@@ -195,6 +195,20 @@ namespace ThMEPLighting.ViewModel
                 OnPropertyChanged("ShouldConsiderBeam");
             }
         }
+        //需要加这个值。否则存不住结果
+        private bool _NotShouldConsiderBeam = false;
+        public bool NotShouldConsiderBeam
+        {
+            get
+            {
+                return _NotShouldConsiderBeam;
+            }
+            set
+            {
+                _NotShouldConsiderBeam = value;
+                OnPropertyChanged("NotShouldConsiderBeam");
+            }
+        }
 
         //板厚
         private double _RoofThickness = 100;
@@ -224,20 +238,59 @@ namespace ThMEPLighting.ViewModel
                 OnPropertyChanged("BufferDist");
             }
         }
-
-
-        //需要加这个值。否则存不住结果
-        private bool _NotShouldConsiderBeam = false;
-        public bool NotShouldConsiderBeam
+        //选择楼层或房间
+        private bool _SelectFloor = true;
+        public bool SelectFloor
         {
             get
             {
-                return _NotShouldConsiderBeam;
+                return _SelectFloor;
             }
             set
             {
-                _NotShouldConsiderBeam = value;
-                OnPropertyChanged("NotShouldConsiderBeam");
+                _SelectFloor = value;
+                OnPropertyChanged("SelectFloor");
+            }
+        }
+
+        private bool _SelectRoom = false;
+        public bool SelectRoom
+        {
+            get
+            {
+                return _SelectRoom;
+            }
+            set
+            {
+                _SelectRoom = value;
+                OnPropertyChanged("SelectRoom");
+            }
+        }
+        //选择地上地下
+        private bool _FloorDown = false;
+        public bool FloorDown
+        {
+            get
+            {
+                return _FloorDown;
+            }
+            set
+            {
+                _FloorDown = value;
+                OnPropertyChanged("FloorDown");
+            }
+        }
+        private bool _FloorUp = true;
+        public bool FloorUp
+        {
+            get
+            {
+                return _FloorUp;
+            }
+            set
+            {
+                _FloorUp = value;
+                OnPropertyChanged("FloorUp");
             }
         }
         #endregion
@@ -527,7 +580,7 @@ namespace ThMEPLighting.ViewModel
                     if (value != _isSelected)
                     {
                         _isSelected = value;
-                        OnPropertyChanged(nameof(IsSelected));                        
+                        OnPropertyChanged(nameof(IsSelected));
                     }
                 }
             }
@@ -536,10 +589,10 @@ namespace ThMEPLighting.ViewModel
         public ObservableCollection<Item> Items => _items;
         public void Add(string text)
         {
-            if(_items.Where(o => o.Text == text).Any()==false)
+            if (_items.Where(o => o.Text == text).Any() == false)
             {
-                _items.Add(new Item() { Text = text ,IsSelected=true});
-            }            
+                _items.Add(new Item() { Text = text, IsSelected = true });
+            }
         }
         private List<string> LaneLineLayers
         {
@@ -565,8 +618,8 @@ namespace ThMEPLighting.ViewModel
 
         private void Remove(string layer)
         {
-            var querys = _items.Where(o => o.Text == layer).Select(o=>o.Text).ToList();
-            foreach(string text in querys)
+            var querys = _items.Where(o => o.Text == layer).Select(o => o.Text).ToList();
+            foreach (string text in querys)
             {
                 var item = _items.Where(o => o.Text == text).First();
                 _items.Remove(item);

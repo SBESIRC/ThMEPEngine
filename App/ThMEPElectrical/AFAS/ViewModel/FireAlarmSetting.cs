@@ -10,6 +10,9 @@ namespace ThMEPElectrical.AFAS.ViewModel
     {
         //----通用
         public double Scale { get; set; }
+        public int SelectFloorRoom { get; set; }//floor:0,room:1
+        public int FloorUpDown { get; set; }//down:0,up:1
+
         public int Beam { get; set; }
         public List<int> LayoutItemList { get; set; }
         public double RoofThickness { get; set; }
@@ -47,18 +50,21 @@ namespace ThMEPElectrical.AFAS.ViewModel
         public FireAlarmSetting()
         {
             Scale = 100;
+            SelectFloorRoom = 0;
+            FloorUpDown = 0;
+
             Beam = 1;
+            RoofThickness = 100;
+            BufferDist = 500;
 
             RoofHight = 2;
             RoofGrade = 0;
-            RoofThickness = 100;
-            BufferDist = 500;
             FixRef = 1.0;
 
             BroadcastLayout = 1;
-            StepLengthBC = 25 * 1000;
+            StepLengthBC = 20 * 1000;
 
-            StepLengthMA = 25 * 1000;
+            StepLengthMA = 20 * 1000;
 
             GasProtectRadius = 8000;
 

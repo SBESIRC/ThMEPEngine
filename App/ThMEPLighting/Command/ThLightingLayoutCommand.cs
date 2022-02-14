@@ -65,6 +65,8 @@ namespace ThMEPLighting.Command
         private void IlluminateUIToSetting()
         {
             FireAlarmSetting.Instance.Scale = _UiConfigs.ScaleSelectIndex == 0 ? 100 : 150;
+            FireAlarmSetting.Instance.SelectFloorRoom = _UiConfigs.SelectFloor == true ? 0 : 1;
+            FireAlarmSetting.Instance.FloorUpDown = _UiConfigs.FloorDown == true ? 0 : 1;
             FireAlarmSetting.Instance.Beam = _UiConfigs.ShouldConsiderBeam == true ? 1 : 0;
             FireAlarmSetting.Instance.RoofThickness = _UiConfigs.RoofThickness;
             FireAlarmSetting.Instance.BufferDist = _UiConfigs.BufferDist;

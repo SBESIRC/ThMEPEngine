@@ -22,6 +22,7 @@ namespace ThMEPLighting.ServiceModels
         public EnumParkingSource ParkingSource { get; set; }
         public int GroupMaxLightCount { get; set; }
         public double BlockScale { get; set; }
+        public Parkingillumination ParkingStallIllumination { get; set; }
         public void SetLightDir(bool isLongSide) 
         {
             //这里灯方向是沿着长边或短边

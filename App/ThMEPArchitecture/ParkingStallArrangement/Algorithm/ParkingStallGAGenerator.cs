@@ -360,30 +360,46 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int Elite_popsize;
         int Max_SelectionSize;
         double EliminateRate;
-        double MutationUpperBound;
         double GoldenRatio;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
         //Inputs
         GaParameter GaPara;
         LayoutParameter LayoutPara;
         ParkingStallArrangementViewModel ParameterViewModel;
-
+        List<Chromosome> InitGenomes;
+        private bool BreakFlag;
         //public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
 
         //public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
         //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public Serilog.Core.Logger Logger = null;
-        public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null)
+        public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null, List<Chromosome> initgenomes = null,bool breakFlag = false)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
             Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
+            if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
+            MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
+
+            InitGenomes = initgenomes;// 输入初始基因，生成初代时使用
+            // TO DO 更改迭代最大时间以及种群数量
+            BreakFlag = breakFlag;// true 则为打断模式（打断模式包含早期迭代，纵向打断迭代，以及横向打断迭代）
+            if (BreakFlag & InitGenomes == null)
+            {
+                if (InitGenomes == null) MaxTime = MaxTime * GoldenRatio;// 早期迭代模式，0.618总时长
+                else//打断迭代，横纵各进行一次
+                {
+                    MaxTime = 0.5 * (1 - GoldenRatio) * MaxTime;// 0.191总时长
+                    PopulationSize = Math.Max((int)(PopulationSize * GoldenRatio), 3);
+                    InitGenomes.ForEach(g => g.Logger = this.Logger);
+                }
+            }
+
             FirstPopulationSizeMultiplyFactor = 2;
             FirstPopulationSize = PopulationSize * FirstPopulationSizeMultiplyFactor;
-            MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
             MutationRate = 1 - GoldenRatio;//变异因子,0.382
             GeneMutationRate = 1 - GoldenRatio;//基因变异因子0.382,保持迭代过程中变异基因的比例
 
@@ -394,11 +410,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             GaPara = gaPara;
             LayoutPara = layoutPara;
             ParameterViewModel = parameterViewModel;
+
             // Run2 添加参数
             Elite_popsize = Math.Max((int)(PopulationSize * 0.2), 1);//精英种群数量,种群数要大于3
             EliminateRate = GoldenRatio;//除保留部分随机淘汰概率0.618
             Max_SelectionSize = Math.Max(2, (int)(GoldenRatio * PopulationSize));//最大保留数量0.618
-            MutationUpperBound = 15700.0;// 最大变异范围，两排车道宽
             LowerUpperBound = new Dictionary<int, Tuple<double, double>>();//储存每条基因可变动范围，方便后续变异
             for (int i = 0; i < GaPara.LineCount; ++i)
             {
@@ -490,7 +506,15 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     var dir = line.GetValue(out double value, out double startVal, out double endVal);
                     double LowerBound = LowerUpperBound[i].Item1;
                     double UpperBound = LowerUpperBound[i].Item2;
-                    var RandValue = RandDoubleInRange(LowerBound, UpperBound);
+                    double RandValue;
+                    if (RandDouble() > GoldenRatio)
+                    {
+                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//纯随机数
+                    }
+                    else
+                    {
+                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//随机特殊解
+                    }
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
                 }
@@ -505,14 +529,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         private List<Chromosome> CreateFirstPopulation()
         {
             List<Chromosome> solutions = new List<Chromosome>();
-            // 添加初始画的分割线,该届必须是合理解
+            // 添加初始画的分割线,该解必须是合理解
             var orgSolution = new Chromosome();
             orgSolution.Logger = this.Logger;
             var orgGenome = ConvertLineToGene();//创建初始基因序列
             orgSolution.Genome = orgGenome;
             //Draw.DrawSeg(solution);
             solutions.Add(orgSolution);
-
+            if (InitGenomes != null)
+            {
+                // 有额外输入的基因，判断是否为合理解，然后添加
+                foreach(var initgenome in InitGenomes)
+                {
+                    // 如果为合理解则添加
+                    if (initgenome.IsVaild(LayoutPara, ParameterViewModel)) solutions.Add(initgenome.Clone());
+                }
+            } 
             while (solutions.Count < FirstPopulationSize)
             {
                 // 随机生成 其余的解
@@ -528,7 +560,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     solutions.Add(solutions[idx].Clone());
                 }
             }
-            
             return solutions;
         }
 
@@ -743,6 +774,23 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             if (UpperBound - LowerBound < tol) return LowerBound ;
             else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
         }
+        private double RandomSpecialNumber(double LowerBound, double UpperBound)
+        {
+            //随机的特殊解，用于卡车位
+            // 输出的之保持在最大最小值之间
+            double tol = 1e-4;
+            if (UpperBound - LowerBound < tol) return LowerBound;
+            else
+            {
+                var parkingLength = ParameterViewModel.VerticalSpotLength;
+                var SolutionLis = new List<double>() { LowerBound, UpperBound};
+                var s1 = LowerBound + parkingLength;
+                var s2 = UpperBound - parkingLength;
+                if (s1 < UpperBound) SolutionLis.Add(s1);
+                if (s2 > LowerBound) SolutionLis.Add(s2);
+                return SolutionLis[RandInt(SolutionLis.Count)];// 随机选一个
+            }
+        }
         #endregion
         #region
         // run2代码部分
@@ -801,13 +849,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 MutationL(rstLM);
                 pop.AddRange(rstLM);
             }
-            var strBest = $"最大车位数: {maxNums}";
-            Active.Editor.WriteMessage(strBest);
-            Logger?.Information(strBest);
+            string strBest;
+            //if (!BreakFlag) strBest = $"最大车位数: {maxNums}";
+            //else
+            //{
+            //    if(InitGenomes != null)
+            //    {
+            //        strBest = $"打断前最大车位数: {maxNums}";
+            //    }
+            //    else
+            //    {
+            //        strBest = $"打断后最大车位数: {maxNums}";
+            //    }
+            //}
+            //Active.Editor.WriteMessage(strBest);
+            //Logger?.Information(strBest);
+            string strConverged;
+            if (maxCount < MaxCount) strConverged = $"未收敛";
+            else strConverged = $"已收敛";
+            Active.Editor.WriteMessage(strConverged);
+            Logger?.Information(strConverged);
             stopWatch.Stop();
-            var strTotalMins = $"运行总时间: {stopWatch.Elapsed.TotalMinutes} 分";
+            var strTotalMins = $"迭代时间: {stopWatch.Elapsed.TotalMinutes} 分";
             Logger?.Information(strTotalMins);
-            return selected;
+            // 返回最后一代选择的比例
+            return selected.Take(SelectionSize).ToList();
         }
         private List<Chromosome> Selection2(List<Chromosome> inputSolution, out int maxNums)
         {
@@ -933,15 +999,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double minVal = LowerUpperBound[j].Item1;
                     double maxVal = LowerUpperBound[j].Item2;
 
-                    //if (maxVal - minVal > MutationUpperBound)
-                    //{
-                    //    maxVal = minVal + MutationUpperBound;
-                    //}
                     var loc = s[i].Genome[j].Value;
 
                     var std = (maxVal - minVal) / lamda;//2sigma 原则，从mean到边界概率为95.45%
-
-                    s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
+                    if (RandDouble() < GoldenRatio)
+                    {
+                        s[i].Genome[j].Value = RandNormalInRange(loc, std, minVal, maxVal);
+                    }
+                    else
+                    {
+                        s[i].Genome[j].Value = RandomSpecialNumber(minVal, maxVal);
+                    }
 
                 }
             }

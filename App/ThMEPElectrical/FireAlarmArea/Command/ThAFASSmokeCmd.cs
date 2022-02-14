@@ -27,6 +27,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
         private double _wallThickness = 100;
         private double _bufferDist = 500;
         private bool _needDetective = true;
+        private bool _floorUpDown = true;
 
         public ThAFASSmokeCmd()
         {
@@ -47,8 +48,9 @@ namespace ThMEPElectrical.FireAlarmArea.Command
             _wallThickness = FireAlarmSetting.Instance.RoofThickness;
             _bufferDist = FireAlarmSetting.Instance.BufferDist;
             _needDetective = _referBeam == true ? true : false;
+            _floorUpDown = FireAlarmSetting.Instance.FloorUpDown == 0 ? false : true;
         }
-       
+
         public override void SubExecute()
         {
             FireAlarmSmokeHeatLayoutExecute();
@@ -130,6 +132,13 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 ThAFASUtils.TransformReset(transformer, geos);
 
                 //--------------打印最终图块
+
+
+                if (_floorUpDown == true)
+                {
+                    layoutResult.ForEach(x => x.Dir = new Autodesk.AutoCAD.Geometry.Vector3d(0, 1, 0));
+                }
+
                 ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
             }

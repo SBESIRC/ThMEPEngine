@@ -71,8 +71,8 @@ namespace TianHua.Electrical.UI.FireAlarm
             {
                 vm.LayoutSmoke = true;
                 vm.LayoutGas = true;
-                vm.LayoutBroadcast = true;
-                vm.LayoutManualAlart = true;
+                //vm.LayoutBroadcast = true;
+                //vm.LayoutManualAlart = true;
                 vm.LayoutDisplay = true;
                 vm.LayoutMonitor = true;
                 vm.LayoutTel = true;
@@ -82,8 +82,8 @@ namespace TianHua.Electrical.UI.FireAlarm
             {
                 vm.LayoutSmoke = false;
                 vm.LayoutGas = false;
-                vm.LayoutBroadcast = false;
-                vm.LayoutManualAlart = false;
+                //vm.LayoutBroadcast = false;
+                //vm.LayoutManualAlart = false;
                 vm.LayoutDisplay = false;
                 vm.LayoutMonitor = false;
                 vm.LayoutTel = false;
@@ -94,16 +94,38 @@ namespace TianHua.Electrical.UI.FireAlarm
         {
             vm.LayoutSmoke = vm.LayoutSmoke == true ? false : true;
             vm.LayoutGas = vm.LayoutGas == true ? false : true;
-            vm.LayoutBroadcast = vm.LayoutBroadcast == true ? false : true;
-            vm.LayoutManualAlart = vm.LayoutManualAlart == true ? false : true;
+            //vm.LayoutBroadcast = vm.LayoutBroadcast == true ? false : true;
+            //vm.LayoutManualAlart = vm.LayoutManualAlart == true ? false : true;
             vm.LayoutDisplay = vm.LayoutDisplay == true ? false : true;
             vm.LayoutMonitor = vm.LayoutMonitor == true ? false : true;
             vm.LayoutTel = vm.LayoutTel == true ? false : true;
         }
 
+        private void cbSelectFloorRoom_Click(object sender, RoutedEventArgs e)
+        {
+            if (vm.SelectFloorRoom == 1)
+            {
+                vm.LayoutDisplay = false;
+                vm.LayoutManualAlart = false;
+                vm.LayoutTel = false;
+
+                cbDisplay.IsEnabled = false;
+                cbMonitor.IsEnabled = false;
+                cbTel.IsEnabled = false;
+            }
+            else
+            {
+                cbDisplay.IsEnabled = true;
+                cbMonitor.IsEnabled = true;
+                cbTel.IsEnabled = true;
+            }
+        }
         public static void Save(FireAlarmViewModel localVM)
         {
             FireAlarmSetting.Instance.Scale = (double)localVM.ScaleItem.Tag;
+            FireAlarmSetting.Instance.SelectFloorRoom = localVM.SelectFloorRoom;
+            FireAlarmSetting.Instance.FloorUpDown = localVM.FloorUpDown;
+
             FireAlarmSetting.Instance.Beam = (int)localVM.Beam;
             FireAlarmSetting.Instance.RoofThickness = localVM.RoofThickness;
             FireAlarmSetting.Instance.BufferDist = localVM.BufferDist;
@@ -187,6 +209,24 @@ namespace TianHua.Electrical.UI.FireAlarm
                 return null;
             }
             return (BeamType)int.Parse(parameter.ToString());
+        }
+    }
+
+    public class TrueFalseConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            var s = (int)value;
+            return s == int.Parse(parameter.ToString());
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            bool isChecked = (bool)value;
+            if (!isChecked)
+            {
+                return null;
+            }
+            return int.Parse(parameter.ToString());
         }
     }
 }

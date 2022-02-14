@@ -52,18 +52,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             outerbrder.SegLines.ForEach(l => SegLines.Add(new Line(l.StartPoint, l.EndPoint)));
             WallLine = outerbrder.WallLine;
             //预切割
-            try
-            {
-                precut();
-            }
-            catch (Exception e)
-            {
-                ;
-            }
+            precut();
             
             VerticalDirection = verticaldirection;// true 则纵向，false横向
             GoPositive = gopositive;
             //GoPositive true则坐标增加顺序打断，false则坐标减少顺序打断
+            // 获取分割线上下边界，目前不做判断
             GaPara = gaPara;
             List<int> VertLines_index = new List<int>();// 垂直线索引
 
@@ -187,34 +181,45 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             OtherLinesIdx.ForEach(idx => OtherLines.Add(new Line(SegLines[idx].StartPoint, SegLines[idx].EndPoint)));
             UpdateNewSegLines(OtherLinesIdx);
         }
-
-        public void Set(ref GaParameter gaPara,Chromosome solution)
+        
+        public List<Chromosome> TransPreSols(ref GaParameter gaPara, List<Chromosome> solutions)
         {
-            //  用之前GA结果赋值给gaPara
-            for (int i =0; i < NewSegLines.Count; ++i)
-            {
-                var GAidx = NewToOrgMap[i];
-                var value = solution.Genome[GAidx].Value;
-                //var line = NewSegLines[i];
-                var line = gaPara.SegLine[i];
-                if (IsVertical(line))
-                {
-                    gaPara.SegLine[i].StartPoint = new Point3d(value, gaPara.SegLine[i].StartPoint.Y,0);
-                    gaPara.SegLine[i].EndPoint = new Point3d(value, gaPara.SegLine[i].EndPoint.Y,0);
-                }
-                else
-                {
-                    gaPara.SegLine[i].StartPoint = new Point3d(gaPara.SegLine[i].StartPoint.X, value ,0);
-                    gaPara.SegLine[i].EndPoint = new Point3d(gaPara.SegLine[i].EndPoint.X, value ,0);
-                }
-            }
-            foreach(var idx in FixedIdx)// 调整上下边界
+            // gaPara 调整最大最小值
+            foreach (var idx in FixedIdx)// 调整上下边界
             {
                 gaPara.MaxValues[idx] = 0;
                 gaPara.MinValues[idx] = 0;
             }
+            // 根据solutions 创建多个基因组
+            var results = new List<Chromosome>();
+            foreach(var solution in solutions)
+            {
+                results.Add(TransPreSol(gaPara, solution));
+            }
+            return results;
         }
-        private void precut(double prop = 0.9)
+        public Chromosome TransPreSol(GaParameter gaPara,Chromosome solution)
+        {
+            // solution 之前的解,获取value
+            // 生成对应的新的Chromosome
+
+            var res = new Chromosome();
+            var NewGenome = new List<Gene>();
+            for (int i = 0; i < NewSegLines.Count; ++i)
+            {
+                var GAidx = NewToOrgMap[i];
+                var value = solution.Genome[GAidx].Value;
+                var line = NewSegLines[i];
+                // 获取打断后分割线start val/end val
+                var dir = line.GetValue(out double _value, out double startVal, out double endVal);
+                Gene gene = new Gene(value, dir, gaPara.MinValues[i], gaPara.MaxValues[i], startVal, endVal);
+                NewGenome.Add(gene);
+            }
+            res.Genome = NewGenome;
+            return res;
+        }
+
+        private void precut(double prop = 0.8)
         {
             ;// 留下的出头比例
             for(int i = 0; i < SegLines.Count; ++i)
@@ -405,17 +410,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     if (templ.Count == 0)
                     {
                         // 平移后未相交
-                        try
-                        {
-                            var pt = crossline.Intersect(BreakedLines[i], Intersect.ExtendThis).First();//延长crossline,得到交点
-                                                                                                        // 将crossline线延长
-                            if (pt.DistanceTo(crossline.StartPoint) > pt.DistanceTo(crossline.EndPoint)) SegLines[idx].EndPoint = pt;
-                            else SegLines[idx].StartPoint = pt;
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
+                        var pt = crossline.Intersect(BreakedLines[i], Intersect.ExtendThis).First();//延长crossline,得到交点
+                                                                                                    // 将crossline线延长
+                        if (pt.DistanceTo(crossline.StartPoint) > pt.DistanceTo(crossline.EndPoint)) SegLines[idx].EndPoint = pt;
+                        else SegLines[idx].StartPoint = pt;
+
+
 
 
                     }
@@ -424,6 +424,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private bool GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
+            // 判断分割线的边界
             // get absolute coordinate of segline
             var line = GaPara.SegLine[i];
             var dir = line.GetValue(out double value, out double startVal, out double endVal);
@@ -540,4 +541,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             Clear();
         }
     }
+
+
 }

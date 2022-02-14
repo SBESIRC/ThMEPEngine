@@ -114,15 +114,31 @@ namespace ThMEPElectrical
             var layoutList = layoutInt.Split(',').Select(x => Convert.ToInt32(x)).ToList();
 
             var setBeam = false;
+            var setWallThick = false;
+            var setFloorRoom = false;
+            var setUpFloor = false;
+
             var beam = 0;
             double wallThick = 100;
-            var setWallThick = false;
+            var selectFloorRoom = 0;
+            var floorUpDown = 0;
 
             foreach (var layout in layoutList)
             {
                 switch (layout)
                 {
                     case (int)ThFaCommon.LayoutItemType.Smoke:
+                        if (setFloorRoom == false)
+                        {
+                            selectFloorRoom = ThAFASUtils.SettingInt("\n选楼层布置(0) 选房间布置(1)", 0);
+                            setFloorRoom = true;
+                        }
+                        if (setUpFloor == false)
+                        {
+                            floorUpDown = ThAFASUtils.SettingInt("\n住宅地下(0) 住宅地上(1)", 1);
+                            setUpFloor = true;
+                        }
+
                         if (setBeam == false)
                         {
                             beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
@@ -154,6 +170,8 @@ namespace ThMEPElectrical
                         FireAlarmSetting.Instance.RoofHight = Convert.ToInt32(RoofHightS);
                         FireAlarmSetting.Instance.Beam = beam;
                         FireAlarmSetting.Instance.RoofThickness = wallThick;
+                        FireAlarmSetting.Instance.SelectFloorRoom = selectFloorRoom;
+                        FireAlarmSetting.Instance.FloorUpDown = floorUpDown;
 
                         break;
 
@@ -187,6 +205,16 @@ namespace ThMEPElectrical
                     case (int)ThFaCommon.LayoutItemType.Tel:
                         break;
                     case (int)ThFaCommon.LayoutItemType.Gas:
+                        if (setFloorRoom == false)
+                        {
+                            selectFloorRoom = ThAFASUtils.SettingInt("\n选楼层布置(0) 选房间布置(1)", 0);
+                            setFloorRoom = true;
+                        }
+                        if (setUpFloor == false)
+                        {
+                            floorUpDown = ThAFASUtils.SettingInt("\n住宅地下(0) 住宅地上(1)", 1);
+                            setUpFloor = true;
+                        }
                         if (setBeam == false)
                         {
                             beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
@@ -201,6 +229,8 @@ namespace ThMEPElectrical
                         FireAlarmSetting.Instance.Beam = beam;
                         FireAlarmSetting.Instance.GasProtectRadius = radius;
                         FireAlarmSetting.Instance.RoofThickness = wallThick;
+                        FireAlarmSetting.Instance.SelectFloorRoom = selectFloorRoom;
+                        FireAlarmSetting.Instance.FloorUpDown = floorUpDown;
 
                         break;
                     case (int)ThFaCommon.LayoutItemType.ManualAlarm:
@@ -226,10 +256,11 @@ namespace ThMEPElectrical
 #endif
         }
 
-
         [CommandMethod("TIANHUACAD", "THFASmokeNoUI", CommandFlags.Session)]
         public void THFASmokeNoUI()
         {
+            var selectFloorRoom = ThAFASUtils.SettingInt("\n选楼层布置(0) 选房间布置(1)", 0);
+            var floorUpDown = ThAFASUtils.SettingInt("\n住宅地下(0) 住宅地上(1)", 1);
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
             var hintStringHight = new Dictionary<string, (string, string)>()
@@ -250,11 +281,14 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.RoofHight = Convert.ToInt32(RoofHightS);
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.RoofThickness = wallThick;
+            FireAlarmSetting.Instance.SelectFloorRoom = selectFloorRoom;
+            FireAlarmSetting.Instance.FloorUpDown = floorUpDown;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Smoke);
-            ThAFASDataPass.Instance = new ThAFASDataPass();
 
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -274,9 +308,10 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.DisplayBuilding = rst;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Display);
-            ThAFASDataPass.Instance = new ThAFASDataPass();
 
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -295,8 +330,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Monitor);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -314,8 +349,8 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Tel);
             ThAFASDataPass.Instance = new ThAFASDataPass();
-
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -330,17 +365,23 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFAGasNoUI", CommandFlags.Session)]
         public void THFAGasNoUI()
         {
+            var selectFloorRoom = ThAFASUtils.SettingInt("\n选楼层布置(0) 选房间布置(1)", 0);
+            var floorUpDown = ThAFASUtils.SettingInt("\n住宅地下(0) 住宅地上(1)", 1);
             var beam = ThAFASUtils.SettingInt("\n不考虑梁（0）考虑梁（1）", 1);
             var wallThick = ThAFASUtils.SettingDouble("\n板厚", 100);
             var radius = ThAFASUtils.SettingDouble("\n可燃气保护半径：", 5600);
+
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.GasProtectRadius = radius;
+            FireAlarmSetting.Instance.RoofThickness = wallThick;
+            FireAlarmSetting.Instance.SelectFloorRoom = selectFloorRoom;
+            FireAlarmSetting.Instance.FloorUpDown = floorUpDown;
+
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Gas);
-            FireAlarmSetting.Instance.RoofThickness = wallThick;
             ThAFASDataPass.Instance = new ThAFASDataPass();
-
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -370,12 +411,13 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.BroadcastLayout = isWallPa;
             FireAlarmSetting.Instance.Beam = beam;
             FireAlarmSetting.Instance.StepLengthBC = stepDistanceP;
+            FireAlarmSetting.Instance.RoofThickness = wallThick;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.Broadcast);
-            FireAlarmSetting.Instance.RoofThickness = wallThick;
-            ThAFASDataPass.Instance = new ThAFASDataPass();
 
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;
@@ -398,9 +440,10 @@ namespace ThMEPElectrical
             FireAlarmSetting.Instance.StepLengthMA = radius;
             FireAlarmSetting.Instance.LayoutItemList.Clear();
             FireAlarmSetting.Instance.LayoutItemList.Add((int)ThFaCommon.LayoutItemType.ManualAlarm);
-            ThAFASDataPass.Instance = new ThAFASDataPass();
 
+            ThAFASDataPass.Instance = new ThAFASDataPass();
             ThAFASUtils.AFASPrepareStep();
+
             if (ThAFASDataPass.Instance.SelectPts == null || ThAFASDataPass.Instance.SelectPts.Count == 0)
             {
                 return;

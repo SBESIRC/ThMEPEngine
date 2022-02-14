@@ -15,6 +15,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.PartitionLayout;
 using ThMEPArchitecture.ViewModel;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Model
 {
@@ -322,7 +323,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
             else
-            {
+            { 
                 //If in manual mode
                 //
                 areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
@@ -331,6 +332,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             if (areas.Count != SegAreasCnt)//分割得到的区域数!=原始区域数
             {
                 return false;//必定是个不合理的解
+            }
+            if (IsInCorrectSegLine(tmpBoundary, SegLines))
+            {
+                return false;
             }
 
             double areaTolerance = 1.0;//面积容差
@@ -403,6 +408,54 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             return true;
         }
 
+        public bool IsInCorrectSegLine(Polyline area, List<Line> seglines)
+        {
+            var halfLaneWidth = 2750;
+            double carWidth = 2400;
+            var lines = area.ToLines();
+            var areaPts = new Point3dCollection(area.GetPoints().ToArray());
+            var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
+            foreach(var l in seglines)
+            {
+                var pts = l.Intersect(area, 0);
+                Line validL = new Line();
+                Line extendL = new Line();
+                if (pts.Count == 2)
+                {
+                    validL = new Line(pts[0], pts[1]);
+                    extendL = validL.ExtendLineEx(-carWidth, 3);
+                }
+                if(pts.Count == 1)
+                {
+                    var spt = l.StartPoint;
+                    var ept = l.EndPoint;
+                    if (area.Contains(spt))
+                    {
+                        validL = new Line(spt, pts[0]);
+                        extendL = validL.ExtendLineEx(-carWidth, 2);
+                    }
+                    else
+                    {
+                        validL = new Line(ept, pts[0]);
+                        extendL = validL.ExtendLineEx(-carWidth, 2);
+                    }
+                }
+                if(pts.Count == 0)
+                {
+                    validL = l;
+                    extendL = validL;
+                }
+
+                var rect = extendL.Buffer(halfLaneWidth);
+                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                if (rst.Count > 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public bool DirectlyArrangementSetParameter(List<Gene> genome)
         {
             Clear();//清空所有参数
@@ -473,7 +526,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             }
             return true;
         }
-
+ #region Tobe deleted
         private void GetPtNumAndDir(List<int> lineNums, out List<int> pointNums, out List<int> directions)
         {
             pointNums = new List<int>();
@@ -499,7 +552,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
             }
         }
-
         private void SubAreaSeg(int i, List<Polyline> areas, List<int> pointNums, List<int> directions, List<Polyline> bdBoxes)
         {
             var subArea = PointAreaSeg.PtAreaSeg(areas[i], pointNums, directions, bdBoxes, IntersectPt);//子区域分割
@@ -542,6 +594,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 }
 
         }
+ #endregion
         private Line GetSegLine(Gene gene)
         {
             Point3d spt, ept;
@@ -575,23 +628,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             var dbObjs = BuildingBlockSpatialIndex.SelectCrossingPolygon(area);
             return dbObjs.Cast<BlockReference>().ToList();
         }
-        private List<Line> GetSegLines(Polyline area)
-        {
-            var segLines = new List<Line>();
-            try
-            {
-                var newArea = area.Buffer(1.0).OfType<Polyline>().OrderByDescending(p => p.Area).First();
-                var dbObjs = SegLineSpatialIndex.SelectCrossingPolygon(newArea);
-                dbObjs.Cast<Entity>()
-                    .ForEach(e => segLines.Add(e as Line));
-
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return segLines;
-        }
+ 
         private List<Line> GetSegLines(Polyline area, out List<int> lineNums)
         {
             var segLines = new List<Line>();
@@ -812,15 +849,28 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     if (obj is Polyline pline)
                     {
-                        var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
-                        if (closedPline.Closed)
+                        if(pline.GetPoints().Count() <= 2)
                         {
-                            plines.Add(closedPline);
+                            continue;
                         }
-                        else
+                        try
                         {
-                            Logger?.Information("存在不闭合的多段线！");
+
+                            var closedPline = ThMEPFrameService.NormalizeEx(pline, closedTor);
+                            if (closedPline.Closed)
+                            {
+                                plines.Add(closedPline);
+                            }
+                            else
+                            {
+                                Logger?.Information("存在不闭合的多段线！");
+                            }
                         }
+                        catch(Exception ex)
+                        {
+                            ;
+                        }
+                        
                     }
                 }
             }

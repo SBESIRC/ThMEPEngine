@@ -1,5 +1,8 @@
 ﻿using AcHelper;
 using AcHelper.Commands;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using Linq2Acad;
 using System;
 using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
@@ -158,6 +161,7 @@ namespace ThMEPLighting.UI.UI
                 ThParkingStallService.Instance.ParkingLayerNames.Clear();
                 ThParkingStallService.Instance.ParkingBlockNames.Clear();
                 ThParkingStallService.Instance.ParkingSource = (Common.EnumParkingSource)parkingLightView.ParkSourcesSelect.Value;
+                ThParkingStallService.Instance.ParkingStallIllumination = parkingLightView.parkingStallIllumination;
                 switch (ThParkingStallService.Instance.ParkingSource) 
                 {
                     case Common.EnumParkingSource.OnlyLayerName://仅图层名称
@@ -257,6 +261,62 @@ namespace ThMEPLighting.UI.UI
                 }
             }
             return haveSelectLayer;
+        }
+
+        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            HideLayer("AI-车位照度",false);
+        }
+
+        private void CheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            HideLayer("AI-车位照度", true);
+        }
+        /// <summary>
+        /// 图层的显隐
+        /// </summary>
+        /// <param name="hideLayer"></param>
+        /// <param name="isHide"></param>
+        void HideLayer(string layerName,bool isHide)
+        {
+            if (Active.Document == null)
+                return;
+            bool isRegen = false;
+            using (Active.Document.LockDocument())
+            using (var db = AcadDatabase.Active())
+            {
+                FocusToCAD();
+                if (!isHide)
+                {
+                    bool layerIndb = false;
+                    foreach (var layer in db.Layers)
+                    {
+                        if (layerName != layer.Name)
+                            continue;
+                        layerIndb = true;
+                        break;
+                    }
+                    if (layerIndb)
+                    {
+                        DbHelper.EnsureLayerOn(layerName);
+                        isRegen = true;
+                    }
+                } 
+                else
+                {
+                    foreach (var layer in db.Layers)
+                    {
+                        if (layerName != layer.Name)
+                            continue;
+                        layer.UpgradeOpen();
+                        layer.IsOff = isHide;
+                        layer.DowngradeOpen();
+                        break;
+                    }
+                }
+            }
+            if(isRegen)//图层解冻后，有些还是看不到
+                CommandHandlerBase.ExecuteFromCommandLine(false, "REGEN");
         }
     }
 }

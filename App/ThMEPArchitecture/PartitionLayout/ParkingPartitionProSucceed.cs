@@ -130,7 +130,26 @@ namespace ThMEPArchitecture.PartitionLayout
             return SplitLine(line, points);
         }
 
-        private bool HasParallelLaneForwardExisted(Line line, Vector3d vec, double maxlength, double minlength,ref double dis_to_move)
+        private List<Line> SplitBufferLineByPoly(Line line, double distance, Polyline cutter)
+        {
+            var pl = line.Buffer(distance);
+            var splits = SplitCurve(cutter, pl);
+            if (splits.Count() == 1)
+            {
+                pl.Dispose();
+                return new List<Line> { line };
+            }
+            splits = splits.Where(e => pl.Contains(e.GetCenter())).ToArray();
+            var points = new List<Point3d>();
+            foreach (var crv in splits)
+                points.AddRange(crv.EntityVertices().Cast<Point3d>());
+            points=points.Select(p => line.GetClosestPointTo(p,false)).ToList();
+            pl.Dispose();
+            return SplitLine(line, points);
+        }
+
+        private bool HasParallelLaneForwardExisted(Line line, Vector3d vec, double maxlength, double minlength, ref double dis_to_move
+            , ref Line prepLine)
         {
             var lperp = CreateLineFromStartPtAndVector(line.GetCenter().TransformBy(Matrix3d.Displacement(vec * 100)), vec, maxlength);
             var lins = IniLanes.Where(e => IsParallelLine(line, e.Line))
@@ -150,6 +169,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (dis1 + dis2 < line.Length / 2)
                 {
                     dis_to_move = lin.GetClosestPointTo(line.GetCenter(), true).DistanceTo(line.GetCenter());
+                    prepLine = lperp;
                     return true;
                 }
                 else return false;
@@ -259,7 +279,8 @@ namespace ThMEPArchitecture.PartitionLayout
             if (IsInAnyPolys(iniobsplit.GetCenter(), Obstacles) || iniobsplit.Length < LengthCanGAdjLaneConnectSingle)
                 return generate_lane_length;
             double dis_to_move = 0;
-            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move)) return generate_lane_length;
+            Line perpLine = new Line();
+            if (HasParallelLaneForwardExisted(iniobsplit, gvec, DisModulus, 1, ref dis_to_move,ref perpLine)) return generate_lane_length;
             if (IsConnectedToLaneDouble(iniobsplit) && iniobsplit.Length < LengthCanGAdjLaneConnectDouble) return generate_lane_length;
             var offsetline = CreateLine(iniobsplit);
             offsetline.TransformBy(Matrix3d.Displacement(-gvec * DisCarAndHalfLane));
@@ -325,7 +346,16 @@ namespace ThMEPArchitecture.PartitionLayout
                         //boxpl = CreatPolyFromLines(boxsplit, boxsplittest);
                         //boxpl.Scale(boxpl.GetRecCentroid(), ScareFactorForCollisionCheck);
                         boxcrossed.AddRange(LaneSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
-                        boxcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
+                        //boxcrossed.AddRange(LaneBufferSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>());
+                        foreach (var bx in LaneBufferSpatialIndex.SelectCrossingPolygon(boxpl).Cast<Polyline>())
+                        {
+                            var pts = bx.Vertices().Cast<Point3d>().ToList();
+                            var pta = AveragePoint(pts[0], pts[3]);
+                            var ptb = AveragePoint(pts[1], pts[2]);
+                            var lin = new Line(pta, ptb);
+                            boxcrossed.Add(lin.Buffer(DisLaneWidth / 2));
+                            lin.Dispose();
+                        }
                         boxsplittest.TransformBy(Matrix3d.Displacement(lane.Vec.GetNormal() * DisLaneWidth / 2));
                         var boxpoints = new List<Point3d>();
                         foreach (var cross in boxcrossed)
@@ -670,7 +700,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         private void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset,
           bool add_to_car_spacialindex = true, bool judge_carmodulebox = true, bool adjust_pillar_edge = false, bool judge_modulebox = false,
-          bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true)
+          bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false)
         {
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
@@ -857,6 +887,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 seg.Dispose();
                 s.Dispose();
             }
+
             segobjs.Dispose();
         }
 

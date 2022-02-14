@@ -102,6 +102,7 @@ namespace ThMEPElectrical.AFAS.Utils
                     AllowDuplicates = false,
                     MessageForAdding = "请选择框线",
                     RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
                 };
                 var dxfNames = new string[]
                 {

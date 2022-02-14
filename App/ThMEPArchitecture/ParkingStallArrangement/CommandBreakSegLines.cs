@@ -155,7 +155,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             outerBrder.SegLines = segbkparam.NewSegLines;
 
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            Preprocessing.DataPreProcessWithOuterBrder(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
 
             ParkingStallGAGenerator geneAlgorithm = null;
 
