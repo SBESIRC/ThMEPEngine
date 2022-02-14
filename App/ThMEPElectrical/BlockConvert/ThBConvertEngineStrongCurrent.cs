@@ -407,13 +407,14 @@ namespace ThMEPElectrical.BlockConvert
                 target.Attributes[ThBConvertCommon.PROPERTY_LOAD_USAGE] = ThBConvertUtils.LoadUsage(source);
             }
 
+            // 由于翻转会造成文字居中显示异常，故暂不支持负载标注的翻转
             // 翻转状态
-            if (target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
-                && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
-            {
-                target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
-                    source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
-            }
+            //if (target.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP)
+            //    && source.CustomProperties.Contains(ThBConvertCommon.PROPERTY_LOAD_FILP))
+            //{
+            //    target.CustomProperties.SetValue(ThBConvertCommon.PROPERTY_LOAD_FILP,
+            //        source.CustomProperties.GetValue(ThBConvertCommon.PROPERTY_LOAD_FILP));
+            //}
         }
     }
 }
