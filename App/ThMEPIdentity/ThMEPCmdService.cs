@@ -31,6 +31,9 @@ namespace ThMEPIdentity
 
         private readonly Dictionary<string, string> USERWHITELIST = new Dictionary<string, string>
         {
+            // AI研究中心
+            {"000176", "聂琳"},
+
             // 上海公建一所
             {"000329", "黄先岳"},
             {"000167", "马恒"},
