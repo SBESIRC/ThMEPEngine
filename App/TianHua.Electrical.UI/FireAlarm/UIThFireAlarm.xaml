@@ -13,13 +13,19 @@
     <Window.Resources>
         <ResourceDictionary>
             <local:BeamConverter x:Key="BeamConverter"/>
+            <local:TrueFalseConverter x:Key="TrueFalseConverter"/>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
             <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
+
         <!--标题栏-->
         <Grid Grid.Row=" 0" x:Name="TitleBar" MouseMove="TitleBar_MouseMove" Background="#FF555555" Height="30">
             <Grid.ColumnDefinitions>
@@ -59,8 +65,100 @@
                 </Button>
             </StackPanel>
         </Grid>
-        <!---->
-        <Grid Grid.Row="1" x:Name="ContentGird" Margin=" 10 10 10 10">
+        <!--比例行-->
+        <Grid Grid.Row="1" Margin=" 10 10 10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0"  Grid.Column="0">
+                <Label  Content ="绘图比例" FontWeight ="Black"  />
+            </StackPanel>
+            <StackPanel Grid.Row="0" Grid.Column="1">
+                <ComboBox  SelectedItem="{Binding ScaleItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
+                            ItemsSource="{Binding ScaleListItems,Mode=OneWay,NotifyOnSourceUpdated=True}">
+                </ComboBox>
+            </StackPanel>
+        </Grid>
+        <!--布置场景-->
+        <Grid Grid.Row="2" Margin=" 10 10 10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0"  Grid.Column="0">
+                <Label  Content ="布置场景" FontWeight ="Black"  />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0">
+                <RadioButton GroupName="rbSelectFloorRoom" Content="选楼层布置" 
+                             Click="cbSelectFloorRoom_Click"
+                             IsChecked="{Binding SelectFloorRoom,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <RadioButton GroupName="rbSelectFloorRoom" Content="选房间布置" 
+                             Click="cbSelectFloorRoom_Click" 
+                             IsChecked="{Binding SelectFloorRoom,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <RadioButton GroupName="rbFloorUpDown" Content="住宅地下" 
+                             IsChecked="{Binding FloorUpDown,Converter={StaticResource TrueFalseConverter},ConverterParameter=0}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <RadioButton GroupName="rbFloorUpDown" Content="住宅地上" 
+                             IsChecked="{Binding FloorUpDown,Converter={StaticResource TrueFalseConverter},ConverterParameter=1}"/>
+            </StackPanel>
+        </Grid>
+
+
+        <!--梁要求-->
+        <Grid Grid.Row="3" Margin=" 10 0 10 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
+                <Label Content="布置要求"  FontWeight ="Black"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="0">
+                <RadioButton GroupName="rbBeam" Content="考虑梁" 
+                             IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=1}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <RadioButton GroupName="rbBeam" Content="不考虑梁" 
+                             IsChecked="{Binding Beam, Converter={StaticResource BeamConverter},ConverterParameter=0}"/>
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <Label  Content ="板顶厚度"  />
+            </StackPanel>
+            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" >
+                <cus:InputTextBox Width ="70" HorizontalAlignment="Left"  TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                <Label Content="mm"/>
+            </StackPanel>
+            <StackPanel Grid.Row="3" Grid.Column="0">
+                <Label  Content ="避梁距离"  />
+            </StackPanel>
+            <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal" >
+                <cus:InputTextBox Width ="70" HorizontalAlignment="Left"  TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding BufferDist,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
+                <Label Content="mm"/>
+            </StackPanel>
+        </Grid>
+        <!--布置内容-->
+        <Grid Grid.Row="4" Margin=" 10 0 10 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -72,109 +170,58 @@
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
                 <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
-                <RowDefinition Height="auto"></RowDefinition>
             </Grid.RowDefinitions>
-
-            <!--比例行-->
-            <StackPanel Grid.Row="0"  Grid.Column="0">
-                <Label  Content ="绘图比例" FontWeight ="Black"  />
-            </StackPanel>
-            <StackPanel Grid.Row="0" Grid.Column="1">
-                <ComboBox  SelectedItem="{Binding ScaleItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
-                            ItemsSource="{Binding ScaleListItems,Mode=OneWay,NotifyOnSourceUpdated=True}">
-
-                </ComboBox>
-            </StackPanel>
-            <!---->
-
-            <!--应用场景-->
-            <!--<StackPanel Grid.Row="1" Grid.ColumnSpan="2">
-                <Label Content="选择应用场景"/>
-            </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="0">
-                <RadioButton GroupName="rbScene" Content="单体场景" />
-            </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="1">
-                <RadioButton GroupName="rbScene" Content="车库场景" />
-            </StackPanel>-->
-            <!---->
-
-            <!--布置要求-->
-            <StackPanel Grid.Row="3" Grid.ColumnSpan="2">
-                <Label Content="布置要求"  FontWeight ="Black"/>
-            </StackPanel>
-            <StackPanel Grid.Row="4" Grid.Column="0">
-                <RadioButton GroupName="rbBeam" Content="考虑梁" 
-                             IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=1}"/>
-            </StackPanel>
-            <StackPanel Grid.Row="4" Grid.Column="1">
-                <RadioButton GroupName="rbBeam" Content="不考虑梁" 
-                             IsChecked="{Binding Beam,Converter={StaticResource BeamConverter},ConverterParameter=0}"/>
-            </StackPanel>
-            <StackPanel Grid.Row="5" Grid.Column="0">
-                <Label  Content ="板顶厚度"  />
-            </StackPanel>
-            <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal" >
-                <cus:InputTextBox Width ="70" HorizontalAlignment="Left"  TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding RoofThickness,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
-                <Label Content="mm"/>
-            </StackPanel>
-            <StackPanel Grid.Row="6" Grid.Column="0">
-                <Label  Content ="避梁距离"  />
-            </StackPanel>
-            <StackPanel Grid.Row="6" Grid.Column="1" Orientation="Horizontal" >
-                <cus:InputTextBox Width ="70" HorizontalAlignment="Left"  TextBoxInputType="InputInteger"  NumCanMinus="False" Text="{Binding BufferDist,Mode=TwoWay,NotifyOnSourceUpdated=True}"></cus:InputTextBox>
-                <Label Content="mm"/>
-            </StackPanel>
-            <!---->
-
-            <!--布置内容-->
-            <StackPanel Grid.Row="7" Grid.ColumnSpan="2">
+            <StackPanel Grid.Row="0" Grid.ColumnSpan="2">
                 <Label Content="请选择需要布置内容"  FontWeight ="Black"/>
             </StackPanel>
-            <StackPanel Grid.Row="8" Grid.Column="0">
-                <CheckBox  Content="烟感温感" IsChecked="{Binding LayoutSmoke,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+            <StackPanel Grid.Row="1" Grid.Column="0">
+                <CheckBox  x:Name="cbSmoke" Content="烟感温感" IsChecked="{Binding LayoutSmoke,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="8" Grid.Column="1">
-                <CheckBox  Content="可燃气体" IsChecked="{Binding LayoutGas,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="1" Grid.Column="1">
+                <CheckBox  x:Name="cbGas" Content="可燃气体" IsChecked="{Binding LayoutGas,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="9" Grid.Column="0">
-                <CheckBox  Content="消防广播" IsChecked="{Binding LayoutBroadcast,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="2" Grid.Column="0">
+                <CheckBox IsEnabled="false" x:Name="cbBroadcast" Content="消防广播" IsChecked="{Binding LayoutBroadcast,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="9" Grid.Column="1">
-                <CheckBox  Content="手报声光" IsChecked="{Binding LayoutManualAlart,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="2" Grid.Column="1">
+                <CheckBox IsEnabled="false" x:Name="cbMA" Content="手报声光" IsChecked="{Binding LayoutManualAlart,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="10" Grid.Column="0">
-                <CheckBox  Content="楼层显示" IsChecked="{Binding LayoutDisplay,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="3" Grid.Column="0">
+                <CheckBox  x:Name="cbDisplay" Content="楼层显示" IsChecked="{Binding LayoutDisplay,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="10" Grid.Column="1">
-                <CheckBox  Content="防火门监控" IsChecked="{Binding LayoutMonitor,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="3" Grid.Column="1">
+                <CheckBox  x:Name="cbMonitor" Content="防火门监控" IsChecked="{Binding LayoutMonitor,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
-            
-            <StackPanel Grid.Row="11" Grid.Column="0">
-                <CheckBox  Content="消防电话" IsChecked="{Binding LayoutTel,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
+
+            <StackPanel Grid.Row="4" Grid.Column="0">
+                <CheckBox  x:Name="cbTel" Content="消防电话" IsChecked="{Binding LayoutTel,Mode=TwoWay,NotifyOnSourceUpdated=True}"/>
             </StackPanel>
             <!---->
 
             <!--布置按钮-->
-            <StackPanel Grid.Row="12" Grid.Column="0">
+            <StackPanel Margin  ="0 5 0 0" Grid.Row="5" Grid.Column="0">
                 <CheckBox  Content="全选" x:Name="cbSelectAll" Click="cbSelectAll_Click"/>
             </StackPanel>
-            <StackPanel Grid.Row="12" Grid.Column="1">
+            <StackPanel Margin  ="0 5 0 0" Grid.Row="5" Grid.Column="1">
                 <cus:ImageButton Content="反选" Width="70"  HorizontalAlignment="Left"  x:Name="cbSelectOther" Click="cbSelectOther_Click"/>
             </StackPanel>
-            <StackPanel Margin  ="0 10 0 0" Grid.Row="13" Grid.Column="1"  Grid.ColumnSpan="2">
+
+        </Grid>
+        <!--布置按钮-->
+        <Grid Grid.Row="5" Margin=" 10 0 10 10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"></RowDefinition>
+            </Grid.RowDefinitions>
+            <StackPanel Margin  ="0 10 0 0" Grid.Row="0" Grid.Column="1"  Grid.ColumnSpan="2">
                 <cus:ImageButton IsTabStop="True" Focusable="True" 
                              TabIndex="0" Content="布置" 
                              x:Name="btnLayout" 

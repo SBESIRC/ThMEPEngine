@@ -24,6 +24,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
         private double _radius = 8000;
         private double _wallThickness = 100;
         private double _bufferDist = 500;
+        private bool  _floorUpDown = true;
 
         public ThAFASGasCmd()
         {
@@ -44,6 +45,7 @@ namespace ThMEPElectrical.FireAlarmArea.Command
             _radius = FireAlarmSetting.Instance.GasProtectRadius;
             _wallThickness = FireAlarmSetting.Instance.RoofThickness;
             _bufferDist = FireAlarmSetting.Instance.BufferDist;
+            _floorUpDown = FireAlarmSetting.Instance.FloorUpDown == 0 ? false : true;
         }
 
         public override void SubExecute()
@@ -110,6 +112,10 @@ namespace ThMEPElectrical.FireAlarmArea.Command
                 ThAFASUtils.TransformReset(transformer, geos);
 
                 //打印
+                if (_floorUpDown == true)
+                {
+                    layoutResult.ForEach(x => x.Dir = new Autodesk.AutoCAD.Geometry.Vector3d(0, 1, 0));
+                }
                 ThFireAlarmInsertBlk.InsertBlock(layoutResult, _scale);
             }
         }

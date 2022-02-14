@@ -312,9 +312,16 @@ namespace ThMEPElectrical.AFAS.Utils
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 //-----------选取图块
-                var selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
-                //var selectPts = ThAFASSelectFrameUtil.GetFrame();
-                //var selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+                var selectFloorRoom = FireAlarmSetting.Instance.SelectFloorRoom;
+                var selectPts = new Point3dCollection();
+                if (selectFloorRoom == 0)
+                {
+                    selectPts = ThAFASSelectFrameUtil.GetFrameBlk();
+                }
+                else
+                {
+                    selectPts = ThAFASSelectFrameUtil.GetRoomFrame();
+                }
 
                 if (selectPts.Count == 0)
                 {

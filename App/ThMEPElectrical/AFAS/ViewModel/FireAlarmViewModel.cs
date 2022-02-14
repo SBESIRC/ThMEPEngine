@@ -31,6 +31,35 @@ namespace ThMEPElectrical.AFAS.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        //-------布置场景
+        private int _SelectFloorRoom { get; set; }
+        public int SelectFloorRoom
+        {
+            get
+            {
+                return _SelectFloorRoom;
+            }
+            set
+            {
+                _SelectFloorRoom = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
+        private int _FloorUpDown { get; set; }
+        public int FloorUpDown
+        {
+            get
+            {
+                return _FloorUpDown;
+            }
+            set
+            {
+                _FloorUpDown = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
 
         //-------梁
         private BeamType _Beam { get; set; }
@@ -294,14 +323,16 @@ namespace ThMEPElectrical.AFAS.ViewModel
 
             SetScale();
             Beam = BeamType.ConsiderBeam;
-            //LayoutItem = LayoutItemType.Smoke;
-            ///layout item
+            SelectFloorRoom = 0;
+            FloorUpDown = 1;
+
+            //---layout item
             LayoutSmoke = true;
-            LayoutBroadcast = true;
+            LayoutBroadcast = false;
             LayoutDisplay = true;
             LayoutTel = true;
             LayoutGas = true;
-            LayoutManualAlart = true;
+            LayoutManualAlart = false;
             LayoutMonitor = true;
 
             //---beam
@@ -364,7 +395,6 @@ namespace ThMEPElectrical.AFAS.ViewModel
     {
         NotConsiderBeam = 0,
         ConsiderBeam = 1,
-
     }
 
     public enum BroadcastLayoutType
