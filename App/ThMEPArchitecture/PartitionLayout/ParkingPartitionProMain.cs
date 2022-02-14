@@ -233,21 +233,11 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
-                LogMomery("Before GenerateLanes : ");
                 GenerateLanes();
-                LogMomery("Before GeneratePerpModules : ");
                 GeneratePerpModules();
-                LogMomery("Before GenerateCarsInModules : ");
                 GenerateCarsInModules();
-                LogMomery("Before GenerateCarsOnRestLanes : ");
                 GenerateCarsOnRestLanes();
-                LogMomery("Before PostProcess : ");
                 PostProcess();
-                LogMomery("After PostProcess : ");
-                //GC.Collect();
-                //GC.WaitForPendingFinalizers();
-                //GC.WaitForFullGCComplete();
-                LogMomery("After GCinPartition : ");
             }
         }
 
@@ -297,9 +287,22 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (lane.Length < LengthCanGIntegralModulesConnectSingle) continue;
                 var offsetlane = CreateLine(lane);
                 offsetlane.TransformBy(Matrix3d.Displacement(vec * (DisModulus + DisLaneWidth / 2)));
-                offsetlane.TransformBy(Matrix3d.Scaling(10, offsetlane.GetCenter()));
+                offsetlane.TransformBy(Matrix3d.Scaling(20, offsetlane.GetCenter()));
                 //与边界相交
-                var linesplitbounds = SplitLine(offsetlane, Boundary)
+                var splits = SplitBufferLineByPoly(offsetlane, DisLaneWidth / 2, Boundary);
+                var linesplitbounds =/* SplitLine(offsetlane, Boundary)*/
+                    splits
+                    .Where(e =>
+                    {
+                        var l = CreateLine(e);
+                        l.StartPoint = l.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(l).GetNormal() * 10));
+                        l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
+                        var bf = l.Buffer(DisLaneWidth / 2 - 1);
+                        var result = bf.Intersect(Boundary, Intersect.OnBothOperands).Count == 0;
+                        bf.Dispose();
+                        l.Dispose();
+                        return result;
+                    })
                     .Where(e => Boundary.Contains(e.GetCenter()))
                     .Where(e => e.Length > LengthCanGIntegralModulesConnectSingle)
                     .Select(e =>
@@ -444,12 +447,30 @@ namespace ThMEPArchitecture.PartitionLayout
                             var pl = CreatPolyFromLines(split, splitback);
                             var plback = pl.Clone() as Polyline;
                             plback.TransformBy(Matrix3d.Displacement(-vec * DisCarAndHalfLane));
+                            var split_splitori_points = plback.Intersect(Boundary, Intersect.OnBothOperands).Select(e => splitori.GetClosestPointTo(e, false)).ToList();
+                            if (false)
+                            {
+                                splitori = SplitLine(splitori, split_splitori_points).Where(e =>
+                                {
+                                    var l = CreateLine(e);
+                                    l.StartPoint = l.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(l).GetNormal() * 10));
+                                    l.EndPoint = l.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(l).GetNormal() * 10));
+                                    var bf = l.Buffer(DisLaneWidth / 2 - 1);
+                                    var result = bf.Intersect(Boundary, Intersect.OnBothOperands).Count == 0;
+                                    bf.Dispose();
+                                    l.Dispose();
+                                    return result;
+                                }).Where(e => e.Length > 1).First();
+                                var line_to_ori = CreateLine(splitori);
+                                line_to_ori.TransformBy(Matrix3d.Displacement(vec.GetNormal() * (DisVertCarLength + DisLaneWidth)));
+                                plback = CreatPolyFromLines(splitori, line_to_ori);
+                            }
                             paras.CarModulesToAdd.Add(new CarModule(plback, splitori, vec));
                             paras.CarBoxesToAdd.Add(plback);
                             generate = true;
                             generate_lane_length = split.Length;
                             double dis_to_move = 0;
-                            if (HasParallelLaneForwardExisted(split, vec, DisParallelCarWidth + DisLaneWidth, 0, ref dis_to_move))
+                            if (HasParallelLaneForwardExisted(split, vec, DisVertCarLength + DisLaneWidth, 0, ref dis_to_move))
                             {
                                 pl.TransformBy(Matrix3d.Displacement(vec * dis_to_move));
                                 split.TransformBy(Matrix3d.Displacement(vec * dis_to_move));
@@ -601,16 +622,33 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (ClosestPointInVertLines(line.StartPoint, line, IniLanes.Select(e => e.Line)) < 10)
                     line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(line).GetNormal() * DisLaneWidth / 2));
                 if (ClosestPointInVertLines(line.EndPoint, line, IniLanes.Select(e => e.Line)) < 10)
-                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisLaneWidth / 2));
+                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * (DisLaneWidth / 2 + DisPillarLength)));
+                if (line.Intersect(Boundary, Intersect.OnBothOperands).Count > 0)
+                {
+                    var lines = SplitLine(line, Boundary).Where(e => e.Length > 1).Where(e => Boundary.Contains(e.GetCenter()));
+                    if (lines.Count() > 0) line = lines.First();
+                    else continue;
+                }
                 line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength, false, false);
+                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength, false, false,false,false,true,false,true,false,true,true);
             }
         }
 
         private void GenerateCarsOnRestLanes()
         {
             LaneSpatialIndex.Update(IniLanes.Select(e => CreatePolyFromLine(e.Line)).ToCollection(), new DBObjectCollection());
-            LaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2 - 10)));
+            LaneBoxes.AddRange(IniLanes.Select(e =>
+            {
+                //e.Line.Buffer(DisLaneWidth / 2 - 10));
+                var la = CreateLine(e.Line);
+                var lb = CreateLine(e.Line);
+                la.TransformBy(Matrix3d.Displacement(CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                lb.TransformBy(Matrix3d.Displacement(-CreateVector(la).GetPerpendicularVector().GetNormal() * (DisLaneWidth / 2 - 10)));
+                var py = CreatPolyFromLines(la, lb);
+                la.Dispose();
+                lb.Dispose();
+                return py;
+            }));
             LaneBufferSpatialIndex.Update(LaneBoxes.ToCollection(), new DBObjectCollection());
             var vertlanes = GeneratePerpModuleLanes(DisVertCarLength + DisLaneWidth / 2, DisVertCarWidth, false);
             foreach (var k in vertlanes)
