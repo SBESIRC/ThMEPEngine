@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Colors;
 
 using DotNetARX;
 using Linq2Acad;
@@ -133,5 +134,27 @@ namespace ThMEPElectrical.AFAS.Utils
             }
         }
 
+        public static void InsertPolyline(List<Polyline> plList, string layerName, int colorIndex)
+        {
+            if (plList == null || plList.Count == 0)
+                return;
+
+            using (var db = AcadDatabase.Active())
+            {
+                var color = Color.FromColorIndex(ColorMethod.ByColor, (short)colorIndex);
+
+                ThMEPEngineCore.Diagnostics.DrawUtils.CreateLayer(layerName, color, ReplaceLayerSetting: true);
+
+                foreach (var pl in plList)
+                {
+                    if (pl != null)
+                    {
+                        var clone = pl.Clone() as Entity;
+                        clone.Layer = layerName;
+                        db.ModelSpace.Add(clone);
+                    }
+                }
+            }
+        }
     }
 }

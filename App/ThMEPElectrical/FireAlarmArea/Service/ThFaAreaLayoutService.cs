@@ -151,8 +151,8 @@ namespace ThMEPElectrical.FireAlarmArea.Service
                 }
             }
 
-            var bufferShrink2 = shrinkedGeom.Buffer(shrinkValue*1.5);
-            var bufferShrinkArea2= bufferShrink2.Area;
+            var bufferShrink2 = shrinkedGeom.Buffer(shrinkValue * 1.5);
+            var bufferShrinkArea2 = bufferShrink2.Area;
             var objs4 = bufferShrink2.ToDbCollection();
             foreach (var obj in objs4)
             {
@@ -238,5 +238,24 @@ namespace ThMEPElectrical.FireAlarmArea.Service
             return priority;
         }
 
+        public static List<Polyline> CleanBlind(List<Polyline> tempBlindsResult)
+        {
+            var blindsResult = new List<Polyline>();
+
+            tempBlindsResult = tempBlindsResult.Where(x => x.Area > 100).ToList();
+            if (tempBlindsResult.Count > 0)
+            {
+                foreach (var blind in tempBlindsResult)
+                {
+                    var shrinkBlind = blind.Buffer(-1).OfType<Polyline>().Where(x => x.Area > 100);
+                    foreach (var bBlind in shrinkBlind)
+                    {
+                        var bufferBlind = bBlind.Buffer(1).OfType<Polyline>();
+                        blindsResult.AddRange(bufferBlind);
+                    }
+                }
+            }
+            return blindsResult;
+        }
     }
 }

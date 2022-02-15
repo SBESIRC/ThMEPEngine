@@ -32,6 +32,7 @@ namespace ThMEPLighting.IlluminationLighting
         {
             blindsResult = new List<Polyline>();
             layoutResult = new List<ThLayoutPt>();
+            var tempBlindsResult = new List<Polyline>();
 
             foreach (var frame in dataQuery.FrameList)
             {
@@ -47,14 +48,14 @@ namespace ThMEPLighting.IlluminationLighting
                     if (layoutParameter.roomType[frame] == ThIlluminationCommon.LayoutType.normal || layoutParameter.roomType[frame] == ThIlluminationCommon.LayoutType.normalEvac)
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThIlluminationCommon.LayoutType.normal, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameN);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameN);
                         dataQuery.FramePriorityList[frame].AddRange(ThFaAreaLayoutService.ToPriority(localPts, ThFaCommon.blk_size[layoutParameter.BlkNameN], layoutParameter.Scale, layoutParameter.priorityExtend));
                     }
                     if (layoutParameter.ifLayoutEmg == true &&
                         (layoutParameter.roomType[frame] == ThIlluminationCommon.LayoutType.evacuation || layoutParameter.roomType[frame] == ThIlluminationCommon.LayoutType.normalEvac))
                     {
                         LayoutProcess(frame, dataQuery, layoutParameter, ThIlluminationCommon.LayoutType.evacuation, out var localPts, out var blines);
-                        ThFaAreaLayoutService.AddResult(layoutResult, blindsResult, localPts, blines, layoutParameter.BlkNameE);
+                        ThFaAreaLayoutService.AddResult(layoutResult, tempBlindsResult, localPts, blines, layoutParameter.BlkNameE);
                     }
                 }
                 catch (Exception ex)
@@ -72,6 +73,8 @@ namespace ThMEPLighting.IlluminationLighting
                     continue;
                 }
             }
+
+            blindsResult = ThFaAreaLayoutService.CleanBlind(tempBlindsResult);
 
         }
 

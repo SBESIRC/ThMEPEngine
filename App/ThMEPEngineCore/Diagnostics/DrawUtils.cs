@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Diagnostics
         /// </summary>
         /// <param name="allLayers"></param>
         /// <param name="aimLayer"></param>
-        public static ObjectId CreateLayer(string aimLayer, Color color, bool IsPlottable = false)
+        public static ObjectId CreateLayer(string aimLayer, Color color, bool IsPlottable = false, bool ReplaceLayerSetting = false)
         {
             LayerTableRecord layerRecord = null;
             using (var db = AcadDatabase.Active())
@@ -76,23 +76,16 @@ namespace ThMEPEngineCore.Diagnostics
                     layerRecord.Color = color;
                     layerRecord.IsPlottable = IsPlottable;
                 }
-                //else
-                //{
-                //    if (!layerRecord.Color.Equals(color))
-                //    {
-                //        layerRecord.UpgradeOpen();
-                //        layerRecord.Color = color;
-                //        layerRecord.IsPlottable = false;
-                //        layerRecord.DowngradeOpen();
-                //    }
-                //    if (!layerRecord.LineWeight.Equals(lineWeight))
-                //    {
-                //        layerRecord.UpgradeOpen();
-                //        layerRecord.LineWeight = lineWeight;
-                //        layerRecord.IsPlottable = false;
-                //        layerRecord.DowngradeOpen();
-                //    }
-                //}
+                else
+                {
+                    if (!layerRecord.Color.Equals(color) && ReplaceLayerSetting == true)
+                    {
+                        layerRecord.UpgradeOpen();
+                        layerRecord.Color = color;
+                        layerRecord.IsPlottable = IsPlottable;
+                        layerRecord.DowngradeOpen();
+                    }
+                }
             }
 
             return layerRecord.ObjectId;

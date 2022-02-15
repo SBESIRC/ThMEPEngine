@@ -148,6 +148,7 @@ namespace ThMEPLighting.IlluminationLighting
                 //转回到原始位置
                 lightResult.ForEach(x => x.TransformBack(transformer));
                 ThAFASUtils.TransformReset(transformer, geos);
+                blindsResult.ForEach(x => transformer.Reset(x));
 
                 //打印
                 if (_floorUpDown == true)
@@ -157,6 +158,7 @@ namespace ThMEPLighting.IlluminationLighting
 
                 ThFireAlarmInsertBlk.InsertBlock(lightResult, _scale);
                 ThFireAlarmInsertBlk.InsertBlockAngle(stairBlkResult, _scale);
+                ThFireAlarmInsertBlk.InsertPolyline(blindsResult, ThIlluminationCommon.Layer_Blind, ThIlluminationCommon.Color_Blind);
 
             }
         }
