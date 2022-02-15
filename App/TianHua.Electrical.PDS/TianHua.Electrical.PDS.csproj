@@ -43,6 +43,7 @@
     <Compile Include="Model\ThPDSID.cs" />
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />
+    <Compile Include="Model\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />
@@ -82,6 +83,20 @@
     <PackageReference Include="QuickGraph">
       <Version>3.6.61119.7</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CADExtension\CADExtension.csproj">
+      <Project>{11DAD9AC-DA76-4B36-8315-9AF9BA638D41}</Project>
+      <Name>CADExtension</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
+      <Project>{C6AC9E68-9059-4DDD-8FA7-58E2656D572E}</Project>
+      <Name>ThCADCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
+    </ProjectReference>
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

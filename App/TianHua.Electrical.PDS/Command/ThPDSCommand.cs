@@ -9,6 +9,7 @@ using Linq2Acad;
 using ThCADExtension;
 using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
+using TianHua.Electrical.PDS.Model;
 using TianHua.Electrical.PDS.Service;
 
 namespace TianHua.Electrical.PDS.Command
@@ -22,7 +23,6 @@ namespace TianHua.Electrical.PDS.Command
                 // 提取标注
                 var markExtractor = new ThCircuitMarkExtractionEngine();
                 markExtractor.ExtractFromMS(acad.Database);
-
                 // 根据块名提取负载及标注块
                 var loadExtractService = new ThPDSLoadExtractService();
                 loadExtractService.Extract(acad.Database);
@@ -59,6 +59,13 @@ namespace TianHua.Electrical.PDS.Command
                     acad.ModelSpace.Add(o);
                     o.LayerId = cabletrayLayer;
                 });
+
+                //做一个标注的Service
+
+                ThPDSLoopGraphEngine graphEngine = new ThPDSLoopGraphEngine(acad.Database, distributionExtractService.Results, loadExtractService.LoadBlocks, cabletrayEngine.Results.OfType<Line>().ToList(), cableEngine.Results.OfType<Curve>().ToList());
+                graphEngine.CreatGraph();
+
+                var graph = graphEngine.GetGraph();
             }
         }
 
