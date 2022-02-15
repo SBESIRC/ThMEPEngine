@@ -54,6 +54,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            ;
+            Utils.SetSeed();
             try
             {
                 using (var docLock = Active.Document.LockDocument())

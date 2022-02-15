@@ -32,29 +32,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
         [ThreadStatic] private static int _Seed;
 
-        private static bool SeedFalg = false;
         public static int Seed
         {
             get 
             {
-                if (!SeedFalg)
+                var path = Path.Combine(System.IO.Path.GetTempPath(), "RandomSeed.txt");
+#if (DEBUG)
+                if (File.Exists(path))// 读取
                 {
-                    var path = "RandomSeed.txt";
-                    if (File.Exists(path))
-                    {
-                        _Seed = int.Parse(File.ReadLines(path).First());
-                    }
-                    else
-                    {
-                        _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
-
-                        using (var tw = new StreamWriter(path, true))
-                        {
-                            tw.WriteLine(_Seed.ToString());
-                        }
-                    }
-                    SeedFalg = true;
+                    _Seed = int.Parse(File.ReadLines(path).First());
                 }
+                else//写入
+                {
+                    _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+
+                    using (var tw = new StreamWriter(path, false))
+                    {
+                        tw.WriteLine(_Seed.ToString());
+                    }
+                }
+#else
+                //Release 只执行写入
+                _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+                using (var tw = new StreamWriter(path, false))
+                {
+                    tw.WriteLine(_Seed.ToString());
+                }
+#endif
                 return _Seed;
             }
         }
@@ -63,6 +67,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             get { return Local ?? (Local = new Random(Seed)); }
         }
 
+        public static void Set()// 设置Seed
+        {
+            Local = new Random(Seed);
+        }
     }
     internal class Utils
     {
@@ -96,6 +104,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
             return true;
         }
+
+        public static void SetSeed()
+        {
+            ThreadSafeRandom.Set();
+        }
+
         public static List<int> RandChoice(int UpperBound, int n=-1,int LowerBound = 0)
         {
             // random choose n integers from n to UpperBound without replacement

@@ -54,6 +54,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
+            Utils.SetSeed();
             try
             {
                 Logger?.Information($"############################################");
