@@ -316,10 +316,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             while (curVal < eval)
             {
                 curLine = CreateTempLine(constantVal, curVal, line2);
+                var spt = curLine.StartPoint;
+                var ept = curLine.EndPoint;
+                var ptInArea = area.Contains(spt) && area.Contains(ept);
                 var linebuffer = curLine.Buffer(1.0);
                 var areaCnt = areaSpatialIndex.SelectCrossingPolygon(linebuffer).Count;
                 var buildCnt = buildingSpatialIndex.SelectCrossingPolygon(linebuffer).Count;
-                if (areaCnt > 0 || buildCnt > 0)
+                if (areaCnt > 0 || buildCnt > 0 || !ptInArea)
                 {
                     curVal += 5500;
                     continue;
