@@ -23,6 +23,6 @@ namespace ThMEPEngineCore.Engine
 
         public abstract void RecognizeMS(Database database, Point3dCollection polygon);
 
-        public abstract void Recognize(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon);
+        public abstract void Recognize(List<ThRawIfcFlowSegmentData> datas, Point3dCollection polygon);
     }
 }

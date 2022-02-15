@@ -7,7 +7,7 @@ namespace ThMEPEngineCore.Engine
     public class ThRawIfcFlowSegmentData
     {
         public object Data { get; set; }
-        public DBObjectCollection Geometries { get; set; }
+        public Entity Geometry { get; set; }
     }
 
     public abstract class ThFlowSegmentExtractionEngine
