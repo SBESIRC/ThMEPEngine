@@ -6,15 +6,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using Autodesk.AutoCAD.Geometry;
-using System.IO;
 using ThCADExtension;
-using Serilog;
 using System.Diagnostics;
 using ThCADCore.NTS;
 using ThMEPArchitecture.PartitionLayout;
 using Dreambuild.AutoCAD;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
-using System.Text.RegularExpressions;
 using ThMEPArchitecture.ViewModel;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm

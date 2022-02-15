@@ -241,7 +241,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             if (visited.Count == seglineCnt)
             {
-                var segLinesGroup = SeglinesGrouping(visited);
+                var segLinesGroup = SeglinesGrouping(visited, orgArea);
                 if(segLinesGroup.Count > 1)
                 {
                     AddConnectLine(orgArea, visited, buildingSpatialIndex);
@@ -275,7 +275,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static void AddConnectLine(Polyline area, List<SegLineEx> visited, 
             ThCADCoreNTSSpatialIndex buildingSpatialIndex)
         {
-            var rstSeglinesList = SeglinesGrouping(visited);//分组
+            var rstSeglinesList = SeglinesGrouping(visited, area);//分组
             var rstConnectLines = GetNearestLines(rstSeglinesList);//找到候选连接线
             foreach(var rst in rstConnectLines)
             {
@@ -436,7 +436,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         /// </summary>
         /// <param name="segLines"></param>
         /// <returns></returns>
-        public static List<List<SegLineEx>> SeglinesGrouping(List<SegLineEx> segLines)
+        public static List<List<SegLineEx>> SeglinesGrouping(List<SegLineEx> segLines, Polyline area)
         {
             var rstSeglinesList = new List<List<SegLineEx>>();
 
@@ -449,7 +449,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     var seglinei = segLines[i].Segline;
                     var seglinej = segLines[j].Segline;
-                    if(seglinei.IsIntersect(seglinej))
+                    if(seglinei.IsIntersect(seglinej, area))
                     {
                         AddItem(seglineDic, i, j);
                     }

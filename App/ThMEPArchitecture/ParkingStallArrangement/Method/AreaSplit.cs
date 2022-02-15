@@ -9,11 +9,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.ParkingStallArrangement.General;
-using System.Diagnostics;
 using NetTopologySuite.Geometries;
-using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using Linq2Acad;
-using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
@@ -261,7 +258,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, Polyline area,ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
         {
-            
             hasBuilding = true;
             if (buildLines.Count == 0)//区域内没有建筑物
             {
@@ -324,7 +320,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 foreach (var pt in closedPts)
                 {
                     var tempLine = new Line(new Point3d(line.StartPoint.X, pt.Y, 0), new Point3d(line.EndPoint.X, pt.Y, 0));
-                    var intersectRsts = tempLine.IsIntersectPt(plines, area);
+                    var intersectRsts = tempLine.IsIntersectPt(pt, plines, area);
                     if(!intersectRsts)
                     {
                         return pt;
@@ -416,13 +412,26 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
 
-        private static bool IsIntersectPt(this Line line, List<Polyline> plines, Polyline area)
+        private static bool IsIntersectPt(this Line line, Point3d targetPt, List<Polyline> plines, Polyline area)
         {
             double tor = 5500;
             var pts = new List<Point3d>();
             foreach(var pline in plines)
             {
                 pts.AddRange(line.Intersect(pline, 0));
+            }
+            var flag = false;
+            foreach(var pt in pts)
+            {
+                if(pt.DistanceTo(targetPt) < 1.0)
+                {
+                    flag = true;
+                    break;
+                }
+            }
+            if(!flag)
+            {
+                pts.Add(targetPt);
             }
             if(pts.Count > 2)
             {

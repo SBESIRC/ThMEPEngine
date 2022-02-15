@@ -1,31 +1,16 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using Linq2Acad;
 using Serilog;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
-using ThMEPArchitecture.ParkingStallArrangement.Method;
 using ThMEPArchitecture.ParkingStallArrangement.Model;
 using ThMEPArchitecture.PartitionLayout;
-using ThMEPEngineCore;
 using ThMEPEngineCore.Command;
-using Draw = ThMEPArchitecture.ParkingStallArrangement.Method.Draw;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
-using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
-using NFox.Cad;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {

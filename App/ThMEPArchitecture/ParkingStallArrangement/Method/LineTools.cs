@@ -1,12 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPArchitecture.ParkingStallArrangement.Model;
+using ThCADCore.NTS;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -166,10 +165,18 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
-        public static bool IsIntersect(this Line line1, Line line2)
+        public static bool IsIntersect(this Line line1, Line line2, Polyline area)
         {
             var pts = line1.Intersect(line2, 0);
-            return pts.Count > 0;
+            if(pts.Count == 0)
+            {
+                return false;
+            }
+            var dbPts = new List<DBPoint>();
+            pts.ForEach(p => dbPts.Add(new DBPoint(p)));
+            var ptSpatialIndex = new ThCADCoreNTSSpatialIndex(dbPts.ToCollection());
+            var rstInArea = ptSpatialIndex.SelectCrossingPolygon(area);
+            return rstInArea.Count > 0;
         }
 
         public static Point3d GetCenterPt(this Line line)
