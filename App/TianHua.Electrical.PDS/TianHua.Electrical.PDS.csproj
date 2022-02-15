@@ -25,6 +25,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\ThPDSCommand.cs" />
     <Compile Include="Engine\ThCableSegmentExtractionEngine.cs" />
     <Compile Include="Engine\ThCableSegmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThCableSegmentRecognitionEngine.cs" />
@@ -37,7 +38,6 @@
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
     <Compile Include="Engine\ThPDSLoadExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSLoadExtractionVisitor.cs" />
-    <Compile Include="Engine\ThPDSDataHandleEngine.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
@@ -48,7 +48,7 @@
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />
     <Compile Include="Service\ThPDSLoadExtractService.cs" />
     <Compile Include="Service\ThLoadNameService.cs" />
-    <Compile Include="Service\ThPDSCommond.cs" />
+    <Compile Include="Service\ThPDSCommon.cs" />
     <Compile Include="Service\ThPDSPolylineService.cs" />
   </ItemGroup>
   <ItemGroup />

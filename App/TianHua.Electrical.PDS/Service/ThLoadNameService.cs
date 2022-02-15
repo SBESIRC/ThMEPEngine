@@ -10,7 +10,7 @@ namespace TianHua.Electrical.PDS.Service
         {
             var excelSrevice = new ReadExcelService();
             var dataSet = excelSrevice.ReadExcelToDataSet(loadConfigUrl, true);
-            var table = dataSet.Tables[ThPDSCommond.LOAD];
+            var table = dataSet.Tables[ThPDSCommon.LOAD];
             return GetBlockNames(table);
         }
 

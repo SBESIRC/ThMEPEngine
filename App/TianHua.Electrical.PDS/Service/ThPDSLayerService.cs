@@ -60,5 +60,10 @@ namespace TianHua.Electrical.PDS.Service
         {
             return database.CreateAILayer("AI-TEST-CABLETRAY", 2);
         }
+
+        public static ObjectId CreateAITestDistributionLayer(this Database database)
+        {
+            return database.CreateAILayer("AI-TEST-DISTRIBUTION", 3);
+        }
     }
 }

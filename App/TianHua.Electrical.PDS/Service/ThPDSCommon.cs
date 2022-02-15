@@ -1,6 +1,6 @@
 ﻿namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSCommond
+    public class ThPDSCommon
     {
         public static readonly string LOAD = "负载";
         public static readonly string DISTRIBUTION_BOX = "配电箱";
