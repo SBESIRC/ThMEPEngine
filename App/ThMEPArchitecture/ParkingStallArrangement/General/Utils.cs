@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -29,14 +30,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
     {
         [ThreadStatic] private static Random Local;
 
-        [ThreadStatic] private static int _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+        [ThreadStatic] private static int _Seed;
 
+        private static bool SeedFalg = false;
         public static int Seed
         {
-            get { return _Seed; }
-            set
+            get 
             {
-                _Seed = value;
+                if (!SeedFalg)
+                {
+                    var path = "RandomSeed.txt";
+                    if (File.Exists(path))
+                    {
+                        _Seed = int.Parse(File.ReadLines(path).First());
+                    }
+                    else
+                    {
+                        _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+
+                        using (var tw = new StreamWriter(path, true))
+                        {
+                            tw.WriteLine(_Seed.ToString());
+                        }
+                    }
+                    SeedFalg = true;
+                }
+                return _Seed;
             }
         }
         public static Random ThisThreadsRandom
@@ -76,15 +95,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             }
 
             return true;
-        }
-
-        public static int GetRandomSeed()
-        {
-            return ThreadSafeRandom.Seed;
-        }
-        public static void SetRandomSeed(int RandSeed)
-        {
-            ThreadSafeRandom.Seed = RandSeed;
         }
         public static List<int> RandChoice(int UpperBound, int n=-1,int LowerBound = 0)
         {

@@ -58,8 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 Logger?.Information($"############################################");
                 Logger?.Information($"手动分割线迭代");
-                SetSeed();
-                Logger?.Information($"Random Seed:{Utils.GetRandomSeed()}");
+                //Logger?.Information($"Random Seed:{Utils.GetRandomSeed()}");
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
@@ -87,25 +86,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             base.AfterExecute();
         }
 
-        private void SetSeed()
-        {
-#if (DEBUG)
-            var seedoptions = new PromptKeywordOptions("\n是否设置RandomSeed：");
-            seedoptions.Keywords.Add("是", "Y", "是(Y)");
-            seedoptions.Keywords.Add("否", "N", "否(N)");
-
-            seedoptions.Keywords.Default = "是";
-            var Msg1 = Active.Editor.GetKeywords(seedoptions);
-            if (Msg1.Status != PromptStatus.OK) return;
-
-            if (Msg1.StringResult.Equals("是"))
-            {
-                var RandSeedMsg = Active.Editor.GetString("\n 请输入RandomSeed:");
-                if (RandSeedMsg.Status != PromptStatus.OK) return;
-                Utils.SetRandomSeed(int.Parse(RandSeedMsg.StringResult));
-            }
-#endif
-        }
         public void Run(AcadDatabase acadDatabase)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
