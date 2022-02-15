@@ -29,10 +29,21 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
     {
         [ThreadStatic] private static Random Local;
 
+        [ThreadStatic] private static int _Seed = unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId);
+
+        public static int Seed
+        {
+            get { return _Seed; }
+            set
+            {
+                _Seed = value;
+            }
+        }
         public static Random ThisThreadsRandom
         {
-            get { return Local ?? (Local = new Random(unchecked(Environment.TickCount * 31 + Thread.CurrentThread.ManagedThreadId))); }
+            get { return Local ?? (Local = new Random(Seed)); }
         }
+
     }
     internal class Utils
     {
@@ -67,6 +78,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             return true;
         }
 
+        public static int GetRandomSeed()
+        {
+            return ThreadSafeRandom.Seed;
+        }
+        public static void SetRandomSeed(int RandSeed)
+        {
+            ThreadSafeRandom.Seed = RandSeed;
+        }
         public static List<int> RandChoice(int UpperBound, int n=-1,int LowerBound = 0)
         {
             // random choose n integers from n to UpperBound without replacement
