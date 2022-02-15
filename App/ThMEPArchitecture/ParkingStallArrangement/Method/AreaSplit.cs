@@ -312,7 +312,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
                     return sortPts.First();
                 }
-                var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
+                //var closeBuild = buildList.OrderBy(blk => line.GetMinDist(blk.GetRect().GetCenter())).ToList().First();
+                var closeBuild = buildList.OrderBy(blk => line.dist2Build(blk)).ToList().First();
                 var rect = closeBuild.GetRect();
                 var plines = GetPlines(closeBuild);
                 plines.ForEach(pl => pl.GetPoints().ForEach(p => closedPts.Add(p)));
@@ -360,6 +361,29 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return sortPts.First();
             }
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
+        }
+
+        private static double dist2Build(this Line line, BlockReference build)
+        {
+            var objs = new DBObjectCollection();
+            (build as Entity).Explode(objs);
+            double minDist = line.GetMinDist(build.GetRect().GetCenter());
+            foreach (var obj in objs)
+            {
+                if(obj is Polyline pline)
+                {
+                    var pts = pline.GetPoints();
+                    foreach(var pt in pts)
+                    {
+                        var dist = line.GetMinDist(pt);
+                        if (dist < minDist)
+                        {
+                            minDist = dist;
+                        }
+                    }
+                }
+            }
+            return minDist;
         }
 
         public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
