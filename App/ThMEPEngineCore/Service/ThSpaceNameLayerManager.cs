@@ -30,6 +30,17 @@ namespace ThMEPEngineCore.Service
                     .ToList();
             }
         }
+        public static List<string> AIRoomNameXRefLayers(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
+                    .Where(o => IsAIRoomNameXRefLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
+            }
+        }
         private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
@@ -52,6 +63,15 @@ namespace ThMEPEngineCore.Service
         private static bool IsModelSpaceLayer(string name)
         {
             string[] patterns = name.ToUpper().Split('-').ToArray();
+            if (patterns.Count() < 2)
+            {
+                return false;
+            }
+            return patterns[0] == "AI" && patterns[1] == "房间名称";
+        }
+        private static bool IsAIRoomNameXRefLayer(string name)
+        {
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').ToArray();
             if (patterns.Count() < 2)
             {
                 return false;

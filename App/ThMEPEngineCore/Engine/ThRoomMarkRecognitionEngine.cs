@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database),
+                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database),
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
@@ -48,7 +48,9 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            throw new NotSupportedException();
+            var engine = new ThRoomMarkExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }       
 
         public override void Recognize(List<ThRawIfcAnnotationElementData> datas, Point3dCollection polygon)

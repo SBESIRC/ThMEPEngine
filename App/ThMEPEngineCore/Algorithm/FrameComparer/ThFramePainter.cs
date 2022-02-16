@@ -28,8 +28,8 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
     {
         public ThFramePainter()
         {
-            ImportLayerBlock();
             PreProcLayer();
+            ImportLayerBlock();
         }
         private void ImportLayerBlock()
         {
@@ -37,14 +37,22 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             {
                 using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalDwgPath(), DwgOpenMode.ReadOnly, false))
                 {
-                    adb.Database.CreateAIDoorLayer();
-                    adb.Database.CreateAIWindowLayer();
-                    adb.Database.CreateAIRoomOutlineLayer();
-                    adb.Database.CreateAIFireCompartmentLayer();
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendDoorLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendWindowLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendRoomFrameLayer, 30);
-                    adb.Database.CreateAILayer(AppendLayerInfo.AppendFireComponentLayer, 30);
+                    if (!adb.Layers.Contains(ThMEPEngineCoreLayerUtils.DOOR))
+                        adb.Database.CreateAIDoorLayer();
+                    if (!adb.Layers.Contains(ThMEPEngineCoreLayerUtils.WINDOW))
+                        adb.Database.CreateAIWindowLayer();
+                    if (!adb.Layers.Contains(ThMEPEngineCoreLayerUtils.ROOMOUTLINE))
+                        adb.Database.CreateAIRoomOutlineLayer();
+                    if (!adb.Layers.Contains(ThMEPEngineCoreLayerUtils.FIRECOMPARTMENT))
+                        adb.Database.CreateAIFireCompartmentLayer();
+                    if (!adb.Layers.Contains(AppendLayerInfo.AppendDoorLayer))
+                        adb.Database.CreateAILayer(AppendLayerInfo.AppendDoorLayer, 30);
+                    if (!adb.Layers.Contains(AppendLayerInfo.AppendWindowLayer))
+                        adb.Database.CreateAILayer(AppendLayerInfo.AppendWindowLayer, 30);
+                    if (!adb.Layers.Contains(AppendLayerInfo.AppendRoomFrameLayer))
+                        adb.Database.CreateAILayer(AppendLayerInfo.AppendRoomFrameLayer, 30);
+                    if (!adb.Layers.Contains(AppendLayerInfo.AppendFireComponentLayer))
+                        adb.Database.CreateAILayer(AppendLayerInfo.AppendFireComponentLayer, 30);
                     adb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Hidden), true);
                     adb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(LineTypeInfo.Continuous), true);
                 }
@@ -72,8 +80,15 @@ namespace ThMEPEngineCore.Algorithm.FrameComparer
             DrawDeleteLine(comp.ErasedFrame, dicCode2Id);
             DrawChangedLine(comp, dicCode2Id);
             DrawAppendLine(comp, type, dicCode2Id);
-            
+            //DrawUnchangedLine(comp, type, dicCode2Id);
         }
+
+        private void DrawUnchangedLine(ThMEPFrameComparer comp, CompareFrameType type, Dictionary<int, ObjectId> dicCode2Id)
+        {
+            var unchangedFrames = comp.unChangedFrame.Keys.ToCollection();
+            DrawLines(ref unchangedFrames, ColorIndex.Cyan, LineTypeInfo.Continuous, ThMEPEngineCoreLayerUtils.ROOMOUTLINE, dicCode2Id);
+        }
+
         public void DrawDeleteLine(DBObjectCollection lines, Dictionary<int, ObjectId> dicCode2Id)
         {
             using (var db = AcadDatabase.Active())
