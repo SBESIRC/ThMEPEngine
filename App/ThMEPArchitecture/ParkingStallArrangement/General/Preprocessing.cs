@@ -24,7 +24,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 {
     public static class Preprocessing
     {
-        public static bool GetOuterBrder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger)
+        public static bool GetOuterBorder(AcadDatabase acadDatabase, out OuterBrder outerBrder, Serilog.Core.Logger Logger)
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder _outerBrder, Logger);
             outerBrder = _outerBrder;
@@ -40,7 +40,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             }
             return true;
         }
-        public static void DataPreprocessing(OuterBrder outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, 
+        public static bool DataPreprocessing(OuterBrder outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, 
             Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true)
         {
             gaPara = new GaParameter();
@@ -60,8 +60,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             {
                 seglineDic.Add(index++, line);
             }
-            WindmillSplit.Split(isDirectlyArrange, area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
+            var rstSplit = WindmillSplit.Split(isDirectlyArrange, area, seglineDic, buildLinesSpatialIndex, ref maxVals, ref minVals, 
                 out Dictionary<int, List<int>> seglineIndexDic, out int segAreasCnt);
+            if(!rstSplit)
+            {
+                return false;
+            }
             gaPara.Set(outerBrder.SegLines, maxVals, minVals);
 
             var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
@@ -77,6 +81,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             }
             layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, outerBrder.SegLines, ptDic, directionList, linePtDic, 
                 seglineIndexDic, segAreasCnt, usePline, Logger);
+            return true;
 
         }
     }

@@ -21,6 +21,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var defaultTesselateLength = 100;
             var lines = polygon.ToLines(defaultTesselateLength);
+            double extendTor = polygon.GetMaxWidth();
+            line = line.ExtendLineEx(extendTor, 3);
             lines.Add(line);
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
             var areas = extendLines.PolygonsEx();
@@ -77,7 +79,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             var defaultTesselateLength = 100;
             var lines = polygon.ToLines(defaultTesselateLength);
-            var lineEx = line.ExtendLine(1e6);
+            double extendTor = polygon.GetMaxWidth();
+            var lineEx = line.ExtendLine(extendTor);
             lines.Add(lineEx);
 
             var extendLines = lines.Select(l => l.ExtendLine(tor)).ToCollection();
@@ -501,7 +504,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
         public static double GetMinDist(this Line line, Point3d pt)
         {
-            var targetPt = line.GetClosestPointTo(pt, true);
+            var targetPt = line.GetClosestPointTo(pt, false);
             return pt.DistanceTo(targetPt);
         }
 

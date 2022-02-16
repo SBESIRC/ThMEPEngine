@@ -12,6 +12,7 @@ using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using Linq2Acad;
 using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
+using AcHelper;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -38,6 +39,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var line = gaParameter.SegLine[i];
                 if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
                 {
+                    if(maxVal < minVal)
+                    {
+                        Active.Editor.WriteMessage("分割线范围宽度小于车道宽度！");
+                        return false;
+                    }
                     sortSegLines.Add(line);
                     maxVals.Add(maxVal);
                     minVals.Add(minVal);

@@ -10,6 +10,7 @@ using Dreambuild.AutoCAD;
 using DotNetARX;
 using System;
 using ThMEPEngineCore;
+using AcHelper;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -125,7 +126,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return Math.Max(Math.Abs(maxPt.X - minPt.X), Math.Abs(maxPt.Y - minPt.Y));
         }
 
-        public static List<Polyline> Split(bool isDirectlyArrange, Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
+        public static bool Split(bool isDirectlyArrange, Polyline area, Dictionary<int, Line> seglineDic, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
             ref List<double> maxVals, ref List<double> minVals, out Dictionary<int, List<int>> seglineIndexDic,out int segSreasCnt)
         {
             var areas = new List<Polyline>() { area };
@@ -148,12 +149,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     var l = cutlines[i];
                     l.GetMaxMinVal(area, buildLinesSpatialIndex, width, out double maxVal2, out double minVal2);
-
+                    if(maxVal2 < minVal2)
+                    {
+                        Active.Editor.WriteMessage("存在范围小于车道宽度的分割线！");
+                        return false;
+                    }
                     maxVals.Add(maxVal2);
                     minVals.Add(minVal2);
                 }
             }
-            return rstAreas;
+            return true;
         }
 
         public static void GetMaxMinVal(this Line line, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double width, out double maxVal, out double minVal)

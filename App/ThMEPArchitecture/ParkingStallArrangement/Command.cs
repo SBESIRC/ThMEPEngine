@@ -87,157 +87,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             base.AfterExecute();
         }
 
-        public void Run(AcadDatabase acadDatabase)
-        {
-            var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (outerBrder.SegLines.Count == 0)//分割线数目为0
-            {
-                Active.Editor.WriteMessage("分割线不存在！");
-                return;
-            }
-            if (!rstDataExtract)
-            {
-                return;
-            }
-            var area = outerBrder.WallLine;
-            var areas = new List<Polyline>() { area };
-            var sortSegLines = new List<Line>();
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-            var gaPara = new GaParameter(outerBrder.SegLines);
-            
-            var usedLines = new HashSet<int>();
-            var maxVals = new List<double>();
-            var minVals = new List<double>();
-            var maxIterations = outerBrder.SegLines.Count;
-            var stopwatch = new Stopwatch();
-            stopwatch.Start();
-            double threshSecond = 20;
-            var correctSeg = Dfs.dfsSplit(ref usedLines, ref areas, ref sortSegLines, buildLinesSpatialIndex, gaPara, ref maxVals, ref minVals, stopwatch, threshSecond);
-            stopwatch.Stop();
-            if(!correctSeg)
-            {
-                Logger?.Information("分割线不合理，分区失败！");
-                return;
-            }
-            gaPara.Set(sortSegLines, maxVals, minVals );
-
-            var segLineDic = new Dictionary<int, Line>();
-            for (int i = 0; i < sortSegLines.Count; i++)
-            {
-                segLineDic.Add(i, sortSegLines[i]);
-            }
-
-            var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
-            var linePtDic = Intersection.GetLinePtDic(ptDic);
-            var intersectPtCnt = ptDic.Count;//交叉点数目
-            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
-            foreach (var num in ptDic.Keys)
-            {
-                var random = new Random();
-                var flag = random.NextDouble() < 0.5;
-                directionList.Add(num, flag);//默认给全横向
-            }
-            ParkingStallGAGenerator geneAlgorithm = null;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortSegLines, ptDic, directionList, linePtDic);
-
-            if (_CommandMode == CommandMode.WithoutUI)
-            {
-                var dirSetted = General.Utils.SetLayoutMainDirection();
-                if (!dirSetted)
-                    return;
-
-                var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
-                if (iterationCnt.Status != PromptStatus.OK) return;
-
-                var popSize = Active.Editor.GetInteger("\n 请输入种群数量:");
-                if (popSize.Status != PromptStatus.OK) return;
-
-                ParkingStallArrangementViewModel parameterViewModel = new ParkingStallArrangementViewModel();
-                parameterViewModel.IterationCount = iterationCnt.Value;
-                parameterViewModel.PopulationCount = popSize.Value;
-                parameterViewModel.MaxTimespan = 180;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, parameterViewModel);
-            }
-            else
-            {
-                ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara,  ParameterViewModel);
-            }
-            geneAlgorithm.Logger = Logger;
-
-            var rst = new List<Chromosome>();
-            var histories = new List<Chromosome>();
-            bool recordprevious = false;
-            try
-            {
-                //rst = geneAlgorithm.Run(histories, recordprevious);
-                rst = geneAlgorithm.Run2(histories, recordprevious);
-            }
-            catch
-            {
-                ;
-            }
-            var solution = rst.First();
-            histories.Add(rst.First());
-            for (int k = 0; k < histories.Count; k++)
-            {
-                layoutPara.Set(histories[k].Genome);
-                var layerNames = "solutions" + k.ToString();
-                using (AcadDatabase adb = AcadDatabase.Active())
-                {
-                    try
-                    {
-                        if(!adb.Layers.Contains(layerNames))
-                            ThMEPEngineCoreLayerUtils.CreateAILayer(adb.Database, layerNames, 30);
-                    }
-                    catch { }
-                }
-                if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
-
-                for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
-                {
-                    var use_partition_pro = true;
-                    if (use_partition_pro)
-                    {
-                        var partitionpro = new ParkingPartitionPro();
-                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                        if (!partitionpro.Validate()) continue;
-                        try
-                        {
-                            partitionpro.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
-                        continue;
-                    }
-                    ParkingPartition partition = new ParkingPartition();
-                    if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel))
-                    {
-                        try
-                        {
-                            partition.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            partition.Dispose();
-                        }
-                    }
-                }
-            }
-            layoutPara.Set(solution.Genome);
-            Draw.DrawSeg(solution);
-        }
-
         public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase)
         {
             bool usePline = ParameterViewModel.UsePolylineAsObstacle;
 
-            var dataprocessingFlag = Preprocessing.GetOuterBrder(acadDatabase, out OuterBrder outerBrder, Logger);
-            if (!dataprocessingFlag) return;
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
-
+            var getouterBorderFlag = Preprocessing.GetOuterBorder(acadDatabase, out OuterBrder outerBrder, Logger);
+            if (!getouterBorderFlag) return;
+            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            if(!dataPreprocessingFlag)
+            {
+                return;
+            }
             var SegLines_C = new List<Line>();
             outerBrder.SegLines.ForEach(l => SegLines_C.Add(l.Clone() as Line));
 

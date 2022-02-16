@@ -60,6 +60,16 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             return true;
         }
+
+        public static double GetMaxWidth(this Polyline pline)
+        {
+            var pts = pline.GetPoints();
+            var ptsOrderedByX = pts.OrderBy(p => p.X);
+            var ptsOrderedByY = pts.OrderBy(p => p.Y);
+            var width = Math.Abs(ptsOrderedByX.First().X - ptsOrderedByX.Last().X);
+            var height = Math.Abs(ptsOrderedByY.First().Y - ptsOrderedByY.Last().Y);
+            return Math.Max(width, height);
+        }
     }
 }
 
