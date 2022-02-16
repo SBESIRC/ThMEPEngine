@@ -126,6 +126,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             fs1.Close();
 #endif
             inilanes = inilanes.Distinct().ToList();
+            //BUG:存在一个暂未解决的bug，使用SelectCrossingPolygon无法找出想要的障碍物
+            //图纸：齐少华:toyu0215.dwg
             var obstacles = ObstaclesSpatialIndex.SelectCrossingPolygon(bound).Cast<Polyline>().ToList();
             var buildingBoxes = new List<Polyline>();
             foreach (var obs in buildingObstacleList)

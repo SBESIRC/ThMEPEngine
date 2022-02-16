@@ -83,7 +83,7 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public static Point3d AveragePoint(Point3d a, Point3d b)
         {
-            return new Point3d((a.X + b.X) / 2, (a.Y + b.Y / 2), (a.Z + b.Z) / 2);
+            return new Point3d((a.X + b.X) / 2, ((a.Y + b.Y) / 2), (a.Z + b.Z) / 2);
         }
 
         public static Point3d GetRecCentroid(this Polyline rec)
