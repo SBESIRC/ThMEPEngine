@@ -414,7 +414,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     validL = new Line(pts[0], pts[1]);
                     extendL = validL.ExtendLineEx(-carWidth, 3);
                 }
-                if(pts.Count == 1)
+                else if(pts.Count == 1)
                 {
                     var spt = l.StartPoint;
                     var ept = l.EndPoint;
@@ -429,18 +429,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                         extendL = validL.ExtendLineEx(-carWidth, 2);
                     }
                 }
-                if(pts.Count == 0)
+                else if(pts.Count == 0)
                 {
                     validL = l;
                     extendL = validL;
                 }
-
-                var rect = extendL.Buffer(halfLaneWidth);
-                var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
-                if (rst.Count > 0)
+                else
                 {
+                    ; 
                     return true;
                 }
+                try
+                {
+                    var rect = extendL.Buffer(halfLaneWidth);
+                    var rst = lineSpatialIndex.SelectCrossingPolygon(rect);
+                    if (rst.Count > 0)
+                    {
+                        return true;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    ;
+                }
+                
             }
             return false;
         }

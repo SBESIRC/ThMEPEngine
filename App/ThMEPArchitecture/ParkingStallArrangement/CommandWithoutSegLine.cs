@@ -72,7 +72,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     for (int i = 0; i < ParameterViewModel.LayoutCount; ++i)
                     {
-                        Run(currentDb, outerBrder, i);
+                        RunWithWindmillSeglineSupported(currentDb, outerBrder, i);
                     }
                     stopWatch.Stop();
                     var strTotalMins = $"总运行时间: {stopWatch.Elapsed.TotalMinutes} 分";
@@ -92,22 +92,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             base.AfterExecute();
         }
 
-        public void Run(AcadDatabase acadDatabase, OuterBrder outerBrder, int index = 0)
+        public void RunWithWindmillSeglineSupported(AcadDatabase acadDatabase, OuterBrder outerBrder, int index = 0)
         {
             var area = outerBrder.WallLine;
             var areas = new List<Polyline>() { area };
-            
+
             var maxVals = new List<double>();
             var minVals = new List<double>();
             var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
-            var sortedSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
-            var gaPara = new GaParameter(sortedSegLines);
-            var buildLinesSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.BuildingLines);
-            var usedLines = new List<int>();
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
-            var splitRst = Dfs.dfsSplitTiny(ref areas, gaPara, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals, stopWatch);
-            if (!splitRst) return;
+            var sortedSegs = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var sortedSegLines = SeglineTools.SeglinePrecut(sortedSegs, area);
+            bool usePline = ParameterViewModel.UsePolylineAsObstacle;           
+
             var autoSpliterLayerName = $"AI-自动分割线{index}";
             if (!acadDatabase.Layers.Contains(autoSpliterLayerName))
                 ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, autoSpliterLayerName, 30);
@@ -122,30 +119,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             if (ParameterViewModel.JustCreateSplittersChecked) return;
 
-            gaPara.Set(sortedSegLines, maxVals, minVals);
-            var segLineDic = new Dictionary<int, Line>();
-            for (int i = 0; i < sortedSegLines.Count; i++)
+            outerBrder.SegLines = sortedSegLines;
+            var dataPreprocessingFlag = Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
+            if (!dataPreprocessingFlag)
             {
-                segLineDic.Add(i, sortedSegLines[i]);
-            }
-
-            var ptDic = Intersection.GetIntersection(segLineDic);//获取分割线的交点
-            var linePtDic = Intersection.GetLinePtDic(ptDic);
-            var intersectPtCnt = ptDic.Count;//交叉点数目
-            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
-
-            foreach (var num in ptDic.Keys)
-            {
-                var random = new Random();
-                var flag = random.NextDouble() < 0.5;
-                directionList.Add(num, flag);//默认给全横向
+                return;
             }
 
             ParkingStallGAGenerator geneAlgorithm = null;
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            var layoutPara = new LayoutParameter(area, outerBrder.BuildingLines, sortedSegLines, ptDic,
-                directionList, linePtDic, null, areas.Count, usePline, Logger);
-
             bool BreakFlag = false;// 是否进行打断
             if (_CommandMode == CommandMode.WithoutUI)
             {
@@ -170,7 +151,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 ParameterViewModel.IterationCount = iterationCnt.Value;
                 ParameterViewModel.PopulationCount = popSize.Value;
                 ParameterViewModel.MaxTimespan = 180;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel,null , BreakFlag);
+                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel, null, BreakFlag);
             }
             else
             {
@@ -186,8 +167,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 rst = geneAlgorithm.Run2(histories, false);
             }
-            catch
+            catch (Exception ex)
             {
+                ;
             }
 
             string autoCarSpotLayer = $"AI-停车位{index}";
@@ -267,8 +249,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //    options.Keywords.Default = "是";
             //    var Msg = Active.Editor.GetKeywords(options);
             //    if (Msg.Status != PromptStatus.OK || Msg.StringResult.Equals("否")) return;
-                
-                
+
+
             //    var options2 = new PromptKeywordOptions("\n打断方向：");
 
             //    options2.Keywords.Add("纵向", "V", "纵向(V)");
@@ -277,7 +259,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //    options2.Keywords.Default = "纵向";
             //    var breakMsg = Active.Editor.GetKeywords(options2);
             //    if (breakMsg.Status != PromptStatus.OK) return;
-                    
+
             //    var breakDir = breakMsg.StringResult.Equals("纵向");
 
             //    var options3 = new PromptKeywordOptions("\n打断顺序：");
@@ -292,11 +274,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //    var posDir = posMsg.StringResult.Equals("坐标增加");
             //    BreakAndOptimize(sortedSegLines_C, outerBrder, rst, breakDir, posDir);
             //}
-                
+
             //layoutPara.Dispose();
         }
         // Note： 分割线打断排布会使用之前的参数（种群数和代数）
-        
+
+       
+
         public LayoutParameter BreakAndOptimize(List<Line> sortedSegLines, OuterBrder outerBrder, List<Chromosome> Orgsolutions, bool verticaldirection, out Chromosome solution, bool gopositive = true)// 打断，赋值，再迭代,默认正方向打断
         {
             outerBrder.SegLines = sortedSegLines;// 之前的分割线

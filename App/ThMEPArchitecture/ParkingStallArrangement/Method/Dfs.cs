@@ -266,7 +266,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return;
             }
 
-            var spliter = GetRandSeg(spliters, seglineDir);
+            var rstGetRandSeg = GetRandSeg(spliters, out AutoSegLines spliter, seglineDir);
+            if(!rstGetRandSeg)
+            {
+                return;
+            }
             var randomSegline = spliter.GetRandomLine();
 
             var subAreas = randomSegline.Segline.SplitByLine(area); //split area
@@ -279,48 +283,52 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        private static AutoSegLines GetRandSeg(List<AutoSegLines> spliters, int seglineDir = 0)
+        private static bool GetRandSeg(List<AutoSegLines> spliters, out AutoSegLines spliter, int seglineDir = 0)
         {
-            if(seglineDir == 1)//竖直优先
+            spliter = null;
+            if (seglineDir == 1)//竖直优先
             {
                 int index = 0;
-                while(true)
+                while(index < spliters.Count)
                 {
-                    var spliter = spliters[index];//选中的分割线
+                    spliter = spliters[index];//选中的分割线
                     if (spliter.MaxValues > spliter.MinValues)
                     {
-                        return spliter;
+                        return true;
                     }
                     index++;
                 }
+                return false;
             }
             else if(seglineDir == -1)//水平优先
             {
                 int index = spliters.Count - 1;
-                while (true)
+                while (index >= 0)
                 {
-                    var spliter = spliters[index];//选中的分割线
+                    spliter = spliters[index];//选中的分割线
                     if (spliter.MaxValues > spliter.MinValues)
                     {
-                        return spliter;
+                        return true;
                     }
                     index--;
                 }
+                return false;
             }
             else
             {
                 var randLs = General.Utils.RandChoice(spliters.Count);
                 int index = 0;
-                while (true)
+                while (index < spliters.Count)
                 {
                     var selectSegNum = randLs[index];
-                    var spliter = spliters[selectSegNum];//选中的分割线
+                    spliter = spliters[selectSegNum];//选中的分割线
                     if (spliter.MaxValues > spliter.MinValues)
                     {
-                        return spliter;
+                        return true;
                     }
                     index++;
                 }
+                return false;
             }
         }
 

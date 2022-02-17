@@ -30,7 +30,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         }
 
         public static bool DataPreprocessing(OuterBrder outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, 
-            Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true)
+            Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true, bool IsAutoSegline = false)
         {
             layoutPara = new LayoutParameter();
             var area = outerBrder.WallLine;

@@ -46,6 +46,7 @@
     <Compile Include="ParkingStallArrangement\Method\Dfs.cs" />
     <Compile Include="ParkingStallArrangement\Method\Intersection.cs" />
     <Compile Include="ParkingStallArrangement\Method\PlineTools.cs" />
+    <Compile Include="ParkingStallArrangement\Method\SeglineTools.cs" />
     <Compile Include="ParkingStallArrangement\Method\WindmillSplit.cs" />
     <Compile Include="ParkingStallArrangement\Model\AutoSegLines.cs" />
     <Compile Include="ParkingStallArrangement\Model\PointAreaSeg.cs" />
