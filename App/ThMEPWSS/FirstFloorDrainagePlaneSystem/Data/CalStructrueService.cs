@@ -17,6 +17,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Config;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPWSS.FirstFloorDrainagePlaneSystem.Engine;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Model;
 using ThMEPWSS.FirstFloorDrainagePlaneSystem.Service;
 
@@ -168,6 +169,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             return roomWallLst;
         }
 
+        /// <summary>
+        /// 获取立管（所有可能的立管图元）
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="polyline"></param>
         public static void GetVerticalPipe(AcadDatabase acdb, Polyline polyline)
         {
             var dxfNames = new string[]
@@ -207,6 +213,11 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             }).ToList();
         }
 
+        /// <summary>
+        /// 获取标注
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="polyline"></param>
         public static void GetPipeMarks(AcadDatabase acdb, Polyline polyline)
         {
             var allLayers = acdb.Layers.Select(x => x.Name).ToList();
@@ -227,44 +238,18 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Data
             }).ToList();
         }
 
-        public static void RecognizeVerticalPipe(AcadDatabase acdb, List<Entity> pipes, List<Entity> marks)
+        /// <summary>
+        /// 识别立管
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="pipes"></param>
+        /// <param name="marks"></param>
+        /// <returns></returns>
+        public static List<VerticalPipeModel> RecognizeVerticalPipe(List<Entity> pipes, List<Entity> marks)
         {
-            var markEnts = EntityService.GetBasicEntity(marks);
-            var markLines = new List<Line>();
-            var markTxts = new List<DBText>();
-            markEnts.ForEach(x =>
-            {
-                if (x is Line line)
-                {
-                    markLines.Add(line);
-                }
-                else if (x is DBText text)
-                {
-                    markTxts.Add(text);
-                }
-            });
-
-            var pipeDic = EntityService.GetBasicEntityDic(pipes);
-            var pipeModel = new List<VerticalPipeModel>();
-            foreach (var dic in pipeDic)
-            {
-                var circle = dic.Value.ToList().OfType<Circle>().FirstOrDefault();
-                if (circle != null)
-                {
-                    var firLine = markLines.FirstOrDefault(x => x.StartPoint.DistanceTo(circle.Center) < circle.Radius || x.EndPoint.DistanceTo(circle.Center) < circle.Radius);
-                    if (firLine != null)
-                    {
-                        markLines.Remove(firLine);
-                        var connectLines = GeometryUtils.GetConenctLine(markLines, firLine);
-                        //var pipeMarkLines = markLines.Where()
-                    }
-                }
-            }
-        }
-
-        public static void GetMathcingMarkByLine(List<DBText> dBTexts)
-        {
-
+            VerticalPipeRecognizeEngine verticalPipeRecognize = new VerticalPipeRecognizeEngine();
+            var resModels = verticalPipeRecognize.Recognize(pipes, marks);
+            return resModels;
         }
     }
 }
