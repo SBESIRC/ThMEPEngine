@@ -737,7 +737,7 @@ namespace TianHua.AutoCAD.ThCui
                     "THFJGN",
                     "天华房间功能提取",
                     "IDI_THCAD_THFJGN_SMALL",
-                    "IDI_THCAD_THFJGN_SMALL",
+                    "IDI_THCAD_THFJGN_LARGE",
                     RibbonButtonStyle.SmallWithText);
 
                 // 房间编号
@@ -749,6 +749,20 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THFJBH_SMALL",
                     "IDI_THCAD_THFJBH_LARGE",
                     RibbonButtonStyle.SmallWithText);
+            }
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 框线对比
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("框线对比",
+                    "天华框线对比",
+                    "THKXDB",
+                    "天华框线对比",
+                    "IDI_THCAD_THKXDB_SMALL",
+                    "IDI_THCAD_THKXDB_LARGE",
+                    RibbonButtonStyle.LargeWithText);
             }
         }
 

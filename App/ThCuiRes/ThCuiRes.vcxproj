@@ -350,6 +350,8 @@
     <Image Include="Images\THOPTIONS_dark_large.ico" />
     <Image Include="Images\THZXJHMX_dark_small.ico" />    
     <Image Include="Images\THZXJHMX_dark_large.ico" />
+    <Image Include="Images\THKXDB_dark_small.ico" />    
+    <Image Include="Images\THKXDB_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

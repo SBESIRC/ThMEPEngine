@@ -160,7 +160,10 @@ namespace TianHua.Electrical.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJKXDB", CommandFlags.Modal)]
+        /// <summary>
+        /// 框线比较
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THKXDB", CommandFlags.Modal)]
         public void FrameComparerUI()
         {
             var dlg = new UIFrameComparer();

@@ -53,6 +53,10 @@ panels:
             attributes: { "IsVisible": false, "IsEnabled": false }
           - text: "房间编号"
             attributes: { "IsVisible": false, "IsEnabled": false }
+      - text: ""
+        items:
+          - text: "框线对比"
+            attributes: { "IsVisible": false, "IsEnabled": false }
     attributes: { "IsVisible": false, "IsEnabled": false }
   - UID: "pnlWGROUNDPLAN"
     name: "WGROUNDPLAN"
