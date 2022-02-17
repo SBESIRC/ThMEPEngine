@@ -265,15 +265,33 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             {
                 return;
             }
-            var selectSegNum = General.Utils.RandInt(spliters.Count - 1);
-            var spliter = spliters[selectSegNum];//选中的分割线
-            var segline = spliter.Seglines;
-            var subAreas = segline.SplitByLine(area); //split area
-            visited.Add(new SegLineEx(segline, spliter.MaxValues, spliter.MinValues));
+
+            var spliter = GetRandSeg(spliters);
+            var randomSegline = spliter.GetRandomLine();
+
+            var subAreas = randomSegline.SplitByLine(area); //split area
+            
+            visited.Add(new SegLineEx(randomSegline, spliter.MaxValues, spliter.MinValues));
             foreach (var subArea in subAreas)
             {
                 GetAreaRandSeglinesByDfs(orgArea, subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
                 if (successedSeg) return;
+            }
+        }
+
+        private static AutoSegLines GetRandSeg(List<AutoSegLines> spliters)
+        {
+            var randLs = General.Utils.RandChoice(spliters.Count);
+            int index = 0;
+            while (true)
+            {
+                var selectSegNum = randLs[index];
+                var spliter = spliters[selectSegNum];//选中的分割线
+                if (spliter.MaxValues > spliter.MinValues)
+                {
+                    return spliter;
+                }
+                index++;
             }
         }
 
