@@ -303,6 +303,9 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.8.116</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
