@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service.LayoutPoint;
+using System;
 
 namespace ThMEPLighting.Garage.Service.Arrange
 {
@@ -58,19 +59,21 @@ namespace ThMEPLighting.Garage.Service.Arrange
             return edges.Select(o => o.Edge).ToList();
         }
 
-        private List<Point3d> LayoutPoints()
+        private List<Tuple<Point3d, Vector3d>> LayoutPoints()
         {
             // Curve 仅支持Line，和Line组成的多段线
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             ThLayoutPointService layoutPointService = null;
             switch (ArrangeParameter.LayoutMode)
             {
                 case LayoutMode.AvoidBeam:
                     layoutPointService = new ThAvoidBeamLayoutPointService(Beams);
+                    layoutPointService.LampLength = ArrangeParameter.LampLength;
                     break;
                 case LayoutMode.ColumnSpan:
                     layoutPointService = new ThColumnSpanLayoutPointService(Columns,
                         ArrangeParameter.NearByDistance);
+                    layoutPointService.LampLength = ArrangeParameter.LampLength;
                     break;
                 case LayoutMode.SpanBeam:
                     layoutPointService = new ThSpanBeamLayoutPointService(Beams);
@@ -82,8 +85,7 @@ namespace ThMEPLighting.Garage.Service.Arrange
             if (layoutPointService != null)
             {
                 layoutPointService.Margin = ArrangeParameter.Margin;
-                layoutPointService.Interval = ArrangeParameter.Interval;
-                layoutPointService.LampLength = ArrangeParameter.LampLength;
+                layoutPointService.Interval = ArrangeParameter.Interval;                
                 layoutPointService.DoubleRowOffsetDis = ArrangeParameter.DoubleRowOffsetDis;
                 results = layoutPointService.Layout(GetEdges(FirstLightEdges), GetEdges(SecondLightEdges));
             }

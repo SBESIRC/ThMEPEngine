@@ -5,6 +5,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
+using System;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPLighting.Garage.Service.LayoutPoint
 {
@@ -23,8 +26,8 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         /// 双排偏移距离
         /// </summary>
         public double DoubleRowOffsetDis { get; set; }
-        public abstract List<Point3d> Layout(List<Line> dxLines);
-        public abstract List<Point3d> Layout(List<Line> firstLines,List<Line> secondLines);
+        public abstract List<Tuple<Point3d, Vector3d>> Layout(List<Line> dxLines);
+        public abstract List<Tuple<Point3d, Vector3d>> Layout(List<Line> firstLines,List<Line> secondLines);
         protected List<Point3d> SequencePoints(List<Line> lines)
         {
             // lines必须是首位排序过的
@@ -40,10 +43,10 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             return results;
         }
 
-        protected List<Point3d> LinearDistribute(List<Line> lines,double margin,double interval)
+        protected List<Tuple<Point3d,Vector3d>> LinearDistribute(List<Line> lines,double margin,double interval)
         {
             // Lmin = D*(N-1)+1600
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             lines.ForEach(l =>
             {
                 var lineParameter = new ThLineSplitParameter
@@ -51,26 +54,40 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                     Margin = margin,
                     Interval = interval,
                     Segment = new List<Point3d> { l.StartPoint, l.EndPoint },
-                };
-                results.AddRange(lineParameter.DistributeLinearSegment());
+                };                
+                var pts = lineParameter.DistributeLinearSegment();
+                var direction = l.StartPoint.GetVectorTo(l.EndPoint).GetNormal();
+                pts.ForEach(p => results.Add(Tuple.Create(p, direction)));
             });
             return results;
         }
 
-        protected List<Point3d> PolylineDistribute(List<Line> segments,List<Line> unLayoutLines, double interval, double margin)
+        protected List<Point3d> PolylineDistribute(Polyline path,List<Line> unLayoutLines, double interval, double margin,double lampLength)
         {
             // segments 是组成一段Polyline连续的线段
             // Lmin = D*(N-1)+1600
             var results = new List<Point3d>();
-            var calculator = new ThLayoutPointCalculator(segments, unLayoutLines, interval, margin);
+            var calculator = new ThLayoutPointCalculator(path, unLayoutLines, interval, margin,lampLength);
             calculator.Layout();            
             return calculator.Results;
         }
 
-        protected List<Point3d>  GetL2LayoutPointByPass(List<Point3d> L1LayoutPoints,List<Line> L1Lines, List<Line> L2Lines)
+        protected List<Tuple<Point3d,Vector3d>> DistributeLaytoutPoints(List<Point3d> pts,List<Line> lines)
+        {
+            var results = new List<Tuple<Point3d, Vector3d>>();
+            var res = ThQueryPointService.Query(pts, lines);
+            res.ForEach(l =>
+            {
+                var dir = l.Key.LineDirection();
+                l.Value.ForEach(p => results.Add(Tuple.Create(p, dir)));
+            });
+            return results;
+        }
+
+        protected List<Tuple<Point3d, Vector3d>> GetL2LayoutPointByPass(List<Tuple<Point3d,Vector3d>> L1LayoutPoints,List<Line> L1Lines, List<Line> L2Lines)
         {
             // 把L1布置的点偏移到L2上
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             var l1LinePointDic = ThQueryPointService.Query(L1LayoutPoints, L1Lines);
             var firstPairService = new ThFirstSecondPairService(L1Lines, L2Lines, DoubleRowOffsetDis);
             L1Lines.ForEach(l =>
@@ -83,15 +100,15 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
                         if (position.IsPointOnCurve(second,1.0) && IsFitToInstall(position,
                             second.StartPoint, second.EndPoint))
                         {
-                            results.Add(position);
+                            results.Add(Tuple.Create(position,second.LineDirection()));
                             break;
                         }
                     }
                 });
             });
-
             return results;
         }
+
         protected List<Line> GetProjectionLinesByPass(List<Line> lines, List<Line> oneLines, List<Line> twoLines)
         {
             // lines 是存在于oneLines上的

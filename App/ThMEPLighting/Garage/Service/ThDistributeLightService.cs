@@ -1,5 +1,4 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage.Model;
@@ -19,7 +18,7 @@ namespace ThMEPLighting.Garage.Service
             int N = CalculateN(splitParameter.Length, splitParameter.Interval, splitParameter.Margin);
             var pts = ToCollection(splitParameter.Segment);
             var path = pts.CreatePolyline(false);
-            var midPt = GetPolylinePt(path, path.Length/2.0);
+            var midPt = path.GetPolylinePt(path.Length/2.0);
             double step = 0.0;
             if (N % 2 == 1)
             {
@@ -35,8 +34,8 @@ namespace ThMEPLighting.Garage.Service
             double half = path.Length / 2.0;
             for (int i = 1; i <= N / 2; i++)
             {
-                var leftPt = GetPolylinePt(path,half - step);
-                var rightPt = GetPolylinePt(path, half + step);
+                var leftPt = path.GetPolylinePt(half - step);
+                var rightPt = path.GetPolylinePt(half + step);
                 results.Insert(0, leftPt);
                 results.Add(rightPt);
                 step += D;
@@ -49,11 +48,6 @@ namespace ThMEPLighting.Garage.Service
             var results = new Point3dCollection();
             pts.ForEach(o => results.Add(o));
             return results;
-        }
-
-        private static Point3d GetPolylinePt(Polyline polyline,double distance)
-        {
-            return polyline.GetPointAtDist(distance);
         }
 
         /// <summary>

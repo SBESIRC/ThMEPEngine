@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 
 namespace ThMEPLighting.Garage.Service.LayoutPoint
 {
@@ -12,23 +13,24 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
         {
             Beams = beams;
         }
-        public override List<Point3d> Layout(List<Line> dxLines)
+        public override List<Tuple<Point3d,Vector3d>> Layout(List<Line> dxLines)
         {
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             var newDxLines = ThMergeLightLineService.Merge(dxLines);
             newDxLines.ForEach(link =>
             {
                 var unLayoutLines = link.CalculateUnLayoutParts(Beams);
-                var pts = PolylineDistribute(link, unLayoutLines, this.Interval, this.Margin);
-                results.AddRange(pts);
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,this.LampLength);
+                results.AddRange(DistributeLaytoutPoints(pts, link));
                 unLayoutLines.ForEach(l => l.Dispose());
             });
             return results;
         }
 
-        public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
+        public override List<Tuple<Point3d, Vector3d>> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             // 计算L1,L2不可布区域
             var l1UnLayoutLines = L1Lines.CalculateUnLayoutParts(Beams);
             var l2UnLayoutLines = L2Lines.CalculateUnLayoutParts(Beams);
@@ -38,12 +40,13 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             // 把L2不可布区域投影到L1上
             var l1NewUnLayoutLines = GetProjectionLinesByPass(l2UnLayoutLines, L2Lines, L1Lines);
             var l1UnLayoutQuery = ThQueryLineService.Create(l1UnLayoutLines.Union(l1NewUnLayoutLines).ToList());
-            var l1LayoutPoints =new List<Point3d>();
+            var l1LayoutPoints =new List<Tuple<Point3d, Vector3d>>();
             newL1Lines.ForEach(link =>
             {
-                var unLayoutLines = link.SelectMany(o=> l1UnLayoutQuery.QueryCollinearLines(o.StartPoint,o.EndPoint)).ToList(); 
-                var pts = PolylineDistribute(link, unLayoutLines, this.Interval, this.Margin);
-                l1LayoutPoints.AddRange(pts);
+                var unLayoutLines = link.SelectMany(o=> l1UnLayoutQuery.QueryCollinearLines(o.StartPoint,o.EndPoint)).ToList();
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,this.LampLength);
+                l1LayoutPoints.AddRange(DistributeLaytoutPoints(pts,link));
             });
 
             // 把L1上布置的点投影到L2上
@@ -56,8 +59,9 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             newL2Exclusives.ForEach(link =>
             {
                 var unLayoutLines = link.SelectMany(o => l2UnLayoutQuery.QueryCollinearLines(o.StartPoint, o.EndPoint)).ToList();
-                var pts = PolylineDistribute(link, unLayoutLines, this.Interval, this.Margin);
-                l2LayoutPoints.AddRange(pts);
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,this.LampLength);
+                l2LayoutPoints.AddRange(DistributeLaytoutPoints(pts, link));
             });
             
             results.AddRange(l1LayoutPoints);

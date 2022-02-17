@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using ThCADCore.NTS;
@@ -18,15 +19,17 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             NearbyDistance = nearbyDistance;
             SpatialIndex = new ThCADCoreNTSSpatialIndex(columns);
         }
-        public override List<Point3d> Layout(List<Line> dxLines)
+        public override List<Tuple<Point3d,Vector3d>> Layout(List<Line> dxLines)
         {
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             var newDxLines = ThMergeLightLineService.Merge(dxLines);
             newDxLines.ForEach(link =>
             {
                 var unLayoutLines = link.SelectMany(l => GetProjectionLines(l)).ToList();
-                var pts = PolylineDistribute(link, unLayoutLines, this.Interval, this.Margin);
-                results.AddRange(pts);
+                var path = link.ToPolyline();
+                var pts = PolylineDistribute(path, unLayoutLines, this.Interval, this.Margin,this.LampLength);
+                results.AddRange(DistributeLaytoutPoints(pts,link));
+                path.Dispose();
                 unLayoutLines.ForEach(l => l.Dispose());
             });
             return results;
@@ -46,9 +49,9 @@ namespace ThMEPLighting.Garage.Service.LayoutPoint
             return new Line(pair.Item1, pair.Item2);
         }
 
-        public override List<Point3d> Layout(List<Line> L1Lines, List<Line> L2Lines)
+        public override List<Tuple<Point3d, Vector3d>> Layout(List<Line> L1Lines, List<Line> L2Lines)
         {
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             var l1l2PubExclusiveLines = CalculatePubExclusiveLines(L1Lines, L2Lines);
             var l1LayoutPoints = Layout(L1Lines); // L1上创建的点
             var l2PassPoints = GetL2LayoutPointByPass(l1LayoutPoints, L1Lines, L2Lines); // L1 传递到 L2上的点

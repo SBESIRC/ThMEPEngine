@@ -632,5 +632,13 @@ namespace ThMEPLighting.Garage
             }
             return dict;
         }
+        public static Point3d GetPolylinePt(this Polyline polyline, double distance)
+        {
+            return polyline.GetPointAtDist(distance);
+        }
+        public static bool IsOn(this Point3d pt, Curve curve, double tolerance = 0.0001)
+        {
+            return pt.DistanceTo(curve.GetClosestPointTo(pt, false)) <= tolerance;
+        }
     }
 }

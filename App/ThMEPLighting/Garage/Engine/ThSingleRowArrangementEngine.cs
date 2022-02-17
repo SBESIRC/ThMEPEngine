@@ -9,6 +9,7 @@ using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service.Number;
 using ThMEPLighting.Garage.Service.LayoutPoint;
+using System;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -81,21 +82,23 @@ namespace ThMEPLighting.Garage.Engine
             });
             return lightEdges;
         }
-        private List<Point3d> LayoutPoints(ThRegionBorder regionBorder)
+        private List<Tuple<Point3d,Vector3d>> LayoutPoints(ThRegionBorder regionBorder)
         {
             // Curve 仅支持Line，和Line组成的多段线
-            var results = new List<Point3d>();
+            var results = new List<Tuple<Point3d, Vector3d>>();
             ThLayoutPointService layoutPointService = null;
             switch (ArrangeParameter.LayoutMode)
             {
                 case LayoutMode.AvoidBeam:
                     layoutPointService = new ThAvoidBeamLayoutPointService(
                         regionBorder.Beams.Select(b => b.Outline).ToCollection());
+                    layoutPointService.LampLength = ArrangeParameter.LampLength;
                     break;
                 case LayoutMode.ColumnSpan:
                     layoutPointService = new ThColumnSpanLayoutPointService(
                         regionBorder.Columns.Select(c => c.Outline).ToCollection(),
                         ArrangeParameter.NearByDistance);
+                    layoutPointService.LampLength = ArrangeParameter.LampLength;
                     break;
                 case LayoutMode.SpanBeam:
                     layoutPointService = new ThSpanBeamLayoutPointService(
@@ -108,7 +111,7 @@ namespace ThMEPLighting.Garage.Engine
             if (layoutPointService != null)
             {
                 layoutPointService.Margin = ArrangeParameter.Margin;
-                layoutPointService.Interval = ArrangeParameter.Interval;
+                layoutPointService.Interval = ArrangeParameter.Interval;                
                 results = layoutPointService.Layout(regionBorder.DxCenterLines);
             }
             return results;
