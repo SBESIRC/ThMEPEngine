@@ -10,6 +10,7 @@ using ThMEPEngineCore.Service.Hvac;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.CAD;
 using AcHelper;
+using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
 {
@@ -47,6 +48,7 @@ namespace ThMEPHVAC.Model
         public ThDuctPortsDrawPort portService;
         public ThDuctPortsDrawPortMark markService;
         public ThDuctPortsDrawEndComp endCompService;
+        public ThTCHDrawFactory tchDrawService;
         public ThDuctPortsDrawService(string scenario, string scale)
         {
             airValveName = "风阀";
@@ -78,6 +80,7 @@ namespace ThMEPHVAC.Model
             portService = new ThDuctPortsDrawPort(portLayer, portName, textAngle);
             endCompService = new ThDuctPortsDrawEndComp(flipDown45, brokenLine, verticalPipe, geoLayer);
             markService = new ThDuctPortsDrawPortMark(textAngle, portMarkName, portMarkLayer);
+            tchDrawService = new ThTCHDrawFactory("D://TG20.db");
         }
         private void GetUcsAngle()
         {

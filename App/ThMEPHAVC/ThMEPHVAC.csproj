@@ -220,6 +220,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\ThQueryRoomAirVolumeService.cs" />
     <Compile Include="Service\ThRoomSelector.cs" />
+    <Compile Include="TCH\ThDrawTCHCross.cs" />
+    <Compile Include="TCH\ThDrawTCHDuct.cs" />
+    <Compile Include="TCH\ThDrawTCHElbow.cs" />
+    <Compile Include="TCH\ThDrawTCHReducing.cs" />
+    <Compile Include="TCH\ThDrawTCHTee.cs" />
+    <Compile Include="TCH\ThTCHCommonTables.cs" />
+    <Compile Include="TCH\ThTCHDrawFactory.cs" />
     <Compile Include="ThHAVCIndoorFanCmds.cs" />
     <Compile Include="ThLoadCalculationSystemCmd.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
@@ -303,6 +310,9 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.8.116</Version>
+    </PackageReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
