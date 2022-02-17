@@ -115,6 +115,7 @@ namespace ThMEPArchitecture.PartitionLayout
         private List<Line> SplitLineBySpacialIndexInPoly(Line line, Polyline polyline, ThCADCoreNTSSpatialIndex spatialIndex, bool allow_on_edge = true)
         {
             var crossed = spatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>();
+            crossed = crossed.Where(e => Boundary.Contains(e.GetCenter()) || Boundary.Intersect(e,Intersect.OnBothOperands).Count>0);
             var points = new List<Point3d>();
             foreach (var c in crossed)
             {
@@ -271,6 +272,26 @@ namespace ThMEPArchitecture.PartitionLayout
             var inilinesplitcarboxes = SplitLine(line, CarBoxes).Where(e => e.Length > 1).First();
             if (IsInAnyBoxes(inilinesplitcarboxes.GetCenter(), CarBoxes) || inilinesplitcarboxes.Length < LengthCanGAdjLaneConnectSingle)
                 return generate_lane_length;
+            var inilinesplitcarboxesaction = CreateLine(inilinesplitcarboxes);
+            inilinesplitcarboxesaction.TransformBy(Matrix3d.Displacement(-gvec.GetNormal() * (DisVertCarLength + DisLaneWidth)));
+            var inilinesplitcarboxesactionpolyline = CreatPolyFromLines(inilinesplitcarboxes, inilinesplitcarboxesaction);
+            var inilinesplitcarboxesactionlaneboxes = IniLanes.Where(e => IsParallelLine(e.Line, inilinesplitcarboxesaction))
+                .Select(e => e.Line.Buffer(DisLaneWidth / 2 - 0.001));
+            var inilinesplitcarboxesactionpoints = new List<Point3d>();
+            foreach (var box in inilinesplitcarboxesactionlaneboxes)
+            {
+                inilinesplitcarboxesactionpoints.AddRange(box.Vertices().Cast<Point3d>());
+                inilinesplitcarboxesactionpoints.AddRange(box.Intersect(inilinesplitcarboxesactionpolyline, Intersect.OnBothOperands));
+            }
+            inilinesplitcarboxesactionpoints = inilinesplitcarboxesactionpoints
+                .Where(e => inilinesplitcarboxesactionpolyline.Contains(e) || inilinesplitcarboxesactionpolyline.GetClosestPointTo(e, false).DistanceTo(e) < 0.0001)
+                .Select(e => inilinesplitcarboxes.GetClosestPointTo(e, false)).ToList();
+            SortAlongCurve(inilinesplitcarboxesactionpoints, inilinesplitcarboxes);
+            if(inilinesplitcarboxesactionpoints.Count > 0)
+                if (inilinesplitcarboxes.StartPoint.DistanceTo(inilinesplitcarboxesactionpoints[0]) < 10) return generate_lane_length;
+            inilinesplitcarboxes =SplitLine(inilinesplitcarboxes, inilinesplitcarboxesactionpoints).First();
+
+
             //与障碍物相交
             var iniplsplitbox = inilinesplitcarboxes.Buffer(DisLaneWidth / 2);
             iniplsplitbox.Scale(iniplsplitbox.GetRecCentroid(), ScareFactorForCollisionCheck);
