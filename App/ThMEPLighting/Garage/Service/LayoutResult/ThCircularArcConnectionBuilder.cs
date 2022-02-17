@@ -55,7 +55,7 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var linkWires = FindWires(DefaultNumbers[0]);
             linkWires = FilterLinkWire2(linkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));
             linkWires = FilerLinkWire1(linkWires, edges);
-            FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
+            //FilterUnLinkWireLight(linkWires, DefaultNumbers[0]); // 过滤没有连接线的灯
 
             // *** 用非默认编号打断默认灯线
             linkWires = BreakWire(linkWires);
@@ -93,12 +93,12 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var firstLinkWires = FindWires(DefaultNumbers[0]);
             firstLinkWires = FilterLinkWire2(firstLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[0]));
             firstLinkWires = FilerLinkWire1(firstLinkWires, GetEdges(totalEdges, EdgePattern.First));
-            FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
+            //FilterUnLinkWireLight(firstLinkWires, DefaultNumbers[0]);
 
             var secondLinkWires = FindWires(DefaultNumbers[1]);
             secondLinkWires = FilterLinkWire2(secondLinkWires, GetFilterPath(branchFilterPaths, DefaultNumbers[1]));
             secondLinkWires = FilerLinkWire1(secondLinkWires, GetEdges(totalEdges, EdgePattern.Second));
-            FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
+            //FilterUnLinkWireLight(secondLinkWires, DefaultNumbers[1]);
             linkWires = linkWires.Union(firstLinkWires);
             linkWires = linkWires.Union(secondLinkWires);
 

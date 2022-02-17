@@ -194,8 +194,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
             var filter = new ThLightFilter(linkWires, ArrangeParameter.LampLength, loopLightPos);
             filter.Filter();
             // *** 更新 ***
-            filter.Results.ForEach(v => LightPositionDict.Remove(v.Key));
-            filter.Results.ForEach(v => RemovedLightPositionDict.Add(v.Key, v.Value));
+            //filter.Results.ForEach(v => LightPositionDict.Remove(v.Key));
+            //filter.Results.ForEach(v => RemovedLightPositionDict.Add(v.Key, v.Value));
         }
         
         protected DBObjectCollection FilterJumpWire()
@@ -213,8 +213,8 @@ namespace ThMEPLighting.Garage.Service.LayoutResult
                     filter.Filter();
 
                     // *** 更新 ***
-                    filter.RemovedLightPos.ForEach(v => LightPositionDict.Remove(v.Key));
-                    filter.RemovedLightPos.ForEach(v => RemovedLightPositionDict.Add(v.Key,v.Value));
+                    //filter.RemovedLightPos.ForEach(v => LightPositionDict.Remove(v.Key));
+                    //filter.RemovedLightPos.ForEach(v => RemovedLightPositionDict.Add(v.Key,v.Value));
                 }
             });
             return results;
