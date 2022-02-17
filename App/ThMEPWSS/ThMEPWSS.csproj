@@ -604,7 +604,6 @@
     <Compile Include="UndergroundSpraySystem\Model\SprayPipe.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem.cs" />
     <Compile Include="UndergroundSpraySystem\Model\SpraySystem2.cs" />
-    <Compile Include="UndergroundSpraySystem\Model\Verticalpipe2.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Valve.cs" />
     <Compile Include="UndergroundSpraySystem\Model\Verticalpipe.cs" />
     <Compile Include="UndergroundSpraySystem\Service\BFS.cs" />
