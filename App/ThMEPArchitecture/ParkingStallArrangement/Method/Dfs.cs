@@ -242,7 +242,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static void GetAreaRandSeglinesByDfs(Polyline orgArea, Polyline area, int seglineCnt, List<SegLineEx> visited,
-            ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg)
+            ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg, int seglineDir = 0)
         {
             if (visited.Count == seglineCnt)
             {
@@ -266,12 +266,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return;
             }
 
-            var spliter = GetRandSeg(spliters);
+            var spliter = GetRandSeg(spliters, seglineDir);
             var randomSegline = spliter.GetRandomLine();
 
-            var subAreas = randomSegline.SplitByLine(area); //split area
+            var subAreas = randomSegline.Segline.SplitByLine(area); //split area
             
-            visited.Add(new SegLineEx(randomSegline, spliter.MaxValues, spliter.MinValues));
+            visited.Add(randomSegline.Clone());
             foreach (var subArea in subAreas)
             {
                 GetAreaRandSeglinesByDfs(orgArea, subArea, seglineCnt, visited, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
@@ -279,19 +279,48 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        private static AutoSegLines GetRandSeg(List<AutoSegLines> spliters)
+        private static AutoSegLines GetRandSeg(List<AutoSegLines> spliters, int seglineDir = 0)
         {
-            var randLs = General.Utils.RandChoice(spliters.Count);
-            int index = 0;
-            while (true)
+            if(seglineDir == 1)//竖直优先
             {
-                var selectSegNum = randLs[index];
-                var spliter = spliters[selectSegNum];//选中的分割线
-                if (spliter.MaxValues > spliter.MinValues)
+                int index = 0;
+                while(true)
                 {
-                    return spliter;
+                    var spliter = spliters[index];//选中的分割线
+                    if (spliter.MaxValues > spliter.MinValues)
+                    {
+                        return spliter;
+                    }
+                    index++;
                 }
-                index++;
+            }
+            else if(seglineDir == -1)//水平优先
+            {
+                int index = spliters.Count - 1;
+                while (true)
+                {
+                    var spliter = spliters[index];//选中的分割线
+                    if (spliter.MaxValues > spliter.MinValues)
+                    {
+                        return spliter;
+                    }
+                    index--;
+                }
+            }
+            else
+            {
+                var randLs = General.Utils.RandChoice(spliters.Count);
+                int index = 0;
+                while (true)
+                {
+                    var selectSegNum = randLs[index];
+                    var spliter = spliters[selectSegNum];//选中的分割线
+                    if (spliter.MaxValues > spliter.MinValues)
+                    {
+                        return spliter;
+                    }
+                    index++;
+                }
             }
         }
 
@@ -618,7 +647,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         /// </summary>
         /// <param name="outerBrder"></param>
         /// <returns></returns>
-        public static List<SegLineEx> GetRandomSeglines(OuterBrder outerBrder)
+        public static List<SegLineEx> GetRandomSeglines(OuterBrder outerBrder, int seglineDir = 0)
         {
             var seglineCnt = outerBrder.Building.Count - 1;//二分法，分割线数目是障碍物数目减一
             var buildingSpatialIndex = new ThCADCoreNTSSpatialIndex(outerBrder.Building.ToCollection());//建筑物索引
@@ -632,7 +661,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var orgArea = outerBrder.WallLine;
                 var segs = new List<SegLineEx>();
                 rstSegLines = new List<SegLineEx>();
-                GetAreaRandSeglinesByDfs(orgArea, area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines, ref successedSeg);
+                GetAreaRandSeglinesByDfs(orgArea, area, seglineCnt, segs, buildingSpatialIndex, ref rstSegLines, ref successedSeg, seglineDir);
             }
 
             return rstSegLines;

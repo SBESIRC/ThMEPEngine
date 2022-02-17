@@ -35,22 +35,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             Direction = segLine.GetDirection() == 1;
         }
 
-        public Line GetRandomLine()
+        public SegLineEx GetRandomLine()
         {
             var direction = Seglines.GetDirection() == 1;
             if (direction)
             {
-                var randomVal = Seglines.StartPoint.X + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
+                var lastCur = Seglines.StartPoint.X;
+                var randomVal = lastCur + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
                 var spt = Seglines.StartPoint;
                 var ept = Seglines.EndPoint;
-                return new Line(new Point3d(randomVal,spt.Y,0), new Point3d(randomVal, ept.Y, 0));
+                var line = new Line(new Point3d(randomVal, spt.Y, 0), new Point3d(randomVal, ept.Y, 0));
+                var maxVal = MaxValues + lastCur - randomVal;
+                var minVal = MinValues + lastCur - randomVal;
+                return new SegLineEx(line, maxVal, minVal);
             }
             else
             {
-                var randomVal = Seglines.StartPoint.Y + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
+                var lastCur = Seglines.StartPoint.Y;
+                var randomVal = lastCur + MinValues + General.Utils.RandDouble() * (MaxValues - MinValues);
                 var spt = Seglines.StartPoint;
                 var ept = Seglines.EndPoint;
-                return new Line(new Point3d(spt.X, randomVal, 0), new Point3d(ept.X, randomVal, 0));
+                var line = new Line(new Point3d(spt.X, randomVal, 0), new Point3d(ept.X, randomVal, 0));
+                var maxVal = MaxValues + lastCur - randomVal;
+                var minVal = MinValues + lastCur - randomVal;
+                return new SegLineEx(line, maxVal, minVal);
             }
         }
     }

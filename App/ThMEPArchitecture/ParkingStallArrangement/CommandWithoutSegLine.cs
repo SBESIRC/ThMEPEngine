@@ -99,7 +99,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             
             var maxVals = new List<double>();
             var minVals = new List<double>();
-
             var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
             var sortedSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
             var gaPara = new GaParameter(sortedSegLines);
