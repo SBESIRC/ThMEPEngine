@@ -69,45 +69,44 @@ namespace TianHua.Electrical.UI.FireAlarm
         {
             if (cbSelectAll.IsChecked == true)
             {
-                vm.LayoutSmoke = true;
-                vm.LayoutGas = true;
-                //vm.LayoutBroadcast = true;
-                //vm.LayoutManualAlart = true;
-                vm.LayoutDisplay = true;
-                vm.LayoutMonitor = true;
-                vm.LayoutTel = true;
+                cbSmoke.IsChecked = cbSmoke.IsEnabled == true ? true : false;
+                cbGas.IsChecked = cbGas.IsEnabled == true ? true : false;
+                cbDisplay.IsChecked = cbDisplay.IsEnabled == true ? true : false;
+                cbMonitor.IsChecked = cbMonitor.IsEnabled == true ? true : false;
+                cbTel.IsChecked = cbTel.IsEnabled == true ? true : false;
 
             }
             else
             {
-                vm.LayoutSmoke = false;
-                vm.LayoutGas = false;
-                //vm.LayoutBroadcast = false;
-                //vm.LayoutManualAlart = false;
-                vm.LayoutDisplay = false;
-                vm.LayoutMonitor = false;
-                vm.LayoutTel = false;
+                cbSmoke.IsChecked = false;
+                cbGas.IsChecked = false;
+                cbDisplay.IsChecked = false;
+                cbMonitor.IsChecked = false;
+                cbTel.IsChecked = false;
             }
         }
 
         private void cbSelectOther_Click(object sender, RoutedEventArgs e)
         {
-            vm.LayoutSmoke = vm.LayoutSmoke == true ? false : true;
-            vm.LayoutGas = vm.LayoutGas == true ? false : true;
-            //vm.LayoutBroadcast = vm.LayoutBroadcast == true ? false : true;
-            //vm.LayoutManualAlart = vm.LayoutManualAlart == true ? false : true;
-            vm.LayoutDisplay = vm.LayoutDisplay == true ? false : true;
-            vm.LayoutMonitor = vm.LayoutMonitor == true ? false : true;
-            vm.LayoutTel = vm.LayoutTel == true ? false : true;
+            if (cbSmoke.IsEnabled == true)
+                cbSmoke.IsChecked  = cbSmoke.IsChecked == true ? false : true;
+            if (cbGas.IsEnabled == true)
+                cbGas.IsChecked = cbGas.IsChecked == true ? false : true;
+            if (cbDisplay.IsEnabled == true)
+                cbDisplay.IsChecked  = cbDisplay.IsChecked == true ? false : true;
+            if (cbMonitor.IsEnabled == true)
+                cbMonitor.IsChecked = cbMonitor.IsChecked == true ? false : true;
+            if (cbTel.IsEnabled == true)
+                cbTel.IsChecked = cbTel.IsChecked == true ? false : true;
         }
 
         private void cbSelectFloorRoom_Click(object sender, RoutedEventArgs e)
         {
             if (vm.SelectFloorRoom == 1)
             {
-                vm.LayoutDisplay = false;
-                vm.LayoutManualAlart = false;
-                vm.LayoutTel = false;
+                cbDisplay.IsChecked  = false;
+                cbMonitor.IsChecked = false;
+                cbTel.IsChecked = false;
 
                 cbDisplay.IsEnabled = false;
                 cbMonitor.IsEnabled = false;
