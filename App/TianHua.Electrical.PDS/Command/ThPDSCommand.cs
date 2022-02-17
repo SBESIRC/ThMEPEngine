@@ -3,10 +3,8 @@ using System.Linq;
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 
-using ThCADExtension;
 using ThMEPEngineCore.Command;
 using TianHua.Electrical.PDS.Engine;
 using TianHua.Electrical.PDS.Model;
@@ -28,41 +26,42 @@ namespace TianHua.Electrical.PDS.Command
                 loadExtractService.Extract(acad.Database);
 
                 // 提取配电箱
-                var distributionExtractService = new ThPDSDistributionExtractService();
-                distributionExtractService.Extract(acad.Database);
-                var distributionLayer = ThPDSLayerService.CreateAITestDistributionLayer(acad.Database);
-                distributionExtractService.Results.ForEach(o =>
-                {
-                    var blockReference = acad.Element<BlockReference>(o.ObjId, true);
-                    var rectangle = blockReference.GeometricExtents.ToRectangle();
-                    acad.ModelSpace.Add(rectangle);
-                    rectangle.LayerId = distributionLayer;
-                });
+                //var distributionExtractService = new ThPDSDistributionExtractService();
+                //distributionExtractService.Extract(acad.Database);
+                //var distributionLayer = ThPDSLayerService.CreateAITestDistributionLayer(acad.Database);
+                //distributionExtractService.Results.ForEach(o =>
+                //{
+                //    var blockReference = acad.Element<BlockReference>(o.ObjId, true);
+                //    var rectangle = blockReference.GeometricExtents.ToRectangle();
+                //    acad.ModelSpace.Add(rectangle);
+                //    rectangle.LayerId = distributionLayer;
+                //});
 
 
                 // 提取回路
                 var cableEngine = new ThCableSegmentRecognitionEngine();
                 cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                var cableLayer = ThPDSLayerService.CreateAITestCableLayer(acad.Database);
-                cableEngine.Results.OfType<Curve>().ForEach(o =>
-                {
-                    acad.ModelSpace.Add(o);
-                    o.LayerId = cableLayer;
-                });
+                //var cableLayer = ThPDSLayerService.CreateAITestCableLayer(acad.Database);
+                //cableEngine.Results.OfType<Curve>().ForEach(o =>
+                //{
+                //    acad.ModelSpace.Add(o);
+                //    o.LayerId = cableLayer;
+                //});
 
                 // 提取桥架
                 var cabletrayEngine = new ThCabletraySegmentRecognitionEngine();
                 cabletrayEngine.RecognizeMS(acad.Database, new Point3dCollection());
-                var cabletrayLayer = ThPDSLayerService.CreateAITestCabletrayLayer(acad.Database);
-                cabletrayEngine.Results.OfType<Curve>().ForEach(o =>
-                {
-                    acad.ModelSpace.Add(o);
-                    o.LayerId = cabletrayLayer;
-                });
+                //var cabletrayLayer = ThPDSLayerService.CreateAITestCabletrayLayer(acad.Database);
+                //cabletrayEngine.Results.OfType<Curve>().ForEach(o =>
+                //{
+                //    acad.ModelSpace.Add(o);
+                //    o.LayerId = cabletrayLayer;
+                //});
 
                 //做一个标注的Service
 
-                ThPDSLoopGraphEngine graphEngine = new ThPDSLoopGraphEngine(acad.Database, distributionExtractService.Results, loadExtractService.LoadBlocks, cabletrayEngine.Results.OfType<Line>().ToList(), cableEngine.Results.OfType<Curve>().ToList());
+                ThPDSLoopGraphEngine graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks,
+                    loadExtractService.LoadBlocks, cabletrayEngine.Results.OfType<Line>().ToList(), cableEngine.Results.OfType<Curve>().ToList());
                 graphEngine.CreatGraph();
 
                 var graph = graphEngine.GetGraph();

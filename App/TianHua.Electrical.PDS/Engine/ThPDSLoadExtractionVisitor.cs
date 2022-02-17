@@ -2,7 +2,8 @@
 
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-
+using DotNetARX;
+using Dreambuild.AutoCAD;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
@@ -12,6 +13,8 @@ namespace TianHua.Electrical.PDS.Engine
     public class ThPDSLoadExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> NameFilter { get; set; }
+        public List<string> PropertyFilter { get; set; }
+        public List<int> DistBoxFilter { get; set; }
 
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -62,7 +65,32 @@ namespace TianHua.Electrical.PDS.Engine
             {
                 if (entity is BlockReference br)
                 {
-                    return NameFilter.Contains(ThMEPXRefService.OriginalFromXref(br.GetEffectiveName()));
+                    var checker = false;
+                    var attributes = br.ObjectId.GetAttributesInBlockReference();
+                    attributes.Values.ForEach(o =>
+                    {
+                        if (!checker)
+                        {
+                            for (var i = 0; i < PropertyFilter.Count; i++)
+                            {
+                                if (DistBoxFilter.Contains(i))
+                                {
+                                    if (o.IndexOf(PropertyFilter[i]) == 0)
+                                    {
+                                        checker = true;
+                                    }
+                                }
+                                else
+                                {
+                                    if (o == PropertyFilter[i])
+                                    {
+                                        checker = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    return checker || NameFilter.Contains(ThMEPXRefService.OriginalFromXref(br.GetEffectiveName()));
                 }
                 return false;
             }

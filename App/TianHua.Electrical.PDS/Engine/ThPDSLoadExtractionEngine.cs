@@ -11,12 +11,16 @@ namespace TianHua.Electrical.PDS.Engine
     public class ThPDSLoadExtractionEngine : ThDistributionElementExtractionEngine
     {
         public List<string> NameFilter { get; set; }
+        public List<string> PropertyFilter { get; set; }
+        public List<int> DistBoxFilter { get; set; }
 
         public override void Extract(Database database)
         {
             var visitor = new ThPDSLoadExtractionVisitor()
             {
                 NameFilter = NameFilter,
+                PropertyFilter = PropertyFilter,
+                DistBoxFilter = DistBoxFilter,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
@@ -31,10 +35,11 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void ExtractFromMS(Database database)
         {
-
             var visitor = new ThPDSLoadExtractionVisitor()
             {
                 NameFilter = NameFilter,
+                PropertyFilter = PropertyFilter,
+                DistBoxFilter = DistBoxFilter,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);

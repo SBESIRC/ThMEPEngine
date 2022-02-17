@@ -89,6 +89,11 @@
         /// 充电桩（快充、慢充）
         /// </summary>
         Charger,
+
+        /// <summary>
+        /// 未知
+        /// </summary>
+        None,
     }
 
     /// <summary>

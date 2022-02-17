@@ -13,28 +13,50 @@ namespace TianHua.Electrical.PDS.Service
     public class ThPDSLoadExtractService
     {
         readonly static string LoadConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "平面关注对象.xlsx");
+
+        /// <summary>
+        /// 标注块
+        /// </summary>
         public List<ThBlockReferenceData> MarkBlocks = new List<ThBlockReferenceData>();
+
+        /// <summary>
+        /// 负载块
+        /// </summary>
         public List<ThBlockReferenceData> LoadBlocks = new List<ThBlockReferenceData>();
+
+        /// <summary>
+        /// 配电箱
+        /// </summary>
+        public List<ThBlockReferenceData> DistBoxBlocks = new List<ThBlockReferenceData>();
+
+        /// <summary>
+        /// 配电箱序列
+        /// </summary>
+        public List<int> DistBoxFilter = new List<int> { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
         public void Extract(Database database)
         {
-            var nameFilter = new List<string>
-            {
-                "E-BDB052",
-                "E-BDB051",
-                "E-BDB054",
-                "电动机及负载标注",
-                "电动机及负载标注2",
-                "水泵标注",
-                "E-BDB001",
-                "E-电力平面-负荷明细",
-            };
-
+            var nameFilter = new List<string>();
+            var propertyFilter = new List<string>();
             var nameService = new ThLoadNameService();
+            var tableInfo = nameService.Acquire(LoadConfigUrl);
+            tableInfo.ForEach(o =>
+            {
+                if (string.IsNullOrEmpty(o.Properties))
+                {
+                    nameFilter.Add(o.BlockName);
+                }
+                else
+                {
+                    propertyFilter.Add(o.Properties);
+                }
+            });
+
             var engine = new ThPDSLoadExtractionEngine
             {
                 NameFilter = nameFilter,
-                //NameFilter = nameService.Acquire(LoadConfigUrl),
+                PropertyFilter = propertyFilter,
+                DistBoxFilter = DistBoxFilter,
             };
             engine.ExtractFromMS(database);
             engine.Results.Select(o => o.Data as ThBlockReferenceData)
@@ -45,6 +67,34 @@ namespace TianHua.Electrical.PDS.Service
                         || block.EffectiveName.Contains("E-电力平面-负荷明细"))
                     {
                         MarkBlocks.Add(block);
+                        return;
+                    }
+                    else if (block.EffectiveName.Contains("E-BDB006-1"))
+                    {
+                        DistBoxBlocks.Add(block);
+                        return;
+                    }
+
+                    var checker = false;
+                    block.Attributes.Values.ForEach(o =>
+                    {
+                        if (!checker)
+                        {
+                            for (var i = 0; i < propertyFilter.Count; i++)
+                            {
+                                if (DistBoxFilter.Contains(i))
+                                {
+                                    if (o.IndexOf(propertyFilter[i]) == 0)
+                                    {
+                                        checker = true;
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    if (checker)
+                    {
+                        DistBoxBlocks.Add(block);
                     }
                     else
                     {

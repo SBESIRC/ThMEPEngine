@@ -38,6 +38,7 @@
     <Compile Include="Engine\ThPDSDistributionExtractionVisitor.cs" />
     <Compile Include="Engine\ThPDSLoadExtractionEngine.cs" />
     <Compile Include="Engine\ThPDSLoadExtractionVisitor.cs" />
+    <Compile Include="Model\ThPDSBlockInfo.cs" />
     <Compile Include="Model\ThPDSCircuit.cs" />
     <Compile Include="Model\ThPDSCircuitGraph.cs" />
     <Compile Include="Model\ThPDSID.cs" />
