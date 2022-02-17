@@ -54,7 +54,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         }
         public override void SubExecute()
         {
-            ;
             Utils.SetSeed();
             try
             {
@@ -92,6 +91,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Active.Editor.WriteMessage($"seconds: {_stopwatch.Elapsed.TotalSeconds} \n");
             base.AfterExecute();
         }
+
         public void Run(AcadDatabase acadDatabase, OuterBrder outerBrder, int index = 0)
         {
             var area = outerBrder.WallLine;
@@ -291,12 +291,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             //layoutPara.Dispose();
         }
         // Note： 分割线打断排布会使用之前的参数（种群数和代数）
+        
         public LayoutParameter BreakAndOptimize(List<Line> sortedSegLines, OuterBrder outerBrder, List<Chromosome> Orgsolutions, bool verticaldirection, out Chromosome solution, bool gopositive = true)// 打断，赋值，再迭代,默认正方向打断
         {
             outerBrder.SegLines = sortedSegLines;// 之前的分割线
             var GaPara = new GaParameter(sortedSegLines);
             //var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
-
 
             var segbkparam = new SegBreak(outerBrder, GaPara, verticaldirection, gopositive);
             outerBrder.SegLines = new List<Line>();

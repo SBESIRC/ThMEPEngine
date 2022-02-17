@@ -41,6 +41,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             {
                 rst.Add(area as Polyline);
             }
+
             return rst;
         }
 
@@ -50,19 +51,20 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var allLines = new List<Line>();
 
             var defaultTesselateLength = 100;
-            var boundlines = polyLines.SelectMany(pl=>pl.ToLines(defaultTesselateLength));
+            var boundlines = polyLines.SelectMany(pl => pl.ToLines(defaultTesselateLength));
             allLines.AddRange(splitterLines);
             allLines.AddRange(boundlines);
-            var extendLineStrings = allLines.Select(l => {
+            var extendLineStrings = allLines.Select(l =>
+            {
                 var el = l.ExtendLine(tor);
                 var linestring = el.ToNTSLineString();
                 el.Dispose();
                 return linestring;
             });
-           
+
             var multiLineStrings = new MultiLineString(extendLineStrings.ToArray());
 
-            foreach(var l in boundlines)
+            foreach (var l in boundlines)
             {
                 l.Dispose();
             }
@@ -75,6 +77,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             return rst;
         }
+
         public static List<Polyline> SplitByExtentedLine(this Line line, Polyline polygon, double tor = 1.0)
         {
             var defaultTesselateLength = 100;
@@ -104,7 +107,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         public static bool IsCorrectSegLines(int i, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
             GaParameter gaParameter, out double maxVal, out double minVal)
         {
-
             maxVal = 0;
             minVal = 0;
             double simplifyFactor = 1.0;
@@ -119,22 +121,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     areas.RemoveAt(k);
                     areas.AddRange(segAreas);
-                    foreach(var segArea in segAreas)
+                    foreach (var segArea in segAreas)
                     {
                         var buildLines = buildLinesSpatialIndex.SelectCrossingPolygon(segArea);
-                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null,out bool flag);
-                        if(segLine.GetValueType(boundPt))
+                        var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
+                        if (segLine.GetValueType(boundPt))
                         {
-                            maxVal = segLine.GetMinDist(boundPt)-2760;
+                            maxVal = segLine.GetMinDist(boundPt) - 2760;
                         }
                         else
                         {
-                            minVal = -segLine.GetMinDist(boundPt)+2760;
+                            minVal = -segLine.GetMinDist(boundPt) + 2760;
                         }
                     }
                     return true;
                 }
-                if(segAreas.Count > 2)
+                if (segAreas.Count > 2)
                 {
                     var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
                     var res = sortedAreas.Take(2);
@@ -167,7 +169,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
                 var area = areas[k];
-                var segAreas = segLine.SplitByLine(area);             
+                var segAreas = segLine.SplitByLine(area);
                 if (segAreas.Count == 2)
                 {
                     foreach (var a in segAreas)
@@ -211,22 +213,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             double minArea = 1e8;
             var segLine = line;//分割线
             var middlePt = segLine.GetMiddlePt();
-            
+
             for (int k = areas.Count - 1; k >= 0; k--)//区域遍历
             {
                 var breakFlag = false;
                 var area = areas[k];
-                if(area.Contains(middlePt))
+                if (area.Contains(middlePt))
                 {
                     var segAreas = segLine.SplitByExtentedLine(area);
-                   
+
                     if (segAreas.Count == 2)
                     {
                         foreach (var a in segAreas)
                         {
                             if (a.Area < minArea)
                             {
-                                breakFlag = true; 
+                                breakFlag = true;
                                 break;
                             }
                         }
@@ -245,7 +247,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                             if (a.Area < minArea)
                             {
                                 breakFlag = true;
-                                continue ;
+                                continue;
                             }
                         }
                         areas.RemoveAt(k);
@@ -259,7 +261,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             return false;
         }
 
-        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, Polyline area,ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
+        public static Point3d GetBoundPt(this Line line, DBObjectCollection buildLines, Polyline segArea, Polyline area, ThCADCoreNTSSpatialIndex areaPtsIndex, out bool hasBuilding)
         {
             hasBuilding = true;
             if (buildLines.Count == 0)//区域内没有建筑物
@@ -282,10 +284,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                             var pt = dbPt.Position;
                             pts.Add(pt);
                         }
-                        if(pts.Count == 0)
+                        if (pts.Count == 0)
                         {
                             var Ls = segArea.ToLines();
-                            foreach(Line l in Ls)
+                            foreach (Line l in Ls)
                             {
                                 pts.AddRange(l.Intersect(area, Intersect.OnBothOperands));
                             }
@@ -297,19 +299,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     {
                         ;
                     }
-                    
+
                 }
-                
+
             }
             var closedPts = new List<Point3d>();
-            if(line.GetDirection() == -1)//水平线才需要考虑穿障碍物
+            if (line.GetDirection() == -1)//水平线才需要考虑穿障碍物
             {
                 var buildList = new List<BlockReference>();
                 foreach (var build in buildLines)
                 {
                     buildList.Add(build as BlockReference);
                 }
-                if(buildList.Count == 0)
+                if (buildList.Count == 0)
                 {
                     var pts = segArea.Intersect(area, 0);
                     var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
@@ -325,12 +327,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     var tempLine = new Line(new Point3d(line.StartPoint.X, pt.Y, 0), new Point3d(line.EndPoint.X, pt.Y, 0));
                     var intersectRsts = tempLine.IsIntersectPt(pt, plines, area);
-                    if(!intersectRsts)
+                    if (!intersectRsts)
                     {
                         return pt;
                     }
                 }
-                if(closedPts.Count == 0)//没有障碍物返回当前线与墙线的交点
+                if (closedPts.Count == 0)//没有障碍物返回当前线与墙线的交点
                 {
                     var pts = segArea.Intersect(area, 0);
                     var sortPts = pts.OrderBy(p => line.GetClosestPointTo(p, false).DistanceTo(p)).ToList();
@@ -373,10 +375,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             double minDist = line.GetMinDist(build.GetRect().GetCenter());
             foreach (var obj in objs)
             {
-                if(obj is Polyline pline)
+                if (obj is Polyline pline)
                 {
                     var pts = pline.GetPoints();
-                    foreach(var pt in pts)
+                    foreach (var pt in pts)
                     {
                         var dist = line.GetMinDist(pt);
                         if (dist < minDist)
@@ -416,25 +418,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             }
             var closedPts = new List<Point3d>();
-           
-            
-                foreach (var build in buildLines)
+
+            foreach (var build in buildLines)
+            {
+                try
                 {
-                    try
-                    {
-                        var br = build as BlockReference;
-                        var pline = br.GetRect();
-                        var pts = pline.GetPoints().ToList();
-                        closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
+                    var br = build as BlockReference;
+                    var pline = br.GetRect();
+                    var pts = pline.GetPoints().ToList();
+                    closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
 
-                    }
-                    catch (Exception ex)
-                    {
-                        ;
-                    }
                 }
-            
-
+                catch (Exception ex)
+                {
+                    ;
+                }
+            }
 
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离
         }
@@ -443,31 +442,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         {
             double tor = 5500;
             var pts = new List<Point3d>();
-            foreach(var pline in plines)
+            foreach (var pline in plines)
             {
                 pts.AddRange(line.Intersect(pline, 0));
             }
             var flag = false;
-            foreach(var pt in pts)
+            foreach (var pt in pts)
             {
-                if(pt.DistanceTo(targetPt) < 1.0)
+                if (pt.DistanceTo(targetPt) < 1.0)
                 {
                     flag = true;
                     break;
                 }
             }
-            if(!flag)
+            if (!flag)
             {
                 pts.Add(targetPt);
             }
-            if(pts.Count > 2)
+            if (pts.Count > 2)
             {
                 return false;
             }
             var lineIntersectWithAreaPts = line.Intersect(area, Intersect.ExtendThis);
             foreach (var pt in pts)
             {
-                foreach(var pt2 in lineIntersectWithAreaPts)
+                foreach (var pt2 in lineIntersectWithAreaPts)
                 {
                     if (pt.DistanceTo(pt2) < tor)
                     {
@@ -502,6 +501,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 return pt.Y > line.StartPoint.Y;
             }
         }
+
         public static double GetMinDist(this Line line, Point3d pt)
         {
             var targetPt = line.GetClosestPointTo(pt, false);
@@ -523,14 +523,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var upper = orderPts2.Last().Y + dist;
 
             var startX = left;
-            while(startX < right)//直线在框内
+            while (startX < right)//直线在框内
             {
                 var upPt = new Point3d(startX, upper, 0);
                 var buttomPt = new Point3d(startX, buttom, 0);
                 var segLine = new Line(upPt, buttomPt);
                 var segRect = segLine.Buffer(1.0);
                 var segRectInBuild = buildLinesSpatialIndex.SelectCrossingPolygon(segRect);
-                if(segRectInBuild.Count > 0)
+                if (segRectInBuild.Count > 0)
                 {
                     startX += laneWidth;
                     continue;//分割线穿墙直接删除
@@ -543,7 +543,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return null;
         }
-        
+
         public static Line ThroughVerticalSeg(Polyline wallLine, ref List<Polyline> orgAreas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, out double maxVal, out double minVal)
         {
             double dist = 5000;
@@ -635,11 +635,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var area = areas.First();//其实进来也就一个区域
 
             var segAreas = segLine.SplitByLine(area);
-            if(segAreas.Count < 2)
+            if (segAreas.Count < 2)
             {
                 return false;
             }
-                
+
             var sortedAreas = segAreas.OrderByDescending(a => a.Area).ToList();
             var res = sortedAreas.Take(2);
             foreach (var segArea in res)
@@ -663,6 +663,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             areas.AddRange(res);
             return true;
         }
+
         public static bool IsCorrectSegLines(Line segLine, Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
           out double maxVal, out double minVal, out List<Polyline> rstAreas)
         {
@@ -689,7 +690,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     return false;//没有建筑物要他作甚
                 }
                 buildingNums.Add(buildCnt);
-                var boundPt = segLine.GetBoundPt(buildLines, segArea,null, out bool flag);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
                     maxVal = segLine.GetMinDist(boundPt) - 2760;
@@ -703,7 +704,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         public static bool IsCorrectSegLines2(Line segLine, ref List<Polyline> areas, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
-  out double maxVal, out double minVal)
+            out double maxVal, out double minVal)
         {
             maxVal = 0;
             minVal = 0;
@@ -724,7 +725,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     return false;//没有建筑物要他作甚
                 }
-                var boundPt = segLine.GetBoundPt(buildLines, segArea,null, out bool flag);
+                var boundPt = segLine.GetBoundPt(buildLines, segArea, null, out bool flag);
                 if (segLine.GetValueType(boundPt))
                 {
                     maxVal = segLine.GetMinDist(boundPt) - 2760;

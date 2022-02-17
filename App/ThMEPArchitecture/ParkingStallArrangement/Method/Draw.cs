@@ -4,9 +4,6 @@ using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPArchitecture.ParkingStallArrangement.Algorithm;
 using ThMEPEngineCore;
 
@@ -45,19 +42,19 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        public static void DrawSeg(List<Line> lines, int index, string layer = "0")
+        public static void DrawSeg(List<Line> lines, int index)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 for (int i = 0; i < lines.Count; i++)
                 {
                     var line = lines[i];
-                    try
+                    var layerNames = "t" + Convert.ToString(index);
+                    if (!acadDatabase.Layers.Contains(layerNames))
                     {
-                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, "t" + Convert.ToString(index), 0);
+                        ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 0);
                     }
-                    catch { }
-                    line.LayerId = DbHelper.GetLayerId("t"+Convert.ToString(index));
+                    line.LayerId = DbHelper.GetLayerId(layerNames);
                     acadDatabase.CurrentSpace.Add(line);
                 }
             }
@@ -71,11 +68,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 for (int i = 0; i < lines.Count; i++)
                 {
                     var line = lines[i];
-                    try
+                    if (!acadDatabase.Layers.Contains(layerNames))
                     {
                         ThMEPEngineCoreLayerUtils.CreateAILayer(acadDatabase.Database, layerNames, 0);
                     }
-                    catch { }
                     line.LayerId = DbHelper.GetLayerId(layerNames);
                     acadDatabase.CurrentSpace.Add(line);
                 }

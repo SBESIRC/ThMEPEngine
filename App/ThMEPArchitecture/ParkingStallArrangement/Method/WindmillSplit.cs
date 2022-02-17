@@ -68,6 +68,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 seglineTndexDic.Add(index, new List<int>() { target });
             }
         }
+
         public static List<Line> GetExtendSegline(Dictionary<int, Line> seglineDic, Dictionary<int, List<int>> seglineIndexDic)
         {
             var segLines = new List<Line>();
@@ -93,12 +94,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return segLines;
         }
+
         public static void ExtendLines(ref Line linei, ref Line linej)
         {
             var intersectPt = linei.Intersect(linej, (Intersect)3).First();//两根线都延展求交点
             linei = ExtendLineToPt(linei, intersectPt);
             linej = ExtendLineToPt(linej, intersectPt);
         }
+
         public static Line ExtendLineToPt(Line line, Point3d pt)
         {
             double tor = 1.0;
@@ -174,54 +177,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var boundPt1 = line.GetBoundPt(buildLines1, rect1, area, ptsIndex, out bool hasBuilding);
             var boundPt2 = line.GetBoundPt(buildLines2, rect2, area, ptsIndex, out bool hasBuilding2);
             maxVal = line.GetMinDist(boundPt1) - 2760;
-            if(!hasBuilding)
-            {
-                maxVal += 2765;
-            }
             minVal = -line.GetMinDist(boundPt2) + 2760;
-            if (!hasBuilding2)
-            {
-                minVal -= 2765;
-            }
-        }
-
-        public static bool GetMaxMinVal(this Line line, Polyline area, out double maxVal, out double minVal)
-        {
-            double tor = 2.0;
-            maxVal = 0;
-            minVal = 0;
-            var lines = area.ToLines();
-            var dir = line.GetDirection();
-            var intersectLines = new List<Line>();
-            foreach(var l in lines)
-            {
-                if(line.Intersect(l,0).Count > 0)
-                {
-                    intersectLines.Add(l);
-                }
-            }
-            if(intersectLines.Count == 1)
-            {
-                var intersect = intersectLines[0];
-                if (dir == 1)//竖直线
-                {
-                    var val = line.StartPoint.X;
-                    var sy = intersect.StartPoint.X - val;
-                    var ey = intersect.EndPoint.X - val;
-                    maxVal = Math.Max(sy, ey) - tor;
-                    minVal = Math.Min(sy, ey) + tor;
-                }
-                else
-                {
-                    var val = line.StartPoint.Y;
-                    var sy = intersect.StartPoint.Y - val;
-                    var ey = intersect.EndPoint.Y - val;
-                    maxVal = Math.Max(sy, ey) - tor;
-                    minVal = Math.Min(sy, ey) + tor;
-                }
-                return true;
-            }
-            return false;
         }
 
         public static Polyline GetHalfBuffer(this Line line, bool flag, double tor = 99999)

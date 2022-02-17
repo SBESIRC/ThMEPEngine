@@ -30,6 +30,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
             return intersectDic;
         }
+
         public static Dictionary<LinePairs, int> GetLinePtDic(Dictionary<int, List<int>> ptDic)
         {
             var linePtDic = new Dictionary<LinePairs, int>();

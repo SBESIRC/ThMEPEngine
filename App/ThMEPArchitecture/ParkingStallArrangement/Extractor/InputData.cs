@@ -5,11 +5,8 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using System.Diagnostics;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 {

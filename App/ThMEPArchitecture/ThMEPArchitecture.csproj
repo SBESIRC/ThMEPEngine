@@ -56,10 +56,8 @@
     <Compile Include="ParkingStallArrangement\Algorithm\ParkingStallDirectGenerator.cs" />
     <Compile Include="ParkingStallArrangement\Command.cs" />
     <Compile Include="ParkingStallArrangement\Extractor\OuterBrder.cs" />
-    <Compile Include="ParkingStallArrangement\General\LineEx.cs" />
     <Compile Include="ParkingStallArrangement\General\Ponit3dEx.cs" />
     <Compile Include="ParkingStallArrangement\General\Rect.cs" />
-    <Compile Include="ParkingStallArrangement\Method\AreaParameter.cs" />
     <Compile Include="ParkingStallArrangement\Method\AreaSplit.cs" />
     <Compile Include="ParkingStallArrangement\Method\Draw.cs" />
     <Compile Include="ParkingStallArrangement\Method\LineTools.cs" />

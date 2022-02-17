@@ -1,8 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
-using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +18,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         public List<BlockReference> Building = new List<BlockReference>();//建筑物block
         public Polyline WallLine = new Polyline();//外框线
         public List<List<Polyline>> buildingPlines = new List<List<Polyline>>();//建筑物hatch提取得到的多段线
+        
         public bool Extract(BlockReference basement)
         {
             var objs = new DBObjectCollection();
@@ -62,7 +61,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             return true;
         }
 
-
         private List<Polyline> ExplodeBlock(BlockReference block)
         {
             var plines = new List<Polyline>();
@@ -77,18 +75,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return plines;
         }
+        
         private bool IsOuterLayer(string layer)
         {
             return layer.ToUpper() == "地库边界";
         }
+        
         private bool IsBuildingLayer(string layer)
         {
             return layer.ToUpper().Contains("障碍物");
         }
+        
         private bool IsEquipmentLayer(string layer)
         {
             return layer.ToUpper() == "机房";
         }
+        
         private bool IsSegLayer(string layer)
         {
             return layer.ToUpper() == "分割线";
@@ -111,6 +113,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 AddObjs(entity);
             }
         }
+        
         private void AddObjs(Entity ent)
         {
             if (IsOuterLayer(ent.Layer))
@@ -130,6 +133,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 AddObjs(ent, SegmentLines);
             }
         }
+        
         private void AddObjs(Entity entity, DBObjectCollection dbObjs)
         {
             if(entity is Polyline)
@@ -141,6 +145,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 dbObjs.Add(line.ToPolyline());
             }
         }
+        
         private void AddObjs2(Entity entity, DBObjectCollection dbObjs)
         {
             if (entity is BlockReference br)
@@ -149,13 +154,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 dbObjs.Add(br);
             }
         }
+        
         private bool IsCurve(Entity ent)
         {
             return ent is Polyline ||
                    ent is Line;
         }
     }
-
-    
-
 }

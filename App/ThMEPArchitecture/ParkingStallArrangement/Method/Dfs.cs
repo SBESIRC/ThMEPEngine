@@ -39,7 +39,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 var line = gaParameter.SegLine[i];
                 if (AreaSplit.IsCorrectSegLines(i, ref areas, buildLinesSpatialIndex, gaParameter, out double maxVal, out double minVal))//分割线正好分割区域
                 {
-                    if(maxVal < minVal)
+                    if (maxVal < minVal)
                     {
                         Active.Editor.WriteMessage("分割线范围宽度小于车道宽度！");
                         return false;
@@ -56,14 +56,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 stopwatch, thresholdSecond);
         }
 
-        public static bool dfsSplitTiny(ref List<Polyline> areas, GaParameter gaParameter, ref List<int> usedLines, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, 
-            ref List<double>  maxVals, ref List<double> minVals, Stopwatch stopwatch)
+        public static bool dfsSplitTiny(ref List<Polyline> areas, GaParameter gaParameter, ref List<int> usedLines, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex,
+            ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch)
         {
             if (usedLines.Count == gaParameter.LineCount)//分割线使用完毕, 退出递归
             {
                 return true;
             }
-            if(stopwatch.Elapsed.TotalSeconds > 10)
+            if (stopwatch.Elapsed.TotalSeconds > 10)
             {
                 stopwatch.Stop();
                 return false;
@@ -85,9 +85,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
 
             //递归搜索
-            return dfsSplitTiny(ref areas, gaParameter, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals,stopwatch);
+            return dfsSplitTiny(ref areas, gaParameter, ref usedLines, buildLinesSpatialIndex, ref maxVals, ref minVals, stopwatch);
         }
-
 
         public static bool dfsSplitWithoutSegline(Polyline wallLine, int throughBuildNums, ref List<Polyline> areas, ref List<Line> sortSegLines,
             ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, double buildNums, ref List<double> maxVals, ref List<double> minVals, Stopwatch stopwatch, double threshSecond)
@@ -222,7 +221,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
             if (spliters is null) return;
 
-            
+
             foreach (var spliter in spliters)
             {
                 var tmpVisited = new List<SegLineEx>();
@@ -238,17 +237,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 GetAreaAllSeglinesByDfs(subAreas.First(), seglineCnt, visited, buildingSpatialIndex, ref rstSegLines);
                 GetAreaAllSeglinesByDfs(subAreas.Last(), seglineCnt, visited, buildingSpatialIndex, ref rstSegLines);
 
-               // visited.RemoveAt(visited.Count - 1);
+                // visited.RemoveAt(visited.Count - 1);
             }
         }
 
-        public static void GetAreaRandSeglinesByDfs(Polyline orgArea, Polyline area, int seglineCnt, List<SegLineEx> visited, 
+        public static void GetAreaRandSeglinesByDfs(Polyline orgArea, Polyline area, int seglineCnt, List<SegLineEx> visited,
             ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg)
         {
             if (visited.Count == seglineCnt)
             {
                 var segLinesGroup = SeglinesGrouping(visited, orgArea);
-                if(segLinesGroup.Count > 1)
+                if (segLinesGroup.Count > 1)
                 {
                     AddConnectLine(orgArea, visited, buildingSpatialIndex);
                 }
@@ -262,7 +261,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var spliters = GetAreaAllSeglines(area, buildingSpatialIndex);
             if (spliters is null) return;
 
-            if(spliters.Count == 0)
+            if (spliters.Count == 0)
             {
                 return;
             }
@@ -278,12 +277,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        public static void AddConnectLine(Polyline area, List<SegLineEx> visited, 
+        public static void AddConnectLine(Polyline area, List<SegLineEx> visited,
             ThCADCoreNTSSpatialIndex buildingSpatialIndex)
         {
             var rstSeglinesList = SeglinesGrouping(visited, area);//分组
             var rstConnectLines = GetNearestLines(rstSeglinesList);//找到候选连接线
-            foreach(var rst in rstConnectLines)
+            foreach (var rst in rstConnectLines)
             {
                 var line1 = rst[0];
                 var line2 = rst[1];
@@ -312,10 +311,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
-        private static SegLineEx GetConnectLine(double constantVal, double sval, double eval, SegLineEx line2, Polyline area, 
+        private static SegLineEx GetConnectLine(double constantVal, double sval, double eval, SegLineEx line2, Polyline area,
             ThCADCoreNTSSpatialIndex buildingSpatialIndex)
         {
-            var areals = new List<Polyline>() { area};
+            var areals = new List<Polyline>() { area };
             var areaSpatialIndex = new ThCADCoreNTSSpatialIndex(areals.ToCollection());
             double curVal = sval + 5500;
             Line curLine = new Line();
@@ -343,7 +342,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         private static Line CreateTempLine(double constantVal, double val, SegLineEx line2)
         {
             Line line = new Line();
-            if(line2.Direction)//竖直
+            if (line2.Direction)//竖直
             {
                 var spt = new Point3d(constantVal, val, 0);
                 var ept = new Point3d(line2.Segline.StartPoint.X, val, 0);
@@ -377,13 +376,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                         if (seg.Direction == targetSeg.Direction)
                         {
                             var dist = GetLinesDist(seg.Segline, targetSeg.Segline);
-                            if(!distLineDic.ContainsKey(dist))
+                            if (!distLineDic.ContainsKey(dist))
                             {
                                 distLineDic.Add(dist, seg);
                             }
                         }
                     }
-                    var rst  = new List<SegLineEx>();
+                    var rst = new List<SegLineEx>();
 
                     rst.Add(targetSeg);
                     rst.Add(distLineDic.OrderBy(d => d.Key).First().Value);
@@ -411,10 +410,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     rstLines.Add(rst);
                 }
             }
-            if(rstSeglinesList.Count > 2)
+            if (rstSeglinesList.Count > 2)
             {
                 var dir = rstSeglinesList[0][0].Direction;
-                if(dir)
+                if (dir)
                 {
                     rstSeglinesList = rstSeglinesList.OrderBy(rst => rst[0].Segline.StartPoint.X).ToList();
                 }
@@ -422,11 +421,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 {
                     rstSeglinesList = rstSeglinesList.OrderBy(rst => rst[0].Segline.StartPoint.Y).ToList();
                 }
-                for(int i = 0; i < rstSeglinesList.Count - 1; i++)
+                for (int i = 0; i < rstSeglinesList.Count - 1; i++)
                 {
                     var rst = new List<SegLineEx>();
                     rst.Add(rstSeglinesList[i][0]);
-                    rst.Add(rstSeglinesList[i+1][0]);
+                    rst.Add(rstSeglinesList[i + 1][0]);
                     rstLines.Add(rst);
                 }
             }
@@ -454,32 +453,32 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var seglineDic = new Dictionary<int, List<int>>();
             for (int i = 0; i < segLinesCnt - 1; i++)
             {
-                for(int j = i+1; j < segLinesCnt; j++)
+                for (int j = i + 1; j < segLinesCnt; j++)
                 {
                     var seglinei = segLines[i].Segline;
                     var seglinej = segLines[j].Segline;
-                    if(seglinei.IsIntersect(seglinej, area))
+                    if (seglinei.IsIntersect(seglinej, area))
                     {
                         AddItem(seglineDic, i, j);
                     }
                 }
-                if(!seglineDic.ContainsKey(i))
+                if (!seglineDic.ContainsKey(i))
                 {
                     seglineDic.Add(i, new List<int>());
                 }
             }
-            if (!seglineDic.ContainsKey(segLinesCnt-1))
+            if (!seglineDic.ContainsKey(segLinesCnt - 1))
             {
-                seglineDic.Add(segLinesCnt-1, new List<int>());
+                seglineDic.Add(segLinesCnt - 1, new List<int>());
             }
             var usedLines = new List<int>();
 
-            foreach(var si in seglineDic.Keys)
+            foreach (var si in seglineDic.Keys)
             {
                 if (usedLines.Contains(si)) continue;
                 var rstLineGroup = new List<int>();
                 GetLineGroup(si, seglineDic, ref rstLineGroup, ref usedLines);
-                if(rstLineGroup.Count > 0)
+                if (rstLineGroup.Count > 0)
                 {
                     var rstSegs = new List<SegLineEx>();
                     rstLineGroup.ForEach(i => rstSegs.Add(segLines[i]));
@@ -494,12 +493,12 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             rstLineGroup.Add(startNum);
             usedLines.Add(startNum);
             var cur = startNum;
-            
+
             var neighbors = seglineDic[cur];
             if (neighbors.Count == 0) return;
-            foreach(var p in neighbors)
+            foreach (var p in neighbors)
             {
-                if(!rstLineGroup.Contains(p))
+                if (!rstLineGroup.Contains(p))
                 {
                     GetLineGroup(p, seglineDic, ref rstLineGroup, ref usedLines);
                 }
@@ -508,7 +507,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
         private static void AddItem(Dictionary<int, List<int>> seglineDic, int i, int j)
         {
-            if(seglineDic.ContainsKey(i))
+            if (seglineDic.ContainsKey(i))
             {
                 seglineDic[i].Add(j);
             }
@@ -609,7 +608,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             var successedSeg = false;
             var maxSegCnt = 20;
             var cnt = 0;
-            while(!successedSeg && cnt++ < maxSegCnt)
+            while (!successedSeg && cnt++ < maxSegCnt)
             {
                 var area = outerBrder.WallLine;
                 var orgArea = outerBrder.WallLine;
@@ -675,7 +674,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 startX += laneWidth;
             }
         }
-        
+
         public static void GetAllHorizontalSeg(Polyline area, ThCADCoreNTSSpatialIndex buildLinesSpatialIndex, List<AutoSegLines> autoSegLinesList)
         {
             var autoSegLines = new AutoSegLines();
@@ -717,7 +716,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                 }
                 startX += laneWidth;
             }
-            ;
         }
     }
 }

@@ -45,7 +45,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public ThCADCoreNTSSpatialIndex BuildingBlockSpatialIndex { get; set; }//所有障碍物索引
         public ThCADCoreNTSSpatialIndex SegLineSpatialIndex { get; set; }//所有分割线索引
         public Dictionary<int, List<int>> SeglineNeighborIndexDic { get; set; }//分割线临近线
-
         public int SegAreasCnt { get; set; }//初始分割线
         public bool UsePline { get; set; }//建筑物框线，true使用polyline，false使用hatch
         private Serilog.Core.Logger Logger { get; set; }
@@ -63,16 +62,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                     foreach (BlockReference buildingBlock in BuildingBlocks)
                     {
                         var cuttersInBuilding = buildingBlock.GetCutters(UsePline, Logger);
-//#if DEBUG
-//                        using (AcadDatabase currentDb = AcadDatabase.Active())
-//                        {
-//                            foreach (var pline in cuttersInBuilding)
-//                            {
-//                                currentDb.CurrentSpace.Add(pline);
-//                            }
-//                        }
-//#endif
-                            allCuttersList.Add(cuttersInBuilding);
+
+                        allCuttersList.Add(cuttersInBuilding);
                     }
                     var allCutters = allCuttersList.SelectMany(c => c).ToCollection();
                     _AllShearwallSpatialIndex = new ThCADCoreNTSSpatialIndex(allCutters);
@@ -228,7 +219,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 if (SeglineNeighborIndexDic is null)
                 {
                     //If in automation mode
-                    //
                     areas.Add(tmpBoundary);
 
                     //init splitting lines
@@ -241,7 +231,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 else
                 {
                     //If in manual mode
-                    //
                     areas = WindmillSplit.Split(tmpBoundary, tmpSegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
                 }
 
@@ -249,7 +238,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
                 {
                     return false;//必定是个不合理的解
                 }
-
+                if (IsInCorrectSegLine(tmpBoundary, SegLines))
+                {
+                    return false;
+                }
                 double areaTolerance = 1.0;//面积容差
                 double areasTotalArea = 0;//分割后区域总面积
                 areas.ForEach(a => areasTotalArea += a.Area);
@@ -323,7 +315,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
             else
             { 
                 //If in manual mode
-                //
                 areas = WindmillSplit.Split(tmpBoundary, SegLineIndexDic, BuildingBlockSpatialIndex, SeglineNeighborIndexDic);
             }
 
