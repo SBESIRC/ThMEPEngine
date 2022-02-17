@@ -11,6 +11,10 @@ using ThMEPEngineCore.Command;
 using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using System.Linq;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -89,41 +93,31 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             else
             {
+                var Cars = new List<Polyline>();
+                var Pillars = new List<Polyline>();
+                var Lanes = new List<Line>();
+                var Boundary = layoutPara.OuterBoundary;
+                var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    var use_partition_pro = true;
-                    if (use_partition_pro)
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
+                    try
                     {
-                        var partitionpro = new ParkingPartitionPro();
-                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                        if (!partitionpro.Validate()) continue;
-                        try
-                        {
-                            count += partitionpro.ProcessAndDisplay();
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
-                        continue;
+                        count += partitionpro.Process(Cars,Pillars,Lanes);
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        ParkingPartition partition = new ParkingPartition();
-                        if (ConvertParametersToPartition(layoutPara, j, ref partition, ParameterViewModel, Logger))
-                        {
-                            try
-                            {
-                                count += partition.ProcessAndDisplay();
-                            }
-                            catch (Exception ex)
-                            {
-                                Logger.Error(ex.Message);
-                                partition.Dispose();
-                            }
-                        }
+                        ;
                     }
                 }
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars,ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                count = Cars.Count;
+                var partitionpro_final = new ParkingPartitionPro();
+                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Pillars = Pillars;
+                partitionpro_final.Display();
             }
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, count);
             layoutPara.Dispose();

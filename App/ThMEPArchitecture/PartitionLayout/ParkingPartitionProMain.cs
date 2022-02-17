@@ -69,8 +69,8 @@ namespace ThMEPArchitecture.PartitionLayout
         public ThCADCoreNTSSpatialIndex LaneBufferSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public ThCADCoreNTSSpatialIndex CarSpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
         public List<Lane> IniLanes = new List<Lane>();
-        private List<Polyline> CarSpots = new List<Polyline>();
-        private List<Polyline> Pillars = new List<Polyline>();
+        public List<Polyline> CarSpots = new List<Polyline>();
+        public List<Polyline> Pillars = new List<Polyline>();
         private List<Polyline> CarBoxes = new List<Polyline>();
         private List<Polyline> IniLaneBoxes = new List<Polyline>();
         private List<CarBoxPlus>CarBoxesPlus=new List<CarBoxPlus>();
@@ -197,11 +197,13 @@ namespace ThMEPArchitecture.PartitionLayout
             return count;
         }
 
-        public int ProcessAndDisplay(string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
+        public int Process(List<Polyline> cars, List<Polyline> pillars, List<Line> lanes, string carLayerName = "AI-停车位", string columnLayerName = "AI-柱子", int carindex = 30, int columncolor = -1)
         {
             GenerateParkingSpaces();
+            cars.AddRange(CarSpots);
+            pillars.AddRange(Pillars);
+            lanes.AddRange(IniLanes.Select(e => CreateLine(e.Line)));
             Dispose();
-            Display(carLayerName, columnLayerName);
             return CarSpots.Count;
         }
 

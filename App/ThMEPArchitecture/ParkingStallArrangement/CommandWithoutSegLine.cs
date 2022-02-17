@@ -227,24 +227,30 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 layoutPara.Set(histories[k].Genome);
                 if (!Chromosome.IsValidatedSolutions(layoutPara)) continue;
+                var Cars = new List<Polyline>();
+                var Pillars = new List<Polyline>();
+                var Lanes = new List<Line>();
+                var Boundary = layoutPara.OuterBoundary;
+                var ObstaclesSpacialIndex = layoutPara.AllShearwallsMPolygonSpatialIndex;
                 for (int j = 0; j < layoutPara.AreaNumber.Count; j++)
                 {
-                    var use_partition_pro = true;
-                    if (use_partition_pro)
+                    var partitionpro = new ParkingPartitionPro();
+                    ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
+                    if (!partitionpro.Validate()) continue;
+                    try
                     {
-                        var partitionpro = new ParkingPartitionPro();
-                        ConvertParametersToPartitionPro(layoutPara, j, ref partitionpro, ParameterViewModel);
-                        if (!partitionpro.Validate()) continue;
-                        try
-                        {
-                            partitionpro.ProcessAndDisplay(autoCarSpotLayer, autoColumnLayer);
-                        }
-                        catch (Exception ex)
-                        {
-                            ;
-                        }
+                        partitionpro.Process(Cars, Pillars, Lanes, autoCarSpotLayer, autoColumnLayer);
+                    }
+                    catch (Exception ex)
+                    {
+                        ;
                     }
                 }
+                LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
+                var partitionpro_final = new ParkingPartitionPro();
+                partitionpro_final.CarSpots = Cars;
+                partitionpro_final.Pillars = Pillars;
+                partitionpro_final.Display();
             }
             layoutPara.Set(solution.Genome);
 

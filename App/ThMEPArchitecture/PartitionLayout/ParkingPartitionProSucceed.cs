@@ -318,7 +318,7 @@ namespace ThMEPArchitecture.PartitionLayout
             return generate_lane_length;
         }
 
-        private List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true)
+        public List<Lane> GeneratePerpModuleLanes(double mindistance, double minlength, bool judge_cross_carbox = true)
         {
             var lanes = new List<Lane>();
             foreach (var lane in IniLanes)
@@ -332,7 +332,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 bdpoints.AddRange(Boundary.Intersect(bdpl, Intersect.OnBothOperands));
                 bdpl.Scale(bdpl.GetRecCentroid(), 1 / (ScareFactorForCollisionCheck - 0.01));
                 bdpoints = bdpoints.Where(p => bdpl.IsPointInFast(p)).Select(p => linetest.GetClosestPointTo(p, false)).ToList();
-                var bdsplits = SplitLine(linetest, bdpoints).Where(e => Boundary.Contains(e.GetCenter())).Where(e => e.Length >= minlength);
+                var bdsplits = SplitLine(linetest, bdpoints).Where(e => Boundary.Contains(e.GetCenter()) || Boundary.GetClosestPointTo(e.GetCenter(), false).DistanceTo(e.GetCenter()) < 1).Where(e => e.Length >= minlength);
                 foreach (var bdsplit in bdsplits)
                 {
                     bdsplit.TransformBy(Matrix3d.Displacement(-lane.Vec.GetNormal() * mindistance));
@@ -719,7 +719,7 @@ namespace ThMEPArchitecture.PartitionLayout
             return count;
         }
 
-        private void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset,
+        public void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset,
           bool add_to_car_spacialindex = true, bool judge_carmodulebox = true, bool adjust_pillar_edge = false, bool judge_modulebox = false,
           bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false)
         {
@@ -908,9 +908,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 seg.Dispose();
                 s.Dispose();
             }
-
             segobjs.Dispose();
         }
-
     }
 }
