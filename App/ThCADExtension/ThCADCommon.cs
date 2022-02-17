@@ -54,6 +54,7 @@ namespace ThCADExtension
         public static readonly string DxfName_TCH_Opening = "TCH_OPENING";
         public static readonly string DxfName_TCH_EQUIPMENT_16 = "TCH_EQUIPMENT";
         public static readonly string DxfName_TCH_EQUIPMENT_12 = "TCH EQUIPMENT";
+        public static readonly string DxfName_VerticalPipe = "TCH_PIPE";
 
         // Area Frame
         public static readonly string RegAppName_AreaFrame = "THCAD_AF";

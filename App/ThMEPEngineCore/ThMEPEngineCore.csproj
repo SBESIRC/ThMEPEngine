@@ -150,6 +150,7 @@
     <Compile Include="CAD\ThWindowInteraction.cs" />
     <Compile Include="Command\ThMEPBaseCommand.cs" />
     <Compile Include="Config\RoomConfigTreeService.cs" />
+    <Compile Include="Config\ThRegularMatchingService.cs" />
     <Compile Include="ConnectWiring\ConnectWiringService.cs" />
     <Compile Include="ConnectWiring\Data\ThBlockPointsExtractor.cs" />
     <Compile Include="ConnectWiring\Data\ThFaFireApartExtractor.cs" />

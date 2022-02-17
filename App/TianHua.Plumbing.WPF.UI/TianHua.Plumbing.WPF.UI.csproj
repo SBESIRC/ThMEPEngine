@@ -93,6 +93,9 @@
     <Compile Include="Converter\MaxProtectDisOpsBooleanConverter.cs" />
     <Compile Include="Converter\CheckObjectOpsBooleanConverter.cs" />
     <Compile Include="Converter\ArrangePositionBooleanConverter.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystemUI\FirstFloorDrainagePlaneUI.xaml.cs">
+      <DependentUpon>FirstFloorDrainagePlaneUI.xaml</DependentUpon>
+    </Compile>
     <Compile Include="PlumbingWPFUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UI\DrainageSystemSupplyAxonometricUI.xaml.cs">
@@ -229,6 +232,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="FirstFloorDrainagePlaneSystemUI\FirstFloorDrainagePlaneUI.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="UI\DrainageSystemSupplyAxonometricUI.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
