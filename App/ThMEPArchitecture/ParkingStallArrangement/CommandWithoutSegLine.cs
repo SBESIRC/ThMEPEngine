@@ -62,7 +62,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 {
                     Logger?.Information($"############################################");
                     Logger?.Information($"自动分割线迭代");
-                    //Logger?.Information($"Random Seed:{Utils.GetRandomSeed()}");
+                    Logger?.Information($"Random Seed:{Utils.GetSeed()}");
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
                     var rstDataExtract = InputData.GetOuterBrder(currentDb, out OuterBrder outerBrder, Logger);
@@ -184,10 +184,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 Logger?.Information($"############################################");
                 Logger?.Information($"垂直打断迭代");
-                var layoutParaVB = BreakAndOptimize(SegLines_C, outerBrder, rst, true, out Chromosome solutionVB);// 垂直打断
+                var layoutParaVB = Functions.BreakAndOptimize(SegLines_C, outerBrder, ParameterViewModel, Logger, out Chromosome solutionVB, true, rst);// 垂直打断
                 Logger?.Information($"############################################");
                 Logger?.Information($"水平打断迭代");
-                var layoutParaHB = BreakAndOptimize(SegLines_C, outerBrder, rst, false, out Chromosome solutionHB);// 横向打断
+                var layoutParaHB = Functions.BreakAndOptimize(SegLines_C, outerBrder, ParameterViewModel, Logger, out Chromosome solutionHB, false, rst);// 横向打断
 
                 if (solutionVB.ParkingStallCount > solution.ParkingStallCount)// 垂直打断比初始优
                 {
@@ -238,90 +238,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
             string finalSplitterLayerName = $"AI-最终分割线{index}";
             Draw.DrawSeg(solution, finalSplitterLayerName);
-
-            //if (_CommandMode == CommandMode.WithoutUI)
-            //{
-            //    var options = new PromptKeywordOptions("\n是否打断迭代：");
-
-            //    options.Keywords.Add("是", "Y", "是(Y)");
-            //    options.Keywords.Add("否", "N", "否(N)");
-
-            //    options.Keywords.Default = "是";
-            //    var Msg = Active.Editor.GetKeywords(options);
-            //    if (Msg.Status != PromptStatus.OK || Msg.StringResult.Equals("否")) return;
-
-
-            //    var options2 = new PromptKeywordOptions("\n打断方向：");
-
-            //    options2.Keywords.Add("纵向", "V", "纵向(V)");
-            //    options2.Keywords.Add("横向", "H", "横向(H)");
-
-            //    options2.Keywords.Default = "纵向";
-            //    var breakMsg = Active.Editor.GetKeywords(options2);
-            //    if (breakMsg.Status != PromptStatus.OK) return;
-
-            //    var breakDir = breakMsg.StringResult.Equals("纵向");
-
-            //    var options3 = new PromptKeywordOptions("\n打断顺序：");
-
-            //    options3.Keywords.Add("坐标增加", "P", "坐标增加(P)");
-            //    options3.Keywords.Add("坐标减少", "N", "坐标减少(N)");
-
-            //    options3.Keywords.Default = "坐标增加";
-            //    var posMsg = Active.Editor.GetKeywords(options3);
-            //    if (posMsg.Status != PromptStatus.OK) return;
-
-            //    var posDir = posMsg.StringResult.Equals("坐标增加");
-            //    BreakAndOptimize(sortedSegLines_C, outerBrder, rst, breakDir, posDir);
-            //}
-
-            //layoutPara.Dispose();
-        }
-        // Note： 分割线打断排布会使用之前的参数（种群数和代数）
-
-       
-
-        public LayoutParameter BreakAndOptimize(List<Line> sortedSegLines, OuterBrder outerBrder, List<Chromosome> Orgsolutions, bool verticaldirection, out Chromosome solution, bool gopositive = true)// 打断，赋值，再迭代,默认正方向打断
-        {
-            outerBrder.SegLines = sortedSegLines;// 之前的分割线
-            var GaPara = new GaParameter(sortedSegLines);
-            //var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
-
-            var segbkparam = new SegBreak(outerBrder, GaPara, verticaldirection, gopositive);
-            outerBrder.SegLines = new List<Line>();
-            segbkparam.NewSegLines.ForEach(l => outerBrder.SegLines.Add(l.Clone() as Line));// 复制打断后的分割线
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
-
-            // gaparam 赋值
-            var initgenomes = segbkparam.TransPreSols(ref gaPara, Orgsolutions);
-
-            ParkingStallGAGenerator geneAlgorithm = null;
-
-            geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel, initgenomes);
-            geneAlgorithm.Logger = Logger;
-
-            var rst = new List<Chromosome>();
-            var histories = new List<Chromosome>();
-            bool recordprevious = false;
-            try
-            {
-                rst = geneAlgorithm.Run2(histories, recordprevious);
-            }
-            catch (Exception ex)
-            {
-                ;
-            }
-
-            solution = rst.First();
-            return layoutPara;
-#if (DEBUG)
-            string layer;
-            if (verticaldirection) layer = "AI-垂直打断后初始分割线-Debug";
-            else layer = "AI-水平打断后初始分割线-Debug";
-            Draw.DrawSeg(segbkparam.NewSegLines, layer);
-            Draw.DrawSeg(sortedSegLines, "AI-打断前分割线-Debug");
-#endif
         }
     }
 }

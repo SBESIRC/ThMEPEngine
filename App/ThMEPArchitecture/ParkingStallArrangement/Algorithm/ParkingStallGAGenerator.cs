@@ -358,6 +358,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         int Max_SelectionSize;
         double EliminateRate;
         double GoldenRatio;
+        private bool SpecialOnly;
         private Dictionary<int, Tuple<double, double>> LowerUpperBound;
         //Inputs
         GaParameter GaPara;
@@ -490,7 +491,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             return genome;
         }
 
-        private bool RandomCreateChromosome(out Chromosome solution, int N = 1000)
+        private bool RandomCreateChromosome(out Chromosome solution, int N = 100)
         {
             // Try N times
             solution = new Chromosome();
@@ -506,11 +507,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     double RandValue;
                     if (RandDouble() > GoldenRatio)
                     {
-                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//纯随机数
+                        RandValue = RandomSpecialNumber(LowerBound, UpperBound);//随机特殊解
                     }
                     else
                     {
-                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//随机特殊解
+                        RandValue = RandDoubleInRange(LowerBound, UpperBound);//纯随机数
                     }
                     Gene gene = new Gene(RandValue, dir, GaPara.MinValues[i], GaPara.MaxValues[i], startVal, endVal);
                     genome.Add(gene);
@@ -520,6 +521,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 {
                     return true;
                 }
+                ReclaimMemory();
             }
             return false;
         }
@@ -751,7 +753,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandNormalInRange(double loc, double scale, double LowerBound, double UpperBound)
         {
-            
+            if (SpecialOnly)
+            {
+                return RandomSpecialNumber(LowerBound, UpperBound);
+            }
             double tol = 1e-4;
             if (UpperBound- LowerBound <= tol) return loc;
 
@@ -767,6 +772,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         }
         private double RandDoubleInRange(double LowerBound, double UpperBound)
         {
+            if (SpecialOnly)
+            {
+                return RandomSpecialNumber(LowerBound, UpperBound);
+            }
             double tol = 1e-4;
             if (UpperBound - LowerBound < tol) return LowerBound ;
             else return RandDouble() * (UpperBound - LowerBound) + LowerBound;
@@ -795,12 +804,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         // 后代生成逻辑增强，保留之前最优解直接保留，不做变异的逻辑。新增精英种群逻辑，保留精英种群，并且参与小变异。
         // 变异逻辑增强，增加小变异（用于局部最优化搜索），保留之前的变异逻辑（目前称之为大变异）。
         // 对精英种群和一部分交叉产生的后代使用小变异，对一部分后代使用大变异，对剩下的后代不做变异。
-        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious)
+        public List<Chromosome> Run2(List<Chromosome> histories, bool recordprevious,bool specialOnly = false)
         {
             Logger?.Information($"迭代次数: {IterationCount}");
             Logger?.Information($"种群数量: {PopulationSize}");
             Logger?.Information($"最大迭代时间: {MaxTime} 分");
-
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
+            SpecialOnly = specialOnly;
             List<Chromosome> selected = new List<Chromosome>();
 
             var pop = CreateFirstPopulation();
@@ -810,8 +821,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             var curIteration = 0;
             int maxCount = 0;
             int maxNums = 0;
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+
             int lamda; //变异方差，随代数递减
 
             while (curIteration++ < IterationCount && maxCount < MaxCount && stopWatch.Elapsed.TotalMinutes < MaxTime)

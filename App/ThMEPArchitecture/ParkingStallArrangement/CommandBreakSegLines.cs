@@ -1,4 +1,5 @@
 ﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using Serilog;
 using System;
@@ -22,7 +23,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 {
     public class ThBreakSegLinesCmd : ThMEPBaseCommand, IDisposable
     {
-        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "GaLog.txt");
+        public static string LogFileName = Path.Combine(System.IO.Path.GetTempPath(), "SegBreakLog.txt");
 
         public Serilog.Core.Logger Logger = new Serilog.LoggerConfiguration().WriteTo
             .File(LogFileName, flushToDiskInterval: new TimeSpan(0, 0, 5), rollingInterval: RollingInterval.Day).CreateLogger();
@@ -113,7 +114,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 return;
             }
 
-            var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
+            var segLinesEx = Dfs.GetRandomSeglines(outerBrder,1);
             var GenSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
             outerBrder.SegLines = GenSegLines;
             var gaPara = new GaParameter(GenSegLines);
@@ -123,7 +124,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var rst = geneAlgorithm.Run();
             try
             {
-                var segbkparam = new SegBreak(outerBrder, gaPara, false, false);
+                var segbkparam = new SegBreak(outerBrder, gaPara, true);
                 Draw.DrawSeg(segbkparam.NewSegLines, 0);
                 outerBrder.SegLines = segbkparam.NewSegLines;
 
@@ -133,7 +134,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                 ;
             }
         }
-
         public void RunBrSeg(AcadDatabase acadDatabase)// 生成二分生成分割线，然后打断，然后迭代
         {
             var rstDataExtract = InputData.GetOuterBrder(acadDatabase, out OuterBrder outerBrder);
@@ -141,28 +141,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             {
                 return;
             }
-
-            var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
-            var GenSegLines = segLinesEx.Select(lex => lex.Segline).ToList();
-            outerBrder.SegLines = GenSegLines;
-            var GaPara = new GaParameter(GenSegLines);
-
-            //var geneAlgorithm = new ParkingStallDirectGenerator(gaPara);
-
-            var segbkparam = new SegBreak(outerBrder, GaPara, true, true);// 纵向且正方向
-            outerBrder.SegLines = segbkparam.NewSegLines;
-
-            bool usePline = ParameterViewModel.UsePolylineAsObstacle;
-            Preprocessing.DataPreprocessing(outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, Logger, false, usePline);
-
-            ParkingStallGAGenerator geneAlgorithm = null;
-
             if (_CommandMode == CommandMode.WithoutUI)
             {
                 var dirSetted = General.Utils.SetLayoutMainDirection();
                 if (!dirSetted)
                     return;
-
                 var iterationCnt = Active.Editor.GetInteger("\n 请输入迭代次数:");
                 if (iterationCnt.Status != PromptStatus.OK) return;
 
@@ -171,28 +154,48 @@ namespace ThMEPArchitecture.ParkingStallArrangement
 
                 ParameterViewModel.IterationCount = iterationCnt.Value;
                 ParameterViewModel.PopulationCount = popSize.Value;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
             else
             {
                 ParkingPartition.LayoutMode = (int)ParameterViewModel.RunMode;
-                geneAlgorithm = new ParkingStallGAGenerator(gaPara, layoutPara, ParameterViewModel);
             }
-            geneAlgorithm.Logger = Logger;
 
-            var rst = new List<Chromosome>();
+            LayoutParameter layoutPara;// 最优的分割方案（横向或者纵向优先
+            Chromosome solution;// 最优解
+            List<Line> GenSegLines;
+            Logger?.Information($"############################################");
+            Logger?.Information($"垂直打断迭代");
+            var segLinesEx = Dfs.GetRandomSeglines(outerBrder,1);
+            var GenSegLinesV = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var layoutParaVB = Functions.BreakAndOptimize(GenSegLinesV, outerBrder, ParameterViewModel, Logger, out Chromosome solutionVB, true, null,true);// 垂直打断,只用特殊解
+            Logger?.Information($"############################################");
+            Logger?.Information($"水平打断迭代");
+            segLinesEx = Dfs.GetRandomSeglines(outerBrder, -1);
+            var GenSegLinesH = segLinesEx.Select(lex => lex.Segline).ToList();
+
+            var layoutParaHB = Functions.BreakAndOptimize(GenSegLinesH, outerBrder, ParameterViewModel, Logger, out Chromosome solutionHB, false, null, true);// 横向打断,只用特殊解
+            
+            if (solutionVB.ParkingStallCount > solutionHB.ParkingStallCount)// 垂直打断比横向优
+            {
+                solution = solutionVB;
+                layoutPara = layoutParaVB;
+                GenSegLines = GenSegLinesV;
+            }
+            else//横向打断最优
+            {
+                solution = solutionHB;
+                layoutPara = layoutParaHB;
+                GenSegLines = GenSegLinesH;
+            }
+            
+            var strBest = $"最大车位数{solution.ParkingStallCount}";
+            Logger?.Information(strBest);
+            Active.Editor.WriteMessage(strBest);
+
             var histories = new List<Chromosome>();
-            bool recordprevious = false;
-            try
-            {
-                rst = geneAlgorithm.Run2(histories, recordprevious);
-            }
-            catch (Exception ex)
-            {
-                ;
-            }
-            var solution = rst.First();
-            histories.Add(rst.First());
+            histories.Add(solution);
+
             var parkingStallCount = solution.ParkingStallCount;
             ParkingSpace.GetSingleParkingSpace(Logger, layoutPara, parkingStallCount);
 
@@ -229,7 +232,6 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             Draw.DrawSeg(solution);
             Draw.DrawSeg(GenSegLines, "自动分割线");
         }
-
 
     }
 }

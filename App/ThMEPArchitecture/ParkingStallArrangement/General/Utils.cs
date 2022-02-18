@@ -62,6 +62,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
                 return _Seed;
             }
         }
+
+        public static int ReadSeed()
+        {
+            return _Seed;
+        }
         public static Random ThisThreadsRandom
         {
             get { return Local ?? (Local = new Random(Seed)); }
@@ -109,7 +114,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         {
             ThreadSafeRandom.Set();
         }
-
+        public static int GetSeed()
+        {
+            return ThreadSafeRandom.ReadSeed();
+        }
         public static List<int> RandChoice(int UpperBound, int n=-1,int LowerBound = 0)
         {
             // random choose n integers from n to UpperBound without replacement
@@ -217,12 +225,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
 
         public static int RandInt(int range)
         {
-            //return General.Utils.RandInt(range);
             return ThreadSafeRandom.ThisThreadsRandom.Next(0, range);
         }
         public static double RandDouble()
         {
-            //return General.Utils.RandDouble();
             return ThreadSafeRandom.ThisThreadsRandom.NextDouble();
         }
         public static double RandNormal(double loc, double scale)
