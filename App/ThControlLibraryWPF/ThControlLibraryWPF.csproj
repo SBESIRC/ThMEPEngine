@@ -64,6 +64,7 @@
     <Compile Include="ControlUtils\FormUtil.cs" />
     <Compile Include="ControlUtils\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlUtils\UListItemData.cs" />
+    <Compile Include="ControlUtils\WindowBehaviorHelper.cs" />
     <Compile Include="ConverterUtil.cs" />
     <Compile Include="CustomControl\ImageButton.cs" />
     <Compile Include="CustomControl\WindowButtonBase.cs" />
@@ -102,6 +103,20 @@
   <ItemGroup>
     <Resource Include="Images\Delete.png" />
     <Resource Include="Images\Delete_red.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\file_white.png" />
+    <Resource Include="Images\folderOpen_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\question_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\save_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\export_white.png" />
+    <Resource Include="Images\Import_white.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -100,6 +100,8 @@ namespace ThControlLibraryWPF.CustomControl
             base.OnApplyTemplate();
             this.Loaded += new RoutedEventHandler(OnWindow_Loaded);
             this.Closed += new EventHandler(OnWindow_Closed);
+            var windowBehaviorHelper = new WindowBehaviorHelper(this);
+            windowBehaviorHelper.RepairBehavior();
         }
         private void OnWindow_Loaded(object sender, RoutedEventArgs e)
         {
