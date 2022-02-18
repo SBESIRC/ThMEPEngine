@@ -52,7 +52,28 @@ namespace TianHua.Electrical.PDS.Service
             Texts = new ThCADCoreNTSSpatialIndex(texts);
 
             var mLeader = markDatas.Select(o => o.Data).OfType<MLeader>();
-            mLeader.ForEach(e => marksDic.Add(ToDbPoint(e.GetFirstVertex(0)), GetTexts(e.MText)));
+            mLeader.ForEach(e =>
+            {
+                var vertex = new Point3d();
+                var continueDo = false;
+                for (var i = 0; i < 5; i++)
+                {
+                    try
+                    {
+                        vertex = e.GetFirstVertex(i);
+                        continueDo = true;
+                        break ;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+                if(continueDo)
+                {
+                    marksDic.Add(ToDbPoint(vertex), GetTexts(e.MText));
+                }
+            });
             markBlocks.ForEach(o =>
             {
                 if (o.EffectiveName.Equals("E-电力平面-负荷明细"))
