@@ -15,10 +15,6 @@ namespace ThMEPWSS.Diagram.ViewModel
         {
             return Config;
         }
-        public void SetIdentfyConfigInfo(WaterWellIdentifyConfigInfo info)
-        {
-            Config.WaterWellInfo.identifyInfo = info;
-        }
         public object Clone()
         {
             throw new NotImplementedException();
@@ -119,57 +115,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             set
             {
                 Config.PumpInfo.strMapScale = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public LAYOUTTYPE PumpLyoutType
-        {
-            get
-            {
-                return Config.PumpInfo.PumpLyoutType;
-            }
-            set
-            {
-                Config.PumpInfo.PumpLyoutType = value;
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool IsPickSelection 
-        {
-            get
-            {
-                return PumpLyoutType.Equals(LAYOUTTYPE.DOTCHOICE);
-            }
-            set
-            {
-                if(value.Equals(true))
-                {
-                    PumpLyoutType = LAYOUTTYPE.DOTCHOICE;
-                }
-                else
-                {
-                    //todo:
-                    PumpLyoutType = LAYOUTTYPE.BOXCHOICE;
-                }
-                this.RaisePropertyChanged();
-            }
-        }
-        public bool IsFrameSelection {
-            get
-            {
-                return PumpLyoutType.Equals(LAYOUTTYPE.BOXCHOICE);
-            }
-            set
-            {
-                if (value.Equals(true))
-                {
-                    PumpLyoutType = LAYOUTTYPE.BOXCHOICE;
-                }
-                else
-                {
-                    //todo:
-                    PumpLyoutType = LAYOUTTYPE.DOTCHOICE;
-                }
                 this.RaisePropertyChanged();
             }
         }

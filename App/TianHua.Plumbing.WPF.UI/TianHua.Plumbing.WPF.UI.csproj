@@ -200,6 +200,9 @@
     <Compile Include="UI\FloorHeightSetting.xaml.cs">
       <DependentUpon>FloorHeightSetting.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiWaterWellPumpInfo.xaml.cs">
+      <DependentUpon>uiWaterWellPumpInfo.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Validations\AboveBeamRule.cs" />
     <Compile Include="Validations\AreaDensityRule.cs" />
     <Compile Include="Validations\NearbyDistanceRule.cs" />
@@ -365,6 +368,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="UI\FloorHeightSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiWaterWellPumpInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

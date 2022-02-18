@@ -22,26 +22,29 @@ using ThMEPWSS.WaterWellPumpLayout.Interface;
 using ThMEPWSS.WaterWellPumpLayout.Service;
 using DotNetARX;
 using ThMEPEngineCore.Command;
+using ThMEPWSS.WaterWellPumpLayout.Model;
+using System.Collections.ObjectModel;
 
 namespace ThMEPWSS.Command
 {
 
     public class ThCreateWaterWellPumpCmd : ThMEPBaseCommand, IDisposable
     {
-        WaterWellPumpConfigInfo configInfo;//配置信息
-        WaterwellPumpParamsViewModel _vm;
+        public WaterWellPumpConfigInfo ConfigInfo;//配置信息
+        public WaterwellPumpParamsViewModel _vm;
+        public ObservableCollection<ThWaterWellConfigInfo> WellConfigInfo { set; get; }
         public ThCreateWaterWellPumpCmd(WaterwellPumpParamsViewModel vm)
         {
             _vm = vm;
             ActionName = "布置";
             CommandName = "THSJSB";
-            configInfo = vm.GetConfigInfo();
+            ConfigInfo = vm.GetConfigInfo();
         }
         public List<ThWWaterWell> GetWaterWellEntityList(Point3dCollection input)
         {
             List<ThWWaterWell> waterWellList = new List<ThWWaterWell>();
             using (var database = AcadDatabase.Active())
-            using (var waterwellEngine = new ThWWaterWellRecognitionEngine(configInfo.WaterWellInfo.identifyInfo))
+            using (var waterwellEngine = new ThWWaterWellRecognitionEngine(ConfigInfo.WaterWellInfo.identifyInfo))
             {
                 waterwellEngine.Recognize(database.Database, input);
                 waterwellEngine.RecognizeMS(database.Database, input);
@@ -55,9 +58,9 @@ namespace ThMEPWSS.Command
             }
             return waterWellList;
         }
-        public List<ThWDeepWellPump> GetDeepWellPumpList()
+        public List<ThWaterPumpModel> GetDeepWellPumpList()
         {
-            List<ThWDeepWellPump> deepWellPump = new List<ThWDeepWellPump>();
+            List<ThWaterPumpModel> deepWellPump = new List<ThWaterPumpModel>();
             using (var database = AcadDatabase.Active())
             using (var engine = new ThWDeepWellPumpEngine())
             {
@@ -65,31 +68,49 @@ namespace ThMEPWSS.Command
                 engine.RecognizeMS(database.Database, range);
                 foreach (ThIfcDistributionFlowElement element in engine.Elements)
                 {
-                    ThWDeepWellPump pump = ThWDeepWellPump.Create(element.Outline.ObjectId);
+                    ThWaterPumpModel pump = ThWaterPumpModel.Create(element.Outline);
                     deepWellPump.Add(pump);
                 }
             }
             return deepWellPump;
         }
-
-
         public List<Line> GetRoomLine(Point3dCollection range)
         {
             using (var database = AcadDatabase.Active())
             using (var acadDb = AcadDatabase.Use(database.Database))
             {
                 List<Line> resLine = new List<Line>();
-                var partSpace = acadDb.ModelSpace.OfType<Entity>()
+                var roomLines = acadDb.ModelSpace.OfType<Entity>()
                         .Where(o => o.Layer.Contains("AI-房间框线")).ToList();
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
-                var dbObjects = spatialIndex.SelectCrossingPolygon(range);
-
-                foreach (var obj in dbObjects)
+                if(range.Count == 0)
                 {
-                    if (obj is Polyline)
+                    foreach(var l in roomLines)
                     {
-                        var pl = obj as Polyline;
-                        resLine.AddRange(pl.ToLines());
+                        if(l is Polyline pline)
+                        {
+                            resLine.AddRange(pline.ToLines());
+                        }
+                        else if(l is Line line)
+                        {
+                            resLine.Add(line);
+                        }
+                    }
+                }
+                else
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(roomLines.ToCollection());
+                    var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+
+                    foreach (var obj in dbObjects)
+                    {
+                        if (obj is Polyline pline)
+                        {
+                            resLine.AddRange(pline.ToLines());
+                        }
+                        else if (obj is Line line)
+                        {
+                            resLine.Add(line);
+                        }
                     }
                 }
                 return resLine;
@@ -190,88 +211,70 @@ namespace ThMEPWSS.Command
         {
             try
             {
-                ThMEPWSS.Common.Utils.FocusMainWindow();
-                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                Common.Utils.FocusMainWindow();
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (var database = AcadDatabase.Active())
                 {
-                    ImportBlockFile();
-
-                    //获取配置信息
-                    if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.DOTCHOICE)
+                    if(WellConfigInfo == null || WellConfigInfo.Count == 0)
                     {
-                        //获取选择数据 
-                        //获取集水井区域 
+                        return;
                     }
-                    else if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.BOXCHOICE)
+                    ImportBlockFile();
+                    var input = new Point3dCollection();
+                    //获取墙
+                    List<Line> wallLine = GetWallColumnEdgesInRange(input);
+                    //获取潜水泵
+                    List<ThWaterPumpModel> pumpList = GetDeepWellPumpList();
+                    foreach (var info in WellConfigInfo)
                     {
-                        var input = Common.Utils.SelectAreas();
-                        //获取集水井
-                        var water_well_list = GetWaterWellEntityList(input);
-                        if (water_well_list.Count == 0)
+                        foreach (var well in info.WellModelList)
                         {
-                            //命令栏提示“未选中集水井”
-                            //退出本次布置动作
-                            return;
+                            foreach (var pump in pumpList)
+                            {
+                                well.CheckHavePump(pump);
+                            }
+                            well.NearWall(wallLine,50.0);
                         }
-                        //获取墙
-                        List<Line> wallLine = GetWallColumnEdgesInRange(input);
-                        //获取车位
-                        List<Point3d> parkPoint = GetParkSpacePointInRange(input);
-                        //获取潜水泵
-                        List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
-                        //获取带定位水管
-                        List<BlockReference> pipeList = GetPipeInRange(input);
-                        //添加排水泵
-                        foreach (ThWWaterWell waterWell in water_well_list)
-                        {
-                            //开启尺寸过滤
-                            if (configInfo.WaterWellInfo.isWaterWellSizeFilter)
-                            {
-                                double area = waterWell.GetAcreage();
-                                if (area < configInfo.WaterWellInfo.fMinacreage)
-                                {
-                                    continue;
-                                }
-                            }
-                            //计算集水井是否靠近墙
-                            waterWell.ParkSpacePoint = parkPoint;
-                            waterWell.NearWall(wallLine, 50);
-                            //计算潜水泵是否在集水井内
-                            foreach (ThWDeepWellPump pump in pumpList)
-                            {
-                                if (waterWell.ContainPump(pump))
-                                {
-                                    break;
-                                }
-                            }
-                            //计算水管是否在集水井内
-                            foreach (var pump in pipeList)
-                            {
-                                waterWell.ContainPipe(pump);
-                            }
+                    }
 
-                            if (configInfo.PumpInfo.isCoveredWaterWell)
+                    double fontHeight = 525;
+                    switch (ConfigInfo.PumpInfo.strMapScale)
+                    {
+                        case "1:50":
+                            fontHeight = 175;
+                            break;
+                        case "1:100":
+                            fontHeight = 350;
+                            break;
+                        case "1:150":
+                            fontHeight = 525;
+                            break;
+                        default:
+                            break;
+                    }
+                    var toDbService = new ThWaterWellToDBService();
+                    foreach (var info in WellConfigInfo)
+                    {
+                        foreach(var well in info.WellModelList)
+                        {
+                            if (ConfigInfo.PumpInfo.isCoveredWaterWell)
                             {
-                                if (waterWell.IsHavePump)
+                                if(well.IsHavePump)
                                 {
-                                    waterWell.RemovePump();
+                                    toDbService.RemovePumpInDb(well.PumpModel);
+                                    well.PumpModel = null;
+                                    well.IsHavePump = false;
+                                    //删除对应的水泵
                                 }
-                                waterWell.RemovePipe();
-                                if (!waterWell.AddDeepWellPump(configInfo))
-                                {
-                                    //提示或写入日志表当前集水井添加泵失败
-                                }
+                                toDbService.InsertPumpToDb(well,int.Parse(info.PumpCount),info.PumpNumber, fontHeight);
                             }
                             else
                             {
-                                if (waterWell.IsHavePump)
+                                if(well.IsHavePump)
                                 {
                                     continue;
                                 }
-                                if (!waterWell.AddDeepWellPump(configInfo))
-                                {
-                                    //提示或写入日志表当前集水井添加泵失败
-                                }
+                                toDbService.InsertPumpToDb(well, int.Parse(info.PumpCount), info.PumpNumber, fontHeight);
                             }
                         }
                     }

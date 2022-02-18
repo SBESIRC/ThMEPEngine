@@ -8,7 +8,7 @@
              xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:local="clr-namespace:TianHua.Hvac.UI.UI" 
              xmlns:local1="clr-namespace:TianHua.Hvac.UI.Convertor"
-                    Closing="ThCustomWindow_Closing"
+             Closing="ThCustomWindow_Closing"
              mc:Ignorable="d" Width="212">
     <Window.Resources>
         <ResourceDictionary>

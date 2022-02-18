@@ -7,11 +7,6 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public enum LAYOUTTYPE
-    {
-        DOTCHOICE = 0,//点选
-        BOXCHOICE     //框选
-    }
     public class WaterWellIdentifyConfigInfo
     {
         public List<string> WhiteList = new List<string>();//白名单
@@ -19,8 +14,8 @@ namespace ThMEPWSS.Pipe.Model
         public WaterWellIdentifyConfigInfo()
         {
             WhiteList.Add("A-Well-1");
-            WhiteList.Add("");
-            WhiteList.Add("");
+            WhiteList.Add("集水坑");
+            WhiteList.Add("沉砂隔油池");
 
             BlackList.Add("");
             BlackList.Add("");
@@ -40,7 +35,6 @@ namespace ThMEPWSS.Pipe.Model
         public string strPipeDiameter = "DN80";//管径
         public string strMapScale = "1:150";//出图比例
         public int PumpsNumber = 2;//单井水泵数量
-        public LAYOUTTYPE PumpLyoutType = LAYOUTTYPE.BOXCHOICE;//布置方式
         public bool isCoveredWaterWell = false;//覆盖已布置水井
     }
 
