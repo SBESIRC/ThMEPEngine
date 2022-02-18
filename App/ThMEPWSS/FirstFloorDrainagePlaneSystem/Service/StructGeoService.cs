@@ -28,7 +28,7 @@ namespace ThMEPWSS.FirstFloorDrainagePlaneSystem.Service
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public static List<Line> GetAllLineByPolyline(Polyline polyline)
+        public static List<Line> GetAllLineByPolyline(this Polyline polyline)
         {
             var allLines = new List<Line>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)

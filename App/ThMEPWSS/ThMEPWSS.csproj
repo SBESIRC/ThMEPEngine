@@ -39,7 +39,9 @@
     <Compile Include="BlockNameConfig\Cmd.cs" />
     <Compile Include="Command\ThTianHuaUserConfigCmd.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Data\CalStructrueService.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Engine\DrainingPointRecognizeEngine.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Engine\VerticalPipeRecognizeEngine.cs" />
+    <Compile Include="FirstFloorDrainagePlaneSystem\Model\DrainingEquipmentModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Model\VerticalPipeModel.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\EntityService.cs" />
     <Compile Include="FirstFloorDrainagePlaneSystem\Service\GeometryUtils.cs" />
