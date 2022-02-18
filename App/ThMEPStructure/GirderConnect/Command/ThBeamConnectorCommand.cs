@@ -103,10 +103,12 @@ namespace ThMEPStructure.GirderConnect.Command
                 var outlineClumns = new Dictionary<Polyline, HashSet<Point3d>>();
                 var outerWalls = new Dictionary<Polyline, HashSet<Polyline>>();
                 var olCrossPts = new Dictionary<Polyline, HashSet<Point3d>>();
+                var outline2OriOutline = new Dictionary<Polyline, Polyline>();
+                var allColumnPts = new HashSet<Point3d>();
 
                 //处理输入
                 MainBeamPreProcess.MPreProcess(outsideColumns, shearwallGroupDict, columnGroupDict, outsideShearwall,
-                    clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts);
+                    clumnPts, ref outlineWalls, outlineClumns, ref outerWalls, ref olCrossPts, ref outline2OriOutline, ref allColumnPts);
 
                 //计算
                 var connectService = new Connect();
@@ -116,7 +118,7 @@ namespace ThMEPStructure.GirderConnect.Command
                 connectService.MaxBeamLength = MainBeamLayoutConfig.MaxBeamLength;
                 connectService.SplitArea = MainBeamLayoutConfig.SplitSelection == true ? MainBeamLayoutConfig.SplitArea : 0;
 
-                var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, ref olCrossPts, transformer);
+                var dicTuples = connectService.Calculate(clumnPts, outlineWalls, outlineClumns, outerWalls, outline2OriOutline, ref olCrossPts, transformer, allColumnPts);
 
                 DBObjectCollection intersectCollection = new DBObjectCollection();
                 outlineWalls.ForEach(o => intersectCollection.Add(o.Key));

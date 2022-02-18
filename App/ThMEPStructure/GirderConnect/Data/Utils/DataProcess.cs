@@ -15,7 +15,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
         /// </summary>
         /// <param name="groupDict"></param>
         /// <param name="outlineWalls"></param>
-        public static void PolylineAddToOutlineWalls(Dictionary<Entity, HashSet<Entity>> groupDict, Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        public static void PolylineAddToOutlineWalls(Dictionary<Entity, HashSet<Entity>> groupDict, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
         {
             foreach (var group in groupDict)
             {
@@ -135,7 +135,7 @@ namespace ThMEPStructure.GirderConnect.Data.Utils
             }
         }
 
-        public static void DicHashAdd(Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns, Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
+        public static void DicHashAdd(Dictionary<Polyline, HashSet<Polyline>> outlinePlColumns, ref Dictionary<Polyline, HashSet<Polyline>> outlineWalls)
         {
             foreach (var outlinePlColumn in outlinePlColumns)
             {

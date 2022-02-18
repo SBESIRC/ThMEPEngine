@@ -29,15 +29,17 @@ namespace ThMEPStructure.GirderConnect.Data
             {
                 lines.ForEach(line =>
                 {
-                    line.Layer = BeamConfig.MainBeamLayerName;
-                    if (standardLength == 0) { line.ColorIndex = 1; }
-                    else
-                    {
-                        if (line.Length > standardLength) { line.ColorIndex = 1; }
-                        else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
+                    if (line.Length < 18000) {
+                        line.Layer = BeamConfig.MainBeamLayerName;
+                        if (standardLength == 0) { line.ColorIndex = 1; }
+                        else
+                        {
+                            if (line.Length > standardLength) { line.ColorIndex = 1; }
+                            else { line.ColorIndex = (int)ColorIndex.BYLAYER; }
+                        }
+                        line.Linetype = "ByLayer";
+                        acdb.ModelSpace.Add(line);
                     }
-                    line.Linetype = "ByLayer";
-                    acdb.ModelSpace.Add(line);
                 });
             }
         }
