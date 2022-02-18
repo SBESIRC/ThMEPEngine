@@ -580,28 +580,28 @@
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, TianHua.Architecture.WPI.UI, 2014 version-->
+    <!--Assembly App, TianHua.Architecture.WPF.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Architecture.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZDCWBZ" Global="THZDCWPZ" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, TianHua.Architecture.WPI.UI, 2016 version-->
+    <!--Assembly App, TianHua.Architecture.WPF.UI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Architecture.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZDCWBZ" Global="THZDCWPZ" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, TianHua.Architecture.WPI.UI, 2018 version-->
+    <!--Assembly App, TianHua.Architecture.WPF.UI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Architecture.WPI.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPIUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Architecture.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Architecture UI" AppName="THArchitectureWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THZDCWBZ" Global="THZDCWPZ" />
             </Commands>
