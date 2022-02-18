@@ -38,7 +38,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.label1 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.frameUpdate = new System.Windows.Forms.Button();
             this.btnDoComparer = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -63,7 +63,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             // columnRegionRange
             // 
             this.columnRegionRange.Text = "问题分类";
-            this.columnRegionRange.Width = 80;
+            this.columnRegionRange.Width = 72;
             // 
             // columnObjRange
             // 
@@ -94,6 +94,7 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.GraphPath.Name = "GraphPath";
             this.GraphPath.Size = new System.Drawing.Size(181, 20);
             this.GraphPath.TabIndex = 2;
+            this.GraphPath.SelectedIndexChanged += new System.EventHandler(this.GraphPath_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -120,14 +121,16 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.label2.TabIndex = 5;
             this.label2.Text = "mm时忽略变化";
             // 
-            // button1
+            // frameUpdate
             // 
-            this.button1.Location = new System.Drawing.Point(111, 373);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "框线更新";
-            this.button1.UseVisualStyleBackColor = true;
+            this.frameUpdate.Enabled = false;
+            this.frameUpdate.Location = new System.Drawing.Point(111, 373);
+            this.frameUpdate.Name = "frameUpdate";
+            this.frameUpdate.Size = new System.Drawing.Size(75, 23);
+            this.frameUpdate.TabIndex = 6;
+            this.frameUpdate.Text = "框线更新";
+            this.frameUpdate.UseVisualStyleBackColor = true;
+            this.frameUpdate.Click += new System.EventHandler(this.frameUpdate_Click);
             // 
             // btnDoComparer
             // 
@@ -145,13 +148,14 @@ namespace TianHua.Electrical.UI.FrameComparer
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(273, 408);
             this.Controls.Add(this.btnDoComparer);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.frameUpdate);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.GraphPath);
             this.Controls.Add(this.curGraph);
             this.Controls.Add(this.listViewComparerRes);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "UIFrameComparer";
@@ -172,7 +176,7 @@ namespace TianHua.Electrical.UI.FrameComparer
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button frameUpdate;
         private System.Windows.Forms.Button btnDoComparer;
     }
 }

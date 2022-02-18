@@ -11,17 +11,21 @@ using ThMEPEngineCore.Algorithm;
 using ThCADExtension;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm.FrameComparer;
 
 namespace TianHua.Electrical.UI.FrameComparer
 {
     public partial class UIFrameComparer : Form
     {
+        private bool isFirst = true;
+        private List<ObjectId> ids;
         public Point3dCollection fence;
-        public bool isModel = true;
+        
         public UIFrameComparer()
         {
             InitializeComponent();
             fence = new Point3dCollection();
+            ids = new List<ObjectId>();
             AddPath();
         }
         public void DoAddFrame(ThMEPFrameComparer comp, Dictionary<int, ObjectId> dicCode2Id, string frameType)
@@ -45,7 +49,8 @@ namespace TianHua.Electrical.UI.FrameComparer
                 var item = new ListViewItem();
                 item.SubItems[0].Text = regionName;
                 item.SubItems.Add(frameType);
-                item.SubItems.Add(dicCode2Id[frame.GetHashCode()].ToString());
+                item.SubItems.Add("转到");
+                ids.Add(dicCode2Id[frame.GetHashCode()]);
                 listViewComparerRes.Items.Add(item);
             }
         }
@@ -56,14 +61,14 @@ namespace TianHua.Electrical.UI.FrameComparer
             {
                 if (listViewComparerRes.SelectedItems.Count == 1)
                 {
-                    var item = listViewComparerRes.SelectedItems[0];
-                    var strId = item.SubItems[2].Text;
-                    var idNum = strId.Substring(1, strId.Length - 2);
-                    var id = new ObjectId(new System.IntPtr(long.Parse(idNum)));
-                    var entity = db.ModelSpace.ElementOrDefault(id);
-                    if (entity != null)
+                    var idx = listViewComparerRes.SelectedIndices[0];
+                    if (idx < ids.Count)
                     {
-                        Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
+                        var entity = db.ModelSpace.ElementOrDefault(ids[idx]);
+                        if (entity != null)
+                        {
+                            Active.Editor.ZoomToObjects(new Entity[] { entity }, 2.0);
+                        }
                     }
                 }
                 Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
@@ -72,12 +77,45 @@ namespace TianHua.Electrical.UI.FrameComparer
 
         private void btnDoComparer_Click(object sender, System.EventArgs e)
         {
+            if (isFirst)
+            {
+                isFirst = false;
+                frameUpdate.Enabled = true;
+            }
+            Hide();
             var fen = SelectRect();
             fence = new Point3dCollection() { fen.Item1, fen.Item2 };
-            if (isModel)
+            var painter = new ThFramePainter();
+            DoRoomComparer(painter, fence, CompareFrameType.ROOM, out ThFrameExactor roomExactor, out ThMEPFrameComparer roomComp);
+            DoComparer(painter, fence, CompareFrameType.DOOR, out ThFrameExactor doorExactor, out ThMEPFrameComparer doorComp);
+            DoComparer(painter, fence, CompareFrameType.WINDOW, out ThFrameExactor windowExactor, out ThMEPFrameComparer windowComp);
+            DoComparer(painter, fence, CompareFrameType.FIRECOMPONENT, out ThFrameExactor fireExactor, out ThMEPFrameComparer fireComp);
+
+            DoAddFrame(roomComp, roomExactor.dicCode2Id, "房间框线");
+            DoAddFrame(doorComp, doorExactor.dicCode2Id, "门");
+            DoAddFrame(windowComp, windowExactor.dicCode2Id, "窗");
+            DoAddFrame(fireComp, fireExactor.dicCode2Id, "防火分区");
+            Show();
+        }
+
+        private void DoRoomComparer(ThFramePainter painter, Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
             {
-                isModel = false;
-                Close();
+                frameExactor = new ThFrameExactor(type, fence);
+                frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
+                var textExactor = new ThFrameTextExactor();
+                _ = new ThMEPFrameTextComparer(frameComp, textExactor);// 对房间框线需要对文本再进行比对
+                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
+            }
+        }
+        private void DoComparer(ThFramePainter painter, Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                frameExactor = new ThFrameExactor(type, fence);
+                frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
+                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
             }
         }
         public Tuple<Point3d, Point3d> SelectRect()
@@ -102,6 +140,16 @@ namespace TianHua.Electrical.UI.FrameComparer
             {
                 return Tuple.Create(leftDownPt.TransformBy(Active.Editor.UCS2WCS()), leftDownPt.TransformBy(Active.Editor.UCS2WCS()));
             }
+        }
+
+        private void GraphPath_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            listViewComparerRes.Items.Clear();
+        }
+
+        private void frameUpdate_Click(object sender, EventArgs e)
+        {
+            listViewComparerRes.Items.Clear();
         }
     }
 }

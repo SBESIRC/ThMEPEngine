@@ -167,47 +167,7 @@ namespace TianHua.Electrical.UI
         public void FrameComparerUI()
         {
             var dlg = new UIFrameComparer();
-            AcadApp.ShowModalDialog(dlg);
-            var t = dlg.fence;
-            if (!dlg.isModel)
-            {
-                dlg = new UIFrameComparer();
-                dlg.fence = t;
-                AcadApp.ShowModelessDialog(dlg);// 面板中fence会被更新
-                DoRoomComparer(dlg.fence, CompareFrameType.ROOM, out ThFrameExactor roomExactor, out ThMEPFrameComparer roomComp);
-                DoComparer(dlg.fence, CompareFrameType.DOOR, out ThFrameExactor doorExactor, out ThMEPFrameComparer doorComp);
-                DoComparer(dlg.fence, CompareFrameType.WINDOW, out ThFrameExactor windowExactor, out ThMEPFrameComparer windowComp);
-                DoComparer(dlg.fence, CompareFrameType.FIRECOMPONENT, out ThFrameExactor fireExactor, out ThMEPFrameComparer fireComp);
-
-                dlg.DoAddFrame(roomComp, roomExactor.dicCode2Id, "房间框线");
-                dlg.DoAddFrame(doorComp, doorExactor.dicCode2Id, "门");
-                dlg.DoAddFrame(windowComp, windowExactor.dicCode2Id, "窗");
-                dlg.DoAddFrame(fireComp, fireExactor.dicCode2Id, "防火分区");
-            }
-        }
-        private void DoRoomComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
-        {
-            frameExactor = new ThFrameExactor(type, fence);
-            frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
-            var textExactor = new ThFrameTextExactor();
-            _ = new ThMEPFrameTextComparer(frameComp, textExactor);// 对房间框线需要对文本再进行比对
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                // 此处单独使用using域是为了立即显示绘制效果
-                var painter = new ThFramePainter();
-                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
-            }
-        }
-        private void DoComparer(Point3dCollection fence, CompareFrameType type, out ThFrameExactor frameExactor, out ThMEPFrameComparer frameComp)
-        {
-            frameExactor = new ThFrameExactor(type, fence);
-            frameComp = new ThMEPFrameComparer(frameExactor.curGraph, frameExactor.reference);
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                // 此处单独使用using域是为了立即显示绘制效果
-                var painter = new ThFramePainter();
-                painter.Draw(frameComp, frameExactor.dicCode2Id, type);
-            }
+            AcadApp.ShowModelessDialog(dlg);
         }
     }
 }
