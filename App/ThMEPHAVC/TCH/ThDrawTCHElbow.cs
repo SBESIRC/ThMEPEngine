@@ -1,6 +1,6 @@
 ﻿namespace ThMEPHVAC.TCH
 {
-    internal class ThDrawTCHElbow
+    public class ThDrawTCHElbow
     {
     }
 }

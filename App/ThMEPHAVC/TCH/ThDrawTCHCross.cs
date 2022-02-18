@@ -1,6 +1,6 @@
 ﻿namespace ThMEPHVAC.TCH
 {
-    internal class ThDrawTCHCross
+    public class ThDrawTCHCross
     {
     }
 }

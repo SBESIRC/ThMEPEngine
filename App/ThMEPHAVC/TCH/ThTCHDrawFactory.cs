@@ -1,11 +1,8 @@
 ﻿using System;
-using SQLite;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPHVAC.Model;
-using System.IO;
 
 namespace ThMEPHVAC.TCH
-{    
+{
     public struct TCHDuctParam
     {
         // Ducts 表
@@ -20,6 +17,15 @@ namespace ThMEPHVAC.TCH
         public double Bulge;
         public double AirLoad;
     }
+    public struct TCHReducingParam
+    {
+        // Ducts 表
+        public ulong ID;
+        public ulong endFaceID;
+        public ulong startFaceID;
+        public ulong subSystemID;
+        public ulong materialID;
+    }
     public struct TCHInterfaceParam
     {
         // MepInterfaces
@@ -33,43 +39,18 @@ namespace ThMEPHVAC.TCH
     }
     public class ThTCHDrawFactory
     {
-        private ThDrawTCHDuct ductService;
-        private ThDrawTCHTee teeService;
-        private ThDrawTCHElbow elbowService;
-        private ThDrawTCHCross crossService;
-        private ThDrawTCHReducing reducingService;
-        private SQLiteConnection connection;
+        public ThDrawTCHDuct ductService;
+        public ThDrawTCHTee teeService;
+        public ThDrawTCHElbow elbowService;
+        public ThDrawTCHCross crossService;
+        public ThDrawTCHReducing reducingService;
+        private ThSQLiteHelper sqliteHelper;
 
         public ThTCHDrawFactory(string databasePath)
         {
-            InitialiseConnection(databasePath);
-            ulong incerse = 0;
-            ductService = new ThDrawTCHDuct(incerse);
-            CloseConnection();
-        }
-
-        public void DrawDuct(SegInfo segInfo)
-        {
-            ductService.GetInsertStatement(segInfo);
-            InsertRecord<TCHDuctParam>(ductService.recordDuct);
-            InsertRecord<TCHInterfaceParam>(ductService.recordDuctSrtInfo);
-            InsertRecord<TCHInterfaceParam>(ductService.recordDuctEndInfo);
-        }
-
-        private void InitialiseConnection(string databasePath)
-        {
-            var options = new SQLiteConnectionString(databasePath, false);
-            connection = new SQLiteConnection(databasePath);
-        }
-        
-        private void InsertRecord<T>(string statement) where T : new()
-        {
-            connection.Query<T>(statement);
-        }
-
-        private void CloseConnection()
-        {
-            connection.Close();
+            sqliteHelper = new ThSQLiteHelper(databasePath);
+            ductService = new ThDrawTCHDuct(sqliteHelper);
+            reducingService = new ThDrawTCHReducing(sqliteHelper);
         }
     }
 }

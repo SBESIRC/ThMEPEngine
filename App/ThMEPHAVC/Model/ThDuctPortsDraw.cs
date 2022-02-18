@@ -4,20 +4,24 @@ using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.TCH;
 
 namespace ThMEPHVAC.Model
 {
     public class ThDuctPortsDraw
     {
+        private ulong gId = 0;
         private double portWidth;
         private double portHeight;
         private ThDuctPortsDrawService service;
         private PortParam portParam;
         private Vector3d orgDisVec;
         private Matrix3d orgDisMat;
+        public ThTCHDrawFactory tchDrawService;
         public ThDuctPortsDraw(PortParam portParam)
         {
             Init(portParam);
+            tchDrawService = new ThTCHDrawFactory("D://TG20.db");
         }
         private void Init(PortParam portParam)
         {
@@ -80,6 +84,7 @@ namespace ThMEPHVAC.Model
 
         private void DrawEndlines(ThDuctPortsAnalysis anayRes)
         {
+            tchDrawService.ductService.Draw(anayRes.breakedDucts, orgDisMat, ref gId);
             service.DrawDuct(anayRes.breakedDucts, orgDisMat);
             service.DrawReducing(anayRes.reducings, orgDisMat);
             service.DrawSideDuctText(anayRes.textAlignment, portParam.srtPoint, portParam.param);
