@@ -10,7 +10,7 @@ using TianHua.Electrical.PDS.Engine;
 
 namespace TianHua.Electrical.PDS.Service
 {
-    public class ThPDSLoadExtractService
+    public class ThPDSBlockExtractService
     {
         readonly static string LoadConfigUrl = Path.Combine(ThCADCommon.SupportPath(), "平面关注对象.xlsx");
 
@@ -32,7 +32,7 @@ namespace TianHua.Electrical.PDS.Service
         /// <summary>
         /// 配电箱序列
         /// </summary>
-        public List<int> DistBoxFilter = new List<int> { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+        public List<int> DistBoxFilter = new List<int> { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
         public void Extract(Database database)
         {
@@ -52,10 +52,10 @@ namespace TianHua.Electrical.PDS.Service
                 }
             });
 
-            var engine = new ThPDSLoadExtractionEngine
+            var engine = new ThPDSBlockExtractionEngine
             {
-                NameFilter = nameFilter,
-                PropertyFilter = propertyFilter,
+                NameFilter = nameFilter.Distinct().ToList(),
+                PropertyFilter = propertyFilter.Distinct().ToList(),
                 DistBoxFilter = DistBoxFilter,
             };
             engine.ExtractFromMS(database);

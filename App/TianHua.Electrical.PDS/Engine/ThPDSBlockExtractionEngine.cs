@@ -8,7 +8,7 @@ using ThMEPEngineCore.Engine;
 
 namespace TianHua.Electrical.PDS.Engine
 {
-    public class ThPDSLoadExtractionEngine : ThDistributionElementExtractionEngine
+    public class ThPDSBlockExtractionEngine : ThDistributionElementExtractionEngine
     {
         public List<string> NameFilter { get; set; }
         public List<string> PropertyFilter { get; set; }
@@ -16,7 +16,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void Extract(Database database)
         {
-            var visitor = new ThPDSLoadExtractionVisitor()
+            var visitor = new ThPDSBlockExtractionVisitor()
             {
                 NameFilter = NameFilter,
                 PropertyFilter = PropertyFilter,
@@ -35,7 +35,7 @@ namespace TianHua.Electrical.PDS.Engine
 
         public override void ExtractFromMS(Database database)
         {
-            var visitor = new ThPDSLoadExtractionVisitor()
+            var visitor = new ThPDSBlockExtractionVisitor()
             {
                 NameFilter = NameFilter,
                 PropertyFilter = PropertyFilter,

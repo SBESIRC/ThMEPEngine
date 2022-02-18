@@ -4,13 +4,14 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 
 namespace TianHua.Electrical.PDS.Engine
 {
-    public class ThPDSLoadExtractionVisitor : ThDistributionElementExtractionVisitor
+    public class ThPDSBlockExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> NameFilter { get; set; }
         public List<string> PropertyFilter { get; set; }
@@ -75,6 +76,7 @@ namespace TianHua.Electrical.PDS.Engine
                             {
                                 if (DistBoxFilter.Contains(i))
                                 {
+                                    // 对配电箱进行首字匹配
                                     if (o.IndexOf(PropertyFilter[i]) == 0)
                                     {
                                         checker = true;
@@ -82,6 +84,7 @@ namespace TianHua.Electrical.PDS.Engine
                                 }
                                 else
                                 {
+                                    // 对其余负载进行完全匹配
                                     if (o == PropertyFilter[i])
                                     {
                                         checker = true;

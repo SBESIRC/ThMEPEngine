@@ -22,7 +22,7 @@ namespace TianHua.Electrical.PDS.Command
                 var markExtractor = new ThCircuitMarkExtractionEngine();
                 markExtractor.ExtractFromMS(acad.Database);
                 // 根据块名提取负载及标注块
-                var loadExtractService = new ThPDSLoadExtractService();
+                var loadExtractService = new ThPDSBlockExtractService();
                 loadExtractService.Extract(acad.Database);
 
                 // 提取配电箱
