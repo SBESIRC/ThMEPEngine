@@ -36,5 +36,10 @@ namespace TianHua.Electrical.PDS.Engine
             }
             Results = curves;
         }
+
+        public override void RecognizeEditor(Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
