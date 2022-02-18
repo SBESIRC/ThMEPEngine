@@ -241,6 +241,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
             }
         }
 
+        /// <summary>
+        /// 生成随机的分割线，自动
+        /// </summary>
+        /// <param name="orgArea"></param>
+        /// <param name="area"></param>
+        /// <param name="seglineCnt"></param>
+        /// <param name="visited"></param>
+        /// <param name="buildingSpatialIndex"></param>
+        /// <param name="rstSegLines"></param>
+        /// <param name="successedSeg"></param>
+        /// <param name="seglineDir"></param>
         public static void GetAreaRandSeglinesByDfs(Polyline orgArea, Polyline area, int seglineCnt, List<SegLineEx> visited,
             ThCADCoreNTSSpatialIndex buildingSpatialIndex, ref List<SegLineEx> rstSegLines, ref bool successedSeg, int seglineDir = 0)
         {
@@ -651,7 +662,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
         }
 
         /// <summary>
-        /// 生成一种随机的分割线方案
+        /// 生成一种随机的分割线方案, 只用于自动生成分割线
         /// </summary>
         /// <param name="outerBrder"></param>
         /// <returns></returns>

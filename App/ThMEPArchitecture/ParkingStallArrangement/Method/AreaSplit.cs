@@ -700,6 +700,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     minVal = -segLine.GetMinDist(boundPt) + 2760;
                 }
             }
+            if(maxVal < minVal)
+            {
+                return false;
+            }
             return true;
         }
 
