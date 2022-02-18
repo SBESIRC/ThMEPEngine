@@ -155,5 +155,10 @@
         /// 位置信息
         /// </summary>
         public ThPDSLocation Location { get; set; }
+
+        /// <summary>
+        /// 是否变频
+        /// </summary>
+        public bool FrequencyConversion { get; set; }
     }
 }
