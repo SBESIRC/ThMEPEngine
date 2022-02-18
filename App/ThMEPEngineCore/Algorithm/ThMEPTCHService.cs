@@ -8,6 +8,11 @@ namespace ThMEPEngineCore.Algorithm
     public static class ThMEPTCHService
     {
         /// <summary>
+        /// DXF
+        /// </summary>
+        public const string DXF_PIPE = "TCH_PIPE";
+
+        /// <summary>
         /// 是否是天正元素
         /// </summary>
         /// <param name="entity"></param>

@@ -182,6 +182,9 @@
     <Compile Include="Engine\ThRawBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThRoomdata.cs" />
     <Compile Include="Engine\ThBeamBuilderEngine.cs" />
+    <Compile Include="Engine\ThTCHPipeExtractionEngine.cs" />
+    <Compile Include="Engine\ThTCHPipeExtractionVisitor.cs" />
+    <Compile Include="Engine\ThTCHPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThWindowOutlineRecognitionEngine.cs" />
     <Compile Include="Extension\ThGeometryExtension.cs" />
     <Compile Include="GridOperation\CutGridRegionService.cs" />
