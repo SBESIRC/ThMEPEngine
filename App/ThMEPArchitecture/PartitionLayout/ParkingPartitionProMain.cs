@@ -530,8 +530,8 @@ namespace ThMEPArchitecture.PartitionLayout
                         .Where(e => !IsInAnyPolys(e.GetCenter(), Obstacles))
                         .Where(e =>
                         {
-                                //与原始车道线模块不相接
-                                var tmpline = CreateLine(e);
+                            //与原始车道线模块不相接
+                            var tmpline = CreateLine(e);
                             tmpline.TransformBy(Matrix3d.Displacement(-vec * DisLaneWidth / 2));
                             if (!IsConnectedToLane(tmpline)) return false;
                             var ptonlane = lane.GetClosestPointTo(e.GetCenter(), false);

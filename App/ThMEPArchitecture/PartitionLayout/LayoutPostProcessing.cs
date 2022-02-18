@@ -27,23 +27,23 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (boundary.GetClosestPointTo(lane.StartPoint, false).DistanceTo(lane.StartPoint) < 10)
                 {
                     var point = lane.StartPoint;
-                    var pointest = point.TransformBy(Matrix3d.Displacement(CreateVector(lane).GetNormal() * 3000));
+                    var pointest = point.TransformBy(Matrix3d.Displacement(CreateVector(lane).GetNormal() * 2000));
                     var vec = CreateVector(lane).GetNormal().GetPerpendicularVector();
                     var carLine = new Line();
                     if (CanAddCarSpots(lane, pointest, vec, carspacialindex, ref carLine))
                     {
-                        generate_cars(lanes, lane, carLine, vec, boundary, obspacialindex,ref cars,ref pillars,vm);
+                        generate_cars(lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars, vm);
                     }
                 }
                 if (boundary.GetClosestPointTo(lane.EndPoint, false).DistanceTo(lane.EndPoint) < 10)
                 {
                     var point = lane.EndPoint;
-                    var pointest = point.TransformBy(Matrix3d.Displacement(-CreateVector(lane).GetNormal() * 3000));
+                    var pointest = point.TransformBy(Matrix3d.Displacement(-CreateVector(lane).GetNormal() * 2000));
                     var vec = CreateVector(lane).GetNormal().GetPerpendicularVector();
                     var carLine = new Line();
                     if (CanAddCarSpots(lane, pointest, vec, carspacialindex, ref carLine))
                     {
-                        generate_cars(lanes, lane, carLine, vec, boundary, obspacialindex, ref cars, ref pillars,vm, false);
+                        generate_cars(lanes, lane, carLine, vec, boundary, obspacialindex, carspacialindex, ref cars, ref pillars,vm, false);
                     }
                 }
             }
@@ -96,7 +96,7 @@ namespace ThMEPArchitecture.PartitionLayout
         }
 
         private static void generate_cars(List<Line> lanes, Line lane, Line carLine, Vector3d vec, Polyline boundary, ThCADCoreNTSSpatialIndex obspacialindex
-            ,ref List<Polyline> cars,ref List<Polyline> pillars, ParkingStallArrangementViewModel vm, bool isstartpoint=true)
+            , ThCADCoreNTSSpatialIndex carspacialindex, ref List<Polyline> cars,ref List<Polyline> pillars, ParkingStallArrangementViewModel vm, bool isstartpoint=true)
         {
             var partitionpro = new ParkingPartitionPro();
             var ps = lane.GetClosestPointTo(carLine.StartPoint, false);
@@ -113,8 +113,11 @@ namespace ThMEPArchitecture.PartitionLayout
             var ls = CreateLineFromStartPtAndVector(ps, vec.GetNormal(), 999999);
             ls.TransformBy(Matrix3d.Displacement(-vec.GetNormal() * ls.Length / 2));
             ls = SplitLine(ls, boundary).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
-            var obcrossed = obspacialindex.SelectCrossingPolygon(ls.Buffer(10)).Cast<Polyline>().ToList();
+            var buffer = ls.Buffer(10);
+            var obcrossed = obspacialindex.SelectCrossingPolygon(buffer).Cast<Polyline>().ToList();
             ls = SplitLine(ls, obcrossed).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
+            var carcrossded = carspacialindex.SelectCrossingPolygon(buffer).Cast<Polyline>().ToList();
+            ls = SplitLine(ls, carcrossded).OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
             ls = SplitLine(ls, lanes.Where(e => IsPerpLine(ls, e)).Where(e => e.GetClosestPointTo(ps, false).DistanceTo(ps) > 10).ToList())
                 .OrderBy(e => e.GetCenter().DistanceTo(ps)).First();
             var le = CreateLine(ls);
