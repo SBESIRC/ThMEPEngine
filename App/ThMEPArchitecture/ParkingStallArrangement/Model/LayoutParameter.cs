@@ -400,7 +400,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Model
         public bool IsInCorrectSegLine(Polyline area, List<Line> seglines)
         {
             var halfLaneWidth = 2750;
-            double carWidth = 2400;
+            double carWidth = 4800;
             var lines = area.ToLines();
             var areaPts = new Point3dCollection(area.GetPoints().ToArray());
             var lineSpatialIndex = new ThCADCoreNTSSpatialIndex(lines.ToCollection());
