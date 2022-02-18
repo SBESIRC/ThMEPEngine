@@ -44,8 +44,9 @@
     <Compile Include="Model\ThPDSID.cs" />
     <Compile Include="Model\ThPDSLoad.cs" />
     <Compile Include="Model\ThPDSLocation.cs" />
-    <Compile Include="Model\ThPDSLoopGraphEngine.cs" />
+    <Compile Include="Engine\ThPDSLoopGraphEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\ThMarkService.cs" />
     <Compile Include="Service\ThPDSLayerService.cs" />
     <Compile Include="Service\ThPDSDistributionExtractService.cs" />
     <Compile Include="Service\ThPDSBlockExtractService.cs" />

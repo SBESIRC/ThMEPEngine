@@ -37,7 +37,6 @@ namespace TianHua.Electrical.PDS.Command
                 //    rectangle.LayerId = distributionLayer;
                 //});
 
-
                 // 提取回路
                 var cableEngine = new ThCableSegmentRecognitionEngine();
                 cableEngine.RecognizeMS(acad.Database, new Point3dCollection());
@@ -59,9 +58,9 @@ namespace TianHua.Electrical.PDS.Command
                 //});
 
                 //做一个标注的Service
-
+                ThMarkService markService = new ThMarkService(markExtractor.Results, loadExtractService.MarkBlocks);
                 ThPDSLoopGraphEngine graphEngine = new ThPDSLoopGraphEngine(acad.Database, loadExtractService.DistBoxBlocks,
-                    loadExtractService.LoadBlocks, cabletrayEngine.Results.OfType<Line>().ToList(), cableEngine.Results.OfType<Curve>().ToList());
+                    loadExtractService.LoadBlocks, cabletrayEngine.Results.OfType<Line>().ToList(), cableEngine.Results.OfType<Curve>().ToList(), markService);
                 graphEngine.CreatGraph();
 
                 var graph = graphEngine.GetGraph();
