@@ -100,6 +100,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             var maxVals = new List<double>();
             var minVals = new List<double>();
             var segLinesEx = Dfs.GetRandomSeglines(outerBrder);
+            if(segLinesEx.Count() < outerBrder.Building.Count - 1)
+            {
+                Active.Editor.WriteMessage("分割线生成失败！");
+                return;
+            }
             var sortedSegs = segLinesEx.Select(lex => lex.Segline).ToList();
 
             var sortedSegLines = SeglineTools.SeglinePrecut(sortedSegs, area);
