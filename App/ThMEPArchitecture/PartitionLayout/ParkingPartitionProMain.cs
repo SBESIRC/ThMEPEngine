@@ -31,7 +31,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 DisVertCarLength = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotLength : vm.VerticalSpotWidth;
                 DisVertCarWidth = vm.VerticalSpotLength > vm.VerticalSpotWidth ? vm.VerticalSpotWidth : vm.VerticalSpotLength;
                 DisLaneWidth = vm.RoadWidth;
-                MaxPillarSpacing = vm.MaxColumnWidth;
+                //MaxPillarSpacing = vm.MaxColumnWidth;
                 PillarNetLength = vm.ColumnSizeOfParalleToRoad;
                 PillarNetDepth = vm.ColumnSizeOfPerpendicularToRoad;
                 ThicknessOfPillarConstruct = vm.ColumnAdditionalSize;
@@ -55,10 +55,12 @@ namespace ThMEPArchitecture.PartitionLayout
             MaxLength = BoundingBox.Length / 2;
             InitialzeDatas(iniLanes);
             Boundary = JoinCurves(walls, iniLanes)[0];
+            DisHalfCarToPillar = (MaxPillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;         
         }
 
         public List<Polyline> Walls;
         public List<Polyline> Obstacles;
+        public List<Line> OriginalLanes=new List<Line>();
         public Polyline Boundary;
         public Polyline OutBoundary;
         private Polyline BoundingBox;
@@ -80,10 +82,11 @@ namespace ThMEPArchitecture.PartitionLayout
         public List<Polyline> BuildingBoxes = new List<Polyline>();
 
         public static bool GeneratePillars = true;
+        public static bool GenerateMiddlePillars = true;
         public static double PillarNetLength = 500;
         public static double PillarNetDepth = 500;
         public static double ThicknessOfPillarConstruct = 50;
-        public static double MaxPillarSpacing = 8000;
+        public static double MaxPillarSpacing = 8400;
         public static double DisVertCarLength = 5100;
         public static double DisVertCarWidth = 2400;
         public static double DisParallelCarLength = 6000;
@@ -94,6 +97,9 @@ namespace ThMEPArchitecture.PartitionLayout
         public static int CountPillarDist = ((int)(Math.Floor(MaxPillarSpacing / DisVertCarWidth)));
         public static double DisCarAndHalfLane = DisLaneWidth / 2 + DisVertCarLength;
         public static double DisModulus = DisCarAndHalfLane * 2;
+        public static double DisHalfCarToPillar = (MaxPillarSpacing - CountPillarDist * DisVertCarWidth - DisPillarLength) / 2;
+        public static double DisPillarMoveDeeplyBackBack = 1000;
+        public static double DisPillarMoveDeeplySingle = 550;
 
         public static double LengthCanGIntegralModulesConnectSingle = 3 * DisVertCarWidth + DisLaneWidth / 2;
         public static double LengthCanGIntegralModulesConnectDouble = 6 * DisVertCarWidth + DisLaneWidth;
@@ -148,6 +154,7 @@ namespace ThMEPArchitecture.PartitionLayout
                 if (!Boundary.Contains(pt))
                     vec = -vec;
                 IniLanes.Add(new Lane(e, vec));
+                OriginalLanes.Add(e);
             }
             Obstacles.ForEach(e => ObstacleVertexes.AddRange(e.Vertices().Cast<Point3d>()));
             IniLaneBoxes.AddRange(IniLanes.Select(e => e.Line.Buffer(DisLaneWidth / 2)));
@@ -602,7 +609,9 @@ namespace ThMEPArchitecture.PartitionLayout
                             line_to_ori.TransformBy(Matrix3d.Displacement(vec.GetNormal() * (DisVertCarLength + DisLaneWidth)));
                             plback = CreatPolyFromLines(splitori, line_to_ori);
                         }
-                        paras.CarModulesToAdd.Add(new CarModule(plback, splitori, vec));
+                        var mod = new CarModule(plback, splitori, vec);
+                        mod.IsInBackBackModule = true;
+                        paras.CarModulesToAdd.Add(mod);
                         paras.CarBoxPlusToAdd.Add(new CarBoxPlus(plback));
                         paras.CarBoxesToAdd.Add(plback);
                         generate = true;
@@ -630,6 +639,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         {
                             paras.CarBoxesToAdd.Add(pl);
                             CarModule module = new CarModule(pl, split, -vec);
+                            module.IsInBackBackModule = true;
                             paras.CarModulesToAdd.Add(module);
                             Lane ln = new Lane(split, vec);
                             paras.LanesToAdd.Add(ln);
@@ -839,9 +849,12 @@ namespace ThMEPArchitecture.PartitionLayout
         {
             var lanes = new List<Lane>();
             CarModules.ForEach(e => lanes.Add(new Lane(e.Line, e.Vec)));
-            foreach (var k in lanes)
+            for (int i = 0; i < lanes.Count; i++)
             {
-                var vl = k.Line;
+                var vl = lanes[i].Line;
+                var generate_middle_pillar = CarModules[i].IsInBackBackModule;
+                var isin_backback = CarModules[i].IsInBackBackModule;
+                if (!GenerateMiddlePillars) generate_middle_pillar = false;
                 UnifyLaneDirection(ref vl, IniLanes);
                 var line = CreateLine(vl);
                 line = SplitLine(line, IniLaneBoxes).OrderBy(e => e.GetCenter().DistanceTo(line.GetCenter())).First();
@@ -851,12 +864,13 @@ namespace ThMEPArchitecture.PartitionLayout
                     line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * (DisLaneWidth / 2 + DisPillarLength)));
                 if (line.Intersect(Boundary, Intersect.OnBothOperands).Count > 0)
                 {
-                    var lines = SplitLine(line, Boundary).Where(e => e.Length > 1).Where(e => Boundary.Contains(e.GetCenter()));
+                    var lines = SplitLine(line, Boundary).Where(e => e.Length > 1)
+                        .Where(e => Boundary.Contains(e.GetCenter()) || ClosestPointInCurves(line.GetCenter(), OriginalLanes) == 0);
                     if (lines.Count() > 0) line = lines.First();
                     else continue;
                 }
-                line.TransformBy(Matrix3d.Displacement(k.Vec.GetNormal() * DisLaneWidth / 2));
-                GenerateCarsAndPillarsForEachLane(line, k.Vec, DisVertCarWidth, DisVertCarLength, false, false,false,false,true,false,true,false,true,true);
+                line.TransformBy(Matrix3d.Displacement(lanes[i].Vec.GetNormal() * DisLaneWidth / 2));
+                GenerateCarsAndPillarsForEachLane(line, lanes[i].Vec, DisVertCarWidth, DisVertCarLength, false, false, false, false, true, false, true, false, true, true, generate_middle_pillar, isin_backback);
             }
         }
 
@@ -978,5 +992,6 @@ namespace ThMEPArchitecture.PartitionLayout
         public Polyline Box;
         public Line Line;
         public Vector3d Vec;
+        public bool IsInBackBackModule = false;
     }
 }

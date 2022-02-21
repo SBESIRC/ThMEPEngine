@@ -721,8 +721,10 @@ namespace ThMEPArchitecture.PartitionLayout
 
         public void GenerateCarsAndPillarsForEachLane(Line line, Vector3d vec, double length_divided, double length_offset,
           bool add_to_car_spacialindex = true, bool judge_carmodulebox = true, bool adjust_pillar_edge = false, bool judge_modulebox = false,
-          bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false)
+          bool gfirstpillar = true, bool allow_pillar_in_wall = false, bool align_back_to_back = true, bool judge_in_obstacles = false, bool glastpillar = true, bool judge_intersect_bound = false,
+          bool generate_middle_pillar = false, bool isin_backback = false)
         {
+            int inipillar_count = Pillars.Count;
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
@@ -734,7 +736,7 @@ namespace ThMEPArchitecture.PartitionLayout
                         line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisPillarLength)), line.EndPoint);
                     else if (line.Length < DisVertCarWidth * 4)
                         line = new Line(line.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(line).GetNormal() * DisPillarLength)), line.EndPoint);
-                }           
+                }
             }
             //背靠背对齐
             if (Math.Abs(length_divided - DisVertCarWidth) < 1 && align_back_to_back)
@@ -766,7 +768,9 @@ namespace ThMEPArchitecture.PartitionLayout
             if (GeneratePillars)
             {
                 var dividecount = Math.Abs(length_divided - DisVertCarWidth) < 1 ? CountPillarDist : 1;
-                DivideCurveByDifferentLength(line, ref segobjs, DisPillarLength, 1, length_divided, dividecount);
+                //DivideCurveByDifferentLength(line, ref segobjs, DisPillarLength, 1, length_divided, dividecount);
+                DivideCurveByKindsOfLength(line, ref segobjs, DisPillarLength, 1, DisHalfCarToPillar, 1,
+                    length_divided, dividecount, DisHalfCarToPillar, 1);
             }
             else
             {
@@ -820,6 +824,7 @@ namespace ThMEPArchitecture.PartitionLayout
                             var lf = CreateLine(li);
                             lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
                             var pillar = CreatePolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
+                            pillar.TransformBy(Matrix3d.Displacement(-CreateVector(ed).GetNormal() * DisHalfCarToPillar));
                             if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
                             {
                                 bool condg = true;
@@ -827,7 +832,11 @@ namespace ThMEPArchitecture.PartitionLayout
                                     condg = false;
                                 if (condg)
                                 {
-                                    //AddToSpatialIndex(pillar, ref CarSpatialIndex);
+                                    //AddToSpatialIndex(pillar, ref CarSpatialIndex);                           
+                                    if (isin_backback)
+                                        pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2)));
+                                    else
+                                        pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2)));
                                     Pillars.Add(pillar);
                                 }
                             }
@@ -843,7 +852,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     else
                     {
                         var dist = car.GetRecCentroid().DistanceTo(precar.GetRecCentroid());
-                        if (Math.Abs(dist - length_divided - DisPillarLength) < 1 && GeneratePillars)
+                        if (Math.Abs(dist - length_divided - DisPillarLength - DisHalfCarToPillar * 2) < 1 && GeneratePillars)
                         {
                             var ed = seg;
                             if (adjust_pillar_edge)
@@ -853,9 +862,15 @@ namespace ThMEPArchitecture.PartitionLayout
                             }
                             var pp = precar.GetClosestPointTo(ed.StartPoint, false);
                             var li = new Line(pp, ed.StartPoint);
+                            li.EndPoint = ed.StartPoint.TransformBy(Matrix3d.Displacement(-CreateVector(li).GetNormal() * DisPillarLength));
                             var lf = CreateLine(li);
                             lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
                             var pillar = CreatePolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
+                            pillar.TransformBy(Matrix3d.Displacement(CreateVector(ed).GetNormal() * DisHalfCarToPillar));
+                            if (isin_backback)
+                                pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplyBackBack-DisPillarDepth/2)));
+                            else
+                                pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplySingle-DisPillarDepth/2)));
                             if (Math.Abs(pillar.Area - DisPillarDepth * DisPillarLength) < 1)
                             {
                                 if (add_to_car_spacialindex)
@@ -886,6 +901,10 @@ namespace ThMEPArchitecture.PartitionLayout
                         var lf = CreateLine(li);
                         lf.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
                         var pillar = CreatePolyFromPoints(new Point3d[] { li.StartPoint, li.EndPoint, lf.EndPoint, lf.StartPoint });
+                        if (isin_backback)
+                            pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplyBackBack - DisPillarDepth / 2)));
+                        else
+                            pillar.TransformBy(Matrix3d.Displacement(CreateVector(new Line(li.StartPoint, lf.StartPoint)).GetNormal() * (DisPillarMoveDeeplySingle - DisPillarDepth / 2)));
                         if (Math.Abs(pillar.Area - DisPillarLength * DisPillarDepth) < 1)
                         {
                             bool condg = true;
@@ -909,6 +928,26 @@ namespace ThMEPArchitecture.PartitionLayout
                 s.Dispose();
             }
             segobjs.Dispose();
+            if (generate_middle_pillar)
+            {
+                var middle_pillars = new List<Polyline>();
+                for (int i = inipillar_count; i < Pillars.Count; i++)
+                {
+                    var p = Pillars[i].Clone() as Polyline;
+                    double dist = DisVertCarLength - DisPillarMoveDeeplyBackBack;
+                    p.TransformBy(Matrix3d.Displacement(vec.GetNormal() * dist));
+                    var pp = p.Clone() as Polyline;
+                    pp.TransformBy(Matrix3d.Displacement(vec.GetNormal() * DisPillarDepth));
+                    var pisegs = new DBObjectCollection();
+                    pp.Explode(pisegs);
+                    var piseg = pisegs.Cast<Line>().Where(e => IsPerpVector(CreateVector(e), vec)).First();
+                    piseg.Scale(piseg.GetCenter(), (DisHalfCarToPillar * 2 + DisPillarLength) / DisPillarLength + 1);
+                    var buffer = piseg.Buffer(1);
+                    if (CarSpatialIndex.SelectCrossingPolygon(buffer).Count > 0)
+                        middle_pillars.Add(p);
+                }
+                Pillars.AddRange(middle_pillars);
+            }
         }
     }
 }
