@@ -726,7 +726,7 @@ namespace ThMEPArchitecture.PartitionLayout
             //允许柱子穿墙
             if (allow_pillar_in_wall && GeneratePillars && Obstacles.Count > 0)
             {
-                double dis_judge_under_building = 2000;
+                double dis_judge_under_building = 5000;
                 if (ClosestPointInCurvesFast(line.StartPoint, Obstacles) < dis_judge_under_building)
                 {
                     var dis = ClosestPointInVertCurves(line.StartPoint, line, IniLanes.Select(e => e.Line).ToList());

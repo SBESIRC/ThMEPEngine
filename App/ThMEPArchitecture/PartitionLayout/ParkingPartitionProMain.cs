@@ -340,7 +340,14 @@ namespace ThMEPArchitecture.PartitionLayout
                         break;
                     }
                 }
-                if (!found) IniLanes.Add(new Lane(lane, module.Vec));
+                if (!found)
+                {
+                    var lanecopied = new Line(lane.StartPoint.TransformBy(Matrix3d.Displacement(CreateVector(lane).GetNormal())),
+                        lane.EndPoint.TransformBy(Matrix3d.Displacement(-CreateVector(lane).GetNormal())));
+                    var buffer = lanecopied.Buffer(DisLaneWidth);
+                    if (buffer.Intersect(Boundary, Intersect.OnBothOperands).Count == 0)
+                        IniLanes.Add(new Lane(lane, module.Vec));
+                }
             }
         }
 
