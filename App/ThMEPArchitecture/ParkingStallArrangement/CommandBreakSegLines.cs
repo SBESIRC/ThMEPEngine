@@ -45,9 +45,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement
         public override void SubExecute()
         {
             Utils.SetSeed();
+            Logger?.Information($"Random Seed:{Utils.GetSeed()}");
             try
             {
-                //Logger?.Information($"Random Seed:{Utils.GetRandomSeed()}");
                 using (var docLock = Active.Document.LockDocument())
                 using (AcadDatabase currentDb = AcadDatabase.Active())
                 {
