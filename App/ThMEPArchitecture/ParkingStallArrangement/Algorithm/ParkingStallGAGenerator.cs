@@ -199,6 +199,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
             }
             //判断是否有孤立的车道线
+            if (lanes.Count == 1) return true;
             for (int i = 0; i < lanes.Count; i++)
             {
                 bool connected = false;
