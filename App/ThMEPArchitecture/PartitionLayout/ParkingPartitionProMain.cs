@@ -804,6 +804,7 @@ namespace ThMEPArchitecture.PartitionLayout
                     if (ClosestPointInCurves(gline.GetCenter(), IniLanes.Select(e => e.Line).ToList()) < 1)
                         continue;
                     if (gline.Length < LengthCanGAdjLaneConnectSingle) continue;
+                    if (!IsConnectedToLane(gline)) continue;
                     bool quit = false;
                     foreach (var box in BuildingBoxes)
                     {
