@@ -61,5 +61,10 @@ namespace TianHua.Plumbing.WPF.UI.FirstFloorDrainagePlaneSystemUI
         {
 
         }
+
+        private void btnDrawWall_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
