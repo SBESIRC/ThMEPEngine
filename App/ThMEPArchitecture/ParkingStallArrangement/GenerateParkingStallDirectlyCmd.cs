@@ -107,7 +107,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
                 LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars,ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);

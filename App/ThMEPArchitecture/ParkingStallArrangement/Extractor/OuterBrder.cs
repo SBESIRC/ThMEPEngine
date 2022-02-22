@@ -42,7 +42,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 break;
             }
 
-            if(WallLine.GetPoints().Count() == 0)//外框线不存在
+            if (WallLine.GetPoints().Count() == 0)//外框线不存在
             {
                 Active.Editor.WriteMessage("地库边界不存在！");
                 return false;
@@ -53,12 +53,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 Active.Editor.WriteMessage("障碍物不存在！");
                 return false;
             }
-            if(Ramps.Count == 0)
+
+            if (Ramps.Count == 0)
             {
                 return true;
             }
 
-            if(Ramps.Count > 0)//合并坡道至墙线
+            if (Ramps.Count > 0)//合并坡道至墙线
             {
                 Ramps.ForEach(ramp => LonelyRamps.Add(ramp));
                 var rampSpatialIndex = new ThCADCoreNTSSpatialIndex(Ramps.ToCollection());
@@ -73,11 +74,11 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 WallLine = splitArea;
             }
 
-            for(int i = SegLines.Count - 1; i >= 0; i--)
+            for (int i = SegLines.Count - 1; i >= 0; i--)
             {
                 var segLine = SegLines[i];
                 var rst = LonelyRampSpatialIndex.SelectFence(segLine);
-                if(rst.Count > 0)
+                if (rst.Count > 0)
                 {
                     var blk = rst[0] as BlockReference;
                     var rect = blk.GetRect();
@@ -88,22 +89,22 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             return true;
         }
-        
+
         private bool IsOuterLayer(string layer)
         {
             return layer.ToUpper() == "地库边界";
         }
-        
+
         private bool IsBuildingLayer(string layer)
         {
             return layer.ToUpper().Contains("障碍物");
         }
-        
+
         private bool IsRampLayer(string layer)
         {
             return layer.ToUpper() == "坡道";
         }
-        
+
         private bool IsSegLayer(string layer)
         {
             return layer.ToUpper() == "分割线";
@@ -113,14 +114,14 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
         {
             var dbObjs = new DBObjectCollection();
             entity.Explode(dbObjs);
-            
+
             foreach (var obj in dbObjs)
             {
                 var ent = obj as Entity;
                 AddObjs(ent);
             }
         }
-        
+
         private void AddObjs(Entity ent)
         {
             if (IsOuterLayer(ent.Layer))
@@ -149,7 +150,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             }
             if (IsSegLayer(ent.Layer))
             {
-                if(ent is Line line)
+                if (ent is Line line)
                 {
                     SegLines.Add(line);
                 }

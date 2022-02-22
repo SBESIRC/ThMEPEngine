@@ -175,7 +175,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
 
             string autoCarSpotLayer = $"AI-停车位{index}";
@@ -231,7 +231,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
                 LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);

@@ -259,7 +259,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 }
                 catch (Exception ex)
                 {
-                    ;
+                    Active.Editor.WriteMessage(ex.Message);
                 }
             }
             return count;
@@ -295,7 +295,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                     continue;
                 }
@@ -340,13 +340,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
 
     public class ParkingStallGAGenerator : IDisposable
     {
-        Random Rand = new Random();
-
         //Genetic Algorithm parameters
-        readonly double MaxTime;
-        readonly int IterationCount = 10;
+        double MaxTime;
+        int IterationCount = 10;
         int PopulationSize;
-
         int FirstPopulationSize;
         double SelectionRate;
         int FirstPopulationSizeMultiplyFactor = 2;
@@ -373,12 +370,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
         //    .File(LogFileName, flushToDiskInterval:new TimeSpan(0,0,5), rollingInterval: RollingInterval.Hour).CreateLogger();
 
         public Serilog.Core.Logger Logger = null;
+
         public ParkingStallGAGenerator(GaParameter gaPara, LayoutParameter layoutPara, ParkingStallArrangementViewModel parameterViewModel=null, List<Chromosome> initgenomes = null,bool breakFlag = false)
         {
             //大部分参数采取黄金分割比例，保持选择与变异过程中种群与基因相对稳定
             GoldenRatio = (Math.Sqrt(5) - 1) / 2;//0.618
             IterationCount = parameterViewModel == null ? 10 : parameterViewModel.IterationCount;
-            Rand = new Random(DateTime.Now.Millisecond);//随机数
+            var Rand = new Random(DateTime.Now.Millisecond);//随机数
             PopulationSize = parameterViewModel == null ? 10 : parameterViewModel.PopulationCount;//种群数量
             if (PopulationSize < 3) throw (new ArgumentOutOfRangeException("种群数量至少为3"));
             MaxTime =  parameterViewModel == null ? 180 : parameterViewModel.MaxTimespan;//最大迭代时间
@@ -423,6 +421,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 LowerUpperBound.Add(i, tempT);
             }
         }
+
         private void GetBoundary(int i, out double LowerBound, out double UpperBound)
         {
             double tol = 1e-4;
@@ -857,7 +856,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
                 MutationL(rstLM);
                 pop.AddRange(rstLM);
             }
-            string strBest;
+            //string strBest;
             //if (!BreakFlag) strBest = $"最大车位数: {maxNums}";
             //else
             //{

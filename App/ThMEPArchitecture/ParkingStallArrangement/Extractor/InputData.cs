@@ -42,10 +42,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
             {
                 return false;
             }
-            if(!(Logger == null))
+            if (!(Logger == null))
             {
                 //check seg lines
-                if(IsOrthogonal(outerBrder.SegLines, out List<Line> NewSegLines, Logger))
+                if (IsOrthogonal(outerBrder.SegLines, out List<Line> NewSegLines, Logger))
                 {
                     outerBrder.SegLines = NewSegLines;
                 }
@@ -55,17 +55,17 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 }
                 if (!IsValidSegLines(outerBrder.SegLines, outerBrder.WallLine, Logger)) return false;
             }
-            
+
             return true;
         }
 
-        private static bool IsOrthogonal(List<Line> SegLines,out List<Line> NewSegLines,Serilog.Core.Logger Logger)
+        private static bool IsOrthogonal(List<Line> SegLines, out List<Line> NewSegLines, Serilog.Core.Logger Logger)
         {
             double tol = 0.02;// arctan 0.02 （1.146°）以下的交会自动归正
             NewSegLines = new List<Line>();
             for (int i = 0; i < SegLines.Count; i++)
             {
-                
+
                 var line = SegLines[i];
                 var spt = line.StartPoint;
 
@@ -85,13 +85,13 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                         return false;
                     }
                     var newX = (spt.X + ept.X) / 2;
-                    spt = new Point3d(newX, spt.Y,0);
+                    spt = new Point3d(newX, spt.Y, 0);
                     ept = new Point3d(newX, ept.Y, 0);
-                    NewSegLines.Add( new Line(spt, ept));
+                    NewSegLines.Add(new Line(spt, ept));
                 }
                 if (X_dif > Y_dif)// 水平线
                 {
-                    if(Y_dif/X_dif > tol)
+                    if (Y_dif / X_dif > tol)
                     {
                         Logger?.Information("发现非正交分割线 ！\n");
                         Logger?.Information("起始点：" + spt.ToString() + "终点：" + ept.ToString() + "的分割线不符合要求\n");
@@ -111,7 +111,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
 
         private static bool IsValidSegLines(List<Line> SegLines, Polyline WallLine, Serilog.Core.Logger Logger)
         {
-            double tol = 1e-4;
+            //double tol = 1e-4;
             for (int i = 0; i < SegLines.Count; i++)
             {
                 var pts = new List<Point3d>();
@@ -129,8 +129,8 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Extractor
                 if (orderPts.Count < 2)
                 {
                     Logger?.Information("该分割线只有" + orderPts.Count.ToString() + "个交点" + "\n");
-                    Logger?.Information("起始点："+ line.StartPoint.ToString()+"终点："+ line.EndPoint.ToString()+"的分割线不符合要求" + "\n");
-                    Active.Editor.WriteMessage("该分割线只有"+ orderPts.Count.ToString() + "个交点" + "\n");
+                    Logger?.Information("起始点：" + line.StartPoint.ToString() + "终点：" + line.EndPoint.ToString() + "的分割线不符合要求" + "\n");
+                    Active.Editor.WriteMessage("该分割线只有" + orderPts.Count.ToString() + "个交点" + "\n");
                     Active.Editor.WriteMessage("起始点：" + line.StartPoint.ToString() + "\n");
                     Active.Editor.WriteMessage("终点：" + line.EndPoint.ToString() + "\n");
                     return false;

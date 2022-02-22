@@ -12,6 +12,7 @@ using ThMEPArchitecture.ParkingStallArrangement.General;
 using NetTopologySuite.Geometries;
 using Linq2Acad;
 using Dreambuild.AutoCAD;
+using AcHelper;
 
 namespace ThMEPArchitecture.ParkingStallArrangement.Method
 {
@@ -323,11 +324,9 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
-
                 }
-
             }
             var closedPts = new List<Point3d>();
             if (line.GetDirection() == -1)//水平线才需要考虑穿障碍物
@@ -380,7 +379,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
             }
@@ -447,18 +446,10 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Method
 
             foreach (var build in buildLines)
             {
-                try
-                {
-                    var br = build as BlockReference;
-                    var pline = br.GetRect();
-                    var pts = pline.GetPoints().ToList();
-                    closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
-
-                }
-                catch (Exception ex)
-                {
-                    ;
-                }
+                var br = build as BlockReference;
+                var pline = br.GetRect();
+                var pts = pline.GetPoints().ToList();
+                closedPts.Add(pts.OrderBy(e => line.GetMinDist(e)).First());
             }
 
             return closedPts.OrderBy(e => line.GetMinDist(e)).First();//返回最近距离

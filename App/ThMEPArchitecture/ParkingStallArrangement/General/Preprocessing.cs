@@ -1,7 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using ThMEPArchitecture.ParkingStallArrangement.Extractor;
 using ThMEPArchitecture.ParkingStallArrangement.Method;
@@ -36,7 +35,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
         }
 
         public static bool DataPreprocessing(OuterBrder outerBrder, out GaParameter gaPara, out LayoutParameter layoutPara, 
-            Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true, bool IsAutoSegline = false)
+            Serilog.Core.Logger Logger = null, bool isDirectlyArrange = false, bool usePline = true)
         {
             layoutPara = new LayoutParameter();
             gaPara = new GaParameter(outerBrder.SegLines);
@@ -59,16 +58,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.General
             gaPara.Set(outerBrder.SegLines, maxVals, minVals);
 
             var ptDic = Intersection.GetIntersection(seglineDic);//获取分割线的交点
-            var linePtDic = Intersection.GetLinePtDic(ptDic);
-            var directionList = new Dictionary<int, bool>();//true表示纵向，false表示横向
-            foreach (var num in ptDic.Keys)
-            {
-                var random = new Random();
-                var flag = random.NextDouble() < 0.5;
-                directionList.Add(num, flag);//默认给全横向
-            }
-            layoutPara = new LayoutParameter(outerBrder, ptDic, directionList, linePtDic, 
-                seglineIndexDic, segAreasCnt, usePline, Logger);
+            layoutPara = new LayoutParameter(outerBrder, ptDic, seglineIndexDic, segAreasCnt, usePline, Logger);
 
             return true;
         }

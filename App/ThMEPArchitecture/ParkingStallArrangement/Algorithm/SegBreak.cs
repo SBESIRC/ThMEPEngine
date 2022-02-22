@@ -637,7 +637,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement.Algorithm
             }
             catch (Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
             solution = rst.First();
             return layoutPara;

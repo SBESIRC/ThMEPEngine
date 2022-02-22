@@ -17,7 +17,6 @@ using static ThMEPArchitecture.ParkingStallArrangement.ParameterConvert;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPArchitecture.ViewModel;
 using ThMEPArchitecture.ParkingStallArrangement.General;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPArchitecture.ParkingStallArrangement
 {
@@ -94,7 +93,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch(Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
 
             //foreach(Polyline pline in segbkparam.BufferTanks)
@@ -131,7 +130,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
             }
             catch (Exception ex)
             {
-                ;
+                Active.Editor.WriteMessage(ex.Message);
             }
         }
         public void RunBrSeg(AcadDatabase acadDatabase)// 生成二分生成分割线，然后打断，然后迭代
@@ -219,7 +218,7 @@ namespace ThMEPArchitecture.ParkingStallArrangement
                     }
                     catch (Exception ex)
                     {
-                        ;
+                        Active.Editor.WriteMessage(ex.Message);
                     }
                 }
                 LayoutPostProcessing.DealWithCarsOntheEndofLanes(ref Cars, ref Pillars, Lanes, ObstaclesSpacialIndex, Boundary, ParameterViewModel);
